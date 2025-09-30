@@ -1,23 +1,24 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class player_stats : MonoBehaviour
+public class stats_iniimigo : MonoBehaviour
 {
     public float speed;
     public int Hp;
+    void Start()
+    {
+        
+    }
 
-
-    private void Update()
+    // Update is called once per frame
+    void Update()
     {
         death();
     }
-
-
-   void death()
+    void death()
     {
         if (Hp <= 0)
         {
             Destroy(this.gameObject);
         }
-    }     
- }
+    }
+}
