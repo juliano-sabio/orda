@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class InimigoPathfinder : MonoBehaviour
+public class movi_inimigo : MonoBehaviour
 {
     [Header("Configurações de Pathfinding")]
     stats_inimigo stats_Inimigo;
