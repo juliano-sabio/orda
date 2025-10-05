@@ -103,8 +103,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2515d31c46cf2f647978f536da124a3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 6
-  Hp: 10
+  Speed: 3
+  Hp_inimigo: 10
+  dano: 2
 --- !u!50 &5488142379463778539
 Rigidbody2D:
   serializedVersion: 5
@@ -180,3 +181,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cc35a38ac71afd4e8835f722bd01d91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  avoidDistance: 2
+  avoidForce: 3
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 0

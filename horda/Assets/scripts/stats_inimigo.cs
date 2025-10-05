@@ -1,22 +1,23 @@
 using UnityEngine;
 
-public class stats_iniimigo : MonoBehaviour
+public class stats_inimigo : MonoBehaviour
 {
-    public float speed;
-    public int Hp;
+    public float Speed;
+    public int Hp_inimigo;
+    public int dano;
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        death();
+        morte();
     }
-    void death()
+    void morte()
     {
-        if (Hp <= 0)
+        if (Hp_inimigo <= 0)
         {
             Destroy(this.gameObject);
         }
