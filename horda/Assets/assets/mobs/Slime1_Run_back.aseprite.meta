@@ -8,6 +8,7 @@ ScriptedImporter:
   assetBundleName: 
   assetBundleVariant: 
   script: {fileID: 11500000, guid: 62a9f0aa5b59740cfbadc7e5f9823bb0, type: 3}
+  importerVersion: 2
   textureImporterSettings:
     alphaSource: 1
     mipMapMode: 0
@@ -83,6 +84,8 @@ ScriptedImporter:
     generateAnimationClips: 1
     addSortingGroup: 1
     addShadowCasters: 0
+    generateIndividualEvents: 1
+    generateSpriteAtlas: 1
   asepriteImporterSettings:
     fileImportMode: 1
     importHiddenLayers: 0
@@ -96,6 +99,8 @@ ScriptedImporter:
     generateAnimationClips: 1
     addSortingGroup: 1
     addShadowCasters: 0
+    generateIndividualEvents: 1
+    generateSpriteAtlas: 1
   importFileNodeState: 1
   platformSettingsDirtyTick: 638955472822125365
   textureAssetName: 
@@ -124,7 +129,7 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: Frame_0
     originalName: 
-    pivot: {x: 0.47563723, y: 0.50967354}
+    pivot: {x: 0.47675958, y: 0.46259156}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -145,7 +150,7 @@ ScriptedImporter:
     uvTransform: {x: 95, y: 42}
   - name: Frame_1
     originalName: 
-    pivot: {x: 0.44635907, y: 0.55294883}
+    pivot: {x: 0.41454202, y: 0.48504755}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -166,7 +171,7 @@ ScriptedImporter:
     uvTransform: {x: 4, y: 42}
   - name: Frame_2
     originalName: 
-    pivot: {x: 0.42834714, y: 0.21873347}
+    pivot: {x: 0.45261183, y: 0.22704233}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -187,7 +192,7 @@ ScriptedImporter:
     uvTransform: {x: 91, y: 4}
   - name: Frame_3
     originalName: 
-    pivot: {x: 0.5148179, y: 0.3319733}
+    pivot: {x: 0.41434318, y: 0.29944584}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -208,7 +213,7 @@ ScriptedImporter:
     uvTransform: {x: 64, y: 4}
   - name: Frame_4
     originalName: 
-    pivot: {x: 0.4899507, y: 0.23849131}
+    pivot: {x: 0.51195264, y: 0.25553265}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -229,7 +234,7 @@ ScriptedImporter:
     uvTransform: {x: 37, y: 4}
   - name: Frame_5
     originalName: 
-    pivot: {x: 0.4676376, y: 0.16637713}
+    pivot: {x: 0.5032675, y: 0.18766928}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -250,7 +255,7 @@ ScriptedImporter:
     uvTransform: {x: 4, y: 4}
   - name: Frame_6
     originalName: 
-    pivot: {x: 0.5088457, y: 0.33127284}
+    pivot: {x: 0.5032672, y: 0.38823533}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -271,7 +276,7 @@ ScriptedImporter:
     uvTransform: {x: 32, y: 42}
   - name: Frame_7
     originalName: 
-    pivot: {x: 0.51404816, y: 0.4595416}
+    pivot: {x: 0.49338982, y: 0.39176124}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -291,9 +296,15 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 65, y: 42}
   spriteSheetImportData: []
+  tileSetImportData: []
   asepriteLayers:
   - layerIndex: 0
-    guid: 1600514793
+    uuid:
+      value0: 2513936845
+      value1: 0
+      value2: 0
+      value3: 0
+    guid: -1781030451
     name: Slime1_Run_back
     layerFlags: 0
     layerType: 0
@@ -372,7 +383,10 @@ ScriptedImporter:
         height: 14
       spriteId: d0132d1ac18b5c647baf5748e8d42b6c
     linkedCells: []
+    tileCells: []
+    tileSetIndex: 0
     parentIndex: -1
+  tileSets: []
   platformSettings:
   - name: Default
     overridden: 0
@@ -414,3 +428,4 @@ ScriptedImporter:
   secondarySpriteTextures: []
   spritePackingTag: 
   canvasSize: {x: 64, y: 64}
+  previousTextureSize: {x: 128, y: 128}
