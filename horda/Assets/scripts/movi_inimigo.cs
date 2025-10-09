@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 
 public class movi_inimigo : MonoBehaviour
 {
@@ -31,6 +32,7 @@ public class movi_inimigo : MonoBehaviour
     void Start()
     {
         stats_Inimigo = GetComponent<stats_inimigo>();
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
         if (rb == null)
         {
@@ -58,8 +60,16 @@ public class movi_inimigo : MonoBehaviour
             tempoUltimaAtualizacao = Time.time;
             ultimaPosicaoPlayer = player.position;
         }
-
         SeguirCaminho();
+    }
+    private void FixedUpdate()
+    {
+
+    }
+    void LateUpdate()
+    {
+        // Mantém a rotação fixa
+        transform.rotation = Quaternion.identity;
     }
 
     void EncontrarPlayer()
@@ -99,6 +109,7 @@ public class movi_inimigo : MonoBehaviour
             caminhoAtual.Add(player.position);
         }
     }
+
 
     Vector2 EncontrarWaypointAlternativo(Vector2 direcaoOriginal, Vector2 pontoColisao)
     {
@@ -197,6 +208,16 @@ public class movi_inimigo : MonoBehaviour
 
         // Mover em direção ao waypoint
         rb.linearVelocity = direcao * stats_Inimigo.Speed;
+
+        // Aplicar flip baseado na direção do movimento
+        if (direcao.x > 0)
+        {
+            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
+        else if (direcao.x < 0)
+        {
+            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
 
         // Verificar se chegou ao waypoint
         if (Vector2.Distance(transform.position, waypointAtual) < 0.5f)
