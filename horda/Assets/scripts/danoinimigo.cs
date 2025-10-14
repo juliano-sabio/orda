@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class EnemyDamage : MonoBehaviour
 {
-    stats_inimigo  stats_inimigo; 
+    status_inimigo  status_inimigo; 
     public float tempoEntreDanos = 1f; // Intervalo entre danos (para não causar dano a cada frame)
     private float tempoProximoDano = 0f;
     private void Start()
     {
-        stats_inimigo = GetComponent<stats_inimigo>();
+        status_inimigo = GetComponent<status_inimigo>();
     }
     private void OnCollisionStay2D(Collision2D collision) // Para jogos 2D
     {
@@ -21,7 +21,7 @@ public class EnemyDamage : MonoBehaviour
 
                 if (playerHealth != null)
                 {
-                    playerHealth.ReceberDano(stats_inimigo.dano);
+                    playerHealth.ReceberDano(status_inimigo.dano);
                 }
 
                 // Define o tempo do próximo dano
