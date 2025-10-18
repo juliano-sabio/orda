@@ -17,7 +17,7 @@ public class EnemyDamage : MonoBehaviour
             if (Time.time >= tempoProximoDano)
             {
                 // Procura o script de vida no Player
-                player_stats playerHealth = collision.gameObject.GetComponent<player_stats>();
+                PlayerStats playerHealth = collision.gameObject.GetComponent<PlayerStats>();
 
                 if (playerHealth != null)
                 {

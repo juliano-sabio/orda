@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class moviment_player : MonoBehaviour
+public class moviment_player2 : MonoBehaviour
 {
     private PlayerStats playerStats;
     private Rigidbody2D rb;
