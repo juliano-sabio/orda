@@ -1,36 +1,40 @@
+﻿using UnityEngine;
 
-using UnityEngine;
+// 🎯 Categorias de Skills
+public enum SkillCategory
+{
+    Ataque,     // Skills de dano, crítico, velocidade de ataque
+    Defesa,     // Skills de vida, defesa, escudo, regeneração
+    Ultimate    // Skills especiais com comportamentos únicos em área
+}
 
-// Cria um menu no Unity para criar novas skills
+// 🎯 Skill Data com Categoria
 [CreateAssetMenu(fileName = "New Skill", menuName = "Skills/Skill Data")]
 public class skilldata : ScriptableObject
 {
-    [Header("Informa��es B�sicas")]
-    public string skillName;          // Nome da skill
-    public string description;        // Descri��o que aparece na UI
-    public Sprite icon;               // �cone da skill
+    [Header("Informações Básicas")]
+    public string skillName;
+    public string description;
+    public Sprite icon;
+    public SkillCategory category;
 
     [Header("Modificadores de Status")]
-    [Tooltip("Multiplicador de dano (1 = normal, 2 = dobro)")]
     public float damageMultiplier = 1f;
-
-    [Tooltip("Multiplicador de velocidade de ataque")]
     public float attackSpeedMultiplier = 1f;
-
-    [Tooltip("Multiplicador de velocidade de movimento")]
     public float moveSpeedMultiplier = 1f;
-
-    [Tooltip("Bonus de vida adicional")]
     public float healthBonus = 0f;
-
-    [Tooltip("Bonus de defesa")]
     public float defenseBonus = 0f;
 
     [Header("Efeitos Visuais e Sonoros")]
-    public GameObject visualEffect;   // Prefab de efeito visual
-    public AudioClip soundEffect;     // Som quando pega a skill
+    public GameObject visualEffect;
+    public AudioClip soundEffect;
 
     [Header("Comportamento Especial")]
-    [Tooltip("Comportamento customizado da skill (opcional)")]
-    public skilldata behavior;    // Script de comportamento especial
+    public SkillBehavior behavior;
+
+    [Header("Configurações Ultimate (apenas para categoria Ultimate)")]
+    public UltimateBehavior ultimateBehavior;
+    public float ultimateRadius = 5f;
+    public float ultimateDuration = 3f;
+    public float ultimateCooldown = 10f;
 }

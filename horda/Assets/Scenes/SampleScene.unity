@@ -834,7 +834,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dfbb85c1df690a47b5cad9495d47512, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::skillmanager
-  availableSkills: []
+  availableSkills:
+  - {fileID: 0}
 --- !u!1 &1931273294
 GameObject:
   m_ObjectHideFlags: 0
