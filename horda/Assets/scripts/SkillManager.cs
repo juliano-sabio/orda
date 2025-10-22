@@ -70,8 +70,19 @@ public class skillmanager : MonoBehaviour
             AudioSource.PlayClipAtPoint(skillData.soundEffect, playerStats.transform.position);
         }
 
-        // Mostra na UI
-        //UIManager.Instance?.ShowSkillAcquired(skillData);
+        // ⭐⭐ MODIFICAÇÃO PRINCIPAL: INTEGRAÇÃO ROBUSTA COM UI ⭐⭐
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowSkillAcquired(skillData);
+            Debug.Log("✅ UI notificada sobre a nova skill!");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ UIManager não encontrado! A UI não será atualizada.");
+
+            // Fallback: Mostra mensagem no console para debug
+            Debug.Log($"🆕 SKILL ADQUIRIDA: {skillData.skillName} - {skillData.description}");
+        }
     }
 
     // 🔧 ADICIONA COMPORTAMENTO ESPECIAL DA SKILL
@@ -142,5 +153,32 @@ public class skillmanager : MonoBehaviour
     public bool HasSkill(skilldata skillData)
     {
         return activeSkills.Contains(skillData);
+    }
+
+    // 🆕 MÉTODO PARA VERIFICAR SE O UIMANAGER ESTÁ FUNCIONANDO
+    public void CheckUIManagerStatus()
+    {
+        if (UIManager.Instance != null)
+        {
+            Debug.Log("✅ UIManager está funcionando corretamente!");
+        }
+        else
+        {
+            Debug.LogError("❌ UIManager não está disponível!");
+        }
+    }
+
+    // 🆕 MÉTODO PARA TESTE MANUAL DE UI
+    public void TestUINotification(skilldata testSkill)
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowSkillAcquired(testSkill);
+            Debug.Log("🧪 Teste de UI executado!");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Não foi possível testar UI - UIManager não encontrado");
+        }
     }
 }
