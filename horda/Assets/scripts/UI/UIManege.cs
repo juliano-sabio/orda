@@ -19,17 +19,23 @@ public class UIManager : MonoBehaviour
     public Text ultimateCooldownText;
     public Slider ultimateCooldownSlider;
 
-    [Header("📊 Painel de Status (TAB)")]
-    public GameObject statusPanel;
+    [Header("💚 Vida (Sempre Visível)")]
     public Slider healthBar;
     public Text healthText;
+
+    [Header("📊 Status Detalhados (Apenas com TAB)")]
+    public GameObject statusPanel;
     public Text damageText;
     public Text speedText;
     public Text defenseText;
+    public Text attackSpeedText;
+
+    [Header("Configurações")]
+    public KeyCode toggleStatusKey = KeyCode.Tab;
+    public float popupDisplayTime = 3f;
 
     private void Awake()
     {
-        // ⭐ Faz o UIManager acessível de qualquer lugar
         if (Instance == null)
         {
             Instance = this;
@@ -43,23 +49,25 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        // Esconde o popup e status no início
+        // Esconde popup e status detalhados no início
         if (skillAcquiredPanel != null)
             skillAcquiredPanel.SetActive(false);
 
         if (statusPanel != null)
             statusPanel.SetActive(false);
+
+        // ⭐ A VIDA FICA SEMPRE VISÍVEL - não precisa esconder
     }
 
     private void Update()
     {
-        // ⭐ Controle do TAB para mostrar/ocultar status
-        if (Input.GetKeyDown(KeyCode.Tab))
+        // Controle do TAB para mostrar/ocultar status detalhados
+        if (Input.GetKeyDown(toggleStatusKey))
         {
             ToggleStatusPanel();
         }
 
-        // Atualiza cooldown e status continuamente
+        // Atualiza UI continuamente
         UpdateUltimateCooldown();
         UpdatePlayerStatus();
     }
@@ -86,7 +94,7 @@ public class UIManager : MonoBehaviour
 
     private IEnumerator HideSkillPopup()
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(popupDisplayTime);
         if (skillAcquiredPanel != null)
             skillAcquiredPanel.SetActive(false);
     }
@@ -162,28 +170,51 @@ public class UIManager : MonoBehaviour
         PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
         if (playerStats == null) return;
 
-        // Atualiza barra de vida (sempre)
-        healthBar.maxValue = playerStats.GetMaxHealth();
-        healthBar.value = playerStats.GetHealth();
-        healthText.text = $"{playerStats.GetHealth():F0}/{playerStats.GetMaxHealth():F0}";
-
-        // Atualiza outros status apenas se o painel estiver aberto
-        if (statusPanel.activeSelf)
+        // ⭐⭐ VIDA - SEMPRE ATUALIZA E SEMPRE VISÍVEL
+        if (healthBar != null)
         {
-            damageText.text = $"Dano: {playerStats.GetDamage():F1}";
-            speedText.text = $"Velocidade: {playerStats.GetMoveSpeed():F1}";
-            defenseText.text = $"Defesa: {playerStats.GetDefense():F0}";
+            healthBar.maxValue = playerStats.GetMaxHealth();
+            healthBar.value = playerStats.GetHealth();
+        }
+
+        if (healthText != null)
+        {
+            healthText.text = $"{playerStats.GetHealth():F0}/{playerStats.GetMaxHealth():F0}";
+        }
+
+        // ⭐ OUTROS STATUS - apenas se o painel estiver aberto
+        if (statusPanel != null && statusPanel.activeSelf)
+        {
+            if (damageText != null)
+                damageText.text = $"Dano: {playerStats.GetDamage():F1}";
+
+            if (speedText != null)
+                speedText.text = $"Velocidade: {playerStats.GetMoveSpeed():F1}";
+
+            if (defenseText != null)
+                defenseText.text = $"Defesa: {playerStats.GetDefense():F0}";
+
+            if (attackSpeedText != null)
+                attackSpeedText.text = $"Vel. Ataque: {playerStats.GetAttackSpeed():F1}";
         }
     }
 
-    // ⭐ MOSTRAR/OCULTAR PAINEL DE STATUS
+    // ⭐ MOSTRAR/OCULTAR PAINEL DE STATUS DETALHADOS
     private void ToggleStatusPanel()
     {
         if (statusPanel != null)
         {
             bool newState = !statusPanel.activeSelf;
             statusPanel.SetActive(newState);
-            Debug.Log($"Status panel: {(newState ? "ABERTO" : "FECHADO")}");
+            Debug.Log($"Status detalhados: {(newState ? "ABERTO" : "FECHADO")}");
         }
+    }
+
+    // 🔄 RESETAR ÍCONES (para quando não há skills)
+    private void ResetSkillIcons()
+    {
+        if (attackSkillIcon != null) attackSkillIcon.color = Color.clear;
+        if (defenseSkillIcon != null) defenseSkillIcon.color = Color.clear;
+        if (ultimateSkillIcon != null) ultimateSkillIcon.color = Color.clear;
     }
 }
