@@ -1,68 +1,85 @@
 ﻿using UnityEngine;
 
-public class EnemyDamage : MonoBehaviour
+public class DanoInimigo : MonoBehaviour
 {
     [Header("Configurações de Dano")]
-    public int damageAmount = 10;
-    public float attackCooldown = 1f;
+    public float dano = 10f;
+    public float intervaloAtaque = 1f;
+    public bool danoContinuo = false;
 
-    [Header("Referência ao ScriptableObject")]
-    public status_inimigo enemyStatus; // ⭐ Arraste o SO no Inspector
+    private float proximoAtaque = 0f;
+    private PlayerStats playerStats;
 
-    private float lastAttackTime;
-
-    private void Start()
+    void Start()
     {
-        // ✅ CORREÇÃO: Para ScriptableObject, NÃO use GetComponent!
-        // A referência deve ser arrastada no Inspector ou carregada de outra forma
-
-        if (enemyStatus == null)
-        {
-            Debug.LogError($"status_inimigo não atribuído no Inspector para {gameObject.name}!");
-
-            // ⭐ Opcional: Tentar carregar automaticamente
-            enemyStatus = Resources.Load<status_inimigo>("Inimigos/status_inimigo");
-            if (enemyStatus != null)
-            {
-                Debug.Log("status_inimigo carregado automaticamente dos Resources!");
-            }
-        }
+        playerStats = FindAnyObjectByType<PlayerStats>();
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            TryDamagePlayer(collision.gameObject);
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
-            TryDamagePlayer(other.gameObject);
+            if (!danoContinuo)
+            {
+                AplicarDano(other.GetComponent<PlayerStats>());
+            }
         }
     }
 
-    private void TryDamagePlayer(GameObject player)
+    void OnTriggerStay2D(Collider2D other)
     {
-        if (Time.time - lastAttackTime < attackCooldown) return;
-
-        PlayerStats playerStats = player.GetComponent<PlayerStats>();
-        if (playerStats != null)
+        if (other.CompareTag("Player") && danoContinuo)
         {
-            playerStats.ReceberDano(damageAmount);
-            lastAttackTime = Time.time;
-
-            Debug.Log($"Inimigo causou {damageAmount} de dano no player!");
-
-            // ✅ Agora você pode acessar os dados do ScriptableObject
-            if (enemyStatus != null)
+            if (Time.time >= proximoAtaque)
             {
-                Debug.Log($"Usando dados de: {enemyStatus.name}");
-                // Exemplo: enemyStatus.danoBase, enemyStatus.vidaMaxima, etc.
+                AplicarDano(other.GetComponent<PlayerStats>());
+                proximoAtaque = Time.time + intervaloAtaque;
             }
         }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            if (!danoContinuo)
+            {
+                AplicarDano(collision.gameObject.GetComponent<PlayerStats>());
+            }
+        }
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && danoContinuo)
+        {
+            if (Time.time >= proximoAtaque)
+            {
+                AplicarDano(collision.gameObject.GetComponent<PlayerStats>());
+                proximoAtaque = Time.time + intervaloAtaque;
+            }
+        }
+    }
+
+    private void AplicarDano(PlayerStats stats)
+    {
+        if (stats != null)
+        {
+            // Use o método correto - TakeDamage em vez de ReceberDano
+            stats.TakeDamage(dano);
+            Debug.Log($"💥 Inimigo causou {dano} de dano no jogador!");
+        }
+    }
+
+    // Método para configurar o dano dinamicamente
+    public void SetDano(float novoDano)
+    {
+        dano = novoDano;
+    }
+
+    // Método para aumentar o dano (útil para inimigos que ficam mais fortes)
+    public void AumentarDano(float bonus)
+    {
+        dano += bonus;
     }
 }

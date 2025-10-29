@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6362577251985021551}
   - component: {fileID: 1004126959984086299}
   - component: {fileID: 6673091900557685604}
-  - component: {fileID: 2908840312444768415}
+  - component: {fileID: 4746755767540082927}
   m_Layer: 0
   m_Name: slime
   m_TagString: Untagged
@@ -180,7 +180,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &1004126959984086299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,20 +193,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cc35a38ac71afd4e8835f722bd01d91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::movi_inimigo
-  distanciaParada: 1
-  raioDetecao: 25
-  intervaloAtualizacaoPath: 0.5
-  numeroRaios: 8
-  distanciaMaximaRaycast: 8
-  mostrarDebug: 1
-  corRaios: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  corCaminho: {r: 0, g: 1, b: 0, a: 1}
-  camadaObstaculos:
-    serializedVersion: 2
-    m_Bits: 24
-  camadaPlayer:
-    serializedVersion: 2
-    m_Bits: 64
+  velocidade: 3
+  "distanciaDetec\xE7\xE3o": 25
+  distanciaAtaque: 2
+  "intervaloAtualiza\xE7\xE3oCaminho": 0.5
+  player: {fileID: 0}
+  pontosCaminho: []
 --- !u!114 &6673091900557685604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,8 +211,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad3c22716d1e8294f8bb243c7cdda376, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDamage
-  tempoEntreDanos: 1
---- !u!114 &2908840312444768415
+  dano: 10
+  intervaloAtaque: 1
+  danoContinuo: 0
+--- !u!114 &4746755767540082927
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -229,10 +223,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7080934257125611889}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2515d31c46cf2f647978f536da124a3e, type: 3}
+  m_Script: {fileID: 11500000, guid: 43a438f4451733741b05811838a64432, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::stats_inimigo
-  status: {fileID: 11400000, guid: 8f3c1676e031fe747aff8da20eaa6394, type: 2}
-  Speed: 0
-  Hp_inimigo: 0
-  dano: 0
+  m_EditorClassIdentifier: Assembly-CSharp::InimigoController
+  dadosInimigo: {fileID: 11400000, guid: 8f3c1676e031fe747aff8da20eaa6394, type: 2}
+  vidaAtual: 10
+  danoAtual: 10

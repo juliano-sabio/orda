@@ -1563,14 +1563,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cd32a3beeee98b4e9ee1f6e6247201c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseDamage: 10
-  baseAttackSpeed: 1
-  baseMoveSpeed: 5
-  baseMaxHealth: 100
-  baseDefense: 0
-  attackSkill: {fileID: 0}
-  defenseSkill: {fileID: 0}
-  ultimateSkill: {fileID: 0}
+  health: 100
+  maxHealth: 100
+  attack: 10
+  defense: 5
+  speed: 8
+  level: 1
+  currentXP: 0
+  xpToNextLevel: 100
+  xpMultiplier: 1.5
+  attackSkills: []
+  defenseSkills: []
+  attackActivationInterval: 2
+  defenseActivationInterval: 3
+  healthText: {fileID: 0}
+  attackText: {fileID: 0}
+  defenseText: {fileID: 0}
+  speedText: {fileID: 0}
+  inventoryText: {fileID: 0}
+  attackSkillsText: {fileID: 0}
+  defenseSkillsText: {fileID: 0}
+  levelText: {fileID: 0}
+  xpText: {fileID: 0}
+  xpSlider: {fileID: 0}
 --- !u!50 &1279116820
 Rigidbody2D:
   serializedVersion: 5
@@ -2273,6 +2288,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::skillmanager
   availableSkills:
   - {fileID: 0}
+  availableModifiers: []
 --- !u!1 &1462636003
 GameObject:
   m_ObjectHideFlags: 0
@@ -2949,18 +2965,27 @@ MonoBehaviour:
   skillIcon: {fileID: 501886923}
   skillNameText: {fileID: 40915790}
   skillDescriptionText: {fileID: 1512920520}
-  attackSkillIcon: {fileID: 1506335159}
-  defenseSkillIcon: {fileID: 1082331334}
-  ultimateSkillIcon: {fileID: 1282386155}
-  ultimateCooldownText: {fileID: 834004264}
-  ultimateCooldownSlider: {fileID: 1282393148}
+  attackSkill1Icon: {fileID: 0}
+  attackSkill2Icon: {fileID: 0}
+  defenseSkill1Icon: {fileID: 0}
+  defenseSkill2Icon: {fileID: 0}
+  attackCooldownText1: {fileID: 0}
+  attackCooldownText2: {fileID: 0}
+  defenseCooldownText1: {fileID: 0}
+  defenseCooldownText2: {fileID: 0}
   healthBar: {fileID: 187781640}
   healthText: {fileID: 1645040827}
+  levelText: {fileID: 0}
+  xpText: {fileID: 0}
+  xpSlider: {fileID: 0}
   statusPanel: {fileID: 2026279652}
   damageText: {fileID: 1650964919}
   speedText: {fileID: 1389645145}
   defenseText: {fileID: 322845297}
   attackSpeedText: {fileID: 0}
+  inventoryText: {fileID: 0}
+  attackSkillsText: {fileID: 0}
+  defenseSkillsText: {fileID: 0}
   toggleStatusKey: 9
   popupDisplayTime: 3
 --- !u!4 &1968545828
@@ -3228,28 +3253,43 @@ MonoBehaviour:
     nome: slime
     tempoParaAparecer: 0
     peso: 3
-    status: {fileID: 11400000, guid: 8f3c1676e031fe747aff8da20eaa6394, type: 2}
   - prefab: {fileID: 0}
     nome: Corredor
     tempoParaAparecer: 30
     peso: 2
-    status: {fileID: 0}
   - prefab: {fileID: 0}
     nome: Tanque
     tempoParaAparecer: 60
     peso: 1
-    status: {fileID: 0}
+  waves:
+  - nome: Wave 1
+    duracao: 30
+    maxInimigos: 15
+    intervaloSpaw: 3
+    waveEspecial: 0
+  - nome: Wave 2
+    duracao: 45
+    maxInimigos: 25
+    intervaloSpaw: 2
+    waveEspecial: 0
+  - nome: Wave 3
+    duracao: 60
+    maxInimigos: 35
+    intervaloSpaw: 1.5
+    waveEspecial: 0
+  usarWaves: 1
+  tempoEntreWaves: 5
   tempoEntreSpawns: 2
   distanciaMinima: 18
   distanciaMaxima: 25
-  limiteInimigos: 50
-  usarLimitesMundo: 1
-  limiteMin: {x: -50, y: -50}
-  limiteMax: {x: 50, y: 50}
-  maxTentativasSpawn: 10
+  limiteInimigos: 20
   aumentaDificuldade: 1
   tempoParaAumentarDificuldade: 30
   reducaoTempoSpawn: 0.1
+  spawnEmGrupo: 0
+  tamanhoGrupoMin: 2
+  tamanhoGrupoMax: 5
+  intervaloEntreGrupos: 5
 --- !u!4 &2027067016
 Transform:
   m_ObjectHideFlags: 0
@@ -3265,6 +3305,71 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1458841533793537547
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 11261116110512547, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1279116817}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -13.88636
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 15.83927
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5483340294184715351, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: dadosInimigo
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8035523421442536905, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
+      propertyPath: m_Name
+      value: slime
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -3281,3 +3386,4 @@ SceneRoots:
   - {fileID: 1337705022}
   - {fileID: 1279116817}
   - {fileID: 1378257766}
+  - {fileID: 1458841533793537547}

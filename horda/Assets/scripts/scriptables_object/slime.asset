@@ -9,9 +9,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8313efc8f9976c7468b9616a7edd3268, type: 3}
+  m_Script: {fileID: 11500000, guid: 5d95cf877d4ba9b428c9bfeb03732ab0, type: 3}
   m_Name: slime
-  m_EditorClassIdentifier: Assembly-CSharp::status_inimigo
-  Speed: 3
-  Hp_inimigo: 4
-  dano: 2
+  m_EditorClassIdentifier: Assembly-CSharp::InimigoData
+  nomeInimigo: slime
+  prefab: {fileID: 7080934257125611889, guid: e07bd50da3dc6ce418afc898632a916f, type: 3}
+  icon: {fileID: 0}
+  vidaBase: 50
+  danoBase: 10
+  velocidadeBase: 3
+  tamanho: 1
+  intervaloAtaque: 1
+  xpDrop: 10
+  isBoss: 0
+  chanceSpawn: 1
+  efeitoMorte: {fileID: 0}
+  somMorte: {fileID: 0}
+  corDestaque: {r: 1, g: 1, b: 1, a: 1}
+  comportamento: 0
+  distanciaAtaque: 2
+  distanciaPerseguicao: 8

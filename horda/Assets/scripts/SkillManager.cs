@@ -2,27 +2,32 @@
 using System.Linq;
 using UnityEngine;
 
-public class skillmanager : MonoBehaviour
+public class SkillManager : MonoBehaviour
 {
     // ⚡ Singleton - acesso global fácil
-    public static skillmanager Instance;
+    public static SkillManager Instance;
 
-    [Header("🎯 Lista de Skills Disponíveis no Jogo")]
-    [SerializeField] private List<skilldata> availableSkills = new List<skilldata>();
+    [Header("🎯 Lista de Skills Disponíveis no Jogo (ScriptableObjects)")]
+    [SerializeField] private List<SkillData> availableSkills = new List<SkillData>();
+
+    [Header("🔧 Modificadores de Skills Disponíveis")]
+    [SerializeField] private List<SkillModifierData> availableModifiers = new List<SkillModifierData>();
 
     // Listas internas de controle
-    private List<skilldata> activeSkills = new List<skilldata>(); // Skills que o jogador tem
-    private Dictionary<skilldata, SkillBehavior> activeBehaviors = new Dictionary<skilldata, SkillBehavior>();
+    private List<SkillData> activeSkills = new List<SkillData>();
+    private List<SkillModifierData> activeModifiers = new List<SkillModifierData>();
 
     private PlayerStats playerStats;
 
+    // 🆕 DICIONÁRIO PARA SKILLS ESPECIAIS
+    private Dictionary<SpecificSkillType, float> specialSkillValues = new Dictionary<SpecificSkillType, float>();
+
     private void Awake()
     {
-        // Configura o singleton
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Persiste entre cenas
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -32,153 +37,516 @@ public class skillmanager : MonoBehaviour
 
     private void Start()
     {
-        // Encontra o PlayerStats automaticamente
         playerStats = FindAnyObjectByType<PlayerStats>();
         if (playerStats == null)
         {
             Debug.LogError("PlayerStats não encontrado na cena!");
         }
+
+        // 🆕 INICIALIZA DICIONÁRIO DE SKILLS ESPECIAIS
+        InitializeSpecialSkillsDictionary();
+
+        // 🆕 VERIFICA SE HÁ SKILLS DISPONÍVEIS
+        CheckAvailableSkills();
+    }
+
+    // 🆕 INICIALIZA DICIONÁRIO DE SKILLS ESPECIAIS
+    private void InitializeSpecialSkillsDictionary()
+    {
+        foreach (SpecificSkillType type in System.Enum.GetValues(typeof(SpecificSkillType)))
+        {
+            if (type != SpecificSkillType.None)
+            {
+                specialSkillValues[type] = 0f;
+            }
+        }
+    }
+
+    // 🆕 VERIFICA SE HÁ SKILLS DISPONÍVEIS
+    private void CheckAvailableSkills()
+    {
+        if (availableSkills.Count == 0)
+        {
+            Debug.LogWarning("⚠️ Lista de skills disponíveis está vazia! Adicione SkillData ScriptableObjects no Inspector.");
+        }
+        else
+        {
+            Debug.Log($"✅ {availableSkills.Count} skills disponíveis carregadas.");
+        }
     }
 
     // 🎁 MÉTODO PRINCIPAL - ADICIONAR UMA SKILL AO JOGADOR
-    public void AddSkill(skilldata skillData)
+    public void AddSkill(SkillData skillData)
     {
-        // Verifica se já tem a skill
+        if (playerStats == null)
+        {
+            Debug.LogError("PlayerStats não encontrado!");
+            return;
+        }
+
         if (activeSkills.Contains(skillData))
         {
             Debug.LogWarning($"Jogador já tem a skill: {skillData.skillName}");
             return;
         }
 
-        Debug.Log($"🎉 Adicionando skill: {skillData.skillName}");
+        Debug.Log($"🎉 Adicionando skill: {skillData.skillName} (Raridade: {skillData.rarity})");
 
         // Adiciona à lista de skills ativas
         activeSkills.Add(skillData);
 
-        // Aplica os efeitos de status (dano, velocidade, etc)
+        // Aplica os efeitos da skill
         ApplySkillEffects(skillData);
 
-        // Se tiver comportamento especial, instancia e configura
-        if (skillData.behavior != null)
-        {
-            AddSkillBehavior(skillData);
-        }
+        // 🆕 APLICA EFEITOS ESPECIAIS BASEADOS NO TIPO
+        ApplySpecialSkillEffects(skillData);
 
-        // Toca efeito sonoro se existir
+        // Toca efeito sonoro
         if (skillData.soundEffect != null)
         {
             AudioSource.PlayClipAtPoint(skillData.soundEffect, playerStats.transform.position);
         }
 
-        // ⭐⭐ MODIFICAÇÃO PRINCIPAL: INTEGRAÇÃO ROBUSTA COM UI ⭐⭐
+        // NOTIFICA UI CORRETAMENTE
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.ShowSkillAcquired(skillData);
-            Debug.Log("✅ UI notificada sobre a nova skill!");
+            UIManager.Instance.ShowSkillAcquired(skillData.skillName, skillData.description);
         }
         else
         {
-            Debug.LogWarning("⚠️ UIManager não encontrado! A UI não será atualizada.");
-
-            // Fallback: Mostra mensagem no console para debug
-            Debug.Log($"🆕 SKILL ADQUIRIDA: {skillData.skillName} - {skillData.description}");
+            Debug.LogWarning("UIManager não encontrado!");
         }
+
+        // ATUALIZA UI DO PLAYERSTATS
+        playerStats.ForceUIUpdate();
     }
 
-    // 🔧 ADICIONA COMPORTAMENTO ESPECIAL DA SKILL
-    private void AddSkillBehavior(skilldata skillData)
+    // 📊 APLICA OS EFEITOS DA SKILL
+    private void ApplySkillEffects(SkillData skillData)
     {
-        // Adiciona o componente de comportamento ao GameObject do SkillManager
-        SkillBehavior behavior = gameObject.AddComponent(skillData.behavior.GetType()) as SkillBehavior;
+        // Aplica bônus de status básicos
+        if (skillData.healthBonus > 0)
+        {
+            playerStats.maxHealth += skillData.healthBonus;
+            playerStats.health += skillData.healthBonus;
+            Debug.Log($"❤️ Vida aumentada em {skillData.healthBonus}");
+        }
 
-        // Inicializa com referência ao PlayerStats
-        behavior.Initialize(playerStats);
+        if (skillData.attackBonus > 0)
+        {
+            playerStats.attack += skillData.attackBonus;
+            Debug.Log($"⚔️ Ataque aumentado em {skillData.attackBonus}");
+        }
 
-        // Aplica o efeito do comportamento
-        behavior.ApplyEffect();
+        if (skillData.defenseBonus > 0)
+        {
+            playerStats.defense += skillData.defenseBonus;
+            Debug.Log($"🛡️ Defesa aumentada em {skillData.defenseBonus}");
+        }
 
-        // Guarda referência para poder remover depois
-        activeBehaviors.Add(skillData, behavior);
+        if (skillData.speedBonus > 0)
+        {
+            playerStats.speed += skillData.speedBonus;
+            Debug.Log($"🏃 Velocidade aumentada em {skillData.speedBonus}");
+        }
 
-        Debug.Log($"Comportamento especial adicionado: {skillData.behavior.GetType()}");
-    }
+        // APLICA MODIFICADORES DE SKILLS CORRETAMENTE
+        foreach (var modifierData in skillData.skillModifiers)
+        {
+            AddSkillModifier(modifierData);
+        }
 
-    // 📊 APLICA OS EFEITOS DE STATUS (DANO, VELOCIDADE, ETC)
-    private void ApplySkillEffects(skilldata skillData)
-    {
-        playerStats.ApplySkillModifiers(skillData);
-
-        // Instancia efeito visual se existir
+        // Efeito visual
         if (skillData.visualEffect != null)
         {
             Instantiate(skillData.visualEffect, playerStats.transform.position, Quaternion.identity);
         }
     }
 
-    // 🗑️ REMOVER UMA SKILL (ÚTIL PARA POWER-UPS TEMPORÁRIOS)
-    public void RemoveSkill(skilldata skillData)
+    // 🆕 APLICA EFEITOS ESPECIAIS BASEADOS NO TIPO DE SKILL
+    private void ApplySpecialSkillEffects(SkillData skillData)
     {
-        if (!activeSkills.Contains(skillData)) return;
-
-        Debug.Log($"Removendo skill: {skillData.skillName}");
-
-        activeSkills.Remove(skillData);
-
-        // Remove comportamento especial se existir
-        if (activeBehaviors.ContainsKey(skillData))
+        if (skillData.specificType != SpecificSkillType.None)
         {
-            activeBehaviors[skillData].RemoveEffect();
-            Destroy(activeBehaviors[skillData]);
-            activeBehaviors.Remove(skillData);
-        }
+            specialSkillValues[skillData.specificType] += skillData.specialValue;
 
-        // Remove os modificadores de status
-        playerStats.RemoveSkillModifiers(skillData);
+            switch (skillData.specificType)
+            {
+                case SpecificSkillType.HealthRegen:
+                    Debug.Log($"💚 Regeneração de vida aumentada: {skillData.specialValue}/s");
+                    StartCoroutine(HealthRegenCoroutine(skillData.specialValue));
+                    break;
+                case SpecificSkillType.CriticalStrike:
+                    Debug.Log($"🎯 Chance de crítico aumentada: {skillData.specialValue}%");
+                    break;
+                case SpecificSkillType.LifeSteal:
+                    Debug.Log($"🩸 Life steal aumentado: {skillData.specialValue}%");
+                    break;
+                case SpecificSkillType.MovementSpeed:
+                    Debug.Log($"🏃‍♂️ Velocidade de movimento aumentada: {skillData.specialValue}%");
+                    playerStats.speed *= (1f + skillData.specialValue / 100f);
+                    break;
+                case SpecificSkillType.AttackSpeed:
+                    Debug.Log($"⚡ Velocidade de ataque aumentada: {skillData.specialValue}%");
+                    playerStats.attackActivationInterval /= (1f + skillData.specialValue / 100f);
+                    break;
+                case SpecificSkillType.AreaDamage:
+                    Debug.Log($"💥 Área de dano aumentada: {skillData.specialValue}%");
+                    break;
+                case SpecificSkillType.Shield:
+                    Debug.Log($"🛡️ Escudo ativado: {skillData.specialValue} de proteção");
+                    playerStats.defense += skillData.specialValue;
+                    break;
+            }
+        }
     }
 
-    // 🎲 PEGA SKILLS ALEATÓRIAS DISPONÍVEIS (PARA SELEÇÃO)
-    public List<skilldata> GetRandomSkills(int count)
+    // 🆕 CORROTINA PARA REGENERAÇÃO DE VIDA
+    private System.Collections.IEnumerator HealthRegenCoroutine(float regenAmount)
     {
-        // Filtra apenas skills que o jogador ainda não tem
+        while (true)
+        {
+            yield return new WaitForSeconds(1f);
+            if (playerStats != null && playerStats.health < playerStats.maxHealth)
+            {
+                playerStats.health = Mathf.Min(playerStats.maxHealth, playerStats.health + regenAmount);
+                playerStats.ForceUIUpdate();
+            }
+        }
+    }
+
+    // 🔧 ADICIONAR MODIFICADOR DE SKILL
+    public void AddSkillModifier(SkillModifierData modifierData)
+    {
+        if (playerStats == null)
+        {
+            Debug.LogError("PlayerStats não encontrado!");
+            return;
+        }
+
+        if (activeModifiers.Contains(modifierData))
+        {
+            Debug.LogWarning($"Jogador já tem o modificador: {modifierData.modifierName}");
+            return;
+        }
+
+        Debug.Log($"✨ Adicionando modificador: {modifierData.modifierName} para {modifierData.targetSkillName}");
+
+        // CONVERTE PARA O SkillModifier DO PlayerStats
+        PlayerStats.SkillModifier playerStatsModifier = new PlayerStats.SkillModifier
+        {
+            modifierName = modifierData.modifierName,
+            targetSkillName = modifierData.targetSkillName,
+            damageMultiplier = modifierData.damageMultiplier,
+            defenseMultiplier = modifierData.defenseMultiplier,
+            element = modifierData.element,
+            duration = modifierData.duration
+        };
+
+        activeModifiers.Add(modifierData);
+        playerStats.AddSkillModifier(playerStatsModifier);
+
+        // NOTIFICA UI CORRETAMENTE
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowModifierAcquired(modifierData.modifierName, modifierData.targetSkillName);
+        }
+
+        playerStats.ForceUIUpdate();
+    }
+
+    // 🗑️ REMOVER UMA SKILL
+    public void RemoveSkill(SkillData skillData)
+    {
+        if (playerStats == null || !activeSkills.Contains(skillData)) return;
+
+        Debug.Log($"🗑️ Removendo skill: {skillData.skillName}");
+        activeSkills.Remove(skillData);
+
+        // Remove bônus de status
+        if (skillData.healthBonus > 0)
+        {
+            playerStats.maxHealth -= skillData.healthBonus;
+            playerStats.health = Mathf.Min(playerStats.health, playerStats.maxHealth);
+        }
+
+        if (skillData.attackBonus > 0)
+        {
+            playerStats.attack -= skillData.attackBonus;
+        }
+
+        if (skillData.defenseBonus > 0)
+        {
+            playerStats.defense -= skillData.defenseBonus;
+        }
+
+        if (skillData.speedBonus > 0)
+        {
+            playerStats.speed -= skillData.speedBonus;
+        }
+
+        // 🆕 REMOVE EFEITOS ESPECIAIS
+        RemoveSpecialSkillEffects(skillData);
+
+        // Remove modificadores
+        foreach (var modifier in skillData.skillModifiers)
+        {
+            RemoveSkillModifier(modifier);
+        }
+
+        playerStats.ForceUIUpdate();
+    }
+
+    // 🆕 REMOVE EFEITOS ESPECIAIS
+    private void RemoveSpecialSkillEffects(SkillData skillData)
+    {
+        if (skillData.specificType != SpecificSkillType.None)
+        {
+            specialSkillValues[skillData.specificType] -= skillData.specialValue;
+
+            switch (skillData.specificType)
+            {
+                case SpecificSkillType.MovementSpeed:
+                    playerStats.speed /= (1f + skillData.specialValue / 100f);
+                    break;
+                case SpecificSkillType.AttackSpeed:
+                    playerStats.attackActivationInterval *= (1f + skillData.specialValue / 100f);
+                    break;
+                case SpecificSkillType.Shield:
+                    playerStats.defense -= skillData.specialValue;
+                    break;
+            }
+        }
+    }
+
+    // 🗑️ REMOVER MODIFICADOR
+    public void RemoveSkillModifier(SkillModifierData modifierData)
+    {
+        if (!activeModifiers.Contains(modifierData)) return;
+
+        Debug.Log($"🗑️ Removendo modificador: {modifierData.modifierName}");
+        activeModifiers.Remove(modifierData);
+
+        // 🆕 NOTA: Para remoção completa, precisaríamos implementar no PlayerStats
+        // Por enquanto apenas remove da lista local
+
+        playerStats.ForceUIUpdate();
+    }
+
+    // 🎲 PEGA SKILLS ALEATÓRIAS DISPONÍVEIS
+    public List<SkillData> GetRandomSkills(int count)
+    {
         var unacquired = availableSkills.Where(s => !activeSkills.Contains(s)).ToList();
 
-        // Embaralha a lista
-        var shuffled = unacquired.OrderBy(x => Random.value).ToList();
+        if (unacquired.Count == 0)
+        {
+            Debug.Log("Todas as skills já foram adquiridas!");
+            return new List<SkillData>();
+        }
 
-        // Pega a quantidade pedida (ou menos se não tiver muitas disponíveis)
+        var shuffled = unacquired.OrderBy(x => Random.value).ToList();
+        return shuffled.Take(Mathf.Min(count, shuffled.Count)).ToList();
+    }
+
+    // 🎲 PEGA MODIFICADORES ALEATÓRIOS DISPONÍVEIS
+    public List<SkillModifierData> GetRandomModifiers(int count)
+    {
+        var unacquired = availableModifiers.Where(m => !activeModifiers.Contains(m)).ToList();
+
+        if (unacquired.Count == 0)
+        {
+            Debug.Log("Todos os modificadores já foram adquiridos!");
+            return new List<SkillModifierData>();
+        }
+
+        var shuffled = unacquired.OrderBy(x => Random.value).ToList();
         return shuffled.Take(Mathf.Min(count, shuffled.Count)).ToList();
     }
 
     // 🔍 VERIFICAR SE JOGADOR TEM UMA SKILL ESPECÍFICA
-    public bool HasSkill(skilldata skillData)
+    public bool HasSkill(SkillData skillData)
     {
         return activeSkills.Contains(skillData);
     }
 
-    // 🆕 MÉTODO PARA VERIFICAR SE O UIMANAGER ESTÁ FUNCIONANDO
-    public void CheckUIManagerStatus()
+    // 🔍 VERIFICAR SE JOGADOR TEM UM MODIFICADOR ESPECÍFICO
+    public bool HasModifier(SkillModifierData modifier)
     {
-        if (UIManager.Instance != null)
+        return activeModifiers.Contains(modifier);
+    }
+
+    // 🔍 VERIFICAR SE JOGADOR TEM UMA SKILL PELO NOME
+    public bool HasSkillByName(string skillName)
+    {
+        return activeSkills.Any(s => s.skillName == skillName);
+    }
+
+    // 🔍 VERIFICAR SE JOGADOR TEM UM MODIFICADOR PELO NOME
+    public bool HasModifierByName(string modifierName)
+    {
+        return activeModifiers.Any(m => m.modifierName == modifierName);
+    }
+
+    // 🆕 VERIFICAR VALOR DE SKILL ESPECIAL
+    public float GetSpecialSkillValue(SpecificSkillType skillType)
+    {
+        return specialSkillValues.ContainsKey(skillType) ? specialSkillValues[skillType] : 0f;
+    }
+
+    // 📊 GETTERS PARA INFORMAÇÕES
+    public List<SkillData> GetActiveSkills() => new List<SkillData>(activeSkills);
+    public List<SkillModifierData> GetActiveModifiers() => new List<SkillModifierData>(activeModifiers);
+    public List<SkillData> GetAvailableSkills() => new List<SkillData>(availableSkills);
+    public List<SkillModifierData> GetAvailableModifiers() => new List<SkillModifierData>(availableModifiers);
+
+    // 🎯 MÉTODO PARA ADICIONAR SKILL POR NOME
+    public bool AddSkillByName(string skillName)
+    {
+        var skill = availableSkills.FirstOrDefault(s => s.skillName == skillName);
+        if (skill != null)
         {
-            Debug.Log("✅ UIManager está funcionando corretamente!");
+            AddSkill(skill);
+            return true;
+        }
+
+        Debug.LogWarning($"Skill não encontrada: {skillName}");
+        return false;
+    }
+
+    // 🎯 MÉTODO PARA ADICIONAR MODIFICADOR POR NOME
+    public bool AddModifierByName(string modifierName)
+    {
+        var modifier = availableModifiers.FirstOrDefault(m => m.modifierName == modifierName);
+        if (modifier != null)
+        {
+            AddSkillModifier(modifier);
+            return true;
+        }
+
+        Debug.LogWarning($"Modificador não encontrado: {modifierName}");
+        return false;
+    }
+
+    // 🎲 MÉTODO PARA ADICIONAR SKILL ALEATÓRIA (PARA TESTE)
+    public void AddRandomSkill()
+    {
+        var randomSkills = GetRandomSkills(1);
+        if (randomSkills.Count > 0)
+        {
+            AddSkill(randomSkills[0]);
         }
         else
         {
-            Debug.LogError("❌ UIManager não está disponível!");
+            Debug.Log("Não há mais skills disponíveis!");
         }
     }
 
-    // 🆕 MÉTODO PARA TESTE MANUAL DE UI
-    public void TestUINotification(skilldata testSkill)
+    // 🎲 MÉTODO PARA ADICIONAR MODIFICADOR ALEATÓRIO (PARA TESTE)
+    public void AddRandomModifier()
     {
-        if (UIManager.Instance != null)
+        var randomModifiers = GetRandomModifiers(1);
+        if (randomModifiers.Count > 0)
         {
-            UIManager.Instance.ShowSkillAcquired(testSkill);
-            Debug.Log("🧪 Teste de UI executado!");
+            AddSkillModifier(randomModifiers[0]);
         }
         else
         {
-            Debug.LogWarning("⚠️ Não foi possível testar UI - UIManager não encontrado");
+            Debug.Log("Não há mais modificadores disponíveis!");
+        }
+    }
+
+    // 🆕 MÉTODO PARA ADICIONAR SKILLS DE TESTE (PARA DESENVOLVIMENTO)
+    public void AddTestSkills()
+    {
+        Debug.Log("🧪 Adicionando skills de teste...");
+
+        if (availableSkills.Count > 0)
+        {
+            AddSkill(availableSkills[0]);
+            if (availableSkills.Count > 1)
+                AddSkill(availableSkills[1]);
+        }
+        else
+        {
+            Debug.LogWarning("Nenhuma skill disponível para teste!");
+        }
+    }
+
+    // 🆕 MÉTODO PARA VERIFICAR STATUS DA INTEGRAÇÃO
+    public void CheckIntegrationStatus()
+    {
+        Debug.Log("🔍 Verificando integração...");
+
+        if (playerStats != null)
+            Debug.Log("✅ PlayerStats: CONECTADO");
+        else
+            Debug.LogError("❌ PlayerStats: NÃO CONECTADO");
+
+        if (UIManager.Instance != null)
+            Debug.Log("✅ UIManager: CONECTADO");
+        else
+            Debug.LogError("❌ UIManager: NÃO CONECTADO");
+
+        Debug.Log($"📊 Skills Ativas: {activeSkills.Count}");
+        Debug.Log($"🔧 Modificadores Ativos: {activeModifiers.Count}");
+        Debug.Log($"🎯 Skills Disponíveis: {availableSkills.Count}");
+    }
+
+    // 🗑️ MÉTODO PARA LIMPAR TODAS AS SKILLS (PARA DEBUG)
+    public void ClearAllSkills()
+    {
+        foreach (var skill in activeSkills.ToList())
+        {
+            RemoveSkill(skill);
+        }
+
+        foreach (var modifier in activeModifiers.ToList())
+        {
+            RemoveSkillModifier(modifier);
+        }
+
+        Debug.Log("🧹 Todas as skills e modificadores foram removidos!");
+    }
+
+    // 🆕 MÉTODO PARA ATUALIZAR UI MANUALMENTE
+    public void ForceUIUpdate()
+    {
+        if (playerStats != null)
+        {
+            playerStats.ForceUIUpdate();
+        }
+    }
+
+    // 🆕 MÉTODO CHAMADO QUANDO O JOGADOR SOBE DE LEVEL
+    public void OnPlayerLevelUp(int newLevel)
+    {
+        Debug.Log($"🎉 Player subiu para o nível {newLevel}! Verificando novas skills...");
+
+        // Exemplo: Dar uma skill aleatória a cada 3 níveis
+        if (newLevel % 3 == 0 && availableSkills.Count > 0)
+        {
+            Debug.Log($"🎁 Presente de level up! Adicionando skill aleatória...");
+            AddRandomSkill();
+        }
+    }
+
+    // 🆕 MÉTODO PARA ADICIONAR SKILLS AO MANAGER DINAMICAMENTE
+    public void AddAvailableSkill(SkillData skillData)
+    {
+        if (!availableSkills.Contains(skillData))
+        {
+            availableSkills.Add(skillData);
+            Debug.Log($"✅ Skill {skillData.skillName} adicionada às disponíveis");
+        }
+    }
+
+    // 🆕 MÉTODO PARA REMOVER SKILL DAS DISPONÍVEIS
+    public void RemoveAvailableSkill(SkillData skillData)
+    {
+        if (availableSkills.Contains(skillData))
+        {
+            availableSkills.Remove(skillData);
+            Debug.Log($"❌ Skill {skillData.skillName} removida das disponíveis");
         }
     }
 }

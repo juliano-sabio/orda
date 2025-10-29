@@ -1,296 +1,361 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 
 public class movi_inimigo : MonoBehaviour
 {
-    [Header("Configurações de Pathfinding")]
-    stats_inimigo stats_Inimigo;
-    public float distanciaParada = 1f;
-    public float raioDetecao = 5f;
-    public float intervaloAtualizacaoPath = 0.5f;
-    public int numeroRaios = 8;
-    public float distanciaMaximaRaycast = 4f;
-
-    [Header("Debug")]
-    public bool mostrarDebug = true;
-    public Color corRaios = Color.yellow;
-    public Color corCaminho = Color.green;
+    [Header("Configurações de Movimento")]
+    public float velocidade = 3f;
+    public float distanciaDetecção = 8f;
+    public float distanciaAtaque = 2f;
+    public float intervaloAtualizaçãoCaminho = 0.5f;
 
     [Header("Referências")]
-    public LayerMask camadaObstaculos;
-    public LayerMask camadaPlayer;
+    public Transform player;
+    public Transform[] pontosCaminho;
 
-    private Transform player;
     private Rigidbody2D rb;
-    private List<Vector2> caminhoAtual = new List<Vector2>();
-    private int indiceWaypointAtual = 0;
-    private float tempoUltimaAtualizacao;
-    private Vector2 ultimaPosicaoPlayer;
+    private Vector2 direcaoMovimento;
+    private int pontoAtual = 0;
+    private float tempoUltimaAtualização;
+    private bool perseguindoPlayer = false;
+    private bool procurandoPlayer = false;
 
     void Start()
     {
-        stats_Inimigo = GetComponent<stats_inimigo>();
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
-        if (rb == null)
+
+        // 🔥 ENCONTRA O PLAYER AUTOMATICAMENTE
+        EncontrarPlayer();
+
+        // Verifica se tem pontos de caminho
+        if (pontosCaminho != null && pontosCaminho.Length > 0)
         {
-            rb = gameObject.AddComponent<Rigidbody2D>();
-            rb.gravityScale = 0;
-            rb.freezeRotation = true;
+            Debug.Log($"🛣️ {pontosCaminho.Length} pontos de caminho configurados");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Nenhum ponto de caminho configurado. Inimigo ficará parado.");
         }
 
-        EncontrarPlayer();
+        tempoUltimaAtualização = Time.time;
+        
+        // Começa a corrotina para procurar player periodicamente
+        StartCoroutine(ProcurarPlayerPeriodicamente());
     }
 
     void Update()
     {
-        if (player == null)
+        // 🔥 SE NÃO TEM PLAYER, TENTA ENCONTRAR NOVAMENTE
+        if (player == null && !procurandoPlayer)
         {
             EncontrarPlayer();
             return;
         }
 
-        // Atualizar path se necessário
-        if (Time.time - tempoUltimaAtualizacao > intervaloAtualizacaoPath ||
-            Vector2.Distance(player.position, ultimaPosicaoPlayer) > 1f)
-        {
-            CalcularNovoCaminho();
-            tempoUltimaAtualizacao = Time.time;
-            ultimaPosicaoPlayer = player.position;
-        }
-        SeguirCaminho();
-    }
-    private void FixedUpdate()
-    {
-
-    }
-    void LateUpdate()
-    {
-        // Mantém a rotação fixa
-        transform.rotation = Quaternion.identity;
-    }
-
-    void EncontrarPlayer()
-    {
-        Collider2D playerCollider = Physics2D.OverlapCircle(transform.position, raioDetecao, camadaPlayer);
-        if (playerCollider != null)
-        {
-            player = playerCollider.transform;
-            ultimaPosicaoPlayer = player.position;
-        }
-    }
-
-    void CalcularNovoCaminho()
-    {
         if (player == null) return;
 
-        caminhoAtual.Clear();
-        indiceWaypointAtual = 0;
+        // Verifica se deve perseguir o player
+        VerificarPlayer();
 
-        Vector2 direcaoPlayer = (Vector2)player.position - (Vector2)transform.position;
-        float distanciaPlayer = direcaoPlayer.magnitude;
-
-        // Verificar se há caminho direto
-        RaycastHit2D hitDireto = Physics2D.Raycast(transform.position, direcaoPlayer.normalized,
-                                                  distanciaPlayer, camadaObstaculos);
-
-        if (hitDireto.collider == null)
+        // Atualiza o caminho periodicamente
+        if (Time.time - tempoUltimaAtualização >= intervaloAtualizaçãoCaminho)
         {
-            // Caminho direto disponível
-            caminhoAtual.Add(player.position);
+            AtualizarCaminho();
+            tempoUltimaAtualização = Time.time;
         }
-        else
-        {
-            // Encontrar caminho alternativo
-            Vector2 waypoint = EncontrarWaypointAlternativo(direcaoPlayer, hitDireto.point);
-            caminhoAtual.Add(waypoint);
-            caminhoAtual.Add(player.position);
-        }
+
+        // Move o inimigo
+        Mover();
     }
 
-
-    Vector2 EncontrarWaypointAlternativo(Vector2 direcaoOriginal, Vector2 pontoColisao)
+    // 🔥 MÉTODO MELHORADO PARA ENCONTRAR PLAYER
+    void EncontrarPlayer()
     {
-        float melhorPontuacao = -Mathf.Infinity;
-        Vector2 melhorDirecao = direcaoOriginal.normalized;
-
-        // Testar diferentes direções ao redor
-        for (int i = 0; i < numeroRaios; i++)
+        procurandoPlayer = true;
+        
+        // Tenta encontrar por tag primeiro
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        
+        if (playerObj != null)
         {
-            float angulo = (i / (float)numeroRaios) * 360f;
-            Vector2 direcaoTeste = RotateVector(direcaoOriginal.normalized, angulo);
+            player = playerObj.transform;
+            Debug.Log($"🎯 Player encontrado por tag: {player.name}");
+            procurandoPlayer = false;
+            return;
+        }
 
-            // Verificar se esta direção está livre
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, direcaoTeste,
-                                               distanciaMaximaRaycast, camadaObstaculos);
+        // Se não encontrou por tag, tenta encontrar por nome
+        playerObj = GameObject.Find("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+            Debug.Log($"🎯 Player encontrado por nome: {player.name}");
+            procurandoPlayer = false;
+            return;
+        }
 
-            if (hit.collider == null)
+        // Se ainda não encontrou, tenta encontrar qualquer objeto com componente Player
+       // MonoBehaviour[] todosOsObjetos = FindObjectOfType<MonoBehaviour>();
+       // foreach (MonoBehaviour obj in todosOsObjetos)
+       // {
+        //    if (obj.GetType().Name.ToLower().Contains("player"))
+        //    {
+        //        player = obj.transform;
+          //      Debug.Log($"🎯 Player encontrado por componente: {player.name}");
+        //        procurandoPlayer = false;
+        //        return;
+         //   }
+       // }
+
+        // Se não encontrou de jeito nenhum
+        Debug.LogWarning("⚠️ Player não encontrado automaticamente. Tentando novamente...");
+        procurandoPlayer = false;
+    }
+
+    // 🔥 CORROTINA PARA PROCURAR PLAYER PERIODICAMENTE
+    IEnumerator ProcurarPlayerPeriodicamente()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(3f); // Procura a cada 3 segundos
+            
+            if (player == null)
             {
-                // Direção livre - calcular quão boa ela é
-                float pontuacao = CalcularPontuacaoDirecao(direcaoTeste, direcaoOriginal);
-                if (pontuacao > melhorPontuacao)
-                {
-                    melhorPontuacao = pontuacao;
-                    melhorDirecao = direcaoTeste;
-                }
+                Debug.Log("🔍 Procurando player periodicamente...");
+                EncontrarPlayer();
             }
             else
             {
-                // Tentar direção que contorna o obstáculo
-                Vector2 direcaoContorno = CalcularDirecaoContorno(hit.normal);
-                float pontuacao = CalcularPontuacaoDirecao(direcaoContorno, direcaoOriginal);
-                if (pontuacao > melhorPontuacao)
+                // Verifica se o player ainda existe na cena
+                if (player.gameObject.scene.IsValid() == false)
                 {
-                    melhorPontuacao = pontuacao;
-                    melhorDirecao = direcaoContorno;
+                    Debug.LogWarning("🚨 Player foi destruído! Procurando novo...");
+                    player = null;
+                    EncontrarPlayer();
                 }
             }
         }
-
-        return (Vector2)transform.position + melhorDirecao * distanciaMaximaRaycast;
     }
 
-    Vector2 CalcularDirecaoContorno(Vector2 normalObstaculo)
+    void VerificarPlayer()
     {
-        // Calcular direção que contorna o obstáculo
-        Vector2 direita = new Vector2(-normalObstaculo.y, normalObstaculo.x);
-        Vector2 esquerda = new Vector2(normalObstaculo.y, -normalObstaculo.x);
+        if (player == null) return;
 
-        // Testar qual direção é melhor
-        RaycastHit2D hitDireita = Physics2D.Raycast(transform.position, direita, 2f, camadaObstaculos);
-        RaycastHit2D hitEsquerda = Physics2D.Raycast(transform.position, esquerda, 2f, camadaObstaculos);
+        float distanciaParaPlayer = Vector2.Distance(transform.position, player.position);
 
-        if (hitDireita.collider == null && hitEsquerda.collider == null)
+        if (distanciaParaPlayer <= distanciaDetecção)
         {
-            // Ambas livres, escolher a que vai mais na direção do player
-            return Vector2.Dot(direita, (Vector2)player.position - (Vector2)transform.position) > 0 ? direita : esquerda;
+            perseguindoPlayer = true;
         }
-        else if (hitDireita.collider == null)
+        else if (distanciaParaPlayer > distanciaDetecção * 1.5f)
         {
-            return direita;
+            perseguindoPlayer = false;
+        }
+    }
+
+    void AtualizarCaminho()
+    {
+        if (perseguindoPlayer && player != null)
+        {
+            // Persegue o player
+            direcaoMovimento = (player.position - transform.position).normalized;
         }
         else
         {
-            return esquerda;
+            // Segue os pontos de caminho
+            SeguirCaminho();
         }
-    }
-
-    float CalcularPontuacaoDirecao(Vector2 direcaoTeste, Vector2 direcaoDesejada)
-    {
-        float pontuacao = 0f;
-
-        // Pontuar baseado na similaridade com a direção desejada
-        pontuacao += Vector2.Dot(direcaoTeste, direcaoDesejada.normalized) * 2f;
-
-        // Pontuar baseado na distância até o player
-        Vector2 posicaoAlvo = (Vector2)transform.position + direcaoTeste * distanciaMaximaRaycast;
-        float distanciaPlayer = Vector2.Distance(posicaoAlvo, player.position);
-        pontuacao += (1f / (distanciaPlayer + 0.1f)) * 1.5f;
-
-        // Verificar se há obstáculos nesta direção
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, direcaoTeste, distanciaMaximaRaycast, camadaObstaculos);
-        if (hit.collider != null)
-        {
-            pontuacao -= 3f;
-        }
-
-        return pontuacao;
     }
 
     void SeguirCaminho()
     {
-        if (caminhoAtual.Count == 0 || indiceWaypointAtual >= caminhoAtual.Count) return;
-
-        Vector2 waypointAtual = caminhoAtual[indiceWaypointAtual];
-        Vector2 direcao = (waypointAtual - (Vector2)transform.position).normalized;
-
-        // Mover em direção ao waypoint
-        rb.linearVelocity = direcao * stats_Inimigo.Speed;
-
-        // Aplicar flip baseado na direção do movimento
-        if (direcao.x > 0)
+        // ⭐⭐ CORREÇÃO: Verifica se há pontos de caminho antes de acessar
+        if (pontosCaminho == null || pontosCaminho.Length == 0)
         {
-            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
-        }
-        else if (direcao.x < 0)
-        {
-            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            // Se não há pontos de caminho, fica parado
+            direcaoMovimento = Vector2.zero;
+            return;
         }
 
-        // Verificar se chegou ao waypoint
-        if (Vector2.Distance(transform.position, waypointAtual) < 0.5f)
+        // Verifica se o ponto atual é válido
+        if (pontoAtual >= pontosCaminho.Length || pontosCaminho[pontoAtual] == null)
         {
-            indiceWaypointAtual++;
-
-            // Se chegou ao final do caminho, recalcular se necessário
-            if (indiceWaypointAtual >= caminhoAtual.Count &&
-                Vector2.Distance(transform.position, player.position) > distanciaParada)
+            pontoAtual = 0; // Volta para o primeiro ponto
+            if (pontosCaminho.Length == 0 || pontosCaminho[0] == null)
             {
-                CalcularNovoCaminho();
+                direcaoMovimento = Vector2.zero;
+                return;
             }
         }
 
-        // Rotacionar na direção do movimento
-        if (rb.linearVelocity != Vector2.zero)
+        // Move em direção ao ponto atual
+        Vector2 direcao = (pontosCaminho[pontoAtual].position - transform.position).normalized;
+        direcaoMovimento = direcao;
+
+        // Verifica se chegou perto o suficiente do ponto
+        float distanciaParaPonto = Vector2.Distance(transform.position, pontosCaminho[pontoAtual].position);
+
+        if (distanciaParaPonto < 0.5f)
         {
-            float angulo = Mathf.Atan2(rb.linearVelocity.y, rb.linearVelocity.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.AngleAxis(angulo, Vector3.forward);
+            pontoAtual++;
+            if (pontoAtual >= pontosCaminho.Length)
+            {
+                pontoAtual = 0; // Volta para o primeiro ponto (loop)
+            }
         }
     }
 
-    Vector2 RotateVector(Vector2 vector, float anguloGraus)
+    void Mover()
     {
-        float anguloRad = anguloGraus * Mathf.Deg2Rad;
-        float cos = Mathf.Cos(anguloRad);
-        float sin = Mathf.Sin(anguloRad);
-        return new Vector2(vector.x * cos - vector.y * sin, vector.x * sin + vector.y * cos);
+        if (direcaoMovimento != Vector2.zero)
+        {
+            // Aplica movimento
+            rb.linearVelocity = direcaoMovimento * velocidade;
+
+            // Rotaciona na direção do movimento (opcional)
+            if (direcaoMovimento.x != 0)
+            {
+                float escalaX = Mathf.Abs(transform.localScale.x);
+                transform.localScale = new Vector3(
+                    direcaoMovimento.x < 0? escalaX : -escalaX,
+                    transform.localScale.y,
+                    transform.localScale.z
+                );
+            }
+        }
+        else
+        {
+            // Para o movimento se não há direção
+            rb.linearVelocity = Vector2.zero;
+        }
     }
 
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        // Para de se mover temporariamente ao entrar em contato com o player
+        if (other.CompareTag("Player"))
+        {
+            StartCoroutine(PararMovimentoTemporariamente());
+        }
+    }
+
+    IEnumerator PararMovimentoTemporariamente()
+    {
+        Vector2 velocidadeOriginal = rb.linearVelocity;
+        rb.linearVelocity = Vector2.zero;
+
+        yield return new WaitForSeconds(0.5f);
+
+        // Restaura movimento se ainda estiver vivo
+        if (rb != null)
+        {
+            rb.linearVelocity = velocidadeOriginal;
+        }
+    }
+
+    // 🔥 MÉTODO MELHORADO PARA CONFIGURAR PLAYER
+    public void ConfigurarPlayer(Transform novoPlayer)
+    {
+        if (novoPlayer != null)
+        {
+            player = novoPlayer;
+            Debug.Log($"🎯 Player configurado manualmente: {player.name}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Tentativa de configurar player nulo!");
+            EncontrarPlayer(); // Tenta encontrar automaticamente
+        }
+    }
+
+    // Método para configurar pontos de caminho dinamicamente
+    public void ConfigurarPontosCaminho(Transform[] novosPontos)
+    {
+        pontosCaminho = novosPontos;
+        pontoAtual = 0;
+
+        if (pontosCaminho != null && pontosCaminho.Length > 0)
+        {
+            Debug.Log($"🛣️ {pontosCaminho.Length} novos pontos de caminho configurados");
+        }
+    }
+
+    // 🔥 MÉTODO PARA FORÇAR BUSCA IMEDIATA DO PLAYER
+    [ContextMenu("Forçar Busca do Player")]
+    public void ForcarBuscaPlayer()
+    {
+        Debug.Log("🔍 Forçando busca imediata do player...");
+        EncontrarPlayer();
+    }
+
+    // Método para forçar perseguição
+    public void ForcarPerseguicao(bool perseguir)
+    {
+        perseguindoPlayer = perseguir;
+    }
+
+    // 🔥 MÉTODO MELHORADO PARA OBTER ESTADO ATUAL
+    public string GetEstadoAtual()
+    {
+        if (player == null)
+            return "❌ SEM PLAYER - Procurando...";
+        else if (perseguindoPlayer)
+            return "🎯 Perseguindo Player";
+        else if (pontosCaminho != null && pontosCaminho.Length > 0)
+            return $"🛣️ Seguindo Caminho (Ponto {pontoAtual + 1}/{pontosCaminho.Length})";
+        else
+            return "⏸️ Parado";
+    }
+
+    // 🔥 MÉTODO PARA DEBUG NO CONSOLE
+    [ContextMenu("Debug Info")]
+    public void DebugInfo()
+    {
+        Debug.Log($"=== DEBUG INIMIGO {name} ===");
+        Debug.Log($"Estado: {GetEstadoAtual()}");
+        Debug.Log($"Player: {(player != null ? player.name : "NULO")}");
+        Debug.Log($"Posição: {transform.position}");
+        Debug.Log($"Velocidade: {rb.linearVelocity.magnitude:F1}");
+        Debug.Log($"Perseguindo: {perseguindoPlayer}");
+    }
+
+    // Método para debug visual
     void OnDrawGizmosSelected()
     {
-        if (!mostrarDebug) return;
+        // Área de detecção
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, distanciaDetecção);
 
-        // Desenhar raio de detecção
+        // Área de ataque
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, distanciaAtaque);
+
+        // Direção do movimento atual
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, raioDetecao);
+        Gizmos.DrawRay(transform.position, direcaoMovimento * 2f);
 
-        // Desenhar raios de teste
-        Gizmos.color = corRaios;
-        for (int i = 0; i < numeroRaios; i++)
+        // Pontos de caminho
+        if (pontosCaminho != null)
         {
-            float angulo = (i / (float)numeroRaios) * 360f;
-            Vector2 direcao = RotateVector(Vector2.right, angulo);
-            Gizmos.DrawRay(transform.position, direcao * distanciaMaximaRaycast);
-        }
-
-        // Desenhar caminho atual
-        if (caminhoAtual.Count > 0)
-        {
-            Gizmos.color = corCaminho;
-            Vector2 pontoAnterior = transform.position;
-
-            for (int i = 0; i < caminhoAtual.Count; i++)
+            Gizmos.color = Color.green;
+            for (int i = 0; i < pontosCaminho.Length; i++)
             {
-                Gizmos.DrawSphere(caminhoAtual[i], 0.2f);
-                Gizmos.DrawLine(pontoAnterior, caminhoAtual[i]);
-                pontoAnterior = caminhoAtual[i];
-
-                // Desenhar linha até o player se for o último ponto
-                if (i == caminhoAtual.Count - 1 && player != null)
+                if (pontosCaminho[i] != null)
                 {
-                    Gizmos.color = Color.red;
-                    Gizmos.DrawLine(caminhoAtual[i], player.position);
+                    Gizmos.DrawWireSphere(pontosCaminho[i].position, 0.3f);
+                    if (i < pontosCaminho.Length - 1 && pontosCaminho[i + 1] != null)
+                    {
+                        Gizmos.DrawLine(pontosCaminho[i].position, pontosCaminho[i + 1].position);
+                    }
                 }
             }
         }
 
-        // Desenhar direção atual do movimento
-        if (Application.isPlaying && rb != null && rb.linearVelocity != Vector2.zero)
+        // 🔥 LINHA ATÉ O PLAYER (se existir)
+        if (player != null)
         {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawRay(transform.position, rb.linearVelocity.normalized * 2f);
+            Gizmos.color = perseguindoPlayer ? Color.red : Color.white;
+            Gizmos.DrawLine(transform.position, player.position);
         }
     }
 }

@@ -1,40 +1,82 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
-// 🎯 Categorias de Skills
-public enum SkillCategory
+[CreateAssetMenu(fileName = "New Skill", menuName = "Survivor/Skill Data")]
+public class SkillData : ScriptableObject
 {
-    Ataque,     // Skills de dano, crítico, velocidade de ataque
-    Defesa,     // Skills de vida, defesa, escudo, regeneração
-    Ultimate    // Skills especiais com comportamentos únicos em área
-}
-
-// 🎯 Skill Data com Categoria
-[CreateAssetMenu(fileName = "New Skill", menuName = "Skills/Skill Data")]
-public class skilldata : ScriptableObject
-{
-    [Header("Informações Básicas")]
+    [Header("🔤 Identificação")]
     public string skillName;
+    [TextArea(3, 5)]
     public string description;
     public Sprite icon;
-    public SkillCategory category;
 
-    [Header("Modificadores de Status")]
-    public float damageMultiplier = 1f;
-    public float attackSpeedMultiplier = 1f;
-    public float moveSpeedMultiplier = 1f;
+    [Header("📊 Bônus de Status")]
     public float healthBonus = 0f;
+    public float attackBonus = 0f;
     public float defenseBonus = 0f;
+    public float speedBonus = 0f;
 
-    [Header("Efeitos Visuais e Sonoros")]
+    [Header("🎯 Modificadores de Skills")]
+    public List<SkillModifierData> skillModifiers = new List<SkillModifierData>();
+
+    [Header("🎭 Efeitos Visuais e Sonoros")]
     public GameObject visualEffect;
     public AudioClip soundEffect;
 
-    [Header("Comportamento Especial")]
-    public SkillBehavior behavior;
+    [Header("⚡ Configurações de Ativação")]
+    public bool isPassive = true;
+    public float activationInterval = 2f;
+    public SkillType skillType = SkillType.Passive;
 
-    [Header("Configurações Ultimate (apenas para categoria Ultimate)")]
-    public UltimateBehavior ultimateBehavior;
-    public float ultimateRadius = 5f;
-    public float ultimateDuration = 3f;
-    public float ultimateCooldown = 10f;
+    [Header("💎 Raridade")]
+    public SkillRarity rarity = SkillRarity.Common;
+
+    [Header("🎯 Tipo de Skill Específica")]
+    public SpecificSkillType specificType = SpecificSkillType.None;
+    public float specialValue = 0f; // Valor especial para tipos específicos
+}
+
+public enum SkillRarity
+{
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary
+}
+
+public enum SkillType
+{
+    Passive,
+    Active,
+    Ultimate
+}
+
+public enum SpecificSkillType
+{
+    None,
+    HealthRegen,
+    CriticalStrike,
+    LifeSteal,
+    DamageReflection,
+    MovementSpeed,
+    AttackSpeed,
+    AreaDamage,
+    Projectile,
+    Shield,
+    Heal
+}
+
+// 🆕 CLASSE DE MODIFICADOR COMPATÍVEL COM PLAYERSTATS
+[System.Serializable]
+public class SkillModifierData
+{
+    public string modifierName;
+    public string targetSkillName;
+    public float damageMultiplier = 1f;
+    public float defenseMultiplier = 1f;
+    public PlayerStats.Element element = PlayerStats.Element.None;
+    public float duration = 0f;
+    public float cooldownReduction = 0f;
+    public float areaOfEffect = 0f;
 }

@@ -1,320 +1,763 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerStats : MonoBehaviour
 {
-    [Header("⭐ Status Base do Jogador")]
-    public float baseDamage = 10f;
-    public float baseAttackSpeed = 1f;
-    public float baseMoveSpeed = 5f;
-    public float baseMaxHealth = 100f;
-    public float baseDefense = 0f;
+    [Header("Status do Jogador")]
+    public float health = 100f;
+    public float maxHealth = 100f;
+    public float attack = 10f;
+    public float defense = 5f;
+    public float speed = 8f;
 
-    [Header("📊 Status Atuais (Calculados)")]
-    public float currentDamage { get; private set; }
-    public float currentAttackSpeed { get; private set; }
-    public float currentMoveSpeed { get; private set; }
-    public float currentMaxHealth { get; private set; }
-    public float currentDefense { get; private set; }
+    [Header("Sistema de Level")]
+    public int level = 1;
+    public float currentXP = 0f;
+    public float xpToNextLevel = 100f;
+    public float xpMultiplier = 1.5f;
 
-    [Header("💚 Sistema de Vida")]
-    public float Hp_atual { get; private set; }
-    public float Hp_max { get; private set; }
+    [Header("Skills de Ataque")]
+    public List<AttackSkill> attackSkills = new List<AttackSkill>();
 
-    [Header("🎯 Skills Ativas por Categoria")]
-    public skilldata attackSkill;
-    public skilldata defenseSkill;
-    public skilldata ultimateSkill;
+    [Header("Skills de Defesa")]
+    public List<DefenseSkill> defenseSkills = new List<DefenseSkill>();
 
-    // Dicionários para controle
-    private Dictionary<skilldata, SkillModifiers> activeModifiers = new Dictionary<skilldata, SkillModifiers>();
-    private Dictionary<SkillCategory, skilldata> activeSkillsByCategory = new Dictionary<SkillCategory, skilldata>();
-    private Dictionary<skilldata, UltimateBehavior> activeUltimates = new Dictionary<skilldata, UltimateBehavior>();
+    [Header("🚀 Sistema de Ultimate")]
+    public UltimateSkill ultimateSkill;
+    public float ultimateCooldown = 30f;
+    public float ultimateChargeTime = 0f;
+    public bool ultimateReady = false;
 
-    // Controle de Ultimate
-    private float ultimateCooldownTimer = 0f;
-    private bool isUltimateReady = true;
+    [Header("Configurações de Ativação")]
+    public float attackActivationInterval = 2f;
+    public float defenseActivationInterval = 3f;
 
-    private void Start()
+    // 🆕 SISTEMA DE ELEMENTOS (PARA IMPLEMENTAÇÃO FUTURA)
+    [Header("⚡ Sistema de Elementos (Futuro)")]
+    public Element currentElement = Element.None;
+    public float elementalBonus = 1.2f;
+
+    private List<string> inventory = new List<string>();
+    private Rigidbody2D rb;
+
+    // Timers para ativação automática
+    private float attackTimer = 0f;
+    private float defenseTimer = 0f;
+    private float currentDefenseBonus = 0f;
+
+    private UIManager uiManager;
+    private SkillManager skillManager;
+
+    // 🆕 ENUM DE ELEMENTOS
+    public enum Element
     {
-        // Inicializa sistema de vida
-        Hp_max = baseMaxHealth;
-        Hp_atual = Hp_max;
-
-        // Inicializa o dicionário de categorias
-        activeSkillsByCategory[SkillCategory.Ataque] = null;
-        activeSkillsByCategory[SkillCategory.Defesa] = null;
-        activeSkillsByCategory[SkillCategory.Ultimate] = null;
-
-        // Inicializa com os status base
-        CalculateFinalStats();
+        None,
+        Fire,
+        Ice,
+        Lightning,
+        Poison,
+        Earth,
+        Wind
     }
 
-    private void Update()
+    [System.Serializable]
+    public class AttackSkill
     {
-        // Atualiza cooldown da ultimate
-        if (!isUltimateReady && ultimateSkill != null)
+        public string skillName;
+        public float baseDamage;
+        public bool isActive;
+        public float cooldown;
+
+        // 🆕 PROPRIEDADES DE ELEMENTO (FUTURO)
+        public Element element = Element.None;
+        public List<SkillModifier> modifiers = new List<SkillModifier>();
+
+        public float CalculateTotalDamage()
         {
-            ultimateCooldownTimer -= Time.deltaTime;
-            if (ultimateCooldownTimer <= 0f)
+            float totalDamage = baseDamage;
+
+            // 🆕 APLICA MODIFICADORES (FUTURO)
+            foreach (var mod in modifiers)
             {
-                isUltimateReady = true;
-                Debug.Log("Ultimate pronta!");
+                totalDamage *= mod.damageMultiplier;
             }
+
+            return totalDamage;
         }
 
-        // Input para ativar ultimate (exemplo: tecla Q)
-        if (Input.GetKeyDown(KeyCode.Q) && isUltimateReady && ultimateSkill != null)
+        // 🆕 MÉTODO PARA ELEMENTO EFETIVO (FUTURO)
+        public Element GetEffectiveElement()
+        {
+            foreach (var mod in modifiers)
+            {
+                if (mod.element != Element.None)
+                    return mod.element;
+            }
+            return element;
+        }
+    }
+
+    [System.Serializable]
+    public class DefenseSkill
+    {
+        public string skillName;
+        public float baseDefense;
+        public bool isActive;
+        public float duration;
+
+        // 🆕 PROPRIEDADES DE ELEMENTO (FUTURO)
+        public Element element = Element.None;
+        public List<SkillModifier> modifiers = new List<SkillModifier>();
+
+        public float CalculateTotalDefense()
+        {
+            float totalDefense = baseDefense;
+
+            // 🆕 APLICA MODIFICADORES (FUTURO)
+            foreach (var mod in modifiers)
+            {
+                totalDefense *= mod.defenseMultiplier;
+            }
+
+            return totalDefense;
+        }
+    }
+
+    [System.Serializable]
+    public class UltimateSkill
+    {
+        public string skillName;
+        public float baseDamage;
+        public bool isActive;
+        public float areaOfEffect;
+        public float duration;
+
+        // 🆕 PROPRIEDADES DE ELEMENTO (FUTURO)
+        public Element element = Element.None;
+        public List<SkillModifier> modifiers = new List<SkillModifier>();
+
+        public float CalculateTotalDamage()
+        {
+            float totalDamage = baseDamage;
+
+            // 🆕 APLICA MODIFICADORES (FUTURO)
+            foreach (var mod in modifiers)
+            {
+                totalDamage *= mod.damageMultiplier;
+            }
+
+            return totalDamage;
+        }
+
+        // 🆕 MÉTODO PARA ELEMENTO EFETIVO (FUTURO)
+        public Element GetEffectiveElement()
+        {
+            foreach (var mod in modifiers)
+            {
+                if (mod.element != Element.None)
+                    return mod.element;
+            }
+            return element;
+        }
+    }
+
+    // 🆕 CLASSE DE MODIFICADOR DE SKILL (FUTURO)
+    [System.Serializable]
+    public class SkillModifier
+    {
+        public string modifierName;
+        public string targetSkillName;
+        public float damageMultiplier = 1f;
+        public float defenseMultiplier = 1f;
+        public Element element = Element.None;
+        public float duration = 0f;
+    }
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        uiManager = UIManager.Instance;
+        skillManager = SkillManager.Instance;
+
+        InitializeSkills();
+        UpdateUI();
+    }
+
+    void InitializeSkills()
+    {
+        // Skills de Ataque
+        attackSkills.Add(new AttackSkill
+        {
+            skillName = "Ataque Automático",
+            baseDamage = 10f,
+            isActive = true,
+            cooldown = 2f,
+            element = Element.None
+        });
+
+        attackSkills.Add(new AttackSkill
+        {
+            skillName = "Golpe Contínuo",
+            baseDamage = 15f,
+            isActive = true,
+            cooldown = 3f,
+            element = Element.None
+        });
+
+        // Skills de Defesa
+        defenseSkills.Add(new DefenseSkill
+        {
+            skillName = "Proteção Passiva",
+            baseDefense = 5f,
+            isActive = true,
+            duration = 4f,
+            element = Element.None
+        });
+
+        defenseSkills.Add(new DefenseSkill
+        {
+            skillName = "Escudo Automático",
+            baseDefense = 8f,
+            isActive = true,
+            duration = 5f,
+            element = Element.None
+        });
+
+        // Ultimate Skill
+        ultimateSkill = new UltimateSkill
+        {
+            skillName = "Fúria do Herói",
+            baseDamage = 50f,
+            isActive = false,
+            areaOfEffect = 5f,
+            duration = 3f,
+            element = Element.None
+        };
+    }
+
+    void Update()
+    {
+        // Movimento
+        float moveX = Input.GetAxis("Horizontal");
+        float moveY = Input.GetAxis("Vertical");
+        Vector2 movement = new Vector2(moveX, moveY).normalized;
+
+        if (rb != null)
+            rb.linearVelocity = movement * speed * Time.deltaTime;
+
+        // Ativação automática das skills
+        HandlePassiveSkills();
+
+        // Atualizar sistema de Ultimate
+        UpdateUltimateSystem();
+
+        // Input para Ultimate
+        if (Input.GetKeyDown(KeyCode.R) && ultimateReady && ultimateSkill.isActive)
         {
             ActivateUltimate();
         }
+
+        // Input para toggle de skills
+        HandleSkillToggleInput();
+
+        // 🆕 INPUT PARA TROCAR ELEMENTO (FUTURO - TESTE)
+        HandleElementInput();
+
+        // 🆕 INPUT PARA TESTAR SKILL MANAGER
+        HandleSkillManagerInput();
     }
 
-    // 🔧 MÉTODO PRINCIPAL - ADICIONAR SKILL COM LIMITAÇÃO DE CATEGORIA
-    public void AddSkill(skilldata skillData)
+    // 🆕 MÉTODO PARA TROCAR ELEMENTOS (FUTURO)
+    void HandleElementInput()
     {
-        // Verifica se já tem uma skill desta categoria
-        if (activeSkillsByCategory[skillData.category] != null)
+        if (Input.GetKeyDown(KeyCode.F1))
         {
-            // Remove a skill antiga da mesma categoria
-            RemoveSkill(activeSkillsByCategory[skillData.category]);
+            ChangeElement(Element.Fire);
         }
-
-        Debug.Log($"🎉 Adicionando skill {skillData.skillName} na categoria {skillData.category}");
-
-        // Adiciona a nova skill
-        activeSkillsByCategory[skillData.category] = skillData;
-
-        // Atualiza as referências públicas
-        UpdateCategoryReferences();
-
-        // ✅ CORREÇÃO: Mudei para ApplySkillModifiers que já existe
-        ApplySkillModifiers(skillData);
-
-        // Se for ultimate, inicializa o comportamento
-        if (skillData.category == SkillCategory.Ultimate && skillData.ultimateBehavior != null)
+        else if (Input.GetKeyDown(KeyCode.F2))
         {
-            AddUltimateBehavior(skillData);
+            ChangeElement(Element.Ice);
         }
-
-        // ✅ CORREÇÃO: Adicionei efeitos visuais e sonoros aqui
-        if (skillData.visualEffect != null)
+        else if (Input.GetKeyDown(KeyCode.F3))
         {
-            Instantiate(skillData.visualEffect, transform.position, Quaternion.identity);
+            ChangeElement(Element.Lightning);
         }
-        if (skillData.soundEffect != null)
+        else if (Input.GetKeyDown(KeyCode.F4))
         {
-            AudioSource.PlayClipAtPoint(skillData.soundEffect, transform.position);
+            ChangeElement(Element.None);
         }
     }
 
-    // 🗑️ REMOVER UMA SKILL
-    public void RemoveSkill(skilldata skillData)
+    // 🆕 INPUT PARA TESTAR SKILL MANAGER
+    void HandleSkillManagerInput()
     {
-        if (skillData == null) return;
-
-        Debug.Log($"Removendo skill: {skillData.skillName}");
-
-        // Remove dos modificadores ativos
-        if (activeModifiers.ContainsKey(skillData))
+        if (Input.GetKeyDown(KeyCode.F5) && skillManager != null)
         {
-            activeModifiers.Remove(skillData);
+            skillManager.AddRandomSkill();
         }
 
-        // Remove do dicionário de categorias
-        if (activeSkillsByCategory[skillData.category] == skillData)
+        if (Input.GetKeyDown(KeyCode.F6) && skillManager != null)
         {
-            activeSkillsByCategory[skillData.category] = null;
+            skillManager.AddRandomModifier();
         }
 
-        // Remove comportamento ultimate se existir
-        if (activeUltimates.ContainsKey(skillData))
+        if (Input.GetKeyDown(KeyCode.F7) && skillManager != null)
         {
-            activeUltimates[skillData].DeactivateUltimate();
-            Destroy(activeUltimates[skillData]);
-            activeUltimates.Remove(skillData);
+            skillManager.AddTestSkills();
         }
 
-        // Atualiza referências e recalcula status
-        UpdateCategoryReferences();
-        CalculateFinalStats();
-    }
-
-    // ⚡ ATIVAR ULTIMATE
-    public void ActivateUltimate()
-    {
-        if (ultimateSkill == null || !isUltimateReady) return;
-
-        Debug.Log($"🔥 Ativando Ultimate: {ultimateSkill.skillName}");
-
-        // Ativa o comportamento da ultimate
-        if (activeUltimates.ContainsKey(ultimateSkill))
+        if (Input.GetKeyDown(KeyCode.F8) && skillManager != null)
         {
-            Vector2 playerPosition = transform.position;
-            activeUltimates[ultimateSkill].ActivateUltimate(playerPosition);
-        }
-
-        // Inicia cooldown
-        isUltimateReady = false;
-        ultimateCooldownTimer = ultimateSkill.ultimateCooldown;
-
-        // Efeito visual e sonoro
-        if (ultimateSkill.visualEffect != null)
-        {
-            Instantiate(ultimateSkill.visualEffect, transform.position, Quaternion.identity);
-        }
-        if (ultimateSkill.soundEffect != null)
-        {
-            AudioSource.PlayClipAtPoint(ultimateSkill.soundEffect, transform.position);
+            skillManager.CheckIntegrationStatus();
         }
     }
 
-    // 🔧 APLICA OS EFEITOS DE UMA SKILL 
-    public void ApplySkillModifiers(skilldata skillData)
+    // 🆕 MÉTODO PARA MUDAR ELEMENTO (FUTURO)
+    public void ChangeElement(Element newElement)
     {
-        // Para skills de Ataque e Defesa, aplica os modificadores
-        if (skillData.category != SkillCategory.Ultimate)
+        currentElement = newElement;
+        Debug.Log($"⚡ Elemento alterado para: {newElement}");
+
+        if (uiManager != null)
+            uiManager.ShowElementChanged(newElement.ToString());
+    }
+
+    // 🆕 MÉTODO PARA CALCULAR DANO COM ELEMENTO (FUTURO)
+    float CalculateElementalDamage(float baseDamage, Element attackElement)
+    {
+        if (attackElement == Element.None || currentElement == Element.None)
+            return baseDamage;
+
+        // 🆕 LÓGICA DE VANTAGENS/DESVANTAGENS AQUI (FUTURO)
+        if (attackElement == currentElement)
         {
-            SkillModifiers modifiers = new SkillModifiers
+            return baseDamage * elementalBonus; // Bônus por mesmo elemento
+        }
+
+        return baseDamage;
+    }
+
+    void UpdateUltimateSystem()
+    {
+        if (!ultimateSkill.isActive) return;
+
+        if (!ultimateReady)
+        {
+            ultimateChargeTime += Time.deltaTime;
+            if (ultimateChargeTime >= ultimateCooldown)
             {
-                damageMultiplier = skillData.damageMultiplier,
-                attackSpeedMultiplier = skillData.attackSpeedMultiplier,
-                moveSpeedMultiplier = skillData.moveSpeedMultiplier,
-                healthBonus = skillData.healthBonus,
-                defenseBonus = skillData.defenseBonus
-            };
+                ultimateReady = true;
+                ultimateChargeTime = ultimateCooldown;
 
-            activeModifiers.Add(skillData, modifiers);
+                if (uiManager != null)
+                    uiManager.SetUltimateReady(true);
+            }
         }
-
-        CalculateFinalStats();
     }
 
-    // 🗑️ MÉTODO CHAMADO QUANDO UMA SKILL É REMOVIDA
-    public void RemoveSkillModifiers(skilldata skillData)
+    void HandlePassiveSkills()
     {
-        if (activeModifiers.ContainsKey(skillData))
+        // Timer para skills de ataque
+        attackTimer += Time.deltaTime;
+        if (attackTimer >= attackActivationInterval)
         {
-            Debug.Log($"Removendo modificadores da skill: {skillData.skillName}");
-            activeModifiers.Remove(skillData);
-            CalculateFinalStats();
+            ActivatePassiveAttackSkills();
+            attackTimer = 0f;
+
+            if (uiManager != null)
+            {
+                uiManager.OnAttackSkillActivated(0);
+                if (attackSkills.Count > 1)
+                    uiManager.OnAttackSkillActivated(1);
+            }
+        }
+
+        // Timer para skills de defesa
+        defenseTimer += Time.deltaTime;
+        if (defenseTimer >= defenseActivationInterval)
+        {
+            ActivatePassiveDefenseSkills();
+            defenseTimer = 0f;
+
+            if (uiManager != null)
+            {
+                uiManager.OnDefenseSkillActivated(0);
+                if (defenseSkills.Count > 1)
+                    uiManager.OnDefenseSkillActivated(1);
+            }
         }
     }
 
-    // 🎯 ADICIONA COMPORTAMENTO ULTIMATE
-    private void AddUltimateBehavior(skilldata skillData)
+    void ActivatePassiveAttackSkills()
     {
-        UltimateBehavior behavior = gameObject.AddComponent(skillData.ultimateBehavior.GetType()) as UltimateBehavior;
-        behavior.Initialize(this, skillData.ultimateRadius, skillData.ultimateDuration);
-        activeUltimates.Add(skillData, behavior);
+        foreach (var skill in attackSkills)
+        {
+            if (skill.isActive)
+            {
+                float totalDamage = skill.CalculateTotalDamage();
+
+                // 🆕 APLICA ELEMENTO NO DANO (FUTURO)
+                Element attackElement = skill.GetEffectiveElement();
+                float finalDamage = CalculateElementalDamage(totalDamage, attackElement);
+
+                Debug.Log($"⚔️ {skill.skillName} ativada! Dano: {finalDamage} | Elemento: {attackElement}");
+                ApplyAreaDamage(finalDamage, attackElement);
+                GainXP(2);
+            }
+        }
+        UpdateUI();
     }
 
-    // 🔄 ATUALIZA REFERÊNCIAS PÚBLICAS
-    private void UpdateCategoryReferences()
+    void ActivatePassiveDefenseSkills()
     {
-        attackSkill = activeSkillsByCategory[SkillCategory.Ataque];
-        defenseSkill = activeSkillsByCategory[SkillCategory.Defesa];
-        ultimateSkill = activeSkillsByCategory[SkillCategory.Ultimate];
-    }
-
-    // 🧮 CALCULA OS STATUS FINAIS COMBINANDO TODAS AS SKILLS
-    private void CalculateFinalStats()
-    {
-        float totalDamageMultiplier = 1f;
-        float totalAttackSpeedMultiplier = 1f;
-        float totalMoveSpeedMultiplier = 1f;
-        float totalHealthBonus = 0f;
         float totalDefenseBonus = 0f;
 
-        foreach (var modifier in activeModifiers.Values)
+        foreach (var skill in defenseSkills)
         {
-            totalDamageMultiplier *= modifier.damageMultiplier;
-            totalAttackSpeedMultiplier *= modifier.attackSpeedMultiplier;
-            totalMoveSpeedMultiplier *= modifier.moveSpeedMultiplier;
-            totalHealthBonus += modifier.healthBonus;
-            totalDefenseBonus += modifier.defenseBonus;
+            if (skill.isActive)
+            {
+                float skillDefense = skill.CalculateTotalDefense();
+                totalDefenseBonus += skillDefense;
+
+                Debug.Log($"🛡️ {skill.skillName} ativada! Defesa: {skillDefense} | Elemento: {skill.element}");
+                GainXP(1);
+            }
         }
 
-        currentDamage = baseDamage * totalDamageMultiplier;
-        currentAttackSpeed = baseAttackSpeed * totalAttackSpeedMultiplier;
-        currentMoveSpeed = baseMoveSpeed * totalMoveSpeedMultiplier;
-        currentMaxHealth = baseMaxHealth + totalHealthBonus;
-        currentDefense = baseDefense + totalDefenseBonus;
+        if (totalDefenseBonus > 0)
+        {
+            if (currentDefenseBonus > 0)
+            {
+                defense -= currentDefenseBonus;
+            }
 
-        // Atualiza vida mantendo a porcentagem
-        float percentHealth = Hp_atual / Hp_max;
-        Hp_max = currentMaxHealth;
-        Hp_atual = Hp_max * percentHealth;
+            defense += totalDefenseBonus;
+            currentDefenseBonus = totalDefenseBonus;
 
-        Debug.Log($"Status atualizados - Dano: {currentDamage}, Velocidade: {currentMoveSpeed}");
+            StartCoroutine(RemoveDefenseBonusAfterTime());
+        }
+
+        UpdateUI();
     }
 
-    // 💥 MÉTODO PARA RECEBER DANO
-    public void ReceberDano(float quantidade)
+    private System.Collections.IEnumerator RemoveDefenseBonusAfterTime()
     {
-        float danoFinal = Mathf.Max(quantidade - currentDefense, 1f);
-        Hp_atual -= danoFinal;
+        yield return new WaitForSeconds(defenseActivationInterval);
+        defense -= currentDefenseBonus;
+        currentDefenseBonus = 0f;
+        UpdateUI();
+    }
 
-        Debug.Log($"Player levou {danoFinal} de dano! Vida atual: {Hp_atual}");
-
-        if (Hp_atual <= 0)
+    // 🆕 ATUALIZADO: AGORA RECEBE ELEMENTO
+    void ApplyAreaDamage(float damage, Element element)
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 3f);
+        foreach (var hitCollider in hitColliders)
         {
-            Morrer();
+            if (hitCollider.gameObject == gameObject) continue;
+
+            // Simula dano em inimigos
+            if (hitCollider.CompareTag("Enemy"))
+            {
+                Debug.Log($"💥 Dano {damage} aplicado no inimigo {hitCollider.name} | Elemento: {element}");
+            }
         }
     }
 
-    // 🏥 MÉTODO PARA CURAR
-    public void Curar(float quantidade)
+    void HandleSkillToggleInput()
     {
-        Hp_atual = Mathf.Min(Hp_atual + quantidade, Hp_max);
-        Debug.Log($"Player curado! Vida atual: {Hp_atual}");
+        if (Input.GetKeyDown(KeyCode.Alpha1) && attackSkills.Count > 0)
+            ToggleAttackSkill(0, !attackSkills[0].isActive);
+
+        if (Input.GetKeyDown(KeyCode.Alpha2) && attackSkills.Count > 1)
+            ToggleAttackSkill(1, !attackSkills[1].isActive);
+
+        if (Input.GetKeyDown(KeyCode.Alpha3) && defenseSkills.Count > 0)
+            ToggleDefenseSkill(0, !defenseSkills[0].isActive);
+
+        if (Input.GetKeyDown(KeyCode.Alpha4) && defenseSkills.Count > 1)
+            ToggleDefenseSkill(1, !defenseSkills[1].isActive);
     }
 
-    // 💀 MÉTODO CHAMADO QUANDO O PLAYER MORRE
-    private void Morrer()
+    public void ActivateUltimate()
     {
-        Debug.Log("Player morreu!");
-        // Aqui você pode chamar o Game Manager
-        // GameManager.Instance.GameOver();
+        if (!ultimateReady || !ultimateSkill.isActive) return;
+
+        float totalDamage = ultimateSkill.CalculateTotalDamage();
+
+        // 🆕 APLICA ELEMENTO NA ULTIMATE (FUTURO)
+        Element ultimateElement = ultimateSkill.GetEffectiveElement();
+        float finalDamage = CalculateElementalDamage(totalDamage, ultimateElement);
+
+        Debug.Log($"🚀 ULTIMATE ATIVADA: {ultimateSkill.skillName}! Dano: {finalDamage} | Elemento: {ultimateElement}");
+
+        // Aplica dano em área
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, ultimateSkill.areaOfEffect);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.gameObject == gameObject) continue;
+            if (hitCollider.CompareTag("Enemy"))
+            {
+                Debug.Log($"💥 ULTIMATE: Dano {finalDamage} no inimigo {hitCollider.name} | Elemento: {ultimateElement}");
+            }
+        }
+
+        // Efeitos visuais
+        StartCoroutine(UltimateEffects(ultimateSkill.duration, ultimateElement));
+
+        // Reseta a ultimate
+        ultimateReady = false;
+        ultimateChargeTime = 0f;
+
+        if (uiManager != null)
+        {
+            uiManager.OnUltimateActivated();
+            uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Ultimate ativada!");
+        }
+
+        GainXP(15);
     }
 
-    // 📊 MÉTODOS PARA OUTROS SCRIPTS CONSULTAREM OS STATUS
-    public float GetDamage() => currentDamage;
-    public float GetAttackSpeed() => currentAttackSpeed;
-    public float GetMoveSpeed() => currentMoveSpeed;
-    public float GetHealth() => Hp_atual;
-    public float GetMaxHealth() => Hp_max;
-    public float GetDefense() => currentDefense;
-    public bool IsUltimateReady() => isUltimateReady;
-    public float GetUltimateCooldownPercent() => isUltimateReady ? 1f : 1f - (ultimateCooldownTimer / ultimateSkill.ultimateCooldown);
-
-    // 🔄 MÉTODO PARA RESTAURAR VIDA COMPLETA
-    public void RestaurarVidaCompleta()
+    // 🆕 ATUALIZADO: AGORA RECEBE ELEMENTO
+    private System.Collections.IEnumerator UltimateEffects(float duration, Element element)
     {
-        Hp_atual = Hp_max;
+        // Buff temporário
+        float originalAttack = attack;
+        float originalSpeed = speed;
+        attack *= 1.5f;
+        speed *= 1.2f;
+
+        Debug.Log($"💥 Efeito da Ultimate ativo! Elemento: {element}");
+
+        yield return new WaitForSeconds(duration);
+
+        // Restaura valores
+        attack = originalAttack;
+        speed = originalSpeed;
+
+        Debug.Log("🔚 Efeito da Ultimate terminou.");
     }
 
-    // 🔍 VERIFICAR SE PODE ADICIONAR SKILL (útil para UI)
-    public bool CanAddSkill(skilldata skillData)
+    // === SISTEMA DE XP E LEVEL ===
+    public void GainXP(float xpAmount)
     {
-        // Sempre pode adicionar se não tiver skill da mesma categoria
-        return activeSkillsByCategory[skillData.category] == null;
+        currentXP += xpAmount;
+        while (currentXP >= xpToNextLevel)
+        {
+            LevelUp();
+        }
+        UpdateUI();
     }
 
-    // 🔍 VERIFICAR SKILL ATUAL EM UMA CATEGORIA
-    public skilldata GetCurrentSkill(SkillCategory category)
+    private void LevelUp()
     {
-        return activeSkillsByCategory[category];
-    }
-}
+        level++;
+        currentXP -= xpToNextLevel;
+        xpToNextLevel = CalculateXPForNextLevel();
 
-// 🏷️ Estrutura para os modificadores de skills
-[System.Serializable]
-public struct SkillModifiers
-{
-    public float damageMultiplier;
-    public float attackSpeedMultiplier;
-    public float moveSpeedMultiplier;
-    public float healthBonus;
-    public float defenseBonus;
+        maxHealth += 10f;
+        health = maxHealth;
+        attack += 2f;
+        defense += 1f;
+        speed += 0.5f;
+
+        if (level == 5 && !ultimateSkill.isActive)
+        {
+            LearnUltimate();
+        }
+
+        Debug.Log($"🎉 LEVEL UP! Agora é nível {level}!");
+
+        // 🆕 NOTIFICA SKILL MANAGER SOBRE LEVEL UP
+        if (skillManager != null)
+        {
+            skillManager.OnPlayerLevelUp(level);
+        }
+
+        if (uiManager != null)
+            uiManager.ShowSkillAcquired($"Level {level}", "Novas habilidades disponíveis!");
+    }
+
+    private void LearnUltimate()
+    {
+        ultimateSkill.isActive = true;
+        Debug.Log($"⭐ ULTIMATE APRENDIDA: {ultimateSkill.skillName}!");
+
+        if (uiManager != null)
+            uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Pressione R para ativar!");
+    }
+
+    private float CalculateXPForNextLevel()
+    {
+        return 100f * Mathf.Pow(xpMultiplier, level - 1);
+    }
+
+    // === SISTEMA DE ITENS ===
+    public void ApplyItemEffect(string itemName, string statType, float boostValue)
+    {
+        switch (statType.ToLower())
+        {
+            case "health":
+                maxHealth += boostValue;
+                health += boostValue;
+                Debug.Log($"❤️ Vida aumentada em {boostValue}!");
+                break;
+            case "attack":
+                attack += boostValue;
+                Debug.Log($"⚔️ Ataque aumentado em {boostValue}!");
+                break;
+            case "defense":
+                defense += boostValue;
+                Debug.Log($"🛡️ Defesa aumentada em {boostValue}!");
+                break;
+            case "speed":
+                speed += boostValue;
+                Debug.Log($"🏃 Velocidade aumentada em {boostValue}!");
+                break;
+        }
+
+        GainXP(10);
+        inventory.Add(itemName);
+        UpdateUI();
+    }
+
+    // 🆕 MÉTODO PARA ADICIONAR MODIFICADOR (FUTURO)
+    public void AddSkillModifier(SkillModifier modifier)
+    {
+        bool applied = false;
+
+        foreach (var skill in attackSkills)
+        {
+            if (skill.skillName == modifier.targetSkillName)
+            {
+                skill.modifiers.Add(modifier);
+                Debug.Log($"✨ Modificador {modifier.modifierName} aplicado em {skill.skillName}");
+                applied = true;
+
+                if (uiManager != null)
+                    uiManager.ShowModifierAcquired(modifier.modifierName, skill.skillName);
+            }
+        }
+
+        foreach (var skill in defenseSkills)
+        {
+            if (skill.skillName == modifier.targetSkillName)
+            {
+                skill.modifiers.Add(modifier);
+                Debug.Log($"✨ Modificador {modifier.modifierName} aplicado em {skill.skillName}");
+                applied = true;
+
+                if (uiManager != null)
+                    uiManager.ShowModifierAcquired(modifier.modifierName, skill.skillName);
+            }
+        }
+
+        if (ultimateSkill.skillName == modifier.targetSkillName)
+        {
+            ultimateSkill.modifiers.Add(modifier);
+            Debug.Log($"✨ Modificador {modifier.modifierName} aplicado na ULTIMATE {ultimateSkill.skillName}");
+            applied = true;
+
+            if (uiManager != null)
+                uiManager.ShowModifierAcquired(modifier.modifierName, ultimateSkill.skillName);
+        }
+
+        if (!applied)
+        {
+            Debug.LogWarning($"⚠️ Nenhuma skill encontrada com o nome: {modifier.targetSkillName}");
+        }
+
+        UpdateUI();
+    }
+
+    // === MÉTODOS DE COMBATE ===
+    public void TakeDamage(float damage)
+    {
+        float reducedDamage = Mathf.Max(0, damage - defense * 0.5f);
+        health -= reducedDamage;
+
+        if (health > 0)
+        {
+            GainXP(2);
+            Debug.Log($"💢 Dano recebido: {reducedDamage} (original: {damage})");
+        }
+
+        UpdateUI();
+
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Heal(float healAmount)
+    {
+        health = Mathf.Min(maxHealth, health + healAmount);
+        UpdateUI();
+        Debug.Log($"💚 Curado em {healAmount}!");
+    }
+
+    // === MÉTODOS DE ACESSO PARA UI ===
+    public float GetCurrentHealth() => health;
+    public float GetMaxHealth() => maxHealth;
+    public float GetAttack() => attack;
+    public float GetDefense() => defense;
+    public float GetSpeed() => speed;
+    public int GetLevel() => level;
+    public float GetCurrentXP() => currentXP;
+    public float GetXPToNextLevel() => xpToNextLevel;
+    public List<string> GetInventory() => new List<string>(inventory);
+    public List<AttackSkill> GetAttackSkills() => attackSkills;
+    public List<DefenseSkill> GetDefenseSkills() => defenseSkills;
+    public UltimateSkill GetUltimateSkill() => ultimateSkill;
+    public float GetUltimateCooldown() => ultimateCooldown;
+    public float GetUltimateChargeTime() => ultimateChargeTime;
+    public bool IsUltimateReady() => ultimateReady;
+    public bool HasUltimate() => ultimateSkill.isActive;
+    public float GetAttackActivationInterval() => attackActivationInterval;
+    public float GetDefenseActivationInterval() => defenseActivationInterval;
+
+    // 🆕 GETTERS PARA ELEMENTOS (FUTURO)
+    public Element GetCurrentElement() => currentElement;
+    public float GetElementalBonus() => elementalBonus;
+
+    public void ToggleAttackSkill(int index, bool active)
+    {
+        if (index >= 0 && index < attackSkills.Count)
+        {
+            attackSkills[index].isActive = active;
+            UpdateUI();
+        }
+    }
+
+    public void ToggleDefenseSkill(int index, bool active)
+    {
+        if (index >= 0 && index < defenseSkills.Count)
+        {
+            defenseSkills[index].isActive = active;
+            UpdateUI();
+        }
+    }
+
+    // 🆕 MÉTODO PARA FORÇAR ATUALIZAÇÃO DA UI
+    public void ForceUIUpdate()
+    {
+        UpdateUI();
+    }
+
+    void UpdateUI()
+    {
+        if (uiManager != null)
+        {
+            uiManager.UpdatePlayerStatus();
+        }
+    }
+
+    private void Die()
+    {
+        Debug.Log("💀 Jogador morreu!");
+        Time.timeScale = 0f;
+    }
 }
