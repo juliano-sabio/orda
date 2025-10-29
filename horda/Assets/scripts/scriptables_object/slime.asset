@@ -18,7 +18,7 @@ MonoBehaviour:
   vidaBase: 50
   danoBase: 10
   velocidadeBase: 3
-  tamanho: 1
+  tamanho: 7
   intervaloAtaque: 1
   xpDrop: 10
   isBoss: 0

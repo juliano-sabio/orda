@@ -1574,18 +1574,21 @@ MonoBehaviour:
   xpMultiplier: 1.5
   attackSkills: []
   defenseSkills: []
+  ultimateSkill:
+    skillName: 
+    baseDamage: 0
+    isActive: 0
+    areaOfEffect: 0
+    duration: 0
+    element: 0
+    modifiers: []
+  ultimateCooldown: 30
+  ultimateChargeTime: 0
+  ultimateReady: 0
   attackActivationInterval: 2
   defenseActivationInterval: 3
-  healthText: {fileID: 0}
-  attackText: {fileID: 0}
-  defenseText: {fileID: 0}
-  speedText: {fileID: 0}
-  inventoryText: {fileID: 0}
-  attackSkillsText: {fileID: 0}
-  defenseSkillsText: {fileID: 0}
-  levelText: {fileID: 0}
-  xpText: {fileID: 0}
-  xpSlider: {fileID: 0}
+  currentElement: 0
+  elementalBonus: 1.2
 --- !u!50 &1279116820
 Rigidbody2D:
   serializedVersion: 5
@@ -2962,22 +2965,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   skillAcquiredPanel: {fileID: 49850573}
-  skillIcon: {fileID: 501886923}
   skillNameText: {fileID: 40915790}
   skillDescriptionText: {fileID: 1512920520}
   attackSkill1Icon: {fileID: 0}
   attackSkill2Icon: {fileID: 0}
   defenseSkill1Icon: {fileID: 0}
   defenseSkill2Icon: {fileID: 0}
+  ultimateSkillIcon: {fileID: 0}
   attackCooldownText1: {fileID: 0}
   attackCooldownText2: {fileID: 0}
   defenseCooldownText1: {fileID: 0}
   defenseCooldownText2: {fileID: 0}
+  ultimateCooldownText: {fileID: 0}
+  ultimateChargeBar: {fileID: 0}
   healthBar: {fileID: 187781640}
   healthText: {fileID: 1645040827}
   levelText: {fileID: 0}
   xpText: {fileID: 0}
   xpSlider: {fileID: 0}
+  ultimateChargeText: {fileID: 0}
+  ultimateReadyEffect: {fileID: 0}
+  currentElementText: {fileID: 0}
+  elementIcon: {fileID: 0}
   statusPanel: {fileID: 2026279652}
   damageText: {fileID: 1650964919}
   speedText: {fileID: 1389645145}
@@ -2986,7 +2995,14 @@ MonoBehaviour:
   inventoryText: {fileID: 0}
   attackSkillsText: {fileID: 0}
   defenseSkillsText: {fileID: 0}
+  ultimateSkillsText: {fileID: 0}
+  elementInfoText: {fileID: 0}
+  skillSelectionPanel: {fileID: 0}
+  skillButtonContainer: {fileID: 0}
+  skillButtonPrefab: {fileID: 0}
+  availableSkillsText: {fileID: 0}
   toggleStatusKey: 9
+  toggleSkillsKey: 107
   popupDisplayTime: 3
 --- !u!4 &1968545828
 Transform:
@@ -3267,22 +3283,29 @@ MonoBehaviour:
     maxInimigos: 15
     intervaloSpaw: 3
     waveEspecial: 0
+    multiplicadorDificuldade: 1
   - nome: Wave 2
     duracao: 45
     maxInimigos: 25
     intervaloSpaw: 2
     waveEspecial: 0
+    multiplicadorDificuldade: 1.2
   - nome: Wave 3
     duracao: 60
     maxInimigos: 35
     intervaloSpaw: 1.5
     waveEspecial: 0
+    multiplicadorDificuldade: 1.5
   usarWaves: 1
   tempoEntreWaves: 5
   tempoEntreSpawns: 2
   distanciaMinima: 18
   distanciaMaxima: 25
   limiteInimigos: 20
+  limitarAreaAtuacao: 0
+  centroArea: {x: 0, y: 0}
+  tamanhoArea: {x: 150, y: 150}
+  manterInimigosDentroArea: 1
   aumentaDificuldade: 1
   tempoParaAumentarDificuldade: 30
   reducaoTempoSpawn: 0.1
@@ -3305,71 +3328,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1458841533793537547
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 11261116110512547, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: player
-      value: 
-      objectReference: {fileID: 1279116817}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -13.88636
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 15.83927
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3926650787666018424, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5483340294184715351, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: dadosInimigo
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8035523421442536905, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
-      propertyPath: m_Name
-      value: slime
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: bec4e06247658fe45a515c5078a12a34, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -3386,4 +3344,3 @@ SceneRoots:
   - {fileID: 1337705022}
   - {fileID: 1279116817}
   - {fileID: 1378257766}
-  - {fileID: 1458841533793537547}
