@@ -26,6 +26,14 @@ public class UIManager : MonoBehaviour
     public Text ultimateCooldownText;
     public Slider ultimateChargeBar;
 
+    // 🆕 NOVO: Ícones de elemento para cada skill
+    [Header("⚡ Ícones de Elemento das Skills")]
+    public Image attackSkill1ElementIcon;
+    public Image attackSkill2ElementIcon;
+    public Image defenseSkill1ElementIcon;
+    public Image defenseSkill2ElementIcon;
+    public Image ultimateSkillElementIcon;
+
     [Header("💚 Vida")]
     public Slider healthBar;
     public Text healthText;
@@ -39,9 +47,12 @@ public class UIManager : MonoBehaviour
     public Text ultimateChargeText;
     public GameObject ultimateReadyEffect;
 
-    [Header("⚡ Elemento Atual (FUTURO)")]
+    [Header("⚡ Sistema de Elementos")]
     public Text currentElementText;
     public Image elementIcon;
+    public GameObject elementAdvantagePanel;
+    public Text advantageText;
+    public Text disadvantageText;
 
     [Header("📊 Status Detalhados")]
     public GameObject statusPanel;
@@ -66,6 +77,15 @@ public class UIManager : MonoBehaviour
     public KeyCode toggleSkillsKey = KeyCode.K;
     public float popupDisplayTime = 3f;
 
+    [Header("🎨 Sprites dos Elementos")]
+    public Sprite fireElementSprite;
+    public Sprite iceElementSprite;
+    public Sprite lightningElementSprite;
+    public Sprite poisonElementSprite;
+    public Sprite earthElementSprite;
+    public Sprite windElementSprite;
+    public Sprite noneElementSprite;
+
     private PlayerStats playerStats;
     private SkillManager skillManager;
     private float[] attackTimers = new float[2];
@@ -73,6 +93,7 @@ public class UIManager : MonoBehaviour
     private float ultimateTimer = 0f;
     private bool ultimateReady = false;
 
+    // 🆕 CORES PARA ELEMENTOS DE SKILLS INDIVIDUAIS
     private Dictionary<PlayerStats.Element, Color> elementColors = new Dictionary<PlayerStats.Element, Color>()
     {
         { PlayerStats.Element.None, Color.white },
@@ -82,6 +103,18 @@ public class UIManager : MonoBehaviour
         { PlayerStats.Element.Poison, new Color(0.5f, 0.1f, 0.8f) },
         { PlayerStats.Element.Earth, new Color(0.6f, 0.4f, 0.2f) },
         { PlayerStats.Element.Wind, new Color(0.4f, 0.8f, 0.9f) }
+    };
+
+    // 🆕 CORES DE BACKGROUND POR ELEMENTO
+    private Dictionary<PlayerStats.Element, Color> elementBackgroundColors = new Dictionary<PlayerStats.Element, Color>()
+    {
+        { PlayerStats.Element.None, new Color(0.3f, 0.3f, 0.3f, 0.7f) },
+        { PlayerStats.Element.Fire, new Color(1f, 0.2f, 0.1f, 0.3f) },
+        { PlayerStats.Element.Ice, new Color(0.1f, 0.4f, 1f, 0.3f) },
+        { PlayerStats.Element.Lightning, new Color(0.9f, 0.9f, 0.1f, 0.3f) },
+        { PlayerStats.Element.Poison, new Color(0.6f, 0.1f, 0.8f, 0.3f) },
+        { PlayerStats.Element.Earth, new Color(0.5f, 0.3f, 0.1f, 0.3f) },
+        { PlayerStats.Element.Wind, new Color(0.3f, 0.7f, 0.9f, 0.3f) }
     };
 
     private void Awake()
@@ -111,6 +144,9 @@ public class UIManager : MonoBehaviour
         if (skillSelectionPanel != null)
             skillSelectionPanel.SetActive(false);
 
+        if (elementAdvantagePanel != null)
+            elementAdvantagePanel.SetActive(false);
+
         playerStats = FindAnyObjectByType<PlayerStats>();
         skillManager = SkillManager.Instance;
 
@@ -120,11 +156,176 @@ public class UIManager : MonoBehaviour
             defenseTimers[i] = 0f;
         }
 
-        FindNullReference();
+        // 🆕 INICIALIZAR ÍCONES DE ELEMENTO
+        InitializeElementIcons();
+    }
+
+    // 🆕 INICIALIZAR ÍCONES DE ELEMENTO
+    private void InitializeElementIcons()
+    {
+        // Esconde todos os ícones de elemento inicialmente
+        SetElementIconVisibility(attackSkill1ElementIcon, false);
+        SetElementIconVisibility(attackSkill2ElementIcon, false);
+        SetElementIconVisibility(defenseSkill1ElementIcon, false);
+        SetElementIconVisibility(defenseSkill2ElementIcon, false);
+        SetElementIconVisibility(ultimateSkillElementIcon, false);
+    }
+
+    // 🆕 CONFIGURAR VISIBILIDADE DO ÍCONE DE ELEMENTO
+    private void SetElementIconVisibility(Image elementIcon, bool visible)
+    {
+        if (elementIcon != null)
+        {
+            elementIcon.gameObject.SetActive(visible);
+        }
+    }
+
+    // 🆕 OBTER SPRITE DO ELEMENTO
+    private Sprite GetElementSprite(PlayerStats.Element element)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.Fire: return fireElementSprite;
+            case PlayerStats.Element.Ice: return iceElementSprite;
+            case PlayerStats.Element.Lightning: return lightningElementSprite;
+            case PlayerStats.Element.Poison: return poisonElementSprite;
+            case PlayerStats.Element.Earth: return earthElementSprite;
+            case PlayerStats.Element.Wind: return windElementSprite;
+            default: return noneElementSprite;
+        }
+    }
+
+    // 🆕 ATUALIZAR ÍCONES DE ELEMENTO DAS SKILLS
+    private void UpdateSkillElementIcons()
+    {
+        if (playerStats == null) return;
+
+        var attackSkills = playerStats.GetAttackSkills();
+        var defenseSkills = playerStats.GetDefenseSkills();
+        var ultimateSkill = playerStats.GetUltimateSkill();
+
+        // 🆕 ATUALIZAR ÍCONES DE ELEMENTO DAS SKILLS DE ATAQUE
+        for (int i = 0; i < 2; i++)
+        {
+            Image elementIcon = i == 0 ? attackSkill1ElementIcon : attackSkill2ElementIcon;
+            Image skillIcon = i == 0 ? attackSkill1Icon : attackSkill2Icon;
+
+            if (elementIcon != null && skillIcon != null)
+            {
+                if (attackSkills.Count > i && attackSkills[i].isActive)
+                {
+                    PlayerStats.Element skillElement = attackSkills[i].GetEffectiveElement();
+                    if (skillElement != PlayerStats.Element.None)
+                    {
+                        elementIcon.sprite = GetElementSprite(skillElement);
+                        elementIcon.color = GetElementColor(skillElement);
+                        SetElementIconVisibility(elementIcon, true);
+
+                        // 🆕 POSICIONAR ÍCONE DE ELEMENTO ABAIXO DA SKILL
+                        PositionElementIcon(elementIcon, skillIcon);
+                    }
+                    else
+                    {
+                        SetElementIconVisibility(elementIcon, false);
+                    }
+                }
+                else
+                {
+                    SetElementIconVisibility(elementIcon, false);
+                }
+            }
+        }
+
+        // 🆕 ATUALIZAR ÍCONES DE ELEMENTO DAS SKILLS DE DEFESA
+        for (int i = 0; i < 2; i++)
+        {
+            Image elementIcon = i == 0 ? defenseSkill1ElementIcon : defenseSkill2ElementIcon;
+            Image skillIcon = i == 0 ? defenseSkill1Icon : defenseSkill2Icon;
+
+            if (elementIcon != null && skillIcon != null)
+            {
+                if (defenseSkills.Count > i && defenseSkills[i].isActive)
+                {
+                    PlayerStats.Element skillElement = defenseSkills[i].element;
+                    if (skillElement != PlayerStats.Element.None)
+                    {
+                        elementIcon.sprite = GetElementSprite(skillElement);
+                        elementIcon.color = GetElementColor(skillElement);
+                        SetElementIconVisibility(elementIcon, true);
+
+                        // 🆕 POSICIONAR ÍCONE DE ELEMENTO ABAIXO DA SKILL
+                        PositionElementIcon(elementIcon, skillIcon);
+                    }
+                    else
+                    {
+                        SetElementIconVisibility(elementIcon, false);
+                    }
+                }
+                else
+                {
+                    SetElementIconVisibility(elementIcon, false);
+                }
+            }
+        }
+
+        // 🆕 ATUALIZAR ÍCONE DE ELEMENTO DA ULTIMATE
+        if (ultimateSkillElementIcon != null && ultimateSkillIcon != null)
+        {
+            if (ultimateSkill.isActive)
+            {
+                PlayerStats.Element ultimateElement = ultimateSkill.GetEffectiveElement();
+                if (ultimateElement != PlayerStats.Element.None)
+                {
+                    ultimateSkillElementIcon.sprite = GetElementSprite(ultimateElement);
+                    ultimateSkillElementIcon.color = GetElementColor(ultimateElement);
+                    SetElementIconVisibility(ultimateSkillElementIcon, true);
+
+                    // 🆕 POSICIONAR ÍCONE DE ELEMENTO ABAIXO DA ULTIMATE
+                    PositionElementIcon(ultimateSkillElementIcon, ultimateSkillIcon);
+                }
+                else
+                {
+                    SetElementIconVisibility(ultimateSkillElementIcon, false);
+                }
+            }
+            else
+            {
+                SetElementIconVisibility(ultimateSkillElementIcon, false);
+            }
+        }
+    }
+
+    // 🆕 POSICIONAR ÍCONE DE ELEMENTO ABAIXO DA SKILL
+    private void PositionElementIcon(Image elementIcon, Image skillIcon)
+    {
+        if (elementIcon != null && skillIcon != null)
+        {
+            RectTransform elementRect = elementIcon.GetComponent<RectTransform>();
+            RectTransform skillRect = skillIcon.GetComponent<RectTransform>();
+
+            if (elementRect != null && skillRect != null)
+            {
+                // Posiciona o ícone do elemento abaixo do ícone da skill
+                elementRect.anchorMin = new Vector2(0.5f, 0f);
+                elementRect.anchorMax = new Vector2(0.5f, 0f);
+                elementRect.pivot = new Vector2(0.5f, 0.5f);
+
+                // Ajuste de posição - abaixo do ícone da skill
+                Vector2 skillPosition = skillRect.anchoredPosition;
+                elementRect.anchoredPosition = new Vector2(
+                    skillPosition.x,
+                    skillPosition.y - skillRect.rect.height * 0.7f
+                );
+
+                // 🆕 TAMANHO PEQUENO DO ÍCONE DE ELEMENTO
+                elementRect.sizeDelta = new Vector2(20f, 20f); // Ícone pequeno
+            }
+        }
     }
 
     private void Update()
     {
+        // ✅ CORRIGIDO: Verificação de null antes de usar Input
         if (Input.GetKeyDown(toggleStatusKey))
         {
             ToggleStatusPanel();
@@ -135,55 +336,141 @@ public class UIManager : MonoBehaviour
             ToggleSkillSelection();
         }
 
+        // ✅ CORRIGIDO: Verificação de null para playerStats
         if (playerStats != null)
         {
             UpdateCooldowns();
             UpdatePlayerStatus();
             UpdateSkillIcons();
+            UpdateSkillElementIcons(); // 🆕 ATUALIZAR ÍCONES DE ELEMENTO
             UpdateUltimateSystem();
             UpdateElementUI();
         }
     }
 
-    private void FindNullReference()
-    {
-        Debug.Log("=== VERIFICAÇÃO DE COMPONENTES UI ===");
-
-        if (attackSkill1Icon == null) Debug.LogError("attackSkill1Icon é NULL");
-        if (attackSkill2Icon == null) Debug.LogError("attackSkill2Icon é NULL");
-        if (defenseSkill1Icon == null) Debug.LogError("defenseSkill1Icon é NULL");
-        if (defenseSkill2Icon == null) Debug.LogError("defenseSkill2Icon é NULL");
-        if (ultimateSkillIcon == null) Debug.LogError("ultimateSkillIcon é NULL");
-
-        if (attackCooldownText1 == null) Debug.LogError("attackCooldownText1 é NULL");
-        if (attackCooldownText2 == null) Debug.LogError("attackCooldownText2 é NULL");
-        if (defenseCooldownText1 == null) Debug.LogError("defenseCooldownText1 é NULL");
-        if (defenseCooldownText2 == null) Debug.LogError("defenseCooldownText2 é NULL");
-        if (ultimateCooldownText == null) Debug.LogError("ultimateCooldownText é NULL");
-
-        Debug.Log("=== FIM DA VERIFICAÇÃO ===");
-    }
-
-    private void UpdateElementUI()
+    // 🆕 ATUALIZADO: UpdateSkillIcons - versão simplificada e corrigida
+    private void UpdateSkillIcons()
     {
         if (playerStats == null) return;
 
-        if (currentElementText != null)
+        try
         {
-            var currentElement = playerStats.GetCurrentElement();
-            currentElementText.text = $"Elemento: {currentElement}";
+            var attackSkills = playerStats.GetAttackSkills();
+            var defenseSkills = playerStats.GetDefenseSkills();
+            var ultimateSkill = playerStats.GetUltimateSkill();
 
-            if (elementColors.ContainsKey(currentElement))
+            if (attackSkills == null || defenseSkills == null || ultimateSkill == null) return;
+
+            // ATUALIZAR ÍCONES DE ATAQUE
+            for (int i = 0; i < 2; i++)
             {
-                currentElementText.color = elementColors[currentElement];
+                Image attackIcon = i == 0 ? attackSkill1Icon : attackSkill2Icon;
+                Text attackCooldown = i == 0 ? attackCooldownText1 : attackCooldownText2;
+
+                if (attackIcon == null) continue;
+
+                if (attackSkills.Count > i)
+                {
+                    var skill = attackSkills[i];
+                    if (skill == null) continue;
+
+                    // ✅ CORRIGIDO: Apenas aplica cor, não lida com elementos aqui
+                    attackIcon.color = skill.isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 0.5f);
+
+                    if (attackCooldown != null)
+                    {
+                        float attackInterval = playerStats.GetAttackActivationInterval();
+                        if (attackInterval <= 0) attackInterval = 1f;
+
+                        float cooldownPercent = attackTimers[i] / attackInterval;
+
+                        if (skill.isActive && cooldownPercent < 1f)
+                        {
+                            attackCooldown.text = $"⏳{(1f - cooldownPercent) * 100f:F0}%";
+                            attackCooldown.color = Color.yellow;
+                        }
+                        else
+                        {
+                            attackCooldown.text = skill.isActive ? $"✅" : "❌";
+                            attackCooldown.color = skill.isActive ? Color.green : Color.red;
+                        }
+                    }
+                }
+                else
+                {
+                    attackIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
+                    if (attackCooldown != null)
+                        attackCooldown.text = "🔘 VAZIO";
+                }
+            }
+
+            // ATUALIZAR ÍCONES DE DEFESA
+            for (int i = 0; i < 2; i++)
+            {
+                Image defenseIcon = i == 0 ? defenseSkill1Icon : defenseSkill2Icon;
+                Text defenseCooldown = i == 0 ? defenseCooldownText1 : defenseCooldownText2;
+
+                if (defenseIcon == null) continue;
+
+                if (defenseSkills.Count > i)
+                {
+                    var skill = defenseSkills[i];
+                    if (skill == null) continue;
+
+                    // ✅ CORRIGIDO: Apenas aplica cor, não lida com elementos aqui
+                    defenseIcon.color = skill.isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 0.5f);
+
+                    if (defenseCooldown != null)
+                    {
+                        float defenseInterval = playerStats.GetDefenseActivationInterval();
+                        if (defenseInterval <= 0) defenseInterval = 1f;
+
+                        float cooldownPercent = defenseTimers[i] / defenseInterval;
+
+                        if (skill.isActive && cooldownPercent < 1f)
+                        {
+                            defenseCooldown.text = $"⏳{(1f - cooldownPercent) * 100f:F0}%";
+                            defenseCooldown.color = Color.yellow;
+                        }
+                        else
+                        {
+                            defenseCooldown.text = skill.isActive ? $"✅" : "❌";
+                            defenseCooldown.color = skill.isActive ? Color.green : Color.red;
+                        }
+                    }
+                }
+                else
+                {
+                    defenseIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
+                    if (defenseCooldown != null)
+                        defenseCooldown.text = "🔘 VAZIO";
+                }
+            }
+
+            // ATUALIZAR ÍCONE DA ULTIMATE
+            if (ultimateSkillIcon != null)
+            {
+                if (ultimateSkill.isActive)
+                {
+                    ultimateSkillIcon.color = Color.white;
+
+                    if (ultimateCooldownText != null)
+                    {
+                        ultimateCooldownText.text = ultimateReady ? $"⭐ PRONTO!" : $"⏳ CARREGANDO";
+                        ultimateCooldownText.color = ultimateReady ? Color.yellow : Color.white;
+                    }
+                }
+                else
+                {
+                    ultimateSkillIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
+                    if (ultimateCooldownText != null)
+                        ultimateCooldownText.text = "🔒 BLOQUEADA";
+                }
             }
         }
-
-        if (elementIcon != null)
+        catch (System.Exception e)
         {
-            var currentElement = playerStats.GetCurrentElement();
-            elementIcon.color = currentElement == PlayerStats.Element.None ?
-                new Color(1, 1, 1, 0.3f) : Color.white;
+            Debug.LogError($"Erro em UpdateSkillIcons: {e.Message}");
         }
     }
 
@@ -201,151 +488,6 @@ public class UIManager : MonoBehaviour
 
             if (defenseTimers[i] >= playerStats.GetDefenseActivationInterval())
                 defenseTimers[i] = 0f;
-        }
-    }
-
-    // ✅ VERSÃO COMPLETAMENTE PROTEGIDA DO UpdateSkillIcons
-    private void UpdateSkillIcons()
-    {
-        if (playerStats == null)
-        {
-            return;
-        }
-
-        try
-        {
-            var attackSkills = playerStats.GetAttackSkills();
-            var defenseSkills = playerStats.GetDefenseSkills();
-            var ultimateSkill = playerStats.GetUltimateSkill();
-
-            if (attackSkills == null || defenseSkills == null || ultimateSkill == null)
-            {
-                return;
-            }
-
-            // ✅ ATUALIZAR ÍCONES DE ATAQUE
-            for (int i = 0; i < 2; i++)
-            {
-                Image attackIcon = i == 0 ? attackSkill1Icon : attackSkill2Icon;
-                Text attackCooldown = i == 0 ? attackCooldownText1 : attackCooldownText2;
-
-                if (attackIcon == null) continue;
-
-                if (attackSkills.Count > i)
-                {
-                    var skill = attackSkills[i];
-                    if (skill == null) continue;
-
-                    attackIcon.color = skill.isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 0.5f);
-
-                    if (attackCooldown != null)
-                    {
-                        float attackInterval = playerStats.GetAttackActivationInterval();
-                        if (attackInterval <= 0) attackInterval = 1f;
-
-                        float cooldownPercent = attackTimers[i] / attackInterval;
-
-                        if (skill.isActive && cooldownPercent < 1f)
-                        {
-                            attackCooldown.text = $"{(1f - cooldownPercent) * 100f:F0}%";
-                            attackCooldown.color = Color.yellow;
-                        }
-                        else
-                        {
-                            string elementInfo = "";
-                            if (skill.GetEffectiveElement() != PlayerStats.Element.None)
-                            {
-                                elementInfo = $"[{skill.GetEffectiveElement()}]";
-                            }
-                            attackCooldown.text = skill.isActive ? $"PRONTO {elementInfo}" : "INATIVA";
-                            attackCooldown.color = skill.isActive ? Color.green : Color.gray;
-                        }
-                    }
-                }
-                else
-                {
-                    attackIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
-                    if (attackCooldown != null)
-                        attackCooldown.text = "VAZIO";
-                }
-            }
-
-            // ✅ ATUALIZAR ÍCONES DE DEFESA
-            for (int i = 0; i < 2; i++)
-            {
-                Image defenseIcon = i == 0 ? defenseSkill1Icon : defenseSkill2Icon;
-                Text defenseCooldown = i == 0 ? defenseCooldownText1 : defenseCooldownText2;
-
-                if (defenseIcon == null) continue;
-
-                if (defenseSkills.Count > i)
-                {
-                    var skill = defenseSkills[i];
-                    if (skill == null) continue;
-
-                    defenseIcon.color = skill.isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 0.5f);
-
-                    if (defenseCooldown != null)
-                    {
-                        float defenseInterval = playerStats.GetDefenseActivationInterval();
-                        if (defenseInterval <= 0) defenseInterval = 1f;
-
-                        float cooldownPercent = defenseTimers[i] / defenseInterval;
-
-                        if (skill.isActive && cooldownPercent < 1f)
-                        {
-                            defenseCooldown.text = $"{(1f - cooldownPercent) * 100f:F0}%";
-                            defenseCooldown.color = Color.yellow;
-                        }
-                        else
-                        {
-                            string elementInfo = "";
-                            if (skill.element != PlayerStats.Element.None)
-                            {
-                                elementInfo = $"[{skill.element}]";
-                            }
-                            defenseCooldown.text = skill.isActive ? $"PRONTO {elementInfo}" : "INATIVA";
-                            defenseCooldown.color = skill.isActive ? Color.green : Color.gray;
-                        }
-                    }
-                }
-                else
-                {
-                    defenseIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
-                    if (defenseCooldown != null)
-                        defenseCooldown.text = "VAZIO";
-                }
-            }
-
-            // ✅ ATUALIZAR ÍCONE DA ULTIMATE
-            if (ultimateSkillIcon != null)
-            {
-                if (ultimateSkill.isActive)
-                {
-                    ultimateSkillIcon.color = ultimateReady ? Color.white : new Color(0.5f, 0.5f, 0.5f, 0.7f);
-
-                    if (ultimateCooldownText != null)
-                    {
-                        string elementInfo = "";
-                        if (ultimateSkill.GetEffectiveElement() != PlayerStats.Element.None)
-                        {
-                            elementInfo = $"[{ultimateSkill.GetEffectiveElement()}]";
-                        }
-                        ultimateCooldownText.text = ultimateReady ? $"PRONTO! {elementInfo}" : "CARREGANDO";
-                        ultimateCooldownText.color = ultimateReady ? Color.yellow : Color.white;
-                    }
-                }
-                else
-                {
-                    ultimateSkillIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
-                    if (ultimateCooldownText != null)
-                        ultimateCooldownText.text = "BLOQUEADA";
-                }
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Erro em UpdateSkillIcons: {e.Message}");
         }
     }
 
@@ -368,115 +510,41 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void UpdatePlayerStatus()
+    // 🆕 ATUALIZADO: UpdateElementUI simplificado
+    private void UpdateElementUI()
     {
         if (playerStats == null) return;
 
-        if (healthBar != null)
+        var currentElement = playerStats.GetCurrentElement();
+
+        if (currentElementText != null)
         {
-            healthBar.maxValue = playerStats.GetMaxHealth();
-            healthBar.value = playerStats.GetCurrentHealth();
+            currentElementText.text = $"Elemento: {currentElement}";
+
+            if (elementColors.ContainsKey(currentElement))
+            {
+                currentElementText.color = elementColors[currentElement];
+            }
         }
 
-        if (healthText != null)
+        if (elementIcon != null)
         {
-            healthText.text = $"{playerStats.GetCurrentHealth():F0}/{playerStats.GetMaxHealth():F0}";
-        }
-
-        if (levelText != null)
-            levelText.text = $"Level: {playerStats.GetLevel()}";
-
-        if (xpText != null)
-            xpText.text = $"XP: {playerStats.GetCurrentXP():F0}/{playerStats.GetXPToNextLevel():F0}";
-
-        if (xpSlider != null)
-        {
-            xpSlider.maxValue = playerStats.GetXPToNextLevel();
-            xpSlider.value = playerStats.GetCurrentXP();
-        }
-
-        if (statusPanel != null && statusPanel.activeSelf)
-        {
-            if (damageText != null)
-                damageText.text = $"Ataque: {playerStats.GetAttack():F1}";
-
-            if (speedText != null)
-                speedText.text = $"Velocidade: {playerStats.GetSpeed():F1}";
-
-            if (defenseText != null)
-                defenseText.text = $"Defesa: {playerStats.GetDefense():F0}";
-
-            if (attackSpeedText != null)
-                attackSpeedText.text = $"Vel. Ataque: {playerStats.GetAttackActivationInterval():F1}s";
-
-            if (elementInfoText != null)
-            {
-                var currentElement = playerStats.GetCurrentElement();
-                elementInfoText.text = $"Elemento Atual: {currentElement}\n" +
-                                      $"Bônus Elemental: {playerStats.GetElementalBonus():F1}x";
-
-                if (elementColors.ContainsKey(currentElement))
-                {
-                    elementInfoText.color = elementColors[currentElement];
-                }
-            }
-
-            if (inventoryText != null)
-            {
-                var inventory = playerStats.GetInventory();
-                inventoryText.text = $"Itens: {(inventory.Count > 0 ? string.Join(", ", inventory) : "Nenhum")}";
-            }
-
-            if (attackSkillsText != null)
-            {
-                string attackInfo = "Skills de Ataque:\n";
-                var attackSkills = playerStats.GetAttackSkills();
-                foreach (var skill in attackSkills)
-                {
-                    string status = skill.isActive ? "✅" : "❌";
-                    string elementInfo = skill.GetEffectiveElement() != PlayerStats.Element.None ?
-                        $"[{skill.GetEffectiveElement()}]" : "";
-                    attackInfo += $"{status} {skill.skillName} {elementInfo}: {skill.CalculateTotalDamage()} dmg\n";
-                }
-                attackSkillsText.text = attackInfo;
-            }
-
-            if (defenseSkillsText != null)
-            {
-                string defenseInfo = "Skills de Defesa:\n";
-                var defenseSkills = playerStats.GetDefenseSkills();
-                foreach (var skill in defenseSkills)
-                {
-                    string status = skill.isActive ? "✅" : "❌";
-                    string elementInfo = skill.element != PlayerStats.Element.None ?
-                        $"[{skill.element}]" : "";
-                    defenseInfo += $"{status} {skill.skillName} {elementInfo}: {skill.CalculateTotalDefense()} def\n";
-                }
-                defenseSkillsText.text = defenseInfo;
-            }
-
-            if (ultimateSkillsText != null)
-            {
-                var ultimate = playerStats.GetUltimateSkill();
-                string ultimateInfo = "Ultimate:\n";
-                if (ultimate.isActive)
-                {
-                    string status = ultimateReady ? "⭐ PRONTA ⭐" : "⏳ CARREGANDO";
-                    string elementInfo = ultimate.GetEffectiveElement() != PlayerStats.Element.None ?
-                        $"[{ultimate.GetEffectiveElement()}]" : "";
-                    ultimateInfo += $"{status} {elementInfo}\n";
-                    ultimateInfo += $"{ultimate.skillName}: {ultimate.CalculateTotalDamage()} dmg\n";
-                    ultimateInfo += $"Área: {ultimate.areaOfEffect}m | Duração: {ultimate.duration}s";
-                }
-                else
-                {
-                    ultimateInfo += "🔒 Disponível no Level 5";
-                }
-                ultimateSkillsText.text = ultimateInfo;
-            }
+            elementIcon.color = currentElement == PlayerStats.Element.None ?
+                new Color(1, 1, 1, 0.3f) : elementColors[currentElement];
         }
     }
 
+    // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
+    private Color GetElementColor(PlayerStats.Element element)
+    {
+        if (elementColors.ContainsKey(element))
+        {
+            return elementColors[element];
+        }
+        return Color.white;
+    }
+
+    // ✅ MÉTODOS RESTANTES CORRIGIDOS E FUNCIONAIS
     public void ShowSkillAcquired(string skillName, string description)
     {
         if (skillAcquiredPanel == null) return;
@@ -490,12 +558,11 @@ public class UIManager : MonoBehaviour
     public void ShowUltimateAcquired(string ultimateName, string description)
     {
         ShowSkillAcquired($"⭐ {ultimateName} ⭐", description);
-        StartCoroutine(UltimateAcquiredEffect());
     }
 
     public void ShowModifierAcquired(string modifierName, string targetSkill)
     {
-        ShowSkillAcquired(modifierName, $"Aplicado em: {targetSkill}");
+        ShowSkillAcquired($"✨ {modifierName}", $"Aplicado em: {targetSkill}");
     }
 
     public void ShowElementChanged(string elementName)
@@ -606,6 +673,35 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // ✅ CORRIGIDO: UpdatePlayerStatus simplificado
+    public void UpdatePlayerStatus()
+    {
+        if (playerStats == null) return;
+
+        if (healthBar != null)
+        {
+            healthBar.maxValue = playerStats.GetMaxHealth();
+            healthBar.value = playerStats.GetCurrentHealth();
+        }
+
+        if (healthText != null)
+        {
+            healthText.text = $"{playerStats.GetCurrentHealth():F0}/{playerStats.GetMaxHealth():F0}";
+        }
+
+        if (levelText != null)
+            levelText.text = $"Level: {playerStats.GetLevel()}";
+
+        if (xpText != null)
+            xpText.text = $"XP: {playerStats.GetCurrentXP():F0}/{playerStats.GetXPToNextLevel():F0}";
+
+        if (xpSlider != null)
+        {
+            xpSlider.maxValue = playerStats.GetXPToNextLevel();
+            xpSlider.value = playerStats.GetCurrentXP();
+        }
+    }
+
     private IEnumerator HideSkillPopup()
     {
         yield return new WaitForSeconds(popupDisplayTime);
@@ -613,9 +709,14 @@ public class UIManager : MonoBehaviour
             skillAcquiredPanel.SetActive(false);
     }
 
-    private IEnumerator UltimateAcquiredEffect()
+    // 🆕 MÉTODO PARA MOSTRAR INFORMAÇÕES DE SKILL
+    public void ShowSkillInfo(SkillData skill)
     {
-        Debug.Log("🎆 ULTIMATE ADQUIRIDA!");
-        yield return null;
+        if (skillAcquiredPanel == null) return;
+
+        skillNameText.text = skill.skillName;
+        skillDescriptionText.text = skill.description;
+        skillAcquiredPanel.SetActive(true);
+        StartCoroutine(HideSkillPopup());
     }
 }

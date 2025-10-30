@@ -34,10 +34,18 @@ public class PlayerStats : MonoBehaviour
     public float attackActivationInterval = 2f;
     public float defenseActivationInterval = 3f;
 
-    // 🆕 SISTEMA DE ELEMENTOS (PARA IMPLEMENTAÇÃO FUTURA)
-    [Header("⚡ Sistema de Elementos (Futuro)")]
-    public Element currentElement = Element.None;
-    public float elementalBonus = 1.2f;
+    // 🆕 SISTEMA DE ELEMENTOS COMPLETO
+    [Header("⚡ Sistema de Elementos")]
+    public ElementSystem elementSystem = new ElementSystem();
+
+    // 🆕 PROPRIEDADE PARA COMPATIBILIDADE
+    public Element CurrentElement
+    {
+        get => elementSystem.currentElement;
+        set => elementSystem.currentElement = value;
+    }
+
+    public float ElementalBonus => elementSystem.elementalBonus;
 
     private List<string> inventory = new List<string>();
     private Rigidbody2D rb;
@@ -62,6 +70,132 @@ public class PlayerStats : MonoBehaviour
         Wind
     }
 
+    // 🆕 SISTEMA DE ELEMENTOS
+    [System.Serializable]
+    public class ElementSystem
+    {
+        public Element currentElement = Element.None;
+        public float elementalBonus = 1.2f;
+        public Dictionary<Element, ElementAffinity> elementAffinities = new Dictionary<Element, ElementAffinity>();
+
+        [Header("Elemental Effects")]
+        public float burnDamagePerSecond = 5f;
+        public float freezeSlowAmount = 0.5f;
+        public float shockStunChance = 0.3f;
+        public float poisonDuration = 3f;
+
+        public ElementSystem()
+        {
+            InitializeElementAffinities();
+        }
+
+        private void InitializeElementAffinities()
+        {
+            elementAffinities[Element.Fire] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Ice, Element.Poison },
+                weakAgainst = new List<Element> { Element.Wind, Element.Earth }
+            };
+
+            elementAffinities[Element.Ice] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Wind, Element.Earth },
+                weakAgainst = new List<Element> { Element.Fire, Element.Lightning }
+            };
+
+            elementAffinities[Element.Lightning] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Wind, Element.Poison },
+                weakAgainst = new List<Element> { Element.Earth, Element.Fire }
+            };
+
+            elementAffinities[Element.Poison] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Earth, Element.Wind },
+                weakAgainst = new List<Element> { Element.Fire, Element.Ice }
+            };
+
+            elementAffinities[Element.Earth] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Lightning, Element.Fire },
+                weakAgainst = new List<Element> { Element.Ice, Element.Poison }
+            };
+
+            elementAffinities[Element.Wind] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Poison, Element.Earth },
+                weakAgainst = new List<Element> { Element.Ice, Element.Lightning }
+            };
+        }
+
+        public float CalculateElementalMultiplier(Element attackElement, Element targetElement)
+        {
+            if (attackElement == Element.None || targetElement == Element.None)
+                return 1f;
+
+            if (elementAffinities.ContainsKey(attackElement))
+            {
+                var affinity = elementAffinities[attackElement];
+
+                if (affinity.strongAgainst.Contains(targetElement))
+                    return elementalBonus; // 1.2x damage
+
+                if (affinity.weakAgainst.Contains(targetElement))
+                    return 1f / elementalBonus; // ~0.83x damage
+            }
+
+            return 1f; // Neutral damage
+        }
+
+        public void ApplyElementalEffect(Element element, GameObject target)
+        {
+            if (target == null) return;
+
+            switch (element)
+            {
+                case Element.Fire:
+                    ApplyBurnEffect(target);
+                    break;
+                case Element.Ice:
+                    ApplyFreezeEffect(target);
+                    break;
+                case Element.Lightning:
+                    ApplyShockEffect(target);
+                    break;
+                case Element.Poison:
+                    ApplyPoisonEffect(target);
+                    break;
+            }
+        }
+
+        private void ApplyBurnEffect(GameObject target)
+        {
+            Debug.Log($"🔥 Aplicando efeito de queimadura em {target.name}");
+        }
+
+        private void ApplyFreezeEffect(GameObject target)
+        {
+            Debug.Log($"❄️ Aplicando efeito de congelamento em {target.name}");
+        }
+
+        private void ApplyShockEffect(GameObject target)
+        {
+            Debug.Log($"⚡ Aplicando efeito de choque em {target.name}");
+        }
+
+        private void ApplyPoisonEffect(GameObject target)
+        {
+            Debug.Log($"☠️ Aplicando efeito de veneno em {target.name}");
+        }
+    }
+
+    [System.Serializable]
+    public class ElementAffinity
+    {
+        public List<Element> strongAgainst = new List<Element>();
+        public List<Element> weakAgainst = new List<Element>();
+    }
+
     [System.Serializable]
     public class AttackSkill
     {
@@ -70,15 +204,18 @@ public class PlayerStats : MonoBehaviour
         public bool isActive;
         public float cooldown;
 
-        // 🆕 PROPRIEDADES DE ELEMENTO (FUTURO)
+        // 🆕 SISTEMA DE ELEMENTOS COMPLETO
         public Element element = Element.None;
         public List<SkillModifier> modifiers = new List<SkillModifier>();
+
+        // 🆕 PROPRIEDADES ESPECÍFICAS POR ELEMENTO
+        public float elementalEffectChance = 0.2f;
+        public float elementalEffectDuration = 3f;
 
         public float CalculateTotalDamage()
         {
             float totalDamage = baseDamage;
 
-            // 🆕 APLICA MODIFICADORES (FUTURO)
             foreach (var mod in modifiers)
             {
                 totalDamage *= mod.damageMultiplier;
@@ -87,7 +224,7 @@ public class PlayerStats : MonoBehaviour
             return totalDamage;
         }
 
-        // 🆕 MÉTODO PARA ELEMENTO EFETIVO (FUTURO)
+        // 🆕 MÉTODO PARA ELEMENTO EFETIVO CONSIDERANDO MODIFICADORES
         public Element GetEffectiveElement()
         {
             foreach (var mod in modifiers)
@@ -96,6 +233,27 @@ public class PlayerStats : MonoBehaviour
                     return mod.element;
             }
             return element;
+        }
+
+        // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
+        public Color GetElementColor()
+        {
+            return GetElementColor(GetEffectiveElement());
+        }
+
+        public static Color GetElementColor(Element element)
+        {
+            switch (element)
+            {
+                case Element.None: return Color.white;
+                case Element.Fire: return new Color(1f, 0.3f, 0.1f);
+                case Element.Ice: return new Color(0.1f, 0.5f, 1f);
+                case Element.Lightning: return new Color(0.8f, 0.8f, 0.1f);
+                case Element.Poison: return new Color(0.5f, 0.1f, 0.8f);
+                case Element.Earth: return new Color(0.6f, 0.4f, 0.2f);
+                case Element.Wind: return new Color(0.4f, 0.8f, 0.9f);
+                default: return Color.white;
+            }
         }
     }
 
@@ -107,7 +265,7 @@ public class PlayerStats : MonoBehaviour
         public bool isActive;
         public float duration;
 
-        // 🆕 PROPRIEDADES DE ELEMENTO (FUTURO)
+        // 🆕 PROPRIEDADES DE ELEMENTO
         public Element element = Element.None;
         public List<SkillModifier> modifiers = new List<SkillModifier>();
 
@@ -115,13 +273,18 @@ public class PlayerStats : MonoBehaviour
         {
             float totalDefense = baseDefense;
 
-            // 🆕 APLICA MODIFICADORES (FUTURO)
             foreach (var mod in modifiers)
             {
                 totalDefense *= mod.defenseMultiplier;
             }
 
             return totalDefense;
+        }
+
+        // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
+        public Color GetElementColor()
+        {
+            return AttackSkill.GetElementColor(element);
         }
     }
 
@@ -134,7 +297,7 @@ public class PlayerStats : MonoBehaviour
         public float areaOfEffect;
         public float duration;
 
-        // 🆕 PROPRIEDADES DE ELEMENTO (FUTURO)
+        // 🆕 PROPRIEDADES DE ELEMENTO
         public Element element = Element.None;
         public List<SkillModifier> modifiers = new List<SkillModifier>();
 
@@ -142,7 +305,6 @@ public class PlayerStats : MonoBehaviour
         {
             float totalDamage = baseDamage;
 
-            // 🆕 APLICA MODIFICADORES (FUTURO)
             foreach (var mod in modifiers)
             {
                 totalDamage *= mod.damageMultiplier;
@@ -151,7 +313,7 @@ public class PlayerStats : MonoBehaviour
             return totalDamage;
         }
 
-        // 🆕 MÉTODO PARA ELEMENTO EFETIVO (FUTURO)
+        // 🆕 MÉTODO PARA ELEMENTO EFETIVO
         public Element GetEffectiveElement()
         {
             foreach (var mod in modifiers)
@@ -161,9 +323,15 @@ public class PlayerStats : MonoBehaviour
             }
             return element;
         }
+
+        // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
+        public Color GetElementColor()
+        {
+            return AttackSkill.GetElementColor(GetEffectiveElement());
+        }
     }
 
-    // 🆕 CLASSE DE MODIFICADOR DE SKILL (FUTURO)
+    // 🆕 CLASSE DE MODIFICADOR DE SKILL
     [System.Serializable]
     public class SkillModifier
     {
@@ -262,14 +430,14 @@ public class PlayerStats : MonoBehaviour
         // Input para toggle de skills
         HandleSkillToggleInput();
 
-        // 🆕 INPUT PARA TROCAR ELEMENTO (FUTURO - TESTE)
+        // 🆕 INPUT PARA TROCAR ELEMENTO
         HandleElementInput();
 
         // 🆕 INPUT PARA TESTAR SKILL MANAGER
         HandleSkillManagerInput();
     }
 
-    // 🆕 MÉTODO PARA TROCAR ELEMENTOS (FUTURO)
+    // 🆕 MÉTODO PARA TROCAR ELEMENTOS
     void HandleElementInput()
     {
         if (Input.GetKeyDown(KeyCode.F1))
@@ -286,6 +454,18 @@ public class PlayerStats : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.F4))
         {
+            ChangeElement(Element.Poison);
+        }
+        else if (Input.GetKeyDown(KeyCode.F5))
+        {
+            ChangeElement(Element.Earth);
+        }
+        else if (Input.GetKeyDown(KeyCode.F6))
+        {
+            ChangeElement(Element.Wind);
+        }
+        else if (Input.GetKeyDown(KeyCode.F12))
+        {
             ChangeElement(Element.None);
         }
     }
@@ -293,50 +473,112 @@ public class PlayerStats : MonoBehaviour
     // 🆕 INPUT PARA TESTAR SKILL MANAGER
     void HandleSkillManagerInput()
     {
-        if (Input.GetKeyDown(KeyCode.F5) && skillManager != null)
+        if (Input.GetKeyDown(KeyCode.F7) && skillManager != null)
         {
             skillManager.AddRandomSkill();
         }
 
-        if (Input.GetKeyDown(KeyCode.F6) && skillManager != null)
+        if (Input.GetKeyDown(KeyCode.F8) && skillManager != null)
         {
             skillManager.AddRandomModifier();
         }
 
-        if (Input.GetKeyDown(KeyCode.F7) && skillManager != null)
+        if (Input.GetKeyDown(KeyCode.F9) && skillManager != null)
         {
             skillManager.AddTestSkills();
         }
 
-        if (Input.GetKeyDown(KeyCode.F8) && skillManager != null)
+        if (Input.GetKeyDown(KeyCode.F10) && skillManager != null)
         {
             skillManager.CheckIntegrationStatus();
         }
     }
 
-    // 🆕 MÉTODO PARA MUDAR ELEMENTO (FUTURO)
+    // 🆕 MÉTODO PARA MUDAR ELEMENTO
     public void ChangeElement(Element newElement)
     {
-        currentElement = newElement;
-        Debug.Log($"⚡ Elemento alterado para: {newElement}");
+        Element previousElement = CurrentElement;
+        CurrentElement = newElement;
+
+        Debug.Log($"⚡ Elemento alterado: {previousElement} → {newElement}");
 
         if (uiManager != null)
             uiManager.ShowElementChanged(newElement.ToString());
+
+        // 🆕 APLICA BÔNUS/MALUS DE MUDANÇA DE ELEMENTO
+        ApplyElementChangeEffects(previousElement, newElement);
     }
 
-    // 🆕 MÉTODO PARA CALCULAR DANO COM ELEMENTO (FUTURO)
-    float CalculateElementalDamage(float baseDamage, Element attackElement)
+    private void ApplyElementChangeEffects(Element oldElement, Element newElement)
     {
-        if (attackElement == Element.None || currentElement == Element.None)
-            return baseDamage;
-
-        // 🆕 LÓGICA DE VANTAGENS/DESVANTAGENS AQUI (FUTURO)
-        if (attackElement == currentElement)
+        // Remove bônus do elemento anterior
+        switch (oldElement)
         {
-            return baseDamage * elementalBonus; // Bônus por mesmo elemento
+            case Element.Fire:
+                attack -= 5f;
+                break;
+            case Element.Ice:
+                defense -= 3f;
+                break;
+            case Element.Earth:
+                defense -= 5f;
+                break;
+            case Element.Wind:
+                speed -= 2f;
+                break;
         }
 
-        return baseDamage;
+        // Aplica bônus do novo elemento
+        switch (newElement)
+        {
+            case Element.Fire:
+                attack += 5f;
+                Debug.Log("🔥 Bônus: +5 de Ataque");
+                break;
+            case Element.Ice:
+                defense += 3f;
+                Debug.Log("❄️ Bônus: +3 de Defesa");
+                break;
+            case Element.Lightning:
+                attackActivationInterval *= 0.8f; // 20% mais rápido
+                Debug.Log("⚡ Bônus: +20% Velocidade de Ataque");
+                break;
+            case Element.Poison:
+                // Bônus de dano contínuo já aplicado no sistema
+                Debug.Log("☠️ Bônus: Dano Contínuo Aplicado");
+                break;
+            case Element.Earth:
+                defense += 5f;
+                Debug.Log("🌍 Bônus: +5 de Defesa");
+                break;
+            case Element.Wind:
+                speed += 2f;
+                Debug.Log("💨 Bônus: +2 de Velocidade");
+                break;
+        }
+
+        UpdateUI();
+    }
+
+    // 🆕 MÉTODO PARA CALCULAR DANO COM ELEMENTO
+    float CalculateElementalDamage(float baseDamage, Element attackElement, Element targetElement = Element.None)
+    {
+        if (attackElement == Element.None || targetElement == Element.None)
+            return baseDamage;
+
+        float multiplier = elementSystem.CalculateElementalMultiplier(attackElement, targetElement);
+        float finalDamage = baseDamage * multiplier;
+
+        if (multiplier > 1f)
+        {
+            Debug.Log($"🎯 VANTAGEM ELEMENTAL! Dano: {baseDamage} → {finalDamage} (x{multiplier})");
+        }
+        else if (multiplier < 1f)
+        {
+            Debug.Log($"⚠️ DESVANTAGEM ELEMENTAL! Dano: {baseDamage} → {finalDamage} (x{multiplier})");
+        }
+
+        return finalDamage;
     }
 
     void UpdateUltimateSystem()
@@ -398,9 +640,9 @@ public class PlayerStats : MonoBehaviour
             {
                 float totalDamage = skill.CalculateTotalDamage();
 
-                // 🆕 APLICA ELEMENTO NO DANO (FUTURO)
+                // 🆕 APLICA ELEMENTO NO DANO
                 Element attackElement = skill.GetEffectiveElement();
-                float finalDamage = CalculateElementalDamage(totalDamage, attackElement);
+                float finalDamage = CalculateElementalDamage(totalDamage, attackElement, Element.None); // Elemento inimigo seria passado aqui
 
                 Debug.Log($"⚔️ {skill.skillName} ativada! Dano: {finalDamage} | Elemento: {attackElement}");
                 ApplyAreaDamage(finalDamage, attackElement);
@@ -461,6 +703,9 @@ public class PlayerStats : MonoBehaviour
             // Simula dano em inimigos
             if (hitCollider.CompareTag("Enemy"))
             {
+                // 🆕 APLICA EFEITO ELEMENTAL
+                elementSystem.ApplyElementalEffect(element, hitCollider.gameObject);
+
                 Debug.Log($"💥 Dano {damage} aplicado no inimigo {hitCollider.name} | Elemento: {element}");
             }
         }
@@ -487,9 +732,9 @@ public class PlayerStats : MonoBehaviour
 
         float totalDamage = ultimateSkill.CalculateTotalDamage();
 
-        // 🆕 APLICA ELEMENTO NA ULTIMATE (FUTURO)
+        // 🆕 APLICA ELEMENTO NA ULTIMATE
         Element ultimateElement = ultimateSkill.GetEffectiveElement();
-        float finalDamage = CalculateElementalDamage(totalDamage, ultimateElement);
+        float finalDamage = CalculateElementalDamage(totalDamage, ultimateElement, Element.None);
 
         Debug.Log($"🚀 ULTIMATE ATIVADA: {ultimateSkill.skillName}! Dano: {finalDamage} | Elemento: {ultimateElement}");
 
@@ -500,6 +745,8 @@ public class PlayerStats : MonoBehaviour
             if (hitCollider.gameObject == gameObject) continue;
             if (hitCollider.CompareTag("Enemy"))
             {
+                // 🆕 APLICA EFEITO ELEMENTAL DA ULTIMATE
+                elementSystem.ApplyElementalEffect(ultimateElement, hitCollider.gameObject);
                 Debug.Log($"💥 ULTIMATE: Dano {finalDamage} no inimigo {hitCollider.name} | Elemento: {ultimateElement}");
             }
         }
@@ -523,11 +770,30 @@ public class PlayerStats : MonoBehaviour
     // 🆕 ATUALIZADO: AGORA RECEBE ELEMENTO
     private System.Collections.IEnumerator UltimateEffects(float duration, Element element)
     {
-        // Buff temporário
+        // Buff temporário baseado no elemento
         float originalAttack = attack;
         float originalSpeed = speed;
-        attack *= 1.5f;
-        speed *= 1.2f;
+
+        // 🆕 BÔNUS ESPECÍFICO POR ELEMENTO
+        switch (element)
+        {
+            case Element.Fire:
+                attack *= 1.5f;
+                break;
+            case Element.Ice:
+                defense *= 1.3f;
+                break;
+            case Element.Lightning:
+                attackActivationInterval *= 0.7f;
+                break;
+            case Element.Wind:
+                speed *= 1.3f;
+                break;
+            default:
+                attack *= 1.5f;
+                speed *= 1.2f;
+                break;
+        }
 
         Debug.Log($"💥 Efeito da Ultimate ativo! Elemento: {element}");
 
@@ -623,7 +889,7 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
     }
 
-    // 🆕 MÉTODO PARA ADICIONAR MODIFICADOR (FUTURO)
+    // 🆕 MÉTODO PARA ADICIONAR MODIFICADOR
     public void AddSkillModifier(SkillModifier modifier)
     {
         bool applied = false;
@@ -719,9 +985,10 @@ public class PlayerStats : MonoBehaviour
     public float GetAttackActivationInterval() => attackActivationInterval;
     public float GetDefenseActivationInterval() => defenseActivationInterval;
 
-    // 🆕 GETTERS PARA ELEMENTOS (FUTURO)
-    public Element GetCurrentElement() => currentElement;
-    public float GetElementalBonus() => elementalBonus;
+    // 🆕 GETTERS PARA ELEMENTOS
+    public Element GetCurrentElement() => CurrentElement;
+    public float GetElementalBonus() => ElementalBonus;
+    public ElementSystem GetElementSystem() => elementSystem;
 
     public void ToggleAttackSkill(int index, bool active)
     {
