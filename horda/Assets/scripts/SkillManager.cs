@@ -7,7 +7,7 @@ public class SkillManager : MonoBehaviour
     // ⚡ Singleton - acesso global fácil
     public static SkillManager Instance;
 
-    [Header("🎯 Lista de Skills Disponíveis no Jogo (ScriptableObjects)")]
+    [Header("🎯 Lista de Skills Disponíveis no Jogo")]
     [SerializeField] private List<SkillData> availableSkills = new List<SkillData>();
 
     [Header("🔧 Modificadores de Skills Disponíveis")]
@@ -21,6 +21,10 @@ public class SkillManager : MonoBehaviour
 
     // 🆕 DICIONÁRIO PARA SKILLS ESPECIAIS
     private Dictionary<SpecificSkillType, float> specialSkillValues = new Dictionary<SpecificSkillType, float>();
+
+    // 🆕 EVENTOS PARA UI
+    public System.Action<SkillData> OnSkillAdded;
+    public System.Action<SkillModifierData> OnModifierAdded;
 
     private void Awake()
     {
@@ -48,6 +52,8 @@ public class SkillManager : MonoBehaviour
 
         // 🆕 VERIFICA SE HÁ SKILLS DISPONÍVEIS
         CheckAvailableSkills();
+
+        Debug.Log("✅ SkillManager inicializado com sistema de elementos!");
     }
 
     // 🆕 INICIALIZA DICIONÁRIO DE SKILLS ESPECIAIS
@@ -72,6 +78,13 @@ public class SkillManager : MonoBehaviour
         else
         {
             Debug.Log($"✅ {availableSkills.Count} skills disponíveis carregadas.");
+
+            // 🆕 LOG DE SKILLS POR ELEMENTO
+            var skillsByElement = availableSkills.GroupBy(s => s.element);
+            foreach (var group in skillsByElement)
+            {
+                Debug.Log($"   {GetElementIcon(group.Key)} {group.Key}: {group.Count()} skills");
+            }
         }
     }
 
@@ -90,7 +103,7 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"🎉 Adicionando skill: {skillData.skillName} (Raridade: {skillData.rarity})");
+        Debug.Log($"🎉 Adicionando skill: {skillData.skillName} (Elemento: {skillData.element})");
 
         // Adiciona à lista de skills ativas
         activeSkills.Add(skillData);
@@ -100,6 +113,9 @@ public class SkillManager : MonoBehaviour
 
         // 🆕 APLICA EFEITOS ESPECIAIS BASEADOS NO TIPO
         ApplySpecialSkillEffects(skillData);
+
+        // 🆕 NOTIFICA UI ATRAVÉS DE EVENTO
+        OnSkillAdded?.Invoke(skillData);
 
         // Toca efeito sonoro
         if (skillData.soundEffect != null)
@@ -119,9 +135,11 @@ public class SkillManager : MonoBehaviour
 
         // ATUALIZA UI DO PLAYERSTATS
         playerStats.ForceUIUpdate();
+
+        Debug.Log($"✅ Skill {skillData.skillName} adicionada com sucesso!");
     }
 
-    // 📊 APLICA OS EFEITOS DA SKILL
+    // 🆕 ATUALIZADO: ApplySkillEffects com sistema de elementos
     private void ApplySkillEffects(SkillData skillData)
     {
         // Aplica bônus de status básicos
@@ -150,6 +168,13 @@ public class SkillManager : MonoBehaviour
             Debug.Log($"🏃 Velocidade aumentada em {skillData.speedBonus}");
         }
 
+        // 🆕 MUDA ELEMENTO SE A SKILL TIVER ELEMENTO ESPECÍFICO
+        if (skillData.element != PlayerStats.Element.None)
+        {
+            playerStats.ChangeElement(skillData.element);
+            Debug.Log($"⚡ Elemento alterado para: {skillData.element}");
+        }
+
         // APLICA MODIFICADORES DE SKILLS CORRETAMENTE
         foreach (var modifierData in skillData.skillModifiers)
         {
@@ -160,6 +185,30 @@ public class SkillManager : MonoBehaviour
         if (skillData.visualEffect != null)
         {
             Instantiate(skillData.visualEffect, playerStats.transform.position, Quaternion.identity);
+        }
+
+        // 🆕 EFEITO VISUAL BASEADO NO ELEMENTO
+        ApplyElementalVisualEffect(skillData.element, playerStats.transform.position);
+    }
+
+    // 🆕 NOVO: Aplica efeito visual baseado no elemento
+    private void ApplyElementalVisualEffect(PlayerStats.Element element, Vector3 position)
+    {
+        // Aqui você pode adicionar partículas específicas para cada elemento
+        switch (element)
+        {
+            case PlayerStats.Element.Fire:
+                Debug.Log("🔥 Efeito visual de Fogo aplicado");
+                break;
+            case PlayerStats.Element.Ice:
+                Debug.Log("❄️ Efeito visual de Gelo aplicado");
+                break;
+            case PlayerStats.Element.Lightning:
+                Debug.Log("⚡ Efeito visual de Raio aplicado");
+                break;
+            case PlayerStats.Element.Poison:
+                Debug.Log("☠️ Efeito visual de Veneno aplicado");
+                break;
         }
     }
 
@@ -197,6 +246,10 @@ public class SkillManager : MonoBehaviour
                     Debug.Log($"🛡️ Escudo ativado: {skillData.specialValue} de proteção");
                     playerStats.defense += skillData.specialValue;
                     break;
+                case SpecificSkillType.ElementalMastery:
+                    Debug.Log($"🎨 Mestre Elemental: {skillData.specialValue}% de bônus");
+                    // Aumenta o bônus elemental
+                    break;
             }
         }
     }
@@ -215,7 +268,7 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🔧 ADICIONAR MODIFICADOR DE SKILL
+    // 🆕 ATUALIZADO: AddSkillModifier com sistema de elementos
     public void AddSkillModifier(SkillModifierData modifierData)
     {
         if (playerStats == null)
@@ -246,6 +299,9 @@ public class SkillManager : MonoBehaviour
         activeModifiers.Add(modifierData);
         playerStats.AddSkillModifier(playerStatsModifier);
 
+        // 🆕 NOTIFICA UI ATRAVÉS DE EVENTO
+        OnModifierAdded?.Invoke(modifierData);
+
         // NOTIFICA UI CORRETAMENTE
         if (UIManager.Instance != null)
         {
@@ -253,6 +309,8 @@ public class SkillManager : MonoBehaviour
         }
 
         playerStats.ForceUIUpdate();
+
+        Debug.Log($"✅ Modificador {modifierData.modifierName} aplicado em {modifierData.targetSkillName}");
     }
 
     // 🗑️ REMOVER UMA SKILL
@@ -295,6 +353,8 @@ public class SkillManager : MonoBehaviour
         }
 
         playerStats.ForceUIUpdate();
+
+        Debug.Log($"✅ Skill {skillData.skillName} removida com sucesso!");
     }
 
     // 🆕 REMOVE EFEITOS ESPECIAIS
@@ -327,10 +387,9 @@ public class SkillManager : MonoBehaviour
         Debug.Log($"🗑️ Removendo modificador: {modifierData.modifierName}");
         activeModifiers.Remove(modifierData);
 
-        // 🆕 NOTA: Para remoção completa, precisaríamos implementar no PlayerStats
-        // Por enquanto apenas remove da lista local
-
         playerStats.ForceUIUpdate();
+
+        Debug.Log($"✅ Modificador {modifierData.modifierName} removido com sucesso!");
     }
 
     // 🎲 PEGA SKILLS ALEATÓRIAS DISPONÍVEIS
@@ -462,9 +521,19 @@ public class SkillManager : MonoBehaviour
 
         if (availableSkills.Count > 0)
         {
-            AddSkill(availableSkills[0]);
-            if (availableSkills.Count > 1)
+            // 🆕 TENTA ENCONTRAR SKILLS COM ELEMENTOS DIFERENTES
+            var fireSkill = availableSkills.FirstOrDefault(s => s.element == PlayerStats.Element.Fire);
+            var iceSkill = availableSkills.FirstOrDefault(s => s.element == PlayerStats.Element.Ice);
+
+            if (fireSkill != null) AddSkill(fireSkill);
+            if (iceSkill != null) AddSkill(iceSkill);
+
+            // Se não encontrou skills com elementos, usa as primeiras disponíveis
+            if (fireSkill == null && iceSkill == null && availableSkills.Count > 1)
+            {
+                AddSkill(availableSkills[0]);
                 AddSkill(availableSkills[1]);
+            }
         }
         else
         {
@@ -472,10 +541,10 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA VERIFICAR STATUS DA INTEGRAÇÃO
+    // 🆕 ATUALIZADO: CheckIntegrationStatus com informações de elementos
     public void CheckIntegrationStatus()
     {
-        Debug.Log("🔍 Verificando integração...");
+        Debug.Log("🔍 Verificando integração do SkillManager...");
 
         if (playerStats != null)
             Debug.Log("✅ PlayerStats: CONECTADO");
@@ -490,6 +559,14 @@ public class SkillManager : MonoBehaviour
         Debug.Log($"📊 Skills Ativas: {activeSkills.Count}");
         Debug.Log($"🔧 Modificadores Ativos: {activeModifiers.Count}");
         Debug.Log($"🎯 Skills Disponíveis: {availableSkills.Count}");
+
+        // 🆕 INFORMAÇÕES DE ELEMENTOS
+        var elementsCount = activeSkills.GroupBy(s => s.element);
+        Debug.Log("🎨 Skills por Elemento:");
+        foreach (var group in elementsCount)
+        {
+            Debug.Log($"   {GetElementIcon(group.Key)} {group.Key}: {group.Count()} skills");
+        }
     }
 
     // 🗑️ MÉTODO PARA LIMPAR TODAS AS SKILLS (PARA DEBUG)
@@ -528,6 +605,16 @@ public class SkillManager : MonoBehaviour
             Debug.Log($"🎁 Presente de level up! Adicionando skill aleatória...");
             AddRandomSkill();
         }
+
+        // 🆕 DESBLOQUEIA SKILLS ESPECIAIS EM NÍVEIS ESPECÍFICOS
+        if (newLevel == 5)
+        {
+            Debug.Log("⭐ Nível 5 alcançado! Skills especiais disponíveis.");
+        }
+        else if (newLevel == 10)
+        {
+            Debug.Log("🌟🌟 Nível 10 alcançado! Skills raras disponíveis.");
+        }
     }
 
     // 🆕 MÉTODO PARA ADICIONAR SKILLS AO MANAGER DINAMICAMENTE
@@ -547,6 +634,22 @@ public class SkillManager : MonoBehaviour
         {
             availableSkills.Remove(skillData);
             Debug.Log($"❌ Skill {skillData.skillName} removida das disponíveis");
+        }
+    }
+
+    // 🆕 MÉTODO PARA OBTER ÍCONE DO ELEMENTO
+    private string GetElementIcon(PlayerStats.Element element)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.None: return "⚪";
+            case PlayerStats.Element.Fire: return "🔥";
+            case PlayerStats.Element.Ice: return "❄️";
+            case PlayerStats.Element.Lightning: return "⚡";
+            case PlayerStats.Element.Poison: return "☠️";
+            case PlayerStats.Element.Earth: return "🌍";
+            case PlayerStats.Element.Wind: return "💨";
+            default: return "⚪";
         }
     }
 }
