@@ -360,12 +360,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuManager
   mainMenuPanel: {fileID: 594082219}
   optionsPanel: {fileID: 1967486567}
+  characterSelectionPanel: {fileID: 0}
   playButton: {fileID: 924137023}
   optionsButton: {fileID: 28617532}
   exitButton: {fileID: 1689979719}
   optionsBackButton: {fileID: 210518703}
   volumeSlider: {fileID: 90872237}
   fullscreenToggle: {fileID: 1119272448}
+  characterSelectionSceneName: CharacterSelection
   gameSceneName: GameScene
 --- !u!4 &112040088
 Transform:
@@ -1746,7 +1748,7 @@ RectTransform:
   m_Father: {fileID: 1176584040}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 592, y: 412.1}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2080,7 +2082,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1967486568
 RectTransform:
   m_ObjectHideFlags: 0

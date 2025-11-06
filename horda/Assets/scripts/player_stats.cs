@@ -343,14 +343,62 @@ public class PlayerStats : MonoBehaviour
         public float duration = 0f;
     }
 
+    // 🆕 MÉTODO DE INICIALIZAÇÃO DO CHARACTER SELECTION (ATUALIZADO)
+    public void InitializeFromCharacterSelection()
+    {
+        StartCoroutine(DelayedCharacterInitialization());
+    }
+
+    private System.Collections.IEnumerator DelayedCharacterInitialization()
+    {
+        // Espera um frame para garantir que todos os sistemas carregaram
+        yield return null;
+
+        Debug.Log("🔍 Procurando CharacterSelectionManager...");
+
+        // 🆕 BUSCA O MANAGER NA CENA ATUAL (não usa mais Instance)
+        CharacterSelectionManager selectionManager = FindAnyObjectByType<CharacterSelectionManager>();
+
+        if (selectionManager != null && SkillManager.Instance != null)
+        {
+            Debug.Log("✅ CharacterSelectionManager encontrado!");
+
+            // Aguarda mais um frame para garantir que está totalmente inicializado
+            yield return null;
+
+            selectionManager.ApplyCharacterToPlayerSystems(this, SkillManager.Instance);
+            Debug.Log("✅ Personagem selecionado aplicado ao PlayerStats!");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ CharacterSelectionManager não encontrado! Usando configurações padrão.");
+            InitializeDefaultSkills();
+        }
+
+        UpdateUI();
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         uiManager = UIManager.Instance;
         skillManager = SkillManager.Instance;
 
-        InitializeSkills();
+        // 🆕 INICIALIZAÇÃO CORRIGIDA
+        StartCoroutine(DelayedStart());
+    }
+
+    private System.Collections.IEnumerator DelayedStart()
+    {
+        // Espera todos os sistemas inicializarem
+        yield return new WaitForSeconds(0.1f);
+
+        // 🆕 INICIALIZA COM PERSONAGEM SELECIONADO
+        yield return StartCoroutine(DelayedCharacterInitialization());
+
         UpdateUI();
+
+        Debug.Log("✅ PlayerStats inicializado completamente!");
     }
 
     void InitializeSkills()
@@ -403,6 +451,15 @@ public class PlayerStats : MonoBehaviour
             duration = 3f,
             element = Element.None
         };
+    }
+
+    void InitializeDefaultSkills()
+    {
+        // Configuração fallback caso o CharacterSelection não esteja disponível
+        Debug.Log("🔄 Inicializando skills padrão...");
+
+        // Sua inicialização padrão atual
+        InitializeSkills();
     }
 
     void Update()

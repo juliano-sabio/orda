@@ -13,6 +13,12 @@ public class SkillManager : MonoBehaviour
     [Header("🔧 Modificadores de Skills Disponíveis")]
     [SerializeField] private List<SkillModifierData> availableModifiers = new List<SkillModifierData>();
 
+    [Header("⚔️ Skills de Ataque Disponíveis")]
+    [SerializeField] private List<SkillData> availableAttackSkills = new List<SkillData>();
+
+    [Header("🛡️ Skills de Defesa Disponíveis")]
+    [SerializeField] private List<SkillData> availableDefenseSkills = new List<SkillData>();
+
     // Listas internas de controle
     private List<SkillData> activeSkills = new List<SkillData>();
     private List<SkillModifierData> activeModifiers = new List<SkillModifierData>();
@@ -25,6 +31,13 @@ public class SkillManager : MonoBehaviour
     // 🆕 EVENTOS PARA UI
     public System.Action<SkillData> OnSkillAdded;
     public System.Action<SkillModifierData> OnModifierAdded;
+
+    // 🆕 EVENTO PARA ESCOLHA DE SKILL
+    public System.Action<List<SkillData>, System.Action<SkillData>> OnSkillChoiceRequired;
+
+    // 🆕 NÍVEIS PARA ESCOLHA DE SKILLS
+    private readonly int[] attackSkillLevels = { 1, 13 };
+    private readonly int[] defenseSkillLevels = { 7, 25 };
 
     private void Awake()
     {
@@ -47,13 +60,65 @@ public class SkillManager : MonoBehaviour
             Debug.LogError("PlayerStats não encontrado na cena!");
         }
 
+        // 🆕 SEPARA SKILLS POR TIPO
+        SeparateSkillsByType();
+
         // 🆕 INICIALIZA DICIONÁRIO DE SKILLS ESPECIAIS
         InitializeSpecialSkillsDictionary();
 
         // 🆕 VERIFICA SE HÁ SKILLS DISPONÍVEIS
         CheckAvailableSkills();
 
-        Debug.Log("✅ SkillManager inicializado com sistema de elementos!");
+        Debug.Log("✅ SkillManager inicializado com sistema de escolha por nível!");
+    }
+
+    // 🆕 SEPARA SKILLS POR TIPO (Ataque/Defesa)
+    private void SeparateSkillsByType()
+    {
+        availableAttackSkills.Clear();
+        availableDefenseSkills.Clear();
+
+        foreach (var skill in availableSkills)
+        {
+            if (IsAttackSkill(skill))
+            {
+                availableAttackSkills.Add(skill);
+            }
+            else if (IsDefenseSkill(skill))
+            {
+                availableDefenseSkills.Add(skill);
+            }
+        }
+
+        Debug.Log($"⚔️ Skills de Ataque: {availableAttackSkills.Count}");
+        Debug.Log($"🛡️ Skills de Defesa: {availableDefenseSkills.Count}");
+    }
+
+    // 🆕 VERIFICA SE É SKILL DE ATAQUE
+    private bool IsAttackSkill(SkillData skill)
+    {
+        return skill.attackBonus > 0 ||
+               skill.specificType == SpecificSkillType.CriticalStrike ||
+               skill.specificType == SpecificSkillType.LifeSteal ||
+               skill.specificType == SpecificSkillType.AttackSpeed ||
+               skill.specificType == SpecificSkillType.AreaDamage ||
+               skill.specificType == SpecificSkillType.Projectile ||
+               skill.specificType == SpecificSkillType.ChainLightning ||
+               skill.specificType == SpecificSkillType.PoisonCloud ||
+               skill.specificType == SpecificSkillType.FireAura ||
+               skill.specificType == SpecificSkillType.EarthStomp;
+    }
+
+    // 🆕 VERIFICA SE É SKILL DE DEFESA
+    private bool IsDefenseSkill(SkillData skill)
+    {
+        return skill.defenseBonus > 0 ||
+               skill.healthBonus > 0 ||
+               skill.specificType == SpecificSkillType.HealthRegen ||
+               skill.specificType == SpecificSkillType.Shield ||
+               skill.specificType == SpecificSkillType.Heal ||
+               skill.specificType == SpecificSkillType.DamageReflection ||
+               skill.specificType == SpecificSkillType.IceBarrier;
     }
 
     // 🆕 INICIALIZA DICIONÁRIO DE SKILLS ESPECIAIS
@@ -139,260 +204,207 @@ public class SkillManager : MonoBehaviour
         Debug.Log($"✅ Skill {skillData.skillName} adicionada com sucesso!");
     }
 
-    // 🆕 ATUALIZADO: ApplySkillEffects com sistema de elementos
-    private void ApplySkillEffects(SkillData skillData)
+    // 🆕 MÉTODO PARA SOLICITAR ESCOLHA DE SKILL
+    public void RequestSkillChoice(List<SkillData> skillsToChoose, System.Action<SkillData> onSkillChosen)
     {
-        // Aplica bônus de status básicos
-        if (skillData.healthBonus > 0)
-        {
-            playerStats.maxHealth += skillData.healthBonus;
-            playerStats.health += skillData.healthBonus;
-            Debug.Log($"❤️ Vida aumentada em {skillData.healthBonus}");
-        }
+        Debug.Log($"🎯 Solicitando escolha entre {skillsToChoose.Count} skills");
 
-        if (skillData.attackBonus > 0)
-        {
-            playerStats.attack += skillData.attackBonus;
-            Debug.Log($"⚔️ Ataque aumentado em {skillData.attackBonus}");
-        }
-
-        if (skillData.defenseBonus > 0)
-        {
-            playerStats.defense += skillData.defenseBonus;
-            Debug.Log($"🛡️ Defesa aumentada em {skillData.defenseBonus}");
-        }
-
-        if (skillData.speedBonus > 0)
-        {
-            playerStats.speed += skillData.speedBonus;
-            Debug.Log($"🏃 Velocidade aumentada em {skillData.speedBonus}");
-        }
-
-        // 🆕 MUDA ELEMENTO SE A SKILL TIVER ELEMENTO ESPECÍFICO
-        if (skillData.element != PlayerStats.Element.None)
-        {
-            playerStats.ChangeElement(skillData.element);
-            Debug.Log($"⚡ Elemento alterado para: {skillData.element}");
-        }
-
-        // APLICA MODIFICADORES DE SKILLS CORRETAMENTE
-        foreach (var modifierData in skillData.skillModifiers)
-        {
-            AddSkillModifier(modifierData);
-        }
-
-        // Efeito visual
-        if (skillData.visualEffect != null)
-        {
-            Instantiate(skillData.visualEffect, playerStats.transform.position, Quaternion.identity);
-        }
-
-        // 🆕 EFEITO VISUAL BASEADO NO ELEMENTO
-        ApplyElementalVisualEffect(skillData.element, playerStats.transform.position);
+        // Notifica através do evento que uma escolha é necessária
+        OnSkillChoiceRequired?.Invoke(skillsToChoose, onSkillChosen);
     }
 
-    // 🆕 NOVO: Aplica efeito visual baseado no elemento
-    private void ApplyElementalVisualEffect(PlayerStats.Element element, Vector3 position)
+    // 🆕 MÉTODO CHAMADO QUANDO O JOGADOR SOBE DE LEVEL (ATUALIZADO)
+    public void OnPlayerLevelUp(int newLevel)
     {
-        // Aqui você pode adicionar partículas específicas para cada elemento
-        switch (element)
+        Debug.Log($"🎉 Player subiu para o nível {newLevel}! Verificando escolhas de skill...");
+
+        // 🆕 VERIFICA SE É UM NÍVEL DE ESCOLHA DE SKILL
+        if (attackSkillLevels.Contains(newLevel))
         {
-            case PlayerStats.Element.Fire:
-                Debug.Log("🔥 Efeito visual de Fogo aplicado");
-                break;
-            case PlayerStats.Element.Ice:
-                Debug.Log("❄️ Efeito visual de Gelo aplicado");
-                break;
-            case PlayerStats.Element.Lightning:
-                Debug.Log("⚡ Efeito visual de Raio aplicado");
-                break;
-            case PlayerStats.Element.Poison:
-                Debug.Log("☠️ Efeito visual de Veneno aplicado");
-                break;
+            OfferAttackSkillChoice();
+        }
+        else if (defenseSkillLevels.Contains(newLevel))
+        {
+            OfferDefenseSkillChoice();
+        }
+        else
+        {
+            // 🆕 NÍVEIS NORMAIS - APENAS BÔNUS DE STATUS
+            ApplyLevelUpBonuses(newLevel);
         }
     }
 
-    // 🆕 APLICA EFEITOS ESPECIAIS BASEADOS NO TIPO DE SKILL
-    private void ApplySpecialSkillEffects(SkillData skillData)
+    // 🆕 OFERECE ESCOLHA DE SKILL DE ATAQUE
+    private void OfferAttackSkillChoice()
     {
-        if (skillData.specificType != SpecificSkillType.None)
+        if (availableAttackSkills.Count == 0)
         {
-            specialSkillValues[skillData.specificType] += skillData.specialValue;
-
-            switch (skillData.specificType)
-            {
-                case SpecificSkillType.HealthRegen:
-                    Debug.Log($"💚 Regeneração de vida aumentada: {skillData.specialValue}/s");
-                    StartCoroutine(HealthRegenCoroutine(skillData.specialValue));
-                    break;
-                case SpecificSkillType.CriticalStrike:
-                    Debug.Log($"🎯 Chance de crítico aumentada: {skillData.specialValue}%");
-                    break;
-                case SpecificSkillType.LifeSteal:
-                    Debug.Log($"🩸 Life steal aumentado: {skillData.specialValue}%");
-                    break;
-                case SpecificSkillType.MovementSpeed:
-                    Debug.Log($"🏃‍♂️ Velocidade de movimento aumentada: {skillData.specialValue}%");
-                    playerStats.speed *= (1f + skillData.specialValue / 100f);
-                    break;
-                case SpecificSkillType.AttackSpeed:
-                    Debug.Log($"⚡ Velocidade de ataque aumentada: {skillData.specialValue}%");
-                    playerStats.attackActivationInterval /= (1f + skillData.specialValue / 100f);
-                    break;
-                case SpecificSkillType.AreaDamage:
-                    Debug.Log($"💥 Área de dano aumentada: {skillData.specialValue}%");
-                    break;
-                case SpecificSkillType.Shield:
-                    Debug.Log($"🛡️ Escudo ativado: {skillData.specialValue} de proteção");
-                    playerStats.defense += skillData.specialValue;
-                    break;
-                case SpecificSkillType.ElementalMastery:
-                    Debug.Log($"🎨 Mestre Elemental: {skillData.specialValue}% de bônus");
-                    // Aumenta o bônus elemental
-                    break;
-            }
-        }
-    }
-
-    // 🆕 CORROTINA PARA REGENERAÇÃO DE VIDA
-    private System.Collections.IEnumerator HealthRegenCoroutine(float regenAmount)
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1f);
-            if (playerStats != null && playerStats.health < playerStats.maxHealth)
-            {
-                playerStats.health = Mathf.Min(playerStats.maxHealth, playerStats.health + regenAmount);
-                playerStats.ForceUIUpdate();
-            }
-        }
-    }
-
-    // 🆕 ATUALIZADO: AddSkillModifier com sistema de elementos
-    public void AddSkillModifier(SkillModifierData modifierData)
-    {
-        if (playerStats == null)
-        {
-            Debug.LogError("PlayerStats não encontrado!");
+            Debug.LogWarning("⚠️ Nenhuma skill de ataque disponível!");
             return;
         }
 
-        if (activeModifiers.Contains(modifierData))
+        var choices = GetRandomSkillsFromList(availableAttackSkills, 3);
+        if (choices.Count > 0)
         {
-            Debug.LogWarning($"Jogador já tem o modificador: {modifierData.modifierName}");
+            Debug.Log($"⚔️ Oferecendo {choices.Count} skills de ataque para escolha");
+            RequestSkillChoice(choices, OnAttackSkillChosen);
+        }
+    }
+
+    // 🆕 OFERECE ESCOLHA DE SKILL DE DEFESA
+    private void OfferDefenseSkillChoice()
+    {
+        if (availableDefenseSkills.Count == 0)
+        {
+            Debug.LogWarning("⚠️ Nenhuma skill de defesa disponível!");
             return;
         }
 
-        Debug.Log($"✨ Adicionando modificador: {modifierData.modifierName} para {modifierData.targetSkillName}");
-
-        // CONVERTE PARA O SkillModifier DO PlayerStats
-        PlayerStats.SkillModifier playerStatsModifier = new PlayerStats.SkillModifier
+        var choices = GetRandomSkillsFromList(availableDefenseSkills, 3);
+        if (choices.Count > 0)
         {
-            modifierName = modifierData.modifierName,
-            targetSkillName = modifierData.targetSkillName,
-            damageMultiplier = modifierData.damageMultiplier,
-            defenseMultiplier = modifierData.defenseMultiplier,
-            element = modifierData.element,
-            duration = modifierData.duration
+            Debug.Log($"🛡️ Oferecendo {choices.Count} skills de defesa para escolha");
+            RequestSkillChoice(choices, OnDefenseSkillChosen);
+        }
+    }
+
+    // 🆕 CALLBACK QUANDO SKILL DE ATAQUE É ESCOLHIDA
+    private void OnAttackSkillChosen(SkillData chosenSkill)
+    {
+        if (chosenSkill != null)
+        {
+            Debug.Log($"🎯 Skill de ataque escolhida: {chosenSkill.skillName}");
+            AddSkill(chosenSkill);
+
+            // 🆕 ADICIONA COMO SKILL DE ATAQUE NO PLAYERSTATS
+            AddAsAttackSkill(chosenSkill);
+        }
+    }
+
+    // 🆕 CALLBACK QUANDO SKILL DE DEFESA É ESCOLHIDA
+    private void OnDefenseSkillChosen(SkillData chosenSkill)
+    {
+        if (chosenSkill != null)
+        {
+            Debug.Log($"🎯 Skill de defesa escolhida: {chosenSkill.skillName}");
+            AddSkill(chosenSkill);
+
+            // 🆕 ADICIONA COMO SKILL DE DEFESA NO PLAYERSTATS
+            AddAsDefenseSkill(chosenSkill);
+        }
+    }
+
+    // 🆕 ADICIONA SKILL COMO ATAQUE NO PLAYERSTATS
+    private void AddAsAttackSkill(SkillData skillData)
+    {
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null)
+        {
+            Debug.LogError("PlayerStats não encontrado na cena!");
+            return;
+        }
+
+        var attackSkill = new PlayerStats.AttackSkill
+        {
+            skillName = skillData.skillName,
+            baseDamage = skillData.attackBonus > 0 ? skillData.attackBonus : 10f,
+            isActive = true,
+            cooldown = 2f,
+            element = skillData.element
         };
 
-        activeModifiers.Add(modifierData);
-        playerStats.AddSkillModifier(playerStatsModifier);
-
-        // 🆕 NOTIFICA UI ATRAVÉS DE EVENTO
-        OnModifierAdded?.Invoke(modifierData);
-
-        // NOTIFICA UI CORRETAMENTE
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.ShowModifierAcquired(modifierData.modifierName, modifierData.targetSkillName);
-        }
-
-        playerStats.ForceUIUpdate();
-
-        Debug.Log($"✅ Modificador {modifierData.modifierName} aplicado em {modifierData.targetSkillName}");
+        player.attackSkills.Add(attackSkill);
+        Debug.Log($"⚔️ Skill {skillData.skillName} adicionada como ataque");
     }
 
-    // 🗑️ REMOVER UMA SKILL
-    public void RemoveSkill(SkillData skillData)
+    // 🆕 ADICIONA SKILL COMO DEFESA NO PLAYERSTATS
+    private void AddAsDefenseSkill(SkillData skillData)
     {
-        if (playerStats == null || !activeSkills.Contains(skillData)) return;
-
-        Debug.Log($"🗑️ Removendo skill: {skillData.skillName}");
-        activeSkills.Remove(skillData);
-
-        // Remove bônus de status
-        if (skillData.healthBonus > 0)
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null)
         {
-            playerStats.maxHealth -= skillData.healthBonus;
-            playerStats.health = Mathf.Min(playerStats.health, playerStats.maxHealth);
+            Debug.LogError("PlayerStats não encontrado na cena!");
+            return;
         }
 
-        if (skillData.attackBonus > 0)
+        var defenseSkill = new PlayerStats.DefenseSkill
         {
-            playerStats.attack -= skillData.attackBonus;
-        }
+            skillName = skillData.skillName,
+            baseDefense = skillData.defenseBonus > 0 ? skillData.defenseBonus : 5f,
+            isActive = true,
+            duration = 4f,
+            element = skillData.element
+        };
 
-        if (skillData.defenseBonus > 0)
-        {
-            playerStats.defense -= skillData.defenseBonus;
-        }
-
-        if (skillData.speedBonus > 0)
-        {
-            playerStats.speed -= skillData.speedBonus;
-        }
-
-        // 🆕 REMOVE EFEITOS ESPECIAIS
-        RemoveSpecialSkillEffects(skillData);
-
-        // Remove modificadores
-        foreach (var modifier in skillData.skillModifiers)
-        {
-            RemoveSkillModifier(modifier);
-        }
-
-        playerStats.ForceUIUpdate();
-
-        Debug.Log($"✅ Skill {skillData.skillName} removida com sucesso!");
+        player.defenseSkills.Add(defenseSkill);
+        Debug.Log($"🛡️ Skill {skillData.skillName} adicionada como defesa");
     }
 
-    // 🆕 REMOVE EFEITOS ESPECIAIS
-    private void RemoveSpecialSkillEffects(SkillData skillData)
+    // 🆕 APLICA BÔNUS DE LEVEL UP (PARA NÍVEIS SEM ESCOLHA DE SKILL)
+    private void ApplyLevelUpBonuses(int level)
     {
-        if (skillData.specificType != SpecificSkillType.None)
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null)
         {
-            specialSkillValues[skillData.specificType] -= skillData.specialValue;
+            Debug.LogError("PlayerStats não encontrado na cena!");
+            return;
+        }
 
-            switch (skillData.specificType)
-            {
-                case SpecificSkillType.MovementSpeed:
-                    playerStats.speed /= (1f + skillData.specialValue / 100f);
-                    break;
-                case SpecificSkillType.AttackSpeed:
-                    playerStats.attackActivationInterval *= (1f + skillData.specialValue / 100f);
-                    break;
-                case SpecificSkillType.Shield:
-                    playerStats.defense -= skillData.specialValue;
-                    break;
-            }
+        // Bônus progressivos baseados no nível
+        float healthBonus = level * 2f;
+        float attackBonus = level * 0.5f;
+        float defenseBonus = level * 0.3f;
+        float speedBonus = level * 0.1f;
+
+        player.maxHealth += healthBonus;
+        player.health += healthBonus;
+        player.attack += attackBonus;
+        player.defense += defenseBonus;
+        player.speed += speedBonus;
+
+        Debug.Log($"📈 Bônus de nível {level}: +{healthBonus} Vida, +{attackBonus} Ataque, +{defenseBonus} Defesa, +{speedBonus} Velocidade");
+
+        // Atualiza UI
+        player.ForceUIUpdate();
+    }
+
+    // 🆕 MÉTODO PARA APLICAR PERSONAGEM SELECIONADO (ATUALIZADO)
+    public void ApplySelectedCharacterToPlayer()
+    {
+        // 🆕 BUSCA O CHARACTER SELECTION MANAGER NA CENA
+        CharacterSelectionManager selectionManager = FindAnyObjectByType<CharacterSelectionManager>();
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+
+        if (selectionManager != null && player != null)
+        {
+            selectionManager.ApplyCharacterToPlayerSystems(player, this);
+            Debug.Log("✅ Personagem selecionado aplicado via SkillManager!");
+        }
+        else if (player != null)
+        {
+            Debug.LogWarning("⚠️ CharacterSelectionManager não encontrado! Iniciando com skills padrão.");
         }
     }
 
-    // 🗑️ REMOVER MODIFICADOR
-    public void RemoveSkillModifier(SkillModifierData modifierData)
+    // 🆕 OBTÉM SKILLS ALEATÓRIAS DE UMA LISTA ESPECÍFICA
+    private List<SkillData> GetRandomSkillsFromList(List<SkillData> sourceList, int count)
     {
-        if (!activeModifiers.Contains(modifierData)) return;
+        var unacquired = sourceList.Where(s => !activeSkills.Contains(s)).ToList();
 
-        Debug.Log($"🗑️ Removendo modificador: {modifierData.modifierName}");
-        activeModifiers.Remove(modifierData);
+        if (unacquired.Count == 0)
+        {
+            Debug.Log($"Todas as skills de {sourceList.Count} já foram adquiridas!");
+            return new List<SkillData>();
+        }
 
-        playerStats.ForceUIUpdate();
-
-        Debug.Log($"✅ Modificador {modifierData.modifierName} removido com sucesso!");
+        var shuffled = unacquired.OrderBy(x => Random.value).ToList();
+        return shuffled.Take(Mathf.Min(count, shuffled.Count)).ToList();
     }
 
-    // 🎲 PEGA SKILLS ALEATÓRIAS DISPONÍVEIS
+    // 🎲 PEGA SKILLS ALEATÓRIAS DISPONÍVEIS (MÉTODO ORIGINAL)
     public List<SkillData> GetRandomSkills(int count)
     {
         var unacquired = availableSkills.Where(s => !activeSkills.Contains(s)).ToList();
@@ -546,7 +558,9 @@ public class SkillManager : MonoBehaviour
     {
         Debug.Log("🔍 Verificando integração do SkillManager...");
 
-        if (playerStats != null)
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player != null)
             Debug.Log("✅ PlayerStats: CONECTADO");
         else
             Debug.LogError("❌ PlayerStats: NÃO CONECTADO");
@@ -588,32 +602,11 @@ public class SkillManager : MonoBehaviour
     // 🆕 MÉTODO PARA ATUALIZAR UI MANUALMENTE
     public void ForceUIUpdate()
     {
-        if (playerStats != null)
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player != null)
         {
-            playerStats.ForceUIUpdate();
-        }
-    }
-
-    // 🆕 MÉTODO CHAMADO QUANDO O JOGADOR SOBE DE LEVEL
-    public void OnPlayerLevelUp(int newLevel)
-    {
-        Debug.Log($"🎉 Player subiu para o nível {newLevel}! Verificando novas skills...");
-
-        // Exemplo: Dar uma skill aleatória a cada 3 níveis
-        if (newLevel % 3 == 0 && availableSkills.Count > 0)
-        {
-            Debug.Log($"🎁 Presente de level up! Adicionando skill aleatória...");
-            AddRandomSkill();
-        }
-
-        // 🆕 DESBLOQUEIA SKILLS ESPECIAIS EM NÍVEIS ESPECÍFICOS
-        if (newLevel == 5)
-        {
-            Debug.Log("⭐ Nível 5 alcançado! Skills especiais disponíveis.");
-        }
-        else if (newLevel == 10)
-        {
-            Debug.Log("🌟🌟 Nível 10 alcançado! Skills raras disponíveis.");
+            player.ForceUIUpdate();
         }
     }
 
@@ -624,6 +617,12 @@ public class SkillManager : MonoBehaviour
         {
             availableSkills.Add(skillData);
             Debug.Log($"✅ Skill {skillData.skillName} adicionada às disponíveis");
+
+            // 🆕 ATUALIZA LISTAS SEPARADAS
+            if (IsAttackSkill(skillData))
+                availableAttackSkills.Add(skillData);
+            else if (IsDefenseSkill(skillData))
+                availableDefenseSkills.Add(skillData);
         }
     }
 
@@ -634,6 +633,10 @@ public class SkillManager : MonoBehaviour
         {
             availableSkills.Remove(skillData);
             Debug.Log($"❌ Skill {skillData.skillName} removida das disponíveis");
+
+            // 🆕 ATUALIZA LISTAS SEPARADAS
+            availableAttackSkills.Remove(skillData);
+            availableDefenseSkills.Remove(skillData);
         }
     }
 
@@ -651,5 +654,310 @@ public class SkillManager : MonoBehaviour
             case PlayerStats.Element.Wind: return "💨";
             default: return "⚪";
         }
+    }
+
+    // 🆕 MÉTODO PARA VERIFICAR CHARACTER SELECTION MANAGER
+    [ContextMenu("Debug CharacterSelection Manager")]
+    public void DebugCharacterSelectionManager()
+    {
+        CharacterSelectionManager manager = FindAnyObjectByType<CharacterSelectionManager>();
+        if (manager != null)
+        {
+            Debug.Log($"✅ CharacterSelectionManager encontrado!");
+            Debug.Log($"Personagens carregados: {manager.characters.Count}");
+            Debug.Log($"Personagem selecionado: {manager.selectedCharacterIndex}");
+        }
+        else
+        {
+            Debug.Log("❌ CharacterSelectionManager não encontrado na cena atual");
+        }
+    }
+
+    // ========== MÉTODOS EXISTENTES (mantidos para compatibilidade) ==========
+
+    // 🆕 ATUALIZADO: ApplySkillEffects com sistema de elementos
+    private void ApplySkillEffects(SkillData skillData)
+    {
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null)
+        {
+            Debug.LogError("PlayerStats não encontrado!");
+            return;
+        }
+
+        // Aplica bônus de status básicos
+        if (skillData.healthBonus > 0)
+        {
+            player.maxHealth += skillData.healthBonus;
+            player.health += skillData.healthBonus;
+            Debug.Log($"❤️ Vida aumentada em {skillData.healthBonus}");
+        }
+
+        if (skillData.attackBonus > 0)
+        {
+            player.attack += skillData.attackBonus;
+            Debug.Log($"⚔️ Ataque aumentado em {skillData.attackBonus}");
+        }
+
+        if (skillData.defenseBonus > 0)
+        {
+            player.defense += skillData.defenseBonus;
+            Debug.Log($"🛡️ Defesa aumentada em {skillData.defenseBonus}");
+        }
+
+        if (skillData.speedBonus > 0)
+        {
+            player.speed += skillData.speedBonus;
+            Debug.Log($"🏃 Velocidade aumentada em {skillData.speedBonus}");
+        }
+
+        // 🆕 MUDA ELEMENTO SE A SKILL TIVER ELEMENTO ESPECÍFICO
+        if (skillData.element != PlayerStats.Element.None)
+        {
+            player.ChangeElement(skillData.element);
+            Debug.Log($"⚡ Elemento alterado para: {skillData.element}");
+        }
+
+        // APLICA MODIFICADORES DE SKILLS CORRETAMENTE
+        foreach (var modifierData in skillData.skillModifiers)
+        {
+            AddSkillModifier(modifierData);
+        }
+
+        // Efeito visual
+        if (skillData.visualEffect != null)
+        {
+            Instantiate(skillData.visualEffect, player.transform.position, Quaternion.identity);
+        }
+
+        // 🆕 EFEITO VISUAL BASEADO NO ELEMENTO
+        ApplyElementalVisualEffect(skillData.element, player.transform.position);
+    }
+
+    // 🆕 NOVO: Aplica efeito visual baseado no elemento
+    private void ApplyElementalVisualEffect(PlayerStats.Element element, Vector3 position)
+    {
+        // Aqui você pode adicionar partículas específicas para cada elemento
+        switch (element)
+        {
+            case PlayerStats.Element.Fire:
+                Debug.Log("🔥 Efeito visual de Fogo aplicado");
+                break;
+            case PlayerStats.Element.Ice:
+                Debug.Log("❄️ Efeito visual de Gelo aplicado");
+                break;
+            case PlayerStats.Element.Lightning:
+                Debug.Log("⚡ Efeito visual de Raio aplicado");
+                break;
+            case PlayerStats.Element.Poison:
+                Debug.Log("☠️ Efeito visual de Veneno aplicado");
+                break;
+        }
+    }
+
+    // 🆕 APLICA EFEITOS ESPECIAIS BASEADOS NO TIPO DE SKILL
+    private void ApplySpecialSkillEffects(SkillData skillData)
+    {
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null)
+        {
+            Debug.LogError("PlayerStats não encontrado!");
+            return;
+        }
+
+        if (skillData.specificType != SpecificSkillType.None)
+        {
+            specialSkillValues[skillData.specificType] += skillData.specialValue;
+
+            switch (skillData.specificType)
+            {
+                case SpecificSkillType.HealthRegen:
+                    Debug.Log($"💚 Regeneração de vida aumentada: {skillData.specialValue}/s");
+                    StartCoroutine(HealthRegenCoroutine(skillData.specialValue));
+                    break;
+                case SpecificSkillType.CriticalStrike:
+                    Debug.Log($"🎯 Chance de crítico aumentada: {skillData.specialValue}%");
+                    break;
+                case SpecificSkillType.LifeSteal:
+                    Debug.Log($"🩸 Life steal aumentado: {skillData.specialValue}%");
+                    break;
+                case SpecificSkillType.MovementSpeed:
+                    Debug.Log($"🏃‍♂️ Velocidade de movimento aumentada: {skillData.specialValue}%");
+                    player.speed *= (1f + skillData.specialValue / 100f);
+                    break;
+                case SpecificSkillType.AttackSpeed:
+                    Debug.Log($"⚡ Velocidade de ataque aumentada: {skillData.specialValue}%");
+                    player.attackActivationInterval /= (1f + skillData.specialValue / 100f);
+                    break;
+                case SpecificSkillType.AreaDamage:
+                    Debug.Log($"💥 Área de dano aumentada: {skillData.specialValue}%");
+                    break;
+                case SpecificSkillType.Shield:
+                    Debug.Log($"🛡️ Escudo ativado: {skillData.specialValue} de proteção");
+                    player.defense += skillData.specialValue;
+                    break;
+                case SpecificSkillType.ElementalMastery:
+                    Debug.Log($"🎨 Mestre Elemental: {skillData.specialValue}% de bônus");
+                    // Aumenta o bônus elemental
+                    break;
+            }
+        }
+    }
+
+    // 🆕 CORROTINA PARA REGENERAÇÃO DE VIDA
+    private System.Collections.IEnumerator HealthRegenCoroutine(float regenAmount)
+    {
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null) yield break;
+
+        while (true)
+        {
+            yield return new WaitForSeconds(1f);
+            if (player != null && player.health < player.maxHealth)
+            {
+                player.health = Mathf.Min(player.maxHealth, player.health + regenAmount);
+                player.ForceUIUpdate();
+            }
+        }
+    }
+
+    // 🆕 ATUALIZADO: AddSkillModifier com sistema de elementos
+    public void AddSkillModifier(SkillModifierData modifierData)
+    {
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null)
+        {
+            Debug.LogError("PlayerStats não encontrado!");
+            return;
+        }
+
+        if (activeModifiers.Contains(modifierData))
+        {
+            Debug.LogWarning($"Jogador já tem o modificador: {modifierData.modifierName}");
+            return;
+        }
+
+        Debug.Log($"✨ Adicionando modificador: {modifierData.modifierName} para {modifierData.targetSkillName}");
+
+        // CONVERTE PARA O SkillModifier DO PlayerStats
+        PlayerStats.SkillModifier playerStatsModifier = new PlayerStats.SkillModifier
+        {
+            modifierName = modifierData.modifierName,
+            targetSkillName = modifierData.targetSkillName,
+            damageMultiplier = modifierData.damageMultiplier,
+            defenseMultiplier = modifierData.defenseMultiplier,
+            element = modifierData.element,
+            duration = modifierData.duration
+        };
+
+        activeModifiers.Add(modifierData);
+        player.AddSkillModifier(playerStatsModifier);
+
+        // 🆕 NOTIFICA UI ATRAVÉS DE EVENTO
+        OnModifierAdded?.Invoke(modifierData);
+
+        // NOTIFICA UI CORRETAMENTE
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowModifierAcquired(modifierData.modifierName, modifierData.targetSkillName);
+        }
+
+        player.ForceUIUpdate();
+
+        Debug.Log($"✅ Modificador {modifierData.modifierName} aplicado em {modifierData.targetSkillName}");
+    }
+
+    // 🗑️ REMOVER UMA SKILL
+    public void RemoveSkill(SkillData skillData)
+    {
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null || !activeSkills.Contains(skillData)) return;
+
+        Debug.Log($"🗑️ Removendo skill: {skillData.skillName}");
+        activeSkills.Remove(skillData);
+
+        // Remove bônus de status
+        if (skillData.healthBonus > 0)
+        {
+            player.maxHealth -= skillData.healthBonus;
+            player.health = Mathf.Min(player.health, player.maxHealth);
+        }
+
+        if (skillData.attackBonus > 0)
+        {
+            player.attack -= skillData.attackBonus;
+        }
+
+        if (skillData.defenseBonus > 0)
+        {
+            player.defense -= skillData.defenseBonus;
+        }
+
+        if (skillData.speedBonus > 0)
+        {
+            player.speed -= skillData.speedBonus;
+        }
+
+        // 🆕 REMOVE EFEITOS ESPECIAIS
+        RemoveSpecialSkillEffects(skillData);
+
+        // Remove modificadores
+        foreach (var modifier in skillData.skillModifiers)
+        {
+            RemoveSkillModifier(modifier);
+        }
+
+        player.ForceUIUpdate();
+
+        Debug.Log($"✅ Skill {skillData.skillName} removida com sucesso!");
+    }
+
+    // 🆕 REMOVE EFEITOS ESPECIAIS
+    private void RemoveSpecialSkillEffects(SkillData skillData)
+    {
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player == null) return;
+
+        if (skillData.specificType != SpecificSkillType.None)
+        {
+            specialSkillValues[skillData.specificType] -= skillData.specialValue;
+
+            switch (skillData.specificType)
+            {
+                case SpecificSkillType.MovementSpeed:
+                    player.speed /= (1f + skillData.specialValue / 100f);
+                    break;
+                case SpecificSkillType.AttackSpeed:
+                    player.attackActivationInterval *= (1f + skillData.specialValue / 100f);
+                    break;
+                case SpecificSkillType.Shield:
+                    player.defense -= skillData.specialValue;
+                    break;
+            }
+        }
+    }
+
+    // 🗑️ REMOVER MODIFICADOR
+    public void RemoveSkillModifier(SkillModifierData modifierData)
+    {
+        if (!activeModifiers.Contains(modifierData)) return;
+
+        Debug.Log($"🗑️ Removendo modificador: {modifierData.modifierName}");
+        activeModifiers.Remove(modifierData);
+
+        // 🆕 BUSCA O PLAYERSTATS NA CENA
+        PlayerStats player = FindAnyObjectByType<PlayerStats>();
+        if (player != null)
+        {
+            player.ForceUIUpdate();
+        }
+
+        Debug.Log($"✅ Modificador {modifierData.modifierName} removido com sucesso!");
     }
 }

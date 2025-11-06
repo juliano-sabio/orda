@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 227619ca6a352bd4b8662f00ca1a329f, type: 3}
+  m_Name: personagem_teste
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  characterName: aleatorio
+  description: 
+  icon: {fileID: 0}
+  unlocked: 1
+  characterPrefab: {fileID: 0}
+  maxHealth: 100
+  baseAttack: 10
+  baseDefense: 5
+  baseSpeed: 8
+  baseElement: 1
+  strongAgainst: 
+  weakAgainst: 
+  ultimateSkill:
+    ultimateName: 
+    description: 
+    ultimateIcon: {fileID: 0}
+    cooldown: 30
+    baseDamage: 50
+    areaOfEffect: 5
+    duration: 3
+    element: 0
+    specialEffect: 
+    ultimateType: 0
+    specialValue: 0
+    behaviorScriptName: 
+    visualEffectPrefab: {fileID: 0}
+  startingSkills: []
+  startingModifiers: []
+  specialSkillBehavior: {fileID: 0}
+  ultimateBehavior: {fileID: 0}
+  unlockLevel: 1
+  xpMultiplier: 1.5
+  characterColor: {r: 1, g: 1, b: 1, a: 1}
+  auraColor:
+    m_Mode: 0
+    m_GradientMin:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 1, g: 1, b: 1, a: 1}
+      key2: {r: 0, g: 0, b: 0, a: 0}
+      key3: {r: 0, g: 0, b: 0, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 65535
+      ctime2: 0
+      ctime3: 0
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 2
+      m_NumAlphaKeys: 2
+    m_GradientMax:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 1, g: 1, b: 1, a: 1}
+      key2: {r: 0, g: 0, b: 0, a: 0}
+      key3: {r: 0, g: 0, b: 0, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 65535
+      ctime2: 0
+      ctime3: 0
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 2
+      m_NumAlphaKeys: 2
+    m_ColorMin: {r: 0, g: 0, b: 0, a: 0}
+    m_ColorMax: {r: 0, g: 0, b: 0, a: 0}
+  animatorController: {fileID: 0}
