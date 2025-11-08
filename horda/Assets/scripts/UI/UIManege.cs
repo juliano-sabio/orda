@@ -719,4 +719,56 @@ public class UIManager : MonoBehaviour
         skillAcquiredPanel.SetActive(true);
         StartCoroutine(HideSkillPopup());
     }
+    // Adicione estes métodos ao UIManager:
+
+    public void UpdateSkillCooldowns(PlayerStats playerStats)
+    {
+        if (playerStats == null) return;
+
+        // Atualizar cooldowns das skills de ataque
+        for (int i = 0; i < playerStats.GetAttackSkills().Count; i++)
+        {
+            var skill = playerStats.GetAttackSkills()[i];
+            string cooldownKey = $"AttackSkill_{i}";
+
+            if (skill.IsOnCooldown)
+            {
+                float cooldownPercent = skill.currentCooldown / skill.cooldown;
+                UpdateSkillCooldownUI(cooldownKey, cooldownPercent, skill.skillName);
+            }
+            else
+            {
+                ClearSkillCooldownUI(cooldownKey);
+            }
+        }
+
+        // Atualizar cooldowns das skills de defesa
+        for (int i = 0; i < playerStats.GetDefenseSkills().Count; i++)
+        {
+            var skill = playerStats.GetDefenseSkills()[i];
+            string cooldownKey = $"DefenseSkill_{i}";
+
+            if (skill.IsOnCooldown)
+            {
+                float cooldownPercent = skill.currentCooldown / skill.cooldown;
+                UpdateSkillCooldownUI(cooldownKey, cooldownPercent, skill.skillName);
+            }
+            else
+            {
+                ClearSkillCooldownUI(cooldownKey);
+            }
+        }
+    }
+
+    private void UpdateSkillCooldownUI(string skillKey, float cooldownPercent, string skillName)
+    {
+        // Implementar a lógica para atualizar a UI de cooldown
+        // Isso depende de como sua UI está estruturada
+        Debug.Log($"⏳ {skillName} em cooldown: {cooldownPercent:P0}");
+    }
+
+    private void ClearSkillCooldownUI(string skillKey)
+    {
+        // Implementar a lógica para limpar o cooldown da UI
+    }
 }

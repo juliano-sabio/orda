@@ -12,6 +12,12 @@ public class PlayerStats : MonoBehaviour
     public float defense = 5f;
     public float speed = 8f;
 
+    [Header("Sistema de Regeneração")]
+    public float healthRegenRate = 1f; // Vida por segundo
+    public float healthRegenDelay = 5f; // Tempo sem levar dano para começar regeneração
+    private float timeSinceLastDamage = 0f;
+    private bool isRegenerating = false;
+
     [Header("Sistema de Level")]
     public int level = 1;
     public float currentXP = 0f;
@@ -55,6 +61,9 @@ public class PlayerStats : MonoBehaviour
     private float defenseTimer = 0f;
     private float currentDefenseBonus = 0f;
 
+    // 🆕 Cooldowns individuais para skills
+    private Dictionary<string, float> skillCooldowns = new Dictionary<string, float>();
+
     private UIManager uiManager;
     private SkillManager skillManager;
 
@@ -70,7 +79,7 @@ public class PlayerStats : MonoBehaviour
         Wind
     }
 
-    // 🆕 SISTEMA DE ELEMENTOS
+    // 🆕 SISTEMA DE ELEMENTOS (MELHORADO)
     [System.Serializable]
     public class ElementSystem
     {
@@ -171,21 +180,25 @@ public class PlayerStats : MonoBehaviour
         private void ApplyBurnEffect(GameObject target)
         {
             Debug.Log($"🔥 Aplicando efeito de queimadura em {target.name}");
+            // Implementar lógica de queimadura
         }
 
         private void ApplyFreezeEffect(GameObject target)
         {
             Debug.Log($"❄️ Aplicando efeito de congelamento em {target.name}");
+            // Implementar lógica de congelamento
         }
 
         private void ApplyShockEffect(GameObject target)
         {
             Debug.Log($"⚡ Aplicando efeito de choque em {target.name}");
+            // Implementar lógica de choque
         }
 
         private void ApplyPoisonEffect(GameObject target)
         {
             Debug.Log($"☠️ Aplicando efeito de veneno em {target.name}");
+            // Implementar lógica de veneno
         }
     }
 
@@ -203,14 +216,13 @@ public class PlayerStats : MonoBehaviour
         public float baseDamage;
         public bool isActive;
         public float cooldown;
-
-        // 🆕 SISTEMA DE ELEMENTOS COMPLETO
+        public float currentCooldown = 0f;
         public Element element = Element.None;
         public List<SkillModifier> modifiers = new List<SkillModifier>();
-
-        // 🆕 PROPRIEDADES ESPECÍFICAS POR ELEMENTO
         public float elementalEffectChance = 0.2f;
         public float elementalEffectDuration = 3f;
+
+        public bool IsOnCooldown => currentCooldown > 0f;
 
         public float CalculateTotalDamage()
         {
@@ -224,7 +236,6 @@ public class PlayerStats : MonoBehaviour
             return totalDamage;
         }
 
-        // 🆕 MÉTODO PARA ELEMENTO EFETIVO CONSIDERANDO MODIFICADORES
         public Element GetEffectiveElement()
         {
             foreach (var mod in modifiers)
@@ -235,7 +246,6 @@ public class PlayerStats : MonoBehaviour
             return element;
         }
 
-        // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
         public Color GetElementColor()
         {
             return GetElementColor(GetEffectiveElement());
@@ -255,6 +265,19 @@ public class PlayerStats : MonoBehaviour
                 default: return Color.white;
             }
         }
+
+        public void UpdateCooldown(float deltaTime)
+        {
+            if (currentCooldown > 0f)
+            {
+                currentCooldown = Mathf.Max(0f, currentCooldown - deltaTime);
+            }
+        }
+
+        public void StartCooldown()
+        {
+            currentCooldown = cooldown;
+        }
     }
 
     [System.Serializable]
@@ -264,10 +287,12 @@ public class PlayerStats : MonoBehaviour
         public float baseDefense;
         public bool isActive;
         public float duration;
-
-        // 🆕 PROPRIEDADES DE ELEMENTO
+        public float cooldown;
+        public float currentCooldown = 0f;
         public Element element = Element.None;
         public List<SkillModifier> modifiers = new List<SkillModifier>();
+
+        public bool IsOnCooldown => currentCooldown > 0f;
 
         public float CalculateTotalDefense()
         {
@@ -281,10 +306,22 @@ public class PlayerStats : MonoBehaviour
             return totalDefense;
         }
 
-        // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
         public Color GetElementColor()
         {
             return AttackSkill.GetElementColor(element);
+        }
+
+        public void UpdateCooldown(float deltaTime)
+        {
+            if (currentCooldown > 0f)
+            {
+                currentCooldown = Mathf.Max(0f, currentCooldown - deltaTime);
+            }
+        }
+
+        public void StartCooldown()
+        {
+            currentCooldown = cooldown;
         }
     }
 
@@ -296,8 +333,6 @@ public class PlayerStats : MonoBehaviour
         public bool isActive;
         public float areaOfEffect;
         public float duration;
-
-        // 🆕 PROPRIEDADES DE ELEMENTO
         public Element element = Element.None;
         public List<SkillModifier> modifiers = new List<SkillModifier>();
 
@@ -313,7 +348,6 @@ public class PlayerStats : MonoBehaviour
             return totalDamage;
         }
 
-        // 🆕 MÉTODO PARA ELEMENTO EFETIVO
         public Element GetEffectiveElement()
         {
             foreach (var mod in modifiers)
@@ -324,14 +358,12 @@ public class PlayerStats : MonoBehaviour
             return element;
         }
 
-        // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
         public Color GetElementColor()
         {
             return AttackSkill.GetElementColor(GetEffectiveElement());
         }
     }
 
-    // 🆕 CLASSE DE MODIFICADOR DE SKILL
     [System.Serializable]
     public class SkillModifier
     {
@@ -341,31 +373,47 @@ public class PlayerStats : MonoBehaviour
         public float defenseMultiplier = 1f;
         public Element element = Element.None;
         public float duration = 0f;
+        public float cooldownReduction = 0f;
     }
 
-    // 🆕 MÉTODO DE INICIALIZAÇÃO DO CHARACTER SELECTION (ATUALIZADO)
+    // 🆕 INICIALIZAÇÃO MELHORADA
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        uiManager = UIManager.Instance;
+        skillManager = SkillManager.Instance;
+
+        StartCoroutine(DelayedStart());
+    }
+
+    private IEnumerator DelayedStart()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        // 🆕 INICIALIZAÇÃO MAIS ROBUSTA
+        yield return StartCoroutine(DelayedCharacterInitialization());
+
+        UpdateUI();
+        Debug.Log("✅ PlayerStats inicializado completamente!");
+    }
+
+    // 🆕 MÉTODO DE INICIALIZAÇÃO DO CHARACTER SELECTION (OTIMIZADO)
     public void InitializeFromCharacterSelection()
     {
         StartCoroutine(DelayedCharacterInitialization());
     }
 
-    private System.Collections.IEnumerator DelayedCharacterInitialization()
+    private IEnumerator DelayedCharacterInitialization()
     {
-        // Espera um frame para garantir que todos os sistemas carregaram
         yield return null;
 
         Debug.Log("🔍 Procurando CharacterSelectionManager...");
-
-        // 🆕 BUSCA O MANAGER NA CENA ATUAL (não usa mais Instance)
-        CharacterSelectionManager selectionManager = FindAnyObjectByType<CharacterSelectionManager>();
+        CharacterSelectionManagerIntegrated selectionManager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
 
         if (selectionManager != null && SkillManager.Instance != null)
         {
             Debug.Log("✅ CharacterSelectionManager encontrado!");
-
-            // Aguarda mais um frame para garantir que está totalmente inicializado
             yield return null;
-
             selectionManager.ApplyCharacterToPlayerSystems(this, SkillManager.Instance);
             Debug.Log("✅ Personagem selecionado aplicado ao PlayerStats!");
         }
@@ -376,29 +424,6 @@ public class PlayerStats : MonoBehaviour
         }
 
         UpdateUI();
-    }
-
-    void Start()
-    {
-        rb = GetComponent<Rigidbody2D>();
-        uiManager = UIManager.Instance;
-        skillManager = SkillManager.Instance;
-
-        // 🆕 INICIALIZAÇÃO CORRIGIDA
-        StartCoroutine(DelayedStart());
-    }
-
-    private System.Collections.IEnumerator DelayedStart()
-    {
-        // Espera todos os sistemas inicializarem
-        yield return new WaitForSeconds(0.1f);
-
-        // 🆕 INICIALIZA COM PERSONAGEM SELECIONADO
-        yield return StartCoroutine(DelayedCharacterInitialization());
-
-        UpdateUI();
-
-        Debug.Log("✅ PlayerStats inicializado completamente!");
     }
 
     void InitializeSkills()
@@ -429,6 +454,7 @@ public class PlayerStats : MonoBehaviour
             baseDefense = 5f,
             isActive = true,
             duration = 4f,
+            cooldown = 5f,
             element = Element.None
         });
 
@@ -438,6 +464,7 @@ public class PlayerStats : MonoBehaviour
             baseDefense = 8f,
             isActive = true,
             duration = 5f,
+            cooldown = 6f,
             element = Element.None
         });
 
@@ -453,24 +480,22 @@ public class PlayerStats : MonoBehaviour
         };
     }
 
-    void InitializeDefaultSkills()
+    public void InitializeDefaultSkills()
     {
-        // Configuração fallback caso o CharacterSelection não esteja disponível
         Debug.Log("🔄 Inicializando skills padrão...");
-
-        // Sua inicialização padrão atual
         InitializeSkills();
     }
 
     void Update()
     {
         // Movimento
-        float moveX = Input.GetAxis("Horizontal");
-        float moveY = Input.GetAxis("Vertical");
-        Vector2 movement = new Vector2(moveX, moveY).normalized;
+        HandleMovement();
 
-        if (rb != null)
-            rb.linearVelocity = movement * speed * Time.deltaTime;
+        // 🆕 Sistema de regeneração
+        HandleHealthRegeneration();
+
+        // 🆕 Atualizar cooldowns das skills
+        UpdateSkillCooldowns();
 
         // Ativação automática das skills
         HandlePassiveSkills();
@@ -494,99 +519,94 @@ public class PlayerStats : MonoBehaviour
         HandleSkillManagerInput();
     }
 
-    // 🆕 MÉTODO PARA TROCAR ELEMENTOS
-    void HandleElementInput()
+    // 🆕 SISTEMA DE REGENERAÇÃO DE VIDA
+    void HandleHealthRegeneration()
     {
-        if (Input.GetKeyDown(KeyCode.F1))
+        timeSinceLastDamage += Time.deltaTime;
+
+        // Só começa a regenerar depois de um tempo sem levar dano
+        if (timeSinceLastDamage >= healthRegenDelay && health < maxHealth)
         {
-            ChangeElement(Element.Fire);
+            if (!isRegenerating)
+            {
+                isRegenerating = true;
+                Debug.Log("💚 Regeneração de vida iniciada");
+            }
+
+            float regenAmount = healthRegenRate * Time.deltaTime;
+            health = Mathf.Min(maxHealth, health + regenAmount);
+
+            // Atualiza UI a cada 0.5 segundos durante regeneração
+            if (Time.frameCount % 30 == 0) // Aproximadamente 0.5 segundos
+            {
+                UpdateUI();
+            }
         }
-        else if (Input.GetKeyDown(KeyCode.F2))
+        else if (isRegenerating && health >= maxHealth)
         {
-            ChangeElement(Element.Ice);
-        }
-        else if (Input.GetKeyDown(KeyCode.F3))
-        {
-            ChangeElement(Element.Lightning);
-        }
-        else if (Input.GetKeyDown(KeyCode.F4))
-        {
-            ChangeElement(Element.Poison);
-        }
-        else if (Input.GetKeyDown(KeyCode.F5))
-        {
-            ChangeElement(Element.Earth);
-        }
-        else if (Input.GetKeyDown(KeyCode.F6))
-        {
-            ChangeElement(Element.Wind);
-        }
-        else if (Input.GetKeyDown(KeyCode.F12))
-        {
-            ChangeElement(Element.None);
+            isRegenerating = false;
+            Debug.Log("💚 Vida totalmente regenerada");
         }
     }
 
-    // 🆕 INPUT PARA TESTAR SKILL MANAGER
-    void HandleSkillManagerInput()
+    // 🆕 ATUALIZAR COOLDOWNS DAS SKILLS
+    void UpdateSkillCooldowns()
     {
-        if (Input.GetKeyDown(KeyCode.F7) && skillManager != null)
+        foreach (var skill in attackSkills)
         {
-            skillManager.AddRandomSkill();
+            skill.UpdateCooldown(Time.deltaTime);
         }
 
-        if (Input.GetKeyDown(KeyCode.F8) && skillManager != null)
+        foreach (var skill in defenseSkills)
         {
-            skillManager.AddRandomModifier();
-        }
-
-        if (Input.GetKeyDown(KeyCode.F9) && skillManager != null)
-        {
-            skillManager.AddTestSkills();
-        }
-
-        if (Input.GetKeyDown(KeyCode.F10) && skillManager != null)
-        {
-            skillManager.CheckIntegrationStatus();
+            skill.UpdateCooldown(Time.deltaTime);
         }
     }
 
-    // 🆕 MÉTODO PARA MUDAR ELEMENTO
+    void HandleMovement()
+    {
+        float moveX = Input.GetAxis("Horizontal");
+        float moveY = Input.GetAxis("Vertical");
+        Vector2 movement = new Vector2(moveX, moveY).normalized;
+
+        if (rb != null)
+            rb.linearVelocity = movement * speed * Time.deltaTime;
+    }
+
+    // 🆕 MÉTODO PARA MUDAR ELEMENTO (OTIMIZADO)
     public void ChangeElement(Element newElement)
     {
         Element previousElement = CurrentElement;
+
+        // Remove bônus do elemento anterior
+        RemoveElementBonus(previousElement);
+
+        // Aplica novo elemento
         CurrentElement = newElement;
+        ApplyElementBonus(newElement);
 
         Debug.Log($"⚡ Elemento alterado: {previousElement} → {newElement}");
 
         if (uiManager != null)
             uiManager.ShowElementChanged(newElement.ToString());
 
-        // 🆕 APLICA BÔNUS/MALUS DE MUDANÇA DE ELEMENTO
-        ApplyElementChangeEffects(previousElement, newElement);
+        UpdateUI();
     }
 
-    private void ApplyElementChangeEffects(Element oldElement, Element newElement)
+    private void RemoveElementBonus(Element element)
     {
-        // Remove bônus do elemento anterior
-        switch (oldElement)
+        switch (element)
         {
-            case Element.Fire:
-                attack -= 5f;
-                break;
-            case Element.Ice:
-                defense -= 3f;
-                break;
-            case Element.Earth:
-                defense -= 5f;
-                break;
-            case Element.Wind:
-                speed -= 2f;
-                break;
+            case Element.Fire: attack -= 5f; break;
+            case Element.Ice: defense -= 3f; break;
+            case Element.Earth: defense -= 5f; break;
+            case Element.Wind: speed -= 2f; break;
         }
+    }
 
-        // Aplica bônus do novo elemento
-        switch (newElement)
+    private void ApplyElementBonus(Element element)
+    {
+        switch (element)
         {
             case Element.Fire:
                 attack += 5f;
@@ -597,11 +617,10 @@ public class PlayerStats : MonoBehaviour
                 Debug.Log("❄️ Bônus: +3 de Defesa");
                 break;
             case Element.Lightning:
-                attackActivationInterval *= 0.8f; // 20% mais rápido
+                attackActivationInterval *= 0.8f;
                 Debug.Log("⚡ Bônus: +20% Velocidade de Ataque");
                 break;
             case Element.Poison:
-                // Bônus de dano contínuo já aplicado no sistema
                 Debug.Log("☠️ Bônus: Dano Contínuo Aplicado");
                 break;
             case Element.Earth:
@@ -613,79 +632,45 @@ public class PlayerStats : MonoBehaviour
                 Debug.Log("💨 Bônus: +2 de Velocidade");
                 break;
         }
-
-        UpdateUI();
     }
 
-    // 🆕 MÉTODO PARA CALCULAR DANO COM ELEMENTO
-    float CalculateElementalDamage(float baseDamage, Element attackElement, Element targetElement = Element.None)
+    // 🆕 MÉTODOS DE INPUT OTIMIZADOS
+    void HandleElementInput()
     {
-        if (attackElement == Element.None || targetElement == Element.None)
-            return baseDamage;
-
-        float multiplier = elementSystem.CalculateElementalMultiplier(attackElement, targetElement);
-        float finalDamage = baseDamage * multiplier;
-
-        if (multiplier > 1f)
-        {
-            Debug.Log($"🎯 VANTAGEM ELEMENTAL! Dano: {baseDamage} → {finalDamage} (x{multiplier})");
-        }
-        else if (multiplier < 1f)
-        {
-            Debug.Log($"⚠️ DESVANTAGEM ELEMENTAL! Dano: {baseDamage} → {finalDamage} (x{multiplier})");
-        }
-
-        return finalDamage;
+        if (Input.GetKeyDown(KeyCode.F1)) ChangeElement(Element.Fire);
+        else if (Input.GetKeyDown(KeyCode.F2)) ChangeElement(Element.Ice);
+        else if (Input.GetKeyDown(KeyCode.F3)) ChangeElement(Element.Lightning);
+        else if (Input.GetKeyDown(KeyCode.F4)) ChangeElement(Element.Poison);
+        else if (Input.GetKeyDown(KeyCode.F5)) ChangeElement(Element.Earth);
+        else if (Input.GetKeyDown(KeyCode.F6)) ChangeElement(Element.Wind);
+        else if (Input.GetKeyDown(KeyCode.F12)) ChangeElement(Element.None);
     }
 
-    void UpdateUltimateSystem()
+    void HandleSkillManagerInput()
     {
-        if (!ultimateSkill.isActive) return;
+        if (skillManager == null) return;
 
-        if (!ultimateReady)
-        {
-            ultimateChargeTime += Time.deltaTime;
-            if (ultimateChargeTime >= ultimateCooldown)
-            {
-                ultimateReady = true;
-                ultimateChargeTime = ultimateCooldown;
-
-                if (uiManager != null)
-                    uiManager.SetUltimateReady(true);
-            }
-        }
+        if (Input.GetKeyDown(KeyCode.F7)) skillManager.AddRandomSkill();
+        if (Input.GetKeyDown(KeyCode.F8)) skillManager.AddRandomModifier();
+        if (Input.GetKeyDown(KeyCode.F9)) skillManager.AddTestSkills();
+        if (Input.GetKeyDown(KeyCode.F10)) skillManager.CheckIntegrationStatus();
     }
 
+    // ✅ MÉTODOS EXISTENTES (MANTIDOS E OTIMIZADOS)
     void HandlePassiveSkills()
     {
-        // Timer para skills de ataque
         attackTimer += Time.deltaTime;
         if (attackTimer >= attackActivationInterval)
         {
             ActivatePassiveAttackSkills();
             attackTimer = 0f;
-
-            if (uiManager != null)
-            {
-                uiManager.OnAttackSkillActivated(0);
-                if (attackSkills.Count > 1)
-                    uiManager.OnAttackSkillActivated(1);
-            }
         }
 
-        // Timer para skills de defesa
         defenseTimer += Time.deltaTime;
         if (defenseTimer >= defenseActivationInterval)
         {
             ActivatePassiveDefenseSkills();
             defenseTimer = 0f;
-
-            if (uiManager != null)
-            {
-                uiManager.OnDefenseSkillActivated(0);
-                if (defenseSkills.Count > 1)
-                    uiManager.OnDefenseSkillActivated(1);
-            }
         }
     }
 
@@ -693,16 +678,18 @@ public class PlayerStats : MonoBehaviour
     {
         foreach (var skill in attackSkills)
         {
-            if (skill.isActive)
+            if (skill.isActive && !skill.IsOnCooldown)
             {
                 float totalDamage = skill.CalculateTotalDamage();
-
-                // 🆕 APLICA ELEMENTO NO DANO
                 Element attackElement = skill.GetEffectiveElement();
-                float finalDamage = CalculateElementalDamage(totalDamage, attackElement, Element.None); // Elemento inimigo seria passado aqui
+                float finalDamage = CalculateElementalDamage(totalDamage, attackElement, Element.None);
 
                 Debug.Log($"⚔️ {skill.skillName} ativada! Dano: {finalDamage} | Elemento: {attackElement}");
                 ApplyAreaDamage(finalDamage, attackElement);
+
+                // 🆕 Iniciar cooldown
+                skill.StartCooldown();
+
                 GainXP(2);
             }
         }
@@ -715,33 +702,31 @@ public class PlayerStats : MonoBehaviour
 
         foreach (var skill in defenseSkills)
         {
-            if (skill.isActive)
+            if (skill.isActive && !skill.IsOnCooldown)
             {
                 float skillDefense = skill.CalculateTotalDefense();
                 totalDefenseBonus += skillDefense;
-
                 Debug.Log($"🛡️ {skill.skillName} ativada! Defesa: {skillDefense} | Elemento: {skill.element}");
+
+                // 🆕 Iniciar cooldown
+                skill.StartCooldown();
+
                 GainXP(1);
             }
         }
 
         if (totalDefenseBonus > 0)
         {
-            if (currentDefenseBonus > 0)
-            {
-                defense -= currentDefenseBonus;
-            }
-
+            if (currentDefenseBonus > 0) defense -= currentDefenseBonus;
             defense += totalDefenseBonus;
             currentDefenseBonus = totalDefenseBonus;
-
             StartCoroutine(RemoveDefenseBonusAfterTime());
         }
 
         UpdateUI();
     }
 
-    private System.Collections.IEnumerator RemoveDefenseBonusAfterTime()
+    private IEnumerator RemoveDefenseBonusAfterTime()
     {
         yield return new WaitForSeconds(defenseActivationInterval);
         defense -= currentDefenseBonus;
@@ -749,20 +734,31 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
     }
 
-    // 🆕 ATUALIZADO: AGORA RECEBE ELEMENTO
+    float CalculateElementalDamage(float baseDamage, Element attackElement, Element targetElement)
+    {
+        if (attackElement == Element.None || targetElement == Element.None)
+            return baseDamage;
+
+        float multiplier = elementSystem.CalculateElementalMultiplier(attackElement, targetElement);
+        float finalDamage = baseDamage * multiplier;
+
+        if (multiplier > 1f)
+            Debug.Log($"🎯 VANTAGEM ELEMENTAL! Dano: {baseDamage} → {finalDamage} (x{multiplier})");
+        else if (multiplier < 1f)
+            Debug.Log($"⚠️ DESVANTAGEM ELEMENTAL! Dano: {baseDamage} → {finalDamage} (x{multiplier})");
+
+        return finalDamage;
+    }
+
     void ApplyAreaDamage(float damage, Element element)
     {
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 3f);
         foreach (var hitCollider in hitColliders)
         {
             if (hitCollider.gameObject == gameObject) continue;
-
-            // Simula dano em inimigos
             if (hitCollider.CompareTag("Enemy"))
             {
-                // 🆕 APLICA EFEITO ELEMENTAL
                 elementSystem.ApplyElementalEffect(element, hitCollider.gameObject);
-
                 Debug.Log($"💥 Dano {damage} aplicado no inimigo {hitCollider.name} | Elemento: {element}");
             }
         }
@@ -772,98 +768,17 @@ public class PlayerStats : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1) && attackSkills.Count > 0)
             ToggleAttackSkill(0, !attackSkills[0].isActive);
-
         if (Input.GetKeyDown(KeyCode.Alpha2) && attackSkills.Count > 1)
             ToggleAttackSkill(1, !attackSkills[1].isActive);
-
         if (Input.GetKeyDown(KeyCode.Alpha3) && defenseSkills.Count > 0)
             ToggleDefenseSkill(0, !defenseSkills[0].isActive);
-
         if (Input.GetKeyDown(KeyCode.Alpha4) && defenseSkills.Count > 1)
             ToggleDefenseSkill(1, !defenseSkills[1].isActive);
     }
 
-    public void ActivateUltimate()
-    {
-        if (!ultimateReady || !ultimateSkill.isActive) return;
+    // ✅ MÉTODOS RESTANTES MANTIDOS...
+    // (GainXP, LevelUp, ActivateUltimate, TakeDamage, Heal, etc.)
 
-        float totalDamage = ultimateSkill.CalculateTotalDamage();
-
-        // 🆕 APLICA ELEMENTO NA ULTIMATE
-        Element ultimateElement = ultimateSkill.GetEffectiveElement();
-        float finalDamage = CalculateElementalDamage(totalDamage, ultimateElement, Element.None);
-
-        Debug.Log($"🚀 ULTIMATE ATIVADA: {ultimateSkill.skillName}! Dano: {finalDamage} | Elemento: {ultimateElement}");
-
-        // Aplica dano em área
-        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, ultimateSkill.areaOfEffect);
-        foreach (var hitCollider in hitColliders)
-        {
-            if (hitCollider.gameObject == gameObject) continue;
-            if (hitCollider.CompareTag("Enemy"))
-            {
-                // 🆕 APLICA EFEITO ELEMENTAL DA ULTIMATE
-                elementSystem.ApplyElementalEffect(ultimateElement, hitCollider.gameObject);
-                Debug.Log($"💥 ULTIMATE: Dano {finalDamage} no inimigo {hitCollider.name} | Elemento: {ultimateElement}");
-            }
-        }
-
-        // Efeitos visuais
-        StartCoroutine(UltimateEffects(ultimateSkill.duration, ultimateElement));
-
-        // Reseta a ultimate
-        ultimateReady = false;
-        ultimateChargeTime = 0f;
-
-        if (uiManager != null)
-        {
-            uiManager.OnUltimateActivated();
-            uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Ultimate ativada!");
-        }
-
-        GainXP(15);
-    }
-
-    // 🆕 ATUALIZADO: AGORA RECEBE ELEMENTO
-    private System.Collections.IEnumerator UltimateEffects(float duration, Element element)
-    {
-        // Buff temporário baseado no elemento
-        float originalAttack = attack;
-        float originalSpeed = speed;
-
-        // 🆕 BÔNUS ESPECÍFICO POR ELEMENTO
-        switch (element)
-        {
-            case Element.Fire:
-                attack *= 1.5f;
-                break;
-            case Element.Ice:
-                defense *= 1.3f;
-                break;
-            case Element.Lightning:
-                attackActivationInterval *= 0.7f;
-                break;
-            case Element.Wind:
-                speed *= 1.3f;
-                break;
-            default:
-                attack *= 1.5f;
-                speed *= 1.2f;
-                break;
-        }
-
-        Debug.Log($"💥 Efeito da Ultimate ativo! Elemento: {element}");
-
-        yield return new WaitForSeconds(duration);
-
-        // Restaura valores
-        attack = originalAttack;
-        speed = originalSpeed;
-
-        Debug.Log("🔚 Efeito da Ultimate terminou.");
-    }
-
-    // === SISTEMA DE XP E LEVEL ===
     public void GainXP(float xpAmount)
     {
         currentXP += xpAmount;
@@ -886,6 +801,9 @@ public class PlayerStats : MonoBehaviour
         defense += 1f;
         speed += 0.5f;
 
+        // 🆕 Melhora regeneração a cada level
+        healthRegenRate += 0.2f;
+
         if (level == 5 && !ultimateSkill.isActive)
         {
             LearnUltimate();
@@ -893,7 +811,6 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"🎉 LEVEL UP! Agora é nível {level}!");
 
-        // 🆕 NOTIFICA SKILL MANAGER SOBRE LEVEL UP
         if (skillManager != null)
         {
             skillManager.OnPlayerLevelUp(level);
@@ -917,89 +834,14 @@ public class PlayerStats : MonoBehaviour
         return 100f * Mathf.Pow(xpMultiplier, level - 1);
     }
 
-    // === SISTEMA DE ITENS ===
-    public void ApplyItemEffect(string itemName, string statType, float boostValue)
-    {
-        switch (statType.ToLower())
-        {
-            case "health":
-                maxHealth += boostValue;
-                health += boostValue;
-                Debug.Log($"❤️ Vida aumentada em {boostValue}!");
-                break;
-            case "attack":
-                attack += boostValue;
-                Debug.Log($"⚔️ Ataque aumentado em {boostValue}!");
-                break;
-            case "defense":
-                defense += boostValue;
-                Debug.Log($"🛡️ Defesa aumentada em {boostValue}!");
-                break;
-            case "speed":
-                speed += boostValue;
-                Debug.Log($"🏃 Velocidade aumentada em {boostValue}!");
-                break;
-        }
-
-        GainXP(10);
-        inventory.Add(itemName);
-        UpdateUI();
-    }
-
-    // 🆕 MÉTODO PARA ADICIONAR MODIFICADOR
-    public void AddSkillModifier(SkillModifier modifier)
-    {
-        bool applied = false;
-
-        foreach (var skill in attackSkills)
-        {
-            if (skill.skillName == modifier.targetSkillName)
-            {
-                skill.modifiers.Add(modifier);
-                Debug.Log($"✨ Modificador {modifier.modifierName} aplicado em {skill.skillName}");
-                applied = true;
-
-                if (uiManager != null)
-                    uiManager.ShowModifierAcquired(modifier.modifierName, skill.skillName);
-            }
-        }
-
-        foreach (var skill in defenseSkills)
-        {
-            if (skill.skillName == modifier.targetSkillName)
-            {
-                skill.modifiers.Add(modifier);
-                Debug.Log($"✨ Modificador {modifier.modifierName} aplicado em {skill.skillName}");
-                applied = true;
-
-                if (uiManager != null)
-                    uiManager.ShowModifierAcquired(modifier.modifierName, skill.skillName);
-            }
-        }
-
-        if (ultimateSkill.skillName == modifier.targetSkillName)
-        {
-            ultimateSkill.modifiers.Add(modifier);
-            Debug.Log($"✨ Modificador {modifier.modifierName} aplicado na ULTIMATE {ultimateSkill.skillName}");
-            applied = true;
-
-            if (uiManager != null)
-                uiManager.ShowModifierAcquired(modifier.modifierName, ultimateSkill.skillName);
-        }
-
-        if (!applied)
-        {
-            Debug.LogWarning($"⚠️ Nenhuma skill encontrada com o nome: {modifier.targetSkillName}");
-        }
-
-        UpdateUI();
-    }
-
-    // === MÉTODOS DE COMBATE ===
     public void TakeDamage(float damage)
     {
         float reducedDamage = Mathf.Max(0, damage - defense * 0.5f);
         health -= reducedDamage;
+
+        // 🆕 Reinicia timer de regeneração quando leva dano
+        timeSinceLastDamage = 0f;
+        isRegenerating = false;
 
         if (health > 0)
         {
@@ -1022,46 +864,77 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"💚 Curado em {healAmount}!");
     }
 
-    // === MÉTODOS DE ACESSO PARA UI ===
-    public float GetCurrentHealth() => health;
-    public float GetMaxHealth() => maxHealth;
-    public float GetAttack() => attack;
-    public float GetDefense() => defense;
-    public float GetSpeed() => speed;
-    public int GetLevel() => level;
-    public float GetCurrentXP() => currentXP;
-    public float GetXPToNextLevel() => xpToNextLevel;
-    public List<string> GetInventory() => new List<string>(inventory);
-    public List<AttackSkill> GetAttackSkills() => attackSkills;
-    public List<DefenseSkill> GetDefenseSkills() => defenseSkills;
-    public UltimateSkill GetUltimateSkill() => ultimateSkill;
-    public float GetUltimateCooldown() => ultimateCooldown;
-    public float GetUltimateChargeTime() => ultimateChargeTime;
-    public bool IsUltimateReady() => ultimateReady;
-    public bool HasUltimate() => ultimateSkill.isActive;
-    public float GetAttackActivationInterval() => attackActivationInterval;
-    public float GetDefenseActivationInterval() => defenseActivationInterval;
-
-    // 🆕 GETTERS PARA ELEMENTOS
-    public Element GetCurrentElement() => CurrentElement;
-    public float GetElementalBonus() => ElementalBonus;
-    public ElementSystem GetElementSystem() => elementSystem;
-
-    public void ToggleAttackSkill(int index, bool active)
+    public void ActivateUltimate()
     {
-        if (index >= 0 && index < attackSkills.Count)
+        if (!ultimateReady || !ultimateSkill.isActive) return;
+
+        float totalDamage = ultimateSkill.CalculateTotalDamage();
+        Element ultimateElement = ultimateSkill.GetEffectiveElement();
+        float finalDamage = CalculateElementalDamage(totalDamage, ultimateElement, Element.None);
+
+        Debug.Log($"🚀 ULTIMATE ATIVADA: {ultimateSkill.skillName}! Dano: {finalDamage} | Elemento: {ultimateElement}");
+
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, ultimateSkill.areaOfEffect);
+        foreach (var hitCollider in hitColliders)
         {
-            attackSkills[index].isActive = active;
-            UpdateUI();
+            if (hitCollider.gameObject == gameObject) continue;
+            if (hitCollider.CompareTag("Enemy"))
+            {
+                elementSystem.ApplyElementalEffect(ultimateElement, hitCollider.gameObject);
+                Debug.Log($"💥 ULTIMATE: Dano {finalDamage} no inimigo {hitCollider.name} | Elemento: {ultimateElement}");
+            }
         }
+
+        StartCoroutine(UltimateEffects(ultimateSkill.duration, ultimateElement));
+        ultimateReady = false;
+        ultimateChargeTime = 0f;
+
+        if (uiManager != null)
+        {
+            uiManager.OnUltimateActivated();
+            uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Ultimate ativada!");
+        }
+
+        GainXP(15);
     }
 
-    public void ToggleDefenseSkill(int index, bool active)
+    private IEnumerator UltimateEffects(float duration, Element element)
     {
-        if (index >= 0 && index < defenseSkills.Count)
+        float originalAttack = attack;
+        float originalSpeed = speed;
+
+        switch (element)
         {
-            defenseSkills[index].isActive = active;
-            UpdateUI();
+            case Element.Fire: attack *= 1.5f; break;
+            case Element.Ice: defense *= 1.3f; break;
+            case Element.Lightning: attackActivationInterval *= 0.7f; break;
+            case Element.Wind: speed *= 1.3f; break;
+            default: attack *= 1.5f; speed *= 1.2f; break;
+        }
+
+        Debug.Log($"💥 Efeito da Ultimate ativo! Elemento: {element}");
+        yield return new WaitForSeconds(duration);
+
+        attack = originalAttack;
+        speed = originalSpeed;
+        Debug.Log("🔚 Efeito da Ultimate terminou.");
+    }
+
+    void UpdateUltimateSystem()
+    {
+        if (!ultimateSkill.isActive) return;
+
+        if (!ultimateReady)
+        {
+            ultimateChargeTime += Time.deltaTime;
+            if (ultimateChargeTime >= ultimateCooldown)
+            {
+                ultimateReady = true;
+                ultimateChargeTime = ultimateCooldown;
+
+                if (uiManager != null)
+                    uiManager.SetUltimateReady(true);
+            }
         }
     }
 
@@ -1083,5 +956,174 @@ public class PlayerStats : MonoBehaviour
     {
         Debug.Log("💀 Jogador morreu!");
         Time.timeScale = 0f;
+    }
+
+    // 🆕 GETTERS E SETTERS COMPLETOS
+    public float GetCurrentHealth() => health;
+    public float GetMaxHealth() => maxHealth;
+    public float GetAttack() => attack;
+    public float GetDefense() => defense;
+    public float GetSpeed() => speed;
+    public int GetLevel() => level;
+    public float GetCurrentXP() => currentXP;
+    public float GetXPToNextLevel() => xpToNextLevel;
+    public List<string> GetInventory() => new List<string>(inventory);
+    public List<AttackSkill> GetAttackSkills() => attackSkills;
+    public List<DefenseSkill> GetDefenseSkills() => defenseSkills;
+    public UltimateSkill GetUltimateSkill() => ultimateSkill;
+    public float GetUltimateCooldown() => ultimateCooldown;
+    public float GetUltimateChargeTime() => ultimateChargeTime;
+    public bool IsUltimateReady() => ultimateReady;
+    public bool HasUltimate() => ultimateSkill.isActive;
+    public float GetAttackActivationInterval() => attackActivationInterval;
+    public float GetDefenseActivationInterval() => defenseActivationInterval;
+    public Element GetCurrentElement() => CurrentElement;
+    public float GetElementalBonus() => ElementalBonus;
+    public ElementSystem GetElementSystem() => elementSystem;
+    public float GetHealthRegenRate() => healthRegenRate;
+    public bool IsRegeneratingHealth() => isRegenerating;
+
+    public void ToggleAttackSkill(int index, bool active)
+    {
+        if (index >= 0 && index < attackSkills.Count)
+        {
+            attackSkills[index].isActive = active;
+            UpdateUI();
+        }
+    }
+
+    public void ToggleDefenseSkill(int index, bool active)
+    {
+        if (index >= 0 && index < defenseSkills.Count)
+        {
+            defenseSkills[index].isActive = active;
+            UpdateUI();
+        }
+    }
+
+    public void ApplyItemEffect(string itemName, string statType, float boostValue)
+    {
+        switch (statType.ToLower())
+        {
+            case "health":
+                maxHealth += boostValue;
+                health += boostValue;
+                Debug.Log($"❤️ Vida aumentada em {boostValue}!");
+                break;
+            case "attack":
+                attack += boostValue;
+                Debug.Log($"⚔️ Ataque aumentado em {boostValue}!");
+                break;
+            case "defense":
+                defense += boostValue;
+                Debug.Log($"🛡️ Defesa aumentada em {boostValue}!");
+                break;
+            case "speed":
+                speed += boostValue;
+                Debug.Log($"🏃 Velocidade aumentada em {boostValue}!");
+                break;
+            case "regen":
+                healthRegenRate += boostValue;
+                Debug.Log($"💚 Regeneração aumentada em {boostValue}!");
+                break;
+        }
+
+        GainXP(10);
+        inventory.Add(itemName);
+        UpdateUI();
+    }
+
+    public void AddSkillModifier(SkillModifier modifier)
+    {
+        bool applied = false;
+
+        foreach (var skill in attackSkills)
+        {
+            if (skill.skillName == modifier.targetSkillName)
+            {
+                skill.modifiers.Add(modifier);
+
+                // 🆕 Aplicar redução de cooldown se existir
+                if (modifier.cooldownReduction > 0f)
+                {
+                    skill.cooldown = Mathf.Max(0.1f, skill.cooldown * (1f - modifier.cooldownReduction));
+                }
+
+                Debug.Log($"✨ Modificador {modifier.modifierName} aplicado em {skill.skillName}");
+                applied = true;
+                if (uiManager != null)
+                    uiManager.ShowModifierAcquired(modifier.modifierName, skill.skillName);
+            }
+        }
+
+        foreach (var skill in defenseSkills)
+        {
+            if (skill.skillName == modifier.targetSkillName)
+            {
+                skill.modifiers.Add(modifier);
+
+                // 🆕 Aplicar redução de cooldown se existir
+                if (modifier.cooldownReduction > 0f)
+                {
+                    skill.cooldown = Mathf.Max(0.1f, skill.cooldown * (1f - modifier.cooldownReduction));
+                }
+
+                Debug.Log($"✨ Modificador {modifier.modifierName} aplicado em {skill.skillName}");
+                applied = true;
+                if (uiManager != null)
+                    uiManager.ShowModifierAcquired(modifier.modifierName, skill.skillName);
+            }
+        }
+
+        if (ultimateSkill.skillName == modifier.targetSkillName)
+        {
+            ultimateSkill.modifiers.Add(modifier);
+            Debug.Log($"✨ Modificador {modifier.modifierName} aplicado na ULTIMATE {ultimateSkill.skillName}");
+            applied = true;
+            if (uiManager != null)
+                uiManager.ShowModifierAcquired(modifier.modifierName, ultimateSkill.skillName);
+        }
+
+        if (!applied)
+        {
+            Debug.LogWarning($"⚠️ Nenhuma skill encontrada com o nome: {modifier.targetSkillName}");
+        }
+
+        UpdateUI();
+    }
+
+    // 🆕 MÉTODOS PARA VERIFICAR COOLDOWNS
+    public float GetSkillCooldown(string skillName)
+    {
+        foreach (var skill in attackSkills)
+        {
+            if (skill.skillName == skillName)
+                return skill.currentCooldown;
+        }
+
+        foreach (var skill in defenseSkills)
+        {
+            if (skill.skillName == skillName)
+                return skill.currentCooldown;
+        }
+
+        return 0f;
+    }
+
+    public float GetSkillCooldownPercentage(string skillName)
+    {
+        foreach (var skill in attackSkills)
+        {
+            if (skill.skillName == skillName)
+                return skill.currentCooldown / skill.cooldown;
+        }
+
+        foreach (var skill in defenseSkills)
+        {
+            if (skill.skillName == skillName)
+                return skill.currentCooldown / skill.cooldown;
+        }
+
+        return 0f;
     }
 }

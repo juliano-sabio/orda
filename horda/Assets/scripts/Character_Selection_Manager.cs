@@ -1,493 +1,537 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
+using TMPro;
+using System.Collections.Generic;
 
-public class CharacterSelectionManager : MonoBehaviour
+public class CharacterSelectionManagerIntegrated : MonoBehaviour
 {
-    [Header("Configurações dos Personagens")]
-    public List<CharacterData> characters;
+    [Header("🎯 Sistema de Seleção de Personagens")]
+    public CharacterData[] characters;
+    public CharacterIconUI[] characterIcons;
     public int selectedCharacterIndex = 0;
 
-    [Header("Referências UI - Sistema Completo")]
-    public Image characterIcon;
-    public Text characterName;
-    public Text characterDescription;
-    public GameObject selectionIndicator;
-    public Button selectButton;
-    public Button confirmButton;
-    public Button startButton;
+    [Header("💰 Sistema de Moedas")]
+    public int playerCoins = 1000;
+    public TextMeshProUGUI coinsText;
 
-    [Header("Display de Status")]
-    public Slider healthSlider;
-    public Slider attackSlider;
-    public Slider defenseSlider;
-    public Slider speedSlider;
-    public Text healthText;
-    public Text attackText;
-    public Text defenseText;
-    public Text speedText;
+    [Header("🎯 Sistema de Upgrades Expandido")]
+    public GameObject grupoUpgrades;
+    public Button[] upgradeBotoes;
+    public TextMeshProUGUI[] upgradeNiveis;
+    public TextMeshProUGUI[] upgradeCustos;
+    public string[] upgradeTypes = {
+        "Health", "Attack", "Defense", "Speed",
+        "HealthRegen", "AttackCooldown", "DefenseCooldown"
+    };
 
-    [Header("⚡ Sistema de Elementos")]
-    public Image elementIcon;
-    public Text elementText;
-    public GameObject elementAdvantagePanel;
-    public Text advantageText;
-    public Text disadvantageText;
-    public GameObject elementalBonusPanel;
-    public Text elementalBonusText;
+    [Header("🎮 Sistema de Stages")]
+    public StageData[] stages; // 🆕 AGORA USA StageData EXISTENTE
+    public StageButtonUI[] stageButtons;
+    public TextMeshProUGUI stageNameText;
+    public TextMeshProUGUI stageDifficultyText;
+    public int selectedStageIndex = 0;
 
-    [Header("🚀 Ultimate Display")]
-    public Image ultimateIcon;
-    public Text ultimateName;
-    public Text ultimateDescription;
-    public Text ultimateCooldown;
-    public Text ultimateEffect;
-    public Text ultimateType;
+    [Header("⏱️ Sistema de Cooldown e Regen")]
+    public Slider healthRegenSlider;
+    public TextMeshProUGUI healthRegenValueText;
+    public Slider attackCooldownSlider;
+    public TextMeshProUGUI attackCooldownValueText;
+    public Slider defenseCooldownSlider;
+    public TextMeshProUGUI defenseCooldownValueText;
 
-    [Header("🎯 Skills Iniciais")]
-    public Transform skillsContainer;
-    public GameObject skillSlotPrefab;
-    public Text skillsCountText;
+    private int[] upgradeLevels = new int[7];
 
-    [Header("🔧 Modificadores")]
-    public Transform modifiersContainer;
-    public GameObject modifierSlotPrefab;
-    public Text modifiersCountText;
+    [Header("📊 UI References")]
+    public TextMeshProUGUI characterNameText;
+    public TextMeshProUGUI characterLevelText;
+    public TextMeshProUGUI characterElementText;
+    public TextMeshProUGUI characterDescriptionText;
+    public Slider[] statusSliders;
+    public TextMeshProUGUI[] statusValues;
 
-    [Header("💎 Informações de Progressão")]
-    public Text unlockLevelText;
-    public Text xpMultiplierText;
-
-    private Dictionary<PlayerStats.Element, Color> elementColors;
-
-    void Awake()
-    {
-        InitializeElementColors();
-        Debug.Log("✅ CharacterSelectionManager inicializado para esta cena");
-    }
+    // 🆕 DADOS DO JOGADOR SALVOS
+    private int playerLevel = 1;
+    private int unlockedCharacters = 1;
 
     void Start()
     {
-        InitializeSelection();
+        LoadPlayerData();
+        InitializeCharacterSystem();
+        InitializeStageSystem();
         UpdateUI();
-
-        // Configura botões
-        if (selectButton != null)
-            selectButton.onClick.AddListener(SelectCurrentCharacter);
-
-        if (confirmButton != null)
-            confirmButton.onClick.AddListener(ConfirmSelection);
-
-        if (startButton != null)
-            startButton.onClick.AddListener(StartGame);
+        UpdateUpgradesUI();
+        UpdateCooldownAndRegenUI();
     }
 
-    void InitializeElementColors()
+    // 🆕 SISTEMA DE STAGES (ATUALIZADO PARA StageData)
+    private void InitializeStageSystem()
     {
-        elementColors = new Dictionary<PlayerStats.Element, Color>()
+        if (stageButtons != null && stages != null)
         {
-            { PlayerStats.Element.None, Color.white },
-            { PlayerStats.Element.Fire, new Color(1f, 0.3f, 0.1f) },
-            { PlayerStats.Element.Ice, new Color(0.1f, 0.5f, 1f) },
-            { PlayerStats.Element.Lightning, new Color(0.8f, 0.8f, 0.1f) },
-            { PlayerStats.Element.Poison, new Color(0.5f, 0.1f, 0.8f) },
-            { PlayerStats.Element.Earth, new Color(0.6f, 0.4f, 0.2f) },
-            { PlayerStats.Element.Wind, new Color(0.4f, 0.8f, 0.9f) }
-        };
-    }
+            for (int i = 0; i < stageButtons.Length && i < stages.Length; i++)
+            {
+                if (stageButtons[i] != null)
+                {
+                    int stageIndex = i;
+                    stageButtons[i].Initialize(stages[i], stageIndex, this);
+                }
+            }
 
-    void InitializeSelection()
-    {
-        selectedCharacterIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
-        CheckCharacterUnlocks();
-    }
-
-    void CheckCharacterUnlocks()
-    {
-        int playerLevel = PlayerPrefs.GetInt("PlayerLevel", 1);
-
-        foreach (var character in characters)
-        {
-            character.unlocked = playerLevel >= character.unlockLevel;
+            if (stages.Length > 0)
+            {
+                OnStageSelected(0);
+            }
         }
     }
 
-    public void NextCharacter()
+    public void OnStageSelected(int stageIndex)
     {
-        selectedCharacterIndex++;
-        if (selectedCharacterIndex >= characters.Count)
-            selectedCharacterIndex = 0;
+        if (stageIndex < 0 || stageIndex >= stages.Length) return;
 
-        UpdateUI();
-    }
+        selectedStageIndex = stageIndex;
+        StageData selectedStage = stages[stageIndex];
 
-    public void PreviousCharacter()
-    {
-        selectedCharacterIndex--;
-        if (selectedCharacterIndex < 0)
-            selectedCharacterIndex = characters.Count - 1;
+        if (stageNameText != null)
+            stageNameText.text = selectedStage.stageName;
 
-        UpdateUI();
-    }
+        if (stageDifficultyText != null)
+            stageDifficultyText.text = $"Dificuldade: {selectedStage.difficulty}/5";
 
-    void UpdateUI()
-    {
-        if (characters.Count == 0) return;
-
-        CharacterData currentCharacter = characters[selectedCharacterIndex];
-
-        // Informações básicas
-        characterIcon.sprite = currentCharacter.icon;
-        characterName.text = currentCharacter.characterName;
-        characterDescription.text = currentCharacter.description;
-
-        // Status base
-        UpdateStatusDisplay(currentCharacter);
-
-        // Sistema de elemento
-        UpdateElementDisplay(currentCharacter);
-
-        // Ultimate específica
-        UpdateUltimateDisplay(currentCharacter);
-
-        // Skills e modificadores
-        UpdateSkillsDisplay(currentCharacter);
-        UpdateModifiersDisplay(currentCharacter);
-
-        // Informações de progressão
-        UpdateProgressionDisplay(currentCharacter);
-
-        // Estado dos botões
-        UpdateButtonsState(currentCharacter);
-    }
-
-    void UpdateStatusDisplay(CharacterData character)
-    {
-        healthSlider.value = character.maxHealth / 200f;
-        attackSlider.value = character.baseAttack / 30f;
-        defenseSlider.value = character.baseDefense / 15f;
-        speedSlider.value = character.baseSpeed / 12f;
-
-        healthText.text = character.maxHealth.ToString();
-        attackText.text = character.baseAttack.ToString();
-        defenseText.text = character.baseDefense.ToString();
-        speedText.text = character.baseSpeed.ToString();
-    }
-
-    void UpdateElementDisplay(CharacterData character)
-    {
-        elementIcon.color = elementColors[character.baseElement];
-        elementText.text = character.baseElement.ToString();
-        elementText.color = elementColors[character.baseElement];
-
-        advantageText.text = "Fortes contra: " + string.Join(", ", character.strongAgainst);
-        disadvantageText.text = "Fracos contra: " + string.Join(", ", character.weakAgainst);
-
-        bool hasElement = character.baseElement != PlayerStats.Element.None;
-        elementAdvantagePanel.SetActive(hasElement);
-        elementalBonusPanel.SetActive(hasElement);
-
-        if (hasElement)
+        for (int i = 0; i < stageButtons.Length; i++)
         {
-            elementalBonusText.text = GetElementalBonusDescription(character.baseElement);
+            if (stageButtons[i] != null)
+            {
+                stageButtons[i].SetSelected(i == stageIndex);
+            }
+        }
+
+        Debug.Log($"🎯 Stage selecionado: {selectedStage.stageName}");
+    }
+
+    // 🆕 MÉTODOS DE DADOS DO JOGADOR (ATUALIZADOS)
+    private void LoadPlayerData()
+    {
+        playerCoins = PlayerPrefs.GetInt("PlayerCoins", 1000);
+        playerLevel = PlayerPrefs.GetInt("PlayerLevel", 1);
+        unlockedCharacters = PlayerPrefs.GetInt("UnlockedCharacters", 1);
+
+        for (int i = 0; i < upgradeLevels.Length; i++)
+        {
+            upgradeLevels[i] = PlayerPrefs.GetInt($"UpgradeLevel_{i}", 1);
+        }
+
+        // 🆕 CARREGAR DESBLOQUEIO BASEADO NO unlockLevel DO CharacterData
+        for (int i = 0; i < characters.Length; i++)
+        {
+            if (characters[i] != null)
+            {
+                characters[i].unlocked = (playerLevel >= characters[i].unlockLevel) || (i < unlockedCharacters);
+            }
+        }
+
+        // 🆕 CARREGAR STAGES DESBLOQUEADOS (usa 'unlocked' do StageData)
+        for (int i = 0; i < stages.Length; i++)
+        {
+            if (i == 0) // Primeiro stage sempre desbloqueado
+                stages[i].unlocked = true;
+            else
+                stages[i].unlocked = PlayerPrefs.GetInt($"StageUnlocked_{i}", 0) == 1;
         }
     }
 
-    string GetElementalBonusDescription(PlayerStats.Element element)
+    public void SavePlayerData()
     {
-        switch (element)
+        PlayerPrefs.SetInt("PlayerCoins", playerCoins);
+        PlayerPrefs.SetInt("PlayerLevel", playerLevel);
+        PlayerPrefs.SetInt("UnlockedCharacters", unlockedCharacters);
+
+        for (int i = 0; i < upgradeLevels.Length; i++)
         {
-            case PlayerStats.Element.Fire: return "🔥 +5 Ataque | Dano em Área";
-            case PlayerStats.Element.Ice: return "❄️ +3 Defesa | Lentidão em Inimigos";
-            case PlayerStats.Element.Lightning: return "⚡ +20% Velocidade de Ataque";
-            case PlayerStats.Element.Poison: return "☠️ Dano Contínuo | Redução de Cura";
-            case PlayerStats.Element.Earth: return "🌍 +5 Defesa | Resistência a Knockback";
-            case PlayerStats.Element.Wind: return "💨 +2 Velocidade | Esquiva Aumentada";
-            default: return "Sem bônus elemental";
+            PlayerPrefs.SetInt($"UpgradeLevel_{i}", upgradeLevels[i]);
+        }
+
+        // 🆕 SALVAR STAGES DESBLOQUEADOS
+        for (int i = 0; i < stages.Length; i++)
+        {
+            PlayerPrefs.SetInt($"StageUnlocked_{i}", stages[i].unlocked ? 1 : 0);
+        }
+
+        PlayerPrefs.Save();
+        Debug.Log("💾 Dados do jogador salvos!");
+    }
+
+    // 🆕 INICIALIZAÇÃO DO SISTEMA DE PERSONAGENS
+    private void InitializeCharacterSystem()
+    {
+        for (int i = 0; i < characterIcons.Length && i < characters.Length; i++)
+        {
+            if (characterIcons[i] != null && characters[i] != null)
+            {
+                characterIcons[i].Initialize(characters[i], i, this);
+            }
+        }
+
+        if (characters.Length > 0 && characters[0] != null)
+        {
+            SelectCharacter(0);
         }
     }
 
-    void UpdateUltimateDisplay(CharacterData character)
+    // 🆕 MÉTODO DE UPGRADE
+    public void UpgradeStat(int statIndex)
     {
-        if (character.ultimateSkill != null)
-        {
-            ultimateIcon.sprite = character.ultimateSkill.ultimateIcon;
-            ultimateName.text = character.ultimateSkill.ultimateName;
-            ultimateDescription.text = character.ultimateSkill.description;
-            ultimateCooldown.text = $"Recarga: {character.ultimateSkill.cooldown}s";
-            ultimateEffect.text = character.ultimateSkill.specialEffect;
-            ultimateType.text = $"Tipo: {character.ultimateSkill.ultimateType}";
+        if (statIndex < 0 || statIndex >= upgradeLevels.Length) return;
 
-            ultimateIcon.color = elementColors[character.ultimateSkill.element];
-        }
-        else
-        {
-            ultimateName.text = "Nenhuma Ultimate";
-            ultimateDescription.text = "Este personagem não possui uma ultimate específica";
-            ultimateCooldown.text = "";
-            ultimateEffect.text = "";
-            ultimateType.text = "";
-        }
-    }
+        int upgradeCost = upgradeLevels[statIndex] * 100;
 
-    void UpdateSkillsDisplay(CharacterData character)
-    {
-        if (skillsContainer == null)
+        if (playerCoins < upgradeCost)
         {
-            Debug.LogError("❌ skillsContainer não atribuído!");
+            Debug.Log("Moedas insuficientes!");
             return;
         }
 
-        // Limpa container
-        foreach (Transform child in skillsContainer)
-            Destroy(child.gameObject);
+        playerCoins -= upgradeCost;
+        upgradeLevels[statIndex]++;
 
-        // Cria slots para cada skill
-        foreach (var skill in character.startingSkills)
+        SavePlayerData();
+        UpdateUI();
+        UpdateUpgradesUI();
+        UpdateCooldownAndRegenUI();
+
+        Debug.Log($"🆙 Upgrade aplicado! {upgradeTypes[statIndex]} Nível: {upgradeLevels[statIndex]}");
+    }
+
+    // 🆕 ATUALIZAR UI DE UPGRADES
+    void UpdateUpgradesUI()
+    {
+        for (int i = 0; i < upgradeLevels.Length; i++)
         {
-            if (skillSlotPrefab != null)
+            if (upgradeNiveis != null && i < upgradeNiveis.Length)
+                upgradeNiveis[i].text = $"Nv.{upgradeLevels[i]}";
+
+            if (upgradeCustos != null && i < upgradeCustos.Length)
             {
-                GameObject slot = Instantiate(skillSlotPrefab, skillsContainer);
-                SkillSelectionSlot slotUI = slot.GetComponent<SkillSelectionSlot>();
-                if (slotUI != null)
-                    slotUI.SetSkill(skill);
+                int custo = upgradeLevels[i] * 100;
+                upgradeCustos[i].text = custo.ToString();
+            }
+
+            if (upgradeBotoes != null && i < upgradeBotoes.Length)
+            {
+                int custo = upgradeLevels[i] * 100;
+                upgradeBotoes[i].interactable = playerCoins >= custo;
             }
         }
-
-        if (skillsCountText != null)
-            skillsCountText.text = $"Skills: {character.startingSkills.Count}";
     }
 
-    void UpdateModifiersDisplay(CharacterData character)
+    // 🆕 ATUALIZAR UI DE COOLDOWN E REGENERAÇÃO
+    void UpdateCooldownAndRegenUI()
     {
-        if (modifiersContainer == null)
+        float healthRegenValue = 1f + (upgradeLevels[4] - 1) * 0.5f;
+        float attackCooldownReduction = upgradeLevels[5] * 0.05f;
+        float defenseCooldownReduction = upgradeLevels[6] * 0.05f;
+
+        if (healthRegenSlider != null)
         {
-            Debug.LogError("❌ modifiersContainer não atribuído!");
-            return;
+            healthRegenSlider.value = healthRegenValue / 5f;
+            if (healthRegenValueText != null)
+                healthRegenValueText.text = $"{healthRegenValue:F1}/s";
         }
 
-        // Limpa container
-        foreach (Transform child in modifiersContainer)
-            Destroy(child.gameObject);
-
-        // Cria slots para cada modificador
-        foreach (var modifier in character.startingModifiers)
+        if (attackCooldownSlider != null)
         {
-            if (modifierSlotPrefab != null)
-            {
-                GameObject slot = Instantiate(modifierSlotPrefab, modifiersContainer);
-                ModifierSelectionSlot slotUI = slot.GetComponent<ModifierSelectionSlot>();
-                if (slotUI != null)
-                    slotUI.SetModifier(modifier);
-            }
+            attackCooldownSlider.value = attackCooldownReduction / 0.5f;
+            if (attackCooldownValueText != null)
+                attackCooldownValueText.text = $"-{attackCooldownReduction * 100:F0}%";
         }
 
-        if (modifiersCountText != null)
-            modifiersCountText.text = $"Modificadores: {character.startingModifiers.Count}";
-    }
-
-    void UpdateProgressionDisplay(CharacterData character)
-    {
-        if (unlockLevelText != null)
-            unlockLevelText.text = $"Desbloqueio: Nv. {character.unlockLevel}";
-
-        if (xpMultiplierText != null)
-            xpMultiplierText.text = $"Multiplicador de XP: {character.xpMultiplier}x";
-    }
-
-    void UpdateButtonsState(CharacterData character)
-    {
-        if (selectButton != null)
+        if (defenseCooldownSlider != null)
         {
-            selectButton.interactable = character.unlocked;
-            Text selectButtonText = selectButton.GetComponentInChildren<Text>();
-            if (selectButtonText != null)
-            {
-                selectButtonText.text = character.unlocked ? "Selecionar" : $"Nv. {character.unlockLevel}";
-            }
-        }
-
-        int savedSelection = PlayerPrefs.GetInt("SelectedCharacter", -1);
-        if (confirmButton != null)
-            confirmButton.interactable = (savedSelection != -1 && characters[savedSelection].unlocked);
-    }
-
-    void SelectCurrentCharacter()
-    {
-        if (characters[selectedCharacterIndex].unlocked)
-        {
-            PlayerPrefs.SetInt("SelectedCharacter", selectedCharacterIndex);
-            PlayerPrefs.Save();
-
-            if (selectionIndicator != null)
-                selectionIndicator.SetActive(true);
-
-            if (confirmButton != null)
-                confirmButton.interactable = true;
-
-            Debug.Log($"Personagem selecionado: {characters[selectedCharacterIndex].characterName}");
+            defenseCooldownSlider.value = defenseCooldownReduction / 0.5f;
+            if (defenseCooldownValueText != null)
+                defenseCooldownValueText.text = $"-{defenseCooldownReduction * 100:F0}%";
         }
     }
 
-    void ConfirmSelection()
+    // 🆕 APLICAR UPGRADES AO PERSONAGEM
+    public void ApplyUpgradesToCharacter(PlayerStats playerStats, CharacterData characterData)
     {
-        int savedSelection = PlayerPrefs.GetInt("SelectedCharacter", -1);
-        if (savedSelection != -1 && characters[savedSelection].unlocked)
+        if (playerStats == null || characterData == null) return;
+
+        // 🆕 USA OS VALORES DO SEU CharacterData
+        float healthBonus = characterData.maxHealth * (upgradeLevels[0] - 1) * 0.05f;
+        float attackBonus = characterData.baseAttack * (upgradeLevels[1] - 1) * 0.05f;
+        float defenseBonus = characterData.baseDefense * (upgradeLevels[2] - 1) * 0.05f;
+        float speedBonus = characterData.baseSpeed * (upgradeLevels[3] - 1) * 0.03f;
+        float regenBonus = characterData.baseHealthRegen * (upgradeLevels[4] - 1) * 0.5f;
+        float attackCooldownReduction = upgradeLevels[5] * 0.05f;
+        float defenseCooldownReduction = upgradeLevels[6] * 0.05f;
+
+        // APLICA BÔNUS
+        playerStats.maxHealth = characterData.maxHealth + healthBonus;
+        playerStats.attack = characterData.baseAttack + attackBonus;
+        playerStats.defense = characterData.baseDefense + defenseBonus;
+        playerStats.speed = characterData.baseSpeed + speedBonus;
+        playerStats.healthRegenRate = characterData.baseHealthRegen + regenBonus;
+        playerStats.healthRegenDelay = characterData.baseRegenDelay;
+        playerStats.attackActivationInterval = Mathf.Max(0.1f, characterData.baseAttackCooldown * (1f - attackCooldownReduction));
+        playerStats.defenseActivationInterval = Mathf.Max(0.1f, characterData.baseDefenseCooldown * (1f - defenseCooldownReduction));
+
+        // 🆕 APLICA BÔNUS DE ELEMENTO DO SEU CharacterData
+        playerStats.CurrentElement = characterData.baseElement;
+        if (characterData.baseElement != PlayerStats.Element.None)
         {
-            InitializePlayerWithSelectedCharacter();
-            if (startButton != null) startButton.gameObject.SetActive(true);
-            if (confirmButton != null) confirmButton.gameObject.SetActive(false);
-        }
-    }
-
-    void StartGame()
-    {
-        Debug.Log("🚀 Iniciando jogo com personagem selecionado...");
-
-        // Salva a seleção final
-        PlayerPrefs.SetInt("SelectedCharacter", selectedCharacterIndex);
-        PlayerPrefs.Save();
-
-        // Carrega a cena de gameplay
-        SceneManager.LoadScene("Gameplay");
-    }
-
-    void InitializePlayerWithSelectedCharacter()
-    {
-        CharacterData selectedChar = GetSelectedCharacter();
-
-        // Salva dados para o PlayerStats
-        PlayerPrefs.SetFloat("SelectedHealth", selectedChar.maxHealth);
-        PlayerPrefs.SetFloat("SelectedAttack", selectedChar.baseAttack);
-        PlayerPrefs.SetFloat("SelectedDefense", selectedChar.baseDefense);
-        PlayerPrefs.SetFloat("SelectedSpeed", selectedChar.baseSpeed);
-        PlayerPrefs.SetString("SelectedElement", selectedChar.baseElement.ToString());
-
-        // Salva informações de skills
-        SaveCharacterSkillsData(selectedChar);
-
-        PlayerPrefs.Save();
-    }
-
-    void SaveCharacterSkillsData(CharacterData character)
-    {
-        // Salva informações da ultimate
-        if (character.ultimateSkill != null)
-        {
-            PlayerPrefs.SetString("SelectedUltimate", JsonUtility.ToJson(character.ultimateSkill));
+            playerStats.attack += characterData.elementAttackBonus;
+            playerStats.defense += characterData.elementDefenseBonus;
+            playerStats.speed += characterData.elementSpeedBonus;
+            playerStats.attackActivationInterval *= (1f - characterData.elementCooldownReduction);
+            playerStats.defenseActivationInterval *= (1f - characterData.elementCooldownReduction);
         }
 
-        // Salva contagem de skills
-        PlayerPrefs.SetInt("StartingSkillsCount", character.startingSkills.Count);
-        PlayerPrefs.SetInt("StartingModifiersCount", character.startingModifiers.Count);
+        Debug.Log($"🎯 {characterData.characterName} - Upgrades aplicados");
     }
 
-    // 🎯 MÉTODO PRINCIPAL DE INTEGRAÇÃO
+    // 🆕 MÉTODO PARA APLICAR PERSONAGEM AOS SISTEMAS (SIMPLIFICADO)
     public void ApplyCharacterToPlayerSystems(PlayerStats playerStats, SkillManager skillManager)
     {
-        CharacterData characterData = GetSelectedCharacter();
+        if (selectedCharacterIndex < 0 || selectedCharacterIndex >= characters.Length) return;
+        if (characters[selectedCharacterIndex] == null) return;
 
-        if (playerStats != null && characterData != null)
+        CharacterData selectedCharacter = characters[selectedCharacterIndex];
+
+        ApplyCharacterBaseStats(playerStats, selectedCharacter);
+        ApplyUpgradesToCharacter(playerStats, selectedCharacter);
+
+        // 🆕 APLICA ULTIMATE DO SEU CharacterData (SIMPLIFICADO)
+        if (selectedCharacter.ultimateSkill != null)
         {
-            // 1. Aplica status base ao PlayerStats
-            ApplyBaseStats(playerStats, characterData);
+            Debug.Log($"✨ Ultimate aplicada: {selectedCharacter.ultimateSkill.ultimateName}");
+        }
 
-            // 2. Aplica elemento
-            playerStats.ChangeElement(characterData.baseElement);
+        Debug.Log($"🎮 {selectedCharacter.characterName} aplicado ao PlayerStats!");
+    }
 
-            // 3. Configura ultimate específica
-            ApplyUltimateToPlayer(playerStats, characterData);
+    private void ApplyCharacterBaseStats(PlayerStats playerStats, CharacterData character)
+    {
+        playerStats.health = character.maxHealth;
+        playerStats.maxHealth = character.maxHealth;
+        playerStats.attack = character.baseAttack;
+        playerStats.defense = character.baseDefense;
+        playerStats.speed = character.baseSpeed;
+        playerStats.healthRegenRate = character.baseHealthRegen;
+        playerStats.healthRegenDelay = character.baseRegenDelay;
+        playerStats.attackActivationInterval = character.baseAttackCooldown;
+        playerStats.defenseActivationInterval = character.baseDefenseCooldown;
+        playerStats.CurrentElement = character.baseElement;
+    }
 
-            // 4. Aplica skills iniciais via SkillManager
-            if (skillManager != null)
-                ApplyStartingSkills(skillManager, characterData);
+    // 🆕 ATUALIZAR DISPLAY DE STATUS
+    public void UpdateStatusDisplay(CharacterData character)
+    {
+        if (character == null) return;
 
-            // 5. Aplica modificadores iniciais
-            if (skillManager != null)
-                ApplyStartingModifiers(skillManager, characterData);
+        // ATUALIZA TEXTO BÁSICO
+        if (characterNameText != null)
+            characterNameText.text = character.characterName;
 
-            // 6. Configura comportamentos especiais
-            ApplySpecialBehaviors(playerStats, characterData);
+        if (characterDescriptionText != null)
+            characterDescriptionText.text = character.description;
 
-            Debug.Log($"✅ Personagem {characterData.characterName} aplicado aos sistemas do jogo!");
+        if (characterLevelText != null)
+            characterLevelText.text = $"Nível {playerLevel}";
+
+        if (characterElementText != null)
+        {
+            string elementIcon = character.GetElementIcon();
+            characterElementText.text = $"Elemento: {elementIcon} {character.baseElement}";
+            characterElementText.color = character.GetElementColor();
+        }
+
+        // 🆕 CALCULA BÔNUS COM UPGRADES
+        float healthBonus = character.maxHealth * (upgradeLevels[0] - 1) * 0.05f;
+        float attackBonus = character.baseAttack * (upgradeLevels[1] - 1) * 0.05f;
+        float defenseBonus = character.baseDefense * (upgradeLevels[2] - 1) * 0.05f;
+        float speedBonus = character.baseSpeed * (upgradeLevels[3] - 1) * 0.03f;
+        float regenBonus = character.baseHealthRegen * (upgradeLevels[4] - 1) * 0.5f;
+
+        // ATUALIZA SLIDERS
+        UpdateStatusSlider(0, character.maxHealth + healthBonus, 200f, "Vida");
+        UpdateStatusSlider(1, character.baseAttack + attackBonus, 50f, "Ataque");
+        UpdateStatusSlider(2, character.baseDefense + defenseBonus, 30f, "Defesa");
+        UpdateStatusSlider(3, character.baseSpeed + speedBonus, 20f, "Velocidade");
+        UpdateStatusSlider(4, character.baseHealthRegen + regenBonus, 10f, "Regeneração");
+
+        // 🆕 COOLDOWNS
+        float attackCooldownReduction = upgradeLevels[5] * 5f;
+        float defenseCooldownReduction = upgradeLevels[6] * 5f;
+
+        UpdateStatusSlider(5, attackCooldownReduction, 50f, "Red. CD Ataque");
+        UpdateStatusSlider(6, defenseCooldownReduction, 50f, "Red. CD Defesa");
+
+        UpdateCooldownAndRegenUI();
+    }
+
+    private void UpdateStatusSlider(int index, float value, float maxValue, string label)
+    {
+        if (statusSliders != null && index < statusSliders.Length)
+        {
+            statusSliders[index].value = value / maxValue;
+        }
+
+        if (statusValues != null && index < statusValues.Length)
+        {
+            statusValues[index].text = $"{label}: {value:F1}";
         }
     }
 
-    void ApplyBaseStats(PlayerStats playerStats, CharacterData characterData)
+    // 🆕 MÉTODOS DE SELEÇÃO DE PERSONAGEM
+    public void OnCharacterIconClicked(int characterIndex)
     {
-        playerStats.maxHealth = characterData.maxHealth;
-        playerStats.health = characterData.maxHealth;
-        playerStats.attack = characterData.baseAttack;
-        playerStats.defense = characterData.baseDefense;
-        playerStats.speed = characterData.baseSpeed;
+        SelectCharacter(characterIndex);
     }
 
-    void ApplyUltimateToPlayer(PlayerStats playerStats, CharacterData characterData)
+    public void SelectCharacter(int characterIndex)
     {
-        if (characterData.ultimateSkill != null)
+        if (characterIndex < 0 || characterIndex >= characters.Length) return;
+        if (characters[characterIndex] == null || !characters[characterIndex].unlocked) return;
+
+        // DESMARCA PERSONAGEM ANTERIOR
+        if (selectedCharacterIndex >= 0 && selectedCharacterIndex < characterIcons.Length)
         {
-            playerStats.ultimateSkill.skillName = characterData.ultimateSkill.ultimateName;
-            playerStats.ultimateSkill.baseDamage = characterData.ultimateSkill.baseDamage;
-            playerStats.ultimateSkill.areaOfEffect = characterData.ultimateSkill.areaOfEffect;
-            playerStats.ultimateSkill.duration = characterData.ultimateSkill.duration;
-            playerStats.ultimateSkill.element = characterData.ultimateSkill.element;
-            playerStats.ultimateSkill.isActive = true;
-            playerStats.ultimateCooldown = characterData.ultimateSkill.cooldown;
+            if (characterIcons[selectedCharacterIndex] != null)
+                characterIcons[selectedCharacterIndex].SetSelected(false);
+        }
+
+        // MARCA NOVO PERSONAGEM
+        selectedCharacterIndex = characterIndex;
+
+        if (characterIcons[characterIndex] != null)
+            characterIcons[characterIndex].SetSelected(true);
+
+        // ATUALIZA UI
+        UpdateStatusDisplay(characters[characterIndex]);
+        UpdateUI();
+
+        Debug.Log($"🎯 Personagem selecionado: {characters[characterIndex].characterName}");
+    }
+
+    // 🆕 ATUALIZAR UI PRINCIPAL
+    private void UpdateUI()
+    {
+        if (coinsText != null)
+            coinsText.text = $"Moedas: {playerCoins}";
+
+        if (selectedCharacterIndex >= 0 && selectedCharacterIndex < characters.Length)
+        {
+            UpdateStatusDisplay(characters[selectedCharacterIndex]);
         }
     }
 
-    void ApplyStartingSkills(SkillManager skillManager, CharacterData characterData)
+    // 🆕 MÉTODOS ADICIONAIS
+    public void AddCoins(int amount)
     {
-        // Adiciona skills iniciais do personagem
-        foreach (var skill in characterData.startingSkills)
-        {
-            skillManager.AddSkill(skill);
-        }
+        playerCoins += amount;
+        SavePlayerData();
+        UpdateUI();
+        UpdateUpgradesUI();
+        Debug.Log($"💰 +{amount} moedas! Total: {playerCoins}");
     }
 
-    void ApplyStartingModifiers(SkillManager skillManager, CharacterData characterData)
+    public void UnlockCharacter(int characterIndex)
     {
-        foreach (var modifier in characterData.startingModifiers)
-        {
-            skillManager.AddSkillModifier(modifier);
-        }
+        if (characterIndex < 0 || characterIndex >= characters.Length) return;
+        if (characters[characterIndex] == null) return;
+
+        characters[characterIndex].unlocked = true;
+        if (unlockedCharacters <= characterIndex)
+            unlockedCharacters = characterIndex + 1;
+
+        if (characterIcons[characterIndex] != null)
+            characterIcons[characterIndex].RefreshStatus();
+
+        SavePlayerData();
+        Debug.Log($"🔓 {characters[characterIndex].characterName} desbloqueado!");
     }
 
-    void ApplySpecialBehaviors(PlayerStats playerStats, CharacterData characterData)
+    public void UnlockStage(int stageIndex)
     {
-        // Adiciona componentes de comportamento especial se existirem
-        if (characterData.specialSkillBehavior != null)
-        {
-            // Remove comportamentos existentes do mesmo tipo
-            var existingBehavior = playerStats.GetComponent(characterData.specialSkillBehavior.GetType());
-            if (existingBehavior != null)
-                Destroy(existingBehavior);
+        if (stageIndex < 0 || stageIndex >= stages.Length) return;
 
-            SkillBehavior behavior = playerStats.gameObject.AddComponent(characterData.specialSkillBehavior.GetType()) as SkillBehavior;
-            if (behavior != null)
-                behavior.Initialize(playerStats);
-        }
+        stages[stageIndex].unlocked = true;
 
-        if (characterData.ultimateBehavior != null && characterData.ultimateSkill != null)
-        {
-            // Remove comportamentos existentes do mesmo tipo
-            var existingUltimate = playerStats.GetComponent(characterData.ultimateBehavior.GetType());
-            if (existingUltimate != null)
-                Destroy(existingUltimate);
+        if (stageButtons[stageIndex] != null)
+            stageButtons[stageIndex].RefreshStatus();
 
-            UltimateBehavior ultimate = playerStats.gameObject.AddComponent(characterData.ultimateBehavior.GetType()) as UltimateBehavior;
-            if (ultimate != null)
-                ultimate.Initialize(playerStats, characterData.ultimateSkill.areaOfEffect, characterData.ultimateSkill.duration);
-        }
+        SavePlayerData();
+        Debug.Log($"🔓 Stage {stages[stageIndex].stageName} desbloqueado!");
     }
 
-    public CharacterData GetSelectedCharacter()
+    public void StartGame()
     {
-        int savedIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
-        if (savedIndex < characters.Count && savedIndex >= 0)
-            return characters[savedIndex];
-        return characters[0];
+        if (selectedCharacterIndex < 0 || selectedCharacterIndex >= characters.Length || characters[selectedCharacterIndex] == null)
+        {
+            Debug.LogError("❌ Nenhum personagem selecionado!");
+            return;
+        }
+
+        if (!characters[selectedCharacterIndex].unlocked)
+        {
+            Debug.LogError("❌ Personagem não desbloqueado!");
+            return;
+        }
+
+        if (selectedStageIndex < 0 || selectedStageIndex >= stages.Length)
+        {
+            Debug.LogError("❌ Nenhum stage selecionado!");
+            return;
+        }
+
+        if (!stages[selectedStageIndex].unlocked)
+        {
+            Debug.LogError("❌ Stage não desbloqueado!");
+            return;
+        }
+
+        Debug.Log($"🚀 Iniciando jogo com {characters[selectedCharacterIndex].characterName} no stage {stages[selectedStageIndex].stageName}");
+    }
+
+    // 🆕 CONFIGURAÇÃO AUTOMÁTICA DE REFERÊNCIAS
+    public void ConfigurarReferenciasAutomaticamente()
+    {
+        coinsText = GameObject.Find("TextoMoedas")?.GetComponent<TextMeshProUGUI>();
+        grupoUpgrades = GameObject.Find("GrupoUpgrades");
+
+        characterNameText = GameObject.Find("TituloDetalhes")?.GetComponent<TextMeshProUGUI>();
+        characterDescriptionText = GameObject.Find("TextoDescricao")?.GetComponent<TextMeshProUGUI>();
+        characterLevelText = GameObject.Find("TextoNivel")?.GetComponent<TextMeshProUGUI>();
+        characterElementText = GameObject.Find("TextoElemento")?.GetComponent<TextMeshProUGUI>();
+
+        // COOLDOWN/REGEN
+        healthRegenSlider = GameObject.Find("HealthRegen_Slider")?.GetComponent<Slider>();
+        healthRegenValueText = GameObject.Find("HealthRegen_Value")?.GetComponent<TextMeshProUGUI>();
+        attackCooldownSlider = GameObject.Find("AttackCooldown_Slider")?.GetComponent<Slider>();
+        attackCooldownValueText = GameObject.Find("AttackCooldown_Value")?.GetComponent<TextMeshProUGUI>();
+        defenseCooldownSlider = GameObject.Find("DefenseCooldown_Slider")?.GetComponent<Slider>();
+        defenseCooldownValueText = GameObject.Find("DefenseCooldown_Value")?.GetComponent<TextMeshProUGUI>();
+
+        ConfigurarReferenciasUpgrades();
+        Debug.Log("✅ Referências configuradas automaticamente!");
+    }
+
+    public void ConfigurarReferenciasUpgrades()
+    {
+        if (grupoUpgrades != null)
+        {
+            upgradeBotoes = new Button[7];
+            upgradeNiveis = new TextMeshProUGUI[7];
+            upgradeCustos = new TextMeshProUGUI[7];
+
+            string[] upgrades = { "VIDA", "ATAQUE", "DEFESA", "VELOCIDADE", "REGENERACAO", "COOLDOWN_ATAQUE", "COOLDOWN_DEFESA" };
+            for (int i = 0; i < 7; i++)
+            {
+                upgradeBotoes[i] = GameObject.Find($"Upgrade{upgrades[i]}_Btn")?.GetComponent<Button>();
+                upgradeNiveis[i] = GameObject.Find($"Upgrade{upgrades[i]}_Nivel")?.GetComponent<TextMeshProUGUI>();
+                upgradeCustos[i] = GameObject.Find($"Upgrade{upgrades[i]}_Custo")?.GetComponent<TextMeshProUGUI>();
+            }
+        }
     }
 }

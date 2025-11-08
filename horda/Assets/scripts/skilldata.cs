@@ -56,88 +56,8 @@ public class SkillData : ScriptableObject
     public float duration = 0f;
     public bool isToggleable = false;
 
-    // 🆕 MÉTODO GetFullDescription() ADICIONADO PARA CORRIGIR O ERRO
-    public string GetFullDescription()
-    {
-        string fullDescription = description;
-
-        // Adiciona informações de elemento
-        if (element != PlayerStats.Element.None)
-        {
-            fullDescription += $"\n\n{GetElementIcon()} Elemento: {element}";
-            if (elementalBonus != 1.0f)
-            {
-                fullDescription += $"\nBônus Elemental: {elementalBonus}x";
-            }
-        }
-
-        // Adiciona bônus de status
-        if (healthBonus != 0) fullDescription += $"\n❤️ Vida: {(healthBonus > 0 ? "+" : "")}{healthBonus}";
-        if (attackBonus != 0) fullDescription += $"\n⚔️ Ataque: {(attackBonus > 0 ? "+" : "")}{attackBonus}";
-        if (defenseBonus != 0) fullDescription += $"\n🛡️ Defesa: {(defenseBonus > 0 ? "+" : "")}{defenseBonus}";
-        if (speedBonus != 0) fullDescription += $"\n🏃 Velocidade: {(speedBonus > 0 ? "+" : "")}{speedBonus}";
-
-        // Adiciona informações de tipo específico
-        if (specificType != SpecificSkillType.None)
-        {
-            fullDescription += $"\n🎯 Efeito: {GetSpecificTypeDescription()}";
-        }
-
-        // Adiciona informações de raridade
-        fullDescription += $"\n💎 Raridade: {rarity}";
-
-        return fullDescription;
-    }
-
-    // 🆕 MÉTODO AUXILIAR PARA DESCRIÇÃO DO TIPO ESPECÍFICO
-    private string GetSpecificTypeDescription()
-    {
-        switch (specificType)
-        {
-            case SpecificSkillType.HealthRegen:
-                return $"Regeneração de Vida: {specialValue}/s";
-            case SpecificSkillType.CriticalStrike:
-                return $"Chance de Crítico: {specialValue}%";
-            case SpecificSkillType.LifeSteal:
-                return $"Roubo de Vida: {specialValue}%";
-            case SpecificSkillType.MovementSpeed:
-                return $"Velocidade de Movimento: +{specialValue}%";
-            case SpecificSkillType.AttackSpeed:
-                return $"Velocidade de Ataque: +{specialValue}%";
-            case SpecificSkillType.AreaDamage:
-                return $"Dano em Área: +{specialValue}%";
-            case SpecificSkillType.Shield:
-                return $"Escudo: {specialValue} de defesa";
-            case SpecificSkillType.Heal:
-                return $"Cura: {specialValue} de vida";
-            case SpecificSkillType.Projectile:
-                return $"Projéteis: {specialValue} adicionais";
-            case SpecificSkillType.DamageReflection:
-                return $"Reflexão de Dano: {specialValue}%";
-            case SpecificSkillType.ElementalMastery:
-                return $"Domínio Elemental: +{specialValue}% de dano elemental";
-            case SpecificSkillType.ChainLightning:
-                return $"Relâmpago em Cadeia: {specialValue} alvos";
-            case SpecificSkillType.PoisonCloud:
-                return $"Nuvem de Veneno: {specialValue} de dano por segundo";
-            case SpecificSkillType.FireAura:
-                return $"Aura de Fogo: {specialValue} de dano por segundo";
-            case SpecificSkillType.IceBarrier:
-                return $"Barreira de Gelo: {specialValue} de defesa";
-            case SpecificSkillType.WindDash:
-                return $"Dash de Vento: +{specialValue}% de velocidade";
-            case SpecificSkillType.EarthStomp:
-                return $"Pisada da Terra: {specialValue} de dano em área";
-            default:
-                return specificType.ToString();
-        }
-    }
-
-    // 🆕 MÉTODOS DE CONVENIÊNCIA
-    public string GetElementIcon()
-    {
-        return GetElementIcon(element);
-    }
+    // MÉTODOS (mantidos iguais)
+    public string GetElementIcon() { return GetElementIcon(this.element); }
 
     public static string GetElementIcon(PlayerStats.Element element)
     {
@@ -154,10 +74,7 @@ public class SkillData : ScriptableObject
         }
     }
 
-    public Color GetElementColor()
-    {
-        return GetElementColor(element);
-    }
+    public Color GetElementColor() { return GetElementColor(this.element); }
 
     public static Color GetElementColor(PlayerStats.Element element)
     {
@@ -174,213 +91,223 @@ public class SkillData : ScriptableObject
         }
     }
 
+    public string GetFullDescription()
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine(description);
+        sb.AppendLine();
+
+        if (element != PlayerStats.Element.None)
+        {
+            sb.AppendLine($"{GetElementIcon()} Elemento: {element}");
+            if (elementalBonus != 1.0f) sb.AppendLine($"Bônus Elemental: {elementalBonus}x");
+        }
+
+        if (healthBonus != 0) sb.AppendLine($"❤️ Vida: {FormatBonus(healthBonus)}");
+        if (attackBonus != 0) sb.AppendLine($"⚔️ Ataque: {FormatBonus(attackBonus)}");
+        if (defenseBonus != 0) sb.AppendLine($"🛡️ Defesa: {FormatBonus(defenseBonus)}");
+        if (speedBonus != 0) sb.AppendLine($"🏃 Velocidade: {FormatBonus(speedBonus)}");
+
+        if (specificType != SpecificSkillType.None)
+            sb.AppendLine($"🎯 Efeito: {GetSpecificTypeDescription()}");
+
+        if (cooldown > 0) sb.AppendLine($"⏱️ Cooldown: {cooldown}s");
+        if (duration > 0) sb.AppendLine($"⏰ Duração: {duration}s");
+
+        sb.AppendLine($"💎 Raridade: {rarity}");
+
+        return sb.ToString().Trim();
+    }
+
+    private string FormatBonus(float value) => value > 0 ? $"+{value}" : value.ToString();
+
+    private string GetSpecificTypeDescription()
+    {
+        switch (specificType)
+        {
+            case SpecificSkillType.HealthRegen: return $"Regeneração de Vida: {specialValue}/s";
+            case SpecificSkillType.CriticalStrike: return $"Chance de Crítico: {specialValue}%";
+            case SpecificSkillType.LifeSteal: return $"Roubo de Vida: {specialValue}%";
+            case SpecificSkillType.MovementSpeed: return $"Velocidade de Movimento: +{specialValue}%";
+            case SpecificSkillType.AttackSpeed: return $"Velocidade de Ataque: +{specialValue}%";
+            case SpecificSkillType.AreaDamage: return $"Dano em Área: +{specialValue}%";
+            case SpecificSkillType.Shield: return $"Escudo: {specialValue} de defesa";
+            case SpecificSkillType.Heal: return $"Cura: {specialValue} de vida";
+            case SpecificSkillType.Projectile: return $"Projéteis: {specialValue} adicionais";
+            case SpecificSkillType.DamageReflection: return $"Reflexão de Dano: {specialValue}%";
+            case SpecificSkillType.ElementalMastery: return $"Domínio Elemental: +{specialValue}% de dano elemental";
+            case SpecificSkillType.ChainLightning: return $"Relâmpago em Cadeia: {specialValue} alvos";
+            case SpecificSkillType.PoisonCloud: return $"Nuvem de Veneno: {specialValue} de dano por segundo";
+            case SpecificSkillType.FireAura: return $"Aura de Fogo: {specialValue} de dano por segundo";
+            case SpecificSkillType.IceBarrier: return $"Barreira de Gelo: {specialValue} de defesa";
+            case SpecificSkillType.WindDash: return $"Dash de Vento: +{specialValue}% de velocidade";
+            case SpecificSkillType.EarthStomp: return $"Pisada da Terra: {specialValue} de dano em área";
+            default: return specificType.ToString();
+        }
+    }
+
     public bool MeetsRequirements(int playerLevel, List<SkillData> acquiredSkills)
     {
-        // Verifica nível
-        if (playerLevel < requiredLevel)
-            return false;
+        if (playerLevel < requiredLevel) return false;
 
-        // Verifica skills requeridas
         foreach (var requiredSkill in requiredSkills)
-        {
-            if (!acquiredSkills.Contains(requiredSkill))
-                return false;
-        }
+            if (!acquiredSkills.Contains(requiredSkill)) return false;
+
+        if (isUnique && acquiredSkills.Contains(this)) return false;
 
         return true;
     }
 
-    // 🆕 MÉTODO PARA APLICAR EFEITOS ELEMENTAIS
-    public void ApplyElementalEffects(GameObject target)
+    public void ApplyElementalEffects(GameObject target, PlayerStats playerStats = null)
     {
         if (element == PlayerStats.Element.None || target == null) return;
 
         switch (element)
         {
-            case PlayerStats.Element.Fire:
-                ApplyFireEffect(target);
-                break;
-            case PlayerStats.Element.Ice:
-                ApplyIceEffect(target);
-                break;
-            case PlayerStats.Element.Lightning:
-                ApplyLightningEffect(target);
-                break;
-            case PlayerStats.Element.Poison:
-                ApplyPoisonEffect(target);
-                break;
-            case PlayerStats.Element.Earth:
-                ApplyEarthEffect(target);
-                break;
-            case PlayerStats.Element.Wind:
-                ApplyWindEffect(target);
-                break;
+            case PlayerStats.Element.Fire: ApplyFireEffect(target, playerStats); break;
+            case PlayerStats.Element.Ice: ApplyIceEffect(target, playerStats); break;
+            case PlayerStats.Element.Lightning: ApplyLightningEffect(target, playerStats); break;
+            case PlayerStats.Element.Poison: ApplyPoisonEffect(target, playerStats); break;
+            case PlayerStats.Element.Earth: ApplyEarthEffect(target, playerStats); break;
+            case PlayerStats.Element.Wind: ApplyWindEffect(target, playerStats); break;
         }
     }
 
-    private void ApplyFireEffect(GameObject target)
-    {
-        Debug.Log($"🔥 Aplicando efeito de Fogo em {target.name}");
-        // Implementar lógica de queimadura
-    }
+    private void ApplyFireEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"🔥 Aplicando efeito de Fogo em {target.name}");
+    private void ApplyIceEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"❄️ Aplicando efeito de Gelo em {target.name}");
+    private void ApplyLightningEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"⚡ Aplicando efeito de Raio em {target.name}");
+    private void ApplyPoisonEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"☠️ Aplicando efeito de Veneno em {target.name}");
+    private void ApplyEarthEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"🌍 Aplicando efeito de Terra em {target.name}");
+    private void ApplyWindEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"💨 Aplicando efeito de Vento em {target.name}");
 
-    private void ApplyIceEffect(GameObject target)
-    {
-        Debug.Log($"❄️ Aplicando efeito de Gelo em {target.name}");
-        // Implementar lógica de congelamento
-    }
+    public bool IsValid() => !string.IsNullOrEmpty(skillName);
 
-    private void ApplyLightningEffect(GameObject target)
-    {
-        Debug.Log($"⚡ Aplicando efeito de Raio em {target.name}");
-        // Implementar lógica de choque
-    }
-
-    private void ApplyPoisonEffect(GameObject target)
-    {
-        Debug.Log($"☠️ Aplicando efeito de Veneno em {target.name}");
-        // Implementar lógica de veneno
-    }
-
-    private void ApplyEarthEffect(GameObject target)
-    {
-        Debug.Log($"🌍 Aplicando efeito de Terra em {target.name}");
-        // Implementar lógica de lentidão
-    }
-
-    private void ApplyWindEffect(GameObject target)
-    {
-        Debug.Log($"💨 Aplicando efeito de Vento em {target.name}");
-        // Implementar lógica de empurrão
-    }
-
-    // 🆕 MÉTODO PARA VERIFICAR SE A SKILL É VÁLIDA
-    public bool IsValid()
-    {
-        return !string.IsNullOrEmpty(skillName) && !string.IsNullOrEmpty(description);
-    }
-
-    // 🆕 MÉTODO PARA OBTER COR DA RARIDADE
     public Color GetRarityColor()
     {
         switch (rarity)
         {
-            case SkillRarity.Common: return Color.gray;
-            case SkillRarity.Uncommon: return Color.green;
-            case SkillRarity.Rare: return Color.blue;
-            case SkillRarity.Epic: return new Color(0.5f, 0f, 0.5f); // Roxo
-            case SkillRarity.Legendary: return new Color(1f, 0.5f, 0f); // Laranja
-            case SkillRarity.Mythic: return Color.red;
+            case SkillRarity.Common: return new Color(0.7f, 0.7f, 0.7f);
+            case SkillRarity.Uncommon: return new Color(0.2f, 0.8f, 0.2f);
+            case SkillRarity.Rare: return new Color(0.2f, 0.4f, 1f);
+            case SkillRarity.Epic: return new Color(0.6f, 0.2f, 0.8f);
+            case SkillRarity.Legendary: return new Color(1f, 0.5f, 0f);
+            case SkillRarity.Mythic: return new Color(1f, 0.1f, 0.1f);
             default: return Color.white;
         }
     }
+
+    public void ApplyToPlayer(PlayerStats playerStats)
+    {
+        if (playerStats == null) return;
+        playerStats.maxHealth += healthBonus;
+        playerStats.health += healthBonus;
+        playerStats.attack += attackBonus;
+        playerStats.defense += defenseBonus;
+        playerStats.speed += speedBonus;
+    }
+
+    public void RemoveFromPlayer(PlayerStats playerStats)
+    {
+        if (playerStats == null) return;
+        playerStats.maxHealth -= healthBonus;
+        playerStats.health = Mathf.Min(playerStats.health, playerStats.maxHealth);
+        playerStats.attack -= attackBonus;
+        playerStats.defense -= defenseBonus;
+        playerStats.speed -= speedBonus;
+    }
+}
+
+// ✅ CORREÇÃO: Enums sem Headers - Headers NÃO são permitidos em enums
+public enum SkillType
+{
+    Passive,
+    Active,
+    Ultimate,
+    Aura,
+    Toggle,
+    Attack,
+    Defense
 }
 
 public enum SkillRarity
 {
-    Common,      // Comum - Cinza
-    Uncommon,    // Incomum - Verde
-    Rare,        // Rara - Azul
-    Epic,        // Épica - Roxo
-    Legendary,   // Lendária - Laranja
-    Mythic       // Mítica - Vermelho
-}
-
-public enum SkillType
-{
-    Passive,     // Passiva - Ativa automaticamente
-    Active,      // Ativa - Requer ativação manual
-    Ultimate,    // Ultimate - Habilidade suprema
-    Aura,        // Aura - Afeta área ao redor
-    Toggle       // Alternável - Liga/Desliga
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
+    Mythic
 }
 
 public enum SpecificSkillType
 {
     None,
-    HealthRegen,         // Regeneração de vida
-    CriticalStrike,      // Golpe crítico
-    LifeSteal,           // Roubo de vida
-    DamageReflection,    // Reflexão de dano
-    MovementSpeed,       // Velocidade de movimento
-    AttackSpeed,         // Velocidade de ataque
-    AreaDamage,          // Dano em área
-    Projectile,          // Projéteis
-    Shield,              // Escudo
-    Heal,                // Cura
-    ElementalMastery,    // Domínio Elemental
-    ChainLightning,      // Relâmpago em Cadeia
-    PoisonCloud,         // Nuvem de Veneno
-    FireAura,            // Aura de Fogo
-    IceBarrier,          // Barreira de Gelo
-    WindDash,            // Dash de Vento
-    EarthStomp           // Pisada da Terra
+    HealthRegen,
+    CriticalStrike,
+    LifeSteal,
+    MovementSpeed,
+    AttackSpeed,
+    AreaDamage,
+    Projectile,
+    Shield,
+    Heal,
+    DamageReflection,
+    ElementalMastery,
+    ChainLightning,
+    PoisonCloud,
+    FireAura,
+    IceBarrier,
+    WindDash,
+    EarthStomp
 }
 
-// 🆕 CLASSE DE MODIFICADOR COMPATÍVEL COM PLAYERSTATS
+// ✅ CORREÇÃO: SkillModifierData sem Headers - usando comentários normais
 [System.Serializable]
 public class SkillModifierData
 {
-    [Header("🔤 Identificação")]
+    // Identificação
     public string modifierName;
     public string targetSkillName;
 
-    [Header("📊 Modificadores de Status")]
+    // Modificadores de Status
     public float damageMultiplier = 1f;
     public float defenseMultiplier = 1f;
     public float speedMultiplier = 1f;
     public float healthMultiplier = 1f;
 
-    [Header("⚡ Sistema de Elementos")]
+    // Sistema de Elementos
     public PlayerStats.Element element = PlayerStats.Element.None;
     public float elementalEffectChance = 0f;
     public float elementalEffectDuration = 0f;
 
-    [Header("⏱️ Configurações de Tempo")]
+    // Configurações de Tempo
     public float duration = 0f;
     public float cooldownReduction = 0f;
 
-    [Header("🎯 Configurações de Alcance")]
+    // Configurações de Alcance
     public float areaOfEffect = 0f;
     public int additionalTargets = 0;
 
-    [Header("💫 Efeitos Especiais")]
+    // Efeitos Especiais
     public bool causesBurn = false;
     public bool causesFreeze = false;
     public bool causesStun = false;
     public bool causesPoison = false;
     public float specialEffectChance = 0f;
 
-    // 🆕 MÉTODOS DE CONVENIÊNCIA
-    public string GetElementIcon()
-    {
-        return SkillData.GetElementIcon(element);
-    }
-
-    public Color GetElementColor()
-    {
-        return SkillData.GetElementColor(element);
-    }
+    public string GetElementIcon() => SkillData.GetElementIcon(element);
+    public Color GetElementColor() => SkillData.GetElementColor(element);
 
     public string GetDescription()
     {
-        string desc = $"{modifierName}\n";
-
-        if (damageMultiplier != 1f)
-            desc += $"Dano: {damageMultiplier}x ";
-        if (defenseMultiplier != 1f)
-            desc += $"Defesa: {defenseMultiplier}x ";
-        if (element != PlayerStats.Element.None)
-            desc += $"\nElemento: {element}";
-        if (areaOfEffect > 0)
-            desc += $"\nÁrea: +{areaOfEffect}m";
-        if (cooldownReduction > 0)
-            desc += $"\nRedução de Cooldown: {cooldownReduction}s";
-
-        return desc;
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine(modifierName);
+        if (damageMultiplier != 1f) sb.AppendLine($"Dano: {damageMultiplier}x");
+        if (defenseMultiplier != 1f) sb.AppendLine($"Defesa: {defenseMultiplier}x");
+        if (element != PlayerStats.Element.None) sb.AppendLine($"Elemento: {element}");
+        return sb.ToString().Trim();
     }
 
-    // 🆕 CONVERSÃO PARA PlayerStats.SkillModifier
     public PlayerStats.SkillModifier ToPlayerStatsModifier()
     {
         return new PlayerStats.SkillModifier
@@ -393,4 +320,6 @@ public class SkillModifierData
             duration = this.duration
         };
     }
+
+    public bool IsValid() => !string.IsNullOrEmpty(modifierName) && !string.IsNullOrEmpty(targetSkillName);
 }

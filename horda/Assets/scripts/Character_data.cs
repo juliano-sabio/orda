@@ -1,10 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "New Character", menuName = "Character System/Character Data")]
 public class CharacterData : ScriptableObject
 {
-    [Header("Informa��es B�sicas")]
+    [Header("Informações Básicas")]
     public string characterName;
     public string description;
     public Sprite icon;
@@ -24,40 +24,92 @@ public class CharacterData : ScriptableObject
     [Range(5, 12)]
     public float baseSpeed = 8f;
 
-    [Header("? Sistema de Elementos")]
+    [Header("🆕 Sistema de Regeneração")]
+    [Range(0.5f, 5f)]
+    public float baseHealthRegen = 1f;
+
+    [Range(3f, 10f)]
+    public float baseRegenDelay = 5f;
+
+    [Header("🆕 Sistema de Cooldowns")]
+    [Range(0.5f, 3f)]
+    public float baseAttackCooldown = 2f;
+
+    [Range(1f, 5f)]
+    public float baseDefenseCooldown = 3f;
+
+    [Header("Sistema de Elementos")]
     public PlayerStats.Element baseElement = PlayerStats.Element.None;
     public List<PlayerStats.Element> strongAgainst = new List<PlayerStats.Element>();
     public List<PlayerStats.Element> weakAgainst = new List<PlayerStats.Element>();
 
-    [Header("?? Ultimate Espec�fica")]
+    [Header("Ultimate Específica")]
     public UltimateData ultimateSkill;
 
-    [Header("?? Skills Iniciais do Personagem")]
-    public List<SkillData> startingSkills = new List<SkillData>();
-    public List<SkillModifierData> startingModifiers = new List<SkillModifierData>();
-
-    [Header("?? Comportamentos Especiais")]
+    [Header("Comportamentos Especiais")]
     public SkillBehavior specialSkillBehavior;
     public UltimateBehavior ultimateBehavior;
 
-    [Header("?? Progress�o")]
+    [Header("Progressão")]
     public int unlockLevel = 1;
     public float xpMultiplier = 1.5f;
 
-    [Header("?? Customiza��o Visual")]
+    [Header("🆕 Bônus por Elemento")]
+    [Range(0f, 10f)]
+    public float elementAttackBonus = 0f;
+
+    [Range(0f, 10f)]
+    public float elementDefenseBonus = 0f;
+
+    [Range(0f, 5f)]
+    public float elementSpeedBonus = 0f;
+
+    [Range(0f, 2f)]
+    public float elementCooldownReduction = 0f;
+
+    [Header("Customização Visual")]
     public Color characterColor = Color.white;
     public ParticleSystem.MinMaxGradient auraColor;
     public RuntimeAnimatorController animatorController;
 
-    // ?? M�TODOS DE CONVENI�NCIA
+    // 🆕 MÉTODOS DE CONVENIÊNCIA ATUALIZADOS
     public string GetElementIcon()
     {
-        return SkillData.GetElementIcon(baseElement);
+        return GetElementIcon(baseElement);
+    }
+
+    public static string GetElementIcon(PlayerStats.Element element)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.Fire: return "🔥";
+            case PlayerStats.Element.Ice: return "❄️";
+            case PlayerStats.Element.Lightning: return "⚡";
+            case PlayerStats.Element.Poison: return "☠️";
+            case PlayerStats.Element.Earth: return "🌍";
+            case PlayerStats.Element.Wind: return "💨";
+            default: return "⚪";
+        }
     }
 
     public Color GetElementColor()
     {
-        return SkillData.GetElementColor(baseElement);
+        return GetElementColor(baseElement);
+    }
+
+    public static Color GetElementColor(PlayerStats.Element element)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.None: return Color.white;
+            case PlayerStats.Element.Fire: return new Color(1f, 0.3f, 0.1f);
+            case PlayerStats.Element.Ice: return new Color(0.1f, 0.5f, 1f);
+            case PlayerStats.Element.Lightning: return new Color(0.8f, 0.8f, 0.1f);
+            case PlayerStats.Element.Poison: return new Color(0.5f, 0.1f, 0.8f);
+            case PlayerStats.Element.Earth: return new Color(0.6f, 0.4f, 0.2f);
+            case PlayerStats.Element.Wind: return new Color(0.4f, 0.8f, 0.9f);
+            default: return Color.white;
+        }
     }
 
     public bool HasUltimate()
@@ -65,46 +117,59 @@ public class CharacterData : ScriptableObject
         return ultimateSkill != null;
     }
 
-    public List<SkillData> GetSkillsByType(SkillType type)
+    // 🆕 MÉTODOS PARA BÔNUS DE ELEMENTO
+    public float GetElementAttackBonus()
     {
-        return startingSkills.FindAll(skill => skill.skillType == type);
+        return elementAttackBonus;
     }
 
-    public List<SkillData> GetSkillsByElement(PlayerStats.Element element)
+    public float GetElementDefenseBonus()
     {
-        return startingSkills.FindAll(skill => skill.element == element);
+        return elementDefenseBonus;
     }
-}
 
-[System.Serializable]
-public class UltimateData
-{
-    public string ultimateName;
-    [TextArea(2, 4)]
-    public string description;
-    public Sprite ultimateIcon;
+    public float GetElementSpeedBonus()
+    {
+        return elementSpeedBonus;
+    }
 
-    [Range(30, 60)]
-    public float cooldown = 30f;
+    public float GetElementCooldownReduction()
+    {
+        return elementCooldownReduction;
+    }
 
-    [Range(20, 100)]
-    public float baseDamage = 50f;
+    // 🆕 MÉTODO PARA OBTER TODOS OS STATUS BASE
+    public Dictionary<string, float> GetBaseStats()
+    {
+        return new Dictionary<string, float>
+        {
+            { "Health", maxHealth },
+            { "Attack", baseAttack },
+            { "Defense", baseDefense },
+            { "Speed", baseSpeed },
+            { "HealthRegen", baseHealthRegen },
+            { "AttackCooldown", baseAttackCooldown },
+            { "DefenseCooldown", baseDefenseCooldown }
+        };
+    }
 
-    [Range(3, 8)]
-    public float areaOfEffect = 5f;
+    // 🆕 MÉTODO PARA OBTER DESCRIÇÃO DOS BÔNUS DO ELEMENTO
+    public string GetElementBonusDescription()
+    {
+        if (baseElement == PlayerStats.Element.None)
+            return "Sem bônus elemental";
 
-    [Range(2, 10)]
-    public float duration = 3f;
+        List<string> bonuses = new List<string>();
 
-    public PlayerStats.Element element;
+        if (elementAttackBonus > 0)
+            bonuses.Add($"+{elementAttackBonus} Ataque");
+        if (elementDefenseBonus > 0)
+            bonuses.Add($"+{elementDefenseBonus} Defesa");
+        if (elementSpeedBonus > 0)
+            bonuses.Add($"+{elementSpeedBonus} Velocidade");
+        if (elementCooldownReduction > 0)
+            bonuses.Add($"-{elementCooldownReduction * 100}% Cooldown");
 
-    [Header("Efeitos Especiais")]
-    [TextArea(1, 3)]
-    public string specialEffect;
-    public SpecificSkillType ultimateType = SpecificSkillType.None;
-    public float specialValue = 0f;
-
-    [Header("Configura��es de Comportamento")]
-    public string behaviorScriptName;
-    public GameObject visualEffectPrefab;
+        return bonuses.Count > 0 ? string.Join(" | ", bonuses) : "Bônus elemental passivo";
+    }
 }

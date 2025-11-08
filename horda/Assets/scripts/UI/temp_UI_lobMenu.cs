@@ -1,19 +1,21 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class temp_UI_lobMenu : MonoBehaviour
 {
-    [Header("Referências UI")]
+    [Header("Referências UI Básicas")]
     public Button playButton;
     public Button optionsButton;
     public Button exitButton;
     public Text playerLevelText;
     public Text selectedCharacterText;
+    public Text coinsText;
 
     void Start()
     {
-        // Configurar botões
+        // Configurar botões básicos
         if (playButton != null)
             playButton.onClick.AddListener(OnPlayButtonClicked);
 
@@ -23,11 +25,11 @@ public class temp_UI_lobMenu : MonoBehaviour
         if (exitButton != null)
             exitButton.onClick.AddListener(OnExitButtonClicked);
 
-        // Atualizar informações do jogador
         UpdatePlayerInfo();
     }
 
-    void UpdatePlayerInfo()
+    // 🆕 MUDAR DE private PARA public!
+    public void UpdatePlayerInfo()
     {
         // Atualizar nível do jogador
         if (playerLevelText != null)
@@ -36,45 +38,38 @@ public class temp_UI_lobMenu : MonoBehaviour
             playerLevelText.text = $"Nível: {playerLevel}";
         }
 
-        // 🆕 ATUALIZADO: Buscar informações do personagem selecionado
+        // Atualizar personagem selecionado
         if (selectedCharacterText != null)
         {
-            // 🆕 BUSCA O MANAGER NA CENA ATUAL
-            CharacterSelectionManager manager = FindAnyObjectByType<CharacterSelectionManager>();
+            int selectedIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
 
-            if (manager != null)
+            // 🆕 CORREÇÃO: Buscar CharacterSelectionManagerIntegrated
+            CharacterSelectionManagerIntegrated charManager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
+            if (charManager != null && charManager.characters != null &&
+                selectedIndex < charManager.characters.Length &&
+                charManager.characters[selectedIndex] != null)
             {
-                int selectedIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
-                if (selectedIndex < manager.characters.Count)
-                {
-                    string charName = manager.characters[selectedIndex].characterName;
-                    selectedCharacterText.text = $"Personagem: {charName}";
-                }
-                else
-                {
-                    selectedCharacterText.text = "Personagem: Nenhum";
-                }
+                string charName = charManager.characters[selectedIndex].characterName;
+                selectedCharacterText.text = $"Personagem: {charName}";
             }
             else
             {
-                selectedCharacterText.text = "Personagem: Não selecionado";
+                selectedCharacterText.text = "Personagem: Nenhum";
             }
+        }
+
+        // Atualizar moedas
+        if (coinsText != null)
+        {
+            int coins = PlayerPrefs.GetInt("PlayerCoins", 1000);
+            coinsText.text = $"Moedas: {coins}";
         }
     }
 
     void OnPlayButtonClicked()
     {
-        Debug.Log("🎮 Iniciando jogo...");
-
-        // 🆕 ATUALIZADO: Usar GameSceneManager se disponível
-        if (GameSceneManager.Instance != null)
-        {
-            GameSceneManager.Instance.GoToCharacterSelection();
-        }
-        else
-        {
-            SceneManager.LoadScene("CharacterSelection");
-        }
+        Debug.Log("🎮 Indo para seleção de personagem...");
+        SceneManager.LoadScene("CharacterSelection");
     }
 
     void OnOptionsButtonClicked()
@@ -90,41 +85,75 @@ public class temp_UI_lobMenu : MonoBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
     }
 
-    // 🆕 MÉTODO PARA ATUALIZAR INFORMAÇÕES DINAMICAMENTE
-    public void RefreshUI()
+    // 🆕 MÉTODO PARA ATUALIZAR APENAS AS MOEDAS
+    public void UpdateCoinsDisplay()
+    {
+        if (coinsText != null)
+        {
+            int coins = PlayerPrefs.GetInt("PlayerCoins", 1000);
+            coinsText.text = $"Moedas: {coins}";
+        }
+    }
+
+    // 🆕 MÉTODO PARA ATUALIZAR APENAS O PERSONAGEM (CORRIGIDO)
+    public void UpdateCharacterDisplay()
+    {
+        if (selectedCharacterText != null)
+        {
+            int selectedIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+
+            // 🆕 CORREÇÃO: Usa CharacterSelectionManagerIntegrated
+            CharacterSelectionManagerIntegrated charManager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
+
+            if (charManager != null && charManager.characters != null &&
+                selectedIndex < charManager.characters.Length &&
+                charManager.characters[selectedIndex] != null)
+            {
+                string charName = charManager.characters[selectedIndex].characterName;
+                selectedCharacterText.text = $"Personagem: {charName}";
+            }
+            else
+            {
+                selectedCharacterText.text = "Personagem: Nenhum";
+            }
+        }
+    }
+
+    // 🆕 MÉTODO PARA REFRESCAR TODA A UI
+    public void RefreshAllUI()
     {
         UpdatePlayerInfo();
     }
 
-    // 🆕 MÉTODO PARA TESTE RÁPIDO
-    [ContextMenu("Testar Navegação")]
-    public void TestNavigation()
+    // 🆕 MÉTODO PARA VERIFICAR STATUS (CORRIGIDO)
+    [ContextMenu("Verificar Status do Lobby")]
+    public void CheckLobbyStatus()
     {
-        Debug.Log("🧪 Testando navegação...");
+        Debug.Log("🔍 Status do Lobby:");
 
-        // 🆕 BUSCA O MANAGER NA CENA ATUAL
-        CharacterSelectionManager manager = FindAnyObjectByType<CharacterSelectionManager>();
+        // 🆕 CORREÇÃO: Usa CharacterSelectionManagerIntegrated
+        CharacterSelectionManagerIntegrated charManager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
 
-        if (manager != null)
-        {
-            Debug.Log($"✅ CharacterSelectionManager encontrado com {manager.characters.Count} personagens");
-        }
-        else
-        {
-            Debug.Log("ℹ️ CharacterSelectionManager não está nesta cena");
-        }
-    }
+        Debug.Log($"CharacterSelectionManagerIntegrated: {(charManager != null ? "✅ Encontrado" : "❌ Não encontrado")}");
 
-    void Update()
-    {
-        // Atualizar dinamicamente (opcional)
-        if (Input.GetKeyDown(KeyCode.F5))
+        if (charManager != null && charManager.characters != null)
         {
-            RefreshUI();
+            Debug.Log($"Personagens disponíveis: {charManager.characters.Length}");
+            for (int i = 0; i < charManager.characters.Length; i++)
+            {
+                if (charManager.characters[i] != null)
+                {
+                    Debug.Log($"• {i}: {charManager.characters[i].characterName} ({(charManager.characters[i].unlocked ? "🔓" : "🔒")})");
+                }
+            }
         }
+
+        Debug.Log($"Moedas: {PlayerPrefs.GetInt("PlayerCoins", 1000)}");
+        Debug.Log($"Nível: {PlayerPrefs.GetInt("PlayerLevel", 1)}");
+        Debug.Log($"Personagem selecionado: {PlayerPrefs.GetInt("SelectedCharacter", 0)}");
     }
 }

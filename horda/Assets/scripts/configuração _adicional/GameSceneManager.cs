@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class GameSceneManager : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
-    // 🎯 MÉTODOS PÚBLICOS PARA NAVEGAÇÃO
+    // 🎯 MÉTODOS PÚBLICOS PARA NAVEGAÇÃO - CORRIGIDOS
     public void GoToMainMenu()
     {
         Debug.Log("🏠 Indo para Menu Principal...");
@@ -41,32 +42,54 @@ public class GameSceneManager : MonoBehaviour
         Debug.Log("🚀 Iniciando Gameplay...");
         SceneManager.LoadScene(gameplayScene);
 
-        // Garante que o PlayerStats será inicializado corretamente
-        Invoke("InitializeGameplay", 0.1f);
+        // 🆕 CORREÇÃO: Inicialização mais robusta
+        StartCoroutine(InitializeGameplayCoroutine());
     }
 
-    void InitializeGameplay()
+    private IEnumerator InitializeGameplayCoroutine()
     {
-        // 🆕 BUSCA O CHARACTER SELECTION MANAGER NA CENA ATUAL (não usa mais Instance)
-        CharacterSelectionManager selectionManager = FindAnyObjectByType<CharacterSelectionManager>();
-        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
-        SkillManager skillManager = FindAnyObjectByType<SkillManager>();
+        // Espera a cena carregar completamente
+        yield return new WaitForSeconds(0.1f);
 
-        if (playerStats != null && selectionManager != null)
+        // 🆕 CORREÇÃO: Usa CharacterSelectionManagerIntegrated
+        CharacterSelectionManagerIntegrated selectionManager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
+        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
+        SkillManager skillManager = SkillManager.Instance;
+
+        if (playerStats != null)
         {
-            selectionManager.ApplyCharacterToPlayerSystems(playerStats, skillManager);
-            Debug.Log("✅ Personagem selecionado aplicado ao gameplay!");
+            if (selectionManager != null)
+            {
+                selectionManager.ApplyCharacterToPlayerSystems(playerStats, skillManager);
+                Debug.Log("✅ Personagem selecionado aplicado ao gameplay!");
+            }
+            else
+            {
+                Debug.Log("⚠️ Iniciando sem seleção de personagem (modo padrão)");
+                // Inicializa com stats padrão
+                playerStats.InitializeDefaultSkills();
+            }
+
+            // Força atualização da UI
+            playerStats.ForceUIUpdate();
         }
-        else if (playerStats != null)
+        else
         {
-            Debug.Log("⚠️ Iniciando sem personagem selecionado (modo direto)");
+            Debug.LogError("❌ PlayerStats não encontrado na cena de gameplay!");
         }
     }
 
-    // 🆕 MÉTODO PARA INICIAR GAMEPLAY COM PERSONAGEM ESPECÍFICO
+    // 🆕 MÉTODO MELHORADO PARA INICIAR COM PERSONAGEM ESPECÍFICO
     public void StartGameplayWithCharacter(int characterIndex)
     {
         Debug.Log($"🚀 Iniciando Gameplay com personagem índice: {characterIndex}");
+
+        // 🆕 VALIDAÇÃO DE ÍNDICE
+        if (characterIndex < 0)
+        {
+            Debug.LogError("❌ Índice de personagem inválido!");
+            return;
+        }
 
         // Salva a seleção antes de mudar de cena
         PlayerPrefs.SetInt("SelectedCharacter", characterIndex);
@@ -75,13 +98,31 @@ public class GameSceneManager : MonoBehaviour
         StartGameplay();
     }
 
-    // 🆕 MÉTODO PARA VERIFICAR SE HÁ PERSONAGEM SELECIONADO
+    // 🆕 MÉTODO PARA CARREGAR CENA COM VALIDAÇÃO
+    public void LoadSceneByName(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            Debug.LogError("❌ Nome da cena está vazio!");
+            return;
+        }
+
+        if (!SceneExists(sceneName))
+        {
+            Debug.LogError($"❌ Cena '{sceneName}' não existe no build settings!");
+            return;
+        }
+
+        Debug.Log($"📁 Carregando cena: {sceneName}");
+        SceneManager.LoadScene(sceneName);
+    }
+
+    // ✅ MÉTODOS EXISTENTES (MANTIDOS)
     public bool HasSelectedCharacter()
     {
         return PlayerPrefs.HasKey("SelectedCharacter");
     }
 
-    // 🆕 MÉTODO PARA OBTER PERSONAGEM SELECIONADO
     public int GetSelectedCharacterIndex()
     {
         return PlayerPrefs.GetInt("SelectedCharacter", 0);
@@ -90,7 +131,6 @@ public class GameSceneManager : MonoBehaviour
     public void QuitGame()
     {
         Debug.Log("👋 Saindo do jogo...");
-
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -98,7 +138,6 @@ public class GameSceneManager : MonoBehaviour
 #endif
     }
 
-    // 🆕 MÉTODO PARA REINICIAR A CENA ATUAL
     public void RestartCurrentScene()
     {
         string currentScene = SceneManager.GetActiveScene().name;
@@ -106,21 +145,6 @@ public class GameSceneManager : MonoBehaviour
         SceneManager.LoadScene(currentScene);
     }
 
-    // 🆕 MÉTODO PARA CARREGAR CENA POR NOME
-    public void LoadSceneByName(string sceneName)
-    {
-        if (!string.IsNullOrEmpty(sceneName))
-        {
-            Debug.Log($"📁 Carregando cena: {sceneName}");
-            SceneManager.LoadScene(sceneName);
-        }
-        else
-        {
-            Debug.LogError("❌ Nome da cena está vazio!");
-        }
-    }
-
-    // 🆕 MÉTODO PARA VERIFICAR SE CENA EXISTE
     public bool SceneExists(string sceneName)
     {
         for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
@@ -133,7 +157,7 @@ public class GameSceneManager : MonoBehaviour
         return false;
     }
 
-    // 🆕 MÉTODO DE DEBUG
+    // 🆕 MÉTODO DE DEBUG MELHORADO
     [ContextMenu("Debug Scene Info")]
     public void DebugSceneInfo()
     {
@@ -148,16 +172,13 @@ public class GameSceneManager : MonoBehaviour
             Debug.Log($"Cena [{i}]: {sceneName}");
         }
 
-        // Verifica CharacterSelectionManager
-        CharacterSelectionManager manager = FindAnyObjectByType<CharacterSelectionManager>();
-        if (manager != null)
-        {
-            Debug.Log($"✅ CharacterSelectionManager encontrado na cena atual");
-            Debug.Log($"Personagens carregados: {manager.characters.Count}");
-        }
-        else
-        {
-            Debug.Log("❌ CharacterSelectionManager não encontrado na cena atual");
-        }
+        // 🆕 CORREÇÃO: Usa CharacterSelectionManagerIntegrated
+        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
+        CharacterSelectionManagerIntegrated manager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
+        SkillManager skillManager = SkillManager.Instance;
+
+        Debug.Log($"PlayerStats: {(playerStats != null ? "✅ Encontrado" : "❌ Não encontrado")}");
+        Debug.Log($"CharacterSelectionManagerIntegrated: {(manager != null ? "✅ Encontrado" : "❌ Não encontrado")}");
+        Debug.Log($"SkillManager: {(skillManager != null ? "✅ Encontrado" : "❌ Não encontrado")}");
     }
 }

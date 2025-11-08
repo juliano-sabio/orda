@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 227619ca6a352bd4b8662f00ca1a329f, type: 3}
-  m_Name: personagem_teste
+  m_Name: fodase
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
-  characterName: aleatorio
+  characterName: 
   description: 
   icon: {fileID: 0}
   unlocked: 1
@@ -21,29 +21,22 @@ MonoBehaviour:
   baseAttack: 10
   baseDefense: 5
   baseSpeed: 8
-  baseElement: 1
+  baseHealthRegen: 1
+  baseRegenDelay: 5
+  baseAttackCooldown: 2
+  baseDefenseCooldown: 3
+  baseElement: 0
   strongAgainst: 
   weakAgainst: 
-  ultimateSkill:
-    ultimateName: 
-    description: 
-    ultimateIcon: {fileID: 0}
-    cooldown: 30
-    baseDamage: 50
-    areaOfEffect: 5
-    duration: 3
-    element: 0
-    specialEffect: 
-    ultimateType: 0
-    specialValue: 0
-    behaviorScriptName: 
-    visualEffectPrefab: {fileID: 0}
-  startingSkills: []
-  startingModifiers: []
+  ultimateSkill: {fileID: 0}
   specialSkillBehavior: {fileID: 0}
   ultimateBehavior: {fileID: 0}
   unlockLevel: 1
   xpMultiplier: 1.5
+  elementAttackBonus: 0
+  elementDefenseBonus: 0
+  elementSpeedBonus: 0
+  elementCooldownReduction: 0
   characterColor: {r: 1, g: 1, b: 1, a: 1}
   auraColor:
     m_Mode: 0
