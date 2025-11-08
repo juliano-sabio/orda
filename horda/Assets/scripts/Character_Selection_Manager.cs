@@ -25,7 +25,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     };
 
     [Header("🎮 Sistema de Stages")]
-    public StageData[] stages; // 🆕 AGORA USA StageData EXISTENTE
+    public StageData[] stages;
     public StageButtonUI[] stageButtons;
     public TextMeshProUGUI stageNameText;
     public TextMeshProUGUI stageDifficultyText;
@@ -55,38 +55,129 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     void Start()
     {
+        InitializeSystems();
+    }
+
+    // ✅ MÉTODO INICIALIZADOR CORRIGIDO
+    private void InitializeSystems()
+    {
+        Debug.Log("🔧 Inicializando sistemas...");
+
+        // ✅ INICIALIZA ARRAYS SE ESTIVEREM NULL
+        InitializeArrays();
+
         LoadPlayerData();
         InitializeCharacterSystem();
         InitializeStageSystem();
         UpdateUI();
         UpdateUpgradesUI();
         UpdateCooldownAndRegenUI();
+
+        Debug.Log("✅ Sistemas inicializados com sucesso!");
     }
 
-    // 🆕 SISTEMA DE STAGES (ATUALIZADO PARA StageData)
+    // ✅ NOVO MÉTODO PARA INICIALIZAR ARRAYS
+    private void InitializeArrays()
+    {
+        // Inicializa arrays que podem estar null
+        if (characters == null)
+        {
+            characters = new CharacterData[0];
+            Debug.Log("⚠️ Array 'characters' inicializado como vazio");
+        }
+
+        if (characterIcons == null)
+        {
+            characterIcons = new CharacterIconUI[0];
+            Debug.Log("⚠️ Array 'characterIcons' inicializado como vazio");
+        }
+
+        if (stages == null)
+        {
+            stages = new StageData[0];
+            Debug.Log("⚠️ Array 'stages' inicializado como vazio");
+        }
+
+        if (stageButtons == null)
+        {
+            stageButtons = new StageButtonUI[0];
+            Debug.Log("⚠️ Array 'stageButtons' inicializado como vazio");
+        }
+
+        if (upgradeBotoes == null)
+        {
+            upgradeBotoes = new Button[7];
+            Debug.Log("⚠️ Array 'upgradeBotoes' inicializado");
+        }
+
+        if (upgradeNiveis == null)
+        {
+            upgradeNiveis = new TextMeshProUGUI[7];
+            Debug.Log("⚠️ Array 'upgradeNiveis' inicializado");
+        }
+
+        if (upgradeCustos == null)
+        {
+            upgradeCustos = new TextMeshProUGUI[7];
+            Debug.Log("⚠️ Array 'upgradeCustos' inicializado");
+        }
+
+        if (statusSliders == null)
+        {
+            statusSliders = new Slider[0];
+            Debug.Log("⚠️ Array 'statusSliders' inicializado como vazio");
+        }
+
+        if (statusValues == null)
+        {
+            statusValues = new TextMeshProUGUI[0];
+            Debug.Log("⚠️ Array 'statusValues' inicializado como vazio");
+        }
+
+        // Inicializa upgradeLevels
+        if (upgradeLevels == null || upgradeLevels.Length == 0)
+        {
+            upgradeLevels = new int[7];
+            for (int i = 0; i < upgradeLevels.Length; i++)
+            {
+                upgradeLevels[i] = 1;
+            }
+        }
+    }
+
+    // ✅ SISTEMA DE STAGES CORRIGIDO
     private void InitializeStageSystem()
     {
-        if (stageButtons != null && stages != null)
+        if (stageButtons == null || stages == null)
         {
-            for (int i = 0; i < stageButtons.Length && i < stages.Length; i++)
-            {
-                if (stageButtons[i] != null)
-                {
-                    int stageIndex = i;
-                    stageButtons[i].Initialize(stages[i], stageIndex, this);
-                }
-            }
+            Debug.Log("⚠️ Stage system não configurado - arrays null");
+            return;
+        }
 
-            if (stages.Length > 0)
+        int minLength = Mathf.Min(stageButtons.Length, stages.Length);
+
+        for (int i = 0; i < minLength; i++)
+        {
+            if (stageButtons[i] != null && stages[i] != null)
             {
-                OnStageSelected(0);
+                int stageIndex = i;
+                stageButtons[i].Initialize(stages[i], stageIndex, this);
             }
+        }
+
+        if (stages.Length > 0)
+        {
+            OnStageSelected(0);
         }
     }
 
     public void OnStageSelected(int stageIndex)
     {
-        if (stageIndex < 0 || stageIndex >= stages.Length) return;
+        if (stageIndex < 0 || stages == null || stageIndex >= stages.Length)
+        {
+            Debug.Log("⚠️ Stage selection inválido");
+            return;
+        }
 
         selectedStageIndex = stageIndex;
         StageData selectedStage = stages[stageIndex];
@@ -97,6 +188,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         if (stageDifficultyText != null)
             stageDifficultyText.text = $"Dificuldade: {selectedStage.difficulty}/5";
 
+        // Atualiza botões de stage
         for (int i = 0; i < stageButtons.Length; i++)
         {
             if (stageButtons[i] != null)
@@ -108,35 +200,49 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         Debug.Log($"🎯 Stage selecionado: {selectedStage.stageName}");
     }
 
-    // 🆕 MÉTODOS DE DADOS DO JOGADOR (ATUALIZADOS)
+    // ✅ MÉTODOS DE DADOS DO JOGADOR CORRIGIDOS
     private void LoadPlayerData()
     {
+        Debug.Log("💾 Carregando dados do jogador...");
+
         playerCoins = PlayerPrefs.GetInt("PlayerCoins", 1000);
         playerLevel = PlayerPrefs.GetInt("PlayerLevel", 1);
         unlockedCharacters = PlayerPrefs.GetInt("UnlockedCharacters", 1);
 
+        // ✅ CARREGA UPGRADES COM VERIFICAÇÃO
         for (int i = 0; i < upgradeLevels.Length; i++)
         {
             upgradeLevels[i] = PlayerPrefs.GetInt($"UpgradeLevel_{i}", 1);
         }
 
-        // 🆕 CARREGAR DESBLOQUEIO BASEADO NO unlockLevel DO CharacterData
-        for (int i = 0; i < characters.Length; i++)
+        // ✅ CARREGA DESBLOQUEIO DE PERSONAGENS COM VERIFICAÇÃO
+        if (characters != null)
         {
-            if (characters[i] != null)
+            for (int i = 0; i < characters.Length; i++)
             {
-                characters[i].unlocked = (playerLevel >= characters[i].unlockLevel) || (i < unlockedCharacters);
+                if (characters[i] != null)
+                {
+                    characters[i].unlocked = (playerLevel >= characters[i].unlockLevel) || (i < unlockedCharacters);
+                }
             }
         }
 
-        // 🆕 CARREGAR STAGES DESBLOQUEADOS (usa 'unlocked' do StageData)
-        for (int i = 0; i < stages.Length; i++)
+        // ✅ CARREGA STAGES DESBLOQUEADOS COM VERIFICAÇÃO
+        if (stages != null)
         {
-            if (i == 0) // Primeiro stage sempre desbloqueado
-                stages[i].unlocked = true;
-            else
-                stages[i].unlocked = PlayerPrefs.GetInt($"StageUnlocked_{i}", 0) == 1;
+            for (int i = 0; i < stages.Length; i++)
+            {
+                if (stages[i] != null)
+                {
+                    if (i == 0) // Primeiro stage sempre desbloqueado
+                        stages[i].unlocked = true;
+                    else
+                        stages[i].unlocked = PlayerPrefs.GetInt($"StageUnlocked_{i}", 0) == 1;
+                }
+            }
         }
+
+        Debug.Log("✅ Dados do jogador carregados!");
     }
 
     public void SavePlayerData()
@@ -145,25 +251,40 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         PlayerPrefs.SetInt("PlayerLevel", playerLevel);
         PlayerPrefs.SetInt("UnlockedCharacters", unlockedCharacters);
 
+        // ✅ SALVA UPGRADES
         for (int i = 0; i < upgradeLevels.Length; i++)
         {
             PlayerPrefs.SetInt($"UpgradeLevel_{i}", upgradeLevels[i]);
         }
 
-        // 🆕 SALVAR STAGES DESBLOQUEADOS
-        for (int i = 0; i < stages.Length; i++)
+        // ✅ SALVA STAGES DESBLOQUEADOS
+        if (stages != null)
         {
-            PlayerPrefs.SetInt($"StageUnlocked_{i}", stages[i].unlocked ? 1 : 0);
+            for (int i = 0; i < stages.Length; i++)
+            {
+                if (stages[i] != null)
+                {
+                    PlayerPrefs.SetInt($"StageUnlocked_{i}", stages[i].unlocked ? 1 : 0);
+                }
+            }
         }
 
         PlayerPrefs.Save();
         Debug.Log("💾 Dados do jogador salvos!");
     }
 
-    // 🆕 INICIALIZAÇÃO DO SISTEMA DE PERSONAGENS
+    // ✅ SISTEMA DE PERSONAGENS CORRIGIDO
     private void InitializeCharacterSystem()
     {
-        for (int i = 0; i < characterIcons.Length && i < characters.Length; i++)
+        if (characterIcons == null || characters == null)
+        {
+            Debug.Log("⚠️ Character system não configurado - arrays null");
+            return;
+        }
+
+        int minLength = Mathf.Min(characterIcons.Length, characters.Length);
+
+        for (int i = 0; i < minLength; i++)
         {
             if (characterIcons[i] != null && characters[i] != null)
             {
@@ -177,16 +298,20 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO DE UPGRADE
+    // ✅ MÉTODO DE UPGRADE CORRIGIDO
     public void UpgradeStat(int statIndex)
     {
-        if (statIndex < 0 || statIndex >= upgradeLevels.Length) return;
+        if (statIndex < 0 || statIndex >= upgradeLevels.Length)
+        {
+            Debug.Log("❌ Índice de upgrade inválido");
+            return;
+        }
 
         int upgradeCost = upgradeLevels[statIndex] * 100;
 
         if (playerCoins < upgradeCost)
         {
-            Debug.Log("Moedas insuficientes!");
+            Debug.Log("💰 Moedas insuficientes!");
             return;
         }
 
@@ -201,21 +326,27 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         Debug.Log($"🆙 Upgrade aplicado! {upgradeTypes[statIndex]} Nível: {upgradeLevels[statIndex]}");
     }
 
-    // 🆕 ATUALIZAR UI DE UPGRADES
+    // ✅ ATUALIZAR UI DE UPGRADES CORRIGIDO
     void UpdateUpgradesUI()
     {
+        if (upgradeNiveis == null || upgradeCustos == null || upgradeBotoes == null)
+        {
+            Debug.Log("⚠️ Arrays de upgrade UI não configurados");
+            return;
+        }
+
         for (int i = 0; i < upgradeLevels.Length; i++)
         {
-            if (upgradeNiveis != null && i < upgradeNiveis.Length)
+            if (i < upgradeNiveis.Length && upgradeNiveis[i] != null)
                 upgradeNiveis[i].text = $"Nv.{upgradeLevels[i]}";
 
-            if (upgradeCustos != null && i < upgradeCustos.Length)
+            if (i < upgradeCustos.Length && upgradeCustos[i] != null)
             {
                 int custo = upgradeLevels[i] * 100;
                 upgradeCustos[i].text = custo.ToString();
             }
 
-            if (upgradeBotoes != null && i < upgradeBotoes.Length)
+            if (i < upgradeBotoes.Length && upgradeBotoes[i] != null)
             {
                 int custo = upgradeLevels[i] * 100;
                 upgradeBotoes[i].interactable = playerCoins >= custo;
@@ -223,7 +354,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         }
     }
 
-    // 🆕 ATUALIZAR UI DE COOLDOWN E REGENERAÇÃO
+    // ✅ ATUALIZAR UI DE COOLDOWN E REGENERAÇÃO CORRIGIDO
     void UpdateCooldownAndRegenUI()
     {
         float healthRegenValue = 1f + (upgradeLevels[4] - 1) * 0.5f;
@@ -252,12 +383,16 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         }
     }
 
-    // 🆕 APLICAR UPGRADES AO PERSONAGEM
+    // ✅ APLICAR UPGRADES AO PERSONAGEM CORRIGIDO
     public void ApplyUpgradesToCharacter(PlayerStats playerStats, CharacterData characterData)
     {
-        if (playerStats == null || characterData == null) return;
+        if (playerStats == null || characterData == null)
+        {
+            Debug.Log("❌ PlayerStats ou CharacterData null");
+            return;
+        }
 
-        // 🆕 USA OS VALORES DO SEU CharacterData
+        // Aplica bônus de upgrades
         float healthBonus = characterData.maxHealth * (upgradeLevels[0] - 1) * 0.05f;
         float attackBonus = characterData.baseAttack * (upgradeLevels[1] - 1) * 0.05f;
         float defenseBonus = characterData.baseDefense * (upgradeLevels[2] - 1) * 0.05f;
@@ -266,52 +401,46 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         float attackCooldownReduction = upgradeLevels[5] * 0.05f;
         float defenseCooldownReduction = upgradeLevels[6] * 0.05f;
 
-        // APLICA BÔNUS
+        // Aplica valores base
         playerStats.maxHealth = characterData.maxHealth + healthBonus;
         playerStats.attack = characterData.baseAttack + attackBonus;
         playerStats.defense = characterData.baseDefense + defenseBonus;
         playerStats.speed = characterData.baseSpeed + speedBonus;
         playerStats.healthRegenRate = characterData.baseHealthRegen + regenBonus;
-        playerStats.healthRegenDelay = characterData.baseRegenDelay;
+
+        // Aplica cooldowns com limites
         playerStats.attackActivationInterval = Mathf.Max(0.1f, characterData.baseAttackCooldown * (1f - attackCooldownReduction));
         playerStats.defenseActivationInterval = Mathf.Max(0.1f, characterData.baseDefenseCooldown * (1f - defenseCooldownReduction));
-
-        // 🆕 APLICA BÔNUS DE ELEMENTO DO SEU CharacterData
-        playerStats.CurrentElement = characterData.baseElement;
-        if (characterData.baseElement != PlayerStats.Element.None)
-        {
-            playerStats.attack += characterData.elementAttackBonus;
-            playerStats.defense += characterData.elementDefenseBonus;
-            playerStats.speed += characterData.elementSpeedBonus;
-            playerStats.attackActivationInterval *= (1f - characterData.elementCooldownReduction);
-            playerStats.defenseActivationInterval *= (1f - characterData.elementCooldownReduction);
-        }
 
         Debug.Log($"🎯 {characterData.characterName} - Upgrades aplicados");
     }
 
-    // 🆕 MÉTODO PARA APLICAR PERSONAGEM AOS SISTEMAS (SIMPLIFICADO)
+    // ✅ MÉTODO PARA APLICAR PERSONAGEM AOS SISTEMAS
     public void ApplyCharacterToPlayerSystems(PlayerStats playerStats, SkillManager skillManager)
     {
-        if (selectedCharacterIndex < 0 || selectedCharacterIndex >= characters.Length) return;
-        if (characters[selectedCharacterIndex] == null) return;
+        if (selectedCharacterIndex < 0 || selectedCharacterIndex >= characters.Length)
+        {
+            Debug.Log("❌ Índice de personagem inválido");
+            return;
+        }
+
+        if (characters[selectedCharacterIndex] == null)
+        {
+            Debug.Log("❌ CharacterData null");
+            return;
+        }
 
         CharacterData selectedCharacter = characters[selectedCharacterIndex];
 
         ApplyCharacterBaseStats(playerStats, selectedCharacter);
         ApplyUpgradesToCharacter(playerStats, selectedCharacter);
 
-        // 🆕 APLICA ULTIMATE DO SEU CharacterData (SIMPLIFICADO)
-        if (selectedCharacter.ultimateSkill != null)
-        {
-            Debug.Log($"✨ Ultimate aplicada: {selectedCharacter.ultimateSkill.ultimateName}");
-        }
-
         Debug.Log($"🎮 {selectedCharacter.characterName} aplicado ao PlayerStats!");
     }
 
     private void ApplyCharacterBaseStats(PlayerStats playerStats, CharacterData character)
     {
+        // ✅ APLICA ESTATÍSTICAS BÁSICAS
         playerStats.health = character.maxHealth;
         playerStats.maxHealth = character.maxHealth;
         playerStats.attack = character.baseAttack;
@@ -321,13 +450,28 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         playerStats.healthRegenDelay = character.baseRegenDelay;
         playerStats.attackActivationInterval = character.baseAttackCooldown;
         playerStats.defenseActivationInterval = character.baseDefenseCooldown;
-        playerStats.CurrentElement = character.baseElement;
+
+        // ✅ CORREÇÃO: ENUM NUNCA É NULL, VERIFICAMOS SE É DIFERENTE DO VALOR PADRÃO
+        // Assumindo que o valor padrão do enum é 0 (None/PrimeiroValor)
+        if (character.baseElement != default(PlayerStats.Element))
+        {
+            playerStats.CurrentElement = character.baseElement;
+            Debug.Log($"🎯 Elemento aplicado: {character.baseElement}");
+        }
+        else
+        {
+            Debug.Log("ℹ️ Usando elemento padrão do personagem");
+        }
     }
 
-    // 🆕 ATUALIZAR DISPLAY DE STATUS
+    // ✅ ATUALIZAR DISPLAY DE STATUS CORRIGIDO
     public void UpdateStatusDisplay(CharacterData character)
     {
-        if (character == null) return;
+        if (character == null)
+        {
+            Debug.Log("❌ Character null no UpdateStatusDisplay");
+            return;
+        }
 
         // ATUALIZA TEXTO BÁSICO
         if (characterNameText != null)
@@ -341,12 +485,10 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
         if (characterElementText != null)
         {
-            string elementIcon = character.GetElementIcon();
-            characterElementText.text = $"Elemento: {elementIcon} {character.baseElement}";
-            characterElementText.color = character.GetElementColor();
+            characterElementText.text = $"Elemento: {character.baseElement}";
         }
 
-        // 🆕 CALCULA BÔNUS COM UPGRADES
+        // CALCULA BÔNUS COM UPGRADES
         float healthBonus = character.maxHealth * (upgradeLevels[0] - 1) * 0.05f;
         float attackBonus = character.baseAttack * (upgradeLevels[1] - 1) * 0.05f;
         float defenseBonus = character.baseDefense * (upgradeLevels[2] - 1) * 0.05f;
@@ -360,30 +502,23 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         UpdateStatusSlider(3, character.baseSpeed + speedBonus, 20f, "Velocidade");
         UpdateStatusSlider(4, character.baseHealthRegen + regenBonus, 10f, "Regeneração");
 
-        // 🆕 COOLDOWNS
-        float attackCooldownReduction = upgradeLevels[5] * 5f;
-        float defenseCooldownReduction = upgradeLevels[6] * 5f;
-
-        UpdateStatusSlider(5, attackCooldownReduction, 50f, "Red. CD Ataque");
-        UpdateStatusSlider(6, defenseCooldownReduction, 50f, "Red. CD Defesa");
-
         UpdateCooldownAndRegenUI();
     }
 
     private void UpdateStatusSlider(int index, float value, float maxValue, string label)
     {
-        if (statusSliders != null && index < statusSliders.Length)
+        if (statusSliders != null && index < statusSliders.Length && statusSliders[index] != null)
         {
             statusSliders[index].value = value / maxValue;
         }
 
-        if (statusValues != null && index < statusValues.Length)
+        if (statusValues != null && index < statusValues.Length && statusValues[index] != null)
         {
             statusValues[index].text = $"{label}: {value:F1}";
         }
     }
 
-    // 🆕 MÉTODOS DE SELEÇÃO DE PERSONAGEM
+    // ✅ MÉTODOS DE SELEÇÃO DE PERSONAGEM CORRIGIDOS
     public void OnCharacterIconClicked(int characterIndex)
     {
         SelectCharacter(characterIndex);
@@ -391,8 +526,17 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     public void SelectCharacter(int characterIndex)
     {
-        if (characterIndex < 0 || characterIndex >= characters.Length) return;
-        if (characters[characterIndex] == null || !characters[characterIndex].unlocked) return;
+        if (characterIndex < 0 || characterIndex >= characters.Length)
+        {
+            Debug.Log("❌ Índice de personagem inválido");
+            return;
+        }
+
+        if (characters[characterIndex] == null || !characters[characterIndex].unlocked)
+        {
+            Debug.Log("❌ Personagem null ou bloqueado");
+            return;
+        }
 
         // DESMARCA PERSONAGEM ANTERIOR
         if (selectedCharacterIndex >= 0 && selectedCharacterIndex < characterIcons.Length)
@@ -404,7 +548,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         // MARCA NOVO PERSONAGEM
         selectedCharacterIndex = characterIndex;
 
-        if (characterIcons[characterIndex] != null)
+        if (characterIndex < characterIcons.Length && characterIcons[characterIndex] != null)
             characterIcons[characterIndex].SetSelected(true);
 
         // ATUALIZA UI
@@ -414,19 +558,19 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         Debug.Log($"🎯 Personagem selecionado: {characters[characterIndex].characterName}");
     }
 
-    // 🆕 ATUALIZAR UI PRINCIPAL
+    // ✅ ATUALIZAR UI PRINCIPAL CORRIGIDO
     private void UpdateUI()
     {
         if (coinsText != null)
             coinsText.text = $"Moedas: {playerCoins}";
 
-        if (selectedCharacterIndex >= 0 && selectedCharacterIndex < characters.Length)
+        if (selectedCharacterIndex >= 0 && selectedCharacterIndex < characters.Length && characters[selectedCharacterIndex] != null)
         {
             UpdateStatusDisplay(characters[selectedCharacterIndex]);
         }
     }
 
-    // 🆕 MÉTODOS ADICIONAIS
+    // ✅ MÉTODOS ADICIONAIS CORRIGIDOS
     public void AddCoins(int amount)
     {
         playerCoins += amount;
@@ -438,14 +582,17 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     public void UnlockCharacter(int characterIndex)
     {
-        if (characterIndex < 0 || characterIndex >= characters.Length) return;
-        if (characters[characterIndex] == null) return;
+        if (characterIndex < 0 || characterIndex >= characters.Length || characters[characterIndex] == null)
+        {
+            Debug.Log("❌ Índice de personagem inválido para desbloquear");
+            return;
+        }
 
         characters[characterIndex].unlocked = true;
         if (unlockedCharacters <= characterIndex)
             unlockedCharacters = characterIndex + 1;
 
-        if (characterIcons[characterIndex] != null)
+        if (characterIndex < characterIcons.Length && characterIcons[characterIndex] != null)
             characterIcons[characterIndex].RefreshStatus();
 
         SavePlayerData();
@@ -454,11 +601,15 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     public void UnlockStage(int stageIndex)
     {
-        if (stageIndex < 0 || stageIndex >= stages.Length) return;
+        if (stageIndex < 0 || stageIndex >= stages.Length || stages[stageIndex] == null)
+        {
+            Debug.Log("❌ Índice de stage inválido para desbloquear");
+            return;
+        }
 
         stages[stageIndex].unlocked = true;
 
-        if (stageButtons[stageIndex] != null)
+        if (stageIndex < stageButtons.Length && stageButtons[stageIndex] != null)
             stageButtons[stageIndex].RefreshStatus();
 
         SavePlayerData();
@@ -479,7 +630,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             return;
         }
 
-        if (selectedStageIndex < 0 || selectedStageIndex >= stages.Length)
+        if (selectedStageIndex < 0 || selectedStageIndex >= stages.Length || stages[selectedStageIndex] == null)
         {
             Debug.LogError("❌ Nenhum stage selecionado!");
             return;
@@ -494,24 +645,18 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         Debug.Log($"🚀 Iniciando jogo com {characters[selectedCharacterIndex].characterName} no stage {stages[selectedStageIndex].stageName}");
     }
 
-    // 🆕 CONFIGURAÇÃO AUTOMÁTICA DE REFERÊNCIAS
+    // ✅ CONFIGURAÇÃO AUTOMÁTICA DE REFERÊNCIAS
     public void ConfigurarReferenciasAutomaticamente()
     {
+        Debug.Log("🔧 Configurando referências automaticamente...");
+
         coinsText = GameObject.Find("TextoMoedas")?.GetComponent<TextMeshProUGUI>();
         grupoUpgrades = GameObject.Find("GrupoUpgrades");
 
-        characterNameText = GameObject.Find("TituloDetalhes")?.GetComponent<TextMeshProUGUI>();
+        characterNameText = GameObject.Find("NomePersonagemSelecionado")?.GetComponent<TextMeshProUGUI>();
         characterDescriptionText = GameObject.Find("TextoDescricao")?.GetComponent<TextMeshProUGUI>();
-        characterLevelText = GameObject.Find("TextoNivel")?.GetComponent<TextMeshProUGUI>();
-        characterElementText = GameObject.Find("TextoElemento")?.GetComponent<TextMeshProUGUI>();
-
-        // COOLDOWN/REGEN
-        healthRegenSlider = GameObject.Find("HealthRegen_Slider")?.GetComponent<Slider>();
-        healthRegenValueText = GameObject.Find("HealthRegen_Value")?.GetComponent<TextMeshProUGUI>();
-        attackCooldownSlider = GameObject.Find("AttackCooldown_Slider")?.GetComponent<Slider>();
-        attackCooldownValueText = GameObject.Find("AttackCooldown_Value")?.GetComponent<TextMeshProUGUI>();
-        defenseCooldownSlider = GameObject.Find("DefenseCooldown_Slider")?.GetComponent<Slider>();
-        defenseCooldownValueText = GameObject.Find("DefenseCooldown_Value")?.GetComponent<TextMeshProUGUI>();
+        characterLevelText = GameObject.Find("NivelPersonagem")?.GetComponent<TextMeshProUGUI>();
+        characterElementText = GameObject.Find("ElementoPersonagem")?.GetComponent<TextMeshProUGUI>();
 
         ConfigurarReferenciasUpgrades();
         Debug.Log("✅ Referências configuradas automaticamente!");
