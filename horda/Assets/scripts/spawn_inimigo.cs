@@ -324,8 +324,6 @@ public class EnemySpawnerCompleto : MonoBehaviour
         Debug.Log($"📊 Stats: {novaWave.duracao}s, {novaWave.maxInimigos} inimigos, x{novaWave.multiplicadorDificuldade} dificuldade");
     }
 
-    // ... (MANTENHA OS OUTROS MÉTODOS EXISTENTES - VerificarPrefabs, AplicarDificuldadeNoInimigo, CriarInimigoSeguro, etc.)
-
     void VerificarPrefabs()
     {
         for (int i = tiposInimigos.Count - 1; i >= 0; i--)
@@ -388,15 +386,20 @@ public class EnemySpawnerCompleto : MonoBehaviour
             }
 
             TipoInimigo tipoEscolhido = EscolherTipoInimigoPorPeso();
-            if (tipoEscolhido.prefab != null)
+
+            // ✅ CORREÇÃO: VERIFICAR SE O TIPO ESCOLHIDO É VÁLIDO
+            if (tipoEscolhido == null || tipoEscolhido.prefab == null)
             {
-                GameObject novoInimigo = CriarInimigoSeguro(tipoEscolhido, posicaoSpawn);
-                if (novoInimigo != null)
-                {
-                    inimigosAtivos.Add(novoInimigo);
-                    AplicarDificuldadeNoInimigo(novoInimigo, waveAtualIndex);
-                    inimigosSpawnados++;
-                }
+                Debug.LogWarning("⚠️ Tipo de inimigo inválido para spawn em grupo");
+                continue;
+            }
+
+            GameObject novoInimigo = CriarInimigoSeguro(tipoEscolhido, posicaoSpawn);
+            if (novoInimigo != null)
+            {
+                inimigosAtivos.Add(novoInimigo);
+                AplicarDificuldadeNoInimigo(novoInimigo, waveAtualIndex);
+                inimigosSpawnados++;
             }
         }
 
@@ -409,6 +412,13 @@ public class EnemySpawnerCompleto : MonoBehaviour
     void SpawnarInimigo()
     {
         TipoInimigo tipoEscolhido = EscolherTipoInimigoPorPeso();
+
+        // ✅ CORREÇÃO: VERIFICAR SE O TIPO ESCOLHIDO É VÁLIDO ANTES DE USAR
+        if (tipoEscolhido == null)
+        {
+            Debug.LogWarning("⚠️ Nenhum tipo de inimigo disponível para spawn!");
+            return;
+        }
 
         if (tipoEscolhido.prefab != null)
         {
@@ -426,9 +436,11 @@ public class EnemySpawnerCompleto : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            Debug.LogError($"❌ Prefab ausente para: {tipoEscolhido.nome}");
+        }
     }
-
-    // ... (MANTENHA OS OUTROS MÉTODOS EXISTENTES - Área, Movimento, etc.)
 
     public bool EstaDentroDaArea(Vector2 posicao)
     {
@@ -542,5 +554,10 @@ public class EnemySpawnerCompleto : MonoBehaviour
         }
     }
 
-    // ... (MANTENHA OS MÉTODOS PÚBLICOS E DEBUG)
+    // Métodos de debug e informações
+    public int GetWaveAtualIndex() => waveAtualIndex;
+    public string GetNomeWaveAtual() => waveAtualIndex >= 0 && waveAtualIndex < waves.Count ? waves[waveAtualIndex].nome : "Nenhuma";
+    public int GetInimigosAtivosCount() => inimigosAtivos.Count;
+    public int GetInimigosDisponiveisCount() => inimigosDisponiveis.Count;
+    public bool IsWaveAtiva() => waveAtiva;
 }
