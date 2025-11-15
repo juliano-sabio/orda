@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using UnityEditor;
 using System.Collections.Generic;
 
@@ -31,14 +32,16 @@ public class UIManagerCanvasCreator : EditorWindow
         CreateHUDLevelXP(canvasGO, uiManager);
         CreateHUDUltimate(canvasGO, uiManager);
         CreateHUDElement(canvasGO, uiManager);
-        CreateElementAdvantagePanel(canvasGO, uiManager); // 🆕 NOVO
+        CreateElementAdvantagePanel(canvasGO, uiManager);
         CreateStatusPanel(canvasGO, uiManager);
         CreateSkillSelectionPanel(canvasGO, uiManager);
+        CreateStatusCardPanel(canvasGO, uiManager);
 
         // Selecionar o Canvas criado
         Selection.activeGameObject = canvasGO;
 
         Debug.Log("✅ Canvas UIManager COMPLETO criado com sucesso!");
+        Debug.Log("🎮 Controles: Tab (Status), K (Skills), C (Cards), R (Ultimate)");
     }
 
     private static void CreateSkillAcquiredPanel(GameObject parent, UIManager uiManager)
@@ -49,22 +52,23 @@ public class UIManagerCanvasCreator : EditorWindow
         Image bg = panel.GetComponent<Image>();
         bg.color = new Color(0, 0, 0, 0.9f);
 
-        // Skill Name Text
-        GameObject nameText = CreateText(panel, "SkillNameText", new Vector2(0, 50), new Vector2(480, 60));
-        Text nameTextComponent = nameText.GetComponent<Text>();
+        // Skill Name Text (TMP)
+        GameObject nameText = CreateTMPText(panel, "SkillNameText", new Vector2(0, 50), new Vector2(480, 60));
+        TextMeshProUGUI nameTextComponent = nameText.GetComponent<TextMeshProUGUI>();
         nameTextComponent.text = "NOVA SKILL ADQUIRIDA!";
         nameTextComponent.color = Color.yellow;
         nameTextComponent.fontSize = 28;
-        nameTextComponent.fontStyle = FontStyle.Bold;
-        nameTextComponent.alignment = TextAnchor.MiddleCenter;
+        nameTextComponent.fontStyle = FontStyles.Bold;
+        nameTextComponent.alignment = TextAlignmentOptions.Center;
 
-        // Skill Description Text
-        GameObject descText = CreateText(panel, "SkillDescriptionText", new Vector2(0, -30), new Vector2(480, 80));
-        Text descTextComponent = descText.GetComponent<Text>();
+        // Skill Description Text (TMP)
+        GameObject descText = CreateTMPText(panel, "SkillDescriptionText", new Vector2(0, -30), new Vector2(480, 80));
+        TextMeshProUGUI descTextComponent = descText.GetComponent<TextMeshProUGUI>();
         descTextComponent.text = "Descrição detalhada da skill adquirida...";
         descTextComponent.color = Color.white;
         descTextComponent.fontSize = 18;
-        descTextComponent.alignment = TextAnchor.UpperCenter;
+        descTextComponent.alignment = TextAlignmentOptions.Top;
+        descTextComponent.textWrappingMode = TextWrappingModes.Normal;
 
         uiManager.skillAcquiredPanel = panel;
         uiManager.skillNameText = nameTextComponent;
@@ -73,7 +77,7 @@ public class UIManagerCanvasCreator : EditorWindow
 
     private static void CreateHUDSkills(GameObject parent, UIManager uiManager)
     {
-        GameObject hud = CreatePanel(parent, "HUD_Skills", new Vector2(600, 150)); // 🆕 Aumentado para caber ícones de elemento
+        GameObject hud = CreatePanel(parent, "HUD_Skills", new Vector2(600, 150));
         RectTransform rect = hud.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0, 0);
         rect.anchorMax = new Vector2(0, 0);
@@ -86,14 +90,14 @@ public class UIManagerCanvasCreator : EditorWindow
         // Attack Skill 1
         GameObject skill1 = CreateSkillSlot(attackSkills, "AttackSkill1", new Vector2(-60, 0), uiManager);
         uiManager.attackSkill1Icon = skill1.transform.Find("Icon").GetComponent<Image>();
-        uiManager.attackCooldownText1 = skill1.transform.Find("CooldownText").GetComponent<Text>();
-        uiManager.attackSkill1ElementIcon = CreateElementIcon(skill1, "ElementIcon", new Vector2(0, -60)); // 🆕 Ícone de elemento
+        uiManager.attackCooldownText1 = skill1.transform.Find("CooldownText").GetComponent<TextMeshProUGUI>();
+        uiManager.attackSkill1ElementIcon = CreateElementIcon(skill1, "ElementIcon", new Vector2(0, -60));
 
         // Attack Skill 2
         GameObject skill2 = CreateSkillSlot(attackSkills, "AttackSkill2", new Vector2(60, 0), uiManager);
         uiManager.attackSkill2Icon = skill2.transform.Find("Icon").GetComponent<Image>();
-        uiManager.attackCooldownText2 = skill2.transform.Find("CooldownText").GetComponent<Text>();
-        uiManager.attackSkill2ElementIcon = CreateElementIcon(skill2, "ElementIcon", new Vector2(0, -60)); // 🆕 Ícone de elemento
+        uiManager.attackCooldownText2 = skill2.transform.Find("CooldownText").GetComponent<TextMeshProUGUI>();
+        uiManager.attackSkill2ElementIcon = CreateElementIcon(skill2, "ElementIcon", new Vector2(0, -60));
 
         // Defense Skills
         GameObject defenseSkills = CreatePanel(hud, "DefenseSkills", new Vector2(240, 150));
@@ -103,20 +107,20 @@ public class UIManagerCanvasCreator : EditorWindow
         // Defense Skill 1
         GameObject defense1 = CreateSkillSlot(defenseSkills, "DefenseSkill1", new Vector2(-60, 0), uiManager);
         uiManager.defenseSkill1Icon = defense1.transform.Find("Icon").GetComponent<Image>();
-        uiManager.defenseCooldownText1 = defense1.transform.Find("CooldownText").GetComponent<Text>();
-        uiManager.defenseSkill1ElementIcon = CreateElementIcon(defense1, "ElementIcon", new Vector2(0, -60)); // 🆕 Ícone de elemento
+        uiManager.defenseCooldownText1 = defense1.transform.Find("CooldownText").GetComponent<TextMeshProUGUI>();
+        uiManager.defenseSkill1ElementIcon = CreateElementIcon(defense1, "ElementIcon", new Vector2(0, -60));
 
         // Defense Skill 2
         GameObject defense2 = CreateSkillSlot(defenseSkills, "DefenseSkill2", new Vector2(60, 0), uiManager);
         uiManager.defenseSkill2Icon = defense2.transform.Find("Icon").GetComponent<Image>();
-        uiManager.defenseCooldownText2 = defense2.transform.Find("CooldownText").GetComponent<Text>();
-        uiManager.defenseSkill2ElementIcon = CreateElementIcon(defense2, "ElementIcon", new Vector2(0, -60)); // 🆕 Ícone de elemento
+        uiManager.defenseCooldownText2 = defense2.transform.Find("CooldownText").GetComponent<TextMeshProUGUI>();
+        uiManager.defenseSkill2ElementIcon = CreateElementIcon(defense2, "ElementIcon", new Vector2(0, -60));
 
-        // Ultimate Skill (maior e centralizada)
+        // Ultimate Skill
         GameObject ultimate = CreateUltimateSkillSlot(hud, "UltimateSkill", new Vector2(480, 0), uiManager);
         uiManager.ultimateSkillIcon = ultimate.transform.Find("Icon").GetComponent<Image>();
-        uiManager.ultimateCooldownText = ultimate.transform.Find("CooldownText").GetComponent<Text>();
-        uiManager.ultimateSkillElementIcon = CreateElementIcon(ultimate, "ElementIcon", new Vector2(0, -70)); // 🆕 Ícone de elemento
+        uiManager.ultimateCooldownText = ultimate.transform.Find("CooldownText").GetComponent<TextMeshProUGUI>();
+        uiManager.ultimateSkillElementIcon = CreateElementIcon(ultimate, "ElementIcon", new Vector2(0, -70));
     }
 
     // 🆕 MÉTODO PARA CRIAR ÍCONE DE ELEMENTO
@@ -126,7 +130,7 @@ public class UIManagerCanvasCreator : EditorWindow
         elementIcon.transform.SetParent(parent.transform);
 
         RectTransform rect = elementIcon.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(20, 20); // 🆕 Tamanho pequeno
+        rect.sizeDelta = new Vector2(20, 20);
         rect.anchoredPosition = position;
         rect.anchorMin = new Vector2(0.5f, 0f);
         rect.anchorMax = new Vector2(0.5f, 0f);
@@ -134,7 +138,7 @@ public class UIManagerCanvasCreator : EditorWindow
 
         Image iconImage = elementIcon.GetComponent<Image>();
         iconImage.color = Color.white;
-        iconImage.gameObject.SetActive(false); // 🆕 Inicia oculto
+        iconImage.gameObject.SetActive(false);
 
         return iconImage;
     }
@@ -153,16 +157,16 @@ public class UIManagerCanvasCreator : EditorWindow
         iconRect.anchoredPosition = Vector2.zero;
 
         Image iconImage = icon.GetComponent<Image>();
-        iconImage.color = Color.gray; // Placeholder
+        iconImage.color = Color.gray;
 
-        // Cooldown Text
-        GameObject cooldownText = CreateText(slot, "CooldownText", new Vector2(0, -45), new Vector2(100, 30));
-        Text textComponent = cooldownText.GetComponent<Text>();
+        // Cooldown Text (TMP)
+        GameObject cooldownText = CreateTMPText(slot, "CooldownText", new Vector2(0, -45), new Vector2(100, 30));
+        TextMeshProUGUI textComponent = cooldownText.GetComponent<TextMeshProUGUI>();
         textComponent.text = "PRONTO";
         textComponent.color = Color.green;
         textComponent.fontSize = 12;
-        textComponent.fontStyle = FontStyle.Bold;
-        textComponent.alignment = TextAnchor.MiddleCenter;
+        textComponent.fontStyle = FontStyles.Bold;
+        textComponent.alignment = TextAlignmentOptions.Center;
 
         return slot;
     }
@@ -181,16 +185,16 @@ public class UIManagerCanvasCreator : EditorWindow
         iconRect.anchoredPosition = Vector2.zero;
 
         Image iconImage = icon.GetComponent<Image>();
-        iconImage.color = Color.red; // Destaque para ultimate
+        iconImage.color = Color.red;
 
-        // Cooldown Text
-        GameObject cooldownText = CreateText(slot, "CooldownText", new Vector2(0, -55), new Vector2(120, 30));
-        Text textComponent = cooldownText.GetComponent<Text>();
+        // Cooldown Text (TMP)
+        GameObject cooldownText = CreateTMPText(slot, "CooldownText", new Vector2(0, -55), new Vector2(120, 30));
+        TextMeshProUGUI textComponent = cooldownText.GetComponent<TextMeshProUGUI>();
         textComponent.text = "BLOQUEADA";
         textComponent.color = Color.gray;
         textComponent.fontSize = 11;
-        textComponent.fontStyle = FontStyle.Bold;
-        textComponent.alignment = TextAnchor.MiddleCenter;
+        textComponent.fontStyle = FontStyles.Bold;
+        textComponent.alignment = TextAlignmentOptions.Center;
 
         return slot;
     }
@@ -208,14 +212,14 @@ public class UIManagerCanvasCreator : EditorWindow
         GameObject healthBar = CreateSlider(healthHUD, "HealthBar", new Vector2(0, 10), new Vector2(300, 30));
         uiManager.healthBar = healthBar.GetComponent<Slider>();
 
-        // Health Text
-        GameObject healthText = CreateText(healthHUD, "HealthText", new Vector2(0, -20), new Vector2(300, 30));
-        Text textComponent = healthText.GetComponent<Text>();
+        // Health Text (TMP)
+        GameObject healthText = CreateTMPText(healthHUD, "HealthText", new Vector2(0, -20), new Vector2(300, 30));
+        TextMeshProUGUI textComponent = healthText.GetComponent<TextMeshProUGUI>();
         textComponent.text = "100/100";
         textComponent.color = Color.green;
         textComponent.fontSize = 16;
-        textComponent.fontStyle = FontStyle.Bold;
-        textComponent.alignment = TextAnchor.MiddleCenter;
+        textComponent.fontStyle = FontStyles.Bold;
+        textComponent.alignment = TextAlignmentOptions.Center;
 
         uiManager.healthText = textComponent;
     }
@@ -229,22 +233,22 @@ public class UIManagerCanvasCreator : EditorWindow
         rect.pivot = new Vector2(1, 1);
         rect.anchoredPosition = new Vector2(-20, -20);
 
-        // Level Text
-        GameObject levelText = CreateText(levelHUD, "LevelText", new Vector2(0, 30), new Vector2(280, 30));
-        Text levelTextComponent = levelText.GetComponent<Text>();
-        levelTextComponent.text = "⭐ Level: 1"; // 🆕 Com emoji
+        // Level Text (TMP)
+        GameObject levelText = CreateTMPText(levelHUD, "LevelText", new Vector2(0, 30), new Vector2(280, 30));
+        TextMeshProUGUI levelTextComponent = levelText.GetComponent<TextMeshProUGUI>();
+        levelTextComponent.text = "⭐ Level: 1";
         levelTextComponent.color = Color.white;
         levelTextComponent.fontSize = 20;
-        levelTextComponent.fontStyle = FontStyle.Bold;
-        levelTextComponent.alignment = TextAnchor.UpperRight;
+        levelTextComponent.fontStyle = FontStyles.Bold;
+        levelTextComponent.alignment = TextAlignmentOptions.TopRight;
 
-        // XP Text
-        GameObject xpText = CreateText(levelHUD, "XPText", new Vector2(0, 0), new Vector2(280, 25));
-        Text xpTextComponent = xpText.GetComponent<Text>();
-        xpTextComponent.text = "📊 XP: 0/100"; // 🆕 Com emoji
+        // XP Text (TMP)
+        GameObject xpText = CreateTMPText(levelHUD, "XPText", new Vector2(0, 0), new Vector2(280, 25));
+        TextMeshProUGUI xpTextComponent = xpText.GetComponent<TextMeshProUGUI>();
+        xpTextComponent.text = "📊 XP: 0/100";
         xpTextComponent.color = Color.cyan;
         xpTextComponent.fontSize = 14;
-        xpTextComponent.alignment = TextAnchor.UpperRight;
+        xpTextComponent.alignment = TextAlignmentOptions.TopRight;
 
         // XP Slider
         GameObject xpSlider = CreateSlider(levelHUD, "XPSlider", new Vector2(0, -25), new Vector2(280, 15));
@@ -267,19 +271,19 @@ public class UIManagerCanvasCreator : EditorWindow
         GameObject ultimateBar = CreateSlider(ultimateHUD, "UltimateChargeBar", new Vector2(0, 20), new Vector2(250, 20));
         uiManager.ultimateChargeBar = ultimateBar.GetComponent<Slider>();
 
-        // Ultimate Charge Text
-        GameObject chargeText = CreateText(ultimateHUD, "UltimateChargeText", new Vector2(0, -10), new Vector2(250, 30));
-        Text chargeTextComponent = chargeText.GetComponent<Text>();
-        chargeTextComponent.text = "🚀 ULTIMATE: 0%"; // 🆕 Com emoji
+        // Ultimate Charge Text (TMP)
+        GameObject chargeText = CreateTMPText(ultimateHUD, "UltimateChargeText", new Vector2(0, -10), new Vector2(250, 30));
+        TextMeshProUGUI chargeTextComponent = chargeText.GetComponent<TextMeshProUGUI>();
+        chargeTextComponent.text = "🚀 ULTIMATE: 0%";
         chargeTextComponent.color = Color.white;
         chargeTextComponent.fontSize = 14;
-        chargeTextComponent.alignment = TextAnchor.MiddleCenter;
+        chargeTextComponent.alignment = TextAlignmentOptions.Center;
 
-        // Ultimate Ready Effect (placeholder)
+        // Ultimate Ready Effect
         GameObject readyEffect = CreatePanel(ultimateHUD, "UltimateReadyEffect", new Vector2(50, 50));
         readyEffect.SetActive(false);
         Image effectImage = readyEffect.GetComponent<Image>();
-        effectImage.color = new Color(1, 1, 0, 0.5f); // Amarelo semi-transparente
+        effectImage.color = new Color(1, 1, 0, 0.5f);
 
         uiManager.ultimateChargeText = chargeTextComponent;
         uiManager.ultimateReadyEffect = readyEffect;
@@ -287,7 +291,7 @@ public class UIManagerCanvasCreator : EditorWindow
 
     private static void CreateHUDElement(GameObject parent, UIManager uiManager)
     {
-        GameObject elementHUD = CreatePanel(parent, "HUD_Element", new Vector2(250, 80)); // 🆕 Aumentado
+        GameObject elementHUD = CreatePanel(parent, "HUD_Element", new Vector2(250, 80));
         RectTransform rect = elementHUD.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(1, 0);
         rect.anchorMax = new Vector2(1, 0);
@@ -298,28 +302,27 @@ public class UIManagerCanvasCreator : EditorWindow
         GameObject elementIcon = new GameObject("ElementIcon", typeof(Image));
         elementIcon.transform.SetParent(elementHUD.transform);
         RectTransform iconRect = elementIcon.GetComponent<RectTransform>();
-        iconRect.sizeDelta = new Vector2(50, 50); // 🆕 Aumentado
+        iconRect.sizeDelta = new Vector2(50, 50);
         iconRect.anchoredPosition = new Vector2(-40, 0);
         Image iconImage = elementIcon.GetComponent<Image>();
-        iconImage.color = new Color(1, 1, 1, 0.3f); // 🆕 Inicia semi-transparente
+        iconImage.color = new Color(1, 1, 1, 0.3f);
 
-        // Current Element Text
-        GameObject elementText = CreateText(elementHUD, "CurrentElementText", new Vector2(70, 0), new Vector2(160, 40));
-        Text textComponent = elementText.GetComponent<Text>();
-        textComponent.text = "⚡ Elemento: None"; // 🆕 Com emoji
+        // Current Element Text (TMP)
+        GameObject elementText = CreateTMPText(elementHUD, "CurrentElementText", new Vector2(70, 0), new Vector2(160, 40));
+        TextMeshProUGUI textComponent = elementText.GetComponent<TextMeshProUGUI>();
+        textComponent.text = "⚡ Elemento: None";
         textComponent.color = Color.white;
         textComponent.fontSize = 14;
-        textComponent.alignment = TextAnchor.MiddleLeft;
+        textComponent.alignment = TextAlignmentOptions.Left;
 
         uiManager.elementIcon = iconImage;
         uiManager.currentElementText = textComponent;
     }
 
-    // 🆕 NOVO: Painel de Vantagens/Desvantagens Elementais
     private static void CreateElementAdvantagePanel(GameObject parent, UIManager uiManager)
     {
         GameObject panel = CreatePanel(parent, "ElementAdvantagePanel", new Vector2(300, 80));
-        panel.SetActive(false); // 🆕 Inicia oculto
+        panel.SetActive(false);
         RectTransform rect = panel.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0, 0.5f);
         rect.anchorMax = new Vector2(0, 0.5f);
@@ -329,21 +332,21 @@ public class UIManagerCanvasCreator : EditorWindow
         Image bg = panel.GetComponent<Image>();
         bg.color = new Color(0, 0, 0, 0.8f);
 
-        // Advantage Text
-        GameObject advantageText = CreateText(panel, "AdvantageText", new Vector2(0, 15), new Vector2(280, 25));
-        Text advantageTextComponent = advantageText.GetComponent<Text>();
+        // Advantage Text (TMP)
+        GameObject advantageText = CreateTMPText(panel, "AdvantageText", new Vector2(0, 15), new Vector2(280, 25));
+        TextMeshProUGUI advantageTextComponent = advantageText.GetComponent<TextMeshProUGUI>();
         advantageTextComponent.text = "Forte contra: ";
         advantageTextComponent.color = Color.green;
         advantageTextComponent.fontSize = 12;
-        advantageTextComponent.alignment = TextAnchor.MiddleLeft;
+        advantageTextComponent.alignment = TextAlignmentOptions.Left;
 
-        // Disadvantage Text
-        GameObject disadvantageText = CreateText(panel, "DisadvantageText", new Vector2(0, -15), new Vector2(280, 25));
-        Text disadvantageTextComponent = disadvantageText.GetComponent<Text>();
+        // Disadvantage Text (TMP)
+        GameObject disadvantageText = CreateTMPText(panel, "DisadvantageText", new Vector2(0, -15), new Vector2(280, 25));
+        TextMeshProUGUI disadvantageTextComponent = disadvantageText.GetComponent<TextMeshProUGUI>();
         disadvantageTextComponent.text = "Fraco contra: ";
         disadvantageTextComponent.color = Color.red;
         disadvantageTextComponent.fontSize = 12;
-        disadvantageTextComponent.alignment = TextAnchor.MiddleLeft;
+        disadvantageTextComponent.alignment = TextAlignmentOptions.Left;
 
         uiManager.elementAdvantagePanel = panel;
         uiManager.advantageText = advantageTextComponent;
@@ -352,7 +355,7 @@ public class UIManagerCanvasCreator : EditorWindow
 
     private static void CreateStatusPanel(GameObject parent, UIManager uiManager)
     {
-        GameObject statusPanel = CreatePanel(parent, "StatusPanel", new Vector2(450, 600)); // 🆕 Aumentado
+        GameObject statusPanel = CreatePanel(parent, "StatusPanel", new Vector2(450, 600));
         statusPanel.SetActive(false);
         RectTransform rect = statusPanel.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -363,56 +366,49 @@ public class UIManagerCanvasCreator : EditorWindow
         Image bg = statusPanel.GetComponent<Image>();
         bg.color = new Color(0, 0, 0, 0.95f);
 
-        // Título
-        GameObject title = CreateText(statusPanel, "Title", new Vector2(0, 280), new Vector2(430, 40));
-        Text titleText = title.GetComponent<Text>();
+        // Título (TMP)
+        GameObject title = CreateTMPText(statusPanel, "Title", new Vector2(0, 280), new Vector2(430, 40));
+        TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
         titleText.text = "📊 STATUS DO JOGADOR";
         titleText.color = Color.yellow;
         titleText.fontSize = 24;
-        titleText.fontStyle = FontStyle.Bold;
-        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.fontStyle = FontStyles.Bold;
+        titleText.alignment = TextAlignmentOptions.Center;
 
-        // Criar todos os textos de status
+        // Criar todos os textos de status (TMP)
         float startY = 230;
         float spacing = -30;
 
-        uiManager.damageText = CreateStatusText(statusPanel, "DamageText", "⚔️ Ataque: 10.0", new Vector2(0, startY)); // 🆕 Com emoji
-        uiManager.speedText = CreateStatusText(statusPanel, "SpeedText", "🏃 Velocidade: 8.0", new Vector2(0, startY + spacing)); // 🆕 Com emoji
-        uiManager.defenseText = CreateStatusText(statusPanel, "DefenseText", "🛡️ Defesa: 5", new Vector2(0, startY + spacing * 2)); // 🆕 Com emoji
-        uiManager.attackSpeedText = CreateStatusText(statusPanel, "AttackSpeedText", "⚡ Vel. Ataque: 2.0s", new Vector2(0, startY + spacing * 3)); // 🆕 Com emoji
-
-        // 🆕 Element Info Text com mais espaço
-        uiManager.elementInfoText = CreateStatusText(statusPanel, "ElementInfoText", "⚡ Elemento: None\n📈 Bônus: 1.2x", new Vector2(0, startY + spacing * 4), new Vector2(400, 60));
-
-        uiManager.inventoryText = CreateStatusText(statusPanel, "InventoryText", "🎒 Itens: Nenhum", new Vector2(0, startY + spacing * 6)); // 🆕 Com emoji
-
-        // 🆕 Skills com mais espaço para elementos
-        uiManager.attackSkillsText = CreateStatusText(statusPanel, "AttackSkillsText", "⚔️ Skills de Ataque:\n- Ataque Automático", new Vector2(-200, startY + spacing * 7), new Vector2(180, 100));
-        uiManager.defenseSkillsText = CreateStatusText(statusPanel, "DefenseSkillsText", "🛡️ Skills de Defesa:\n- Proteção Passiva", new Vector2(200, startY + spacing * 7), new Vector2(180, 100));
-
-        uiManager.ultimateSkillsText = CreateStatusText(statusPanel, "UltimateSkillsText", "🚀 Ultimate:\n🔒 Disponível no Level 5", new Vector2(0, startY + spacing * 11), new Vector2(400, 80));
+        uiManager.damageText = CreateTMPStatusText(statusPanel, "DamageText", "⚔️ Ataque: 10.0", new Vector2(0, startY));
+        uiManager.speedText = CreateTMPStatusText(statusPanel, "SpeedText", "🏃 Velocidade: 8.0", new Vector2(0, startY + spacing));
+        uiManager.defenseText = CreateTMPStatusText(statusPanel, "DefenseText", "🛡️ Defesa: 5", new Vector2(0, startY + spacing * 2));
+        uiManager.attackSpeedText = CreateTMPStatusText(statusPanel, "AttackSpeedText", "⚡ Vel. Ataque: 2.0s", new Vector2(0, startY + spacing * 3));
+        uiManager.elementInfoText = CreateTMPStatusText(statusPanel, "ElementInfoText", "⚡ Elemento: None\n📈 Bônus: 1.2x", new Vector2(0, startY + spacing * 4), new Vector2(400, 60));
+        uiManager.inventoryText = CreateTMPStatusText(statusPanel, "InventoryText", "🎒 Itens: Nenhum", new Vector2(0, startY + spacing * 6));
+        uiManager.attackSkillsText = CreateTMPStatusText(statusPanel, "AttackSkillsText", "⚔️ Skills de Ataque:\n- Ataque Automático", new Vector2(-200, startY + spacing * 7), new Vector2(180, 100));
+        uiManager.defenseSkillsText = CreateTMPStatusText(statusPanel, "DefenseSkillsText", "🛡️ Skills de Defesa:\n- Proteção Passiva", new Vector2(200, startY + spacing * 7), new Vector2(180, 100));
+        uiManager.ultimateSkillsText = CreateTMPStatusText(statusPanel, "UltimateSkillsText", "🚀 Ultimate:\n🔒 Disponível no Level 5", new Vector2(0, startY + spacing * 11), new Vector2(400, 80));
 
         uiManager.statusPanel = statusPanel;
     }
 
-    private static Text CreateStatusText(GameObject parent, string name, string text, Vector2 position, Vector2? size = null)
+    private static TextMeshProUGUI CreateTMPStatusText(GameObject parent, string name, string text, Vector2 position, Vector2? size = null)
     {
         Vector2 textSize = size ?? new Vector2(400, 25);
-        GameObject textGO = CreateText(parent, name, position, textSize);
-        Text textComponent = textGO.GetComponent<Text>();
+        GameObject textGO = CreateTMPText(parent, name, position, textSize);
+        TextMeshProUGUI textComponent = textGO.GetComponent<TextMeshProUGUI>();
         textComponent.text = text;
         textComponent.color = Color.white;
         textComponent.fontSize = 12;
-        textComponent.alignment = TextAnchor.MiddleLeft;
-        textComponent.horizontalOverflow = HorizontalWrapMode.Wrap;
-        textComponent.verticalOverflow = VerticalWrapMode.Overflow;
+        textComponent.alignment = TextAlignmentOptions.Left;
+        textComponent.textWrappingMode = TextWrappingModes.Normal;
 
         return textComponent;
     }
 
     private static void CreateSkillSelectionPanel(GameObject parent, UIManager uiManager)
     {
-        GameObject selectionPanel = CreatePanel(parent, "SkillSelectionPanel", new Vector2(700, 500)); // 🆕 Aumentado
+        GameObject selectionPanel = CreatePanel(parent, "SkillSelectionPanel", new Vector2(700, 500));
         selectionPanel.SetActive(false);
         RectTransform rect = selectionPanel.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -423,22 +419,22 @@ public class UIManagerCanvasCreator : EditorWindow
         Image bg = selectionPanel.GetComponent<Image>();
         bg.color = new Color(0, 0, 0, 0.95f);
 
-        // Título
-        GameObject title = CreateText(selectionPanel, "Title", new Vector2(0, 230), new Vector2(680, 40));
-        Text titleText = title.GetComponent<Text>();
+        // Título (TMP)
+        GameObject title = CreateTMPText(selectionPanel, "Title", new Vector2(0, 230), new Vector2(680, 40));
+        TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
         titleText.text = "🎯 SELEÇÃO DE SKILLS";
         titleText.color = Color.yellow;
         titleText.fontSize = 28;
-        titleText.fontStyle = FontStyle.Bold;
-        titleText.alignment = TextAnchor.MiddleCenter;
+        titleText.fontStyle = FontStyles.Bold;
+        titleText.alignment = TextAlignmentOptions.Center;
 
-        // Available Skills Text
-        GameObject availableText = CreateText(selectionPanel, "AvailableSkillsText", new Vector2(0, 190), new Vector2(680, 30));
-        Text availableTextComponent = availableText.GetComponent<Text>();
-        availableTextComponent.text = "📚 Skills Disponíveis: 0 | ✅ Skills Ativas: 0"; // 🆕 Com emojis
+        // Available Skills Text (TMP)
+        GameObject availableText = CreateTMPText(selectionPanel, "AvailableSkillsText", new Vector2(0, 190), new Vector2(680, 30));
+        TextMeshProUGUI availableTextComponent = availableText.GetComponent<TextMeshProUGUI>();
+        availableTextComponent.text = "📚 Skills Disponíveis: 0 | ✅ Skills Ativas: 0";
         availableTextComponent.color = Color.cyan;
         availableTextComponent.fontSize = 16;
-        availableTextComponent.alignment = TextAnchor.MiddleCenter;
+        availableTextComponent.alignment = TextAlignmentOptions.Center;
 
         // Skill Button Container
         GameObject container = new GameObject("SkillButtonContainer", typeof(RectTransform), typeof(VerticalLayoutGroup));
@@ -459,39 +455,134 @@ public class UIManagerCanvasCreator : EditorWindow
         ContentSizeFitter sizeFitter = container.AddComponent<ContentSizeFitter>();
         sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        // Criar prefab de botão placeholder
-        GameObject buttonPrefab = CreateButton(container, "SkillButtonPrefab", new Vector2(600, 80)); // 🆕 Aumentado
+        // Criar prefab de botão placeholder (TMP)
+        GameObject buttonPrefab = CreateTMPButton(container, "SkillButtonPrefab", new Vector2(600, 80));
         buttonPrefab.name = "SkillButtonPrefab";
         buttonPrefab.SetActive(false);
 
         uiManager.skillSelectionPanel = selectionPanel;
-        uiManager.skillButtonContainer = container.transform;
+        uiManager.skillButtonContainer = container.transform; // ✅ CORRIGIDO: Transform em vez de GameObject
         uiManager.skillButtonPrefab = buttonPrefab;
         uiManager.availableSkillsText = availableTextComponent;
     }
 
-    private static GameObject CreateButton(GameObject parent, string name, Vector2 size)
+    // 🆕 NOVO: Painel de Status Cards
+    private static void CreateStatusCardPanel(GameObject parent, UIManager uiManager)
+    {
+        GameObject panel = CreatePanel(parent, "StatusCardPanel", new Vector2(900, 600));
+        panel.SetActive(false);
+        RectTransform rect = panel.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+
+        Image bg = panel.GetComponent<Image>();
+        bg.color = new Color(0, 0, 0, 0.95f);
+
+        // Tentar carregar sprite de background (opcional)
+        var backgroundSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
+        if (backgroundSprite != null)
+        {
+            bg.sprite = backgroundSprite;
+            bg.type = Image.Type.Sliced;
+        }
+
+        // Título (TMP)
+        GameObject title = CreateTMPText(panel, "Title", new Vector2(0, 250), new Vector2(600, 60));
+        TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
+        titleText.text = "🃏 CARTAS DE STATUS";
+        titleText.color = Color.yellow;
+        titleText.fontSize = 32;
+        titleText.fontStyle = FontStyles.Bold;
+        titleText.alignment = TextAlignmentOptions.Center;
+
+        // Status Points Text (TMP)
+        GameObject pointsText = CreateTMPText(panel, "StatusPointsText", new Vector2(300, 200), new Vector2(300, 40));
+        TextMeshProUGUI pointsTextComponent = pointsText.GetComponent<TextMeshProUGUI>();
+        pointsTextComponent.text = "🎯 Pontos Disponíveis: 0";
+        pointsTextComponent.color = Color.white;
+        pointsTextComponent.fontSize = 18;
+        pointsTextComponent.fontStyle = FontStyles.Bold;
+        pointsTextComponent.alignment = TextAlignmentOptions.Right;
+
+        // Container dos Cards
+        GameObject container = new GameObject("StatusCardContainer", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+        container.transform.SetParent(panel.transform);
+        RectTransform containerRect = container.GetComponent<RectTransform>();
+        containerRect.anchorMin = new Vector2(0.5f, 0.5f);
+        containerRect.anchorMax = new Vector2(0.5f, 0.5f);
+        containerRect.pivot = new Vector2(0.5f, 0.5f);
+        containerRect.sizeDelta = new Vector2(800, 300);
+        containerRect.anchoredPosition = new Vector2(0, -50);
+
+        HorizontalLayoutGroup layout = container.GetComponent<HorizontalLayoutGroup>();
+        layout.spacing = 20;
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
+
+        // Bônus Ativos (TMP)
+        GameObject bonusesText = CreateTMPText(panel, "ActiveBonusesText", new Vector2(-350, 0), new Vector2(250, 300));
+        TextMeshProUGUI bonusesTextComponent = bonusesText.GetComponent<TextMeshProUGUI>();
+        bonusesTextComponent.text = "✅ BÔNUS ATIVOS:\nNenhum";
+        bonusesTextComponent.color = Color.green;
+        bonusesTextComponent.fontSize = 14;
+        bonusesTextComponent.alignment = TextAlignmentOptions.TopLeft;
+        bonusesTextComponent.textWrappingMode = TextWrappingModes.Normal;
+
+        // Botão Fechar - ✅ CORRIGIDO: Chamada correta do método
+        GameObject closeButton = CreateTMPButton(panel, "CloseButton", new Vector2(400, -250), new Vector2(100, 40));
+        TextMeshProUGUI closeButtonText = closeButton.GetComponentInChildren<TextMeshProUGUI>();
+        closeButtonText.text = "FECHAR (C)";
+        closeButtonText.color = Color.white;
+        closeButtonText.fontSize = 14;
+
+        Button closeBtn = closeButton.GetComponent<Button>();
+        // O listener será configurado em runtime
+
+        uiManager.statusCardPanel = panel;
+        uiManager.statusCardContainer = container.transform; // ✅ CORRIGIDO: Transform em vez de GameObject
+        uiManager.statusPointsText = pointsTextComponent;
+        uiManager.activeBonusesText = bonusesTextComponent;
+    }
+
+    // ✅ CORRIGIDO: Método CreateTMPButton com todos os parâmetros
+    private static GameObject CreateTMPButton(GameObject parent, string name, Vector2 position, Vector2 size)
     {
         GameObject button = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
         button.transform.SetParent(parent.transform);
 
         RectTransform rect = button.GetComponent<RectTransform>();
         rect.sizeDelta = size;
+        rect.anchoredPosition = position;
 
         Image image = button.GetComponent<Image>();
         image.color = new Color(0.2f, 0.2f, 0.2f, 1f);
 
-        // Texto do botão
-        GameObject textGO = CreateText(button, "Text", Vector2.zero, size);
-        Text textComponent = textGO.GetComponent<Text>();
-        textComponent.text = "Nome da Skill\nDescrição da skill";
+        // Tentar carregar sprite (opcional)
+        var buttonSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+        if (buttonSprite != null)
+        {
+            image.sprite = buttonSprite;
+            image.type = Image.Type.Sliced;
+        }
+
+        // Texto do botão (TMP)
+        GameObject textGO = CreateTMPText(button, "Text", Vector2.zero, size);
+        TextMeshProUGUI textComponent = textGO.GetComponent<TextMeshProUGUI>();
+        textComponent.text = "Botão";
         textComponent.color = Color.white;
-        textComponent.fontSize = 14; // 🆕 Aumentado
-        textComponent.alignment = TextAnchor.MiddleCenter;
-        textComponent.horizontalOverflow = HorizontalWrapMode.Wrap;
-        textComponent.verticalOverflow = VerticalWrapMode.Overflow;
+        textComponent.fontSize = 14;
+        textComponent.alignment = TextAlignmentOptions.Center;
 
         return button;
+    }
+
+    // ✅ CORRIGIDO: Método sobrecarregado para criar botão sem position/size (para SkillSelection)
+    private static GameObject CreateTMPButton(GameObject parent, string name, Vector2 size)
+    {
+        return CreateTMPButton(parent, name, Vector2.zero, size);
     }
 
     // Métodos auxiliares
@@ -510,22 +601,21 @@ public class UIManagerCanvasCreator : EditorWindow
         return panel;
     }
 
-    private static GameObject CreateText(GameObject parent, string name, Vector2 position, Vector2 size)
+    // 🆕 MÉTODO PARA CRIAR TEXTO TMP
+    private static GameObject CreateTMPText(GameObject parent, string name, Vector2 position, Vector2 size)
     {
-        GameObject textGO = new GameObject(name, typeof(RectTransform), typeof(Text));
+        GameObject textGO = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
         textGO.transform.SetParent(parent.transform);
 
         RectTransform rect = textGO.GetComponent<RectTransform>();
         rect.sizeDelta = size;
         rect.anchoredPosition = position;
 
-        Text text = textGO.GetComponent<Text>();
+        TextMeshProUGUI text = textGO.GetComponent<TextMeshProUGUI>();
         text.color = Color.white;
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         text.fontSize = 14;
-        text.alignment = TextAnchor.MiddleCenter;
-        text.horizontalOverflow = HorizontalWrapMode.Wrap;
-        text.verticalOverflow = VerticalWrapMode.Overflow;
+        text.alignment = TextAlignmentOptions.Center;
+        text.textWrappingMode = TextWrappingModes.Normal;
 
         return textGO;
     }

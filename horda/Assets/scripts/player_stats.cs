@@ -66,6 +66,7 @@ public class PlayerStats : MonoBehaviour
 
     private UIManager uiManager;
     private SkillManager skillManager;
+    private StatusCardSystem cardSystem; // 🆕 Referência ao sistema de cards
 
     // 🆕 ENUM DE ELEMENTOS
     public enum Element
@@ -382,6 +383,7 @@ public class PlayerStats : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         uiManager = UIManager.Instance;
         skillManager = SkillManager.Instance;
+        cardSystem = StatusCardSystem.Instance; // 🆕 Inicializar sistema de cards
 
         StartCoroutine(DelayedStart());
     }
@@ -776,9 +778,6 @@ public class PlayerStats : MonoBehaviour
             ToggleDefenseSkill(1, !defenseSkills[1].isActive);
     }
 
-    // ✅ MÉTODOS RESTANTES MANTIDOS...
-    // (GainXP, LevelUp, ActivateUltimate, TakeDamage, Heal, etc.)
-
     public void GainXP(float xpAmount)
     {
         currentXP += xpAmount;
@@ -789,6 +788,7 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
     }
 
+    // 🆕 ATUALIZADO: LevelUp com integração do sistema de cards
     private void LevelUp()
     {
         level++;
@@ -810,6 +810,12 @@ public class PlayerStats : MonoBehaviour
         }
 
         Debug.Log($"🎉 LEVEL UP! Agora é nível {level}!");
+
+        // 🆕 NOTIFICAR SISTEMA DE CARDS SOBRE O LEVEL UP
+        if (cardSystem != null)
+        {
+            cardSystem.OnPlayerLevelUp(level);
+        }
 
         if (skillManager != null)
         {

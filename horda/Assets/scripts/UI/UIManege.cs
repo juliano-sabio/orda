@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,8 +10,8 @@ public class UIManager : MonoBehaviour
 
     [Header("🔔 Popup de Skill")]
     public GameObject skillAcquiredPanel;
-    public Text skillNameText;
-    public Text skillDescriptionText;
+    public TextMeshProUGUI skillNameText;
+    public TextMeshProUGUI skillDescriptionText;
 
     [Header("🎯 HUD de Skills")]
     public Image attackSkill1Icon;
@@ -19,11 +20,11 @@ public class UIManager : MonoBehaviour
     public Image defenseSkill2Icon;
     public Image ultimateSkillIcon;
 
-    public Text attackCooldownText1;
-    public Text attackCooldownText2;
-    public Text defenseCooldownText1;
-    public Text defenseCooldownText2;
-    public Text ultimateCooldownText;
+    public TextMeshProUGUI attackCooldownText1;
+    public TextMeshProUGUI attackCooldownText2;
+    public TextMeshProUGUI defenseCooldownText1;
+    public TextMeshProUGUI defenseCooldownText2;
+    public TextMeshProUGUI ultimateCooldownText;
     public Slider ultimateChargeBar;
 
     // 🆕 NOVO: Ícones de elemento para cada skill
@@ -36,45 +37,54 @@ public class UIManager : MonoBehaviour
 
     [Header("💚 Vida")]
     public Slider healthBar;
-    public Text healthText;
+    public TextMeshProUGUI healthText;
 
     [Header("⭐ Level e XP")]
-    public Text levelText;
-    public Text xpText;
+    public TextMeshProUGUI levelText;
+    public TextMeshProUGUI xpText;
     public Slider xpSlider;
 
     [Header("🚀 Ultimate")]
-    public Text ultimateChargeText;
+    public TextMeshProUGUI ultimateChargeText;
     public GameObject ultimateReadyEffect;
 
     [Header("⚡ Sistema de Elementos")]
-    public Text currentElementText;
+    public TextMeshProUGUI currentElementText;
     public Image elementIcon;
     public GameObject elementAdvantagePanel;
-    public Text advantageText;
-    public Text disadvantageText;
+    public TextMeshProUGUI advantageText;
+    public TextMeshProUGUI disadvantageText;
 
     [Header("📊 Status Detalhados")]
     public GameObject statusPanel;
-    public Text damageText;
-    public Text speedText;
-    public Text defenseText;
-    public Text attackSpeedText;
-    public Text inventoryText;
-    public Text attackSkillsText;
-    public Text defenseSkillsText;
-    public Text ultimateSkillsText;
-    public Text elementInfoText;
+    public TextMeshProUGUI damageText;
+    public TextMeshProUGUI speedText;
+    public TextMeshProUGUI defenseText;
+    public TextMeshProUGUI attackSpeedText;
+    public TextMeshProUGUI inventoryText;
+    public TextMeshProUGUI attackSkillsText;
+    public TextMeshProUGUI defenseSkillsText;
+    public TextMeshProUGUI ultimateSkillsText;
+    public TextMeshProUGUI elementInfoText;
 
     [Header("🎯 Skill Manager UI")]
     public GameObject skillSelectionPanel;
     public Transform skillButtonContainer;
     public GameObject skillButtonPrefab;
-    public Text availableSkillsText;
+    public TextMeshProUGUI availableSkillsText;
+
+    // 🆕 NOVO: Sistema de Status Cards
+    [Header("🃏 Sistema de Status Cards")]
+    public GameObject statusCardPanel;
+    public Transform statusCardContainer;
+    public TextMeshProUGUI statusPointsText;
+    public TextMeshProUGUI activeBonusesText;
+    public GameObject statusCardPrefab;
 
     [Header("Configurações")]
     public KeyCode toggleStatusKey = KeyCode.Tab;
     public KeyCode toggleSkillsKey = KeyCode.K;
+    public KeyCode toggleCardsKey = KeyCode.C; // 🆕 Nova tecla para cards
     public float popupDisplayTime = 3f;
 
     [Header("🎨 Sprites dos Elementos")]
@@ -88,6 +98,7 @@ public class UIManager : MonoBehaviour
 
     private PlayerStats playerStats;
     private SkillManager skillManager;
+    private StatusCardSystem cardSystem;
     private float[] attackTimers = new float[2];
     private float[] defenseTimers = new float[2];
     private float ultimateTimer = 0f;
@@ -132,6 +143,24 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        InitializeUI();
+
+        playerStats = FindAnyObjectByType<PlayerStats>();
+        skillManager = SkillManager.Instance;
+        cardSystem = StatusCardSystem.Instance;
+
+        for (int i = 0; i < 2; i++)
+        {
+            attackTimers[i] = 0f;
+            defenseTimers[i] = 0f;
+        }
+
+        // 🆕 INICIALIZAR ÍCONES DE ELEMENTO
+        InitializeElementIcons();
+    }
+
+    private void InitializeUI()
+    {
         if (skillAcquiredPanel != null)
             skillAcquiredPanel.SetActive(false);
 
@@ -147,17 +176,8 @@ public class UIManager : MonoBehaviour
         if (elementAdvantagePanel != null)
             elementAdvantagePanel.SetActive(false);
 
-        playerStats = FindAnyObjectByType<PlayerStats>();
-        skillManager = SkillManager.Instance;
-
-        for (int i = 0; i < 2; i++)
-        {
-            attackTimers[i] = 0f;
-            defenseTimers[i] = 0f;
-        }
-
-        // 🆕 INICIALIZAR ÍCONES DE ELEMENTO
-        InitializeElementIcons();
+        if (statusCardPanel != null)
+            statusCardPanel.SetActive(false);
     }
 
     // 🆕 INICIALIZAR ÍCONES DE ELEMENTO
@@ -336,6 +356,12 @@ public class UIManager : MonoBehaviour
             ToggleSkillSelection();
         }
 
+        // 🆕 NOVO: Toggle do sistema de cards
+        if (Input.GetKeyDown(toggleCardsKey) && statusCardPanel != null)
+        {
+            ToggleStatusCards();
+        }
+
         // ✅ CORRIGIDO: Verificação de null para playerStats
         if (playerStats != null)
         {
@@ -345,6 +371,12 @@ public class UIManager : MonoBehaviour
             UpdateSkillElementIcons(); // 🆕 ATUALIZAR ÍCONES DE ELEMENTO
             UpdateUltimateSystem();
             UpdateElementUI();
+        }
+
+        // 🆕 ATUALIZAR SISTEMA DE CARDS
+        if (cardSystem != null)
+        {
+            UpdateStatusCardsUI();
         }
     }
 
@@ -365,7 +397,7 @@ public class UIManager : MonoBehaviour
             for (int i = 0; i < 2; i++)
             {
                 Image attackIcon = i == 0 ? attackSkill1Icon : attackSkill2Icon;
-                Text attackCooldown = i == 0 ? attackCooldownText1 : attackCooldownText2;
+                TextMeshProUGUI attackCooldown = i == 0 ? attackCooldownText1 : attackCooldownText2;
 
                 if (attackIcon == null) continue;
 
@@ -408,7 +440,7 @@ public class UIManager : MonoBehaviour
             for (int i = 0; i < 2; i++)
             {
                 Image defenseIcon = i == 0 ? defenseSkill1Icon : defenseSkill2Icon;
-                Text defenseCooldown = i == 0 ? defenseCooldownText1 : defenseCooldownText2;
+                TextMeshProUGUI defenseCooldown = i == 0 ? defenseCooldownText1 : defenseCooldownText2;
 
                 if (defenseIcon == null) continue;
 
@@ -544,6 +576,72 @@ public class UIManager : MonoBehaviour
         return Color.white;
     }
 
+    // 🆕 NOVO: ATUALIZAR UI DO SISTEMA DE CARDS
+    private void UpdateStatusCardsUI()
+    {
+        if (statusPointsText != null && cardSystem != null)
+        {
+            statusPointsText.text = $"🎯 Pontos: {cardSystem.GetCurrentStatusPoints()}";
+        }
+
+        if (activeBonusesText != null && cardSystem != null)
+        {
+            var activeBonuses = cardSystem.GetActiveBonuses();
+            if (activeBonuses.Count > 0)
+            {
+                string bonusesText = "✅ BÔNUS ATIVOS:\n";
+                foreach (var bonus in activeBonuses)
+                {
+                    bonusesText += $"- {bonus.cardData.cardName}\n";
+                }
+                activeBonusesText.text = bonusesText;
+            }
+            else
+            {
+                activeBonusesText.text = "✅ BÔNUS ATIVOS:\nNenhum";
+            }
+        }
+    }
+
+    // 🆕 NOVO: TOGGLE DO PAINEL DE CARDS
+    public void ToggleStatusCards()
+    {
+        if (statusCardPanel != null)
+        {
+            bool newState = !statusCardPanel.activeSelf;
+            statusCardPanel.SetActive(newState);
+
+            if (newState)
+            {
+                UpdateStatusCardsUI();
+            }
+        }
+    }
+
+    // 🆕 NOVO: MOSTRAR GANHO DE PONTOS DE STATUS
+    public void ShowStatusPointsGained(int pointsGained, int totalPoints)
+    {
+        if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
+        {
+            skillNameText.text = "🎯 Pontos de Status!";
+            skillDescriptionText.text = $"+{pointsGained} pontos!\nTotal: {totalPoints}";
+            skillAcquiredPanel.SetActive(true);
+            StartCoroutine(HideSkillPopup());
+        }
+    }
+
+    // 🆕 NOVO: MOSTRAR CARD APLICADO
+    public void ShowStatusCardApplied(string cardName, string description)
+    {
+        if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
+        {
+            skillNameText.text = $"🃏 {cardName}";
+            skillDescriptionText.text = description;
+            skillAcquiredPanel.SetActive(true);
+            StartCoroutine(HideSkillPopup());
+        }
+    }
+
     // ✅ MÉTODOS RESTANTES CORRIGIDOS E FUNCIONAIS
     public void ShowSkillAcquired(string skillName, string description)
     {
@@ -635,7 +733,7 @@ public class UIManager : MonoBehaviour
 
             GameObject buttonObj = Instantiate(skillButtonPrefab, skillButtonContainer);
             Button button = buttonObj.GetComponent<Button>();
-            Text buttonText = buttonObj.GetComponentInChildren<Text>();
+            TextMeshProUGUI buttonText = buttonObj.GetComponentInChildren<TextMeshProUGUI>();
 
             if (buttonText != null)
             {
@@ -719,8 +817,8 @@ public class UIManager : MonoBehaviour
         skillAcquiredPanel.SetActive(true);
         StartCoroutine(HideSkillPopup());
     }
-    // Adicione estes métodos ao UIManager:
 
+    // 🆕 ATUALIZADO: UpdateSkillCooldowns com suporte a elementos
     public void UpdateSkillCooldowns(PlayerStats playerStats)
     {
         if (playerStats == null) return;
@@ -734,7 +832,7 @@ public class UIManager : MonoBehaviour
             if (skill.IsOnCooldown)
             {
                 float cooldownPercent = skill.currentCooldown / skill.cooldown;
-                UpdateSkillCooldownUI(cooldownKey, cooldownPercent, skill.skillName);
+                UpdateSkillCooldownUI(cooldownKey, cooldownPercent, skill.skillName, skill.GetEffectiveElement());
             }
             else
             {
@@ -751,7 +849,7 @@ public class UIManager : MonoBehaviour
             if (skill.IsOnCooldown)
             {
                 float cooldownPercent = skill.currentCooldown / skill.cooldown;
-                UpdateSkillCooldownUI(cooldownKey, cooldownPercent, skill.skillName);
+                UpdateSkillCooldownUI(cooldownKey, cooldownPercent, skill.skillName, skill.element);
             }
             else
             {
@@ -760,15 +858,25 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void UpdateSkillCooldownUI(string skillKey, float cooldownPercent, string skillName)
+    private void UpdateSkillCooldownUI(string skillKey, float cooldownPercent, string skillName, PlayerStats.Element element)
     {
-        // Implementar a lógica para atualizar a UI de cooldown
-        // Isso depende de como sua UI está estruturada
-        Debug.Log($"⏳ {skillName} em cooldown: {cooldownPercent:P0}");
+        // Implementar a lógica para atualizar a UI de cooldown com cores de elemento
+        Color elementColor = GetElementColor(element);
+        Debug.Log($"⏳ {skillName} em cooldown: {cooldownPercent:P0} | Elemento: {element}");
     }
 
     private void ClearSkillCooldownUI(string skillKey)
     {
         // Implementar a lógica para limpar o cooldown da UI
+    }
+
+    // 🆕 MÉTODO PARA FORÇAR ATUALIZAÇÃO COMPLETA DA UI
+    public void ForceUIUpdate()
+    {
+        UpdatePlayerStatus();
+        UpdateSkillIcons();
+        UpdateSkillElementIcons();
+        UpdateElementUI();
+        UpdateStatusCardsUI();
     }
 }
