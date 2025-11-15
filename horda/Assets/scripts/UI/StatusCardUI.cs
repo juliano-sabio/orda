@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -11,7 +11,7 @@ public class StatusCardUI : MonoBehaviour
     public TextMeshProUGUI rarityText;
     public TextMeshProUGUI levelRequirementText;
     public Image cardBackground;
-    public Image cardIcon; // Novo campo para o �cone
+    public Image cardIcon;
     public Button selectButton;
 
     [Header("Cores por Raridade")]
@@ -36,12 +36,12 @@ public class StatusCardUI : MonoBehaviour
 
         cardNameText.text = cardData.cardName;
         descriptionText.text = cardData.description;
-        costText.text = $"Custo: {cardData.cost}";
+        costText.text = $"💎 Custo: {cardData.cost}";
         rarityText.text = cardData.rarity.ToString();
-        levelRequirementText.text = $"Nv. {cardData.requiredLevel}";
+        levelRequirementText.text = $"📊 Nv. {cardData.requiredLevel}";
         cardBackground.color = GetRarityColor(cardData.rarity);
 
-        // Atualizar �cone se dispon�vel
+        // Atualizar ícone se disponível
         if (cardIcon != null && cardData.icon != null)
         {
             cardIcon.sprite = cardData.icon;
@@ -51,11 +51,13 @@ public class StatusCardUI : MonoBehaviour
         selectButton.onClick.RemoveAllListeners();
         selectButton.onClick.AddListener(OnCardSelected);
 
+        // 🆕 Verifica se pode comprar o card
         bool canAfford = cardSystem.CanAffordCard(cardData);
         selectButton.interactable = canAfford;
 
         // Feedback visual
-        costText.color = canAfford ? Color.white : Color.red;
+        costText.color = canAfford ? Color.yellow : Color.red;
+        cardBackground.color = canAfford ? GetRarityColor(cardData.rarity) : new Color(0.3f, 0.3f, 0.3f, 0.7f);
     }
 
     Color GetRarityColor(CardRarity rarity)
@@ -72,6 +74,13 @@ public class StatusCardUI : MonoBehaviour
 
     void OnCardSelected()
     {
-        cardSystem?.ApplyStatusCard(cardData);
+        if (cardSystem != null && cardData != null)
+        {
+            // 🆕 Usa o método manual para aplicação infinita
+            cardSystem.ApplyStatusCardManually(cardData);
+
+            // 🆕 Atualiza a UI deste card específico
+            UpdateUI();
+        }
     }
 }

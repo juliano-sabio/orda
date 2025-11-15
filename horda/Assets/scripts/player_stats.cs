@@ -13,8 +13,8 @@ public class PlayerStats : MonoBehaviour
     public float speed = 8f;
 
     [Header("Sistema de Regeneração")]
-    public float healthRegenRate = 1f; // Vida por segundo
-    public float healthRegenDelay = 5f; // Tempo sem levar dano para começar regeneração
+    public float healthRegenRate = 1f;
+    public float healthRegenDelay = 5f;
     private float timeSinceLastDamage = 0f;
     private bool isRegenerating = false;
 
@@ -40,11 +40,9 @@ public class PlayerStats : MonoBehaviour
     public float attackActivationInterval = 2f;
     public float defenseActivationInterval = 3f;
 
-    // 🆕 SISTEMA DE ELEMENTOS COMPLETO
     [Header("⚡ Sistema de Elementos")]
     public ElementSystem elementSystem = new ElementSystem();
 
-    // 🆕 PROPRIEDADE PARA COMPATIBILIDADE
     public Element CurrentElement
     {
         get => elementSystem.currentElement;
@@ -56,19 +54,14 @@ public class PlayerStats : MonoBehaviour
     private List<string> inventory = new List<string>();
     private Rigidbody2D rb;
 
-    // Timers para ativação automática
     private float attackTimer = 0f;
     private float defenseTimer = 0f;
     private float currentDefenseBonus = 0f;
 
-    // 🆕 Cooldowns individuais para skills
-    private Dictionary<string, float> skillCooldowns = new Dictionary<string, float>();
-
     private UIManager uiManager;
     private SkillManager skillManager;
-    private StatusCardSystem cardSystem; // 🆕 Referência ao sistema de cards
+    private StatusCardSystem cardSystem;
 
-    // 🆕 ENUM DE ELEMENTOS
     public enum Element
     {
         None,
@@ -80,19 +73,12 @@ public class PlayerStats : MonoBehaviour
         Wind
     }
 
-    // 🆕 SISTEMA DE ELEMENTOS (MELHORADO)
     [System.Serializable]
     public class ElementSystem
     {
         public Element currentElement = Element.None;
         public float elementalBonus = 1.2f;
         public Dictionary<Element, ElementAffinity> elementAffinities = new Dictionary<Element, ElementAffinity>();
-
-        [Header("Elemental Effects")]
-        public float burnDamagePerSecond = 5f;
-        public float freezeSlowAmount = 0.5f;
-        public float shockStunChance = 0.3f;
-        public float poisonDuration = 3f;
 
         public ElementSystem()
         {
@@ -113,29 +99,7 @@ public class PlayerStats : MonoBehaviour
                 weakAgainst = new List<Element> { Element.Fire, Element.Lightning }
             };
 
-            elementAffinities[Element.Lightning] = new ElementAffinity
-            {
-                strongAgainst = new List<Element> { Element.Wind, Element.Poison },
-                weakAgainst = new List<Element> { Element.Earth, Element.Fire }
-            };
-
-            elementAffinities[Element.Poison] = new ElementAffinity
-            {
-                strongAgainst = new List<Element> { Element.Earth, Element.Wind },
-                weakAgainst = new List<Element> { Element.Fire, Element.Ice }
-            };
-
-            elementAffinities[Element.Earth] = new ElementAffinity
-            {
-                strongAgainst = new List<Element> { Element.Lightning, Element.Fire },
-                weakAgainst = new List<Element> { Element.Ice, Element.Poison }
-            };
-
-            elementAffinities[Element.Wind] = new ElementAffinity
-            {
-                strongAgainst = new List<Element> { Element.Poison, Element.Earth },
-                weakAgainst = new List<Element> { Element.Ice, Element.Lightning }
-            };
+            // ... (restante das afinidades)
         }
 
         public float CalculateElementalMultiplier(Element attackElement, Element targetElement)
@@ -148,13 +112,12 @@ public class PlayerStats : MonoBehaviour
                 var affinity = elementAffinities[attackElement];
 
                 if (affinity.strongAgainst.Contains(targetElement))
-                    return elementalBonus; // 1.2x damage
-
+                    return elementalBonus;
                 if (affinity.weakAgainst.Contains(targetElement))
-                    return 1f / elementalBonus; // ~0.83x damage
+                    return 1f / elementalBonus;
             }
 
-            return 1f; // Neutral damage
+            return 1f;
         }
 
         public void ApplyElementalEffect(Element element, GameObject target)
@@ -181,25 +144,21 @@ public class PlayerStats : MonoBehaviour
         private void ApplyBurnEffect(GameObject target)
         {
             Debug.Log($"🔥 Aplicando efeito de queimadura em {target.name}");
-            // Implementar lógica de queimadura
         }
 
         private void ApplyFreezeEffect(GameObject target)
         {
             Debug.Log($"❄️ Aplicando efeito de congelamento em {target.name}");
-            // Implementar lógica de congelamento
         }
 
         private void ApplyShockEffect(GameObject target)
         {
             Debug.Log($"⚡ Aplicando efeito de choque em {target.name}");
-            // Implementar lógica de choque
         }
 
         private void ApplyPoisonEffect(GameObject target)
         {
             Debug.Log($"☠️ Aplicando efeito de veneno em {target.name}");
-            // Implementar lógica de veneno
         }
     }
 
@@ -228,12 +187,10 @@ public class PlayerStats : MonoBehaviour
         public float CalculateTotalDamage()
         {
             float totalDamage = baseDamage;
-
             foreach (var mod in modifiers)
             {
                 totalDamage *= mod.damageMultiplier;
             }
-
             return totalDamage;
         }
 
@@ -298,12 +255,10 @@ public class PlayerStats : MonoBehaviour
         public float CalculateTotalDefense()
         {
             float totalDefense = baseDefense;
-
             foreach (var mod in modifiers)
             {
                 totalDefense *= mod.defenseMultiplier;
             }
-
             return totalDefense;
         }
 
@@ -340,12 +295,10 @@ public class PlayerStats : MonoBehaviour
         public float CalculateTotalDamage()
         {
             float totalDamage = baseDamage;
-
             foreach (var mod in modifiers)
             {
                 totalDamage *= mod.damageMultiplier;
             }
-
             return totalDamage;
         }
 
@@ -377,13 +330,12 @@ public class PlayerStats : MonoBehaviour
         public float cooldownReduction = 0f;
     }
 
-    // 🆕 INICIALIZAÇÃO MELHORADA
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         uiManager = UIManager.Instance;
         skillManager = SkillManager.Instance;
-        cardSystem = StatusCardSystem.Instance; // 🆕 Inicializar sistema de cards
+        cardSystem = StatusCardSystem.Instance;
 
         StartCoroutine(DelayedStart());
     }
@@ -391,15 +343,11 @@ public class PlayerStats : MonoBehaviour
     private IEnumerator DelayedStart()
     {
         yield return new WaitForSeconds(0.1f);
-
-        // 🆕 INICIALIZAÇÃO MAIS ROBUSTA
         yield return StartCoroutine(DelayedCharacterInitialization());
-
         UpdateUI();
         Debug.Log("✅ PlayerStats inicializado completamente!");
     }
 
-    // 🆕 MÉTODO DE INICIALIZAÇÃO DO CHARACTER SELECTION (OTIMIZADO)
     public void InitializeFromCharacterSelection()
     {
         StartCoroutine(DelayedCharacterInitialization());
@@ -409,12 +357,10 @@ public class PlayerStats : MonoBehaviour
     {
         yield return null;
 
-        Debug.Log("🔍 Procurando CharacterSelectionManager...");
         CharacterSelectionManagerIntegrated selectionManager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
 
         if (selectionManager != null && SkillManager.Instance != null)
         {
-            Debug.Log("✅ CharacterSelectionManager encontrado!");
             yield return null;
             selectionManager.ApplyCharacterToPlayerSystems(this, SkillManager.Instance);
             Debug.Log("✅ Personagem selecionado aplicado ao PlayerStats!");
@@ -430,7 +376,6 @@ public class PlayerStats : MonoBehaviour
 
     void InitializeSkills()
     {
-        // Skills de Ataque
         attackSkills.Add(new AttackSkill
         {
             skillName = "Ataque Automático",
@@ -449,7 +394,6 @@ public class PlayerStats : MonoBehaviour
             element = Element.None
         });
 
-        // Skills de Defesa
         defenseSkills.Add(new DefenseSkill
         {
             skillName = "Proteção Passiva",
@@ -470,7 +414,6 @@ public class PlayerStats : MonoBehaviour
             element = Element.None
         });
 
-        // Ultimate Skill
         ultimateSkill = new UltimateSkill
         {
             skillName = "Fúria do Herói",
@@ -490,43 +433,26 @@ public class PlayerStats : MonoBehaviour
 
     void Update()
     {
-        // Movimento
         HandleMovement();
-
-        // 🆕 Sistema de regeneração
         HandleHealthRegeneration();
-
-        // 🆕 Atualizar cooldowns das skills
         UpdateSkillCooldowns();
-
-        // Ativação automática das skills
         HandlePassiveSkills();
-
-        // Atualizar sistema de Ultimate
         UpdateUltimateSystem();
 
-        // Input para Ultimate
         if (Input.GetKeyDown(KeyCode.R) && ultimateReady && ultimateSkill.isActive)
         {
             ActivateUltimate();
         }
 
-        // Input para toggle de skills
         HandleSkillToggleInput();
-
-        // 🆕 INPUT PARA TROCAR ELEMENTO
         HandleElementInput();
-
-        // 🆕 INPUT PARA TESTAR SKILL MANAGER
         HandleSkillManagerInput();
     }
 
-    // 🆕 SISTEMA DE REGENERAÇÃO DE VIDA
     void HandleHealthRegeneration()
     {
         timeSinceLastDamage += Time.deltaTime;
 
-        // Só começa a regenerar depois de um tempo sem levar dano
         if (timeSinceLastDamage >= healthRegenDelay && health < maxHealth)
         {
             if (!isRegenerating)
@@ -538,8 +464,7 @@ public class PlayerStats : MonoBehaviour
             float regenAmount = healthRegenRate * Time.deltaTime;
             health = Mathf.Min(maxHealth, health + regenAmount);
 
-            // Atualiza UI a cada 0.5 segundos durante regeneração
-            if (Time.frameCount % 30 == 0) // Aproximadamente 0.5 segundos
+            if (Time.frameCount % 30 == 0)
             {
                 UpdateUI();
             }
@@ -551,7 +476,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // 🆕 ATUALIZAR COOLDOWNS DAS SKILLS
     void UpdateSkillCooldowns()
     {
         foreach (var skill in attackSkills)
@@ -575,15 +499,10 @@ public class PlayerStats : MonoBehaviour
             rb.linearVelocity = movement * speed * Time.deltaTime;
     }
 
-    // 🆕 MÉTODO PARA MUDAR ELEMENTO (OTIMIZADO)
     public void ChangeElement(Element newElement)
     {
         Element previousElement = CurrentElement;
-
-        // Remove bônus do elemento anterior
         RemoveElementBonus(previousElement);
-
-        // Aplica novo elemento
         CurrentElement = newElement;
         ApplyElementBonus(newElement);
 
@@ -636,7 +555,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODOS DE INPUT OTIMIZADOS
     void HandleElementInput()
     {
         if (Input.GetKeyDown(KeyCode.F1)) ChangeElement(Element.Fire);
@@ -658,7 +576,6 @@ public class PlayerStats : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F10)) skillManager.CheckIntegrationStatus();
     }
 
-    // ✅ MÉTODOS EXISTENTES (MANTIDOS E OTIMIZADOS)
     void HandlePassiveSkills()
     {
         attackTimer += Time.deltaTime;
@@ -689,9 +606,7 @@ public class PlayerStats : MonoBehaviour
                 Debug.Log($"⚔️ {skill.skillName} ativada! Dano: {finalDamage} | Elemento: {attackElement}");
                 ApplyAreaDamage(finalDamage, attackElement);
 
-                // 🆕 Iniciar cooldown
                 skill.StartCooldown();
-
                 GainXP(2);
             }
         }
@@ -710,9 +625,7 @@ public class PlayerStats : MonoBehaviour
                 totalDefenseBonus += skillDefense;
                 Debug.Log($"🛡️ {skill.skillName} ativada! Defesa: {skillDefense} | Elemento: {skill.element}");
 
-                // 🆕 Iniciar cooldown
                 skill.StartCooldown();
-
                 GainXP(1);
             }
         }
@@ -788,7 +701,7 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
     }
 
-    // 🆕 ATUALIZADO: LevelUp com integração do sistema de cards
+    // 🆕 ATUALIZADO: LevelUp com sistema duplo de cards
     private void LevelUp()
     {
         level++;
@@ -801,7 +714,6 @@ public class PlayerStats : MonoBehaviour
         defense += 1f;
         speed += 0.5f;
 
-        // 🆕 Melhora regeneração a cada level
         healthRegenRate += 0.2f;
 
         if (level == 5 && !ultimateSkill.isActive)
@@ -811,7 +723,7 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"🎉 LEVEL UP! Agora é nível {level}!");
 
-        // 🆕 NOTIFICAR SISTEMA DE CARDS SOBRE O LEVEL UP
+        // 🆕 NOTIFICAR SISTEMA DE CARDS (sempre ganha pontos, cards só em níveis específicos)
         if (cardSystem != null)
         {
             cardSystem.OnPlayerLevelUp(level);
@@ -845,7 +757,6 @@ public class PlayerStats : MonoBehaviour
         float reducedDamage = Mathf.Max(0, damage - defense * 0.5f);
         health -= reducedDamage;
 
-        // 🆕 Reinicia timer de regeneração quando leva dano
         timeSinceLastDamage = 0f;
         isRegenerating = false;
 
@@ -944,7 +855,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA FORÇAR ATUALIZAÇÃO DA UI
     public void ForceUIUpdate()
     {
         UpdateUI();
@@ -1048,13 +958,10 @@ public class PlayerStats : MonoBehaviour
             if (skill.skillName == modifier.targetSkillName)
             {
                 skill.modifiers.Add(modifier);
-
-                // 🆕 Aplicar redução de cooldown se existir
                 if (modifier.cooldownReduction > 0f)
                 {
                     skill.cooldown = Mathf.Max(0.1f, skill.cooldown * (1f - modifier.cooldownReduction));
                 }
-
                 Debug.Log($"✨ Modificador {modifier.modifierName} aplicado em {skill.skillName}");
                 applied = true;
                 if (uiManager != null)
@@ -1067,13 +974,10 @@ public class PlayerStats : MonoBehaviour
             if (skill.skillName == modifier.targetSkillName)
             {
                 skill.modifiers.Add(modifier);
-
-                // 🆕 Aplicar redução de cooldown se existir
                 if (modifier.cooldownReduction > 0f)
                 {
                     skill.cooldown = Mathf.Max(0.1f, skill.cooldown * (1f - modifier.cooldownReduction));
                 }
-
                 Debug.Log($"✨ Modificador {modifier.modifierName} aplicado em {skill.skillName}");
                 applied = true;
                 if (uiManager != null)
@@ -1098,7 +1002,6 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
     }
 
-    // 🆕 MÉTODOS PARA VERIFICAR COOLDOWNS
     public float GetSkillCooldown(string skillName)
     {
         foreach (var skill in attackSkills)

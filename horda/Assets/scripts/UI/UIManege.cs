@@ -27,7 +27,6 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI ultimateCooldownText;
     public Slider ultimateChargeBar;
 
-    // 🆕 NOVO: Ícones de elemento para cada skill
     [Header("⚡ Ícones de Elemento das Skills")]
     public Image attackSkill1ElementIcon;
     public Image attackSkill2ElementIcon;
@@ -73,7 +72,6 @@ public class UIManager : MonoBehaviour
     public GameObject skillButtonPrefab;
     public TextMeshProUGUI availableSkillsText;
 
-    // 🆕 NOVO: Sistema de Status Cards
     [Header("🃏 Sistema de Status Cards")]
     public GameObject statusCardPanel;
     public Transform statusCardContainer;
@@ -84,7 +82,7 @@ public class UIManager : MonoBehaviour
     [Header("Configurações")]
     public KeyCode toggleStatusKey = KeyCode.Tab;
     public KeyCode toggleSkillsKey = KeyCode.K;
-    public KeyCode toggleCardsKey = KeyCode.C; // 🆕 Nova tecla para cards
+    public KeyCode toggleCardsKey = KeyCode.C; // 🆕 Para uso MANUAL infinito!
     public float popupDisplayTime = 3f;
 
     [Header("🎨 Sprites dos Elementos")]
@@ -116,18 +114,6 @@ public class UIManager : MonoBehaviour
         { PlayerStats.Element.Wind, new Color(0.4f, 0.8f, 0.9f) }
     };
 
-    // 🆕 CORES DE BACKGROUND POR ELEMENTO
-    private Dictionary<PlayerStats.Element, Color> elementBackgroundColors = new Dictionary<PlayerStats.Element, Color>()
-    {
-        { PlayerStats.Element.None, new Color(0.3f, 0.3f, 0.3f, 0.7f) },
-        { PlayerStats.Element.Fire, new Color(1f, 0.2f, 0.1f, 0.3f) },
-        { PlayerStats.Element.Ice, new Color(0.1f, 0.4f, 1f, 0.3f) },
-        { PlayerStats.Element.Lightning, new Color(0.9f, 0.9f, 0.1f, 0.3f) },
-        { PlayerStats.Element.Poison, new Color(0.6f, 0.1f, 0.8f, 0.3f) },
-        { PlayerStats.Element.Earth, new Color(0.5f, 0.3f, 0.1f, 0.3f) },
-        { PlayerStats.Element.Wind, new Color(0.3f, 0.7f, 0.9f, 0.3f) }
-    };
-
     private void Awake()
     {
         if (Instance == null)
@@ -157,6 +143,8 @@ public class UIManager : MonoBehaviour
 
         // 🆕 INICIALIZAR ÍCONES DE ELEMENTO
         InitializeElementIcons();
+
+        Debug.Log("✅ UIManager inicializado completamente!");
     }
 
     private void InitializeUI()
@@ -183,7 +171,6 @@ public class UIManager : MonoBehaviour
     // 🆕 INICIALIZAR ÍCONES DE ELEMENTO
     private void InitializeElementIcons()
     {
-        // Esconde todos os ícones de elemento inicialmente
         SetElementIconVisibility(attackSkill1ElementIcon, false);
         SetElementIconVisibility(attackSkill2ElementIcon, false);
         SetElementIconVisibility(defenseSkill1ElementIcon, false);
@@ -191,7 +178,6 @@ public class UIManager : MonoBehaviour
         SetElementIconVisibility(ultimateSkillElementIcon, false);
     }
 
-    // 🆕 CONFIGURAR VISIBILIDADE DO ÍCONE DE ELEMENTO
     private void SetElementIconVisibility(Image elementIcon, bool visible)
     {
         if (elementIcon != null)
@@ -200,7 +186,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 OBTER SPRITE DO ELEMENTO
     private Sprite GetElementSprite(PlayerStats.Element element)
     {
         switch (element)
@@ -240,8 +225,6 @@ public class UIManager : MonoBehaviour
                         elementIcon.sprite = GetElementSprite(skillElement);
                         elementIcon.color = GetElementColor(skillElement);
                         SetElementIconVisibility(elementIcon, true);
-
-                        // 🆕 POSICIONAR ÍCONE DE ELEMENTO ABAIXO DA SKILL
                         PositionElementIcon(elementIcon, skillIcon);
                     }
                     else
@@ -272,8 +255,6 @@ public class UIManager : MonoBehaviour
                         elementIcon.sprite = GetElementSprite(skillElement);
                         elementIcon.color = GetElementColor(skillElement);
                         SetElementIconVisibility(elementIcon, true);
-
-                        // 🆕 POSICIONAR ÍCONE DE ELEMENTO ABAIXO DA SKILL
                         PositionElementIcon(elementIcon, skillIcon);
                     }
                     else
@@ -299,8 +280,6 @@ public class UIManager : MonoBehaviour
                     ultimateSkillElementIcon.sprite = GetElementSprite(ultimateElement);
                     ultimateSkillElementIcon.color = GetElementColor(ultimateElement);
                     SetElementIconVisibility(ultimateSkillElementIcon, true);
-
-                    // 🆕 POSICIONAR ÍCONE DE ELEMENTO ABAIXO DA ULTIMATE
                     PositionElementIcon(ultimateSkillElementIcon, ultimateSkillIcon);
                 }
                 else
@@ -315,7 +294,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 POSICIONAR ÍCONE DE ELEMENTO ABAIXO DA SKILL
     private void PositionElementIcon(Image elementIcon, Image skillIcon)
     {
         if (elementIcon != null && skillIcon != null)
@@ -325,27 +303,23 @@ public class UIManager : MonoBehaviour
 
             if (elementRect != null && skillRect != null)
             {
-                // Posiciona o ícone do elemento abaixo do ícone da skill
                 elementRect.anchorMin = new Vector2(0.5f, 0f);
                 elementRect.anchorMax = new Vector2(0.5f, 0f);
                 elementRect.pivot = new Vector2(0.5f, 0.5f);
 
-                // Ajuste de posição - abaixo do ícone da skill
                 Vector2 skillPosition = skillRect.anchoredPosition;
                 elementRect.anchoredPosition = new Vector2(
                     skillPosition.x,
                     skillPosition.y - skillRect.rect.height * 0.7f
                 );
 
-                // 🆕 TAMANHO PEQUENO DO ÍCONE DE ELEMENTO
-                elementRect.sizeDelta = new Vector2(20f, 20f); // Ícone pequeno
+                elementRect.sizeDelta = new Vector2(20f, 20f);
             }
         }
     }
 
     private void Update()
     {
-        // ✅ CORRIGIDO: Verificação de null antes de usar Input
         if (Input.GetKeyDown(toggleStatusKey))
         {
             ToggleStatusPanel();
@@ -356,19 +330,18 @@ public class UIManager : MonoBehaviour
             ToggleSkillSelection();
         }
 
-        // 🆕 NOVO: Toggle do sistema de cards
+        // 🆕 AGORA: Input para abrir painel MANUAL de cards (uso infinito de pontos)
         if (Input.GetKeyDown(toggleCardsKey) && statusCardPanel != null)
         {
             ToggleStatusCards();
         }
 
-        // ✅ CORRIGIDO: Verificação de null para playerStats
         if (playerStats != null)
         {
             UpdateCooldowns();
             UpdatePlayerStatus();
             UpdateSkillIcons();
-            UpdateSkillElementIcons(); // 🆕 ATUALIZAR ÍCONES DE ELEMENTO
+            UpdateSkillElementIcons();
             UpdateUltimateSystem();
             UpdateElementUI();
         }
@@ -380,7 +353,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 ATUALIZADO: UpdateSkillIcons - versão simplificada e corrigida
     private void UpdateSkillIcons()
     {
         if (playerStats == null) return;
@@ -406,7 +378,6 @@ public class UIManager : MonoBehaviour
                     var skill = attackSkills[i];
                     if (skill == null) continue;
 
-                    // ✅ CORRIGIDO: Apenas aplica cor, não lida com elementos aqui
                     attackIcon.color = skill.isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 0.5f);
 
                     if (attackCooldown != null)
@@ -449,7 +420,6 @@ public class UIManager : MonoBehaviour
                     var skill = defenseSkills[i];
                     if (skill == null) continue;
 
-                    // ✅ CORRIGIDO: Apenas aplica cor, não lida com elementos aqui
                     defenseIcon.color = skill.isActive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 0.5f);
 
                     if (defenseCooldown != null)
@@ -542,7 +512,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 ATUALIZADO: UpdateElementUI simplificado
     private void UpdateElementUI()
     {
         if (playerStats == null) return;
@@ -566,7 +535,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
     private Color GetElementColor(PlayerStats.Element element)
     {
         if (elementColors.ContainsKey(element))
@@ -576,12 +544,13 @@ public class UIManager : MonoBehaviour
         return Color.white;
     }
 
-    // 🆕 NOVO: ATUALIZAR UI DO SISTEMA DE CARDS
-    private void UpdateStatusCardsUI()
+    // 🆕 ATUALIZADO: Mostra pontos disponíveis para uso infinito
+    // 🆕 MUDAR de private para public
+    public void UpdateStatusCardsUI() // ✅ CORRIGIDO: Agora é público
     {
         if (statusPointsText != null && cardSystem != null)
         {
-            statusPointsText.text = $"🎯 Pontos: {cardSystem.GetCurrentStatusPoints()}";
+            statusPointsText.text = $"🎯 Pontos Disponíveis: {cardSystem.GetCurrentStatusPoints()}";
         }
 
         if (activeBonusesText != null && cardSystem != null)
@@ -592,7 +561,7 @@ public class UIManager : MonoBehaviour
                 string bonusesText = "✅ BÔNUS ATIVOS:\n";
                 foreach (var bonus in activeBonuses)
                 {
-                    bonusesText += $"- {bonus.cardData.cardName}\n";
+                    bonusesText += $"- {bonus.cardData.cardName} (+{bonus.cardData.statBonus})\n";
                 }
                 activeBonusesText.text = bonusesText;
             }
@@ -603,7 +572,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 NOVO: TOGGLE DO PAINEL DE CARDS
+    // 🆕 MÉTODO RESTAURADO: Para uso MANUAL dos pontos infinitos
     public void ToggleStatusCards()
     {
         if (statusCardPanel != null)
@@ -613,36 +582,59 @@ public class UIManager : MonoBehaviour
 
             if (newState)
             {
+                RefreshManualCardPanel();
                 UpdateStatusCardsUI();
+                Debug.Log("🎴 Painel manual de cards aberto - Use pontos infinitos!");
             }
         }
     }
 
-    // 🆕 NOVO: MOSTRAR GANHO DE PONTOS DE STATUS
-    public void ShowStatusPointsGained(int pointsGained, int totalPoints)
+    // 🆕 NOVO: Atualizar painel manual com todos os cards disponíveis
+    private void RefreshManualCardPanel()
     {
-        if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
+        if (cardSystem == null || statusCardContainer == null) return;
+
+        // Limpa cards anteriores
+        foreach (Transform child in statusCardContainer)
         {
-            skillNameText.text = "🎯 Pontos de Status!";
-            skillDescriptionText.text = $"+{pointsGained} pontos!\nTotal: {totalPoints}";
-            skillAcquiredPanel.SetActive(true);
-            StartCoroutine(HideSkillPopup());
+            Destroy(child.gameObject);
         }
+
+        // Pega todos os cards disponíveis
+        var availableCards = cardSystem.GetAvailableCards();
+        var activeBonuses = cardSystem.GetActiveBonuses();
+
+        // Filtra apenas cards que podem ser comprados (não estão ativos)
+        List<StatusCardData> purchasableCards = new List<StatusCardData>();
+
+        foreach (var card in availableCards)
+        {
+            bool isAlreadyActive = activeBonuses.Exists(bonus => bonus.cardData.cardName == card.cardName);
+            if (!isAlreadyActive)
+            {
+                purchasableCards.Add(card);
+            }
+        }
+
+        // Cria os cards na UI
+        foreach (var cardData in purchasableCards)
+        {
+            if (statusCardPrefab != null)
+            {
+                GameObject cardObj = Instantiate(statusCardPrefab, statusCardContainer);
+                StatusCardUI cardUI = cardObj.GetComponent<StatusCardUI>();
+
+                if (cardUI != null)
+                {
+                    cardUI.Initialize(cardData, cardSystem);
+                }
+            }
+        }
+
+        Debug.Log($"🃏 {purchasableCards.Count} cards disponíveis para compra manual");
     }
 
-    // 🆕 NOVO: MOSTRAR CARD APLICADO
-    public void ShowStatusCardApplied(string cardName, string description)
-    {
-        if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
-        {
-            skillNameText.text = $"🃏 {cardName}";
-            skillDescriptionText.text = description;
-            skillAcquiredPanel.SetActive(true);
-            StartCoroutine(HideSkillPopup());
-        }
-    }
-
-    // ✅ MÉTODOS RESTANTES CORRIGIDOS E FUNCIONAIS
+    // ✅ MÉTODOS DE FEEDBACK
     public void ShowSkillAcquired(string skillName, string description)
     {
         if (skillAcquiredPanel == null) return;
@@ -666,6 +658,30 @@ public class UIManager : MonoBehaviour
     public void ShowElementChanged(string elementName)
     {
         ShowSkillAcquired("⚡ Elemento Alterado", $"Elemento atual: {elementName}");
+    }
+
+    // 🆕 NOVO: Mostrar ganho de pontos de status
+    public void ShowStatusPointsGained(int pointsGained, int totalPoints)
+    {
+        if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
+        {
+            skillNameText.text = "🎯 Pontos de Status!";
+            skillDescriptionText.text = $"+{pointsGained} pontos!\nTotal: {totalPoints}";
+            skillAcquiredPanel.SetActive(true);
+            StartCoroutine(HideSkillPopup());
+        }
+    }
+
+    // 🆕 NOVO: Mostrar card aplicado
+    public void ShowStatusCardApplied(string cardName, string description)
+    {
+        if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
+        {
+            skillNameText.text = $"🃏 {cardName}";
+            skillDescriptionText.text = description;
+            skillAcquiredPanel.SetActive(true);
+            StartCoroutine(HideSkillPopup());
+        }
     }
 
     public void OnUltimateActivated()
@@ -767,7 +783,7 @@ public class UIManager : MonoBehaviour
         {
             bool newState = !statusPanel.activeSelf;
             statusPanel.SetActive(newState);
-            if (newState) UpdatePlayerStatus();
+            if (newState) UpdateDetailedStatus();
         }
     }
 
@@ -800,6 +816,72 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // 🆕 ATUALIZADO: Status detalhado
+    private void UpdateDetailedStatus()
+    {
+        if (playerStats == null) return;
+
+        if (damageText != null)
+            damageText.text = $"⚔️ Ataque: {playerStats.GetAttack():F1}";
+
+        if (speedText != null)
+            speedText.text = $"🏃 Velocidade: {playerStats.GetSpeed():F1}";
+
+        if (defenseText != null)
+            defenseText.text = $"🛡️ Defesa: {playerStats.GetDefense():F1}";
+
+        if (attackSpeedText != null)
+            attackSpeedText.text = $"⚡ Vel. Ataque: {playerStats.GetAttackActivationInterval():F1}s";
+
+        if (elementInfoText != null)
+            elementInfoText.text = $"⚡ Elemento: {playerStats.GetCurrentElement()}\n📈 Bônus: {playerStats.GetElementalBonus():F1}x";
+
+        if (inventoryText != null)
+        {
+            var inventory = playerStats.GetInventory();
+            inventoryText.text = $"🎒 Itens: {(inventory.Count > 0 ? string.Join(", ", inventory) : "Nenhum")}";
+        }
+
+        // Skills
+        if (attackSkillsText != null)
+        {
+            var attackSkills = playerStats.GetAttackSkills();
+            string attackText = "⚔️ Skills de Ataque:\n";
+            foreach (var skill in attackSkills)
+            {
+                attackText += $"- {skill.skillName} ({skill.CalculateTotalDamage():F1} dmg) {(skill.isActive ? "✅" : "❌")}\n";
+            }
+            attackSkillsText.text = attackText;
+        }
+
+        if (defenseSkillsText != null)
+        {
+            var defenseSkills = playerStats.GetDefenseSkills();
+            string defenseText = "🛡️ Skills de Defesa:\n";
+            foreach (var skill in defenseSkills)
+            {
+                defenseText += $"- {skill.skillName} ({skill.CalculateTotalDefense():F1} def) {(skill.isActive ? "✅" : "❌")}\n";
+            }
+            defenseSkillsText.text = defenseText;
+        }
+
+        if (ultimateSkillsText != null)
+        {
+            var ultimate = playerStats.GetUltimateSkill();
+            string ultimateText = "🚀 Ultimate:\n";
+            if (ultimate.isActive)
+            {
+                ultimateText += $"- {ultimate.skillName} ({ultimate.CalculateTotalDamage():F1} dmg)\n";
+                ultimateText += playerStats.IsUltimateReady() ? "⭐ PRONTA!" : "⏳ CARREGANDO";
+            }
+            else
+            {
+                ultimateText += "🔒 Disponível no Level 5";
+            }
+            ultimateSkillsText.text = ultimateText;
+        }
+    }
+
     private IEnumerator HideSkillPopup()
     {
         yield return new WaitForSeconds(popupDisplayTime);
@@ -816,58 +898,6 @@ public class UIManager : MonoBehaviour
         skillDescriptionText.text = skill.description;
         skillAcquiredPanel.SetActive(true);
         StartCoroutine(HideSkillPopup());
-    }
-
-    // 🆕 ATUALIZADO: UpdateSkillCooldowns com suporte a elementos
-    public void UpdateSkillCooldowns(PlayerStats playerStats)
-    {
-        if (playerStats == null) return;
-
-        // Atualizar cooldowns das skills de ataque
-        for (int i = 0; i < playerStats.GetAttackSkills().Count; i++)
-        {
-            var skill = playerStats.GetAttackSkills()[i];
-            string cooldownKey = $"AttackSkill_{i}";
-
-            if (skill.IsOnCooldown)
-            {
-                float cooldownPercent = skill.currentCooldown / skill.cooldown;
-                UpdateSkillCooldownUI(cooldownKey, cooldownPercent, skill.skillName, skill.GetEffectiveElement());
-            }
-            else
-            {
-                ClearSkillCooldownUI(cooldownKey);
-            }
-        }
-
-        // Atualizar cooldowns das skills de defesa
-        for (int i = 0; i < playerStats.GetDefenseSkills().Count; i++)
-        {
-            var skill = playerStats.GetDefenseSkills()[i];
-            string cooldownKey = $"DefenseSkill_{i}";
-
-            if (skill.IsOnCooldown)
-            {
-                float cooldownPercent = skill.currentCooldown / skill.cooldown;
-                UpdateSkillCooldownUI(cooldownKey, cooldownPercent, skill.skillName, skill.element);
-            }
-            else
-            {
-                ClearSkillCooldownUI(cooldownKey);
-            }
-        }
-    }
-
-    private void UpdateSkillCooldownUI(string skillKey, float cooldownPercent, string skillName, PlayerStats.Element element)
-    {
-        // Implementar a lógica para atualizar a UI de cooldown com cores de elemento
-        Color elementColor = GetElementColor(element);
-        Debug.Log($"⏳ {skillName} em cooldown: {cooldownPercent:P0} | Elemento: {element}");
-    }
-
-    private void ClearSkillCooldownUI(string skillKey)
-    {
-        // Implementar a lógica para limpar o cooldown da UI
     }
 
     // 🆕 MÉTODO PARA FORÇAR ATUALIZAÇÃO COMPLETA DA UI
