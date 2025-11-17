@@ -81,7 +81,7 @@ public class StatusCardSystem : MonoBehaviour
 
         if (uiManager != null)
         {
-            uiManager.ShowStatusPointsGained(statusPointsPerLevel, currentStatusPoints);
+            uiManager.ShowStatusPointsGained(statusPointsPerLevel);
 
             // 🆕 Atualiza a UI para mostrar pontos disponíveis
             uiManager.UpdateStatusCardsUI(); // ✅ AGORA FUNCIONA!

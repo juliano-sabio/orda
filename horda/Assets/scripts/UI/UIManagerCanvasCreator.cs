@@ -36,12 +36,34 @@ public class UIManagerCanvasCreator : EditorWindow
         CreateStatusPanel(canvasGO, uiManager);
         CreateSkillSelectionPanel(canvasGO, uiManager);
         CreateStatusCardPanel(canvasGO, uiManager);
+        CreateXPGainText(canvasGO, uiManager); // 🆕 ADICIONADO: Texto de ganho de XP
 
         // Selecionar o Canvas criado
         Selection.activeGameObject = canvasGO;
 
         Debug.Log("✅ Canvas UIManager COMPLETO criado com sucesso!");
         Debug.Log("🎮 Controles: Tab (Status), K (Skills), C (Cards), R (Ultimate)");
+    }
+
+    // 🆕 MÉTODO PARA CRIAR TEXTO DE GANHO DE XP
+    private static void CreateXPGainText(GameObject parent, UIManager uiManager)
+    {
+        GameObject xpGainText = CreateTMPText(parent, "XPGainText", new Vector2(0, 100), new Vector2(300, 50));
+        xpGainText.SetActive(false);
+
+        TextMeshProUGUI textComponent = xpGainText.GetComponent<TextMeshProUGUI>();
+        textComponent.text = "+0 XP";
+        textComponent.color = Color.yellow;
+        textComponent.fontSize = 24;
+        textComponent.fontStyle = FontStyles.Bold;
+        textComponent.alignment = TextAlignmentOptions.Center;
+
+        // Adicionar efeito de sombra para melhor visibilidade
+        Shadow shadow = xpGainText.AddComponent<Shadow>();
+        shadow.effectColor = new Color(0, 0, 0, 0.8f);
+        shadow.effectDistance = new Vector2(2, -2);
+
+        uiManager.xpGainText = textComponent;
     }
 
     private static void CreateSkillAcquiredPanel(GameObject parent, UIManager uiManager)
@@ -461,7 +483,7 @@ public class UIManagerCanvasCreator : EditorWindow
         buttonPrefab.SetActive(false);
 
         uiManager.skillSelectionPanel = selectionPanel;
-        uiManager.skillButtonContainer = container.transform; // ✅ CORRIGIDO: Transform em vez de GameObject
+        uiManager.skillButtonContainer = container.transform;
         uiManager.skillButtonPrefab = buttonPrefab;
         uiManager.availableSkillsText = availableTextComponent;
     }
@@ -479,14 +501,6 @@ public class UIManagerCanvasCreator : EditorWindow
 
         Image bg = panel.GetComponent<Image>();
         bg.color = new Color(0, 0, 0, 0.95f);
-
-        // Tentar carregar sprite de background (opcional)
-        var backgroundSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
-        if (backgroundSprite != null)
-        {
-            bg.sprite = backgroundSprite;
-            bg.type = Image.Type.Sliced;
-        }
 
         // Título (TMP)
         GameObject title = CreateTMPText(panel, "Title", new Vector2(0, 250), new Vector2(600, 60));
@@ -531,7 +545,7 @@ public class UIManagerCanvasCreator : EditorWindow
         bonusesTextComponent.alignment = TextAlignmentOptions.TopLeft;
         bonusesTextComponent.textWrappingMode = TextWrappingModes.Normal;
 
-        // Botão Fechar - ✅ CORRIGIDO: Chamada correta do método
+        // Botão Fechar
         GameObject closeButton = CreateTMPButton(panel, "CloseButton", new Vector2(400, -250), new Vector2(100, 40));
         TextMeshProUGUI closeButtonText = closeButton.GetComponentInChildren<TextMeshProUGUI>();
         closeButtonText.text = "FECHAR (C)";
@@ -539,10 +553,9 @@ public class UIManagerCanvasCreator : EditorWindow
         closeButtonText.fontSize = 14;
 
         Button closeBtn = closeButton.GetComponent<Button>();
-        // O listener será configurado em runtime
 
         uiManager.statusCardPanel = panel;
-        uiManager.statusCardContainer = container.transform; // ✅ CORRIGIDO: Transform em vez de GameObject
+        uiManager.statusCardContainer = container.transform;
         uiManager.statusPointsText = pointsTextComponent;
         uiManager.activeBonusesText = bonusesTextComponent;
     }
@@ -559,14 +572,6 @@ public class UIManagerCanvasCreator : EditorWindow
 
         Image image = button.GetComponent<Image>();
         image.color = new Color(0.2f, 0.2f, 0.2f, 1f);
-
-        // Tentar carregar sprite (opcional)
-        var buttonSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
-        if (buttonSprite != null)
-        {
-            image.sprite = buttonSprite;
-            image.type = Image.Type.Sliced;
-        }
 
         // Texto do botão (TMP)
         GameObject textGO = CreateTMPText(button, "Text", Vector2.zero, size);

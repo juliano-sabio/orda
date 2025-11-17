@@ -24,6 +24,14 @@ public class PlayerStats : MonoBehaviour
     public float xpToNextLevel = 100f;
     public float xpMultiplier = 1.5f;
 
+    [Header("📦 Sistema de Coleta de XP")]
+    public float xpCollectionRadius = 3f;
+    public bool autoCollectXP = true;
+
+    [Header("Visualização da Área de Coleta")]
+    public bool showCollectionRadius = true;
+    public Color collectionRadiusColor = new Color(0, 1, 0, 0.1f);
+
     [Header("Skills de Ataque")]
     public List<AttackSkill> attackSkills = new List<AttackSkill>();
 
@@ -607,7 +615,7 @@ public class PlayerStats : MonoBehaviour
                 ApplyAreaDamage(finalDamage, attackElement);
 
                 skill.StartCooldown();
-                GainXP(2);
+                // ❌ REMOVIDO: GainXP(2); - XP agora só vem das orbes
             }
         }
         UpdateUI();
@@ -626,7 +634,7 @@ public class PlayerStats : MonoBehaviour
                 Debug.Log($"🛡️ {skill.skillName} ativada! Defesa: {skillDefense} | Elemento: {skill.element}");
 
                 skill.StartCooldown();
-                GainXP(1);
+                // ❌ REMOVIDO: GainXP(1); - XP agora só vem das orbes
             }
         }
 
@@ -673,6 +681,13 @@ public class PlayerStats : MonoBehaviour
             if (hitCollider.gameObject == gameObject) continue;
             if (hitCollider.CompareTag("Enemy"))
             {
+                // Aplica dano no inimigo
+                InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
+                if (inimigo != null)
+                {
+                    inimigo.ReceberDano(damage);
+                }
+
                 elementSystem.ApplyElementalEffect(element, hitCollider.gameObject);
                 Debug.Log($"💥 Dano {damage} aplicado no inimigo {hitCollider.name} | Elemento: {element}");
             }
@@ -691,9 +706,15 @@ public class PlayerStats : MonoBehaviour
             ToggleDefenseSkill(1, !defenseSkills[1].isActive);
     }
 
+    // 🆕 SISTEMA DE XP APENAS POR ORBES
     public void GainXP(float xpAmount)
     {
         currentXP += xpAmount;
+
+        // Efeito visual de ganho de XP
+        if (uiManager != null)
+            uiManager.ShowXPGained(xpAmount);
+
         while (currentXP >= xpToNextLevel)
         {
             LevelUp();
@@ -762,7 +783,7 @@ public class PlayerStats : MonoBehaviour
 
         if (health > 0)
         {
-            GainXP(2);
+            // ❌ REMOVIDO: GainXP(2); - XP agora só vem das orbes
             Debug.Log($"💢 Dano recebido: {reducedDamage} (original: {damage})");
         }
 
@@ -797,6 +818,13 @@ public class PlayerStats : MonoBehaviour
             if (hitCollider.gameObject == gameObject) continue;
             if (hitCollider.CompareTag("Enemy"))
             {
+                // Aplica dano no inimigo
+                InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
+                if (inimigo != null)
+                {
+                    inimigo.ReceberDano(finalDamage);
+                }
+
                 elementSystem.ApplyElementalEffect(ultimateElement, hitCollider.gameObject);
                 Debug.Log($"💥 ULTIMATE: Dano {finalDamage} no inimigo {hitCollider.name} | Elemento: {ultimateElement}");
             }
@@ -812,7 +840,7 @@ public class PlayerStats : MonoBehaviour
             uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Ultimate ativada!");
         }
 
-        GainXP(15);
+        // ❌ REMOVIDO: GainXP(15); - XP agora só vem das orbes
     }
 
     private IEnumerator UltimateEffects(float duration, Element element)
@@ -853,6 +881,36 @@ public class PlayerStats : MonoBehaviour
                     uiManager.SetUltimateReady(true);
             }
         }
+    }
+
+    // 🆕 MÉTODOS DO SISTEMA DE COLETA DE XP
+    public float GetXpCollectionRadius()
+    {
+        return xpCollectionRadius;
+    }
+
+    public void SetXpCollectionRadius(float newRadius)
+    {
+        xpCollectionRadius = Mathf.Max(0.5f, newRadius);
+        Debug.Log($"📦 Raio de coleta ajustado para: {xpCollectionRadius}");
+    }
+
+    public void BoostCollectionRadius(float boostAmount, float duration = 0f)
+    {
+        xpCollectionRadius += boostAmount;
+        Debug.Log($"📦 Raio de coleta aumentado para {xpCollectionRadius}");
+
+        if (duration > 0f)
+        {
+            StartCoroutine(TemporaryRadiusBoost(boostAmount, duration));
+        }
+    }
+
+    private IEnumerator TemporaryRadiusBoost(float boostAmount, float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        xpCollectionRadius -= boostAmount;
+        Debug.Log($"📦 Raio de coleta voltou ao normal: {xpCollectionRadius}");
     }
 
     public void ForceUIUpdate()
@@ -942,9 +1000,13 @@ public class PlayerStats : MonoBehaviour
                 healthRegenRate += boostValue;
                 Debug.Log($"💚 Regeneração aumentada em {boostValue}!");
                 break;
+            case "collectionradius":
+                BoostCollectionRadius(boostValue);
+                Debug.Log($"📦 Raio de coleta aumentado em {boostValue}!");
+                break;
         }
 
-        GainXP(10);
+        // ❌ REMOVIDO: GainXP(10); - XP agora só vem das orbes
         inventory.Add(itemName);
         UpdateUI();
     }
@@ -1034,5 +1096,18 @@ public class PlayerStats : MonoBehaviour
         }
 
         return 0f;
+    }
+
+    // 🆕 VISUALIZAÇÃO NO EDITOR
+    void OnDrawGizmosSelected()
+    {
+        if (showCollectionRadius)
+        {
+            Gizmos.color = collectionRadiusColor;
+            Gizmos.DrawWireSphere(transform.position, xpCollectionRadius);
+
+            Gizmos.color = new Color(collectionRadiusColor.r, collectionRadiusColor.g, collectionRadiusColor.b, 0.3f);
+            Gizmos.DrawSphere(transform.position, xpCollectionRadius);
+        }
     }
 }
