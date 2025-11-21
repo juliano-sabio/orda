@@ -107,7 +107,29 @@ public class PlayerStats : MonoBehaviour
                 weakAgainst = new List<Element> { Element.Fire, Element.Lightning }
             };
 
-            // ... (restante das afinidades)
+            elementAffinities[Element.Lightning] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Wind, Element.Poison },
+                weakAgainst = new List<Element> { Element.Earth, Element.Fire }
+            };
+
+            elementAffinities[Element.Poison] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Earth, Element.Wind },
+                weakAgainst = new List<Element> { Element.Fire, Element.Lightning }
+            };
+
+            elementAffinities[Element.Earth] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Lightning, Element.Poison },
+                weakAgainst = new List<Element> { Element.Wind, Element.Ice }
+            };
+
+            elementAffinities[Element.Wind] = new ElementAffinity
+            {
+                strongAgainst = new List<Element> { Element.Fire, Element.Earth },
+                weakAgainst = new List<Element> { Element.Ice, Element.Lightning }
+            };
         }
 
         public float CalculateElementalMultiplier(Element attackElement, Element targetElement)
@@ -146,6 +168,12 @@ public class PlayerStats : MonoBehaviour
                 case Element.Poison:
                     ApplyPoisonEffect(target);
                     break;
+                case Element.Earth:
+                    ApplySlowEffect(target);
+                    break;
+                case Element.Wind:
+                    ApplyKnockbackEffect(target);
+                    break;
             }
         }
 
@@ -167,6 +195,16 @@ public class PlayerStats : MonoBehaviour
         private void ApplyPoisonEffect(GameObject target)
         {
             Debug.Log($"☠️ Aplicando efeito de veneno em {target.name}");
+        }
+
+        private void ApplySlowEffect(GameObject target)
+        {
+            Debug.Log($"🌍 Aplicando efeito de lentidão em {target.name}");
+        }
+
+        private void ApplyKnockbackEffect(GameObject target)
+        {
+            Debug.Log($"💨 Aplicando efeito de repulsão em {target.name}");
         }
     }
 
@@ -615,7 +653,6 @@ public class PlayerStats : MonoBehaviour
                 ApplyAreaDamage(finalDamage, attackElement);
 
                 skill.StartCooldown();
-                // ❌ REMOVIDO: GainXP(2); - XP agora só vem das orbes
             }
         }
         UpdateUI();
@@ -634,7 +671,6 @@ public class PlayerStats : MonoBehaviour
                 Debug.Log($"🛡️ {skill.skillName} ativada! Defesa: {skillDefense} | Elemento: {skill.element}");
 
                 skill.StartCooldown();
-                // ❌ REMOVIDO: GainXP(1); - XP agora só vem das orbes
             }
         }
 
@@ -681,7 +717,7 @@ public class PlayerStats : MonoBehaviour
             if (hitCollider.gameObject == gameObject) continue;
             if (hitCollider.CompareTag("Enemy"))
             {
-                // Aplica dano no inimigo
+                // ✅ CORRIGIDO: Usa InimigoController em vez de EnemyHealth
                 InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
                 if (inimigo != null)
                 {
@@ -722,7 +758,6 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
     }
 
-    // 🆕 ATUALIZADO: LevelUp com sistema duplo de cards
     private void LevelUp()
     {
         level++;
@@ -744,7 +779,7 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"🎉 LEVEL UP! Agora é nível {level}!");
 
-        // 🆕 NOTIFICAR SISTEMA DE CARDS (sempre ganha pontos, cards só em níveis específicos)
+        // 🆕 NOTIFICAR SISTEMA DE CARDS
         if (cardSystem != null)
         {
             cardSystem.OnPlayerLevelUp(level);
@@ -783,7 +818,6 @@ public class PlayerStats : MonoBehaviour
 
         if (health > 0)
         {
-            // ❌ REMOVIDO: GainXP(2); - XP agora só vem das orbes
             Debug.Log($"💢 Dano recebido: {reducedDamage} (original: {damage})");
         }
 
@@ -802,6 +836,26 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"💚 Curado em {healAmount}!");
     }
 
+    // ✅ MÉTODO ADICIONADO: UpdateUltimateSystem
+    private void UpdateUltimateSystem()
+    {
+        if (!ultimateSkill.isActive) return;
+
+        if (!ultimateReady)
+        {
+            ultimateChargeTime += Time.deltaTime;
+            if (ultimateChargeTime >= ultimateCooldown)
+            {
+                ultimateReady = true;
+                ultimateChargeTime = ultimateCooldown;
+
+                if (uiManager != null)
+                    uiManager.SetUltimateReady(true);
+            }
+        }
+    }
+
+    // ✅ MÉTODO ADICIONADO: ActivateUltimate
     public void ActivateUltimate()
     {
         if (!ultimateReady || !ultimateSkill.isActive) return;
@@ -818,7 +872,7 @@ public class PlayerStats : MonoBehaviour
             if (hitCollider.gameObject == gameObject) continue;
             if (hitCollider.CompareTag("Enemy"))
             {
-                // Aplica dano no inimigo
+                // ✅ CORRIGIDO: Usa InimigoController em vez de EnemyHealth
                 InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
                 if (inimigo != null)
                 {
@@ -839,8 +893,6 @@ public class PlayerStats : MonoBehaviour
             uiManager.OnUltimateActivated();
             uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Ultimate ativada!");
         }
-
-        // ❌ REMOVIDO: GainXP(15); - XP agora só vem das orbes
     }
 
     private IEnumerator UltimateEffects(float duration, Element element)
@@ -865,60 +917,8 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("🔚 Efeito da Ultimate terminou.");
     }
 
-    void UpdateUltimateSystem()
-    {
-        if (!ultimateSkill.isActive) return;
-
-        if (!ultimateReady)
-        {
-            ultimateChargeTime += Time.deltaTime;
-            if (ultimateChargeTime >= ultimateCooldown)
-            {
-                ultimateReady = true;
-                ultimateChargeTime = ultimateCooldown;
-
-                if (uiManager != null)
-                    uiManager.SetUltimateReady(true);
-            }
-        }
-    }
-
-    // 🆕 MÉTODOS DO SISTEMA DE COLETA DE XP
-    public float GetXpCollectionRadius()
-    {
-        return xpCollectionRadius;
-    }
-
-    public void SetXpCollectionRadius(float newRadius)
-    {
-        xpCollectionRadius = Mathf.Max(0.5f, newRadius);
-        Debug.Log($"📦 Raio de coleta ajustado para: {xpCollectionRadius}");
-    }
-
-    public void BoostCollectionRadius(float boostAmount, float duration = 0f)
-    {
-        xpCollectionRadius += boostAmount;
-        Debug.Log($"📦 Raio de coleta aumentado para {xpCollectionRadius}");
-
-        if (duration > 0f)
-        {
-            StartCoroutine(TemporaryRadiusBoost(boostAmount, duration));
-        }
-    }
-
-    private IEnumerator TemporaryRadiusBoost(float boostAmount, float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        xpCollectionRadius -= boostAmount;
-        Debug.Log($"📦 Raio de coleta voltou ao normal: {xpCollectionRadius}");
-    }
-
-    public void ForceUIUpdate()
-    {
-        UpdateUI();
-    }
-
-    void UpdateUI()
+    // ✅ MÉTODO ADICIONADO: UpdateUI
+    private void UpdateUI()
     {
         if (uiManager != null)
         {
@@ -926,91 +926,19 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    private void Die()
+    // ✅ MÉTODO ADICIONADO: GetElementSystem
+    public ElementSystem GetElementSystem()
     {
-        Debug.Log("💀 Jogador morreu!");
-        Time.timeScale = 0f;
+        return elementSystem;
     }
 
-    // 🆕 GETTERS E SETTERS COMPLETOS
-    public float GetCurrentHealth() => health;
-    public float GetMaxHealth() => maxHealth;
-    public float GetAttack() => attack;
-    public float GetDefense() => defense;
-    public float GetSpeed() => speed;
-    public int GetLevel() => level;
-    public float GetCurrentXP() => currentXP;
-    public float GetXPToNextLevel() => xpToNextLevel;
-    public List<string> GetInventory() => new List<string>(inventory);
-    public List<AttackSkill> GetAttackSkills() => attackSkills;
-    public List<DefenseSkill> GetDefenseSkills() => defenseSkills;
-    public UltimateSkill GetUltimateSkill() => ultimateSkill;
-    public float GetUltimateCooldown() => ultimateCooldown;
-    public float GetUltimateChargeTime() => ultimateChargeTime;
-    public bool IsUltimateReady() => ultimateReady;
-    public bool HasUltimate() => ultimateSkill.isActive;
-    public float GetAttackActivationInterval() => attackActivationInterval;
-    public float GetDefenseActivationInterval() => defenseActivationInterval;
-    public Element GetCurrentElement() => CurrentElement;
-    public float GetElementalBonus() => ElementalBonus;
-    public ElementSystem GetElementSystem() => elementSystem;
-    public float GetHealthRegenRate() => healthRegenRate;
-    public bool IsRegeneratingHealth() => isRegenerating;
-
-    public void ToggleAttackSkill(int index, bool active)
+    // ✅ MÉTODO ADICIONADO: GetCurrentElement
+    public Element GetCurrentElement()
     {
-        if (index >= 0 && index < attackSkills.Count)
-        {
-            attackSkills[index].isActive = active;
-            UpdateUI();
-        }
+        return CurrentElement;
     }
 
-    public void ToggleDefenseSkill(int index, bool active)
-    {
-        if (index >= 0 && index < defenseSkills.Count)
-        {
-            defenseSkills[index].isActive = active;
-            UpdateUI();
-        }
-    }
-
-    public void ApplyItemEffect(string itemName, string statType, float boostValue)
-    {
-        switch (statType.ToLower())
-        {
-            case "health":
-                maxHealth += boostValue;
-                health += boostValue;
-                Debug.Log($"❤️ Vida aumentada em {boostValue}!");
-                break;
-            case "attack":
-                attack += boostValue;
-                Debug.Log($"⚔️ Ataque aumentado em {boostValue}!");
-                break;
-            case "defense":
-                defense += boostValue;
-                Debug.Log($"🛡️ Defesa aumentada em {boostValue}!");
-                break;
-            case "speed":
-                speed += boostValue;
-                Debug.Log($"🏃 Velocidade aumentada em {boostValue}!");
-                break;
-            case "regen":
-                healthRegenRate += boostValue;
-                Debug.Log($"💚 Regeneração aumentada em {boostValue}!");
-                break;
-            case "collectionradius":
-                BoostCollectionRadius(boostValue);
-                Debug.Log($"📦 Raio de coleta aumentado em {boostValue}!");
-                break;
-        }
-
-        // ❌ REMOVIDO: GainXP(10); - XP agora só vem das orbes
-        inventory.Add(itemName);
-        UpdateUI();
-    }
-
+    // ✅ MÉTODO ADICIONADO: AddSkillModifier
     public void AddSkillModifier(SkillModifier modifier)
     {
         bool applied = false;
@@ -1061,6 +989,125 @@ public class PlayerStats : MonoBehaviour
             Debug.LogWarning($"⚠️ Nenhuma skill encontrada com o nome: {modifier.targetSkillName}");
         }
 
+        UpdateUI();
+    }
+
+    // ✅ MÉTODO ADICIONADO: ToggleAttackSkill
+    public void ToggleAttackSkill(int index, bool active)
+    {
+        if (index >= 0 && index < attackSkills.Count)
+        {
+            attackSkills[index].isActive = active;
+            UpdateUI();
+        }
+    }
+
+    // ✅ MÉTODO ADICIONADO: ToggleDefenseSkill
+    public void ToggleDefenseSkill(int index, bool active)
+    {
+        if (index >= 0 && index < defenseSkills.Count)
+        {
+            defenseSkills[index].isActive = active;
+            UpdateUI();
+        }
+    }
+
+    // 🆕 MÉTODOS DO SISTEMA DE COLETA DE XP
+    public float GetXpCollectionRadius()
+    {
+        return xpCollectionRadius;
+    }
+
+    public void SetXpCollectionRadius(float newRadius)
+    {
+        xpCollectionRadius = Mathf.Max(0.5f, newRadius);
+        Debug.Log($"📦 Raio de coleta ajustado para: {xpCollectionRadius}");
+    }
+
+    public void BoostCollectionRadius(float boostAmount, float duration = 0f)
+    {
+        xpCollectionRadius += boostAmount;
+        Debug.Log($"📦 Raio de coleta aumentado para {xpCollectionRadius}");
+
+        if (duration > 0f)
+        {
+            StartCoroutine(TemporaryRadiusBoost(boostAmount, duration));
+        }
+    }
+
+    private IEnumerator TemporaryRadiusBoost(float boostAmount, float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        xpCollectionRadius -= boostAmount;
+        Debug.Log($"📦 Raio de coleta voltou ao normal: {xpCollectionRadius}");
+    }
+
+    public void ForceUIUpdate()
+    {
+        UpdateUI();
+    }
+
+    private void Die()
+    {
+        Debug.Log("💀 Jogador morreu!");
+        Time.timeScale = 0f;
+    }
+
+    // 🆕 GETTERS E SETTERS COMPLETOS
+    public float GetCurrentHealth() => health;
+    public float GetMaxHealth() => maxHealth;
+    public float GetAttack() => attack;
+    public float GetDefense() => defense;
+    public float GetSpeed() => speed;
+    public int GetLevel() => level;
+    public float GetCurrentXP() => currentXP;
+    public float GetXPToNextLevel() => xpToNextLevel;
+    public List<string> GetInventory() => new List<string>(inventory);
+    public List<AttackSkill> GetAttackSkills() => attackSkills;
+    public List<DefenseSkill> GetDefenseSkills() => defenseSkills;
+    public UltimateSkill GetUltimateSkill() => ultimateSkill;
+    public float GetUltimateCooldown() => ultimateCooldown;
+    public float GetUltimateChargeTime() => ultimateChargeTime;
+    public bool IsUltimateReady() => ultimateReady;
+    public bool HasUltimate() => ultimateSkill.isActive;
+    public float GetAttackActivationInterval() => attackActivationInterval;
+    public float GetDefenseActivationInterval() => defenseActivationInterval;
+    public float GetElementalBonus() => ElementalBonus;
+    public float GetHealthRegenRate() => healthRegenRate;
+    public bool IsRegeneratingHealth() => isRegenerating;
+
+    public void ApplyItemEffect(string itemName, string statType, float boostValue)
+    {
+        switch (statType.ToLower())
+        {
+            case "health":
+                maxHealth += boostValue;
+                health += boostValue;
+                Debug.Log($"❤️ Vida aumentada em {boostValue}!");
+                break;
+            case "attack":
+                attack += boostValue;
+                Debug.Log($"⚔️ Ataque aumentado em {boostValue}!");
+                break;
+            case "defense":
+                defense += boostValue;
+                Debug.Log($"🛡️ Defesa aumentada em {boostValue}!");
+                break;
+            case "speed":
+                speed += boostValue;
+                Debug.Log($"🏃 Velocidade aumentada em {boostValue}!");
+                break;
+            case "regen":
+                healthRegenRate += boostValue;
+                Debug.Log($"💚 Regeneração aumentada em {boostValue}!");
+                break;
+            case "collectionradius":
+                BoostCollectionRadius(boostValue);
+                Debug.Log($"📦 Raio de coleta aumentado em {boostValue}!");
+                break;
+        }
+
+        inventory.Add(itemName);
         UpdateUI();
     }
 
