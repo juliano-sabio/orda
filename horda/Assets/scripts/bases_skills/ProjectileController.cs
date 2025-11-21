@@ -80,10 +80,51 @@ public class ProjectileController2D : MonoBehaviour
     {
         if (hasHit) return;
 
-        if (other.CompareTag("Enemy"))
+        // 🎯 MÉTODO CORRIGIDO: Verificação robusta de inimigos
+        if (IsEnemy(other.gameObject))
         {
             OnHitTarget(other.gameObject);
         }
+    }
+
+    // 🎯 MÉTODO NOVO: Verificação robusta de inimigos
+    private bool IsEnemy(GameObject obj)
+    {
+        if (obj == null) return false;
+
+        // Método 1: Verificação por tag (com try-catch)
+        try
+        {
+            if (obj.CompareTag("Enemy") || obj.CompareTag("enemy"))
+            {
+                return true;
+            }
+        }
+        catch (UnityException)
+        {
+            // Tags não existem, continuar para outros métodos
+        }
+
+        // Método 2: Verificação por componente
+        if (obj.GetComponent<InimigoController>() != null)
+        {
+            return true;
+        }
+
+        // Método 3: Verificação por nome
+        string objName = obj.name.ToLower();
+        if (objName.Contains("enemy") || objName.Contains("inimigo"))
+        {
+            return true;
+        }
+
+        // Método 4: Verificação por layer
+        if (obj.layer == LayerMask.NameToLayer("Enemy"))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     void OnHitTarget(GameObject enemy = null)
@@ -102,9 +143,33 @@ public class ProjectileController2D : MonoBehaviour
                 inimigo.ReceberDano(damage);
                 Debug.Log($"💥 Projétil 2D acertou {targetEnemy.name} com {damage} de dano {element}");
             }
+            else
+            {
+                // Fallback: tenta encontrar qualquer componente de inimigo
+                MonoBehaviour[] components = targetEnemy.GetComponents<MonoBehaviour>();
+                foreach (var component in components)
+                {
+                    if (component.GetType().Name.ToLower().Contains("enemy") ||
+                        component.GetType().Name.ToLower().Contains("inimigo"))
+                    {
+                        // Usa reflexão para chamar método de dano se existir
+                        var damageMethod = component.GetType().GetMethod("ReceberDano");
+                        if (damageMethod != null)
+                        {
+                            damageMethod.Invoke(component, new object[] { damage });
+                            Debug.Log($"💥 Projétil acertou {targetEnemy.name} via reflexão");
+                            break;
+                        }
+                    }
+                }
+            }
 
             // Aplica efeito elemental
             ApplyElementalEffect(targetEnemy);
+        }
+        else
+        {
+            Debug.Log("🎯 Projétil atingiu alvo (sem GameObject específico)");
         }
 
         // Efeito de impacto
@@ -118,10 +183,43 @@ public class ProjectileController2D : MonoBehaviour
 
     void ApplyElementalEffect(GameObject enemy)
     {
+        if (enemy == null) return;
+
         PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
-        if (playerStats != null && enemy != null)
+        if (playerStats != null)
         {
             playerStats.GetElementSystem().ApplyElementalEffect(element, enemy);
+        }
+        else
+        {
+            // Fallback: aplica efeito básico
+            ApplyBasicElementalEffect(enemy);
+        }
+    }
+
+    // 🎯 MÉTODO NOVO: Efeitos elementais básicos
+    private void ApplyBasicElementalEffect(GameObject enemy)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.Fire:
+                Debug.Log($"🔥 {enemy.name} está queimando!");
+                break;
+            case PlayerStats.Element.Ice:
+                Debug.Log($"❄️ {enemy.name} está congelado!");
+                break;
+            case PlayerStats.Element.Lightning:
+                Debug.Log($"⚡ {enemy.name} está eletrocutado!");
+                break;
+            case PlayerStats.Element.Poison:
+                Debug.Log($"☠️ {enemy.name} está envenenado!");
+                break;
+            case PlayerStats.Element.Earth:
+                Debug.Log($"🌍 {enemy.name} está atordoado!");
+                break;
+            case PlayerStats.Element.Wind:
+                Debug.Log($"💨 {enemy.name} está sendo empurrado!");
+                break;
         }
     }
 
@@ -155,6 +253,19 @@ public class ProjectileController2D : MonoBehaviour
             case PlayerStats.Element.Earth: return new Color(0.6f, 0.3f, 0.1f);
             case PlayerStats.Element.Wind: return Color.white;
             default: return Color.white;
+        }
+    }
+
+    // 🎯 MÉTODO NOVO: Para debug
+    void OnDrawGizmos()
+    {
+        if (hasHit) return;
+
+        // Desenha linha para o alvo (apenas no editor)
+        if (target != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(transform.position, target.position);
         }
     }
 }

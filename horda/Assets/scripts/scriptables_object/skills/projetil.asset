@@ -19,6 +19,8 @@ MonoBehaviour:
   attackBonus: 20
   defenseBonus: 0
   speedBonus: 0
+  healthRegenBonus: 0
+  attackSpeedMultiplier: 1
   element: 0
   elementalBonus: 1
   elementalEffectChance: 0.2
@@ -106,3 +108,16 @@ MonoBehaviour:
   maxStacks: 1
   duration: 5
   isToggleable: 0
+  projectilePrefab2D: {fileID: 7800008629741502241, guid: 9b611ab392c4d9b4ba29c94fa42b22f0, type: 3}
+  projectileSpeed: 8
+  projectileLifeTime: 4
+  projectileCount: 1
+  projectileSpread: 0
+  homingProjectile: 0
+  homingStrength: 2
+  pierceEnemies: 0
+  pierceCount: 1
+  bounceBetweenEnemies: 0
+  bounceCount: 0
+  explodeOnImpact: 0
+  explosionRadius: 2

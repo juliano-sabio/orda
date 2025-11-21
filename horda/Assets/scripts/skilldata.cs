@@ -15,6 +15,8 @@ public class SkillData : ScriptableObject
     public float attackBonus = 0f;
     public float defenseBonus = 0f;
     public float speedBonus = 0f;
+    public float healthRegenBonus = 0f;
+    public float attackSpeedMultiplier = 1.0f;
 
     [Header("⚡ Sistema de Elementos")]
     public PlayerStats.Element element = PlayerStats.Element.None;
@@ -56,7 +58,25 @@ public class SkillData : ScriptableObject
     public float duration = 0f;
     public bool isToggleable = false;
 
-    // MÉTODOS (mantidos iguais)
+    // 🆕 PROPRIEDADES ADICIONADAS PARA PROJÉTEIS
+    [Header("🚀 Configurações de Projétil (2D)")]
+    public GameObject projectilePrefab2D;
+    public float projectileSpeed = 8f;
+    public float projectileLifeTime = 4f;
+    public int projectileCount = 1;
+    public float projectileSpread = 0f;
+    public bool homingProjectile = false;
+    public float homingStrength = 2f;
+
+    [Header("🎯 Comportamento de Projétil")]
+    public bool pierceEnemies = false;
+    public int pierceCount = 1;
+    public bool bounceBetweenEnemies = false;
+    public int bounceCount = 0;
+    public bool explodeOnImpact = false;
+    public float explosionRadius = 2f;
+
+    // MÉTODOS
     public string GetElementIcon() { return GetElementIcon(this.element); }
 
     public static string GetElementIcon(PlayerStats.Element element)
@@ -107,6 +127,19 @@ public class SkillData : ScriptableObject
         if (attackBonus != 0) sb.AppendLine($"⚔️ Ataque: {FormatBonus(attackBonus)}");
         if (defenseBonus != 0) sb.AppendLine($"🛡️ Defesa: {FormatBonus(defenseBonus)}");
         if (speedBonus != 0) sb.AppendLine($"🏃 Velocidade: {FormatBonus(speedBonus)}");
+        if (healthRegenBonus != 0) sb.AppendLine($"💚 Regeneração: {FormatBonus(healthRegenBonus)}/s");
+        if (attackSpeedMultiplier != 1.0f) sb.AppendLine($"⚡ Vel. Ataque: {attackSpeedMultiplier}x");
+
+        // 🆕 DESCRIÇÕES PARA PROJÉTEIS
+        if (specificType == SpecificSkillType.Projectile)
+        {
+            sb.AppendLine($"🎯 Projéteis: {projectileCount}");
+            if (projectileSpeed != 8f) sb.AppendLine($"💨 Velocidade: {projectileSpeed}");
+            if (pierceEnemies) sb.AppendLine($"🔪 Penetração: {pierceCount} inimigos");
+            if (bounceBetweenEnemies) sb.AppendLine($"🔁 Ricochete: {bounceCount} vezes");
+            if (explodeOnImpact) sb.AppendLine($"💥 Explosão: {explosionRadius}m de raio");
+            if (homingProjectile) sb.AppendLine($"🎯 Projétil Guiado");
+        }
 
         if (specificType != SpecificSkillType.None)
             sb.AppendLine($"🎯 Efeito: {GetSpecificTypeDescription()}");
@@ -133,7 +166,8 @@ public class SkillData : ScriptableObject
             case SpecificSkillType.AreaDamage: return $"Dano em Área: +{specialValue}%";
             case SpecificSkillType.Shield: return $"Escudo: {specialValue} de defesa";
             case SpecificSkillType.Heal: return $"Cura: {specialValue} de vida";
-            case SpecificSkillType.Projectile: return $"Projéteis: {specialValue} adicionais";
+            case SpecificSkillType.Projectile:
+                return $"Projéteis: {projectileCount} | Vel: {projectileSpeed} | Dano: +{attackBonus}";
             case SpecificSkillType.DamageReflection: return $"Reflexão de Dano: {specialValue}%";
             case SpecificSkillType.ElementalMastery: return $"Domínio Elemental: +{specialValue}% de dano elemental";
             case SpecificSkillType.ChainLightning: return $"Relâmpago em Cadeia: {specialValue} alvos";
@@ -173,12 +207,41 @@ public class SkillData : ScriptableObject
         }
     }
 
-    private void ApplyFireEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"🔥 Aplicando efeito de Fogo em {target.name}");
-    private void ApplyIceEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"❄️ Aplicando efeito de Gelo em {target.name}");
-    private void ApplyLightningEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"⚡ Aplicando efeito de Raio em {target.name}");
-    private void ApplyPoisonEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"☠️ Aplicando efeito de Veneno em {target.name}");
-    private void ApplyEarthEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"🌍 Aplicando efeito de Terra em {target.name}");
-    private void ApplyWindEffect(GameObject target, PlayerStats playerStats) => Debug.Log($"💨 Aplicando efeito de Vento em {target.name}");
+    private void ApplyFireEffect(GameObject target, PlayerStats playerStats)
+    {
+        Debug.Log($"🔥 Aplicando efeito de Fogo em {target.name}");
+        // Implementar queimadura contínua
+    }
+
+    private void ApplyIceEffect(GameObject target, PlayerStats playerStats)
+    {
+        Debug.Log($"❄️ Aplicando efeito de Gelo em {target.name}");
+        // Implementar lentidão
+    }
+
+    private void ApplyLightningEffect(GameObject target, PlayerStats playerStats)
+    {
+        Debug.Log($"⚡ Aplicando efeito de Raio em {target.name}");
+        // Implementar corrente elétrica
+    }
+
+    private void ApplyPoisonEffect(GameObject target, PlayerStats playerStats)
+    {
+        Debug.Log($"☠️ Aplicando efeito de Veneno em {target.name}");
+        // Implementar dano contínuo
+    }
+
+    private void ApplyEarthEffect(GameObject target, PlayerStats playerStats)
+    {
+        Debug.Log($"🌍 Aplicando efeito de Terra em {target.name}");
+        // Implementar atordoamento
+    }
+
+    private void ApplyWindEffect(GameObject target, PlayerStats playerStats)
+    {
+        Debug.Log($"💨 Aplicando efeito de Vento em {target.name}");
+        // Implementar repulsão
+    }
 
     public bool IsValid() => !string.IsNullOrEmpty(skillName);
 
@@ -199,25 +262,62 @@ public class SkillData : ScriptableObject
     public void ApplyToPlayer(PlayerStats playerStats)
     {
         if (playerStats == null) return;
+
+        // Aplica bônus básicos
         playerStats.maxHealth += healthBonus;
         playerStats.health += healthBonus;
         playerStats.attack += attackBonus;
         playerStats.defense += defenseBonus;
         playerStats.speed += speedBonus;
+
+        // Aplica as novas propriedades
+        playerStats.healthRegenRate += healthRegenBonus;
+        playerStats.attackActivationInterval *= attackSpeedMultiplier;
+
+        Debug.Log($"✨ Skill {skillName} aplicada ao player");
     }
 
     public void RemoveFromPlayer(PlayerStats playerStats)
     {
         if (playerStats == null) return;
+
+        // Remove bônus básicos
         playerStats.maxHealth -= healthBonus;
         playerStats.health = Mathf.Min(playerStats.health, playerStats.maxHealth);
         playerStats.attack -= attackBonus;
         playerStats.defense -= defenseBonus;
         playerStats.speed -= speedBonus;
+
+        // Remove as novas propriedades
+        playerStats.healthRegenRate -= healthRegenBonus;
+        playerStats.attackActivationInterval /= attackSpeedMultiplier;
+
+        Debug.Log($"🔴 Skill {skillName} removida do player");
+    }
+
+    // 🆕 MÉTODOS ESPECÍFICOS PARA PROJÉTEIS
+    public bool IsProjectileSkill()
+    {
+        return specificType == SpecificSkillType.Projectile;
+    }
+
+    public bool HasProjectilePrefab()
+    {
+        return projectilePrefab2D != null || visualEffect != null;
+    }
+
+    public GameObject GetProjectilePrefab()
+    {
+        return projectilePrefab2D != null ? projectilePrefab2D : visualEffect;
+    }
+
+    public float GetProjectileDamage()
+    {
+        return attackBonus > 0 ? attackBonus : 15f;
     }
 }
 
-// ✅ CORREÇÃO: Enums sem Headers - Headers NÃO são permitidos em enums
+// Enums
 public enum SkillType
 {
     Passive,
@@ -261,7 +361,6 @@ public enum SpecificSkillType
     EarthStomp
 }
 
-// ✅ CORREÇÃO: SkillModifierData sem Headers - usando comentários normais
 [System.Serializable]
 public class SkillModifierData
 {

@@ -8,22 +8,33 @@ public class SkillChoiceUI : MonoBehaviour
 {
     [Header("Referências UI")]
     public GameObject choicePanel;
-    public Text titleText; // UI padrão
-    public TextMeshProUGUI titleTextTMP; // TextMeshPro (opcional)
+    public Text titleText;
+    public TextMeshProUGUI titleTextTMP;
     public Transform skillsContainer;
     public GameObject skillChoicePrefab;
     public Button confirmButton;
 
     [Header("Configurações")]
     public float autoCloseDelay = 2f;
+    public bool pauseGameDuringChoice = true;
+
+    [Header("Fallbacks Automáticos")]
+    public bool createFallbackUI = true;
 
     private List<SkillData> currentChoices;
     private System.Action<SkillData> onSkillChosen;
     private List<GameObject> currentButtons = new List<GameObject>();
+    private float previousTimeScale;
+    private GameObject fallbackPanel;
 
     void Awake()
     {
-        // Garante que o painel está ativo para receber eventos
+        if (!gameObject.activeInHierarchy)
+        {
+            Debug.LogWarning("⚠️ SkillChoiceUI inativo no Awake! Ativando...");
+            gameObject.SetActive(true);
+        }
+
         if (choicePanel != null)
         {
             choicePanel.SetActive(false);
@@ -33,80 +44,148 @@ public class SkillChoiceUI : MonoBehaviour
     void Start()
     {
         Debug.Log("🔄 SkillChoiceUI iniciando...");
+        StartCoroutine(InitializeWithDelay());
+    }
 
-        // 🆕 CORREÇÃO: Registro seguro no SkillManager
-        RegisterWithSkillManager();
+    private IEnumerator InitializeWithDelay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        CheckAndFixConfiguration();
+        Debug.Log("✅ SkillChoiceUI inicializado completamente");
+    }
 
-        // Garante que está ativo e bem configurado
-        if (gameObject.activeInHierarchy)
+    private void CheckAndFixConfiguration()
+    {
+        Debug.Log("🔧 Verificando configuração do SkillChoiceUI...");
+
+        if (!gameObject.activeInHierarchy)
         {
-            Debug.Log("✅ SkillChoiceUI ativo na hierarquia");
-        }
-        else
-        {
-            Debug.LogError("❌ SkillChoiceUI INATIVO na hierarquia! Ativando...");
             gameObject.SetActive(true);
+            Debug.Log("✅ GameObject ativado");
         }
 
-        // Reposicionamento seguro
-        StartCoroutine(InitializePanel());
-    }
-
-    // 🆕 CORREÇÃO: Método para registro seguro no SkillManager
-    private void RegisterWithSkillManager()
-    {
-        if (SkillManager.Instance != null)
+        if (choicePanel == null)
         {
-            // 🆕 USA O MÉTODO PÚBLICO para registrar
-            SkillManager.Instance.RegisterSkillChoiceListener(ShowSkillChoice);
-            Debug.Log("✅ Registrado no SkillManager usando método público");
-        }
-        else
-        {
-            Debug.LogError("❌ SkillManager não encontrado no Start!");
-            // Tenta encontrar novamente após delay
-            StartCoroutine(RegisterWithSkillManagerDelayed());
-        }
-    }
+            Debug.LogWarning("⚠️ ChoicePanel não atribuído! Procurando automaticamente...");
+            choicePanel = FindPanelInChildren();
 
-    // 🆕 CORREÇÃO: Registro com delay se necessário
-    private IEnumerator RegisterWithSkillManagerDelayed()
-    {
-        yield return new WaitForSeconds(1f);
-
-        if (SkillManager.Instance != null)
-        {
-            SkillManager.Instance.RegisterSkillChoiceListener(ShowSkillChoice);
-            Debug.Log("✅ Registrado no SkillManager após delay");
-        }
-        else
-        {
-            Debug.LogError("❌ SkillManager ainda não encontrado após delay!");
-        }
-    }
-
-    // 🆕 CORREÇÃO: Inicialização mais robusta do painel
-    private IEnumerator InitializePanel()
-    {
-        yield return new WaitForEndOfFrame();
-
-        if (choicePanel != null)
-        {
-            // Garante configuração correta do RectTransform
-            RectTransform rect = choicePanel.GetComponent<RectTransform>();
-            if (rect != null)
+            if (choicePanel == null && createFallbackUI)
             {
-                rect.anchorMin = new Vector2(0.5f, 0.5f);
-                rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.anchoredPosition = Vector2.zero;
+                choicePanel = CreateFallbackPanel();
+                Debug.Log("✅ Painel fallback criado");
             }
-
-            Debug.Log("✅ Painel de escolha inicializado corretamente");
         }
+
+        if (skillChoicePrefab == null)
+        {
+            Debug.LogWarning("⚠️ SkillChoicePrefab não atribuído! Criando fallback...");
+            skillChoicePrefab = CreateFallbackPrefab();
+        }
+
+        if (skillsContainer == null && choicePanel != null)
+        {
+            skillsContainer = choicePanel.transform;
+            Debug.Log("✅ Usando transform do painel como container");
+        }
+
+        Debug.Log("✅ Configuração verificada e corrigida");
     }
 
-    // 🆕 CORREÇÃO: Método público para ser chamado pelo SkillManager
+    private GameObject FindPanelInChildren()
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.name.Contains("Panel") || child.name.Contains("painel", System.StringComparison.OrdinalIgnoreCase))
+            {
+                return child.gameObject;
+            }
+        }
+
+        if (transform.childCount > 0)
+        {
+            return transform.GetChild(0).gameObject;
+        }
+
+        return null;
+    }
+
+    private GameObject CreateFallbackPanel()
+    {
+        GameObject panel = new GameObject("SkillChoicePanel_Fallback");
+        panel.transform.SetParent(transform);
+
+        RectTransform rect = panel.AddComponent<RectTransform>();
+        Image image = panel.AddComponent<Image>();
+
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = new Vector2(600, 400);
+        rect.anchoredPosition = Vector2.zero;
+
+        image.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+
+        GameObject container = new GameObject("SkillsContainer");
+        container.transform.SetParent(panel.transform);
+        RectTransform containerRect = container.AddComponent<RectTransform>();
+        containerRect.anchorMin = new Vector2(0.5f, 0.5f);
+        containerRect.anchorMax = new Vector2(0.5f, 0.5f);
+        containerRect.pivot = new Vector2(0.5f, 0.5f);
+        containerRect.sizeDelta = new Vector2(500, 300);
+        containerRect.anchoredPosition = Vector2.zero;
+
+        skillsContainer = container.transform;
+
+        return panel;
+    }
+
+    private GameObject CreateFallbackPrefab()
+    {
+        GameObject prefab = new GameObject("SkillButton_Fallback");
+
+        RectTransform rect = prefab.AddComponent<RectTransform>();
+        Image image = prefab.AddComponent<Image>();
+        Button button = prefab.AddComponent<Button>();
+
+        rect.sizeDelta = new Vector2(400, 80);
+        image.color = Color.gray;
+
+        GameObject textObj = new GameObject("ButtonText");
+        textObj.transform.SetParent(prefab.transform);
+        RectTransform textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.sizeDelta = Vector2.zero;
+        textRect.anchoredPosition = Vector2.zero;
+
+        TextMeshProUGUI textTMP = textObj.AddComponent<TextMeshProUGUI>();
+        if (textTMP != null)
+        {
+            textTMP.text = "Skill Button";
+            textTMP.color = Color.white;
+            textTMP.alignment = TextAlignmentOptions.Center;
+            textTMP.fontSize = 14;
+        }
+        else
+        {
+            Text text = textObj.AddComponent<Text>();
+            text.text = "Skill Button";
+            text.color = Color.white;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.fontSize = 14;
+        }
+
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.gray;
+        colors.highlightedColor = Color.blue;
+        colors.pressedColor = Color.cyan;
+        colors.selectedColor = Color.blue;
+        button.colors = colors;
+
+        prefab.SetActive(false);
+        return prefab;
+    }
+
     public void ShowSkillChoice(List<SkillData> skills, System.Action<SkillData> callback)
     {
         Debug.Log("🎯 ShowSkillChoice chamado!");
@@ -117,7 +196,8 @@ public class SkillChoiceUI : MonoBehaviour
             return;
         }
 
-        // Verifica se o GameObject está ativo
+        CheckAndFixConfiguration();
+
         if (!gameObject.activeInHierarchy)
         {
             Debug.LogError("❌ SkillChoiceUI GameObject está INATIVO! Ativando...");
@@ -127,10 +207,9 @@ public class SkillChoiceUI : MonoBehaviour
         currentChoices = skills;
         onSkillChosen = callback;
 
-        // Limpa container anterior
+        PauseGame();
         ClearSkillButtons();
 
-        // Ativa o painel ANTES de criar os botões
         if (choicePanel != null)
         {
             choicePanel.SetActive(true);
@@ -138,36 +217,51 @@ public class SkillChoiceUI : MonoBehaviour
         }
         else
         {
-            Debug.LogError("❌ ChoicePanel não atribuído!");
+            Debug.LogError("❌ ChoicePanel não atribuído mesmo após fallback!");
+            ResumeGame();
             return;
         }
 
-        // 🆕 CORREÇÃO: Atualiza título (compatível com Text e TextMeshPro)
         UpdateTitleText();
-
         Debug.Log($"📋 Mostrando escolha de {skills.Count} skills");
 
-        // Usa Coroutine para criar botões de forma segura
         StartCoroutine(CreateSkillButtonsWithDelay(skills));
     }
 
-    // 🆕 CORREÇÃO: Método para atualizar título compatível com ambos os sistemas
+    private void PauseGame()
+    {
+        if (pauseGameDuringChoice)
+        {
+            previousTimeScale = Time.timeScale;
+            Time.timeScale = 0f;
+            Debug.Log("⏸️ Jogo pausado durante escolha de skill");
+            AudioListener.pause = true;
+        }
+    }
+
+    private void ResumeGame()
+    {
+        if (pauseGameDuringChoice)
+        {
+            Time.timeScale = previousTimeScale;
+            AudioListener.pause = false;
+            Debug.Log("▶️ Jogo despausado");
+        }
+    }
+
     private void UpdateTitleText()
     {
         PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
         int currentLevel = playerStats != null ? playerStats.level : 1;
         string title = $"🎯 ESCOLHA UMA SKILL (Nível {currentLevel})";
 
-        // Tenta usar TextMeshPro primeiro, depois Text padrão
         if (titleTextTMP != null)
         {
             titleTextTMP.text = title;
-            Debug.Log("✅ Título atualizado (TextMeshPro)");
         }
         else if (titleText != null)
         {
             titleText.text = title;
-            Debug.Log("✅ Título atualizado (Text padrão)");
         }
         else
         {
@@ -175,7 +269,6 @@ public class SkillChoiceUI : MonoBehaviour
         }
     }
 
-    // 🆕 CORREÇÃO: Cria botões com delay para garantir layout
     private IEnumerator CreateSkillButtonsWithDelay(List<SkillData> skills)
     {
         yield return new WaitForEndOfFrame();
@@ -188,11 +281,30 @@ public class SkillChoiceUI : MonoBehaviour
         Debug.Log($"✅ {skills.Count} botões de skill criados");
     }
 
+    private void ClearSkillButtons()
+    {
+        foreach (GameObject button in currentButtons)
+        {
+            if (button != null)
+                Destroy(button);
+        }
+        currentButtons.Clear();
+
+        if (skillsContainer != null)
+        {
+            foreach (Transform child in skillsContainer)
+            {
+                if (child != null && child.gameObject != null)
+                    Destroy(child.gameObject);
+            }
+        }
+    }
+
     private void CreateSkillChoiceButton(SkillData skill, int index)
     {
         if (skillChoicePrefab == null)
         {
-            Debug.LogError("❌ SkillChoicePrefab não atribuído!");
+            Debug.LogError("❌ SkillChoicePrefab não atribuído mesmo após fallback!");
             return;
         }
 
@@ -206,21 +318,17 @@ public class SkillChoiceUI : MonoBehaviour
             return;
         }
 
-        // 🆕 CORREÇÃO: Configura texto compatível com ambos os sistemas
         SetupButtonText(buttonObj, skill);
 
-        // Configura cor baseada no elemento
         Image buttonImage = buttonObj.GetComponent<Image>();
         if (buttonImage != null)
         {
             buttonImage.color = GetElementColor(skill.element) * 0.8f;
         }
 
-        // Configura o clique
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(() => OnSkillSelected(skill));
 
-        // Posicionamento
         RectTransform rect = buttonObj.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -231,14 +339,12 @@ public class SkillChoiceUI : MonoBehaviour
         Debug.Log($"✅ Botão criado para: {skill.skillName}");
     }
 
-    // 🆕 CORREÇÃO: Método para configurar texto compatível
     private void SetupButtonText(GameObject buttonObj, SkillData skill)
     {
         string buttonText = $"<b>{skill.skillName}</b>\n" +
                            $"{GetElementIcon(skill.element)} {skill.element}\n" +
                            $"{skill.description}";
 
-        // Tenta TextMeshPro primeiro
         TextMeshProUGUI textTMP = buttonObj.GetComponentInChildren<TextMeshProUGUI>();
         if (textTMP != null)
         {
@@ -246,11 +352,9 @@ public class SkillChoiceUI : MonoBehaviour
             return;
         }
 
-        // Se não encontrar TextMeshPro, tenta Text padrão
         Text text = buttonObj.GetComponentInChildren<Text>();
         if (text != null)
         {
-            // Remove tags HTML para Text padrão
             string plainText = buttonText.Replace("<b>", "").Replace("</b>", "");
             text.text = plainText;
             return;
@@ -263,7 +367,6 @@ public class SkillChoiceUI : MonoBehaviour
     {
         Debug.Log($"🎯 Skill selecionada: {selectedSkill.skillName}");
 
-        // Efeito visual de confirmação
         if (selectedSkill != null)
         {
             StartCoroutine(SelectionConfirmationEffect(selectedSkill));
@@ -277,7 +380,6 @@ public class SkillChoiceUI : MonoBehaviour
 
     private IEnumerator SelectionConfirmationEffect(SkillData selectedSkill)
     {
-        // Feedback visual
         foreach (var button in currentButtons)
         {
             if (button != null)
@@ -287,34 +389,23 @@ public class SkillChoiceUI : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(0.5f);
+        float elapsed = 0f;
+        while (elapsed < 0.5f)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
 
-        // Executa o callback
         onSkillChosen?.Invoke(selectedSkill);
 
-        // Fecha o painel
-        yield return new WaitForSeconds(autoCloseDelay);
+        elapsed = 0f;
+        while (elapsed < autoCloseDelay)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
         ClosePanel();
-    }
-
-    private void ClearSkillButtons()
-    {
-        foreach (GameObject button in currentButtons)
-        {
-            if (button != null)
-                Destroy(button);
-        }
-        currentButtons.Clear();
-
-        // Limpa children do container também
-        if (skillsContainer != null)
-        {
-            foreach (Transform child in skillsContainer)
-            {
-                if (child != null && child.gameObject != null)
-                    Destroy(child.gameObject);
-            }
-        }
     }
 
     public void ClosePanel()
@@ -326,140 +417,93 @@ public class SkillChoiceUI : MonoBehaviour
         }
 
         ClearSkillButtons();
-
-        // Limpa referências
+        ResumeGame();
         currentChoices = null;
         onSkillChosen = null;
     }
 
-    // Métodos auxiliares para elementos
-    private string GetElementIcon(PlayerStats.Element element)
+    [ContextMenu("🎯 Forçar Aparecimento da Escolha")]
+    public void ForceShowChoice()
     {
-        switch (element)
-        {
-            case PlayerStats.Element.None: return "⚪";
-            case PlayerStats.Element.Fire: return "🔥";
-            case PlayerStats.Element.Ice: return "❄️";
-            case PlayerStats.Element.Lightning: return "⚡";
-            case PlayerStats.Element.Poison: return "☠️";
-            case PlayerStats.Element.Earth: return "🌍";
-            case PlayerStats.Element.Wind: return "💨";
-            default: return "⚪";
-        }
+        Debug.Log("🎯 Forçando aparecimento da escolha de skills...");
+
+        CheckAndFixConfiguration();
+
+        List<SkillData> testSkills = CreateTestSkills();
+
+        ShowSkillChoice(testSkills, (selectedSkill) => {
+            Debug.Log($"✅ Skill selecionada: {selectedSkill.skillName}");
+
+            if (SkillManager.Instance != null)
+            {
+                SkillManager.Instance.AddSkill(selectedSkill);
+            }
+        });
+    }
+
+    private List<SkillData> CreateTestSkills()
+    {
+        List<SkillData> testSkills = new List<SkillData>();
+
+        // Skill de teste 1 - Projétil
+        SkillData testSkill1 = ScriptableObject.CreateInstance<SkillData>();
+        testSkill1.skillName = "🔥 Projétil de Fogo";
+        testSkill1.description = "Dispara projéteis de fogo que queimam inimigos";
+        testSkill1.attackBonus = 15f;
+        testSkill1.healthBonus = 10f;
+        testSkill1.element = PlayerStats.Element.Fire;
+        testSkill1.specificType = SpecificSkillType.Projectile;
+        testSkills.Add(testSkill1);
+
+        // Skill de teste 2 - Regeneração
+        SkillData testSkill2 = ScriptableObject.CreateInstance<SkillData>();
+        testSkill2.skillName = "💚 Regeneração";
+        testSkill2.description = "Regenera vida gradualmente durante a batalha";
+        testSkill2.healthBonus = 20f;
+        testSkill2.healthRegenBonus = 2f;
+        testSkill2.specificType = SpecificSkillType.HealthRegen;
+        testSkills.Add(testSkill2);
+
+        // Skill de teste 3 - Velocidade
+        SkillData testSkill3 = ScriptableObject.CreateInstance<SkillData>();
+        testSkill3.skillName = "💨 Velocidade do Vento";
+        testSkill3.description = "Aumenta a velocidade de movimento e ataque";
+        testSkill3.speedBonus = 2f;
+        testSkill3.attackSpeedMultiplier = 0.8f;
+        testSkill3.element = PlayerStats.Element.Wind;
+        testSkills.Add(testSkill3);
+
+        return testSkills;
     }
 
     private Color GetElementColor(PlayerStats.Element element)
     {
         switch (element)
         {
-            case PlayerStats.Element.None: return Color.white;
-            case PlayerStats.Element.Fire: return new Color(1f, 0.3f, 0.1f);
-            case PlayerStats.Element.Ice: return new Color(0.1f, 0.5f, 1f);
-            case PlayerStats.Element.Lightning: return new Color(0.8f, 0.8f, 0.1f);
-            case PlayerStats.Element.Poison: return new Color(0.5f, 0.1f, 0.8f);
-            case PlayerStats.Element.Earth: return new Color(0.6f, 0.4f, 0.2f);
-            case PlayerStats.Element.Wind: return new Color(0.4f, 0.8f, 0.9f);
+            case PlayerStats.Element.Fire: return Color.red;
+            case PlayerStats.Element.Poison: return Color.blue;
+            case PlayerStats.Element.Earth: return Color.green;
+            case PlayerStats.Element.Wind: return Color.cyan;
+            case PlayerStats.Element.Lightning: return Color.yellow;
             default: return Color.white;
+        }
+    }
+
+    private string GetElementIcon(PlayerStats.Element element)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.Fire: return "🔥";
+            case PlayerStats.Element.Poison: return "💧";
+            case PlayerStats.Element.Earth: return "🌿";
+            case PlayerStats.Element.Wind: return "💨";
+            case PlayerStats.Element.Lightning: return "⚡";
+            default: return "✨";
         }
     }
 
     void OnDestroy()
     {
-        // 🆕 CORREÇÃO: Desregistra usando método público
-        if (SkillManager.Instance != null)
-        {
-            SkillManager.Instance.UnregisterSkillChoiceListener(ShowSkillChoice);
-            Debug.Log("🔒 Desregistrado do SkillManager");
-        }
-    }
-
-    // 🆕 MÉTODO PARA VERIFICAR CONFIGURAÇÃO
-    [ContextMenu("🔍 Verificar Configuração do SkillChoiceUI")]
-    public void CheckConfiguration()
-    {
-        Debug.Log("🔍 CONFIGURAÇÃO DO SKILLCHOICEUI:");
-        Debug.Log($"• GameObject ativo: {gameObject.activeInHierarchy}");
-        Debug.Log($"• ChoicePanel atribuído: {choicePanel != null}");
-        Debug.Log($"• ChoicePanel ativo: {choicePanel?.activeInHierarchy ?? false}");
-        Debug.Log($"• SkillsContainer atribuído: {skillsContainer != null}");
-        Debug.Log($"• SkillChoicePrefab atribuído: {skillChoicePrefab != null}");
-        Debug.Log($"• TitleText (UI): {titleText != null}");
-        Debug.Log($"• TitleTextTMP (TextMeshPro): {titleTextTMP != null}");
-        Debug.Log($"• SkillManager disponível: {SkillManager.Instance != null}");
-
-        if (SkillManager.Instance != null)
-        {
-            Debug.Log($"• Registrado no SkillManager: ✅");
-        }
-    }
-
-    // 🆕 MÉTODO PARA ATIVAR MANUALMENTE
-    [ContextMenu("🚀 Ativar SkillChoiceUI Manualmente")]
-    public void ActivateManually()
-    {
-        gameObject.SetActive(true);
-        if (choicePanel != null)
-        {
-            choicePanel.SetActive(true);
-        }
-
-        // 🆕 Re-registra no SkillManager
-        RegisterWithSkillManager();
-
-        Debug.Log("✅ SkillChoiceUI ativado e registrado manualmente");
-    }
-
-    // 🆕 MÉTODO PARA CONVERTER PARA TEXTMESHPRO (se necessário)
-    [ContextMenu("🔄 Configurar para TextMeshPro")]
-    public void SetupForTextMeshPro()
-    {
-        // Se estiver usando Text padrão, tenta encontrar/migrar para TextMeshPro
-        if (titleText != null && titleTextTMP == null)
-        {
-            titleTextTMP = titleText.GetComponent<TextMeshProUGUI>();
-            if (titleTextTMP == null)
-            {
-                Debug.LogWarning("⚠️ TextMeshProUGUI não encontrado no título. Considere migrar para TextMeshPro.");
-            }
-        }
-
-        Debug.Log("✅ Configuração TextMeshPro verificada");
-    }
-
-    // Método para teste manual
-    [ContextMenu("🎯 Testar Skill Choice UI")]
-    public void TestSkillChoiceUI()
-    {
-        // Cria skills de teste
-        List<SkillData> testSkills = new List<SkillData>();
-
-        // Skill de teste 1
-        SkillData testSkill1 = ScriptableObject.CreateInstance<SkillData>();
-        testSkill1.skillName = "🔥 Fire Ball";
-        testSkill1.description = "Uma bola de fogo que causa dano em área";
-        testSkill1.element = PlayerStats.Element.Fire;
-        testSkill1.attackBonus = 15f;
-        testSkills.Add(testSkill1);
-
-        // Skill de teste 2
-        SkillData testSkill2 = ScriptableObject.CreateInstance<SkillData>();
-        testSkill2.skillName = "❄️ Ice Spear";
-        testSkill2.description = "Lança de gelo que causa lentidão";
-        testSkill2.element = PlayerStats.Element.Ice;
-        testSkill2.attackBonus = 12f;
-        testSkills.Add(testSkill2);
-
-        // Skill de teste 3
-        SkillData testSkill3 = ScriptableObject.CreateInstance<SkillData>();
-        testSkill3.skillName = "⚡ Lightning Strike";
-        testSkill3.description = "Golpe elétrico com chance de atordoar";
-        testSkill3.element = PlayerStats.Element.Lightning;
-        testSkill3.attackBonus = 14f;
-        testSkills.Add(testSkill3);
-
-        Debug.Log("🎯 Iniciando teste manual...");
-        ShowSkillChoice(testSkills, (selectedSkill) => {
-            Debug.Log($"✅ Skill de teste selecionada: {selectedSkill.skillName}");
-        });
+        ResumeGame();
     }
 }

@@ -17,10 +17,10 @@ public class SkillManager : MonoBehaviour
     // Configurações de Progressão
     public int[] levelUpMilestones = { 1, 3, 6, 10, 15, 20 };
     public int skillsPerChoice = 3;
+    public bool allowDuplicateChoices = false;
 
-    // 🆕 CONFIGURAÇÃO DE ESCOLHA INICIAL
     [Header("Configurações de Escolha Inicial")]
-    public bool alwaysOfferInitialChoice = true;
+    public bool alwaysOfferInitialChoice = false; // 🎯 Controlado pelos milestones agora
 
     // Eventos
     public event Action<List<SkillData>, Action<SkillData>> OnSkillChoiceRequired;
@@ -30,6 +30,7 @@ public class SkillManager : MonoBehaviour
     private PlayerStats playerStats;
     private SkillChoiceUI skillChoiceUI;
     private bool initialChoiceOffered = false;
+    private List<SkillData> recentlyOfferedSkills = new List<SkillData>();
 
     void Awake()
     {
@@ -49,8 +50,6 @@ public class SkillManager : MonoBehaviour
         Debug.Log("🔄 SkillManager iniciando...");
 
         playerStats = FindAnyObjectByType<PlayerStats>();
-
-        // 🆕 CORREÇÃO: Busca mais robusta do SkillChoiceUI
         skillChoiceUI = FindSkillChoiceUIInUIManager();
 
         if (skillChoiceUI == null)
@@ -62,7 +61,6 @@ public class SkillManager : MonoBehaviour
         if (skillChoiceUI != null)
         {
             Debug.Log($"✅ SkillChoiceUI encontrado: {skillChoiceUI.gameObject.name}");
-            // 🆕 CORREÇÃO: Registra o evento usando método público
             RegisterSkillChoiceListener(skillChoiceUI.ShowSkillChoice);
         }
         else
@@ -75,11 +73,9 @@ public class SkillManager : MonoBehaviour
 
         Debug.Log("✅ SkillManager inicializado!");
 
-        // 🆕 CORREÇÃO: Verificação melhorada para escolha inicial
         StartCoroutine(DelayedInitialCheck());
     }
 
-    // 🆕 CORREÇÃO: Verificação com delay para garantir que tudo carregou
     private IEnumerator DelayedInitialCheck()
     {
         yield return new WaitForSeconds(1.0f);
@@ -87,24 +83,13 @@ public class SkillManager : MonoBehaviour
         if (playerStats == null)
         {
             playerStats = FindAnyObjectByType<PlayerStats>();
-            if (playerStats == null)
-            {
-                Debug.LogError("❌ PlayerStats ainda null após delay!");
-                yield break;
-            }
         }
 
         if (skillChoiceUI == null)
         {
             skillChoiceUI = FindSkillChoiceUIInUIManager();
-            if (skillChoiceUI == null)
+            if (skillChoiceUI != null)
             {
-                Debug.LogError("❌ SkillChoiceUI ainda null após delay!");
-                yield break;
-            }
-            else
-            {
-                // 🆕 CORREÇÃO: Registra o evento se encontrado após delay
                 RegisterSkillChoiceListener(skillChoiceUI.ShowSkillChoice);
             }
         }
@@ -112,29 +97,30 @@ public class SkillManager : MonoBehaviour
         CheckForInitialSkillChoice();
     }
 
-    // 🆕 CORREÇÃO: Método melhorado para verificação inicial
     private void CheckForInitialSkillChoice()
     {
         Debug.Log($"🔍 Verificando escolha inicial - Level: {playerStats?.level}, JáOferecida: {initialChoiceOffered}");
 
-        if (!initialChoiceOffered && playerStats != null && playerStats.level == 1)
+        // 🎯 OFERECE APENAS SE LEVEL 1 FOR MILESTONE
+        bool level1IsMilestone = Array.Exists(levelUpMilestones, milestone => milestone == 1);
+
+        if (!initialChoiceOffered && playerStats != null && playerStats.level == 1 && level1IsMilestone)
         {
-            Debug.Log("🎯 Player começou no nível 1 - verificando escolha inicial...");
+            Debug.Log("🎯 Player começou no nível 1 (milestone) - oferecendo escolha inicial de 3 skills!");
+            initialChoiceOffered = true;
 
-            bool level1IsMilestone = Array.Exists(levelUpMilestones, milestone => milestone == 1);
-            bool shouldOffer = alwaysOfferInitialChoice || level1IsMilestone;
-
-            if (shouldOffer)
-            {
-                Debug.Log("✅ Oferecendo escolha inicial!");
-                initialChoiceOffered = true;
-                OfferSkillChoice();
-            }
-            else
-            {
-                Debug.Log($"ℹ️ Sem escolha inicial - Level1IsMilestone: {level1IsMilestone}, AlwaysOffer: {alwaysOfferInitialChoice}");
-            }
+            StartCoroutine(DelayedInitialChoice());
         }
+        else if (playerStats != null && playerStats.level == 1)
+        {
+            Debug.Log($"ℹ️ Level 1 não é milestone - sem escolha inicial. Milestones: {string.Join(", ", levelUpMilestones)}");
+        }
+    }
+
+    private IEnumerator DelayedInitialChoice()
+    {
+        yield return new WaitForSeconds(1.5f);
+        OfferSkillChoice();
     }
 
     private SkillChoiceUI FindSkillChoiceUIInUIManager()
@@ -145,7 +131,6 @@ public class SkillManager : MonoBehaviour
         {
             Debug.Log($"✅ UIManager encontrado: {uiManager.gameObject.name}");
 
-            // Procura como componente direto
             SkillChoiceUI skillUI = uiManager.GetComponent<SkillChoiceUI>();
             if (skillUI != null)
             {
@@ -153,7 +138,6 @@ public class SkillManager : MonoBehaviour
                 return skillUI;
             }
 
-            // Procura nos children
             skillUI = uiManager.GetComponentInChildren<SkillChoiceUI>(true);
             if (skillUI != null)
             {
@@ -178,7 +162,6 @@ public class SkillManager : MonoBehaviour
         playerStats = FindAnyObjectByType<PlayerStats>();
         skillChoiceUI = FindSkillChoiceUIInUIManager();
 
-        // 🆕 CORREÇÃO: Re-conectar eventos após carregar cena
         if (skillChoiceUI != null)
         {
             Debug.Log("✅ SkillChoiceUI reconectado após carregar cena");
@@ -186,12 +169,10 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🆕 CORREÇÃO: Método OnPlayerLevelUp mais robusto
     public void OnPlayerLevelUp(int newLevel)
     {
         Debug.Log($"📈 Player atingiu nível {newLevel} - Verificando milestones...");
 
-        // 🆕 VERIFICAÇÃO DE SEGURANÇA
         if (playerStats == null)
         {
             playerStats = FindAnyObjectByType<PlayerStats>();
@@ -202,22 +183,13 @@ public class SkillManager : MonoBehaviour
             }
         }
 
-        if (skillChoiceUI == null)
-        {
-            skillChoiceUI = FindSkillChoiceUIInUIManager();
-            if (skillChoiceUI == null)
-            {
-                Debug.LogError("❌ SkillChoiceUI null no level up!");
-                return;
-            }
-        }
-
+        // 🎯 VERIFICA SE É UM MILESTONE - SÓ OFERECE NOS NÍVEIS CONFIGURADOS
         bool isMilestone = Array.Exists(levelUpMilestones, milestone => milestone == newLevel);
         Debug.Log($"🎯 Level {newLevel} é milestone: {isMilestone}");
 
         if (isMilestone)
         {
-            Debug.Log($"🎯 Oferecendo escolha de skill para milestone nível {newLevel}");
+            Debug.Log($"🎯 Oferecendo escolha de 3 skills aleatórias para milestone nível {newLevel}");
             StartCoroutine(OfferSkillChoiceWithDelay());
         }
         else
@@ -228,19 +200,16 @@ public class SkillManager : MonoBehaviour
         ApplyLevelBonusToSkills(newLevel);
     }
 
-    // 🆕 NOVO MÉTODO: Oferece escolha com pequeno delay
     private IEnumerator OfferSkillChoiceWithDelay()
     {
         yield return new WaitForSeconds(0.5f);
         OfferSkillChoice();
     }
 
-    // 🆕 CORREÇÃO: Método OfferSkillChoice mais robusto
     void OfferSkillChoice()
     {
-        Debug.Log("🎯 Iniciando OfferSkillChoice...");
+        Debug.Log("🎯 Iniciando OfferSkillChoice para milestone...");
 
-        // 🆕 VERIFICAÇÕES DE SEGURANÇA
         if (playerStats == null)
         {
             Debug.LogError("❌ PlayerStats null no OfferSkillChoice!");
@@ -253,6 +222,7 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
+        // 🎯 SEMPRE 3 SKILLS ALEATÓRIAS
         List<SkillData> choices = GetRandomSkillChoices(skillsPerChoice);
 
         if (choices.Count == 0)
@@ -261,9 +231,14 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"🎯 Oferecendo {choices.Count} skills para escolha no nível {playerStats.level}");
+        Debug.Log($"🎯 Oferecendo {choices.Count} skills aleatórias no milestone nível {playerStats.level}");
 
-        // 🆕 CORREÇÃO: Verifica se há listeners no evento
+        // Mostra no console as skills oferecidas
+        foreach (var skill in choices)
+        {
+            Debug.Log($"   ➤ {skill.skillName} ({skill.element}) - {skill.specificType}");
+        }
+
         if (OnSkillChoiceRequired != null)
         {
             Debug.Log($"📡 Evento OnSkillChoiceRequired tem {OnSkillChoiceRequired.GetInvocationList().Length} listeners");
@@ -273,7 +248,6 @@ public class SkillManager : MonoBehaviour
         {
             Debug.LogError("❌ Nenhum listener registrado no evento OnSkillChoiceRequired!");
 
-            // 🆕 FALLBACK: Tenta chamar diretamente o SkillChoiceUI
             if (skillChoiceUI != null)
             {
                 Debug.Log("🔄 Tentando fallback - chamando SkillChoiceUI diretamente");
@@ -314,21 +288,43 @@ public class SkillManager : MonoBehaviour
         List<SkillData> choices = new List<SkillData>();
         List<SkillData> availableChoices = new List<SkillData>(availableSkills);
 
+        // Remove skills que o player JÁ TEM
         availableChoices.RemoveAll(skill => activeSkills.Exists(s => s.skillName == skill.skillName));
 
-        if (playerStats != null)
+        // Remove skills recentemente oferecidas para variedade
+        if (allowDuplicateChoices == false && recentlyOfferedSkills.Count > 0)
         {
-            availableChoices.RemoveAll(skill => !skill.MeetsRequirements(playerStats.level, activeSkills));
+            availableChoices.RemoveAll(skill => recentlyOfferedSkills.Contains(skill));
         }
 
+        // Se não tem skills suficientes, reseta a lista de recentes
+        if (availableChoices.Count < count && recentlyOfferedSkills.Count > 0)
+        {
+            Debug.Log("🔄 Poucas skills disponíveis - resetando lista de skills recentes");
+            recentlyOfferedSkills.Clear();
+            availableChoices = new List<SkillData>(availableSkills);
+            availableChoices.RemoveAll(skill => activeSkills.Exists(s => s.skillName == skill.skillName));
+        }
+
+        // 🎯 ESCOLHE 3 SKILLS ALEATÓRIAS
         for (int i = 0; i < Mathf.Min(count, availableChoices.Count); i++)
         {
+            if (availableChoices.Count == 0) break;
+
             int randomIndex = UnityEngine.Random.Range(0, availableChoices.Count);
-            choices.Add(availableChoices[randomIndex]);
+            SkillData chosenSkill = availableChoices[randomIndex];
+
+            choices.Add(chosenSkill);
             availableChoices.RemoveAt(randomIndex);
+
+            // Adiciona às skills recentemente oferecidas
+            if (!recentlyOfferedSkills.Contains(chosenSkill))
+            {
+                recentlyOfferedSkills.Add(chosenSkill);
+            }
         }
 
-        Debug.Log($"🔍 Skills disponíveis para escolha: {choices.Count}");
+        Debug.Log($"🔍 {choices.Count} skills aleatórias selecionadas de {availableSkills.Count} disponíveis");
         return choices;
     }
 
@@ -345,7 +341,17 @@ public class SkillManager : MonoBehaviour
             }
 
             activeSkills.Add(skill);
-            ApplySkillToPlayer(skill);
+
+            // Aplica a skill ao PlayerStats se ele existir
+            if (playerStats != null)
+            {
+                playerStats.ApplyAcquiredSkill(skill);
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ PlayerStats não encontrado para aplicar a skill");
+            }
+
             OnSkillAcquired?.Invoke(skill);
 
             Debug.Log($"✅ Skill adquirida: {skill.skillName}");
@@ -363,7 +369,6 @@ public class SkillManager : MonoBehaviour
         {
             skill.ApplyToPlayer(playerStats);
             ConfigureSkillBehavior(skill);
-            ApplySkillModifiers(skill);
 
             if (skill.element != PlayerStats.Element.None)
             {
@@ -401,19 +406,62 @@ public class SkillManager : MonoBehaviour
 
     void AddProjectileBehavior(SkillData skill)
     {
-        PassiveProjectileSkill2D projectileBehavior = playerStats.gameObject.AddComponent<PassiveProjectileSkill2D>();
-        Debug.Log($"✅ Comportamento de projétil 2D adicionado: {skill.skillName}");
-    }
-
-    void ApplySkillModifiers(SkillData skill)
-    {
-        foreach (var modifierData in skill.skillModifiers)
+        var existingBehavior = GetComponent<PassiveProjectileSkill2D>();
+        if (existingBehavior != null)
         {
-            if (modifierData.IsValid())
+            Debug.Log($"⚡ Comportamento de projétil já existe - melhorando...");
+            existingBehavior.activationInterval = Mathf.Max(0.5f, existingBehavior.activationInterval * 0.8f);
+            return;
+        }
+
+        PassiveProjectileSkill2D projectileBehavior = gameObject.AddComponent<PassiveProjectileSkill2D>();
+
+        // ✅ CORREÇÃO: Inicialização robusta
+        bool initialized = false;
+
+        try
+        {
+            var initializeMethod = projectileBehavior.GetType().GetMethod("InitializeWithSkillData");
+            if (initializeMethod != null)
             {
-                AddSkillModifier(modifierData);
+                initializeMethod.Invoke(projectileBehavior, new object[] { playerStats, skill });
+                initialized = true;
+                Debug.Log($"✅ Comportamento inicializado com InitializeWithSkillData");
             }
         }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"⚠️ InitializeWithSkillData falhou: {e.Message}");
+        }
+
+        if (!initialized)
+        {
+            try
+            {
+                projectileBehavior.Initialize(playerStats);
+
+                var updateMethod = projectileBehavior.GetType().GetMethod("UpdateFromSkillData");
+                if (updateMethod != null)
+                {
+                    updateMethod.Invoke(projectileBehavior, new object[] { skill });
+                }
+
+                initialized = true;
+                Debug.Log($"✅ Comportamento inicializado com Initialize + UpdateFromSkillData");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"⚠️ Inicialização fallback falhou: {e.Message}");
+            }
+        }
+
+        if (!initialized)
+        {
+            projectileBehavior.Initialize(playerStats);
+            Debug.Log($"✅ Comportamento inicializado com método básico");
+        }
+
+        Debug.Log($"✅ Comportamento de projétil 2D adicionado: {skill.skillName}");
     }
 
     void ApplyElementalEffects(SkillData skill)
@@ -456,7 +504,13 @@ public class SkillManager : MonoBehaviour
         if (!activeModifiers.Exists(m => m.modifierName == modifier.modifierName && m.targetSkillName == modifier.targetSkillName))
         {
             activeModifiers.Add(modifier);
-            ApplyModifierToPlayer(modifier);
+
+            // Aplica o modificador ao PlayerStats
+            if (playerStats != null)
+            {
+                playerStats.AddSkillModifier(modifier);
+            }
+
             OnModifierAcquired?.Invoke(modifier);
 
             if (UIManager.Instance != null)
@@ -464,18 +518,27 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    void ApplyModifierToPlayer(PlayerStats.SkillModifier modifier)
+    // 🆕 MÉTODO AddRandomModifier
+    [ContextMenu("Adicionar Modificador Aleatório")]
+    public void AddRandomModifier()
     {
-        if (playerStats == null) return;
+        string[] modifierNames = { "Fogo Intenso", "Gelo Penetrante", "Raio Carregado", "Veneno Mortal" };
+        string[] targetSkills = { "Ataque Automático", "Golpe Contínuo", "Proteção Passiva" };
 
-        try
+        string randomName = modifierNames[UnityEngine.Random.Range(0, modifierNames.Length)];
+        string randomTarget = targetSkills[UnityEngine.Random.Range(0, targetSkills.Length)];
+
+        PlayerStats.SkillModifier modifier = new PlayerStats.SkillModifier
         {
-            playerStats.AddSkillModifier(modifier);
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"❌ Erro ao aplicar modificador {modifier.modifierName}: {e.Message}");
-        }
+            modifierName = randomName,
+            targetSkillName = randomTarget,
+            damageMultiplier = 1.3f,
+            defenseMultiplier = 1.2f,
+            element = (PlayerStats.Element)UnityEngine.Random.Range(1, 6)
+        };
+
+        AddSkillModifier(modifier);
+        Debug.Log($"✨ Modificador aleatório adicionado: {randomName} para {randomTarget}");
     }
 
     void LoadSkillData()
@@ -496,29 +559,6 @@ public class SkillManager : MonoBehaviour
         else
         {
             Debug.Log($"✅ {availableSkills.Count} skills carregadas");
-        }
-
-        LoadActiveSkills();
-    }
-
-    void LoadActiveSkills()
-    {
-        int savedSkillsCount = PlayerPrefs.GetInt("ActiveSkillsCount", 0);
-
-        for (int i = 0; i < savedSkillsCount; i++)
-        {
-            string skillName = PlayerPrefs.GetString($"ActiveSkill_{i}", "");
-            SkillData skill = availableSkills.Find(s => s.skillName == skillName);
-
-            if (skill != null)
-            {
-                activeSkills.Add(skill);
-                if (playerStats != null)
-                {
-                    skill.ApplyToPlayer(playerStats);
-                    ConfigureSkillBehavior(skill);
-                }
-            }
         }
     }
 
@@ -564,10 +604,7 @@ public class SkillManager : MonoBehaviour
         return activeSkills.FindAll(skill => skill.element == element).Count;
     }
 
-    // 🆕 MÉTODOS PÚBLICOS PARA REGISTRO DE EVENTOS
-    /// <summary>
-    /// 🆕 Método público para registrar listeners no evento OnSkillChoiceRequired
-    /// </summary>
+    // MÉTODOS PÚBLICOS PARA REGISTRO DE EVENTOS
     public void RegisterSkillChoiceListener(Action<List<SkillData>, Action<SkillData>> listener)
     {
         if (listener != null)
@@ -577,9 +614,6 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 🆕 Método público para remover listeners do evento OnSkillChoiceRequired
-    /// </summary>
     public void UnregisterSkillChoiceListener(Action<List<SkillData>, Action<SkillData>> listener)
     {
         if (listener != null)
@@ -589,15 +623,11 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 🆕 Método para forçar o registro de todos os SkillChoiceUI encontrados
-    /// </summary>
     [ContextMenu("🔧 Forçar Registro de Eventos")]
     public void ForceEventRegistration()
     {
         Debug.Log("🔧 Forçando registro de eventos...");
 
-        // 🆕 CORREÇÃO: FindObjectsByType atualizado (sem depreciação)
         SkillChoiceUI[] allSkillUIs = FindObjectsByType<SkillChoiceUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         Debug.Log($"🔍 Encontrados {allSkillUIs.Length} SkillChoiceUI na cena");
 
@@ -605,10 +635,8 @@ public class SkillManager : MonoBehaviour
         {
             if (skillUI != null)
             {
-                // Usa o método público para registrar
                 RegisterSkillChoiceListener(skillUI.ShowSkillChoice);
 
-                // Ativa o GameObject se estiver inativo
                 if (!skillUI.gameObject.activeInHierarchy)
                 {
                     skillUI.gameObject.SetActive(true);
@@ -622,118 +650,13 @@ public class SkillManager : MonoBehaviour
         Debug.Log($"📡 Evento agora tem {OnSkillChoiceRequired?.GetInvocationList().Length ?? 0} listeners");
     }
 
-    [ContextMenu("Verificar Configuração de Milestones")]
-    public void CheckMilestonesConfiguration()
+    [ContextMenu("🎯 Forçar Escolha de Skill")]
+    public void ForceSkillChoice()
     {
-        Debug.Log("🔍 Configuração de Milestones:");
-        Debug.Log($"• Milestones: {string.Join(", ", levelUpMilestones)}");
-        Debug.Log($"• Nível 1 é milestone: {Array.Exists(levelUpMilestones, milestone => milestone == 1)}");
-        Debug.Log($"• Always Offer Initial Choice: {alwaysOfferInitialChoice}");
-        Debug.Log($"• Skills por escolha: {skillsPerChoice}");
-
-        int skillsForLevel1 = availableSkills.FindAll(skill => skill.requiredLevel <= 1).Count;
-        Debug.Log($"• Skills disponíveis para nível 1: {skillsForLevel1}");
-        Debug.Log($"• Skills ativas: {activeSkills.Count}");
-        Debug.Log($"• Player nível: {playerStats?.level}");
-        Debug.Log($"• Escolha inicial oferecida: {initialChoiceOffered}");
-        Debug.Log($"• SkillChoiceUI conectado: {skillChoiceUI != null}");
-        Debug.Log($"• Evento tem listeners: {OnSkillChoiceRequired?.GetInvocationList().Length ?? 0}");
+        Debug.Log("🎯 Forçando escolha de skill...");
+        OfferSkillChoice();
     }
 
-    [ContextMenu("Adicionar Skill Aleatória")]
-    public void AddRandomSkill()
-    {
-        if (availableSkills.Count > 0)
-        {
-            List<SkillData> validSkills = availableSkills.FindAll(skill =>
-                skill.MeetsRequirements(playerStats != null ? playerStats.level : 1, activeSkills) &&
-                !HasSkill(skill)
-            );
-
-            if (validSkills.Count > 0)
-            {
-                int randomIndex = UnityEngine.Random.Range(0, validSkills.Count);
-                AddSkill(validSkills[randomIndex]);
-            }
-        }
-    }
-
-    [ContextMenu("Limpar Todas as Skills")]
-    public void ClearAllSkills()
-    {
-        foreach (var skill in activeSkills)
-        {
-            if (playerStats != null)
-            {
-                skill.RemoveFromPlayer(playerStats);
-
-                var behaviors = playerStats.GetComponents<SkillBehavior>();
-                foreach (var behavior in behaviors)
-                {
-                    Destroy(behavior);
-                }
-            }
-        }
-
-        activeSkills.Clear();
-        activeModifiers.Clear();
-        initialChoiceOffered = false;
-
-        if (playerStats != null)
-        {
-            playerStats.InitializeDefaultSkills();
-        }
-
-        Debug.Log("🧹 Todas as skills foram removidas");
-    }
-
-    // 🆕 MÉTODOS DE DIAGNÓSTICO MELHORADOS
-    [ContextMenu("🎯 DIAGNÓSTICO COMPLETO DA ESCOLHA INICIAL")]
-    public void CompleteInitialChoiceDiagnostic()
-    {
-        Debug.Log("🎯 ========== DIAGNÓSTICO COMPLETO ==========");
-
-        // 1. VERIFICA SE O EVENTO ESTÁ SENDO REGISTRADO
-        Debug.Log("1. 📡 Verificando registro de eventos...");
-        if (OnSkillChoiceRequired == null)
-        {
-            Debug.LogError("   ❌ OnSkillChoiceRequired event é NULL - ninguém se registrou!");
-        }
-        else
-        {
-            Debug.Log($"   ✅ Evento registrado - {OnSkillChoiceRequired.GetInvocationList().Length} listeners");
-        }
-
-        // 2. VERIFICA SE A VERIFICAÇÃO INICIAL ESTÁ ACONTECENDO
-        Debug.Log("2. 🔍 Verificando verificação inicial...");
-        Debug.Log($"   • Level Up Milestones: [{string.Join(", ", levelUpMilestones)}]");
-        Debug.Log($"   • Level 1 é milestone: {Array.Exists(levelUpMilestones, milestone => milestone == 1)}");
-        Debug.Log($"   • Always Offer Initial Choice: {alwaysOfferInitialChoice}");
-        Debug.Log($"   • Player Level: {playerStats?.level}");
-        Debug.Log($"   • Skills Ativas: {activeSkills.Count}");
-        Debug.Log($"   • Escolha Inicial Já Oferecida: {initialChoiceOffered}");
-
-        // 3. VERIFICA SE O MÉTODO OfferSkillChoice É CHAMADO
-        Debug.Log("3. 🚀 Verificando chamada do OfferSkillChoice...");
-        Debug.Log($"   • PlayerStats: {(playerStats != null ? "✅ Conectado" : "❌ Não encontrado")}");
-        Debug.Log($"   • SkillChoiceUI: {(skillChoiceUI != null ? "✅ Conectado" : "❌ Não encontrado")}");
-        Debug.Log($"   • Skills disponíveis: {availableSkills.Count}");
-
-        // 4. TESTA OFERECER ESCOLHA AGORA
-        Debug.Log("4. 🧪 Testando OfferSkillChoice agora...");
-        bool canOfferNow = CanOfferSkillChoice();
-        Debug.Log($"   • Pode oferecer agora: {canOfferNow}");
-
-        if (canOfferNow)
-        {
-            Debug.Log("   🚀 Oferecendo escolha agora...");
-            OfferSkillChoice();
-        }
-
-        Debug.Log("🎯 ========== FIM DO DIAGNÓSTICO ==========");
-    }
-
-    // 🆕 MÉTODO PARA FORÇAR ESCOLHA INICIAL
     [ContextMenu("🚀 Forçar Escolha Inicial para Nível 1")]
     public void ForceInitialChoiceForLevel1()
     {
@@ -755,52 +678,75 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA REINICIAR A ESCOLHA INICIAL
-    [ContextMenu("🔄 Reiniciar Escolha Inicial")]
-    public void ResetInitialChoice()
+    [ContextMenu("🔍 Diagnosticar Problema de Escolha")]
+    public void DiagnoseChoiceProblem()
     {
-        initialChoiceOffered = false;
-        Debug.Log("🔄 Escolha inicial reiniciada - será oferecida novamente");
-        StartCoroutine(DelayedInitialCheck());
-    }
+        Debug.Log("🔍 DIAGNÓSTICO DO PROBLEMA DE ESCOLHA:");
 
-    // 🆕 MÉTODO PARA TESTE RÁPIDO DA UI
-    [ContextMenu("🎯 TESTAR UI MANUALMENTE")]
-    public void TestUIManually()
-    {
-        Debug.Log("🎯 TESTANDO UI MANUALMENTE...");
+        Debug.Log($"1. PlayerStats: {(playerStats != null ? "✅ Encontrado" : "❌ Não encontrado")}");
+        Debug.Log($"2. SkillChoiceUI: {(skillChoiceUI != null ? "✅ Encontrado" : "❌ Não encontrado")}");
 
-        // Cria skills de teste
-        List<SkillData> testSkills = new List<SkillData>();
-
-        for (int i = 1; i <= 3; i++)
-        {
-            SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
-            testSkill.skillName = $"Skill Teste {i}";
-            testSkill.description = $"Descrição da skill teste {i}";
-            testSkill.element = (PlayerStats.Element)UnityEngine.Random.Range(0, 6);
-            testSkill.requiredLevel = 1;
-            testSkills.Add(testSkill);
-        }
-
-        // Força a oferta
         if (skillChoiceUI != null)
         {
-            skillChoiceUI.ShowSkillChoice(testSkills, (selected) => {
-                Debug.Log($"✅ Skill selecionada: {selected.skillName}");
-            });
+            Debug.Log($"3. Registrado no evento: {(OnSkillChoiceRequired != null ? "✅ Sim" : "❌ Não")}");
+        }
+
+        Debug.Log($"4. Skills disponíveis: {availableSkills.Count}");
+        Debug.Log($"5. Skills ativas: {activeSkills.Count}");
+        Debug.Log($"6. Milestones: {string.Join(", ", levelUpMilestones)}");
+        Debug.Log($"7. Player Level: {playerStats?.level}");
+        Debug.Log("8. Testando oferta de escolha...");
+        OfferSkillChoice();
+    }
+
+    [ContextMenu("🔧 Reconectar SkillChoiceUI")]
+    public void ReconnectSkillChoiceUI()
+    {
+        skillChoiceUI = FindSkillChoiceUIInUIManager();
+        if (skillChoiceUI != null)
+        {
+            OnSkillChoiceRequired -= skillChoiceUI.ShowSkillChoice;
+            OnSkillChoiceRequired += skillChoiceUI.ShowSkillChoice;
+            Debug.Log("✅ SkillChoiceUI reconectado manualmente");
         }
         else
         {
-            Debug.LogError("❌ SkillChoiceUI não encontrado!");
+            Debug.LogError("❌ SkillChoiceUI não encontrado para reconexão");
         }
     }
 
-    [ContextMenu("Forçar Escolha de Skill")]
-    public void ForceSkillChoice()
+    [ContextMenu("Adicionar Skill Aleatória")]
+    public void AddRandomSkill()
     {
-        Debug.Log("🎯 Forçando escolha de skill...");
-        OfferSkillChoice();
+        if (availableSkills.Count > 0)
+        {
+            List<SkillData> validSkills = availableSkills.FindAll(skill =>
+                skill.MeetsRequirements(playerStats != null ? playerStats.level : 1, activeSkills) &&
+                !HasSkill(skill)
+            );
+
+            if (validSkills.Count > 0)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, validSkills.Count);
+                AddSkill(validSkills[randomIndex]);
+            }
+        }
+    }
+
+    [ContextMenu("Adicionar Skills de Teste")]
+    public void AddTestSkills()
+    {
+        // Cria uma skill de projétil básica para teste
+        SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
+        testSkill.skillName = "Projétil de Teste";
+        testSkill.description = "Projétil automático para teste";
+        testSkill.attackBonus = 15f;
+        testSkill.healthBonus = 10f;
+        testSkill.specificType = SpecificSkillType.Projectile;
+        testSkill.element = PlayerStats.Element.Fire;
+
+        AddSkill(testSkill);
+        Debug.Log("✅ Skill de teste adicionada");
     }
 
     [ContextMenu("Verificar Status da Integração")]
@@ -811,76 +757,89 @@ public class SkillManager : MonoBehaviour
         Debug.Log($"• Skills Ativas: {activeSkills.Count}");
         Debug.Log($"• PlayerStats: {(playerStats != null ? "✅ Conectado" : "❌ Não encontrado")}");
         Debug.Log($"• SkillChoiceUI: {(skillChoiceUI != null ? "✅ Conectado" : "❌ Não encontrado")}");
-        Debug.Log($"• UIManager: {(FindAnyObjectByType<UIManager>() != null ? "✅ Encontrado" : "❌ Não encontrado")}");
-
-        var projectileSkills = activeSkills.FindAll(s => s.specificType == SpecificSkillType.Projectile);
-        Debug.Log($"• Skills de Projétil: {projectileSkills.Count}");
-        Debug.Log($"• Escolha Inicial Oferecida: {initialChoiceOffered}");
-        Debug.Log($"• Always Offer Initial Choice: {alwaysOfferInitialChoice}");
         Debug.Log($"• Evento OnSkillChoiceRequired: {(OnSkillChoiceRequired != null ? "✅ Registrado" : "❌ Null")}");
+        Debug.Log($"• Milestones: {string.Join(", ", levelUpMilestones)}");
+        Debug.Log($"• Próximo Milestone: {GetNextMilestone()}");
     }
 
-    private bool CanOfferSkillChoice()
+    // 🆕 MÉTODOS PARA O SISTEMA DE MILESTONES
+    [ContextMenu("🎯 Testar Escolha de 3 Skills Aleatórias")]
+    public void TestRandomSkillChoice()
     {
-        if (playerStats == null)
-        {
-            Debug.Log("❌ Cannot offer: PlayerStats null");
-            return false;
-        }
+        Debug.Log("🎯 TESTE: Oferecendo 3 skills aleatórias...");
+        OfferSkillChoice();
+    }
 
-        if (skillChoiceUI == null)
+    [ContextMenu("🔄 Limpar Skills do Player")]
+    public void ClearPlayerSkills()
+    {
+        activeSkills.Clear();
+        if (playerStats != null)
         {
-            Debug.Log("❌ Cannot offer: SkillChoiceUI null");
-            return false;
+            playerStats.acquiredSkills.Clear();
+            playerStats.InitializeDefaultSkills();
         }
+        ClearRecentlyOfferedSkills();
+        Debug.Log("🔄 Todas as skills do player foram removidas");
+    }
 
-        List<SkillData> choices = GetRandomSkillChoices(skillsPerChoice);
-        if (choices.Count == 0)
+    [ContextMenu("🔍 Ver Skills Disponíveis")]
+    public void LogAvailableSkills()
+    {
+        Debug.Log($"📚 Skills disponíveis no total: {availableSkills.Count}");
+        foreach (var skill in availableSkills)
         {
-            Debug.Log("❌ Cannot offer: No skills available for choice");
-            return false;
+            Debug.Log($"   • {skill.skillName} ({skill.element}) - {skill.specificType}");
         }
+    }
 
-        Debug.Log("✅ Can offer skill choice!");
-        return true;
+    [ContextMenu("🔍 Ver Milestones Configurados")]
+    public void LogMilestones()
+    {
+        Debug.Log($"🎯 Milestones configurados: {string.Join(", ", levelUpMilestones)}");
+        Debug.Log($"🎯 Próximo milestone: {GetNextMilestone()}");
+    }
+
+    public int GetNextMilestone()
+    {
+        if (playerStats == null) return -1;
+
+        foreach (int milestone in levelUpMilestones)
+        {
+            if (milestone > playerStats.level)
+                return milestone;
+        }
+        return -1; // Não há mais milestones
+    }
+
+    [ContextMenu("🔄 Simular Level Up para Próximo Milestone")]
+    public void SimulateNextMilestoneLevelUp()
+    {
+        if (playerStats == null) return;
+
+        int nextMilestone = GetNextMilestone();
+        if (nextMilestone != -1)
+        {
+            Debug.Log($"🎯 Simulando level up para milestone {nextMilestone}");
+            playerStats.level = nextMilestone - 1; // Define um nível antes
+            OnPlayerLevelUp(nextMilestone); // Chama o level up
+        }
+        else
+        {
+            Debug.Log("ℹ️ Não há mais milestones disponíveis");
+        }
+    }
+
+    // 🆕 MÉTODO PARA LIMPAR SKILLS RECENTES
+    public void ClearRecentlyOfferedSkills()
+    {
+        recentlyOfferedSkills.Clear();
+        Debug.Log("🔄 Lista de skills recentemente oferecidas foi limpa");
     }
 
     void OnApplicationQuit()
     {
         SaveActiveSkills();
-    }
-
-    [ContextMenu("Adicionar Modificador Aleatório")]
-    public void AddRandomModifier()
-    {
-        string[] modifierNames = { "Fogo Intenso", "Gelo Penetrante", "Raio Carregado" };
-        string[] targetSkills = { "Ataque Automático", "Golpe Contínuo" };
-
-        string randomName = modifierNames[UnityEngine.Random.Range(0, modifierNames.Length)];
-        string randomTarget = targetSkills[UnityEngine.Random.Range(0, targetSkills.Length)];
-
-        PlayerStats.SkillModifier modifier = new PlayerStats.SkillModifier
-        {
-            modifierName = randomName,
-            targetSkillName = randomTarget,
-            damageMultiplier = 1.3f
-        };
-
-        AddSkillModifier(modifier);
-    }
-
-    [ContextMenu("Adicionar Skills de Teste")]
-    public void AddTestSkills()
-    {
-        SkillData basicSkill = availableSkills.Find(s => s.requiredLevel <= 1 && s.specificType == SpecificSkillType.Projectile);
-        if (basicSkill != null)
-        {
-            AddSkill(basicSkill);
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ Nenhuma skill de teste encontrada para nível 1");
-        }
     }
 
     void OnDestroy()

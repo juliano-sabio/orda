@@ -51,6 +51,9 @@ public class PlayerStats : MonoBehaviour
     [Header("⚡ Sistema de Elementos")]
     public ElementSystem elementSystem = new ElementSystem();
 
+    [Header("🎯 Sistema de Skills Adquiridas")]
+    public List<SkillData> acquiredSkills = new List<SkillData>();
+
     public Element CurrentElement
     {
         get => elementSystem.currentElement;
@@ -61,6 +64,7 @@ public class PlayerStats : MonoBehaviour
 
     private List<string> inventory = new List<string>();
     private Rigidbody2D rb;
+    private List<SkillBehavior> activeSkillBehaviors = new List<SkillBehavior>();
 
     private float attackTimer = 0f;
     private float defenseTimer = 0f;
@@ -383,6 +387,7 @@ public class PlayerStats : MonoBehaviour
         skillManager = SkillManager.Instance;
         cardSystem = StatusCardSystem.Instance;
 
+        // ❌ NÃO inicializa sistema de skills automaticamente
         StartCoroutine(DelayedStart());
     }
 
@@ -717,7 +722,6 @@ public class PlayerStats : MonoBehaviour
             if (hitCollider.gameObject == gameObject) continue;
             if (hitCollider.CompareTag("Enemy"))
             {
-                // ✅ CORRIGIDO: Usa InimigoController em vez de EnemyHealth
                 InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
                 if (inimigo != null)
                 {
@@ -742,12 +746,10 @@ public class PlayerStats : MonoBehaviour
             ToggleDefenseSkill(1, !defenseSkills[1].isActive);
     }
 
-    // 🆕 SISTEMA DE XP APENAS POR ORBES
     public void GainXP(float xpAmount)
     {
         currentXP += xpAmount;
 
-        // Efeito visual de ganho de XP
         if (uiManager != null)
             uiManager.ShowXPGained(xpAmount);
 
@@ -779,7 +781,6 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"🎉 LEVEL UP! Agora é nível {level}!");
 
-        // 🆕 NOTIFICAR SISTEMA DE CARDS
         if (cardSystem != null)
         {
             cardSystem.OnPlayerLevelUp(level);
@@ -836,7 +837,6 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"💚 Curado em {healAmount}!");
     }
 
-    // ✅ MÉTODO ADICIONADO: UpdateUltimateSystem
     private void UpdateUltimateSystem()
     {
         if (!ultimateSkill.isActive) return;
@@ -855,7 +855,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // ✅ MÉTODO ADICIONADO: ActivateUltimate
     public void ActivateUltimate()
     {
         if (!ultimateReady || !ultimateSkill.isActive) return;
@@ -872,7 +871,6 @@ public class PlayerStats : MonoBehaviour
             if (hitCollider.gameObject == gameObject) continue;
             if (hitCollider.CompareTag("Enemy"))
             {
-                // ✅ CORRIGIDO: Usa InimigoController em vez de EnemyHealth
                 InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
                 if (inimigo != null)
                 {
@@ -917,7 +915,6 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("🔚 Efeito da Ultimate terminou.");
     }
 
-    // ✅ MÉTODO ADICIONADO: UpdateUI
     private void UpdateUI()
     {
         if (uiManager != null)
@@ -926,19 +923,16 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // ✅ MÉTODO ADICIONADO: GetElementSystem
     public ElementSystem GetElementSystem()
     {
         return elementSystem;
     }
 
-    // ✅ MÉTODO ADICIONADO: GetCurrentElement
     public Element GetCurrentElement()
     {
         return CurrentElement;
     }
 
-    // ✅ MÉTODO ADICIONADO: AddSkillModifier
     public void AddSkillModifier(SkillModifier modifier)
     {
         bool applied = false;
@@ -992,7 +986,6 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
     }
 
-    // ✅ MÉTODO ADICIONADO: ToggleAttackSkill
     public void ToggleAttackSkill(int index, bool active)
     {
         if (index >= 0 && index < attackSkills.Count)
@@ -1002,7 +995,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // ✅ MÉTODO ADICIONADO: ToggleDefenseSkill
     public void ToggleDefenseSkill(int index, bool active)
     {
         if (index >= 0 && index < defenseSkills.Count)
@@ -1012,7 +1004,93 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODOS DO SISTEMA DE COLETA DE XP
+    // 🆕 MÉTODOS PARA RECEBER SKILLS DO SKILLMANAGER
+    public void ApplyAcquiredSkill(SkillData skill)
+    {
+        if (skill == null) return;
+
+        if (!acquiredSkills.Contains(skill))
+        {
+            acquiredSkills.Add(skill);
+
+            // Aplica os bônus da skill
+            attack += skill.attackBonus;
+            defense += skill.defenseBonus;
+            maxHealth += skill.healthBonus;
+            health += skill.healthBonus;
+            speed += skill.speedBonus;
+            healthRegenRate += skill.healthRegenBonus;
+            attackActivationInterval *= skill.attackSpeedMultiplier;
+
+            // Configura comportamento específico
+            ConfigureSkillBehavior(skill);
+
+            Debug.Log($"✨ Skill {skill.skillName} aplicada: " +
+                     $"ATK+{skill.attackBonus}, DEF+{skill.defenseBonus}, HP+{skill.healthBonus}");
+
+            UpdateUI();
+        }
+    }
+
+    // 🆕 MÉTODO PARA CONFIGURAR COMPORTAMENTO DA SKILL
+    private void ConfigureSkillBehavior(SkillData skill)
+    {
+        switch (skill.specificType)
+        {
+            case SpecificSkillType.Projectile:
+                AddProjectileBehavior(skill);
+                break;
+
+            case SpecificSkillType.HealthRegen:
+                AddHealthRegenBehavior(skill);
+                break;
+
+            case SpecificSkillType.CriticalStrike:
+                AddCriticalStrikeBehavior(skill);
+                break;
+        }
+    }
+
+    // 🆕 MÉTODO PARA ADICIONAR COMPORTAMENTO DE PROJÉTIL
+    private void AddProjectileBehavior(SkillData skill)
+    {
+        var existingBehavior = GetComponent<PassiveProjectileSkill2D>();
+        if (existingBehavior != null)
+        {
+            existingBehavior.activationInterval *= 0.8f;
+            Debug.Log($"⚡ Comportamento de projétil melhorado por {skill.skillName}");
+            return;
+        }
+
+        PassiveProjectileSkill2D projectileBehavior = gameObject.AddComponent<PassiveProjectileSkill2D>();
+        projectileBehavior.Initialize(this);
+        activeSkillBehaviors.Add(projectileBehavior);
+
+        Debug.Log($"✅ Comportamento de projétil adicionado: {skill.skillName}");
+    }
+
+    // 🆕 MÉTODO PARA ADICIONAR REGENERAÇÃO DE VIDA
+    private void AddHealthRegenBehavior(SkillData skill)
+    {
+        healthRegenRate += skill.healthRegenBonus;
+        healthRegenDelay = Mathf.Max(1f, healthRegenDelay * 0.8f);
+
+        Debug.Log($"💚 Regeneração melhorada: +{skill.healthRegenBonus}/s");
+    }
+
+    // 🆕 MÉTODO PARA ADICIONAR GOLPE CRÍTICO
+    private void AddCriticalStrikeBehavior(SkillData skill)
+    {
+        attack += skill.attackBonus * 0.5f;
+        Debug.Log($"🎯 Chance de crítico aumentada por {skill.skillName}");
+    }
+
+    // 🆕 MÉTODO PARA VERIFICAR SE TEM UMA SKILL
+    public bool HasSkill(string skillName)
+    {
+        return acquiredSkills.Exists(s => s.skillName == skillName);
+    }
+
     public float GetXpCollectionRadius()
     {
         return xpCollectionRadius;
@@ -1053,7 +1131,7 @@ public class PlayerStats : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    // 🆕 GETTERS E SETTERS COMPLETOS
+    // GETTERS
     public float GetCurrentHealth() => health;
     public float GetMaxHealth() => maxHealth;
     public float GetAttack() => attack;
@@ -1144,8 +1222,8 @@ public class PlayerStats : MonoBehaviour
 
         return 0f;
     }
-
-    // 🆕 VISUALIZAÇÃO NO EDITOR
+    // No PlayerStats.cs, modifique o método AddProjectileBehavior:
+    
     void OnDrawGizmosSelected()
     {
         if (showCollectionRadius)
