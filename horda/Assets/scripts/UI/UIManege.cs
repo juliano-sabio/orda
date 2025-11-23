@@ -47,7 +47,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI statusPointsText;
     public TextMeshProUGUI activeBonusesText;
 
-    [Header("Skill Icons")]
+    [Header("🎯 BARRA DE HABILIDADES - Slots de Ícones")]
     public Image attackSkill1Icon;
     public Image attackSkill2Icon;
     public Image defenseSkill1Icon;
@@ -73,10 +73,11 @@ public class UIManager : MonoBehaviour
     public Transform skillButtonContainer;
     public Transform statusCardContainer;
     public GameObject skillButtonPrefab;
-    public GameObject statusCardPrefab; // 🆕 ADICIONADO
+    public GameObject statusCardPrefab;
 
     [Header("Configurações")]
     public float xpTextDisplayTime = 2f;
+    public Sprite defaultSkillIcon; // Ícone padrão para slots vazios
 
     private PlayerStats playerStats;
     private SkillManager skillManager;
@@ -105,6 +106,7 @@ public class UIManager : MonoBehaviour
         cardSystem = FindAnyObjectByType<StatusCardSystem>();
 
         InitializeUI();
+        UpdateSkillIcons(); // 🆕 ATUALIZAR ÍCONES NA INICIALIZAÇÃO
     }
 
     void InitializeUI()
@@ -130,6 +132,245 @@ public class UIManager : MonoBehaviour
         if (playerStats != null)
         {
             UpdatePlayerStatus();
+        }
+    }
+
+    // 🆕 MÉTODO PARA ATUALIZAR TODOS OS ÍCONES DE SKILL
+    public void UpdateSkillIcons()
+    {
+        if (playerStats == null) return;
+
+        Debug.Log("🔄 Atualizando ícones da barra de habilidades...");
+
+        // 🎯 ATUALIZAR SLOTS DE ATAQUE
+        UpdateAttackSkillIcons();
+
+        // 🛡️ ATUALIZAR SLOTS DE DEFESA
+        UpdateDefenseSkillIcons();
+
+        // 🚀 ATUALIZAR SLOT DE ULTIMATE
+        UpdateUltimateSkillIcon();
+
+        // ⚡ ATUALIZAR ÍCONE DE ELEMENTO
+        UpdateElementIcon();
+    }
+
+    private void UpdateAttackSkillIcons()
+    {
+        var attackSkills = playerStats.GetAttackSkills();
+
+        // Slot 1 de Ataque
+        if (attackSkill1Icon != null)
+        {
+            if (attackSkills.Count > 0 && attackSkills[0].isActive)
+            {
+                attackSkill1Icon.sprite = GetSkillIcon(attackSkills[0].skillName);
+                attackSkill1Icon.color = Color.white;
+                attackSkill1Icon.gameObject.SetActive(true);
+
+                // Atualizar ícone elemental
+                if (attackSkill1ElementIcon != null)
+                {
+                    attackSkill1ElementIcon.color = GetElementColor(attackSkills[0].element);
+                    attackSkill1ElementIcon.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                attackSkill1Icon.sprite = defaultSkillIcon;
+                attackSkill1Icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+                if (attackSkill1ElementIcon != null)
+                    attackSkill1ElementIcon.gameObject.SetActive(false);
+            }
+        }
+
+        // Slot 2 de Ataque
+        if (attackSkill2Icon != null)
+        {
+            if (attackSkills.Count > 1 && attackSkills[1].isActive)
+            {
+                attackSkill2Icon.sprite = GetSkillIcon(attackSkills[1].skillName);
+                attackSkill2Icon.color = Color.white;
+                attackSkill2Icon.gameObject.SetActive(true);
+
+                if (attackSkill2ElementIcon != null)
+                {
+                    attackSkill2ElementIcon.color = GetElementColor(attackSkills[1].element);
+                    attackSkill2ElementIcon.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                attackSkill2Icon.sprite = defaultSkillIcon;
+                attackSkill2Icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+                if (attackSkill2ElementIcon != null)
+                    attackSkill2ElementIcon.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void UpdateDefenseSkillIcons()
+    {
+        var defenseSkills = playerStats.GetDefenseSkills();
+
+        // Slot 1 de Defesa
+        if (defenseSkill1Icon != null)
+        {
+            if (defenseSkills.Count > 0 && defenseSkills[0].isActive)
+            {
+                defenseSkill1Icon.sprite = GetSkillIcon(defenseSkills[0].skillName);
+                defenseSkill1Icon.color = Color.white;
+                defenseSkill1Icon.gameObject.SetActive(true);
+
+                if (defenseSkill1ElementIcon != null)
+                {
+                    defenseSkill1ElementIcon.color = GetElementColor(defenseSkills[0].element);
+                    defenseSkill1ElementIcon.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                defenseSkill1Icon.sprite = defaultSkillIcon;
+                defenseSkill1Icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+                if (defenseSkill1ElementIcon != null)
+                    defenseSkill1ElementIcon.gameObject.SetActive(false);
+            }
+        }
+
+        // Slot 2 de Defesa
+        if (defenseSkill2Icon != null)
+        {
+            if (defenseSkills.Count > 1 && defenseSkills[1].isActive)
+            {
+                defenseSkill2Icon.sprite = GetSkillIcon(defenseSkills[1].skillName);
+                defenseSkill2Icon.color = Color.white;
+                defenseSkill2Icon.gameObject.SetActive(true);
+
+                if (defenseSkill2ElementIcon != null)
+                {
+                    defenseSkill2ElementIcon.color = GetElementColor(defenseSkills[1].element);
+                    defenseSkill2ElementIcon.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                defenseSkill2Icon.sprite = defaultSkillIcon;
+                defenseSkill2Icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+                if (defenseSkill2ElementIcon != null)
+                    defenseSkill2ElementIcon.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void UpdateUltimateSkillIcon()
+    {
+        var ultimateSkill = playerStats.GetUltimateSkill();
+
+        if (ultimateSkillIcon != null)
+        {
+            if (ultimateSkill.isActive)
+            {
+                ultimateSkillIcon.sprite = GetSkillIcon(ultimateSkill.skillName);
+                ultimateSkillIcon.color = playerStats.IsUltimateReady() ? Color.yellow : Color.white;
+                ultimateSkillIcon.gameObject.SetActive(true);
+
+                if (ultimateSkillElementIcon != null)
+                {
+                    ultimateSkillElementIcon.color = GetElementColor(ultimateSkill.element);
+                    ultimateSkillElementIcon.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                ultimateSkillIcon.sprite = defaultSkillIcon;
+                ultimateSkillIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
+                if (ultimateSkillElementIcon != null)
+                    ultimateSkillElementIcon.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void UpdateElementIcon()
+    {
+        if (elementIcon != null)
+        {
+            var currentElement = playerStats.GetCurrentElement();
+            if (currentElement != PlayerStats.Element.None)
+            {
+                elementIcon.color = GetElementColor(currentElement);
+                elementIcon.gameObject.SetActive(true);
+            }
+            else
+            {
+                elementIcon.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    // 🆕 MÉTODO PARA OBTER ÍCONE DA SKILL
+    private Sprite GetSkillIcon(string skillName)
+    {
+        // Buscar no SkillManager se disponível
+        if (skillManager != null)
+        {
+            var method = skillManager.GetType().GetMethod("GetSkillIcon");
+            if (method != null)
+            {
+                return method.Invoke(skillManager, new object[] { skillName }) as Sprite;
+            }
+        }
+
+        // Fallback: criar ícone baseado no nome ou elemento
+        return CreateFallbackIcon(skillName);
+    }
+
+    private Sprite CreateFallbackIcon(string skillName)
+    {
+        // Em um projeto real, você teria sprites pré-definidos
+        // Aqui é apenas um fallback
+        if (defaultSkillIcon != null)
+            return defaultSkillIcon;
+
+        // Criar um sprite simples programaticamente (apenas para teste)
+        Texture2D texture = new Texture2D(64, 64);
+        Color[] pixels = new Color[64 * 64];
+
+        // Preencher com cor baseada no nome
+        Color baseColor = ColorForString(skillName);
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = baseColor;
+        }
+
+        texture.SetPixels(pixels);
+        texture.Apply();
+
+        return Sprite.Create(texture, new Rect(0, 0, 64, 64), Vector2.one * 0.5f);
+    }
+
+    private Color ColorForString(string text)
+    {
+        // Gerar cor consistente baseada no texto
+        System.Random rand = new System.Random(text.GetHashCode());
+        return new Color(
+            (float)rand.NextDouble() * 0.7f + 0.3f,
+            (float)rand.NextDouble() * 0.7f + 0.3f,
+            (float)rand.NextDouble() * 0.7f + 0.3f
+        );
+    }
+
+    // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
+    private Color GetElementColor(PlayerStats.Element element)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.Fire: return new Color(1f, 0.3f, 0.1f);
+            case PlayerStats.Element.Ice: return new Color(0.1f, 0.5f, 1f);
+            case PlayerStats.Element.Lightning: return new Color(0.8f, 0.8f, 0.1f);
+            case PlayerStats.Element.Poison: return new Color(0.5f, 0.1f, 0.8f);
+            case PlayerStats.Element.Earth: return new Color(0.6f, 0.4f, 0.2f);
+            case PlayerStats.Element.Wind: return new Color(0.4f, 0.8f, 0.9f);
+            default: return Color.white;
         }
     }
 
@@ -190,7 +431,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODOS PARA STATUS CARD SYSTEM - CORRIGIDOS
     // 🆕 MÉTODOS PARA STATUS CARD SYSTEM - CORRIGIDOS
     public void ShowStatusPointsGained(int points)
     {
@@ -703,20 +943,6 @@ public class UIManager : MonoBehaviour
         icon.gameObject.SetActive(elementColor != Color.white);
     }
 
-    private Color GetElementColor(PlayerStats.Element element)
-    {
-        switch (element)
-        {
-            case PlayerStats.Element.Fire: return new Color(1f, 0.3f, 0.1f);
-            case PlayerStats.Element.Ice: return new Color(0.1f, 0.5f, 1f);
-            case PlayerStats.Element.Lightning: return new Color(0.8f, 0.8f, 0.1f);
-            case PlayerStats.Element.Poison: return new Color(0.5f, 0.1f, 0.8f);
-            case PlayerStats.Element.Earth: return new Color(0.6f, 0.4f, 0.2f);
-            case PlayerStats.Element.Wind: return new Color(0.4f, 0.8f, 0.9f);
-            default: return Color.white;
-        }
-    }
-
     public void ShowElementAdvantage(string strongAgainst, string weakAgainst)
     {
         if (elementAdvantagePanel != null && advantageText != null && disadvantageText != null)
@@ -740,10 +966,80 @@ public class UIManager : MonoBehaviour
     {
         UpdatePlayerStatus();
         UpdateSkillCooldowns();
+        UpdateSkillIcons(); // 🆕 AGORA ATUALIZA ÍCONES TAMBÉM
         UpdateElementIcons();
 
         if (statusPanelVisible) UpdateStatusPanel();
         if (skillSelectionPanelVisible) UpdateSkillSelectionPanel();
         if (statusCardPanelVisible) UpdateStatusCardPanel();
+    }
+
+    // 🆕 MÉTODO PARA LIMPAR TODOS OS ÍCONES (útil para reset)
+    public void ClearAllSkillIcons()
+    {
+        ClearSkillIcon(attackSkill1Icon, attackSkill1ElementIcon);
+        ClearSkillIcon(attackSkill2Icon, attackSkill2ElementIcon);
+        ClearSkillIcon(defenseSkill1Icon, defenseSkill1ElementIcon);
+        ClearSkillIcon(defenseSkill2Icon, defenseSkill2ElementIcon);
+        ClearSkillIcon(ultimateSkillIcon, ultimateSkillElementIcon);
+
+        if (elementIcon != null)
+            elementIcon.gameObject.SetActive(false);
+
+        Debug.Log("🧹 Todos os ícones de skills foram limpos");
+    }
+
+    private void ClearSkillIcon(Image mainIcon, Image elementIcon)
+    {
+        if (mainIcon != null)
+        {
+            mainIcon.sprite = defaultSkillIcon;
+            mainIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+        }
+
+        if (elementIcon != null)
+            elementIcon.gameObject.SetActive(false);
+    }
+
+    // 🆕 MÉTODO PARA DESTACAR SLOT QUANDO NOVA SKILL É ADQUIRIDA
+    public void HighlightSkillSlot(string skillType, int slotIndex)
+    {
+        StartCoroutine(HighlightSlotCoroutine(skillType, slotIndex));
+    }
+
+    private IEnumerator HighlightSlotCoroutine(string skillType, int slotIndex)
+    {
+        Image targetIcon = null;
+
+        // Encontrar o ícone alvo baseado no tipo e slot
+        switch (skillType.ToLower())
+        {
+            case "attack":
+                targetIcon = slotIndex == 0 ? attackSkill1Icon : attackSkill2Icon;
+                break;
+            case "defense":
+                targetIcon = slotIndex == 0 ? defenseSkill1Icon : defenseSkill2Icon;
+                break;
+            case "ultimate":
+                targetIcon = ultimateSkillIcon;
+                break;
+        }
+
+        if (targetIcon == null) yield break;
+
+        // Efeito de pulsação
+        float duration = 2f;
+        float elapsed = 0f;
+        Color originalColor = targetIcon.color;
+
+        while (elapsed < duration)
+        {
+            float pulse = Mathf.PingPong(elapsed * 3f, 1f);
+            targetIcon.color = Color.Lerp(originalColor, Color.yellow, pulse);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        targetIcon.color = originalColor;
     }
 }

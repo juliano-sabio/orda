@@ -9,6 +9,8 @@ public class SkillData : ScriptableObject
     [TextArea(3, 5)]
     public string description;
     public Sprite icon;
+    [Header("🎨 Prefab do Card")]
+    public GameObject cardPrefab;
 
     [Header("📊 Bônus de Status")]
     public float healthBonus = 0f;
