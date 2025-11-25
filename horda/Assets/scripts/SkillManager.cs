@@ -849,4 +849,6 @@ public class SkillManager : MonoBehaviour
         OnModifierAcquired = null;
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
+    
+    
 }

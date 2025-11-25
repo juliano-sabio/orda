@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class SkillChoiceUI : MonoBehaviour
 {
@@ -11,7 +14,7 @@ public class SkillChoiceUI : MonoBehaviour
     public Text titleText;
     public TextMeshProUGUI titleTextTMP;
     public Transform skillsContainer;
-    public GameObject skillChoicePrefab; // 🎯 AGORA É FALLBACK
+    public GameObject skillChoicePrefab;
     public Button confirmButton;
 
     [Header("Configurações")]
@@ -20,35 +23,16 @@ public class SkillChoiceUI : MonoBehaviour
 
     [Header("Layout Horizontal")]
     public bool useHorizontalLayout = true;
-    public float cardSpacing = 20f;
-    public Vector2 cardSize = new Vector2(200f, 250f);
-
-    [Header("Fallbacks Automáticos")]
-    public bool createFallbackUI = true;
-
-    [Header("🎨 Templates de Card (Fallbacks)")]
-    public GameObject defaultCardTemplate;
-    public GameObject fireCardTemplate;
-    public GameObject iceCardTemplate;
-    public GameObject lightningCardTemplate;
-    public GameObject poisonCardTemplate;
-    public GameObject earthCardTemplate;
-    public GameObject windCardTemplate;
+    public float cardSpacing = 30f;
+    public Vector2 cardSize = new Vector2(300f, 450f);
 
     private List<SkillData> currentChoices;
     private System.Action<SkillData> onSkillChosen;
     private List<GameObject> currentButtons = new List<GameObject>();
     private float previousTimeScale;
-    private GameObject fallbackPanel;
 
     void Awake()
     {
-        if (!gameObject.activeInHierarchy)
-        {
-            Debug.LogWarning("⚠️ SkillChoiceUI inativo no Awake! Ativando...");
-            gameObject.SetActive(true);
-        }
-
         if (choicePanel != null)
         {
             choicePanel.SetActive(false);
@@ -64,242 +48,43 @@ public class SkillChoiceUI : MonoBehaviour
     private IEnumerator InitializeWithDelay()
     {
         yield return new WaitForSeconds(0.5f);
-        CheckAndFixConfiguration();
         SetupHorizontalLayout();
         Debug.Log("✅ SkillChoiceUI inicializado completamente");
-    }
-
-    private void CheckAndFixConfiguration()
-    {
-        Debug.Log("🔧 Verificando configuração do SkillChoiceUI...");
-
-        if (!gameObject.activeInHierarchy)
-        {
-            gameObject.SetActive(true);
-            Debug.Log("✅ GameObject ativado");
-        }
-
-        if (choicePanel == null)
-        {
-            Debug.LogWarning("⚠️ ChoicePanel não atribuído! Procurando automaticamente...");
-            choicePanel = FindPanelInChildren();
-
-            if (choicePanel == null && createFallbackUI)
-            {
-                choicePanel = CreateFallbackPanel();
-                Debug.Log("✅ Painel fallback criado");
-            }
-        }
-
-        // 🎯 AGORA VERIFICA TEMPLATES DE CARD
-        CheckCardTemplates();
-
-        if (skillsContainer == null && choicePanel != null)
-        {
-            skillsContainer = choicePanel.transform;
-            Debug.Log("✅ Usando transform do painel como container");
-        }
-
-        Debug.Log("✅ Configuração verificada e corrigida");
-    }
-
-    // 🎯 NOVO: Verificar e carregar templates de card
-    private void CheckCardTemplates()
-    {
-        // Carregar templates se não estiverem atribuídos
-        if (defaultCardTemplate == null)
-            defaultCardTemplate = Resources.Load<GameObject>("Cards/DefaultSkillCard");
-
-        if (fireCardTemplate == null)
-            fireCardTemplate = Resources.Load<GameObject>("Cards/ElementalCard_Fire");
-
-        if (iceCardTemplate == null)
-            iceCardTemplate = Resources.Load<GameObject>("Cards/ElementalCard_Ice");
-
-        if (lightningCardTemplate == null)
-            lightningCardTemplate = Resources.Load<GameObject>("Cards/ElementalCard_Lightning");
-
-        if (poisonCardTemplate == null)
-            poisonCardTemplate = Resources.Load<GameObject>("Cards/ElementalCard_Poison");
-
-        if (earthCardTemplate == null)
-            earthCardTemplate = Resources.Load<GameObject>("Cards/ElementalCard_Earth");
-
-        if (windCardTemplate == null)
-            windCardTemplate = Resources.Load<GameObject>("Cards/ElementalCard_Wind");
-
-        // Fallback final
-        if (skillChoicePrefab == null && defaultCardTemplate != null)
-        {
-            skillChoicePrefab = defaultCardTemplate;
-            Debug.Log("✅ Usando DefaultCardTemplate como fallback");
-        }
     }
 
     private void SetupHorizontalLayout()
     {
         if (skillsContainer == null || !useHorizontalLayout) return;
 
-        // Adicionar Horizontal Layout Group
         HorizontalLayoutGroup layout = skillsContainer.GetComponent<HorizontalLayoutGroup>();
         if (layout == null)
             layout = skillsContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
 
-        // Configurar layout horizontal
         layout.spacing = cardSpacing;
-        layout.padding = new RectOffset(20, 20, 20, 20);
+        layout.padding = new RectOffset(30, 30, 20, 20);
         layout.childAlignment = TextAnchor.MiddleCenter;
-        layout.childControlWidth = true;
-        layout.childControlHeight = true;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
         layout.childForceExpandWidth = false;
         layout.childForceExpandHeight = false;
 
-        // Adicionar Content Size Fitter se necessário
         ContentSizeFitter sizeFitter = skillsContainer.GetComponent<ContentSizeFitter>();
-        if (sizeFitter == null)
-            sizeFitter = skillsContainer.gameObject.AddComponent<ContentSizeFitter>();
+        if (sizeFitter != null)
+        {
+            DestroyImmediate(sizeFitter);
+        }
 
-        sizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-        sizeFitter.verticalFit = ContentSizeFitter.FitMode.MinSize;
+        RectTransform containerRect = skillsContainer as RectTransform;
+        if (containerRect != null)
+        {
+            containerRect.sizeDelta = new Vector2(1200f, 500f);
+            containerRect.anchoredPosition = Vector2.zero;
+            containerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            containerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            containerRect.pivot = new Vector2(0.5f, 0.5f);
+        }
 
         Debug.Log("✅ Layout horizontal configurado");
-    }
-
-    private GameObject FindPanelInChildren()
-    {
-        foreach (Transform child in transform)
-        {
-            if (child.name.Contains("Panel") || child.name.Contains("painel", System.StringComparison.OrdinalIgnoreCase))
-            {
-                return child.gameObject;
-            }
-        }
-
-        if (transform.childCount > 0)
-        {
-            return transform.GetChild(0).gameObject;
-        }
-
-        return null;
-    }
-
-    private GameObject CreateFallbackPanel()
-    {
-        GameObject panel = new GameObject("SkillChoicePanel_Fallback");
-        panel.transform.SetParent(transform);
-
-        RectTransform rect = panel.AddComponent<RectTransform>();
-        Image image = panel.AddComponent<Image>();
-
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = new Vector2(800, 400); // Mais largo para layout horizontal
-        rect.anchoredPosition = Vector2.zero;
-
-        image.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
-
-        GameObject container = new GameObject("SkillsContainer");
-        container.transform.SetParent(panel.transform);
-        RectTransform containerRect = container.AddComponent<RectTransform>();
-        containerRect.anchorMin = new Vector2(0.5f, 0.5f);
-        containerRect.anchorMax = new Vector2(0.5f, 0.5f);
-        containerRect.pivot = new Vector2(0.5f, 0.5f);
-        containerRect.sizeDelta = new Vector2(700, 300);
-        containerRect.anchoredPosition = Vector2.zero;
-
-        skillsContainer = container.transform;
-
-        return panel;
-    }
-
-    // 🎯 ATUALIZADO: Criar fallback apenas se necessário
-    private GameObject CreateFallbackPrefab()
-    {
-        Debug.Log("🔧 Criando prefab fallback de emergência...");
-
-        GameObject prefab = new GameObject("SkillCard_Fallback");
-
-        RectTransform rect = prefab.AddComponent<RectTransform>();
-        Image image = prefab.AddComponent<Image>();
-        Button button = prefab.AddComponent<Button>();
-
-        // Tamanho do card
-        rect.sizeDelta = cardSize;
-        image.color = new Color(0.2f, 0.2f, 0.3f);
-        image.sprite = null;
-
-        // Adicionar Layout Element para controle de tamanho
-        LayoutElement layout = prefab.AddComponent<LayoutElement>();
-        layout.preferredWidth = cardSize.x;
-        layout.preferredHeight = cardSize.y;
-        layout.flexibleWidth = 0;
-        layout.flexibleHeight = 0;
-
-        // Criar estrutura básica do card
-        CreateCardStructure(prefab);
-
-        ColorBlock colors = button.colors;
-        colors.normalColor = new Color(0.2f, 0.2f, 0.3f);
-        colors.highlightedColor = new Color(0.3f, 0.3f, 0.5f);
-        colors.pressedColor = new Color(0.4f, 0.4f, 0.7f);
-        colors.selectedColor = new Color(0.3f, 0.3f, 0.5f);
-        button.colors = colors;
-
-        prefab.SetActive(false);
-        return prefab;
-    }
-
-    private void CreateCardStructure(GameObject card)
-    {
-        // Área do ícone (topo)
-        GameObject iconArea = CreateUIElement("IconArea", card.transform,
-            new Vector2(0f, 0.7f), new Vector2(1f, 1f), new Vector2(0, 0));
-        Image iconImage = iconArea.AddComponent<Image>();
-        iconImage.color = new Color(0.3f, 0.3f, 0.4f);
-
-        // Área do nome da skill
-        GameObject nameArea = CreateUIElement("NameArea", card.transform,
-            new Vector2(0f, 0.5f), new Vector2(1f, 0.7f), new Vector2(0, 0));
-        TextMeshProUGUI nameText = nameArea.AddComponent<TextMeshProUGUI>();
-        nameText.text = "Skill Name";
-        nameText.color = Color.white;
-        nameText.fontSize = 16;
-        nameText.alignment = TextAlignmentOptions.Center;
-        nameText.fontStyle = FontStyles.Bold;
-
-        // Área da descrição
-        GameObject descArea = CreateUIElement("DescArea", card.transform,
-            new Vector2(0f, 0.2f), new Vector2(1f, 0.5f), new Vector2(10, 10));
-        TextMeshProUGUI descText = descArea.AddComponent<TextMeshProUGUI>();
-        descText.text = "Skill description will appear here";
-        descText.color = new Color(0.8f, 0.8f, 0.9f);
-        descText.fontSize = 12;
-        descText.alignment = TextAlignmentOptions.Center;
-        descText.textWrappingMode = TextWrappingModes.Normal;
-
-        // Área dos status/bônus
-        GameObject statsArea = CreateUIElement("StatsArea", card.transform,
-            new Vector2(0f, 0f), new Vector2(1f, 0.2f), new Vector2(5, 5));
-        TextMeshProUGUI statsText = statsArea.AddComponent<TextMeshProUGUI>();
-        statsText.text = "❤️+10 ⚔️+5";
-        statsText.color = new Color(0.9f, 0.8f, 0.3f);
-        statsText.fontSize = 11;
-        statsText.alignment = TextAlignmentOptions.Center;
-    }
-
-    private GameObject CreateUIElement(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 sizeDelta)
-    {
-        GameObject element = new GameObject(name, typeof(RectTransform));
-        element.transform.SetParent(parent);
-
-        RectTransform rect = element.GetComponent<RectTransform>();
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.sizeDelta = sizeDelta;
-        rect.anchoredPosition = Vector2.zero;
-
-        return element;
     }
 
     public void ShowSkillChoice(List<SkillData> skills, System.Action<SkillData> callback)
@@ -312,12 +97,17 @@ public class SkillChoiceUI : MonoBehaviour
             return;
         }
 
-        CheckAndFixConfiguration();
-
+        // 🎯 GARANTIR que o GameObject está ATIVO
         if (!gameObject.activeInHierarchy)
         {
-            Debug.LogError("❌ SkillChoiceUI GameObject está INATIVO! Ativando...");
+            Debug.LogWarning("⚠️ SkillChoiceUI inativo! Ativando...");
             gameObject.SetActive(true);
+        }
+
+        // 🎯 GARANTIR que o Canvas está ATIVO
+        if (choicePanel != null && !choicePanel.activeInHierarchy)
+        {
+            choicePanel.SetActive(true);
         }
 
         currentChoices = skills;
@@ -331,17 +121,287 @@ public class SkillChoiceUI : MonoBehaviour
             choicePanel.SetActive(true);
             Debug.Log("✅ Painel de escolha ativado");
         }
-        else
-        {
-            Debug.LogError("❌ ChoicePanel não atribuído mesmo após fallback!");
-            ResumeGame();
-            return;
-        }
 
         UpdateTitleText();
         Debug.Log($"📋 Mostrando escolha de {skills.Count} skills");
 
-        StartCoroutine(CreateSkillButtonsWithDelay(skills));
+        // 🎯 INICIAR COROUTINE COM SEGURANÇA
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(CreateSkillButtonsWithSpecificPrefabs(skills));
+        }
+        else
+        {
+            Debug.LogError("❌ Não pode iniciar coroutine - GameObject inativo!");
+            // Fallback: executar imediatamente
+            StartCoroutine(CreateSkillButtonsWithSpecificPrefabs(skills));
+        }
+    }
+    private IEnumerator CreateSkillButtonsWithSpecificPrefabs(List<SkillData> skills)
+    {
+        yield return new WaitForEndOfFrame();
+
+        for (int i = 0; i < skills.Count; i++)
+        {
+            CreateSkillButtonWithSpecificPrefab(skills[i], i);
+        }
+
+        Debug.Log($"✅ {skills.Count} cards criados com prefabs específicos");
+
+        yield return StartCoroutine(ForceLayoutRefresh());
+    }
+
+    private void CreateSkillButtonWithSpecificPrefab(SkillData skill, int index)
+    {
+        GameObject cardPrefabToUse = skill.cardPrefab;
+
+        if (cardPrefabToUse == null)
+        {
+            cardPrefabToUse = skillChoicePrefab;
+            Debug.LogWarning($"⚠️ Skill {skill.skillName} não tem cardPrefab! Usando fallback genérico");
+        }
+
+        if (cardPrefabToUse == null)
+        {
+            cardPrefabToUse = Resources.Load<GameObject>("Cards/SkillCard_Auto");
+            Debug.LogWarning($"⚠️ Usando card automático do Resources para: {skill.skillName}");
+        }
+
+        if (cardPrefabToUse == null)
+        {
+            Debug.LogError($"🚨 Criando card de emergência para: {skill.skillName}");
+            CreateEmergencySkillButton(skill, index);
+            return;
+        }
+
+        GameObject cardObj = Instantiate(cardPrefabToUse, skillsContainer);
+        cardObj.name = $"{skill.skillName}_Instance";
+        cardObj.SetActive(true);
+        currentButtons.Add(cardObj);
+
+        SetupCardTransform(cardObj);
+        InitializeCardWithSkillData(cardObj, skill);
+
+        Debug.Log($"✅ Card criado: {skill.skillName} | Prefab: {cardPrefabToUse.name}");
+    }
+
+    private void InitializeCardWithSkillData(GameObject cardObj, SkillData skill)
+    {
+        // 🚫 BLOQUEIO TOTAL - não modifica NADA se for prefab no Editor
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning($"🚨 BLOQUEADO: Tentativa de modificar fora do runtime - {skill.skillName}");
+            return;
+        }
+#endif
+
+        // 🎯 VERIFICAÇÃO EXTRA - só modifica em runtime
+        if (!Application.isPlaying)
+        {
+            Debug.LogError($"❌ TENTATIVA PERIGOSA: Modificar em Editor - {skill.skillName}");
+            return;
+        }
+
+        // 🎯 MÉTODO SEGURO - apenas textos, sem cores
+        SetupCardTextsOnly(cardObj, skill);
+
+        // Configura o botão (seguro)
+        Button button = cardObj.GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() => OnSkillSelected(skill));
+            button.interactable = true;
+        }
+
+        Debug.Log($"✅ Card configurado (APENAS TEXTO): {skill.skillName}");
+    }
+
+    private void SetupCardTextsOnly(GameObject cardObj, SkillData skill)
+    {
+        // 🎯 APENAS modifica textos - NUNCA cores
+
+        // Encontra componentes de texto
+        TextMeshProUGUI[] textComponents = cardObj.GetComponentsInChildren<TextMeshProUGUI>();
+        foreach (TextMeshProUGUI text in textComponents)
+        {
+            if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
+            {
+                string elementIcon = skill.GetElementIcon();
+                text.text = $"<b>{skill.skillName}</b>\n{elementIcon} {skill.element}";
+            }
+            else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
+            {
+                text.text = skill.description;
+            }
+            else if (text.name.Contains("Stats") || text.name.Contains("Status") || text.name.Contains("Bonus"))
+            {
+                text.text = GetManualStatsText(skill);
+            }
+            // 🚫 NUNCA modifica text.color!
+        }
+
+        // 🎯 Ícone (apenas sprite, sem cor)
+        Image[] images = cardObj.GetComponentsInChildren<Image>();
+        foreach (Image img in images)
+        {
+            if ((img.name.Contains("Icon") || img.name.Contains("Image")) && skill.icon != null)
+            {
+                img.sprite = skill.icon;
+                // 🚫 NUNCA modifica img.color!
+            }
+        }
+    }
+
+    private void SetupCardTransform(GameObject cardObj)
+    {
+        RectTransform rect = cardObj.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.localScale = Vector3.one;
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = cardSize;
+        }
+
+        LayoutElement layoutElem = cardObj.GetComponent<LayoutElement>();
+        if (layoutElem == null)
+        {
+            layoutElem = cardObj.AddComponent<LayoutElement>();
+        }
+        layoutElem.preferredWidth = cardSize.x;
+        layoutElem.preferredHeight = cardSize.y;
+        layoutElem.flexibleWidth = 0;
+        layoutElem.flexibleHeight = 0;
+    }
+
+    private void CreateEmergencySkillButton(SkillData skill, int index)
+    {
+        GameObject cardObj = new GameObject($"EmergencyCard_{skill.skillName}",
+            typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+
+        cardObj.transform.SetParent(skillsContainer);
+        cardObj.SetActive(true);
+        currentButtons.Add(cardObj);
+
+        Image image = cardObj.GetComponent<Image>();
+        image.color = new Color(0.3f, 0.2f, 0.2f, 1f);
+
+        SetupCardTransform(cardObj);
+        SetupSkillCardManually(cardObj, skill);
+
+        Button button = cardObj.GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() => OnSkillSelected(skill));
+        }
+
+        Debug.LogWarning($"🚨 Card de emergência criado para: {skill.skillName}");
+    }
+
+    private void SetupSkillCardManually(GameObject cardObj, SkillData skill)
+    {
+        // 🎯 MÉTODO APENAS PARA EMERGÊNCIA - também sem cores
+        TextMeshProUGUI[] textComponents = cardObj.GetComponentsInChildren<TextMeshProUGUI>();
+        foreach (TextMeshProUGUI text in textComponents)
+        {
+            if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
+            {
+                text.text = $"<b>{skill.skillName}</b>";
+            }
+            else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
+            {
+                text.text = skill.description;
+            }
+            else if (text.name.Contains("Stats") || text.name.Contains("Status") || text.name.Contains("Bonus"))
+            {
+                text.text = GetManualStatsText(skill);
+            }
+        }
+
+        Image[] images = cardObj.GetComponentsInChildren<Image>();
+        foreach (Image img in images)
+        {
+            if ((img.name.Contains("Icon") || img.name.Contains("Image")) && skill.icon != null)
+            {
+                img.sprite = skill.icon;
+                // 🚫 NUNCA modifica img.color!
+            }
+        }
+    }
+
+    private string GetManualStatsText(SkillData skill)
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+        if (skill.healthBonus != 0) sb.Append($"❤️{skill.healthBonus} ");
+        if (skill.attackBonus != 0) sb.Append($"⚔️{skill.attackBonus} ");
+        if (skill.defenseBonus != 0) sb.Append($"🛡️{skill.defenseBonus} ");
+        if (skill.speedBonus != 0) sb.Append($"🏃{skill.speedBonus} ");
+        if (skill.healthRegenBonus != 0) sb.Append($"💚{skill.healthRegenBonus} ");
+
+        if (sb.Length == 0) sb.Append("💎 Bônus Passivo");
+
+        return sb.ToString();
+    }
+
+    private IEnumerator ForceLayoutRefresh()
+    {
+        yield return new WaitForEndOfFrame();
+
+        if (skillsContainer != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(skillsContainer as RectTransform);
+            Canvas.ForceUpdateCanvases();
+        }
+    }
+
+    private void OnSkillSelected(SkillData selectedSkill)
+    {
+        Debug.Log($"🎯 Skill selecionada: {selectedSkill.skillName}");
+
+        if (selectedSkill != null)
+        {
+            StartCoroutine(SelectionConfirmationEffect(selectedSkill));
+        }
+        else
+        {
+            ClosePanel();
+        }
+    }
+
+    private IEnumerator SelectionConfirmationEffect(SkillData selectedSkill)
+    {
+        foreach (var button in currentButtons)
+        {
+            if (button != null)
+            {
+                Button btn = button.GetComponent<Button>();
+                if (btn != null) btn.interactable = false;
+            }
+        }
+
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        onSkillChosen?.Invoke(selectedSkill);
+
+        yield return new WaitForSecondsRealtime(autoCloseDelay);
+
+        ClosePanel();
+    }
+
+    public void ClosePanel()
+    {
+        if (choicePanel != null)
+        {
+            choicePanel.SetActive(false);
+        }
+
+        ClearSkillButtons();
+        ResumeGame();
+        currentChoices = null;
+        onSkillChosen = null;
     }
 
     private void PauseGame()
@@ -350,7 +410,6 @@ public class SkillChoiceUI : MonoBehaviour
         {
             previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
-            Debug.Log("⏸️ Jogo pausado durante escolha de skill");
             AudioListener.pause = true;
         }
     }
@@ -361,7 +420,6 @@ public class SkillChoiceUI : MonoBehaviour
         {
             Time.timeScale = previousTimeScale;
             AudioListener.pause = false;
-            Debug.Log("▶️ Jogo despausado");
         }
     }
 
@@ -379,22 +437,6 @@ public class SkillChoiceUI : MonoBehaviour
         {
             titleText.text = title;
         }
-        else
-        {
-            Debug.LogWarning("⚠️ Nenhum componente de texto atribuído para o título");
-        }
-    }
-
-    private IEnumerator CreateSkillButtonsWithDelay(List<SkillData> skills)
-    {
-        yield return new WaitForEndOfFrame();
-
-        for (int i = 0; i < skills.Count; i++)
-        {
-            CreateSkillChoiceButton(skills[i], i);
-        }
-
-        Debug.Log($"✅ {skills.Count} cards de skill criados");
     }
 
     private void ClearSkillButtons()
@@ -416,337 +458,292 @@ public class SkillChoiceUI : MonoBehaviour
         }
     }
 
-    // 🎯 MÉTODO PRINCIPAL ATUALIZADO: Hierarquia inteligente de prefabs
-    private void CreateSkillChoiceButton(SkillData skill, int index)
+    [ContextMenu("🎯 Testar Sistema de Cards")]
+    public void TestAutoCardSystem()
     {
-        GameObject cardPrefabToUse = GetCardPrefabForSkill(skill);
-
-        if (cardPrefabToUse == null)
-        {
-            Debug.LogError($"❌ Não foi possível encontrar prefab para: {skill.skillName}");
-            return;
-        }
-
-        GameObject cardObj = Instantiate(cardPrefabToUse, skillsContainer);
-        currentButtons.Add(cardObj);
-
-        Button button = cardObj.GetComponent<Button>();
-        if (button == null)
-        {
-            Debug.LogError($"❌ Botão não encontrado no prefab para: {skill.skillName}");
-            return;
-        }
-
-        SetupSkillCard(cardObj, skill);
-
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => OnSkillSelected(skill));
-
-        cardObj.SetActive(true);
-        Debug.Log($"✅ Card criado para: {skill.skillName} (Prefab: {cardPrefabToUse.name})");
-    }
-
-    // 🎯 NOVO: Hierarquia inteligente para escolher o prefab do card
-    private GameObject GetCardPrefabForSkill(SkillData skill)
-    {
-        // 1. 🥇 PRIORIDADE MÁXIMA: Prefab específico da skill
-        if (skill.cardPrefab != null)
-        {
-            Debug.Log($"🎨 Usando card personalizado para: {skill.skillName}");
-            return skill.cardPrefab;
-        }
-
-        // 2. 🥈 PRIORIDADE ALTA: Template por elemento
-        GameObject elementalTemplate = GetElementalCardTemplate(skill.element);
-        if (elementalTemplate != null)
-        {
-            Debug.Log($"⚡ Usando template elemental ({skill.element}) para: {skill.skillName}");
-            return elementalTemplate;
-        }
-
-        // 3. 🥉 PRIORIDADE MÉDIA: Prefab geral do sistema
-        if (skillChoicePrefab != null)
-        {
-            Debug.Log($"🎯 Usando card padrão do sistema para: {skill.skillName}");
-            return skillChoicePrefab;
-        }
-
-        // 4. 🆘 EMERGÊNCIA: Criar fallback automático
-        Debug.LogWarning($"⚠️ Criando card fallback de emergência para: {skill.skillName}");
-        return CreateFallbackPrefab();
-    }
-
-    // 🎯 NOVO: Obter template baseado no elemento
-    private GameObject GetElementalCardTemplate(PlayerStats.Element element)
-    {
-        switch (element)
-        {
-            case PlayerStats.Element.Fire: return fireCardTemplate;
-            case PlayerStats.Element.Ice: return iceCardTemplate;
-            case PlayerStats.Element.Lightning: return lightningCardTemplate;
-            case PlayerStats.Element.Poison: return poisonCardTemplate;
-            case PlayerStats.Element.Earth: return earthCardTemplate;
-            case PlayerStats.Element.Wind: return windCardTemplate;
-            default: return defaultCardTemplate;
-        }
-    }
-
-    private void SetupSkillCard(GameObject cardObj, SkillData skill)
-    {
-        // Encontrar componentes do card
-        Transform iconArea = cardObj.transform.Find("IconArea");
-        Transform nameArea = cardObj.transform.Find("NameArea");
-        Transform descArea = cardObj.transform.Find("DescArea");
-        Transform statsArea = cardObj.transform.Find("StatsArea");
-
-        // Configurar cor de fundo baseada no elemento (se não tiver prefab específico)
-        if (skill.cardPrefab == null)
-        {
-            Image cardImage = cardObj.GetComponent<Image>();
-            if (cardImage != null)
-            {
-                Color elementColor = GetElementColor(skill.element);
-                cardImage.color = elementColor * 0.3f + new Color(0.1f, 0.1f, 0.1f);
-            }
-        }
-
-        // Configurar ícone
-        if (iconArea != null)
-        {
-            Image iconImage = iconArea.GetComponent<Image>();
-            if (iconImage != null && skill.icon != null)
-            {
-                iconImage.sprite = skill.icon;
-                iconImage.color = GetElementColor(skill.element);
-            }
-            else if (iconImage != null)
-            {
-                iconImage.color = GetElementColor(skill.element);
-
-                // Adicionar texto do elemento se não tiver ícone
-                TextMeshProUGUI elementText = iconArea.GetComponent<TextMeshProUGUI>();
-                if (elementText == null)
-                    elementText = iconArea.gameObject.AddComponent<TextMeshProUGUI>();
-
-                elementText.text = GetElementIcon(skill.element);
-                elementText.color = Color.white;
-                elementText.fontSize = 24;
-                elementText.alignment = TextAlignmentOptions.Center;
-            }
-        }
-
-        // Configurar nome
-        if (nameArea != null)
-        {
-            TextMeshProUGUI nameText = nameArea.GetComponent<TextMeshProUGUI>();
-            if (nameText != null)
-            {
-                nameText.text = $"<b>{skill.skillName}</b>\n{GetElementIcon(skill.element)} {skill.element}";
-                nameText.color = GetElementColor(skill.element);
-            }
-        }
-
-        // Configurar descrição
-        if (descArea != null)
-        {
-            TextMeshProUGUI descText = descArea.GetComponent<TextMeshProUGUI>();
-            if (descText != null)
-            {
-                descText.text = skill.description;
-            }
-        }
-
-        // Configurar status
-        if (statsArea != null)
-        {
-            TextMeshProUGUI statsText = statsArea.GetComponent<TextMeshProUGUI>();
-            if (statsText != null)
-            {
-                statsText.text = GetSkillStatsText(skill);
-            }
-        }
-    }
-
-    private string GetSkillStatsText(SkillData skill)
-    {
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-        if (skill.healthBonus != 0) sb.Append($"❤️{skill.healthBonus} ");
-        if (skill.attackBonus != 0) sb.Append($"⚔️{skill.attackBonus} ");
-        if (skill.defenseBonus != 0) sb.Append($"🛡️{skill.defenseBonus} ");
-        if (skill.speedBonus != 0) sb.Append($"🏃{skill.speedBonus} ");
-        if (skill.healthRegenBonus != 0) sb.Append($"💚{skill.healthRegenBonus} ");
-
-        if (sb.Length == 0) sb.Append("💎 Bônus Passivo");
-
-        return sb.ToString();
-    }
-
-    private void OnSkillSelected(SkillData selectedSkill)
-    {
-        Debug.Log($"🎯 Skill selecionada: {selectedSkill.skillName}");
-
-        if (selectedSkill != null)
-        {
-            StartCoroutine(SelectionConfirmationEffect(selectedSkill));
-        }
-        else
-        {
-            Debug.LogError("❌ Skill selecionada é null!");
-            ClosePanel();
-        }
-    }
-
-    private IEnumerator SelectionConfirmationEffect(SkillData selectedSkill)
-    {
-        foreach (var button in currentButtons)
-        {
-            if (button != null)
-            {
-                Button btn = button.GetComponent<Button>();
-                if (btn != null) btn.interactable = false;
-            }
-        }
-
-        float elapsed = 0f;
-        while (elapsed < 0.5f)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
-        onSkillChosen?.Invoke(selectedSkill);
-
-        elapsed = 0f;
-        while (elapsed < autoCloseDelay)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
-        ClosePanel();
-    }
-
-    public void ClosePanel()
-    {
-        if (choicePanel != null)
-        {
-            choicePanel.SetActive(false);
-            Debug.Log("🔒 Painel de escolha de skill fechado");
-        }
-
-        ClearSkillButtons();
-        ResumeGame();
-        currentChoices = null;
-        onSkillChosen = null;
-    }
-
-    [ContextMenu("🎯 Forçar Aparecimento da Escolha")]
-    public void ForceShowChoice()
-    {
-        Debug.Log("🎯 Forçando aparecimento da escolha de skills...");
-
-        CheckAndFixConfiguration();
+        Debug.Log("🧪 Testando sistema de cards automático...");
 
         List<SkillData> testSkills = CreateTestSkills();
-
         ShowSkillChoice(testSkills, (selectedSkill) => {
-            Debug.Log($"✅ Skill selecionada: {selectedSkill.skillName}");
-
-            if (SkillManager.Instance != null)
-            {
-                SkillManager.Instance.AddSkill(selectedSkill);
-            }
-
-            // 🆕 ATUALIZAR UI APÓS ESCOLHA
-            if (UIManager.Instance != null)
-            {
-                UIManager.Instance.UpdateSkillIcons();
-                UIManager.Instance.ForceRefreshUI();
-            }
+            Debug.Log($"✅ Sistema funcionando! Skill escolhida: {selectedSkill.skillName}");
         });
-    }
-
-    [ContextMenu("🔍 Verificar Sistema de Cards")]
-    public void CheckCardSystem()
-    {
-        Debug.Log("🔍 Verificando sistema de cards...");
-
-        int totalTemplates = 0;
-        if (defaultCardTemplate != null) totalTemplates++;
-        if (fireCardTemplate != null) totalTemplates++;
-        if (iceCardTemplate != null) totalTemplates++;
-        if (lightningCardTemplate != null) totalTemplates++;
-        if (poisonCardTemplate != null) totalTemplates++;
-        if (earthCardTemplate != null) totalTemplates++;
-        if (windCardTemplate != null) totalTemplates++;
-
-        Debug.Log($"📊 Templates carregados: {totalTemplates}/7");
-        Debug.Log($"🎯 Prefab principal: {(skillChoicePrefab != null ? "✅" : "❌")}");
-        Debug.Log($"📦 Container: {(skillsContainer != null ? "✅" : "❌")}");
     }
 
     private List<SkillData> CreateTestSkills()
     {
         List<SkillData> testSkills = new List<SkillData>();
 
-        // Skill de teste 1 - Projétil
         SkillData testSkill1 = ScriptableObject.CreateInstance<SkillData>();
-        testSkill1.skillName = "Projétil de Fogo";
-        testSkill1.description = "Dispara projéteis de fogo que queimam inimigos";
-        testSkill1.attackBonus = 15f;
+        testSkill1.skillName = "Bola de Fogo";
+        testSkill1.description = "Lança uma poderosa bola de fogo que causa dano em área";
+        testSkill1.attackBonus = 25f;
         testSkill1.healthBonus = 10f;
         testSkill1.element = PlayerStats.Element.Fire;
-        testSkill1.specificType = SpecificSkillType.Projectile;
+        testSkill1.rarity = SkillRarity.Rare;
         testSkills.Add(testSkill1);
 
-        // Skill de teste 2 - Regeneração
         SkillData testSkill2 = ScriptableObject.CreateInstance<SkillData>();
-        testSkill2.skillName = "Regeneração";
-        testSkill2.description = "Regenera vida gradualmente durante a batalha";
+        testSkill2.skillName = "Armadura de Gelo";
+        testSkill2.description = "Cria uma armadura gelada que aumenta a defesa";
+        testSkill2.defenseBonus = 15f;
         testSkill2.healthBonus = 20f;
-        testSkill2.healthRegenBonus = 2f;
-        testSkill2.specificType = SpecificSkillType.HealthRegen;
+        testSkill2.element = PlayerStats.Element.Ice;
+        testSkill2.rarity = SkillRarity.Uncommon;
         testSkills.Add(testSkill2);
-
-        // Skill de teste 3 - Velocidade
-        SkillData testSkill3 = ScriptableObject.CreateInstance<SkillData>();
-        testSkill3.skillName = "Velocidade do Vento";
-        testSkill3.description = "Aumenta a velocidade de movimento e ataque";
-        testSkill3.speedBonus = 2f;
-        testSkill3.attackSpeedMultiplier = 0.8f;
-        testSkill3.element = PlayerStats.Element.Wind;
-        testSkills.Add(testSkill3);
 
         return testSkills;
     }
 
-    private Color GetElementColor(PlayerStats.Element element)
+    [ContextMenu("🔍 DEBUG: Verificar ONDE está modificando")]
+    public void DebugWhereIsModifying()
     {
-        switch (element)
+        Debug.Log("=== 🔍 INICIANDO DIAGNÓSTICO COMPLETO ===");
+
+        // 1. Verificar se está no Editor ou Runtime
+        Debug.Log($"🎯 Modo: {(Application.isPlaying ? "RUNTIME" : "EDITOR")}");
+
+        // 2. Verificar todos os prefabs na pasta Resources
+        GameObject[] allPrefabs = Resources.LoadAll<GameObject>("Cards");
+        Debug.Log($"📁 Prefabs carregados: {allPrefabs.Length}");
+
+        foreach (var prefab in allPrefabs)
         {
-            case PlayerStats.Element.Fire: return Color.red;
-            case PlayerStats.Element.Poison: return Color.blue;
-            case PlayerStats.Element.Earth: return Color.green;
-            case PlayerStats.Element.Wind: return Color.cyan;
-            case PlayerStats.Element.Lightning: return Color.yellow;
-            default: return Color.white;
+            Debug.Log($"\n🔍 Analisando prefab: {prefab.name}");
+
+            // Verificar se tem scripts
+            Component[] allComponents = prefab.GetComponents<Component>();
+            foreach (var comp in allComponents)
+            {
+                if (comp == null) continue;
+                string typeName = comp.GetType().Name;
+                if (typeName.Contains("SkillCard") || typeName.Contains("Controller"))
+                {
+                    Debug.LogError($"   ❌ TEM SCRIPT: {typeName}");
+                }
+            }
+
+            // Verificar propriedades modificadas
+            CheckPrefabProperties(prefab);
+        }
+
+        // 3. Verificar instâncias atuais
+        if (skillsContainer != null && skillsContainer.childCount > 0)
+        {
+            Debug.Log($"\n🎴 Instâncias atuais: {skillsContainer.childCount}");
+            for (int i = 0; i < skillsContainer.childCount; i++)
+            {
+                Transform child = skillsContainer.GetChild(i);
+                Debug.Log($"   📦 {child.name} (Instância)");
+            }
+        }
+
+        Debug.Log("=== FIM DO DIAGNÓSTICO ===");
+    }
+
+    private void CheckPrefabProperties(GameObject prefab)
+    {
+        // Verifica cores e textos dos prefabs
+        Image bg = prefab.GetComponent<Image>();
+        if (bg != null)
+        {
+            Debug.Log($"   🎨 Background color: {bg.color}");
+        }
+
+        // Verifica textos nos filhos
+        TextMeshProUGUI[] texts = prefab.GetComponentsInChildren<TextMeshProUGUI>();
+        foreach (var text in texts)
+        {
+            Debug.Log($"   📝 {text.name}: '{text.text}' | Cor: {text.color}");
+        }
+
+        // Verifica imagens nos filhos
+        Image[] images = prefab.GetComponentsInChildren<Image>();
+        foreach (var img in images)
+        {
+            if (img.sprite != null)
+            {
+                Debug.Log($"   🖼️ {img.name}: Sprite '{img.sprite.name}' | Cor: {img.color}");
+            }
         }
     }
 
-    private string GetElementIcon(PlayerStats.Element element)
+    [ContextMenu("🔧 Verificar Configuração")]
+    public void CheckConfiguration()
     {
-        switch (element)
+        Debug.Log("🔍 Verificando configuração do SkillChoiceUI...");
+        Debug.Log($"📊 Choice Panel: {choicePanel != null}");
+        Debug.Log($"📦 Skills Container: {skillsContainer != null}");
+        Debug.Log($"🎯 Skill Prefab: {skillChoicePrefab != null}");
+        Debug.Log($"🔄 Horizontal Layout: {useHorizontalLayout}");
+        Debug.Log($"📐 Card Size: {cardSize}");
+        Debug.Log($"📏 Card Spacing: {cardSpacing}");
+
+        if (skillsContainer != null)
         {
-            case PlayerStats.Element.Fire: return "🔥";
-            case PlayerStats.Element.Poison: return "💧";
-            case PlayerStats.Element.Earth: return "🌿";
-            case PlayerStats.Element.Wind: return "💨";
-            case PlayerStats.Element.Lightning: return "⚡";
-            default: return "✨";
+            HorizontalLayoutGroup layout = skillsContainer.GetComponent<HorizontalLayoutGroup>();
+            ContentSizeFitter fitter = skillsContainer.GetComponent<ContentSizeFitter>();
+
+            Debug.Log($"📐 Layout Group: {layout != null}");
+            Debug.Log($"🔒 ContentSizeFitter: {fitter != null} (deve ser NULL)");
         }
     }
 
+    [ContextMenu("🔓 Destravar Container Manualmente")]
+    public void UnlockContainerManually()
+    {
+        if (skillsContainer == null)
+        {
+            Debug.LogError("❌ Container não encontrado!");
+            return;
+        }
+
+        ContentSizeFitter fitter = skillsContainer.GetComponent<ContentSizeFitter>();
+        if (fitter != null)
+        {
+            DestroyImmediate(fitter);
+            Debug.Log("✅ ContentSizeFitter removido!");
+        }
+
+        HorizontalLayoutGroup layout = skillsContainer.GetComponent<HorizontalLayoutGroup>();
+        if (layout != null)
+        {
+            layout.childControlWidth = false;
+            layout.childControlHeight = false;
+            Debug.Log("✅ Layout Group destravado!");
+        }
+
+        RectTransform rect = skillsContainer as RectTransform;
+        if (rect != null)
+        {
+            rect.sizeDelta = new Vector2(1200, 500);
+            Debug.Log($"✅ Container configurado - Tamanho: {rect.sizeDelta}");
+        }
+
+        Debug.Log("🎯 Container destravado e configurado manualmente!");
+    }
+    [ContextMenu("🔍 Verificar Container e Cards")]
+    public void DebugContainerAndCards()
+    {
+        Debug.Log("=== 🔍 VERIFICAÇÃO DO CONTAINER E CARDS ===");
+
+        if (skillsContainer == null)
+        {
+            Debug.LogError("❌ skillsContainer é NULL!");
+            return;
+        }
+
+        // Verificar container
+        RectTransform containerRect = skillsContainer as RectTransform;
+        if (containerRect != null)
+        {
+            Debug.Log($"📐 Container - Tamanho: {containerRect.sizeDelta}");
+            Debug.Log($"📍 Container - Posição: {containerRect.anchoredPosition}");
+            Debug.Log($"🎯 Container - Ativo: {containerRect.gameObject.activeInHierarchy}");
+        }
+
+        // Verificar Layout Group
+        HorizontalLayoutGroup layout = skillsContainer.GetComponent<HorizontalLayoutGroup>();
+        if (layout != null)
+        {
+            Debug.Log($"📏 Layout - Espaçamento: {layout.spacing}");
+            Debug.Log($"🔧 Layout - Child Control: {layout.childControlWidth} x {layout.childControlHeight}");
+        }
+
+        // Verificar cards existentes
+        int childCount = skillsContainer.childCount;
+        Debug.Log($"🎴 Total de cards no container: {childCount}");
+
+        for (int i = 0; i < childCount; i++)
+        {
+            Transform child = skillsContainer.GetChild(i);
+            GameObject childObj = child.gameObject;
+
+            Debug.Log($"\n🎴 Card {i}: {child.name}");
+            Debug.Log($"   👀 Ativo: {childObj.activeSelf}");
+            Debug.Log($"   🏷️ Tag: {childObj.tag}");
+            Debug.Log($"   🎯 Layer: {childObj.layer}");
+
+            // Verificar componentes
+            RectTransform rect = child.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                Debug.Log($"   📐 Tamanho: {rect.sizeDelta}");
+                Debug.Log($"   📍 Posição: {rect.anchoredPosition}");
+            }
+
+            // Verificar se é prefab instance
+#if UNITY_EDITOR
+            bool isPrefabInstance = PrefabUtility.IsPartOfPrefabInstance(childObj);
+            Debug.Log($"   📁 É Prefab Instance: {isPrefabInstance}");
+
+            if (isPrefabInstance)
+            {
+                GameObject prefabSource = PrefabUtility.GetCorrespondingObjectFromSource(childObj);
+                Debug.Log($"   🔗 Prefab Original: {prefabSource?.name ?? "NONE"}");
+            }
+#endif
+
+            // Verificar componentes de UI
+            Image image = child.GetComponent<Image>();
+            if (image != null)
+            {
+                Debug.Log($"   🎨 Image - Cor: {image.color}");
+                Debug.Log($"   🖼️ Image - Sprite: {image.sprite?.name ?? "NULL"}");
+            }
+
+            Button button = child.GetComponent<Button>();
+            if (button != null)
+            {
+                Debug.Log($"   🔘 Button - Interactable: {button.interactable}");
+            }
+
+            // Verificar textos nos filhos
+            TextMeshProUGUI[] texts = child.GetComponentsInChildren<TextMeshProUGUI>();
+            foreach (var text in texts)
+            {
+                Debug.Log($"   📝 {text.name}: '{text.text}' | Cor: {text.color}");
+            }
+
+            // Verificar imagens nos filhos
+            Image[] images = child.GetComponentsInChildren<Image>();
+            foreach (var img in images)
+            {
+                if (img.transform != child) // Não é o componente principal
+                {
+                    Debug.Log($"   🖼️ {img.name}: Sprite '{img.sprite?.name ?? "NULL"}' | Cor: {img.color}");
+                }
+            }
+        }
+
+        Debug.Log("=== FIM DA VERIFICAÇÃO ===");
+    }
+    [ContextMenu("🎯 Verificar Prefabs das Skills Atuais")]
+    public void DebugCurrentSkillPrefabs()
+    {
+        if (currentChoices == null || currentChoices.Count == 0)
+        {
+            Debug.Log("ℹ️ Nenhuma skill carregada no momento");
+            return;
+        }
+
+        Debug.Log("=== 🔍 VERIFICAÇÃO DE PREFABS DAS SKILLS ATUAIS ===");
+
+        for (int i = 0; i < currentChoices.Count; i++)
+        {
+            SkillData skill = currentChoices[i];
+            Debug.Log($"🎴 Skill {i}: {skill.skillName}");
+            Debug.Log($"   📁 Prefab: {skill.cardPrefab?.name ?? "NULL"}");
+            Debug.Log($"   🖼️ Ícone: {skill.icon?.name ?? "NULL"}");
+
+            if (skill.cardPrefab == null)
+            {
+                Debug.LogWarning($"   ⚠️ Skill não tem cardPrefab! Usará fallback: {skillChoicePrefab?.name ?? "NENHUM"}");
+            }
+        }
+
+        Debug.Log("=== FIM DA VERIFICAÇÃO ===");
+    }
+  
     void OnDestroy()
     {
         ResumeGame();
