@@ -427,7 +427,7 @@ public class SkillChoiceUI : MonoBehaviour
     {
         PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
         int currentLevel = playerStats != null ? playerStats.level : 1;
-        string title = $"🎯 ESCOLHA UMA SKILL (Nível {currentLevel})";
+        string title = $"SKILL (Nível {currentLevel})";
 
         if (titleTextTMP != null)
         {
