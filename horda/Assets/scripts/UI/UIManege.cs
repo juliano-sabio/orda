@@ -79,6 +79,9 @@ public class UIManager : MonoBehaviour
     public GameObject equippedSkillHighlight;
     public TextMeshProUGUI equippedSkillStatsText;
 
+    [Header("⏸️ Referência do Pause Manager")]
+    public PauseManager pauseManager;
+
     [Header("Containers")]
     public Transform skillButtonContainer;
     public Transform statusCardContainer;
@@ -125,15 +128,51 @@ public class UIManager : MonoBehaviour
         skillManager = FindAnyObjectByType<SkillManager>();
         cardSystem = FindAnyObjectByType<StatusCardSystem>();
 
+        // 🆕 ENCONTRAR PAUSE MANAGER
+        FindPauseManager();
+
         InitializeUI();
         UpdateSkillIcons();
 
-        // 🆕 CONECTAR COM SKILL EQUIPADA
         ConnectToEquippedSkill();
 
         Debug.Log("✅ UIManager conectado ao sistema de skills equipadas");
     }
 
+    // 🆕 MÉTODO PARA ENCONTRAR/CRIAR PAUSE MANAGER
+    // 🆕 MÉTODO PARA ENCONTRAR/CRIAR PAUSE MANAGER
+    private void FindPauseManager()
+    {
+        pauseManager = FindAnyObjectByType<PauseManager>();
+        if (pauseManager == null)
+        {
+            Debug.Log("⏸️ PauseManager não encontrado. Criando automaticamente...");
+
+            // Criar um GameObject para o PauseManager
+            GameObject pauseManagerGO = new GameObject("PauseManager");
+            pauseManager = pauseManagerGO.AddComponent<PauseManager>();
+
+            // 🆕 AGORA SIM: Configurar DontDestroyOnLoad (apenas em runtime)
+            if (Application.isPlaying)
+            {
+                DontDestroyOnLoad(pauseManagerGO);
+                Debug.Log("✅ PauseManager criado e configurado com DontDestroyOnLoad");
+            }
+            else
+            {
+                Debug.Log("✅ PauseManager criado (DontDestroyOnLoad será configurado em runtime)");
+            }
+        }
+        else
+        {
+            // 🆕 Garantir DontDestroyOnLoad se já existir
+            if (Application.isPlaying && !pauseManager.gameObject.scene.IsValid())
+            {
+                DontDestroyOnLoad(pauseManager.gameObject);
+            }
+            Debug.Log("✅ PauseManager encontrado na cena");
+        }
+    }
     void InitializeUI()
     {
         UpdatePlayerStatus();
@@ -150,6 +189,9 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
+        // 🆕 VERIFICAR SE O JOGO ESTÁ PAUSADO ANTES DE PROCESSAR INPUT
+        if (IsGamePaused()) return;
+
         HandleInput();
         UpdateSkillCooldowns();
 
@@ -157,6 +199,12 @@ public class UIManager : MonoBehaviour
         {
             UpdatePlayerStatus();
         }
+    }
+
+    // 🆕 MÉTODO PARA VERIFICAR SE O JOGO ESTÁ PAUSADO
+    private bool IsGamePaused()
+    {
+        return pauseManager != null && pauseManager.IsGamePaused();
     }
 
     // 🎮 CONTROLES DE SKILL EQUIPADA
@@ -283,7 +331,6 @@ public class UIManager : MonoBehaviour
         Debug.Log($"🎯 Atualizando Skill HUD com: {equippedSkill.skillName}");
 
         // 🎯 DEFINIR EM QUAL SLOT DA HUD COLOCAR A SKILL EQUIPADA
-        // Por padrão, vamos colocar no primeiro slot de ataque
         Image targetSlot = attackSkill1Icon;
         Image targetElementSlot = attackSkill1ElementIcon;
         TextMeshProUGUI targetCooldown = attackCooldownText1;
@@ -861,7 +908,7 @@ public class UIManager : MonoBehaviour
         {
             if (playerStats.HasUltimate())
             {
-                ultimateCooldownText.text = playerStats.IsUltimateReady() ? "PRONTA!" : "CARREGANDO";
+                ultimateCooldownText.text = playerStats.IsUltimateReady() ? "PRONTA!" : "CARREGINGO";
                 ultimateCooldownText.color = playerStats.IsUltimateReady() ? Color.yellow : Color.gray;
             }
             else
@@ -1401,6 +1448,52 @@ public class UIManager : MonoBehaviour
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(attackSkill1Icon.rectTransform);
             attackSkill1Icon.SetAllDirty();
+        }
+    }
+
+    // 🆕 MÉTODOS DE CONTEXTO PARA O SISTEMA DE PAUSE
+    [ContextMenu("⏸️ Criar Sistema de Pause Completo")]
+    public void CreateCompletePauseSystem()
+    {
+        // Chamar o método estático do UIPauseCreator
+        var method = System.Type.GetType("UIPauseCreator")?.GetMethod("CreateCompletePauseSystem",
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+
+        if (method != null)
+        {
+            method.Invoke(null, null);
+            FindPauseManager(); // Recarregar referência
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ UIPauseCreator não encontrado. Certifique-se de que o script está na pasta Editor/");
+        }
+    }
+
+    [ContextMenu("⏸️ Testar Sistema de Pause")]
+    public void TestPauseSystem()
+    {
+        if (pauseManager != null)
+        {
+            pauseManager.TestPause();
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ PauseManager não encontrado. Use 'Criar Sistema de Pause Completo' primeiro.");
+        }
+    }
+
+    [ContextMenu("⏸️ Verificar Estado do Pause")]
+    public void DebugPauseState()
+    {
+        if (pauseManager != null)
+        {
+            Debug.Log($"⏸️ Estado do Pause: {(pauseManager.IsGamePaused() ? "PAUSADO" : "RODANDO")}");
+            Debug.Log($"⏸️ TimeScale: {Time.timeScale}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ PauseManager não encontrado");
         }
     }
 
