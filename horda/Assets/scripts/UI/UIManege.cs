@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.EventSystems;
 
 public class UIManager : MonoBehaviour
 {
@@ -69,6 +71,14 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI defenseCooldownText2;
     public TextMeshProUGUI ultimateCooldownText;
 
+    [Header("🎯 SKILL MANAGER UI - Conexão com Skill Equipada")]
+    public Image skillManagerMainIcon;
+    public Image skillManagerElementBackground;
+    public TextMeshProUGUI skillManagerSkillName;
+    public TextMeshProUGUI skillManagerElementText;
+    public GameObject equippedSkillHighlight;
+    public TextMeshProUGUI equippedSkillStatsText;
+
     [Header("Containers")]
     public Transform skillButtonContainer;
     public Transform statusCardContainer;
@@ -77,7 +87,16 @@ public class UIManager : MonoBehaviour
 
     [Header("Configurações")]
     public float xpTextDisplayTime = 2f;
-    public Sprite defaultSkillIcon; // Ícone padrão para slots vazios
+    public Sprite defaultSkillIcon;
+
+    [Header("🎨 Cores por Elemento")]
+    public Color fireColor = new Color(1f, 0.3f, 0.1f);
+    public Color iceColor = new Color(0.1f, 0.5f, 1f);
+    public Color lightningColor = new Color(0.8f, 0.8f, 0.1f);
+    public Color poisonColor = new Color(0.5f, 0.1f, 0.8f);
+    public Color earthColor = new Color(0.6f, 0.4f, 0.2f);
+    public Color windColor = new Color(0.4f, 0.8f, 0.9f);
+    public Color defaultColor = new Color(0.2f, 0.2f, 0.3f);
 
     private PlayerStats playerStats;
     private SkillManager skillManager;
@@ -85,6 +104,7 @@ public class UIManager : MonoBehaviour
     private bool statusPanelVisible = false;
     private bool skillSelectionPanelVisible = false;
     private bool statusCardPanelVisible = false;
+    private Coroutine currentPulseCoroutine;
 
     void Awake()
     {
@@ -106,14 +126,18 @@ public class UIManager : MonoBehaviour
         cardSystem = FindAnyObjectByType<StatusCardSystem>();
 
         InitializeUI();
-        UpdateSkillIcons(); // 🆕 ATUALIZAR ÍCONES NA INICIALIZAÇÃO
+        UpdateSkillIcons();
+
+        // 🆕 CONECTAR COM SKILL EQUIPADA
+        ConnectToEquippedSkill();
+
+        Debug.Log("✅ UIManager conectado ao sistema de skills equipadas");
     }
 
     void InitializeUI()
     {
         UpdatePlayerStatus();
 
-        // Esconder painéis
         if (skillAcquiredPanel != null) skillAcquiredPanel.SetActive(false);
         if (statusPanel != null) statusPanel.SetActive(false);
         if (skillSelectionPanel != null) skillSelectionPanel.SetActive(false);
@@ -135,31 +159,366 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA ATUALIZAR TODOS OS ÍCONES DE SKILL
+    // 🎮 CONTROLES DE SKILL EQUIPADA
+    private void HandleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            ToggleStatusPanel();
+        }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            ToggleSkillSelectionPanel();
+        }
+
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            ToggleStatusCardPanel();
+        }
+
+        // 🆕 CONTROLES PARA TROCAR SKILL EQUIPADA
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            PreviousSkill();
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            NextSkill();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha1) && skillManager != null && skillManager.GetActiveSkills().Count > 0)
+        {
+            EquipSkillByIndex(0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2) && skillManager != null && skillManager.GetActiveSkills().Count > 1)
+        {
+            EquipSkillByIndex(1);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3) && skillManager != null && skillManager.GetActiveSkills().Count > 2)
+        {
+            EquipSkillByIndex(2);
+        }
+    }
+
+    // 🆕 SISTEMA DE SKILL EQUIPADA
+    public void ConnectToEquippedSkill()
+    {
+        if (skillManager == null) return;
+
+        skillManager.OnSkillEquippedChanged += OnSkillEquippedChanged;
+
+        var equippedSkill = skillManager.GetEquippedSkill();
+        if (equippedSkill != null)
+        {
+            UpdateSkillManagerWithEquippedSkill(equippedSkill);
+        }
+        else if (skillManager.GetActiveSkills().Count > 0)
+        {
+            skillManager.EquipSkill(skillManager.GetActiveSkills()[0]);
+        }
+    }
+
+    private void OnSkillEquippedChanged(SkillData equippedSkill)
+    {
+        Debug.Log($"🔄 Skill equipada mudou: {equippedSkill?.skillName}");
+        UpdateSkillManagerWithEquippedSkill(equippedSkill);
+    }
+
+    private void UpdateSkillManagerWithEquippedSkill(SkillData equippedSkill)
+    {
+        if (equippedSkill == null)
+        {
+            SetDefaultSkillManagerAppearance();
+            return;
+        }
+
+        // 🎨 ATUALIZAR SKILL MANAGER UI
+        if (skillManagerMainIcon != null)
+        {
+            skillManagerMainIcon.sprite = equippedSkill.icon ?? defaultSkillIcon;
+            skillManagerMainIcon.color = Color.white;
+            StartCoroutine(PulseIcon(skillManagerMainIcon));
+        }
+
+        if (skillManagerElementBackground != null)
+        {
+            Color elementColor = GetElementColor(equippedSkill.element);
+            skillManagerElementBackground.color = elementColor;
+        }
+
+        if (skillManagerSkillName != null)
+        {
+            skillManagerSkillName.text = equippedSkill.skillName;
+            skillManagerSkillName.color = GetElementColor(equippedSkill.element);
+        }
+
+        if (skillManagerElementText != null)
+        {
+            skillManagerElementText.text = $"{equippedSkill.GetElementIcon()} {equippedSkill.element}";
+            skillManagerElementText.color = GetElementColor(equippedSkill.element);
+        }
+
+        if (equippedSkillStatsText != null)
+        {
+            equippedSkillStatsText.text = GetSkillStatsText(equippedSkill);
+        }
+
+        if (equippedSkillHighlight != null)
+        {
+            equippedSkillHighlight.SetActive(true);
+            StartCoroutine(HighlightEffect(equippedSkillHighlight));
+        }
+
+        // 🆕 ATUALIZAR SKILL HUD!
+        UpdateSkillHUDWithEquippedSkill(equippedSkill);
+
+        Debug.Log($"🎯 UI do Skill Manager conectada à: {equippedSkill.skillName}");
+    }
+
+    // 🆕 MÉTODO PARA ATUALIZAR O SKILL HUD COM A SKILL EQUIPADA
+    public void UpdateSkillHUDWithEquippedSkill(SkillData equippedSkill)
+    {
+        if (equippedSkill == null) return;
+
+        Debug.Log($"🎯 Atualizando Skill HUD com: {equippedSkill.skillName}");
+
+        // 🎯 DEFINIR EM QUAL SLOT DA HUD COLOCAR A SKILL EQUIPADA
+        // Por padrão, vamos colocar no primeiro slot de ataque
+        Image targetSlot = attackSkill1Icon;
+        Image targetElementSlot = attackSkill1ElementIcon;
+        TextMeshProUGUI targetCooldown = attackCooldownText1;
+
+        if (targetSlot != null)
+        {
+            // 🖼️ ATUALIZAR ÍCONE PRINCIPAL
+            targetSlot.sprite = equippedSkill.icon ?? defaultSkillIcon;
+            targetSlot.color = Color.white;
+            targetSlot.gameObject.SetActive(true);
+
+            // 🎨 ATUALIZAR COR DO ELEMENTO
+            if (targetElementSlot != null)
+            {
+                targetElementSlot.color = GetElementColor(equippedSkill.element);
+                targetElementSlot.gameObject.SetActive(true);
+            }
+
+            // ⚡ EFEITO VISUAL DE DESTAQUE
+            StartCoroutine(HighlightSkillSlotCoroutine(targetSlot));
+        }
+
+        // 📝 ATUALIZAR TEXTO DE COOLDOWN (se aplicável)
+        if (targetCooldown != null)
+        {
+            if (equippedSkill.cooldown > 0)
+            {
+                targetCooldown.text = $"{equippedSkill.cooldown}s";
+                targetCooldown.color = Color.yellow;
+            }
+            else
+            {
+                targetCooldown.text = "PRONTO";
+                targetCooldown.color = Color.green;
+            }
+        }
+
+        // ✨ ATUALIZAR ELEMENTO PRINCIPAL NA HUD
+        UpdateElementIcon();
+
+        Debug.Log($"✅ Skill HUD atualizada com: {equippedSkill.skillName}");
+    }
+
+    // 🆕 MÉTODO PARA DESTACAR O SLOT DA SKILL EQUIPADA
+    private IEnumerator HighlightSkillSlotCoroutine(Image slot)
+    {
+        if (slot == null) yield break;
+
+        float duration = 1.5f;
+        float elapsed = 0f;
+        Vector3 originalScale = slot.transform.localScale;
+        Color originalColor = slot.color;
+
+        while (elapsed < duration)
+        {
+            // Efeito de pulso
+            float pulse = Mathf.PingPong(elapsed * 4f, 0.2f);
+            slot.transform.localScale = originalScale * (1f + pulse);
+
+            // Efeito de brilho
+            float glow = Mathf.PingPong(elapsed * 3f, 0.3f);
+            slot.color = Color.Lerp(originalColor, Color.yellow, glow);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Restaurar valores originais
+        slot.transform.localScale = originalScale;
+        slot.color = originalColor;
+    }
+
+    // 🆕 MÉTODO PARA LIMPAR SLOT DA HUD
+    private void ClearSkillHUDSlot(Image mainIcon, Image elementIcon, TextMeshProUGUI cooldownText)
+    {
+        if (mainIcon != null)
+        {
+            mainIcon.sprite = defaultSkillIcon;
+            mainIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+        }
+
+        if (elementIcon != null)
+        {
+            elementIcon.gameObject.SetActive(false);
+        }
+
+        if (cooldownText != null)
+        {
+            cooldownText.text = "VAZIO";
+            cooldownText.color = Color.gray;
+        }
+    }
+
+    private string GetSkillStatsText(SkillData skill)
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+        if (skill.attackBonus != 0) sb.AppendLine($"⚔️ Ataque: +{skill.attackBonus}");
+        if (skill.defenseBonus != 0) sb.AppendLine($"🛡️ Defesa: +{skill.defenseBonus}");
+        if (skill.healthBonus != 0) sb.AppendLine($"❤️ Vida: +{skill.healthBonus}");
+        if (skill.speedBonus != 0) sb.AppendLine($"🏃 Velocidade: +{skill.speedBonus}");
+
+        if (sb.Length == 0) sb.AppendLine("💎 Bônus Passivo");
+
+        return sb.ToString();
+    }
+
+    private void SetDefaultSkillManagerAppearance()
+    {
+        if (skillManagerMainIcon != null)
+        {
+            skillManagerMainIcon.sprite = defaultSkillIcon;
+            skillManagerMainIcon.color = Color.gray;
+        }
+
+        if (skillManagerElementBackground != null)
+        {
+            skillManagerElementBackground.color = defaultColor;
+        }
+
+        if (skillManagerSkillName != null)
+        {
+            skillManagerSkillName.text = "Nenhuma Skill Equipada";
+            skillManagerSkillName.color = Color.gray;
+        }
+
+        if (skillManagerElementText != null)
+        {
+            skillManagerElementText.text = "⚪ Selecione uma Skill";
+            skillManagerElementText.color = Color.gray;
+        }
+
+        if (equippedSkillStatsText != null)
+        {
+            equippedSkillStatsText.text = "Equipe uma skill para ver os status";
+        }
+
+        if (equippedSkillHighlight != null)
+        {
+            equippedSkillHighlight.SetActive(false);
+        }
+
+        // 🆕 LIMPAR SLOT DA HUD QUANDO NÃO HÁ SKILL EQUIPADA
+        ClearSkillHUDSlot(attackSkill1Icon, attackSkill1ElementIcon, attackCooldownText1);
+    }
+
+    // 🎮 MÉTODOS DE CONTROLE
+    public void NextSkill()
+    {
+        if (skillManager != null)
+        {
+            skillManager.CycleEquippedSkill();
+        }
+    }
+
+    public void PreviousSkill()
+    {
+        if (skillManager != null && skillManager.GetActiveSkills().Count > 0)
+        {
+            skillManager.selectedSkillIndex = (skillManager.selectedSkillIndex - 1 + skillManager.GetActiveSkills().Count) % skillManager.GetActiveSkills().Count;
+            skillManager.EquipSkill(skillManager.GetActiveSkills()[skillManager.selectedSkillIndex]);
+        }
+    }
+
+    public void EquipSkillByIndex(int index)
+    {
+        if (skillManager != null && index >= 0 && index < skillManager.GetActiveSkills().Count)
+        {
+            skillManager.EquipSkill(skillManager.GetActiveSkills()[index]);
+        }
+    }
+
+    // 🎭 EFEITOS VISUAIS
+    private IEnumerator PulseIcon(Image icon)
+    {
+        float duration = 0.5f;
+        float elapsed = 0f;
+        Vector3 originalScale = icon.transform.localScale;
+
+        while (elapsed < duration)
+        {
+            float pulse = Mathf.PingPong(elapsed * 4f, 0.3f);
+            icon.transform.localScale = originalScale * (1f + pulse);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        icon.transform.localScale = originalScale;
+    }
+
+    private IEnumerator HighlightEffect(GameObject highlight)
+    {
+        float duration = 1.5f;
+        float elapsed = 0f;
+
+        if (highlight.TryGetComponent<Image>(out var image))
+        {
+            Color originalColor = image.color;
+
+            while (elapsed < duration)
+            {
+                float alpha = Mathf.PingPong(elapsed * 2f, 0.5f);
+                image.color = new Color(originalColor.r, originalColor.g, originalColor.b, alpha);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            image.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0f);
+        }
+    }
+
+    // 🎯 MÉTODOS EXISTENTES DO UIMANAGER (mantidos)
     public void UpdateSkillIcons()
     {
         if (playerStats == null) return;
 
         Debug.Log("🔄 Atualizando ícones da barra de habilidades...");
 
-        // 🎯 ATUALIZAR SLOTS DE ATAQUE
         UpdateAttackSkillIcons();
-
-        // 🛡️ ATUALIZAR SLOTS DE DEFESA
         UpdateDefenseSkillIcons();
-
-        // 🚀 ATUALIZAR SLOT DE ULTIMATE
         UpdateUltimateSkillIcon();
-
-        // ⚡ ATUALIZAR ÍCONE DE ELEMENTO
         UpdateElementIcon();
+
+        // 🆕 ATUALIZAR COM SKILL EQUIPADA SE EXISTIR
+        var equippedSkill = skillManager?.GetEquippedSkill();
+        if (equippedSkill != null)
+        {
+            UpdateSkillHUDWithEquippedSkill(equippedSkill);
+        }
     }
 
     private void UpdateAttackSkillIcons()
     {
         var attackSkills = playerStats.GetAttackSkills();
 
-        // Slot 1 de Ataque
         if (attackSkill1Icon != null)
         {
             if (attackSkills.Count > 0 && attackSkills[0].isActive)
@@ -168,7 +527,6 @@ public class UIManager : MonoBehaviour
                 attackSkill1Icon.color = Color.white;
                 attackSkill1Icon.gameObject.SetActive(true);
 
-                // Atualizar ícone elemental
                 if (attackSkill1ElementIcon != null)
                 {
                     attackSkill1ElementIcon.color = GetElementColor(attackSkills[0].element);
@@ -184,7 +542,6 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        // Slot 2 de Ataque
         if (attackSkill2Icon != null)
         {
             if (attackSkills.Count > 1 && attackSkills[1].isActive)
@@ -213,7 +570,6 @@ public class UIManager : MonoBehaviour
     {
         var defenseSkills = playerStats.GetDefenseSkills();
 
-        // Slot 1 de Defesa
         if (defenseSkill1Icon != null)
         {
             if (defenseSkills.Count > 0 && defenseSkills[0].isActive)
@@ -237,7 +593,6 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        // Slot 2 de Defesa
         if (defenseSkill2Icon != null)
         {
             if (defenseSkills.Count > 1 && defenseSkills[1].isActive)
@@ -307,10 +662,8 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA OBTER ÍCONE DA SKILL
     private Sprite GetSkillIcon(string skillName)
     {
-        // Buscar no SkillManager se disponível
         if (skillManager != null)
         {
             var method = skillManager.GetType().GetMethod("GetSkillIcon");
@@ -320,23 +673,18 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        // Fallback: criar ícone baseado no nome ou elemento
         return CreateFallbackIcon(skillName);
     }
 
     private Sprite CreateFallbackIcon(string skillName)
     {
-        // Em um projeto real, você teria sprites pré-definidos
-        // Aqui é apenas um fallback
         if (defaultSkillIcon != null)
             return defaultSkillIcon;
 
-        // Criar um sprite simples programaticamente (apenas para teste)
         Texture2D texture = new Texture2D(64, 64);
         Color[] pixels = new Color[64 * 64];
-
-        // Preencher com cor baseada no nome
         Color baseColor = ColorForString(skillName);
+
         for (int i = 0; i < pixels.Length; i++)
         {
             pixels[i] = baseColor;
@@ -350,7 +698,6 @@ public class UIManager : MonoBehaviour
 
     private Color ColorForString(string text)
     {
-        // Gerar cor consistente baseada no texto
         System.Random rand = new System.Random(text.GetHashCode());
         return new Color(
             (float)rand.NextDouble() * 0.7f + 0.3f,
@@ -359,52 +706,28 @@ public class UIManager : MonoBehaviour
         );
     }
 
-    // 🆕 MÉTODO PARA OBTER COR DO ELEMENTO
     private Color GetElementColor(PlayerStats.Element element)
     {
         switch (element)
         {
-            case PlayerStats.Element.Fire: return new Color(1f, 0.3f, 0.1f);
-            case PlayerStats.Element.Ice: return new Color(0.1f, 0.5f, 1f);
-            case PlayerStats.Element.Lightning: return new Color(0.8f, 0.8f, 0.1f);
-            case PlayerStats.Element.Poison: return new Color(0.5f, 0.1f, 0.8f);
-            case PlayerStats.Element.Earth: return new Color(0.6f, 0.4f, 0.2f);
-            case PlayerStats.Element.Wind: return new Color(0.4f, 0.8f, 0.9f);
+            case PlayerStats.Element.Fire: return fireColor;
+            case PlayerStats.Element.Ice: return iceColor;
+            case PlayerStats.Element.Lightning: return lightningColor;
+            case PlayerStats.Element.Poison: return poisonColor;
+            case PlayerStats.Element.Earth: return earthColor;
+            case PlayerStats.Element.Wind: return windColor;
             default: return Color.white;
         }
     }
 
-    private void HandleInput()
-    {
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            ToggleStatusPanel();
-        }
-
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            ToggleSkillSelectionPanel();
-        }
-
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            ToggleStatusCardPanel();
-        }
-    }
-
-    // ✅ MÉTODO CORRIGIDO: Mostrar ganho de XP
+    // 📊 MÉTODOS DE UI EXISTENTES (mantidos por compatibilidade)
     public void ShowXPGained(float xpAmount)
     {
         if (xpGainText != null)
         {
             xpGainText.text = $"+{xpAmount} XP";
             xpGainText.gameObject.SetActive(true);
-
             StartCoroutine(HideXPGainText());
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ xpGainText não atribuído no UIManager!");
         }
     }
 
@@ -431,37 +754,30 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODOS PARA STATUS CARD SYSTEM - CORRIGIDOS
     public void ShowStatusPointsGained(int points)
     {
         ShowSkillAcquired($"🎯 Pontos de Status", $"Ganhou {points} pontos de status!");
-        Debug.Log($"🎯 Ganhou {points} pontos de status!");
     }
 
-    // 🆕 SOBRECARGA para aceitar 2 argumentos (se o StatusCardSystem estiver chamando assim)
     public void ShowStatusPointsGained(int points, string message)
     {
         ShowSkillAcquired($"🎯 {message}", $"Ganhou {points} pontos de status!");
-        Debug.Log($"🎯 {message}: {points} pontos");
     }
 
     public void ShowStatusCardApplied(string cardName, string effect)
     {
         ShowSkillAcquired($"🃏 Carta Aplicada", $"{cardName}\n{effect}");
-        Debug.Log($"🃏 Carta aplicada: {cardName} - {effect}");
     }
 
     public void UpdateStatusCardsUI()
     {
         UpdateStatusCardPanel();
-        Debug.Log("📊 UI de cartas de status atualizada!");
     }
 
     public void UpdatePlayerStatus()
     {
         if (playerStats == null) return;
 
-        // Atualizar barras
         if (healthBar != null)
         {
             healthBar.maxValue = playerStats.GetMaxHealth();
@@ -480,7 +796,6 @@ public class UIManager : MonoBehaviour
             ultimateChargeBar.value = playerStats.GetUltimateChargeTime();
         }
 
-        // Atualizar textos
         if (healthText != null)
             healthText.text = $"{playerStats.GetCurrentHealth():F0}/{playerStats.GetMaxHealth():F0}";
 
@@ -501,11 +816,9 @@ public class UIManager : MonoBehaviour
         if (currentElementText != null)
             currentElementText.text = $"⚡ Elemento: {playerStats.GetCurrentElement()}";
 
-        // Atualizar efeito de ultimate pronta
         if (ultimateReadyEffect != null)
             ultimateReadyEffect.SetActive(playerStats.IsUltimateReady());
 
-        // Atualizar painel de status se estiver visível
         if (statusPanelVisible)
         {
             UpdateStatusPanel();
@@ -516,7 +829,6 @@ public class UIManager : MonoBehaviour
     {
         if (playerStats == null) return;
 
-        // Atualizar cooldowns das skills de ataque
         if (attackCooldownText1 != null)
         {
             float cooldown1 = playerStats.GetSkillCooldown("Ataque Automático");
@@ -531,7 +843,6 @@ public class UIManager : MonoBehaviour
             attackCooldownText2.color = cooldown2 > 0 ? Color.red : Color.green;
         }
 
-        // Atualizar cooldowns das skills de defesa
         if (defenseCooldownText1 != null)
         {
             float cooldown1 = playerStats.GetSkillCooldown("Proteção Passiva");
@@ -546,7 +857,6 @@ public class UIManager : MonoBehaviour
             defenseCooldownText2.color = cooldown2 > 0 ? Color.red : Color.green;
         }
 
-        // Atualizar ultimate
         if (ultimateCooldownText != null)
         {
             if (playerStats.HasUltimate())
@@ -595,7 +905,6 @@ public class UIManager : MonoBehaviour
         if (elementInfoText != null)
             elementInfoText.text = $"⚡ Elemento: {playerStats.GetCurrentElement()}\n📈 Bônus: {playerStats.GetElementalBonus():F1}x";
 
-        // Inventário
         if (inventoryText != null)
         {
             var inventory = playerStats.GetInventory();
@@ -603,7 +912,6 @@ public class UIManager : MonoBehaviour
             inventoryText.text = $"🎒 Itens: {inventoryStr}";
         }
 
-        // ✅ CORRIGIDO: Skills de Ataque - usando métodos existentes
         if (attackSkillsText != null)
         {
             var attackSkills = playerStats.GetAttackSkills();
@@ -616,7 +924,6 @@ public class UIManager : MonoBehaviour
             attackSkillsText.text = attackStr;
         }
 
-        // ✅ CORRIGIDO: Skills de Defesa - usando métodos existentes
         if (defenseSkillsText != null)
         {
             var defenseSkills = playerStats.GetDefenseSkills();
@@ -629,7 +936,6 @@ public class UIManager : MonoBehaviour
             defenseSkillsText.text = defenseStr;
         }
 
-        // ✅ CORRIGIDO: Ultimate - usando métodos existentes
         if (ultimateSkillsText != null)
         {
             var ultimate = playerStats.GetUltimateSkill();
@@ -666,7 +972,6 @@ public class UIManager : MonoBehaviour
     {
         if (skillManager == null || !skillSelectionPanelVisible) return;
 
-        // Limpar container
         foreach (Transform child in skillButtonContainer)
         {
             if (child.gameObject != skillButtonPrefab)
@@ -675,41 +980,30 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        // ✅ CORRIGIDO: Texto de skills disponíveis - usando métodos simples
         if (availableSkillsText != null)
         {
-            availableSkillsText.text = "📚 Sistema de Skills - Use F7/F8/F9 para testar";
+            availableSkillsText.text = "📚 Sistema de Skills - Use Q/E para trocar skills equipadas";
         }
 
-        // ✅ CORRIGIDO: Criar botões placeholder
         CreateSkillSelectionPlaceholders();
     }
 
-    // ✅ NOVO: Método para criar placeholders no painel de skills
     private void CreateSkillSelectionPlaceholders()
     {
-        // Botão para adicionar skill aleatória
-        GameObject button1 = CreateSkillButton("Adicionar Skill Aleatória (F7)", Color.blue);
+        GameObject button1 = CreateSkillButton("Trocar Skill (Q/E)", Color.blue);
         button1.GetComponent<Button>().onClick.AddListener(() => {
+            NextSkill();
+        });
+
+        GameObject button2 = CreateSkillButton("Adicionar Skill (F7)", Color.green);
+        button2.GetComponent<Button>().onClick.AddListener(() => {
             if (skillManager != null)
             {
-                // Usando reflexão para chamar método que pode existir
                 var method = skillManager.GetType().GetMethod("AddRandomSkill");
                 if (method != null) method.Invoke(skillManager, null);
             }
         });
 
-        // Botão para adicionar modificador
-        GameObject button2 = CreateSkillButton("Adicionar Modificador (F8)", Color.green);
-        button2.GetComponent<Button>().onClick.AddListener(() => {
-            if (skillManager != null)
-            {
-                var method = skillManager.GetType().GetMethod("AddRandomModifier");
-                if (method != null) method.Invoke(skillManager, null);
-            }
-        });
-
-        // Botão para skills de teste
         GameObject button3 = CreateSkillButton("Skills de Teste (F9)", Color.yellow);
         button3.GetComponent<Button>().onClick.AddListener(() => {
             if (skillManager != null)
@@ -760,32 +1054,26 @@ public class UIManager : MonoBehaviour
     {
         if (cardSystem == null || !statusCardPanelVisible) return;
 
-        // ✅ CORRIGIDO: Pontos disponíveis - usando valor padrão
         if (statusPointsText != null)
         {
             statusPointsText.text = "🎯 Sistema de Cartas - Use C para abrir/fechar";
         }
 
-        // ✅ CORRIGIDO: Bônus ativos - usando valor padrão
         if (activeBonusesText != null)
         {
             activeBonusesText.text = "✅ BÔNUS ATIVOS:\nSistema de cartas de status";
         }
 
-        // ✅ CORRIGIDO: Criar cartas placeholder
         CreateStatusCardPlaceholders();
     }
 
-    // ✅ NOVO: Método para criar cartas de status placeholder
     private void CreateStatusCardPlaceholders()
     {
-        // Limpar container
         foreach (Transform child in statusCardContainer)
         {
             Destroy(child.gameObject);
         }
 
-        // Criar algumas cartas de exemplo
         CreateStatusCard("Carta de Ataque", "Aumenta dano em 10%", new Color(1f, 0.3f, 0.3f));
         CreateStatusCard("Carta de Defesa", "Aumenta defesa em 15%", new Color(0.3f, 0.3f, 1f));
         CreateStatusCard("Carta de Velocidade", "Aumenta velocidade em 20%", new Color(0.3f, 1f, 0.3f));
@@ -806,7 +1094,6 @@ public class UIManager : MonoBehaviour
         Button button = card.GetComponent<Button>();
         button.onClick.AddListener(() => OnStatusCardClicked(title));
 
-        // Adicionar texto do título
         GameObject titleText = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
         titleText.transform.SetParent(card.transform);
         RectTransform titleRect = titleText.GetComponent<RectTransform>();
@@ -822,7 +1109,6 @@ public class UIManager : MonoBehaviour
         titleTextComp.alignment = TextAlignmentOptions.Center;
         titleTextComp.fontStyle = FontStyles.Bold;
 
-        // Adicionar texto da descrição
         GameObject descText = new GameObject("Description", typeof(RectTransform), typeof(TextMeshProUGUI));
         descText.transform.SetParent(card.transform);
         RectTransform descRect = descText.GetComponent<RectTransform>();
@@ -845,7 +1131,6 @@ public class UIManager : MonoBehaviour
         ShowSkillAcquired($"Carta {cardName}", "Recurso de cartas de status ativado!");
     }
 
-    // ✅ MÉTODOS DE FEEDBACK VISUAL (mantidos intactos)
     public void ShowSkillAcquired(string skillName, string description)
     {
         if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
@@ -898,7 +1183,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // ✅ MÉTODOS DE ELEMENTOS (mantidos intactos)
     public void UpdateElementIcons()
     {
         if (playerStats == null) return;
@@ -961,20 +1245,25 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // ✅ MÉTODO DE ATUALIZAÇÃO COMPLETA (mantido intacto)
     public void ForceRefreshUI()
     {
         UpdatePlayerStatus();
         UpdateSkillCooldowns();
-        UpdateSkillIcons(); // 🆕 AGORA ATUALIZA ÍCONES TAMBÉM
+        UpdateSkillIcons();
         UpdateElementIcons();
 
         if (statusPanelVisible) UpdateStatusPanel();
         if (skillSelectionPanelVisible) UpdateSkillSelectionPanel();
         if (statusCardPanelVisible) UpdateStatusCardPanel();
+
+        // 🆕 ATUALIZAR SKILL EQUIPADA
+        var equippedSkill = skillManager?.GetEquippedSkill();
+        if (equippedSkill != null)
+        {
+            UpdateSkillManagerWithEquippedSkill(equippedSkill);
+        }
     }
 
-    // 🆕 MÉTODO PARA LIMPAR TODOS OS ÍCONES (útil para reset)
     public void ClearAllSkillIcons()
     {
         ClearSkillIcon(attackSkill1Icon, attackSkill1ElementIcon);
@@ -1001,7 +1290,6 @@ public class UIManager : MonoBehaviour
             elementIcon.gameObject.SetActive(false);
     }
 
-    // 🆕 MÉTODO PARA DESTACAR SLOT QUANDO NOVA SKILL É ADQUIRIDA
     public void HighlightSkillSlot(string skillType, int slotIndex)
     {
         StartCoroutine(HighlightSlotCoroutine(skillType, slotIndex));
@@ -1011,7 +1299,6 @@ public class UIManager : MonoBehaviour
     {
         Image targetIcon = null;
 
-        // Encontrar o ícone alvo baseado no tipo e slot
         switch (skillType.ToLower())
         {
             case "attack":
@@ -1027,7 +1314,6 @@ public class UIManager : MonoBehaviour
 
         if (targetIcon == null) yield break;
 
-        // Efeito de pulsação
         float duration = 2f;
         float elapsed = 0f;
         Color originalColor = targetIcon.color;
@@ -1041,5 +1327,88 @@ public class UIManager : MonoBehaviour
         }
 
         targetIcon.color = originalColor;
+    }
+
+    // 🆕 MÉTODOS DE CONTEXTO PARA TESTE
+    [ContextMenu("🎯 Testar Skill HUD")]
+    public void TestSkillHUD()
+    {
+        Debug.Log("🧪 Testando atualização da Skill HUD...");
+
+        if (skillManager != null && skillManager.GetActiveSkills().Count > 0)
+        {
+            var testSkill = skillManager.GetActiveSkills()[0];
+            UpdateSkillHUDWithEquippedSkill(testSkill);
+            Debug.Log($"✅ HUD testada com: {testSkill.skillName}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Nenhuma skill disponível para testar a HUD");
+        }
+    }
+
+    [ContextMenu("🔍 Verificar Estado da HUD")]
+    public void DebugHUDState()
+    {
+        Debug.Log("🔍 DIAGNÓSTICO DA HUD:");
+
+        Debug.Log($"• attackSkill1Icon: {(attackSkill1Icon != null ? "✅" : "❌")}");
+        Debug.Log($"• attackSkill1ElementIcon: {(attackSkill1ElementIcon != null ? "✅" : "❌")}");
+        Debug.Log($"• attackCooldownText1: {(attackCooldownText1 != null ? "✅" : "❌")}");
+
+        if (attackSkill1Icon != null)
+        {
+            Debug.Log($"• Ícone sprite: {attackSkill1Icon.sprite?.name ?? "NULL"}");
+            Debug.Log($"• Ícone cor: {attackSkill1Icon.color}");
+            Debug.Log($"• Ícone ativo: {attackSkill1Icon.gameObject.activeInHierarchy}");
+        }
+
+        var equippedSkill = skillManager?.GetEquippedSkill();
+        Debug.Log($"• Skill equipada: {equippedSkill?.skillName ?? "Nenhuma"}");
+    }
+
+    [ContextMenu("🔄 Forçar Atualização de Skill Equipada")]
+    public void ForceEquippedSkillUpdate()
+    {
+        var equippedSkill = skillManager?.GetEquippedSkill();
+        if (equippedSkill != null)
+        {
+            UpdateSkillManagerWithEquippedSkill(equippedSkill);
+        }
+    }
+
+    [ContextMenu("⚡ Forçar Atualização Completa da HUD")]
+    public void ForceCompleteHUDUpdate()
+    {
+        StartCoroutine(DelayedHUDUpdate());
+    }
+
+    private IEnumerator DelayedHUDUpdate()
+    {
+        yield return new WaitForEndOfFrame();
+
+        // Forçar atualização de todos os componentes
+        Canvas.ForceUpdateCanvases();
+
+        var equippedSkill = skillManager?.GetEquippedSkill();
+        if (equippedSkill != null)
+        {
+            UpdateSkillHUDWithEquippedSkill(equippedSkill);
+        }
+
+        // Forçar reconstrução de layout
+        if (attackSkill1Icon != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(attackSkill1Icon.rectTransform);
+            attackSkill1Icon.SetAllDirty();
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (skillManager != null)
+        {
+            skillManager.OnSkillEquippedChanged -= OnSkillEquippedChanged;
+        }
     }
 }

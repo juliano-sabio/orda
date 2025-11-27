@@ -14,13 +14,19 @@ public class SkillManager : MonoBehaviour
     public List<SkillData> activeSkills = new List<SkillData>();
     public List<SkillModifier> activeModifiers = new List<SkillModifier>();
 
+    // 🆕 SISTEMA DE SKILL EQUIPADA
+    [Header("🎯 Skill Equipada Atual")]
+    public SkillData currentlyEquippedSkill;
+    public int selectedSkillIndex = 0;
+    public event System.Action<SkillData> OnSkillEquippedChanged;
+
     // Configurações de Progressão
     public int[] levelUpMilestones = { 1, 3, 6, 10, 15, 20 };
     public int skillsPerChoice = 3;
     public bool allowDuplicateChoices = false;
 
     [Header("Configurações de Escolha Inicial")]
-    public bool alwaysOfferInitialChoice = false; // 🎯 Controlado pelos milestones agora
+    public bool alwaysOfferInitialChoice = false;
 
     // Eventos
     public event Action<List<SkillData>, Action<SkillData>> OnSkillChoiceRequired;
@@ -101,7 +107,6 @@ public class SkillManager : MonoBehaviour
     {
         Debug.Log($"🔍 Verificando escolha inicial - Level: {playerStats?.level}, JáOferecida: {initialChoiceOffered}");
 
-        // 🎯 OFERECE APENAS SE LEVEL 1 FOR MILESTONE
         bool level1IsMilestone = Array.Exists(levelUpMilestones, milestone => milestone == 1);
 
         if (!initialChoiceOffered && playerStats != null && playerStats.level == 1 && level1IsMilestone)
@@ -167,6 +172,16 @@ public class SkillManager : MonoBehaviour
             Debug.Log("✅ SkillChoiceUI reconectado após carregar cena");
             RegisterSkillChoiceListener(skillChoiceUI.ShowSkillChoice);
         }
+
+        // 🆕 RECONECTAR SKILL EQUIPADA APÓS CARREGAR CENA
+        if (currentlyEquippedSkill != null && activeSkills.Contains(currentlyEquippedSkill))
+        {
+            OnSkillEquippedChanged?.Invoke(currentlyEquippedSkill);
+        }
+        else if (activeSkills.Count > 0)
+        {
+            EquipSkill(activeSkills[0]);
+        }
     }
 
     public void OnPlayerLevelUp(int newLevel)
@@ -183,7 +198,6 @@ public class SkillManager : MonoBehaviour
             }
         }
 
-        // 🎯 VERIFICA SE É UM MILESTONE - SÓ OFERECE NOS NÍVEIS CONFIGURADOS
         bool isMilestone = Array.Exists(levelUpMilestones, milestone => milestone == newLevel);
         Debug.Log($"🎯 Level {newLevel} é milestone: {isMilestone}");
 
@@ -222,7 +236,6 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        // 🎯 SEMPRE 3 SKILLS ALEATÓRIAS
         List<SkillData> choices = GetRandomSkillChoices(skillsPerChoice);
 
         if (choices.Count == 0)
@@ -233,7 +246,6 @@ public class SkillManager : MonoBehaviour
 
         Debug.Log($"🎯 Oferecendo {choices.Count} skills aleatórias no milestone nível {playerStats.level}");
 
-        // Mostra no console as skills oferecidas
         foreach (var skill in choices)
         {
             Debug.Log($"   ➤ {skill.skillName} ({skill.element}) - {skill.specificType}");
@@ -276,6 +288,12 @@ public class SkillManager : MonoBehaviour
         {
             Debug.Log($"✅ Skill selecionada: {selectedSkill.skillName}");
             AddSkill(selectedSkill);
+
+            // 🆕 EQUIPAR AUTOMATICAMENTE A NOVA SKILL
+            if (currentlyEquippedSkill == null)
+            {
+                EquipSkill(selectedSkill);
+            }
         }
         else
         {
@@ -288,16 +306,13 @@ public class SkillManager : MonoBehaviour
         List<SkillData> choices = new List<SkillData>();
         List<SkillData> availableChoices = new List<SkillData>(availableSkills);
 
-        // Remove skills que o player JÁ TEM
         availableChoices.RemoveAll(skill => activeSkills.Exists(s => s.skillName == skill.skillName));
 
-        // Remove skills recentemente oferecidas para variedade
         if (allowDuplicateChoices == false && recentlyOfferedSkills.Count > 0)
         {
             availableChoices.RemoveAll(skill => recentlyOfferedSkills.Contains(skill));
         }
 
-        // Se não tem skills suficientes, reseta a lista de recentes
         if (availableChoices.Count < count && recentlyOfferedSkills.Count > 0)
         {
             Debug.Log("🔄 Poucas skills disponíveis - resetando lista de skills recentes");
@@ -306,7 +321,6 @@ public class SkillManager : MonoBehaviour
             availableChoices.RemoveAll(skill => activeSkills.Exists(s => s.skillName == skill.skillName));
         }
 
-        // 🎯 ESCOLHE 3 SKILLS ALEATÓRIAS
         for (int i = 0; i < Mathf.Min(count, availableChoices.Count); i++)
         {
             if (availableChoices.Count == 0) break;
@@ -317,7 +331,6 @@ public class SkillManager : MonoBehaviour
             choices.Add(chosenSkill);
             availableChoices.RemoveAt(randomIndex);
 
-            // Adiciona às skills recentemente oferecidas
             if (!recentlyOfferedSkills.Contains(chosenSkill))
             {
                 recentlyOfferedSkills.Add(chosenSkill);
@@ -342,7 +355,6 @@ public class SkillManager : MonoBehaviour
 
             activeSkills.Add(skill);
 
-            // Aplica a skill ao PlayerStats se ele existir
             if (playerStats != null)
             {
                 playerStats.ApplyAcquiredSkill(skill);
@@ -356,9 +368,76 @@ public class SkillManager : MonoBehaviour
 
             Debug.Log($"✅ Skill adquirida: {skill.skillName}");
 
+            // 🆕 SE É A PRIMEIRA SKILL, EQUIPAR AUTOMATICAMENTE
+            if (activeSkills.Count == 1 || currentlyEquippedSkill == null)
+            {
+                EquipSkill(skill);
+            }
+
             if (UIManager.Instance != null)
                 UIManager.Instance.ShowSkillAcquired(skill.skillName, skill.GetFullDescription());
         }
+    }
+
+    // 🆕 SISTEMA DE SKILL EQUIPADA
+    public void EquipSkill(SkillData skill)
+    {
+        if (skill == null || !activeSkills.Contains(skill)) return;
+
+        currentlyEquippedSkill = skill;
+        selectedSkillIndex = activeSkills.IndexOf(skill);
+
+        Debug.Log($"🎯 Skill equipada: {skill.skillName}");
+        OnSkillEquippedChanged?.Invoke(skill);
+
+        // Aplicar efeitos visuais da skill equipada
+        ApplyEquippedSkillEffects(skill);
+    }
+
+    // 🆕 CICLAR ENTRE SKILLS
+    public void CycleEquippedSkill()
+    {
+        if (activeSkills.Count == 0) return;
+
+        selectedSkillIndex = (selectedSkillIndex + 1) % activeSkills.Count;
+        EquipSkill(activeSkills[selectedSkillIndex]);
+    }
+
+    // 🆕 OBTER SKILL EQUIPADA
+    public SkillData GetEquippedSkill()
+    {
+        return currentlyEquippedSkill;
+    }
+
+    // 🆕 OBTER SKILL POR ÍNDICE
+    public SkillData GetSkillByIndex(int index)
+    {
+        if (index >= 0 && index < activeSkills.Count)
+            return activeSkills[index];
+        return null;
+    }
+
+    // 🆕 OBTER ÍNDICE DA SKILL EQUIPADA
+    public int GetEquippedSkillIndex()
+    {
+        return selectedSkillIndex;
+    }
+
+    // 🆕 EFECTOS DA SKILL EQUIPADA
+    private void ApplyEquippedSkillEffects(SkillData skill)
+    {
+        if (playerStats == null) return;
+
+        // Aplicar bônus temporários ou efeitos da skill equipada
+        StartCoroutine(EquippedSkillHighlight(skill));
+
+        Debug.Log($"✨ Efeitos da skill equipada aplicados: {skill.skillName}");
+    }
+
+    private IEnumerator EquippedSkillHighlight(SkillData skill)
+    {
+        // Efeito visual temporário
+        yield return new WaitForSeconds(2f);
     }
 
     void ApplySkillToPlayer(SkillData skill)
@@ -416,7 +495,6 @@ public class SkillManager : MonoBehaviour
 
         PassiveProjectileSkill2D projectileBehavior = gameObject.AddComponent<PassiveProjectileSkill2D>();
 
-        // ✅ CORREÇÃO: Inicialização robusta
         bool initialized = false;
 
         try
@@ -505,7 +583,6 @@ public class SkillManager : MonoBehaviour
         {
             activeModifiers.Add(modifier);
 
-            // Aplica o modificador ao PlayerStats
             if (playerStats != null)
             {
                 playerStats.AddSkillModifier(modifier);
@@ -518,7 +595,6 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO AddRandomModifier
     [ContextMenu("Adicionar Modificador Aleatório")]
     public void AddRandomModifier()
     {
@@ -569,6 +645,12 @@ public class SkillManager : MonoBehaviour
         for (int i = 0; i < activeSkills.Count; i++)
         {
             PlayerPrefs.SetString($"ActiveSkill_{i}", activeSkills[i].skillName);
+        }
+
+        // 🆕 SALVAR SKILL EQUIPADA
+        if (currentlyEquippedSkill != null)
+        {
+            PlayerPrefs.SetString("EquippedSkill", currentlyEquippedSkill.skillName);
         }
 
         PlayerPrefs.Save();
@@ -736,7 +818,6 @@ public class SkillManager : MonoBehaviour
     [ContextMenu("Adicionar Skills de Teste")]
     public void AddTestSkills()
     {
-        // Cria uma skill de projétil básica para teste
         SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
         testSkill.skillName = "Projétil de Teste";
         testSkill.description = "Projétil automático para teste";
@@ -755,25 +836,36 @@ public class SkillManager : MonoBehaviour
         Debug.Log("🔍 Status da Integração do SkillManager:");
         Debug.Log($"• Skills Disponíveis: {availableSkills.Count}");
         Debug.Log($"• Skills Ativas: {activeSkills.Count}");
+        Debug.Log($"• Skill Equipada: {(currentlyEquippedSkill != null ? currentlyEquippedSkill.skillName : "Nenhuma")}");
         Debug.Log($"• PlayerStats: {(playerStats != null ? "✅ Conectado" : "❌ Não encontrado")}");
         Debug.Log($"• SkillChoiceUI: {(skillChoiceUI != null ? "✅ Conectado" : "❌ Não encontrado")}");
         Debug.Log($"• Evento OnSkillChoiceRequired: {(OnSkillChoiceRequired != null ? "✅ Registrado" : "❌ Null")}");
+        Debug.Log($"• Evento OnSkillEquippedChanged: {(OnSkillEquippedChanged != null ? "✅ Registrado" : "❌ Null")}");
         Debug.Log($"• Milestones: {string.Join(", ", levelUpMilestones)}");
         Debug.Log($"• Próximo Milestone: {GetNextMilestone()}");
     }
 
-    // 🆕 MÉTODOS PARA O SISTEMA DE MILESTONES
-    [ContextMenu("🎯 Testar Escolha de 3 Skills Aleatórias")]
-    public void TestRandomSkillChoice()
+    // 🆕 MÉTODOS PARA O SISTEMA DE SKILL EQUIPADA
+    [ContextMenu("🎮 Testar Troca de Skill Equipada")]
+    public void TestEquippedSkillSystem()
     {
-        Debug.Log("🎯 TESTE: Oferecendo 3 skills aleatórias...");
-        OfferSkillChoice();
+        if (activeSkills.Count == 0)
+        {
+            Debug.LogWarning("⚠️ Nenhuma skill ativa para testar");
+            return;
+        }
+
+        CycleEquippedSkill();
+        Debug.Log($"🎮 Skill equipada: {currentlyEquippedSkill?.skillName}");
     }
 
     [ContextMenu("🔄 Limpar Skills do Player")]
     public void ClearPlayerSkills()
     {
         activeSkills.Clear();
+        currentlyEquippedSkill = null;
+        selectedSkillIndex = 0;
+
         if (playerStats != null)
         {
             playerStats.acquiredSkills.Clear();
@@ -809,7 +901,7 @@ public class SkillManager : MonoBehaviour
             if (milestone > playerStats.level)
                 return milestone;
         }
-        return -1; // Não há mais milestones
+        return -1;
     }
 
     [ContextMenu("🔄 Simular Level Up para Próximo Milestone")]
@@ -821,8 +913,8 @@ public class SkillManager : MonoBehaviour
         if (nextMilestone != -1)
         {
             Debug.Log($"🎯 Simulando level up para milestone {nextMilestone}");
-            playerStats.level = nextMilestone - 1; // Define um nível antes
-            OnPlayerLevelUp(nextMilestone); // Chama o level up
+            playerStats.level = nextMilestone - 1;
+            OnPlayerLevelUp(nextMilestone);
         }
         else
         {
@@ -830,7 +922,6 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA LIMPAR SKILLS RECENTES
     public void ClearRecentlyOfferedSkills()
     {
         recentlyOfferedSkills.Clear();
@@ -847,8 +938,7 @@ public class SkillManager : MonoBehaviour
         OnSkillChoiceRequired = null;
         OnSkillAcquired = null;
         OnModifierAcquired = null;
+        OnSkillEquippedChanged = null;
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-    
-    
 }
