@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using static PlayerStats;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -38,7 +40,7 @@ public class PlayerStats : MonoBehaviour
     [Header("Skills de Defesa")]
     public List<DefenseSkill> defenseSkills = new List<DefenseSkill>();
 
-    [Header("🚀 Sistema de Ultimate")]
+    [Header("🚀 Sistema de Ultimate - JÁ COMEÇA COM")]
     public UltimateSkill ultimateSkill;
     public float ultimateCooldown = 30f;
     public float ultimateChargeTime = 0f;
@@ -387,7 +389,6 @@ public class PlayerStats : MonoBehaviour
         skillManager = SkillManager.Instance;
         cardSystem = StatusCardSystem.Instance;
 
-        // ❌ NÃO inicializa sistema de skills automaticamente
         StartCoroutine(DelayedStart());
     }
 
@@ -465,11 +466,12 @@ public class PlayerStats : MonoBehaviour
             element = Element.None
         });
 
+        // ⭐ ULTIMATE - JÁ CONFIGURADA E ATIVA
         ultimateSkill = new UltimateSkill
         {
             skillName = "Fúria do Herói",
             baseDamage = 50f,
-            isActive = false,
+            isActive = true, // ← COMEÇA ATIVA
             areaOfEffect = 5f,
             duration = 3f,
             element = Element.None
@@ -480,6 +482,20 @@ public class PlayerStats : MonoBehaviour
     {
         Debug.Log("🔄 Inicializando skills padrão...");
         InitializeSkills();
+
+        // 🚫 LIMPAR skills adquiridas no início
+        acquiredSkills.Clear();
+
+        // ✅ MAS GARANTIR que a ULTIMATE esteja configurada e ATIVA
+        if (ultimateSkill != null)
+        {
+            ultimateSkill.isActive = true;
+            ultimateReady = false;
+            ultimateChargeTime = 0f;
+            Debug.Log("⭐ Ultimate configurada - player começa com ultimate!");
+        }
+
+        Debug.Log("🧹 Skills adquiridas limpas, mas ultimate mantida");
     }
 
     void Update()
@@ -621,10 +637,12 @@ public class PlayerStats : MonoBehaviour
     {
         if (skillManager == null) return;
 
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F7)) skillManager.AddRandomSkill();
         if (Input.GetKeyDown(KeyCode.F8)) skillManager.AddRandomModifier();
-        if (Input.GetKeyDown(KeyCode.F9)) skillManager.AddTestSkills();
+        if (Input.GetKeyDown(KeyCode.F9)) skillManager.CreateTestOrbitalSkill();
         if (Input.GetKeyDown(KeyCode.F10)) skillManager.CheckIntegrationStatus();
+#endif
     }
 
     void HandlePassiveSkills()
@@ -774,11 +792,6 @@ public class PlayerStats : MonoBehaviour
 
         healthRegenRate += 0.2f;
 
-        if (level == 5 && !ultimateSkill.isActive)
-        {
-            LearnUltimate();
-        }
-
         Debug.Log($"🎉 LEVEL UP! Agora é nível {level}!");
 
         if (cardSystem != null)
@@ -793,15 +806,6 @@ public class PlayerStats : MonoBehaviour
 
         if (uiManager != null)
             uiManager.ShowSkillAcquired($"Level {level}", "Novas habilidades disponíveis!");
-    }
-
-    private void LearnUltimate()
-    {
-        ultimateSkill.isActive = true;
-        Debug.Log($"⭐ ULTIMATE APRENDIDA: {ultimateSkill.skillName}!");
-
-        if (uiManager != null)
-            uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Pressione R para ativar!");
     }
 
     private float CalculateXPForNextLevel()
@@ -1013,14 +1017,20 @@ public class PlayerStats : MonoBehaviour
         {
             acquiredSkills.Add(skill);
 
-            // Aplica os bônus da skill
-            attack += skill.attackBonus;
-            defense += skill.defenseBonus;
-            maxHealth += skill.healthBonus;
-            health += skill.healthBonus;
-            speed += skill.speedBonus;
-            healthRegenRate += skill.healthRegenBonus;
-            attackActivationInterval *= skill.attackSpeedMultiplier;
+            // ✅ VERIFICAÇÃO: Não aplicar bônus se for ultimate
+            bool isUltimateSkill = skill.skillName.ToLower().Contains("ultimate");
+
+            if (!isUltimateSkill)
+            {
+                // Aplica os bônus da skill (APENAS se NÃO for ultimate)
+                attack += skill.attackBonus;
+                defense += skill.defenseBonus;
+                maxHealth += skill.healthBonus;
+                health += skill.healthBonus;
+                speed += skill.speedBonus;
+                healthRegenRate += skill.healthRegenBonus;
+                attackActivationInterval *= skill.attackSpeedMultiplier;
+            }
 
             // Configura comportamento específico
             ConfigureSkillBehavior(skill);
@@ -1038,7 +1048,14 @@ public class PlayerStats : MonoBehaviour
         switch (skill.specificType)
         {
             case SpecificSkillType.Projectile:
-                AddProjectileBehavior(skill);
+                if (skill.ShouldUseOrbitalBehavior())
+                {
+                    AddOrbitalProjectileBehavior(skill);
+                }
+                else
+                {
+                    AddProjectileBehavior(skill);
+                }
                 break;
 
             case SpecificSkillType.HealthRegen:
@@ -1051,7 +1068,26 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA ADICIONAR COMPORTAMENTO DE PROJÉTIL
+    // 🆕 MÉTODO PARA ADICIONAR COMPORTAMENTO DE PROJÉTIL ORBITAL
+    private void AddOrbitalProjectileBehavior(SkillData skill)
+    {
+        var existingBehavior = GetComponent<OrbitingProjectileSkillBehavior>();
+        if (existingBehavior != null)
+        {
+            existingBehavior.UpdateFromSkillData(skill);
+            Debug.Log($"⚡ Comportamento orbital melhorado por {skill.skillName}");
+            return;
+        }
+
+        OrbitingProjectileSkillBehavior orbitalBehavior = gameObject.AddComponent<OrbitingProjectileSkillBehavior>();
+        orbitalBehavior.Initialize(this);
+        orbitalBehavior.UpdateFromSkillData(skill);
+        activeSkillBehaviors.Add(orbitalBehavior);
+
+        Debug.Log($"🌀 Comportamento orbital adicionado: {skill.skillName}");
+    }
+
+    // 🆕 MÉTODO PARA ADICIONAR COMPORTAMENTO DE PROJÉTIL NORMAL
     private void AddProjectileBehavior(SkillData skill)
     {
         var existingBehavior = GetComponent<PassiveProjectileSkill2D>();
@@ -1222,8 +1258,7 @@ public class PlayerStats : MonoBehaviour
 
         return 0f;
     }
-    // No PlayerStats.cs, modifique o método AddProjectileBehavior:
-    
+
     void OnDrawGizmosSelected()
     {
         if (showCollectionRadius)

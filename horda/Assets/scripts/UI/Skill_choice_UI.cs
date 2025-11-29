@@ -20,11 +20,15 @@ public class SkillChoiceUI : MonoBehaviour
     [Header("Configurações")]
     public float autoCloseDelay = 2f;
     public bool pauseGameDuringChoice = true;
+    public int numberOfSkillsToShow = 3;
 
     [Header("Layout Horizontal")]
     public bool useHorizontalLayout = true;
     public float cardSpacing = 30f;
     public Vector2 cardSize = new Vector2(300f, 450f);
+
+    [Header("Todas as Skills Disponíveis")]
+    public List<SkillData> allAvailableSkills = new List<SkillData>();
 
     private List<SkillData> currentChoices;
     private System.Action<SkillData> onSkillChosen;
@@ -49,7 +53,35 @@ public class SkillChoiceUI : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         SetupHorizontalLayout();
+
+        // 🎯 CARREGAR SKILLS DO SKILLMANAGER
+        LoadSkillsFromSkillManager();
+
         Debug.Log("✅ SkillChoiceUI inicializado completamente");
+    }
+
+    // 🆕 MÉTODO: Carregar skills do SkillManager
+    private void LoadSkillsFromSkillManager()
+    {
+        SkillManager skillManager = SkillManager.Instance;
+        if (skillManager != null)
+        {
+            List<SkillData> managerSkills = skillManager.GetAvailableSkills();
+            if (managerSkills.Count > 0)
+            {
+                allAvailableSkills.Clear();
+                allAvailableSkills.AddRange(managerSkills);
+                Debug.Log($"✅ Carregadas {allAvailableSkills.Count} skills do SkillManager");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ SkillManager não tem skills disponíveis");
+            }
+        }
+        else
+        {
+            Debug.LogError("❌ SkillManager não encontrado!");
+        }
     }
 
     private void SetupHorizontalLayout()
@@ -87,9 +119,75 @@ public class SkillChoiceUI : MonoBehaviour
         Debug.Log("✅ Layout horizontal configurado");
     }
 
+    // 🆕 MÉTODO PRINCIPAL CORRIGIDO: Mostra 3 skills aleatórias
+    public void ShowRandomSkillChoice(System.Action<SkillData> callback)
+    {
+        Debug.Log("🎯 ShowRandomSkillChoice chamado!");
+
+        // 🎯 ATUALIZAR SKILLS DO SKILLMANAGER SEMPRE ANTES DE MOSTRAR
+        LoadSkillsFromSkillManager();
+
+        if (allAvailableSkills == null || allAvailableSkills.Count == 0)
+        {
+            Debug.LogError("❌ Lista de skills disponíveis vazia!");
+            return;
+        }
+
+        // 🎯 SELECIONAR 3 SKILLS ALEATÓRIAS
+        List<SkillData> randomSkills = SelectRandomSkills(numberOfSkillsToShow);
+
+        Debug.Log($"🎲 {randomSkills.Count} skills selecionadas aleatoriamente de {allAvailableSkills.Count} disponíveis:");
+        foreach (var skill in randomSkills)
+        {
+            Debug.Log($"   ➡️ {skill.skillName} (Raridade: {skill.rarity}, Elemento: {skill.element})");
+        }
+
+        // 🎯 AGORA mostra as 3 skills para o player escolher
+        ShowSkillChoice(randomSkills, callback);
+    }
+
+    // 🆕 MÉTODO: Seleciona N skills aleatórias
+    private List<SkillData> SelectRandomSkills(int count)
+    {
+        List<SkillData> selectedSkills = new List<SkillData>();
+
+        // Se não tem skills suficientes, mostra todas
+        if (allAvailableSkills.Count <= count)
+        {
+            selectedSkills.AddRange(allAvailableSkills);
+            Debug.Log($"ℹ️ Mostrando todas as {allAvailableSkills.Count} skills disponíveis");
+        }
+        else
+        {
+            // 🎯 Embaralhar e selecionar
+            List<SkillData> shuffledSkills = new List<SkillData>(allAvailableSkills);
+            ShuffleSkills(shuffledSkills);
+
+            for (int i = 0; i < count; i++)
+            {
+                selectedSkills.Add(shuffledSkills[i]);
+            }
+        }
+
+        return selectedSkills;
+    }
+
+    // 🆕 MÉTODO: Embaralhar skills
+    private void ShuffleSkills(List<SkillData> skills)
+    {
+        for (int i = skills.Count - 1; i > 0; i--)
+        {
+            int randomIndex = Random.Range(0, i + 1);
+            SkillData temp = skills[i];
+            skills[i] = skills[randomIndex];
+            skills[randomIndex] = temp;
+        }
+    }
+
+    // MÉTODO ORIGINAL (mantido para compatibilidade)
     public void ShowSkillChoice(List<SkillData> skills, System.Action<SkillData> callback)
     {
-        Debug.Log("🎯 ShowSkillChoice chamado!");
+        Debug.Log($"🎯 ShowSkillChoice chamado com {skills.Count} skills!");
 
         if (skills == null || skills.Count == 0)
         {
@@ -133,10 +231,10 @@ public class SkillChoiceUI : MonoBehaviour
         else
         {
             Debug.LogError("❌ Não pode iniciar coroutine - GameObject inativo!");
-            // Fallback: executar imediatamente
             StartCoroutine(CreateSkillButtonsWithSpecificPrefabs(skills));
         }
     }
+
     private IEnumerator CreateSkillButtonsWithSpecificPrefabs(List<SkillData> skills)
     {
         yield return new WaitForEndOfFrame();
@@ -187,7 +285,6 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void InitializeCardWithSkillData(GameObject cardObj, SkillData skill)
     {
-        // 🚫 BLOQUEIO TOTAL - não modifica NADA se for prefab no Editor
 #if UNITY_EDITOR
         if (!Application.isPlaying)
         {
@@ -196,17 +293,14 @@ public class SkillChoiceUI : MonoBehaviour
         }
 #endif
 
-        // 🎯 VERIFICAÇÃO EXTRA - só modifica em runtime
         if (!Application.isPlaying)
         {
             Debug.LogError($"❌ TENTATIVA PERIGOSA: Modificar em Editor - {skill.skillName}");
             return;
         }
 
-        // 🎯 MÉTODO SEGURO - apenas textos, sem cores
         SetupCardTextsOnly(cardObj, skill);
 
-        // Configura o botão (seguro)
         Button button = cardObj.GetComponent<Button>();
         if (button != null)
         {
@@ -220,15 +314,12 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void SetupCardTextsOnly(GameObject cardObj, SkillData skill)
     {
-        // 🎯 APENAS modifica textos - NUNCA cores
-
-        // Encontra componentes de texto
         TextMeshProUGUI[] textComponents = cardObj.GetComponentsInChildren<TextMeshProUGUI>();
         foreach (TextMeshProUGUI text in textComponents)
         {
             if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
             {
-                string elementIcon = skill.GetElementIcon();
+                string elementIcon = GetElementIcon(skill.element);
                 text.text = $"<b>{skill.skillName}</b>\n{elementIcon} {skill.element}";
             }
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
@@ -239,18 +330,31 @@ public class SkillChoiceUI : MonoBehaviour
             {
                 text.text = GetManualStatsText(skill);
             }
-            // 🚫 NUNCA modifica text.color!
         }
 
-        // 🎯 Ícone (apenas sprite, sem cor)
         Image[] images = cardObj.GetComponentsInChildren<Image>();
         foreach (Image img in images)
         {
             if ((img.name.Contains("Icon") || img.name.Contains("Image")) && skill.icon != null)
             {
                 img.sprite = skill.icon;
-                // 🚫 NUNCA modifica img.color!
             }
+        }
+    }
+
+    // 🆕 CORREÇÃO: Método para obter ícone do elemento baseado no PlayerStats.Element
+    private string GetElementIcon(PlayerStats.Element element)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.Fire: return "🔥";
+            case PlayerStats.Element.Ice: return "❄️";
+            case PlayerStats.Element.Lightning: return "⚡";
+            case PlayerStats.Element.Poison: return "☠️";
+            case PlayerStats.Element.Earth: return "🌍";
+            case PlayerStats.Element.Wind: return "💨";
+            case PlayerStats.Element.None: return "⭐";
+            default: return "💎";
         }
     }
 
@@ -302,7 +406,6 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void SetupSkillCardManually(GameObject cardObj, SkillData skill)
     {
-        // 🎯 MÉTODO APENAS PARA EMERGÊNCIA - também sem cores
         TextMeshProUGUI[] textComponents = cardObj.GetComponentsInChildren<TextMeshProUGUI>();
         foreach (TextMeshProUGUI text in textComponents)
         {
@@ -326,7 +429,6 @@ public class SkillChoiceUI : MonoBehaviour
             if ((img.name.Contains("Icon") || img.name.Contains("Image")) && skill.icon != null)
             {
                 img.sprite = skill.icon;
-                // 🚫 NUNCA modifica img.color!
             }
         }
     }
@@ -427,7 +529,7 @@ public class SkillChoiceUI : MonoBehaviour
     {
         PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
         int currentLevel = playerStats != null ? playerStats.level : 1;
-        string title = $"SKILL (Nível {currentLevel})";
+        string title = $"ESCOLHA UMA SKILL (Nível {currentLevel})";
 
         if (titleTextTMP != null)
         {
@@ -458,113 +560,40 @@ public class SkillChoiceUI : MonoBehaviour
         }
     }
 
-    [ContextMenu("🎯 Testar Sistema de Cards")]
-    public void TestAutoCardSystem()
+    [ContextMenu("🎯 Testar Sistema de 3 Skills Aleatórias")]
+    public void TestRandomThreeSkills()
     {
-        Debug.Log("🧪 Testando sistema de cards automático...");
+        Debug.Log("🧪 Testando sistema de 3 skills aleatórias...");
 
-        List<SkillData> testSkills = CreateTestSkills();
-        ShowSkillChoice(testSkills, (selectedSkill) => {
+        // 🎯 ATUALIZAR SKILLS ANTES DO TESTE
+        LoadSkillsFromSkillManager();
+
+        ShowRandomSkillChoice((selectedSkill) => {
             Debug.Log($"✅ Sistema funcionando! Skill escolhida: {selectedSkill.skillName}");
         });
     }
 
-    private List<SkillData> CreateTestSkills()
+    [ContextMenu("🔍 Verificar Skills Disponíveis")]
+    public void DebugAvailableSkills()
     {
-        List<SkillData> testSkills = new List<SkillData>();
+        Debug.Log($"📊 Total de Skills Disponíveis: {allAvailableSkills.Count}");
 
-        SkillData testSkill1 = ScriptableObject.CreateInstance<SkillData>();
-        testSkill1.skillName = "Bola de Fogo";
-        testSkill1.description = "Lança uma poderosa bola de fogo que causa dano em área";
-        testSkill1.attackBonus = 25f;
-        testSkill1.healthBonus = 10f;
-        testSkill1.element = PlayerStats.Element.Fire;
-        testSkill1.rarity = SkillRarity.Rare;
-        testSkills.Add(testSkill1);
-
-        SkillData testSkill2 = ScriptableObject.CreateInstance<SkillData>();
-        testSkill2.skillName = "Armadura de Gelo";
-        testSkill2.description = "Cria uma armadura gelada que aumenta a defesa";
-        testSkill2.defenseBonus = 15f;
-        testSkill2.healthBonus = 20f;
-        testSkill2.element = PlayerStats.Element.Ice;
-        testSkill2.rarity = SkillRarity.Uncommon;
-        testSkills.Add(testSkill2);
-
-        return testSkills;
+        foreach (var skill in allAvailableSkills)
+        {
+            Debug.Log($"   ➡️ {skill.skillName} (Raridade: {skill.rarity}, Elemento: {skill.element})");
+        }
     }
 
-    [ContextMenu("🔍 DEBUG: Verificar ONDE está modificando")]
-    public void DebugWhereIsModifying()
+    [ContextMenu("🔄 Atualizar Skills do SkillManager")]
+    public void RefreshSkillsFromManager()
     {
-        Debug.Log("=== 🔍 INICIANDO DIAGNÓSTICO COMPLETO ===");
-
-        // 1. Verificar se está no Editor ou Runtime
-        Debug.Log($"🎯 Modo: {(Application.isPlaying ? "RUNTIME" : "EDITOR")}");
-
-        // 2. Verificar todos os prefabs na pasta Resources
-        GameObject[] allPrefabs = Resources.LoadAll<GameObject>("Cards");
-        Debug.Log($"📁 Prefabs carregados: {allPrefabs.Length}");
-
-        foreach (var prefab in allPrefabs)
-        {
-            Debug.Log($"\n🔍 Analisando prefab: {prefab.name}");
-
-            // Verificar se tem scripts
-            Component[] allComponents = prefab.GetComponents<Component>();
-            foreach (var comp in allComponents)
-            {
-                if (comp == null) continue;
-                string typeName = comp.GetType().Name;
-                if (typeName.Contains("SkillCard") || typeName.Contains("Controller"))
-                {
-                    Debug.LogError($"   ❌ TEM SCRIPT: {typeName}");
-                }
-            }
-
-            // Verificar propriedades modificadas
-            CheckPrefabProperties(prefab);
-        }
-
-        // 3. Verificar instâncias atuais
-        if (skillsContainer != null && skillsContainer.childCount > 0)
-        {
-            Debug.Log($"\n🎴 Instâncias atuais: {skillsContainer.childCount}");
-            for (int i = 0; i < skillsContainer.childCount; i++)
-            {
-                Transform child = skillsContainer.GetChild(i);
-                Debug.Log($"   📦 {child.name} (Instância)");
-            }
-        }
-
-        Debug.Log("=== FIM DO DIAGNÓSTICO ===");
+        LoadSkillsFromSkillManager();
+        Debug.Log($"🔄 Skills atualizadas: {allAvailableSkills.Count} disponíveis");
     }
 
-    private void CheckPrefabProperties(GameObject prefab)
+    void OnDestroy()
     {
-        // Verifica cores e textos dos prefabs
-        Image bg = prefab.GetComponent<Image>();
-        if (bg != null)
-        {
-            Debug.Log($"   🎨 Background color: {bg.color}");
-        }
-
-        // Verifica textos nos filhos
-        TextMeshProUGUI[] texts = prefab.GetComponentsInChildren<TextMeshProUGUI>();
-        foreach (var text in texts)
-        {
-            Debug.Log($"   📝 {text.name}: '{text.text}' | Cor: {text.color}");
-        }
-
-        // Verifica imagens nos filhos
-        Image[] images = prefab.GetComponentsInChildren<Image>();
-        foreach (var img in images)
-        {
-            if (img.sprite != null)
-            {
-                Debug.Log($"   🖼️ {img.name}: Sprite '{img.sprite.name}' | Cor: {img.color}");
-            }
-        }
+        ResumeGame();
     }
 
     [ContextMenu("🔧 Verificar Configuração")]
@@ -577,6 +606,19 @@ public class SkillChoiceUI : MonoBehaviour
         Debug.Log($"🔄 Horizontal Layout: {useHorizontalLayout}");
         Debug.Log($"📐 Card Size: {cardSize}");
         Debug.Log($"📏 Card Spacing: {cardSpacing}");
+        Debug.Log($"🎲 Skills to Show: {numberOfSkillsToShow}");
+        Debug.Log($"📋 Available Skills: {allAvailableSkills.Count}");
+
+        // 🎯 VERIFICAR SKILLMANAGER
+        SkillManager skillManager = SkillManager.Instance;
+        if (skillManager != null)
+        {
+            Debug.Log($"📚 Skills no SkillManager: {skillManager.GetAvailableSkills().Count}");
+        }
+        else
+        {
+            Debug.LogError("❌ SkillManager não encontrado!");
+        }
 
         if (skillsContainer != null)
         {
@@ -621,6 +663,7 @@ public class SkillChoiceUI : MonoBehaviour
 
         Debug.Log("🎯 Container destravado e configurado manualmente!");
     }
+
     [ContextMenu("🔍 Verificar Container e Cards")]
     public void DebugContainerAndCards()
     {
@@ -717,6 +760,7 @@ public class SkillChoiceUI : MonoBehaviour
 
         Debug.Log("=== FIM DA VERIFICAÇÃO ===");
     }
+
     [ContextMenu("🎯 Verificar Prefabs das Skills Atuais")]
     public void DebugCurrentSkillPrefabs()
     {
@@ -734,6 +778,7 @@ public class SkillChoiceUI : MonoBehaviour
             Debug.Log($"🎴 Skill {i}: {skill.skillName}");
             Debug.Log($"   📁 Prefab: {skill.cardPrefab?.name ?? "NULL"}");
             Debug.Log($"   🖼️ Ícone: {skill.icon?.name ?? "NULL"}");
+            Debug.Log($"   ⚡ Elemento: {skill.element}");
 
             if (skill.cardPrefab == null)
             {
@@ -742,10 +787,5 @@ public class SkillChoiceUI : MonoBehaviour
         }
 
         Debug.Log("=== FIM DA VERIFICAÇÃO ===");
-    }
-  
-    void OnDestroy()
-    {
-        ResumeGame();
     }
 }

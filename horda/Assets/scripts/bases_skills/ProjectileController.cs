@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ProjectileController2D : MonoBehaviour
 {
@@ -9,6 +10,19 @@ public class ProjectileController2D : MonoBehaviour
     public float damage = 25f;
     public PlayerStats.Element element = PlayerStats.Element.None;
 
+    [Header("🎯 Controle Orbital")]
+    public bool isOrbiting = false;
+    public bool allowMovement = true;
+    public bool ignoreTargetsDuringOrbit = true; // 🆕 AGORA FALSE para causar dano orbital
+
+    [Header("⚡ Dano Orbital Contínuo")]
+    public bool orbitalDamageEnabled = true; // 🆕 Novo: ativar dano durante órbita
+    public float orbitalDamageInterval = 0.3f; // 🆕 Intervalo entre danos no mesmo inimigo
+    public float orbitalDamageRadius = 1.5f; // 🆕 Raio de detecção durante órbita
+
+    [Header("🔧 Debug Dano")]
+    public bool debugDamage = true;
+
     [Header("Efeitos Visuais")]
     public GameObject hitEffect;
     public TrailRenderer trailRenderer;
@@ -16,6 +30,8 @@ public class ProjectileController2D : MonoBehaviour
     private Transform target;
     private bool hasHit = false;
     private Rigidbody2D rb;
+    private float spawnTime;
+    private Dictionary<GameObject, float> lastDamageTime = new Dictionary<GameObject, float>(); // 🆕 Controlar intervalo de dano
 
     void Awake()
     {
@@ -30,39 +46,178 @@ public class ProjectileController2D : MonoBehaviour
         this.lifeTime = lifeTime;
         this.element = element;
 
-        // Configura efeitos visuais baseados no elemento
         SetupVisuals();
 
-        // Destroi após tempo limite
+        if (isOrbiting)
+        {
+            allowMovement = false;
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.gravityScale = 0f;
+            }
+        }
+
+        spawnTime = Time.time;
+
+        if (!isOrbiting)
+        {
+            Destroy(gameObject, lifeTime);
+        }
+    }
+
+    public void SetAsOrbiting()
+    {
+        isOrbiting = true;
+        allowMovement = false;
+        ignoreTargetsDuringOrbit = false; // 🆕 AGORA FALSE para causar dano durante órbita
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.gravityScale = 0f;
+        }
+
+        CancelInvoke("DestroyProjectile");
+    }
+
+    public void EnableMovement()
+    {
+        isOrbiting = false;
+        allowMovement = true;
+        ignoreTargetsDuringOrbit = false;
+
+        spawnTime = Time.time;
         Destroy(gameObject, lifeTime);
+
+        if (debugDamage) Debug.Log($"🎯 Projétil ativado - Movimento: {allowMovement}, Orbital: {isOrbiting}");
+    }
+
+    public void LaunchInDirection(Vector2 direction, float launchSpeed)
+    {
+        EnableMovement();
+
+        if (rb != null)
+        {
+            rb.linearVelocity = direction * launchSpeed;
+        }
+        else
+        {
+            StartCoroutine(MoveInDirection(direction, launchSpeed));
+        }
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+        if (debugDamage) Debug.Log($"🚀 Projétil lançado - Direção: {direction}, Velocidade: {launchSpeed}, Dano: {damage}");
+    }
+
+    private IEnumerator MoveInDirection(Vector2 direction, float moveSpeed)
+    {
+        while (!hasHit && Time.time - spawnTime < lifeTime)
+        {
+            if (allowMovement && !isOrbiting)
+            {
+                transform.position += (Vector3)(direction * moveSpeed * Time.deltaTime);
+            }
+            yield return null;
+        }
+
+        if (!hasHit)
+        {
+            DestroyProjectile();
+        }
     }
 
     void Update()
     {
-        if (hasHit || target == null) return;
-
-        // Movimento 2D em direção ao alvo
-        Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
-
-        // Usa Rigidbody2D para movimento suave
-        if (rb != null)
+        if (isOrbiting && Time.time - spawnTime > lifeTime * 2f)
         {
-            rb.linearVelocity = direction * speed;
+            DestroyProjectile();
+            return;
+        }
+
+        // 🆕 VERIFICAR DANO ORBITAL CONTINUAMENTE
+        if (isOrbiting && orbitalDamageEnabled && !hasHit)
+        {
+            CheckOrbitalDamage();
+        }
+
+        if (!allowMovement || isOrbiting || hasHit) return;
+
+        if (target != null)
+        {
+            Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
+
+            if (rb != null)
+            {
+                rb.linearVelocity = direction * speed;
+            }
+            else
+            {
+                transform.position += (Vector3)direction * speed * Time.deltaTime;
+            }
+
+            if (direction != Vector2.zero)
+            {
+                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            }
+
+            CheckCollision();
         }
         else
         {
-            // Fallback: movimento direto
-            transform.position += (Vector3)direction * speed * Time.deltaTime;
+            if (rb != null && rb.linearVelocity == Vector2.zero)
+            {
+                Vector2 currentDirection = transform.right;
+                rb.linearVelocity = currentDirection * speed;
+            }
+
+            CheckCollision();
         }
 
-        // Rotação em direção ao alvo (opcional)
-        if (direction != Vector2.zero)
+        if (Time.time - spawnTime >= lifeTime && !isOrbiting)
         {
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            DestroyProjectile();
+        }
+    }
+
+    // 🆕 MÉTODO PARA VERIFICAR DANO DURANTE ÓRBITA
+    private void CheckOrbitalDamage()
+    {
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, orbitalDamageRadius);
+
+        foreach (Collider2D enemyCollider in hitEnemies)
+        {
+            if (IsEnemy(enemyCollider.gameObject))
+            {
+                TryApplyOrbitalDamage(enemyCollider.gameObject);
+            }
+        }
+    }
+
+    // 🆕 MÉTODO PARA APLICAR DANO ORBITAL COM INTERVALO
+    private void TryApplyOrbitalDamage(GameObject enemy)
+    {
+        if (enemy == null) return;
+
+        // Verificar intervalo de dano
+        if (lastDamageTime.ContainsKey(enemy))
+        {
+            if (Time.time - lastDamageTime[enemy] < orbitalDamageInterval)
+            {
+                return; // Ainda não pode dar dano novamente
+            }
+            lastDamageTime[enemy] = Time.time;
+        }
+        else
+        {
+            lastDamageTime.Add(enemy, Time.time);
         }
 
-        CheckCollision();
+        // Aplicar dano
+        ApplyDamageToEnemy(enemy, "ORBITAL");
     }
 
     void CheckCollision()
@@ -70,7 +225,7 @@ public class ProjectileController2D : MonoBehaviour
         if (target == null) return;
 
         float distanceToTarget = Vector2.Distance(transform.position, target.position);
-        if (distanceToTarget < 0.3f) // Distância de colisão menor para 2D
+        if (distanceToTarget < 0.3f)
         {
             OnHitTarget();
         }
@@ -80,19 +235,37 @@ public class ProjectileController2D : MonoBehaviour
     {
         if (hasHit) return;
 
-        // 🎯 MÉTODO CORRIGIDO: Verificação robusta de inimigos
+        // 🆕 SEM IGNORE - sempre verifica colisão, mesmo durante órbita
         if (IsEnemy(other.gameObject))
         {
-            OnHitTarget(other.gameObject);
+            if (isOrbiting)
+            {
+                // Durante órbita, aplica dano mas NÃO destrói o projétil
+                TryApplyOrbitalDamage(other.gameObject);
+            }
+            else
+            {
+                // Durante lançamento, aplica dano e destrói
+                OnHitTarget(other.gameObject);
+            }
         }
     }
 
-    // 🎯 MÉTODO NOVO: Verificação robusta de inimigos
+    void OnTriggerStay2D(Collider2D other)
+    {
+        if (hasHit) return;
+
+        // 🆕 DANO CONTÍNUO durante órbita
+        if (isOrbiting && IsEnemy(other.gameObject))
+        {
+            TryApplyOrbitalDamage(other.gameObject);
+        }
+    }
+
     private bool IsEnemy(GameObject obj)
     {
         if (obj == null) return false;
 
-        // Método 1: Verificação por tag (com try-catch)
         try
         {
             if (obj.CompareTag("Enemy") || obj.CompareTag("enemy"))
@@ -100,25 +273,19 @@ public class ProjectileController2D : MonoBehaviour
                 return true;
             }
         }
-        catch (UnityException)
-        {
-            // Tags não existem, continuar para outros métodos
-        }
+        catch (UnityException) { }
 
-        // Método 2: Verificação por componente
         if (obj.GetComponent<InimigoController>() != null)
         {
             return true;
         }
 
-        // Método 3: Verificação por nome
         string objName = obj.name.ToLower();
         if (objName.Contains("enemy") || objName.Contains("inimigo"))
         {
             return true;
         }
 
-        // Método 4: Verificação por layer
         if (obj.layer == LayerMask.NameToLayer("Enemy"))
         {
             return true;
@@ -136,49 +303,38 @@ public class ProjectileController2D : MonoBehaviour
 
         if (targetEnemy != null)
         {
-            // Causa dano no inimigo 2D
-            InimigoController inimigo = targetEnemy.GetComponent<InimigoController>();
-            if (inimigo != null)
-            {
-                inimigo.ReceberDano(damage);
-                Debug.Log($"💥 Projétil 2D acertou {targetEnemy.name} com {damage} de dano {element}");
-            }
-            else
-            {
-                // Fallback: tenta encontrar qualquer componente de inimigo
-                MonoBehaviour[] components = targetEnemy.GetComponents<MonoBehaviour>();
-                foreach (var component in components)
-                {
-                    if (component.GetType().Name.ToLower().Contains("enemy") ||
-                        component.GetType().Name.ToLower().Contains("inimigo"))
-                    {
-                        // Usa reflexão para chamar método de dano se existir
-                        var damageMethod = component.GetType().GetMethod("ReceberDano");
-                        if (damageMethod != null)
-                        {
-                            damageMethod.Invoke(component, new object[] { damage });
-                            Debug.Log($"💥 Projétil acertou {targetEnemy.name} via reflexão");
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // Aplica efeito elemental
-            ApplyElementalEffect(targetEnemy);
+            ApplyDamageToEnemy(targetEnemy, "LANÇAMENTO");
         }
         else
         {
-            Debug.Log("🎯 Projétil atingiu alvo (sem GameObject específico)");
+            if (debugDamage) Debug.Log("🎯 Projétil atingiu mas não encontrou GameObject de inimigo");
         }
 
-        // Efeito de impacto
         if (hitEffect != null)
         {
             Instantiate(hitEffect, transform.position, Quaternion.identity);
         }
 
-        Destroy(gameObject);
+        DestroyProjectile();
+    }
+
+    // 🆕 MÉTODO UNIFICADO PARA APLICAR DANO
+    private void ApplyDamageToEnemy(GameObject enemy, string damageType)
+    {
+        if (debugDamage) Debug.Log($"🎯 Tentando causar {damage} de dano ({damageType}) em: {enemy.name}");
+
+        InimigoController inimigo = enemy.GetComponent<InimigoController>();
+        if (inimigo != null)
+        {
+            inimigo.ReceberDano(damage);
+            if (debugDamage) Debug.Log($"💥 DANO {damageType}: {damage} em {enemy.name} | Elemento: {element}");
+        }
+        else
+        {
+            if (debugDamage) Debug.LogError($"❌ InimigoController não encontrado em: {enemy.name}");
+        }
+
+        ApplyElementalEffect(enemy);
     }
 
     void ApplyElementalEffect(GameObject enemy)
@@ -192,12 +348,10 @@ public class ProjectileController2D : MonoBehaviour
         }
         else
         {
-            // Fallback: aplica efeito básico
             ApplyBasicElementalEffect(enemy);
         }
     }
 
-    // 🎯 MÉTODO NOVO: Efeitos elementais básicos
     private void ApplyBasicElementalEffect(GameObject enemy)
     {
         switch (element)
@@ -227,14 +381,12 @@ public class ProjectileController2D : MonoBehaviour
     {
         Color elementColor = GetElementColor();
 
-        // Configura cor do sprite
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
         {
             spriteRenderer.color = elementColor;
         }
 
-        // Configura trail renderer se existir
         if (trailRenderer != null)
         {
             trailRenderer.startColor = elementColor;
@@ -256,16 +408,45 @@ public class ProjectileController2D : MonoBehaviour
         }
     }
 
-    // 🎯 MÉTODO NOVO: Para debug
+    private void DestroyProjectile()
+    {
+        if (gameObject != null)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public bool ShouldDestroy()
+    {
+        return hasHit || (Time.time - spawnTime >= lifeTime && !isOrbiting);
+    }
+
     void OnDrawGizmos()
     {
         if (hasHit) return;
 
-        // Desenha linha para o alvo (apenas no editor)
-        if (target != null)
+        // 🆕 MOSTRAR RAIO DE DANO ORBITAL
+        if (isOrbiting && orbitalDamageEnabled)
         {
             Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, orbitalDamageRadius);
+        }
+
+        if (target != null)
+        {
+            Gizmos.color = isOrbiting ? Color.blue : Color.red;
             Gizmos.DrawLine(transform.position, target.position);
         }
+
+        if (isOrbiting)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(transform.position, 0.5f);
+        }
+    }
+
+    public string GetDebugInfo()
+    {
+        return $"🎯 Projétil - Orbital: {isOrbiting}, DanoOrbital: {orbitalDamageEnabled}, Dano: {damage}, InimigosAfetados: {lastDamageTime.Count}";
     }
 }

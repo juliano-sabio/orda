@@ -78,7 +78,24 @@ public class SkillData : ScriptableObject
     public bool explodeOnImpact = false;
     public float explosionRadius = 2f;
 
-    // MÉTODOS
+    // 🆕 PROPRIEDADES ADICIONADAS PARA PROJÉTEIS ORBITAIS
+    [Header("🌀 Configurações de Projétil Orbital")]
+    public bool isOrbitalProjectile = false;
+    public float orbitRadius = 2f;
+    public float orbitSpeed = 180f;
+    public int numberOfOrbits = 1;
+    public bool continuousOrbitalSpawning = false;
+    public float orbitalSpawnInterval = 2f;
+    public float orbitalLaunchSpeed = 10f;
+    public float maxOrbitalLaunchDistance = 15f;
+    public int maxOrbitalProjectiles = 3;
+
+    [Header("🎯 Configurações de Targeting Orbital")]
+    public OrbitalTargetingMode orbitalTargetingMode = OrbitalTargetingMode.NearestEnemy;
+    public bool autoAcquireTargets = true;
+    public float targetAcquisitionRange = 8f;
+
+    // MÉTODOS EXISTENTES (mantidos intactos)
     public string GetElementIcon() { return GetElementIcon(this.element); }
 
     public static string GetElementIcon(PlayerStats.Element element)
@@ -132,11 +149,23 @@ public class SkillData : ScriptableObject
         if (healthRegenBonus != 0) sb.AppendLine($"💚 Regeneração: {FormatBonus(healthRegenBonus)}/s");
         if (attackSpeedMultiplier != 1.0f) sb.AppendLine($"⚡ Vel. Ataque: {attackSpeedMultiplier}x");
 
-        // 🆕 DESCRIÇÕES PARA PROJÉTEIS
+        // 🆕 DESCRIÇÕES PARA PROJÉTEIS NORMAIS E ORBITAIS
         if (specificType == SpecificSkillType.Projectile)
         {
-            sb.AppendLine($"🎯 Projéteis: {projectileCount}");
-            if (projectileSpeed != 8f) sb.AppendLine($"💨 Velocidade: {projectileSpeed}");
+            if (isOrbitalProjectile)
+            {
+                sb.AppendLine($"🌀 Projéteis Orbitais: {maxOrbitalProjectiles}");
+                sb.AppendLine($"📏 Raio Orbital: {orbitRadius}m");
+                sb.AppendLine($"🔄 Velocidade Orbital: {orbitSpeed}°/s");
+                sb.AppendLine($"🎯 Voltas: {numberOfOrbits}");
+                if (continuousOrbitalSpawning) sb.AppendLine($"⏱️ Spawn: {orbitalSpawnInterval}s");
+            }
+            else
+            {
+                sb.AppendLine($"🎯 Projéteis: {projectileCount}");
+                if (projectileSpeed != 8f) sb.AppendLine($"💨 Velocidade: {projectileSpeed}");
+            }
+
             if (pierceEnemies) sb.AppendLine($"🔪 Penetração: {pierceCount} inimigos");
             if (bounceBetweenEnemies) sb.AppendLine($"🔁 Ricochete: {bounceCount} vezes");
             if (explodeOnImpact) sb.AppendLine($"💥 Explosão: {explosionRadius}m de raio");
@@ -169,7 +198,10 @@ public class SkillData : ScriptableObject
             case SpecificSkillType.Shield: return $"Escudo: {specialValue} de defesa";
             case SpecificSkillType.Heal: return $"Cura: {specialValue} de vida";
             case SpecificSkillType.Projectile:
-                return $"Projéteis: {projectileCount} | Vel: {projectileSpeed} | Dano: +{attackBonus}";
+                if (isOrbitalProjectile)
+                    return $"🌀 Projéteis Orbitais: {maxOrbitalProjectiles} | Raio: {orbitRadius}m | Dano: +{attackBonus}";
+                else
+                    return $"🎯 Projéteis: {projectileCount} | Vel: {projectileSpeed} | Dano: +{attackBonus}";
             case SpecificSkillType.DamageReflection: return $"Reflexão de Dano: {specialValue}%";
             case SpecificSkillType.ElementalMastery: return $"Domínio Elemental: +{specialValue}% de dano elemental";
             case SpecificSkillType.ChainLightning: return $"Relâmpago em Cadeia: {specialValue} alvos";
@@ -317,9 +349,25 @@ public class SkillData : ScriptableObject
     {
         return attackBonus > 0 ? attackBonus : 15f;
     }
+
+    // 🆕 MÉTODOS PARA PROJÉTEIS ORBITAIS
+    public bool IsOrbitalProjectileSkill()
+    {
+        return IsProjectileSkill() && isOrbitalProjectile;
+    }
+
+    public float GetOrbitalProjectileDamage()
+    {
+        return GetProjectileDamage() * (isOrbitalProjectile ? 1.2f : 1f); // Dano extra para orbitais
+    }
+
+    public bool ShouldUseOrbitalBehavior()
+    {
+        return IsProjectileSkill() && isOrbitalProjectile;
+    }
 }
 
-// Enums
+// Enums existentes
 public enum SkillType
 {
     Passive,
@@ -360,7 +408,17 @@ public enum SpecificSkillType
     FireAura,
     IceBarrier,
     WindDash,
-    EarthStomp
+    EarthStomp,
+    Ultimate,
+}
+
+// 🆕 NOVO ENUM PARA TARGETING ORBITAL
+public enum OrbitalTargetingMode
+{
+    NearestEnemy,
+    RandomEnemy,
+    FixedAngle,
+    PlayerDirection
 }
 
 [System.Serializable]
