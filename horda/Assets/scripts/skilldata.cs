@@ -95,6 +95,30 @@ public class SkillData : ScriptableObject
     public bool autoAcquireTargets = true;
     public float targetAcquisitionRange = 8f;
 
+    // 🆕 🌀 PROPRIEDADES ESPECÍFICAS PARA BUMERANGUE
+    [Header("🌀 Configurações de Bumerangue")]
+    public float boomerangThrowRange = 8f;
+    public float boomerangReturnRange = 1.5f;
+    public float boomerangThrowSpeed = 15f;
+    public float boomerangReturnSpeed = 20f;
+    public int boomerangMaxTargets = 3;
+    public float boomerangRotationSpeed = 720f;
+    public bool boomerangPierceThrough = false;
+    public float boomerangLifetime = 5f;
+
+    [Header("🌀 Efeitos de Retorno do Bumerangue")]
+    public bool boomerangHealOnReturn = true;
+    public float boomerangHealPercent = 0.1f; // 10% do dano
+    public bool boomerangBuffOnReturn = false;
+    public float boomerangBuffDuration = 3f;
+    public float boomerangBuffMultiplier = 1.2f;
+
+    [Header("🌀 Comportamento de Bumerangue")]
+    public BoomerangBehaviorType boomerangBehavior = BoomerangBehaviorType.ReturnToPlayer;
+    public bool boomerangSeekNewTargets = true;
+    public float boomerangSeekRadius = 5f;
+    public int boomerangMaxHitsPerThrow = 5;
+
     // MÉTODOS EXISTENTES (mantidos intactos)
     public string GetElementIcon() { return GetElementIcon(this.element); }
 
@@ -149,8 +173,26 @@ public class SkillData : ScriptableObject
         if (healthRegenBonus != 0) sb.AppendLine($"💚 Regeneração: {FormatBonus(healthRegenBonus)}/s");
         if (attackSpeedMultiplier != 1.0f) sb.AppendLine($"⚡ Vel. Ataque: {attackSpeedMultiplier}x");
 
-        // 🆕 DESCRIÇÕES PARA PROJÉTEIS NORMAIS E ORBITAIS
-        if (specificType == SpecificSkillType.Projectile)
+        // 🆕 DESCRIÇÕES PARA BUMERANGUE
+        if (specificType == SpecificSkillType.Boomerang)
+        {
+            sb.AppendLine($"🌀 Bumerangue: {attackBonus} dano");
+            sb.AppendLine($"📏 Alcance: {boomerangThrowRange}m");
+            sb.AppendLine($"🎯 Alvos: {boomerangMaxTargets}");
+            sb.AppendLine($"⚡ Velocidade: {boomerangThrowSpeed}");
+            sb.AppendLine($"↩️ Retorna ao jogador");
+
+            if (boomerangPierceThrough)
+                sb.AppendLine($"🔪 Atravessa inimigos");
+
+            if (boomerangHealOnReturn)
+                sb.AppendLine($"💚 Cura {boomerangHealPercent * 100}% do dano ao retornar");
+
+            if (boomerangSeekNewTargets)
+                sb.AppendLine($"🎯 Busca novos alvos (raio: {boomerangSeekRadius}m)");
+        }
+        // DESCRIÇÕES PARA PROJÉTEIS NORMAIS E ORBITAIS
+        else if (specificType == SpecificSkillType.Projectile)
         {
             if (isOrbitalProjectile)
             {
@@ -172,7 +214,7 @@ public class SkillData : ScriptableObject
             if (homingProjectile) sb.AppendLine($"🎯 Projétil Guiado");
         }
 
-        if (specificType != SpecificSkillType.None)
+        if (specificType != SpecificSkillType.None && specificType != SpecificSkillType.Boomerang)
             sb.AppendLine($"🎯 Efeito: {GetSpecificTypeDescription()}");
 
         if (cooldown > 0) sb.AppendLine($"⏱️ Cooldown: {cooldown}s");
@@ -202,6 +244,8 @@ public class SkillData : ScriptableObject
                     return $"🌀 Projéteis Orbitais: {maxOrbitalProjectiles} | Raio: {orbitRadius}m | Dano: +{attackBonus}";
                 else
                     return $"🎯 Projéteis: {projectileCount} | Vel: {projectileSpeed} | Dano: +{attackBonus}";
+            case SpecificSkillType.Boomerang: // 🆕 NOVO CASO
+                return $"🌀 Bumerangue: {boomerangThrowRange}m alcance | {attackBonus} dano | {boomerangMaxTargets} alvos";
             case SpecificSkillType.DamageReflection: return $"Reflexão de Dano: {specialValue}%";
             case SpecificSkillType.ElementalMastery: return $"Domínio Elemental: +{specialValue}% de dano elemental";
             case SpecificSkillType.ChainLightning: return $"Relâmpago em Cadeia: {specialValue} alvos";
@@ -365,6 +409,52 @@ public class SkillData : ScriptableObject
     {
         return IsProjectileSkill() && isOrbitalProjectile;
     }
+
+    // 🆕 🌀 MÉTODOS ESPECÍFICOS PARA BUMERANGUE
+    public bool IsBoomerangSkill()
+    {
+        return specificType == SpecificSkillType.Boomerang;
+    }
+
+    public float GetBoomerangDamage()
+    {
+        return attackBonus > 0 ? attackBonus : 25f;
+    }
+
+    public float GetBoomerangThrowRange()
+    {
+        return boomerangThrowRange > 0 ? boomerangThrowRange : 8f;
+    }
+
+    public float GetBoomerangThrowSpeed()
+    {
+        return boomerangThrowSpeed > 0 ? boomerangThrowSpeed : 15f;
+    }
+
+    public int GetBoomerangMaxTargets()
+    {
+        return boomerangMaxTargets > 0 ? boomerangMaxTargets : 3;
+    }
+
+    public bool ShouldHealOnReturn()
+    {
+        return boomerangHealOnReturn;
+    }
+
+    public float GetHealAmount(float damageDealt)
+    {
+        return damageDealt * boomerangHealPercent;
+    }
+}
+
+// 🆕 🌀 NOVO ENUM PARA COMPORTAMENTO DE BUMERANGUE
+public enum BoomerangBehaviorType
+{
+    ReturnToPlayer,     // Retorna diretamente ao jogador
+    SeekNewTargets,     // Busca novos alvos antes de retornar
+    OrbitThenReturn,    // Órbita antes de retornar
+    SplitOnReturn,      // Divide-se ao retornar
+    ExplodeOnReturn     // Explode ao retornar
 }
 
 // Enums existentes
@@ -410,6 +500,7 @@ public enum SpecificSkillType
     WindDash,
     EarthStomp,
     Ultimate,
+    Boomerang, // 🆕 NOVO TIPO DE SKILL
 }
 
 // 🆕 NOVO ENUM PARA TARGETING ORBITAL

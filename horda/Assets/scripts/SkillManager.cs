@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,7 +13,7 @@ public class SkillManager : MonoBehaviour
     public List<SkillData> activeSkills = new List<SkillData>();
     public List<SkillModifier> activeModifiers = new List<SkillModifier>();
 
-    // 🆕 SISTEMA DE SKILL EQUIPADA
+    // SISTEMA DE SKILL EQUIPADA
     [Header("🎯 Skill Equipada Atual")]
     public SkillData currentlyEquippedSkill;
     public int selectedSkillIndex = 0;
@@ -29,9 +28,9 @@ public class SkillManager : MonoBehaviour
     public bool alwaysOfferInitialChoice = false;
 
     // Eventos
-    public event Action<List<SkillData>, Action<SkillData>> OnSkillChoiceRequired;
-    public event Action<SkillData> OnSkillAcquired;
-    public event Action<SkillModifier> OnModifierAcquired;
+    public event System.Action<List<SkillData>, System.Action<SkillData>> OnSkillChoiceRequired;
+    public event System.Action<SkillData> OnSkillAcquired;
+    public event System.Action<SkillModifier> OnModifierAcquired;
 
     private PlayerStats playerStats;
     private SkillChoiceUI skillChoiceUI;
@@ -55,20 +54,20 @@ public class SkillManager : MonoBehaviour
     {
         Debug.Log("🔄 SkillManager iniciando...");
 
-        playerStats = FindAnyObjectByType<PlayerStats>();
+        playerStats = FindFirstObjectByType<PlayerStats>();
         skillChoiceUI = FindSkillChoiceUIInUIManager();
 
         if (skillChoiceUI == null)
         {
             Debug.LogError("❌ SkillChoiceUI não encontrado no UIManager!");
-            skillChoiceUI = FindAnyObjectByType<SkillChoiceUI>();
+            skillChoiceUI = FindFirstObjectByType<SkillChoiceUI>();
         }
 
         if (skillChoiceUI != null)
         {
             Debug.Log($"✅ SkillChoiceUI encontrado: {skillChoiceUI.gameObject.name}");
 
-            // 🎯 CONFIGURAR SKILLS NO SKILLCHOICEUI
+            // CONFIGURAR SKILLS NO SKILLCHOICEUI
             if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
             {
                 Debug.Log("🔄 Configurando skills no SkillChoiceUI...");
@@ -94,7 +93,7 @@ public class SkillManager : MonoBehaviour
 
         if (playerStats == null)
         {
-            playerStats = FindAnyObjectByType<PlayerStats>();
+            playerStats = FindFirstObjectByType<PlayerStats>();
         }
 
         if (skillChoiceUI == null)
@@ -102,7 +101,7 @@ public class SkillManager : MonoBehaviour
             skillChoiceUI = FindSkillChoiceUIInUIManager();
             if (skillChoiceUI != null)
             {
-                // 🎯 CONFIGURAR SKILLS NO SKILLCHOICEUI
+                // CONFIGURAR SKILLS NO SKILLCHOICEUI
                 if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
                 {
                     skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
@@ -112,7 +111,7 @@ public class SkillManager : MonoBehaviour
 
         CheckForInitialSkillChoice();
 
-        // 🚫 NÃO adicionar skills automaticamente - player começa SEM skills (exceto ultimate)
+        // NÃO adicionar skills automaticamente - player começa SEM skills (exceto ultimate)
         Debug.Log("🎯 Player começa sem skills (ultimate já está configurada)");
     }
 
@@ -120,7 +119,7 @@ public class SkillManager : MonoBehaviour
     {
         Debug.Log($"🔍 Verificando escolha inicial - Level: {playerStats?.level}, JáOferecida: {initialChoiceOffered}");
 
-        bool level1IsMilestone = Array.Exists(levelUpMilestones, milestone => milestone == 1);
+        bool level1IsMilestone = System.Array.Exists(levelUpMilestones, milestone => milestone == 1);
 
         if (!initialChoiceOffered && playerStats != null && playerStats.level == 1 && level1IsMilestone)
         {
@@ -143,7 +142,7 @@ public class SkillManager : MonoBehaviour
 
     private SkillChoiceUI FindSkillChoiceUIInUIManager()
     {
-        UIManager uiManager = FindAnyObjectByType<UIManager>();
+        UIManager uiManager = FindFirstObjectByType<UIManager>();
 
         if (uiManager != null)
         {
@@ -177,21 +176,21 @@ public class SkillManager : MonoBehaviour
     {
         Debug.Log($"🔄 SkillManager: Cena carregada - {scene.name}");
 
-        playerStats = FindAnyObjectByType<PlayerStats>();
+        playerStats = FindFirstObjectByType<PlayerStats>();
         skillChoiceUI = FindSkillChoiceUIInUIManager();
 
         if (skillChoiceUI != null)
         {
             Debug.Log("✅ SkillChoiceUI reconectado após carregar cena");
 
-            // 🎯 CONFIGURAR SKILLS NO SKILLCHOICEUI
+            // CONFIGURAR SKILLS NO SKILLCHOICEUI
             if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
             {
                 skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
             }
         }
 
-        // 🆕 RECONECTAR SKILL EQUIPADA APÓS CARREGAR CENA
+        // RECONECTAR SKILL EQUIPADA APÓS CARREGAR CENA
         if (currentlyEquippedSkill != null && activeSkills.Contains(currentlyEquippedSkill))
         {
             OnSkillEquippedChanged?.Invoke(currentlyEquippedSkill);
@@ -208,7 +207,7 @@ public class SkillManager : MonoBehaviour
 
         if (playerStats == null)
         {
-            playerStats = FindAnyObjectByType<PlayerStats>();
+            playerStats = FindFirstObjectByType<PlayerStats>();
             if (playerStats == null)
             {
                 Debug.LogError("❌ PlayerStats null no level up!");
@@ -216,7 +215,7 @@ public class SkillManager : MonoBehaviour
             }
         }
 
-        bool isMilestone = Array.Exists(levelUpMilestones, milestone => milestone == newLevel);
+        bool isMilestone = System.Array.Exists(levelUpMilestones, milestone => milestone == newLevel);
         Debug.Log($"🎯 Level {newLevel} é milestone: {isMilestone}");
 
         if (isMilestone)
@@ -254,24 +253,24 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        // 🎯 MÉTODO CORRETO: Chamar ShowRandomSkillChoice DIRETAMENTE
+        // MÉTODO CORRETO: Chamar ShowRandomSkillChoice DIRETAMENTE
         Debug.Log($"🎯 Chamando ShowRandomSkillChoice DIRETAMENTE - {skillChoiceUI.allAvailableSkills?.Count ?? 0} skills disponíveis");
 
-        // 🎯 VERIFICAR E CONFIGURAR SKILLS SE NECESSÁRIO
+        // VERIFICAR E CONFIGURAR SKILLS SE NECESSÁRIO
         if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
         {
             Debug.Log("🔄 Configurando skills no SkillChoiceUI...");
             skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
         }
 
-        // 🎯 VERIFICAR SE TEM SKILLS SUFICIENTES
+        // VERIFICAR SE TEM SKILLS SUFICIENTES
         if (skillChoiceUI.allAvailableSkills.Count < 3)
         {
             Debug.LogWarning($"⚠️ Apenas {skillChoiceUI.allAvailableSkills.Count} skills disponíveis! Criando skills de teste...");
             CreateEmergencyTestSkills();
         }
 
-        // 🎯 CHAMAR O MÉTODO QUE MOSTRA 3 SKILLS ALEATÓRIAS
+        // CHAMAR O MÉTODO QUE MOSTRA 3 SKILLS ALEATÓRIAS
         skillChoiceUI.ShowRandomSkillChoice(OnSkillSelectedFromChoice);
     }
 
@@ -282,7 +281,7 @@ public class SkillManager : MonoBehaviour
             Debug.Log($"✅ Skill selecionada: {selectedSkill.skillName}");
             AddSkill(selectedSkill);
 
-            // 🆕 EQUIPAR AUTOMATICAMENTE A NOVA SKILL
+            // EQUIPAR AUTOMATICAMENTE A NOVA SKILL
             if (currentlyEquippedSkill == null)
             {
                 EquipSkill(selectedSkill);
@@ -294,7 +293,7 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO PARA CRIAR SKILLS DE EMERGÊNCIA
+    // MÉTODO PARA CRIAR SKILLS DE EMERGÊNCIA
     private void CreateEmergencyTestSkills()
     {
         Debug.Log("🚨 CRIANDO SKILLS DE EMERGÊNCIA!");
@@ -306,7 +305,8 @@ public class SkillManager : MonoBehaviour
             "RAIO GELADO",
             "VENENO MORTAL",
             "TERREMOTO",
-            "FUMAÇA VENENOSA"
+            "FUMAÇA VENENOSA",
+            "🌀 BUMERANGUE DO VENTO"
         };
 
         PlayerStats.Element[] elements = {
@@ -314,7 +314,17 @@ public class SkillManager : MonoBehaviour
             PlayerStats.Element.Ice,
             PlayerStats.Element.Poison,
             PlayerStats.Element.Earth,
-            PlayerStats.Element.Poison
+            PlayerStats.Element.Poison,
+            PlayerStats.Element.Wind
+        };
+
+        SpecificSkillType[] types = {
+            SpecificSkillType.Projectile,
+            SpecificSkillType.Projectile,
+            SpecificSkillType.PoisonCloud,
+            SpecificSkillType.EarthStomp,
+            SpecificSkillType.PoisonCloud,
+            SpecificSkillType.Boomerang
         };
 
         for (int i = 0; i < testNames.Length; i++)
@@ -322,12 +332,23 @@ public class SkillManager : MonoBehaviour
             SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
             testSkill.skillName = testNames[i];
             testSkill.description = $"Skill de emergência - {testNames[i]}";
-            testSkill.attackBonus = UnityEngine.Random.Range(10, 30);
-            testSkill.defenseBonus = UnityEngine.Random.Range(5, 15);
-            testSkill.healthBonus = UnityEngine.Random.Range(10, 25);
+            testSkill.attackBonus = Random.Range(10, 30);
+            testSkill.defenseBonus = Random.Range(5, 15);
+            testSkill.healthBonus = Random.Range(10, 25);
             testSkill.element = elements[i];
-            testSkill.specificType = SpecificSkillType.Projectile;
+            testSkill.specificType = types[i];
             testSkill.rarity = SkillRarity.Common;
+
+            if (types[i] == SpecificSkillType.Boomerang)
+            {
+                testSkill.specialValue = 8f;
+                testSkill.activationInterval = 2.5f;
+                testSkill.boomerangThrowRange = 8f;
+                testSkill.boomerangThrowSpeed = 15f;
+                testSkill.boomerangMaxTargets = 3;
+                testSkill.boomerangHealOnReturn = true;
+                testSkill.description = "Um bumerangue que vai e volta, causando dano a múltiplos inimigos";
+            }
 
             skillChoiceUI.allAvailableSkills.Add(testSkill);
         }
@@ -359,7 +380,7 @@ public class SkillManager : MonoBehaviour
         {
             if (availableChoices.Count == 0) break;
 
-            int randomIndex = UnityEngine.Random.Range(0, availableChoices.Count);
+            int randomIndex = Random.Range(0, availableChoices.Count);
             SkillData chosenSkill = availableChoices[randomIndex];
 
             choices.Add(chosenSkill);
@@ -379,7 +400,7 @@ public class SkillManager : MonoBehaviour
     {
         if (skill == null) return;
 
-        // ✅ VERIFICAÇÃO ESPECIAL PARA ULTIMATE
+        // VERIFICAÇÃO ESPECIAL PARA ULTIMATE
         bool isUltimateSkill = skill.skillName.ToLower().Contains("ultimate") ||
                               skill.specificType == SpecificSkillType.Ultimate;
 
@@ -396,6 +417,7 @@ public class SkillManager : MonoBehaviour
             if (playerStats != null)
             {
                 playerStats.ApplyAcquiredSkill(skill);
+                ConfigureSkillBehavior(skill); // ✅ ADICIONADO: Configurar comportamento após aplicar skill
             }
             else
             {
@@ -406,7 +428,7 @@ public class SkillManager : MonoBehaviour
 
             Debug.Log($"✅ Skill adquirida: {skill.skillName}");
 
-            // 🆕 SE É A PRIMEIRA SKILL, EQUIPAR AUTOMATICAMENTE
+            // SE É A PRIMEIRA SKILL, EQUIPAR AUTOMATICAMENTE
             if (activeSkills.Count == 1 || currentlyEquippedSkill == null)
             {
                 EquipSkill(skill);
@@ -417,7 +439,7 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🆕 SISTEMA DE SKILL EQUIPADA
+    // SISTEMA DE SKILL EQUIPADA
     public void EquipSkill(SkillData skill)
     {
         if (skill == null || !activeSkills.Contains(skill)) return;
@@ -432,7 +454,7 @@ public class SkillManager : MonoBehaviour
         ApplyEquippedSkillEffects(skill);
     }
 
-    // 🆕 CICLAR ENTRE SKILLS
+    // CICLAR ENTRE SKILLS
     public void CycleEquippedSkill()
     {
         if (activeSkills.Count == 0) return;
@@ -441,13 +463,13 @@ public class SkillManager : MonoBehaviour
         EquipSkill(activeSkills[selectedSkillIndex]);
     }
 
-    // 🆕 OBTER SKILL EQUIPADA
+    // OBTER SKILL EQUIPADA
     public SkillData GetEquippedSkill()
     {
         return currentlyEquippedSkill;
     }
 
-    // 🆕 OBTER SKILL POR ÍNDICE
+    // OBTER SKILL POR ÍNDICE
     public SkillData GetSkillByIndex(int index)
     {
         if (index >= 0 && index < activeSkills.Count)
@@ -455,13 +477,13 @@ public class SkillManager : MonoBehaviour
         return null;
     }
 
-    // 🆕 OBTER ÍNDICE DA SKILL EQUIPADA
+    // OBTER ÍNDICE DA SKILL EQUIPADA
     public int GetEquippedSkillIndex()
     {
         return selectedSkillIndex;
     }
 
-    // 🆕 EFECTOS DA SKILL EQUIPADA
+    // EFECTOS DA SKILL EQUIPADA
     private void ApplyEquippedSkillEffects(SkillData skill)
     {
         if (playerStats == null) return;
@@ -485,13 +507,6 @@ public class SkillManager : MonoBehaviour
         try
         {
             skill.ApplyToPlayer(playerStats);
-            ConfigureSkillBehavior(skill);
-
-            if (skill.element != PlayerStats.Element.None)
-            {
-                ApplyElementalEffects(skill);
-            }
-
             Debug.Log($"✨ Skill {skill.skillName} aplicada ao player");
         }
         catch (System.Exception e)
@@ -500,9 +515,17 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // 🆕 MÉTODO CONFIGURESKILLBEHAVIOR ATUALIZADO COM PROJÉTEIS ORBITAIS
+    // ✅ MÉTODO CONFIGURESKILLBEHAVIOR CORRIGIDO
     void ConfigureSkillBehavior(SkillData skill)
     {
+        Debug.Log($"⚙️ [yEngine] Configurando comportamento: {skill.skillName} ({skill.specificType})");
+
+        if (playerStats == null)
+        {
+            Debug.LogError("❌ [yEngine] PlayerStats é null!");
+            return;
+        }
+
         switch (skill.specificType)
         {
             case SpecificSkillType.Projectile:
@@ -515,21 +538,104 @@ public class SkillManager : MonoBehaviour
                     AddProjectileBehavior(skill);
                 }
                 break;
-            case SpecificSkillType.HealthRegen:
-                Debug.Log($"🔄 Skill de regeneração configurada: {skill.skillName}");
-                break;
-            case SpecificSkillType.CriticalStrike:
-                Debug.Log($"🎯 Skill de crítico configurada: {skill.skillName}");
-                break;
-        }
 
-        if (skill.isPassive)
-        {
-            Debug.Log($"🔄 Skill Passiva configurada: {skill.skillName}");
+            case SpecificSkillType.Boomerang:
+                // ✅ AGORA ADICIONA CORRETAMENTE AO PLAYER
+                AddBoomerangBehaviorToPlayer(skill);
+                break;
+
+            case SpecificSkillType.HealthRegen:
+                Debug.Log($"🔄 Skill de regeneração: {skill.skillName}");
+                playerStats.healthRegenRate += skill.healthRegenBonus;
+                break;
+
+            case SpecificSkillType.CriticalStrike:
+                Debug.Log($"🎯 Skill de crítico: {skill.skillName}");
+                break;
+
+            default:
+                Debug.Log($"ℹ️ Skill genérica: {skill.skillName}");
+                break;
         }
     }
 
-    // 🆕 MÉTODO PARA PROJÉTEIS ORBITAIS
+    // ✅ MÉTODO NOVO: Adiciona bumerangue ao Player
+    void AddBoomerangBehaviorToPlayer(SkillData skill)
+    {
+        Debug.Log($"🎯 [yEngine] Adicionando BoomerangSkillBehavior ao Player...");
+
+        // 1. Verificar PlayerStats
+        if (playerStats == null)
+        {
+            playerStats = FindFirstObjectByType<PlayerStats>();
+            if (playerStats == null)
+            {
+                Debug.LogError("❌ [yEngine] PlayerStats não encontrado na cena!");
+                return;
+            }
+        }
+
+        // 2. Remover comportamento antigo se existir
+        var oldBehavior = playerStats.GetComponent<BoomerangSkillBehavior>();
+        if (oldBehavior != null)
+        {
+            Destroy(oldBehavior);
+            Debug.Log("🔄 [yEngine] Comportamento antigo removido");
+        }
+
+        // 3. Adicionar novo comportamento AO PLAYER
+        BoomerangSkillBehavior newBehavior = playerStats.gameObject.AddComponent<BoomerangSkillBehavior>();
+
+        if (newBehavior == null)
+        {
+            Debug.LogError("❌ [yEngine] Falha ao criar BoomerangSkillBehavior!");
+            return;
+        }
+
+        // 4. Inicializar com PlayerStats
+        newBehavior.Initialize(playerStats);
+
+        // 5. Configurar com dados da skill
+        newBehavior.UpdateFromSkillData(skill);
+
+        // 6. Ativar
+        newBehavior.SetActive(true);
+
+        Debug.Log($"✅ [yEngine] Comportamento adicionado ao Player {playerStats.name}");
+        Debug.Log($"   • Skill: {skill.skillName}");
+        Debug.Log($"   • Dano: {newBehavior.damage}");
+        Debug.Log($"   • Alcance: {newBehavior.throwRange}");
+        Debug.Log($"   • Ativo: {newBehavior.enabled}");
+
+        // 7. Testar imediatamente
+        StartCoroutine(TestBoomerangAfterDelay(newBehavior));
+    }
+
+    private IEnumerator TestBoomerangAfterDelay(BoomerangSkillBehavior behavior)
+    {
+        yield return new WaitForSeconds(2f);
+
+        if (behavior != null)
+        {
+            Debug.Log("🧪 [yEngine] Testando bumerangue...");
+
+            // Usar reflexão para acessar método privado TestBoomerang
+            var testMethod = typeof(BoomerangSkillBehavior).GetMethod("TestBoomerang",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+
+            if (testMethod != null)
+            {
+                testMethod.Invoke(behavior, null);
+            }
+            else
+            {
+                // Fallback: chamar ApplyEffect
+                behavior.ApplyEffect();
+            }
+        }
+    }
+
+    // MÉTODO PARA PROJÉTEIS ORBITAIS
     void AddOrbitingProjectileBehavior(SkillData skill)
     {
         var existingBehavior = GetComponent<OrbitingProjectileSkillBehavior>();
@@ -658,10 +764,12 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-#if UNITY_EDITOR
+    // ADICIONE ESTE MÉTODO QUE ESTAVA FALTANDO:
     [ContextMenu("🌀 Criar Skill Orbital de Teste")]
     public void CreateTestOrbitalSkill()
     {
+        Debug.Log("🌀 Criando Skill Orbital de Teste...");
+
         // Cria skill temporária apenas para teste
         SkillData orbitalSkill = ScriptableObject.CreateInstance<SkillData>();
         orbitalSkill.skillName = "🌀 Esfera Orbital (TESTE)";
@@ -684,64 +792,6 @@ public class SkillManager : MonoBehaviour
         Debug.Log("🌀 Skill orbital de TESTE criada (some ao reiniciar)");
     }
 
-    [ContextMenu("🎯 Adicionar Skill de Teste")]
-    public void AddTestSkills()
-    {
-        Debug.Log("🧪 Adicionando skill de TESTE (apenas desenvolvimento)");
-
-        SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
-        testSkill.skillName = "Projétil de Teste (EDITOR)";
-        testSkill.description = "Projétil automático para teste - APENAS NO EDITOR";
-        testSkill.attackBonus = 15f;
-        testSkill.healthBonus = 10f;
-        testSkill.specificType = SpecificSkillType.Projectile;
-        testSkill.element = PlayerStats.Element.Fire;
-
-        AddSkill(testSkill);
-        Debug.Log("✅ Skill de teste adicionada (apenas editor)");
-    }
-
-    [ContextMenu("Adicionar Modificador Aleatório")]
-    public void AddRandomModifier()
-    {
-        string[] modifierNames = { "Fogo Intenso", "Gelo Penetrante", "Raio Carregado", "Veneno Mortal" };
-        string[] targetSkills = { "Ataque Automático", "Golpe Contínuo", "Proteção Passiva" };
-
-        string randomName = modifierNames[UnityEngine.Random.Range(0, modifierNames.Length)];
-        string randomTarget = targetSkills[UnityEngine.Random.Range(0, targetSkills.Length)];
-
-        PlayerStats.SkillModifier modifier = new PlayerStats.SkillModifier
-        {
-            modifierName = randomName,
-            targetSkillName = randomTarget,
-            damageMultiplier = 1.3f,
-            defenseMultiplier = 1.2f,
-            element = (PlayerStats.Element)UnityEngine.Random.Range(1, 6)
-        };
-
-        AddSkillModifier(modifier);
-        Debug.Log($"✨ Modificador aleatório adicionado: {randomName} para {randomTarget}");
-    }
-
-    [ContextMenu("Adicionar Skill Aleatória")]
-    public void AddRandomSkill()
-    {
-        if (availableSkills.Count > 0)
-        {
-            List<SkillData> validSkills = availableSkills.FindAll(skill =>
-                skill.MeetsRequirements(playerStats != null ? playerStats.level : 1, activeSkills) &&
-                !HasSkill(skill)
-            );
-
-            if (validSkills.Count > 0)
-            {
-                int randomIndex = UnityEngine.Random.Range(0, validSkills.Count);
-                AddSkill(validSkills[randomIndex]);
-            }
-        }
-    }
-#endif
-
     void LoadSkillData()
     {
         SkillData[] loadedSkills = Resources.LoadAll<SkillData>("Skills");
@@ -760,6 +810,13 @@ public class SkillManager : MonoBehaviour
         else
         {
             Debug.Log($"✅ {availableSkills.Count} skills carregadas");
+
+            // Verificar se tem skills de bumerangue
+            int boomerangCount = availableSkills.FindAll(s => s.specificType == SpecificSkillType.Boomerang).Count;
+            if (boomerangCount > 0)
+            {
+                Debug.Log($"🌀 {boomerangCount} skills de bumerangue carregadas");
+            }
         }
     }
 
@@ -772,7 +829,7 @@ public class SkillManager : MonoBehaviour
             PlayerPrefs.SetString($"ActiveSkill_{i}", activeSkills[i].skillName);
         }
 
-        // 🆕 SALVAR SKILL EQUIPADA
+        // SALVAR SKILL EQUIPADA
         if (currentlyEquippedSkill != null)
         {
             PlayerPrefs.SetString("EquippedSkill", currentlyEquippedSkill.skillName);
@@ -811,7 +868,247 @@ public class SkillManager : MonoBehaviour
         return activeSkills.FindAll(skill => skill.element == element).Count;
     }
 
+    // MÉTODO PARA CONTAR SKILLS POR TIPO ESPECÍFICO
+    public int GetSkillCountBySpecificType(SpecificSkillType specificType)
+    {
+        return activeSkills.FindAll(skill => skill.specificType == specificType).Count;
+    }
+
+    // yEngine - SISTEMA DE DIAGNÓSTICO
+    public void yEngine()
+    {
+        Debug.Log("=== 🚀 yEngine DIAGNOSTICO COMPLETO ===");
+
+        // 1. Verificar Player
+        Debug.Log($"🎯 Player: {(playerStats != null ? playerStats.name : "NULL")}");
+
+        // 2. Verificar Skills disponíveis
+        Debug.Log($"📚 Skills disponíveis: {availableSkills.Count}");
+        foreach (var skill in availableSkills)
+        {
+            Debug.Log($"   • {skill.skillName} - {skill.specificType}");
+        }
+
+        // 3. Verificar Skills ativas
+        Debug.Log($"⚡ Skills ativas: {activeSkills.Count}");
+        foreach (var skill in activeSkills)
+        {
+            Debug.Log($"   • {skill.skillName} - {skill.specificType}");
+        }
+
+        // 4. Verificar Skill equipada
+        Debug.Log($"🎯 Skill equipada: {currentlyEquippedSkill?.skillName ?? "NENHUMA"}");
+
+        // 5. Verificar componentes no Player
+        if (playerStats != null)
+        {
+            var boomerangBehavior = playerStats.GetComponent<BoomerangSkillBehavior>();
+            var projectileBehavior = playerStats.GetComponent<PassiveProjectileSkill2D>();
+            var orbitalBehavior = playerStats.GetComponent<OrbitingProjectileSkillBehavior>();
+
+            Debug.Log($"🤖 Componentes no Player:");
+            Debug.Log($"   • BoomerangSkillBehavior: {(boomerangBehavior != null ? "✅" : "❌")}");
+            Debug.Log($"   • PassiveProjectileSkill2D: {(projectileBehavior != null ? "✅" : "❌")}");
+            Debug.Log($"   • OrbitingProjectileSkillBehavior: {(orbitalBehavior != null ? "✅" : "❌")}");
+        }
+
+        // 6. Forçar teste do sistema
+        StartCoroutine(yEngineTest());
+    }
+
+    private IEnumerator yEngineTest()
+    {
+        yield return new WaitForSeconds(1f);
+
+        // Criar skill de teste
+        SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
+        testSkill.skillName = "🌀 Bumerangue do yEngine";
+        testSkill.description = "Bumerangue de teste gerado pelo yEngine";
+        testSkill.specificType = SpecificSkillType.Boomerang;
+        testSkill.attackBonus = 30f;
+        testSkill.activationInterval = 2f;
+        testSkill.element = PlayerStats.Element.Wind;
+
+        // Configurações de bumerangue
+        testSkill.boomerangThrowRange = 10f;
+        testSkill.boomerangThrowSpeed = 20f;
+        testSkill.boomerangHealOnReturn = true;
+        testSkill.boomerangHealPercent = 0.15f;
+
+        // Adicionar skill
+        AddSkill(testSkill);
+
+        Debug.Log("✅ yEngine: Skill de teste adicionada!");
+    }
+
+    // ✅ NOVOS MÉTODOS PARA DIAGNÓSTICO E TESTE
+    [ContextMenu("🎯 Testar Adição de Bumerangue ao Player")]
+    public void TestBoomerangOnPlayer()
+    {
+        Debug.Log("🧪 Testando adição de bumerangue ao Player...");
+
+        // Criar skill de teste
+        SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
+        testSkill.skillName = "TESTE_BUMERANGUE";
+        testSkill.specificType = SpecificSkillType.Boomerang;
+        testSkill.attackBonus = 30f;
+        testSkill.activationInterval = 2f;
+        testSkill.boomerangThrowRange = 8f;
+        testSkill.boomerangThrowSpeed = 15f;
+        testSkill.boomerangMaxTargets = 3;
+
+        // Adicionar ao Player
+        AddBoomerangBehaviorToPlayer(testSkill);
+
+        // Verificar resultado
+        if (playerStats != null)
+        {
+            var behavior = playerStats.GetComponent<BoomerangSkillBehavior>();
+            if (behavior != null)
+            {
+                Debug.Log("✅ SUCESSO: BoomerangSkillBehavior encontrado no Player!");
+                Debug.Log($"   • Componente ativo: {behavior.enabled}");
+                Debug.Log($"   • Dano configurado: {behavior.damage}");
+
+                // Testar lançamento
+                behavior.TestBoomerang();
+            }
+            else
+            {
+                Debug.LogError("❌ FALHA: BoomerangSkillBehavior NÃO encontrado no Player!");
+            }
+        }
+    }
+
+    [ContextMenu("🔍 Verificar Componentes no Player")]
+    public void CheckPlayerComponents()
+    {
+        if (playerStats == null)
+        {
+            Debug.LogError("❌ PlayerStats não encontrado!");
+            return;
+        }
+
+        Debug.Log("=== 🔍 COMPONENTES NO PLAYER ===");
+
+        // Verificar todos os componentes
+        var components = playerStats.GetComponents<Component>();
+        foreach (var comp in components)
+        {
+            Debug.Log($"• {comp.GetType().Name}");
+        }
+
+        // Verificar específicos
+        var boomerang = playerStats.GetComponent<BoomerangSkillBehavior>();
+        var projectile = playerStats.GetComponent<PassiveProjectileSkill2D>();
+        var orbital = playerStats.GetComponent<OrbitingProjectileSkillBehavior>();
+
+        Debug.Log($"=== ESPECÍFICOS ===");
+        Debug.Log($"• BoomerangSkillBehavior: {(boomerang != null ? "✅" : "❌")}");
+        Debug.Log($"• PassiveProjectileSkill2D: {(projectile != null ? "✅" : "❌")}");
+        Debug.Log($"• OrbitingProjectileSkillBehavior: {(orbital != null ? "✅" : "❌")}");
+    }
+
 #if UNITY_EDITOR
+    [ContextMenu("🚀 yEngine - Diagnóstico Completo")]
+    public void yEngineDiagnostic()
+    {
+        yEngine();
+    }
+
+    [ContextMenu("🌀 yEngine - Testar Bumerangue Direto")]
+    public void yEngineTestBoomerangDirect()
+    {
+        // Criar skill de teste rapidamente
+        SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
+        testSkill.skillName = "TESTE_DIRETO_yEngine";
+        testSkill.specificType = SpecificSkillType.Boomerang;
+        testSkill.attackBonus = 35f;
+        testSkill.activationInterval = 1.5f;
+
+        AddBoomerangBehaviorToPlayer(testSkill);
+    }
+
+    [ContextMenu("🌀 Criar Skill de Bumerangue de Teste")]
+    public void CreateTestBoomerangSkill()
+    {
+        SkillData boomerangSkill = ScriptableObject.CreateInstance<SkillData>();
+        boomerangSkill.skillName = "🌀 Bumerangue do Vento (TESTE)";
+        boomerangSkill.description = "Um bumerangue que vai e volta, causando dano a múltiplos inimigos\n\n• Dano base: 25\n• Alcance: 8 metros\n• Atinge até 3 inimigos\n• Retorna ao jogador\n• Cura 10% do dano causado ao retornar";
+        boomerangSkill.attackBonus = 25f;
+        boomerangSkill.activationInterval = 2.5f;
+        boomerangSkill.specificType = SpecificSkillType.Boomerang;
+        boomerangSkill.element = PlayerStats.Element.Wind;
+        boomerangSkill.boomerangThrowRange = 8f;
+        boomerangSkill.boomerangThrowSpeed = 15f;
+        boomerangSkill.boomerangMaxTargets = 3;
+        boomerangSkill.boomerangHealOnReturn = true;
+        boomerangSkill.boomerangHealPercent = 0.1f;
+        boomerangSkill.rarity = SkillRarity.Uncommon;
+        boomerangSkill.isPassive = true;
+
+        // Adiciona TEMPORARIAMENTE
+        AddSkill(boomerangSkill);
+        Debug.Log("🌀 Skill de bumerangue de TESTE criada (some ao reiniciar)");
+    }
+
+    [ContextMenu("🎯 Adicionar Skill de Teste")]
+    public void AddTestSkills()
+    {
+        Debug.Log("🧪 Adicionando skill de TESTE (apenas desenvolvimento)");
+
+        SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
+        testSkill.skillName = "Projétil de Teste (EDITOR)";
+        testSkill.description = "Projétil automático para teste - APENAS NO EDITOR";
+        testSkill.attackBonus = 15f;
+        testSkill.healthBonus = 10f;
+        testSkill.specificType = SpecificSkillType.Projectile;
+        testSkill.element = PlayerStats.Element.Fire;
+
+        AddSkill(testSkill);
+        Debug.Log("✅ Skill de teste adicionada (apenas editor)");
+    }
+
+    [ContextMenu("Adicionar Modificador Aleatório")]
+    public void AddRandomModifier()
+    {
+        string[] modifierNames = { "Fogo Intenso", "Gelo Penetrante", "Raio Carregado", "Veneno Mortal", "Vento Cortante" };
+        string[] targetSkills = { "Ataque Automático", "Golpe Contínuo", "Proteção Passiva", "🌀 Bumerangue do Vento" };
+
+        string randomName = modifierNames[Random.Range(0, modifierNames.Length)];
+        string randomTarget = targetSkills[Random.Range(0, targetSkills.Length)];
+
+        PlayerStats.SkillModifier modifier = new PlayerStats.SkillModifier
+        {
+            modifierName = randomName,
+            targetSkillName = randomTarget,
+            damageMultiplier = 1.3f,
+            defenseMultiplier = 1.2f,
+            element = (PlayerStats.Element)Random.Range(1, 6)
+        };
+
+        AddSkillModifier(modifier);
+        Debug.Log($"✨ Modificador aleatório adicionado: {randomName} para {randomTarget}");
+    }
+
+    [ContextMenu("Adicionar Skill Aleatória")]
+    public void AddRandomSkill()
+    {
+        if (availableSkills.Count > 0)
+        {
+            List<SkillData> validSkills = availableSkills.FindAll(skill =>
+                skill.MeetsRequirements(playerStats != null ? playerStats.level : 1, activeSkills) &&
+                !HasSkill(skill)
+            );
+
+            if (validSkills.Count > 0)
+            {
+                int randomIndex = Random.Range(0, validSkills.Count);
+                AddSkill(validSkills[randomIndex]);
+            }
+        }
+    }
+
     [ContextMenu("🚨 DIAGNÓSTICO URGENTE: Verificar Sistema de 3 Skills")]
     public void UrgentDiagnosis()
     {
@@ -821,7 +1118,7 @@ public class SkillManager : MonoBehaviour
         if (skillChoiceUI == null)
         {
             Debug.LogError("❌ SKILLCHOICEUI NULL!");
-            skillChoiceUI = FindAnyObjectByType<SkillChoiceUI>();
+            skillChoiceUI = FindFirstObjectByType<SkillChoiceUI>();
             Debug.Log($"🔍 Tentativa de encontrar: {(skillChoiceUI != null ? "✅ Encontrado" : "❌ Não encontrado")}");
         }
         else
@@ -833,6 +1130,9 @@ public class SkillManager : MonoBehaviour
 
         // 2. Verificar availableSkills
         Debug.Log($"📚 AvailableSkills no Manager: {availableSkills.Count}");
+
+        // Verificar tipos específicos
+        Debug.Log($"🌀 Skills de bumerangue disponíveis: {availableSkills.FindAll(s => s.specificType == SpecificSkillType.Boomerang).Count}");
 
         // 3. Forçar teste do sistema
         Debug.Log("🔄 FORÇANDO TESTE DO SISTEMA...");
@@ -935,6 +1235,9 @@ public class SkillManager : MonoBehaviour
         var orbitalBehavior = GetComponent<OrbitingProjectileSkillBehavior>();
         if (orbitalBehavior != null) Destroy(orbitalBehavior);
 
+        var boomerangBehavior = GetComponent<BoomerangSkillBehavior>();
+        if (boomerangBehavior != null) Destroy(boomerangBehavior);
+
         var projectileBehavior = GetComponent<PassiveProjectileSkill2D>();
         if (projectileBehavior != null) Destroy(projectileBehavior);
 
@@ -946,6 +1249,16 @@ public class SkillManager : MonoBehaviour
     {
         Debug.Log($"📚 Skills disponíveis no total: {availableSkills.Count}");
         foreach (var skill in availableSkills)
+        {
+            Debug.Log($"   • {skill.skillName} ({skill.element}) - {skill.specificType}");
+        }
+    }
+
+    [ContextMenu("🔍 Ver Skills Ativas")]
+    public void LogActiveSkills()
+    {
+        Debug.Log($"📚 Skills ativas: {activeSkills.Count}");
+        foreach (var skill in activeSkills)
         {
             Debug.Log($"   • {skill.skillName} ({skill.element}) - {skill.specificType}");
         }
@@ -988,8 +1301,163 @@ public class SkillManager : MonoBehaviour
         Debug.Log($"• Skills no UI: {(skillChoiceUI != null ? skillChoiceUI.allAvailableSkills?.Count.ToString() ?? "0" : "N/A")}");
         Debug.Log($"• Milestones: {string.Join(", ", levelUpMilestones)}");
         Debug.Log($"• Próximo Milestone: {GetNextMilestone()}");
+
+        // Informações específicas
+        Debug.Log($"• Skills de Bumerangue: {GetSkillCountBySpecificType(SpecificSkillType.Boomerang)}");
+        Debug.Log($"• Comportamentos Ativos: {GetActiveBehaviorsCount()}");
+    }
+
+    [ContextMenu("🚨 DEBUG URGENTE - Verificar destruição")]
+    public void UrgentDestructionDebug()
+    {
+        Debug.Log("=== 🚨 DEBUG URGENTE - VERIFICAÇÃO DE DESTRUIÇÃO ===");
+
+        // 1. Criar objeto teste
+        GameObject testObj = new GameObject("URGENT_TEST_OBJECT");
+        testObj.transform.position = transform.position;
+
+        // 2. Adicionar componente marcador
+        testObj.AddComponent<DestructionMarker>();
+
+        // 3. Verificar em intervalos
+        StartCoroutine(DestructionMonitor(testObj));
+    }
+
+    [ContextMenu("🔍 ENCONTRAR DESTRUIDORES")]
+    public void FindDestroyers()
+    {
+        Debug.Log("=== 🔍 BUSCANDO SCRIPTS DESTRUIDORES ===");
+
+        var allBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+        var destroyers = new List<MonoBehaviour>();
+
+        foreach (var behaviour in allBehaviours)
+        {
+            var type = behaviour.GetType();
+            var methods = type.GetMethods(System.Reflection.BindingFlags.Instance |
+                                         System.Reflection.BindingFlags.Public |
+                                         System.Reflection.BindingFlags.NonPublic);
+
+            foreach (var method in methods)
+            {
+                if (method.Name.Contains("Destroy") ||
+                    method.Name.Contains("Clean") ||
+                    method.Name.Contains("Remove"))
+                {
+                    if (!destroyers.Contains(behaviour))
+                    {
+                        destroyers.Add(behaviour);
+                        Debug.LogWarning($"⚠️ Possível destruidor: {type.Name} em {behaviour.gameObject.name}");
+                        Debug.Log($"   Método suspeito: {method.Name}");
+                    }
+                }
+            }
+        }
+
+        if (destroyers.Count == 0)
+        {
+            Debug.Log("✅ Nenhum script destruidor óbvio encontrado");
+        }
+    }
+
+    [ContextMenu("🎯 TESTE ULTRA SIMPLES")]
+    public void UltraSimpleTest()
+    {
+        Debug.Log("=== 🎯 TESTE ULTRA SIMPLES ===");
+
+        // 1. Criar objeto na posição do jogador
+        GameObject testObj = new GameObject("TEST_DIRECT");
+        testObj.transform.position = transform.position + Vector3.right * 2f;
+
+        // 2. Adicionar sprite VISÍVEL
+        SpriteRenderer sr = testObj.AddComponent<SpriteRenderer>();
+
+        // Criar sprite 100% vermelho
+        Texture2D tex = new Texture2D(64, 64);
+        Color[] colors = new Color[64 * 64];
+        for (int i = 0; i < colors.Length; i++)
+        {
+            colors[i] = Color.red;
+        }
+        tex.SetPixels(colors);
+        tex.Apply();
+
+        sr.sprite = Sprite.Create(tex, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
+        sr.color = Color.red;
+        sr.sortingOrder = 9999;
+
+        // 3. Tornar grande
+        testObj.transform.localScale = new Vector3(2f, 2f, 1f);
+
+        // 4. Não destruir
+        Debug.Log($"✅ Objeto criado em: {testObj.transform.position}");
+        Debug.Log($"🎯 Nome: {testObj.name}");
+        Debug.Log($"📏 Escala: {testObj.transform.localScale}");
+
+        // 5. Verificar em 5 segundos
+        StartCoroutine(CheckTestObject(testObj));
     }
 #endif
+
+    // CLASSE INTERNA PARA MARCAÇÃO DE DESTRUIÇÃO
+    private class DestructionMarker : MonoBehaviour
+    {
+        void OnDestroy()
+        {
+            Debug.LogError($"💀 DESTRUIDO: {gameObject.name} às {Time.time:F2}s");
+        }
+    }
+
+    private IEnumerator DestructionMonitor(GameObject obj)
+    {
+        float[] checkTimes = { 0.1f, 0.5f, 1f, 2f, 5f };
+
+        foreach (float time in checkTimes)
+        {
+            yield return new WaitForSeconds(time);
+
+            if (obj == null)
+            {
+                Debug.LogError($"❌ OBJETO DESTRUÍDO ANTES DE {time}s!");
+                break;
+            }
+            else
+            {
+                Debug.Log($"✅ Objeto ainda existe após {time}s: {obj.name}");
+            }
+        }
+
+        if (obj != null)
+        {
+            Debug.Log($"🎉 Objeto sobreviveu a todos os checks!");
+            Destroy(obj, 10f); // Limpar depois
+        }
+    }
+
+    private IEnumerator CheckTestObject(GameObject obj)
+    {
+        yield return new WaitForSeconds(5f);
+
+        if (obj == null)
+        {
+            Debug.LogError("❌❌❌ OBJETO FOI DESTRUÍDO!");
+        }
+        else
+        {
+            Debug.Log($"✅ Objeto ainda existe: {obj.name}");
+            Debug.Log($"📍 Posição: {obj.transform.position}");
+        }
+    }
+
+    // MÉTODO PARA CONTAR COMPORTAMENTOS ATIVOS
+    private int GetActiveBehaviorsCount()
+    {
+        int count = 0;
+        if (GetComponent<BoomerangSkillBehavior>() != null) count++;
+        if (GetComponent<OrbitingProjectileSkillBehavior>() != null) count++;
+        if (GetComponent<PassiveProjectileSkill2D>() != null) count++;
+        return count;
+    }
 
     public int GetNextMilestone()
     {
