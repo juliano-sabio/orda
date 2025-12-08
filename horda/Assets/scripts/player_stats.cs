@@ -743,7 +743,12 @@ public class PlayerStats : MonoBehaviour
                 InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
                 if (inimigo != null)
                 {
-                    inimigo.ReceberDano(damage);
+                    // Verifica se é crítico (exemplo: 10% de chance)
+                    bool isCrit = UnityEngine.Random.value < 0.1f;
+                    float finalDamage = isCrit ? damage * 2f : damage;
+
+                    // Usa o método com dano flutuante
+                    inimigo.ReceberDano(finalDamage, isCrit);
                 }
 
                 elementSystem.ApplyElementalEffect(element, hitCollider.gameObject);
@@ -878,7 +883,10 @@ public class PlayerStats : MonoBehaviour
                 InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
                 if (inimigo != null)
                 {
-                    inimigo.ReceberDano(finalDamage);
+                    // Chance de crítico na ultimate
+                    bool isCrit = UnityEngine.Random.value < 0.3f;
+                    float ultimateDamage = isCrit ? finalDamage * 1.5f : finalDamage;
+                    inimigo.ReceberDano(ultimateDamage, isCrit);
                 }
 
                 elementSystem.ApplyElementalEffect(ultimateElement, hitCollider.gameObject);

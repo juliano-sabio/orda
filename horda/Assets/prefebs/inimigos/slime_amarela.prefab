@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 1271100660801019675}
   m_Layer: 0
   m_Name: slime_amarela
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -133,6 +133,14 @@ MonoBehaviour:
   dadosInimigo: {fileID: 11400000, guid: 7fc3fa49b321338499a24b9535a6c71f, type: 2}
   vidaAtual: 70
   danoAtual: 10
+  xpOrbPrefab: {fileID: 0}
+  minOrbs: 1
+  maxOrbs: 3
+  xpPorOrbe: 5
+  forcaDrop: 2
+  damageNumberHeight: 2
+  normalDamageColor: {r: 1, g: 1, b: 1, a: 1}
+  critDamageColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!114 &4536141257480560677
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,6 +157,14 @@ MonoBehaviour:
   "distanciaDetec\xE7\xE3o": 25
   distanciaAtaque: 2
   "intervaloAtualiza\xE7\xE3oCaminho": 0.5
+  usarDesvioObstaculos: 1
+  distanciaDetecaoObstaculos: 3
+  camadaObstaculos:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  forcaDesvio: 2
+  suavizacaoDesvio: 3
+  anguloDesvio: 45
   player: {fileID: 0}
   pontosCaminho: []
 --- !u!114 &751179304906468814
