@@ -112,13 +112,42 @@ MonoBehaviour:
   projectilePrefab2D: {fileID: 7800008629741502241, guid: 9b611ab392c4d9b4ba29c94fa42b22f0, type: 3}
   projectileSpeed: 8
   projectileLifeTime: 4
-  projectileCount: 1
+  projectileCount: 0
   projectileSpread: 0
   homingProjectile: 0
-  homingStrength: 2
+  homingStrength: 0
   pierceEnemies: 0
   pierceCount: 1
   bounceBetweenEnemies: 0
   bounceCount: 0
   explodeOnImpact: 0
   explosionRadius: 2
+  isOrbitalProjectile: 0
+  orbitRadius: 2
+  orbitSpeed: 180
+  numberOfOrbits: 1
+  continuousOrbitalSpawning: 0
+  orbitalSpawnInterval: 2
+  orbitalLaunchSpeed: 10
+  maxOrbitalLaunchDistance: 15
+  maxOrbitalProjectiles: 3
+  orbitalTargetingMode: 0
+  autoAcquireTargets: 1
+  targetAcquisitionRange: 8
+  boomerangThrowRange: 8
+  boomerangReturnRange: 1.5
+  boomerangThrowSpeed: 15
+  boomerangReturnSpeed: 20
+  boomerangMaxTargets: 3
+  boomerangRotationSpeed: 720
+  boomerangPierceThrough: 0
+  boomerangLifetime: 5
+  boomerangHealOnReturn: 1
+  boomerangHealPercent: 0.1
+  boomerangBuffOnReturn: 0
+  boomerangBuffDuration: 3
+  boomerangBuffMultiplier: 1.2
+  boomerangBehavior: 0
+  boomerangSeekNewTargets: 1
+  boomerangSeekRadius: 5
+  boomerangMaxHitsPerThrow: 5

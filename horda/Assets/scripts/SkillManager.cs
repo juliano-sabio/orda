@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static PlayerStats;
+using System.Linq; // ADICIONE ESTA LINHA PARA USAR .Count()
 
 public class SkillManager : MonoBehaviour
 {
@@ -400,6 +401,19 @@ public class SkillManager : MonoBehaviour
     {
         if (skill == null) return;
 
+        // VERIFICAÇÃO MAIS RIGOROSA PARA DUPLICAÇÃO
+        bool alreadyHasExactSkill = activeSkills.Exists(s =>
+            s.skillName == skill.skillName &&
+            s.specificType == skill.specificType &&
+            s.element == skill.element
+        );
+
+        if (alreadyHasExactSkill)
+        {
+            Debug.LogWarning($"⚠️ Skill {skill.skillName} já foi adquirida anteriormente!");
+            return;
+        }
+
         // VERIFICAÇÃO ESPECIAL PARA ULTIMATE
         bool isUltimateSkill = skill.skillName.ToLower().Contains("ultimate") ||
                               skill.specificType == SpecificSkillType.Ultimate;
@@ -526,6 +540,14 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
+        // VERIFICAR SE A SKILL JÁ FOI CONFIGURADA
+        int sameSkillCount = activeSkills.Count(s => s.skillName == skill.skillName);
+        if (sameSkillCount > 1)
+        {
+            Debug.LogWarning($"⚠️ [yEngine] Skill {skill.skillName} já foi configurada anteriormente! (aparece {sameSkillCount} vezes)");
+            return;
+        }
+
         switch (skill.specificType)
         {
             case SpecificSkillType.Projectile:
@@ -576,11 +598,14 @@ public class SkillManager : MonoBehaviour
         }
 
         // 2. Remover comportamento antigo se existir
-        var oldBehavior = playerStats.GetComponent<BoomerangSkillBehavior>();
-        if (oldBehavior != null)
+        var oldBehaviors = playerStats.GetComponents<BoomerangSkillBehavior>();
+        if (oldBehaviors.Length > 0)
         {
-            Destroy(oldBehavior);
-            Debug.Log("🔄 [yEngine] Comportamento antigo removido");
+            Debug.Log($"🔄 [yEngine] Removendo {oldBehaviors.Length} comportamentos antigos de bumerangue");
+            foreach (var oldBehavior in oldBehaviors)
+            {
+                Destroy(oldBehavior);
+            }
         }
 
         // 3. Adicionar novo comportamento AO PLAYER
@@ -635,34 +660,65 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // MÉTODO PARA PROJÉTEIS ORBITAIS
+    // ✅ MÉTODO CORRIGIDO: PROJÉTEIS ORBITAIS
     void AddOrbitingProjectileBehavior(SkillData skill)
     {
-        var existingBehavior = GetComponent<OrbitingProjectileSkillBehavior>();
-        if (existingBehavior != null)
+        if (playerStats == null)
         {
-            existingBehavior.UpdateFromSkillData(skill);
+            Debug.LogError("❌ PlayerStats não encontrado para orbital!");
             return;
         }
 
-        OrbitingProjectileSkillBehavior orbitalBehavior = gameObject.AddComponent<OrbitingProjectileSkillBehavior>();
+        var existingBehaviors = playerStats.GetComponents<OrbitingProjectileSkillBehavior>();
+        if (existingBehaviors.Length > 0)
+        {
+            // Se já existe, apenas atualiza o primeiro e remove extras
+            Debug.Log($"🌀 Comportamento orbital já existe - atualizando...");
+            existingBehaviors[0].UpdateFromSkillData(skill);
+
+            // Remove comportamentos duplicados
+            for (int i = 1; i < existingBehaviors.Length; i++)
+            {
+                Destroy(existingBehaviors[i]);
+                Debug.Log($"🧹 Removido comportamento orbital duplicado #{i}");
+            }
+            return;
+        }
+
+        OrbitingProjectileSkillBehavior orbitalBehavior = playerStats.gameObject.AddComponent<OrbitingProjectileSkillBehavior>();
         orbitalBehavior.Initialize(playerStats);
         orbitalBehavior.UpdateFromSkillData(skill);
 
-        Debug.Log($"🌀 Comportamento orbital adicionado: {skill.skillName}");
+        Debug.Log($"🌀 Comportamento orbital adicionado AO PLAYER: {skill.skillName}");
     }
 
+    // ✅ MÉTODO CORRIGIDO: PROJÉTEIS NORMAIS
     void AddProjectileBehavior(SkillData skill)
     {
-        var existingBehavior = GetComponent<PassiveProjectileSkill2D>();
-        if (existingBehavior != null)
+        // Verificar se já existe NO PLAYER, não no SkillManager
+        if (playerStats == null)
         {
-            Debug.Log($"⚡ Comportamento de projétil já existe - melhorando...");
-            existingBehavior.activationInterval = Mathf.Max(0.5f, existingBehavior.activationInterval * 0.8f);
+            Debug.LogError("❌ PlayerStats não encontrado!");
             return;
         }
 
-        PassiveProjectileSkill2D projectileBehavior = gameObject.AddComponent<PassiveProjectileSkill2D>();
+        var existingBehaviors = playerStats.GetComponents<PassiveProjectileSkill2D>();
+        if (existingBehaviors.Length > 0)
+        {
+            // Se já existe, apenas melhora o primeiro e remove extras
+            Debug.Log($"⚡ Comportamento de projétil já existe no player - melhorando...");
+            existingBehaviors[0].activationInterval = Mathf.Max(0.5f, existingBehaviors[0].activationInterval * 0.8f);
+
+            // Remove comportamentos duplicados
+            for (int i = 1; i < existingBehaviors.Length; i++)
+            {
+                Destroy(existingBehaviors[i]);
+                Debug.Log($"🧹 Removido comportamento de projétil duplicado #{i}");
+            }
+            return;
+        }
+
+        PassiveProjectileSkill2D projectileBehavior = playerStats.gameObject.AddComponent<PassiveProjectileSkill2D>();
 
         bool initialized = false;
 
@@ -708,7 +764,7 @@ public class SkillManager : MonoBehaviour
             Debug.Log($"✅ Comportamento inicializado com método básico");
         }
 
-        Debug.Log($"✅ Comportamento de projétil 2D adicionado: {skill.skillName}");
+        Debug.Log($"✅ Comportamento de projétil 2D adicionado AO PLAYER: {skill.skillName}");
     }
 
     void ApplyElementalEffects(SkillData skill)
@@ -902,14 +958,7 @@ public class SkillManager : MonoBehaviour
         // 5. Verificar componentes no Player
         if (playerStats != null)
         {
-            var boomerangBehavior = playerStats.GetComponent<BoomerangSkillBehavior>();
-            var projectileBehavior = playerStats.GetComponent<PassiveProjectileSkill2D>();
-            var orbitalBehavior = playerStats.GetComponent<OrbitingProjectileSkillBehavior>();
-
-            Debug.Log($"🤖 Componentes no Player:");
-            Debug.Log($"   • BoomerangSkillBehavior: {(boomerangBehavior != null ? "✅" : "❌")}");
-            Debug.Log($"   • PassiveProjectileSkill2D: {(projectileBehavior != null ? "✅" : "❌")}");
-            Debug.Log($"   • OrbitingProjectileSkillBehavior: {(orbitalBehavior != null ? "✅" : "❌")}");
+            CheckForDuplicateProjectiles(); // CHAMA A VERIFICAÇÃO DE DUPLICADOS
         }
 
         // 6. Forçar teste do sistema
@@ -941,7 +990,60 @@ public class SkillManager : MonoBehaviour
         Debug.Log("✅ yEngine: Skill de teste adicionada!");
     }
 
-    // ✅ NOVOS MÉTODOS PARA DIAGNÓSTICO E TESTE
+    // ✅ NOVO MÉTODO DE VERIFICAÇÃO DE DUPLICADOS
+    [ContextMenu("🔍 Verificar Projéteis Duplicados")]
+    public void CheckForDuplicateProjectiles()
+    {
+        Debug.Log("=== 🔍 VERIFICAÇÃO DE PROJÉTEIS DUPLICADOS ===");
+
+        if (playerStats == null)
+        {
+            playerStats = FindFirstObjectByType<PlayerStats>();
+        }
+
+        if (playerStats != null)
+        {
+            // Verificar todos os componentes de projétil no player
+            var projectileBehaviors = playerStats.GetComponents<PassiveProjectileSkill2D>();
+            var orbitalBehaviors = playerStats.GetComponents<OrbitingProjectileSkillBehavior>();
+            var boomerangBehaviors = playerStats.GetComponents<BoomerangSkillBehavior>();
+
+            Debug.Log($"🎯 Player: {playerStats.name}");
+            Debug.Log($"• PassiveProjectileSkill2D: {projectileBehaviors.Length} instância(s)");
+            Debug.Log($"• OrbitingProjectileSkillBehavior: {orbitalBehaviors.Length} instância(s)");
+            Debug.Log($"• BoomerangSkillBehavior: {boomerangBehaviors.Length} instância(s)");
+
+            bool foundDuplicates = false;
+
+            if (projectileBehaviors.Length > 1)
+            {
+                Debug.LogError($"❌ PROJÉTEIS DUPLICADOS DETECTADOS: {projectileBehaviors.Length} instâncias!");
+                foundDuplicates = true;
+            }
+
+            if (orbitalBehaviors.Length > 1)
+            {
+                Debug.LogError($"❌ ORBITAIS DUPLICADOS DETECTADOS: {orbitalBehaviors.Length} instâncias!");
+                foundDuplicates = true;
+            }
+
+            if (boomerangBehaviors.Length > 1)
+            {
+                Debug.LogError($"❌ BUMERANGUES DUPLICADOS DETECTADOS: {boomerangBehaviors.Length} instâncias!");
+                foundDuplicates = true;
+            }
+
+            if (!foundDuplicates)
+            {
+                Debug.Log("✅ Nenhum comportamento duplicado encontrado!");
+            }
+        }
+        else
+        {
+            Debug.LogError("❌ PlayerStats não encontrado!");
+        }
+    }
+
     [ContextMenu("🎯 Testar Adição de Bumerangue ao Player")]
     public void TestBoomerangOnPlayer()
     {
@@ -963,15 +1065,25 @@ public class SkillManager : MonoBehaviour
         // Verificar resultado
         if (playerStats != null)
         {
-            var behavior = playerStats.GetComponent<BoomerangSkillBehavior>();
-            if (behavior != null)
+            var behaviors = playerStats.GetComponents<BoomerangSkillBehavior>();
+            if (behaviors.Length > 0)
             {
-                Debug.Log("✅ SUCESSO: BoomerangSkillBehavior encontrado no Player!");
-                Debug.Log($"   • Componente ativo: {behavior.enabled}");
-                Debug.Log($"   • Dano configurado: {behavior.damage}");
+                Debug.Log($"✅ SUCESSO: {behaviors.Length} BoomerangSkillBehavior encontrado(s) no Player!");
+                Debug.Log($"   • Componente ativo: {behaviors[0].enabled}");
+                Debug.Log($"   • Dano configurado: {behaviors[0].damage}");
 
                 // Testar lançamento
-                behavior.TestBoomerang();
+                behaviors[0].TestBoomerang();
+
+                // Remover extras se houver
+                if (behaviors.Length > 1)
+                {
+                    for (int i = 1; i < behaviors.Length; i++)
+                    {
+                        Destroy(behaviors[i]);
+                        Debug.Log($"🧹 Removido bumerangue duplicado #{i}");
+                    }
+                }
             }
             else
             {
@@ -999,14 +1111,14 @@ public class SkillManager : MonoBehaviour
         }
 
         // Verificar específicos
-        var boomerang = playerStats.GetComponent<BoomerangSkillBehavior>();
-        var projectile = playerStats.GetComponent<PassiveProjectileSkill2D>();
-        var orbital = playerStats.GetComponent<OrbitingProjectileSkillBehavior>();
+        var boomerangs = playerStats.GetComponents<BoomerangSkillBehavior>();
+        var projectiles = playerStats.GetComponents<PassiveProjectileSkill2D>();
+        var orbitals = playerStats.GetComponents<OrbitingProjectileSkillBehavior>();
 
         Debug.Log($"=== ESPECÍFICOS ===");
-        Debug.Log($"• BoomerangSkillBehavior: {(boomerang != null ? "✅" : "❌")}");
-        Debug.Log($"• PassiveProjectileSkill2D: {(projectile != null ? "✅" : "❌")}");
-        Debug.Log($"• OrbitingProjectileSkillBehavior: {(orbital != null ? "✅" : "❌")}");
+        Debug.Log($"• BoomerangSkillBehavior: {boomerangs.Length} instância(s)");
+        Debug.Log($"• PassiveProjectileSkill2D: {projectiles.Length} instância(s)");
+        Debug.Log($"• OrbitingProjectileSkillBehavior: {orbitals.Length} instância(s)");
     }
 
 #if UNITY_EDITOR
@@ -1231,15 +1343,20 @@ public class SkillManager : MonoBehaviour
         currentlyEquippedSkill = null;
         selectedSkillIndex = 0;
 
-        // Remove comportamentos
-        var orbitalBehavior = GetComponent<OrbitingProjectileSkillBehavior>();
-        if (orbitalBehavior != null) Destroy(orbitalBehavior);
+        // Remove comportamentos DO PLAYER (não do SkillManager)
+        if (playerStats != null)
+        {
+            var orbitalBehaviors = playerStats.GetComponents<OrbitingProjectileSkillBehavior>();
+            foreach (var behavior in orbitalBehaviors) Destroy(behavior);
 
-        var boomerangBehavior = GetComponent<BoomerangSkillBehavior>();
-        if (boomerangBehavior != null) Destroy(boomerangBehavior);
+            var boomerangBehaviors = playerStats.GetComponents<BoomerangSkillBehavior>();
+            foreach (var behavior in boomerangBehaviors) Destroy(behavior);
 
-        var projectileBehavior = GetComponent<PassiveProjectileSkill2D>();
-        if (projectileBehavior != null) Destroy(projectileBehavior);
+            var projectileBehaviors = playerStats.GetComponents<PassiveProjectileSkill2D>();
+            foreach (var behavior in projectileBehaviors) Destroy(behavior);
+
+            Debug.Log($"🧹 {orbitalBehaviors.Length + boomerangBehaviors.Length + projectileBehaviors.Length} comportamentos removidos do player");
+        }
 
         Debug.Log("🧹 TODAS as skills foram removidas - player resetado");
     }
@@ -1453,9 +1570,12 @@ public class SkillManager : MonoBehaviour
     private int GetActiveBehaviorsCount()
     {
         int count = 0;
-        if (GetComponent<BoomerangSkillBehavior>() != null) count++;
-        if (GetComponent<OrbitingProjectileSkillBehavior>() != null) count++;
-        if (GetComponent<PassiveProjectileSkill2D>() != null) count++;
+        if (playerStats != null)
+        {
+            if (playerStats.GetComponent<BoomerangSkillBehavior>() != null) count++;
+            if (playerStats.GetComponent<OrbitingProjectileSkillBehavior>() != null) count++;
+            if (playerStats.GetComponent<PassiveProjectileSkill2D>() != null) count++;
+        }
         return count;
     }
 
