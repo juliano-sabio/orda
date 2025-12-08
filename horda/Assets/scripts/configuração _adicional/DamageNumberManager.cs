@@ -6,32 +6,23 @@ public class DamageNumberManager : MonoBehaviour
 {
     [Header("🔧 PREFAB")]
     public GameObject damagePrefab;
-    public GameObject fatalDamagePrefab; // 🔥 PREFAB ESPECIAL PARA DANO FATAL
 
-    [Header("📏 CONFIGURAÇÃO DE TAMANHO")]
-    [Range(0.05f, 1f)]
+    [Header("📏 CONFIGURAÇÃO")]
     public float canvasScale = 0.15f;
-
-    [Range(10, 100)]
     public int normalFontSize = 24;
-
-    [Range(10, 100)]
     public int critFontSize = 32;
+    public int fatalFontSize = 48;
 
-    [Range(10, 100)]
-    public int fatalFontSize = 48; // 🔥 TAMANHO MAIOR PARA FATAL
-
-    [Header("🎨 CONFIGURAÇÃO DE CORES")]
+    [Header("🎨 CORES")]
     public Color normalColor = Color.white;
     public Color critColor = Color.yellow;
-    public Color fatalColor = Color.red; // 🔥 COR ESPECIAL PARA FATAL
+    public Color fatalColor = Color.red;
 
-    [Header("⏱️ CONFIGURAÇÃO DE TEMPO")]
+    [Header("⏱️ TEMPO")]
     public float duration = 1f;
-    public float fatalDuration = 1.5f; // 🔥 DURAÇÃO MAIOR PARA FATAL
+    public float fatalDuration = 1.5f;
     public float floatSpeed = 2f;
     public float floatHeight = 1.5f;
-    public float fatalFloatHeight = 2.5f; // 🔥 FLUTUA MAIS ALTO
 
     private Canvas worldCanvas;
 
@@ -42,6 +33,7 @@ public class DamageNumberManager : MonoBehaviour
         {
             if (_instance == null)
             {
+                // 🔥 Usando FindFirstObjectByType
                 _instance = FindFirstObjectByType<DamageNumberManager>();
             }
             return _instance;
@@ -62,6 +54,7 @@ public class DamageNumberManager : MonoBehaviour
 
     void CreateCanvas()
     {
+        // 🔥 Usando FindObjectsByType
         Canvas[] oldCanvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
         foreach (Canvas canvas in oldCanvases)
         {
@@ -78,75 +71,60 @@ public class DamageNumberManager : MonoBehaviour
         canvasObj.transform.position = Vector3.zero;
         canvasObj.transform.localScale = new Vector3(canvasScale, canvasScale, canvasScale);
 
-        if (Camera.main != null)
+        Camera mainCamera = Camera.main;
+        if (mainCamera != null)
         {
-            worldCanvas.worldCamera = Camera.main;
+            worldCanvas.worldCamera = mainCamera;
         }
 
         CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
         scaler.dynamicPixelsPerUnit = 100;
     }
 
-    // ✅ MÉTODO PARA DANO NORMAL
+    // ✅ DANO NORMAL
     public void ShowDamage(Transform targetTransform, float damage, bool isCrit = false)
     {
-        if (targetTransform == null || worldCanvas == null) return;
-
-        GameObject prefabToUse = damagePrefab;
-        if (prefabToUse == null)
-        {
-            Debug.LogError("❌ Prefab normal não configurado!");
+        if (targetTransform == null || worldCanvas == null || damagePrefab == null)
             return;
-        }
 
-        CreateDamagePopup(targetTransform, damage, isCrit, false, prefabToUse);
+        CreatePopup(targetTransform.position, damage, isCrit, false);
     }
 
-    // ✅ MÉTODO NOVO PARA DANO FATAL
+    // ✅ DANO FATAL
     public void ShowDamageFatal(Transform targetTransform, float damage, bool isCrit = false)
     {
-        if (targetTransform == null || worldCanvas == null) return;
-
-        GameObject prefabToUse = fatalDamagePrefab != null ? fatalDamagePrefab : damagePrefab;
-        if (prefabToUse == null)
-        {
-            Debug.LogError("❌ Nenhum prefab configurado!");
+        if (targetTransform == null || worldCanvas == null || damagePrefab == null)
             return;
-        }
 
-        CreateDamagePopup(targetTransform, damage, isCrit, true, prefabToUse);
+        CreatePopup(targetTransform.position, damage, isCrit, true);
     }
 
-    // ✅ MÉTODO ÚNICO PARA CRIAR POPUP
-    private void CreateDamagePopup(Transform targetTransform, float damage, bool isCrit,
-                                  bool isFatal, GameObject prefab)
+    // ✅ CRIAR POPUP
+    private void CreatePopup(Vector3 position, float damage, bool isCrit, bool isFatal)
     {
-        GameObject popup = Instantiate(prefab, worldCanvas.transform);
+        GameObject popup = Instantiate(damagePrefab, worldCanvas.transform);
 
-        Vector3 enemyPos = targetTransform.position;
-        float height = isFatal ? fatalFloatHeight : floatHeight;
-        Vector3 popupPos = enemyPos + (Vector3.up * height);
+        float height = isFatal ? floatHeight * 1.5f : floatHeight;
+        Vector3 popupPos = position + (Vector3.up * height);
 
         popup.transform.position = popupPos;
         popup.transform.rotation = Quaternion.identity;
 
-        // Configura texto
+        // Configurar texto
         SetupText(popup, damage, isCrit, isFatal);
 
-        // Adiciona animação
-        float durationToUse = isFatal ? fatalDuration : duration;
-        popup.AddComponent<DamagePopup>().Initialize(
-            targetTransform,
+        // Adicionar animação
+        DamagePopupAnimator anim = popup.AddComponent<DamagePopupAnimator>();
+        anim.Initialize(
+            popupPos,
             isFatal ? fatalColor : (isCrit ? critColor : normalColor),
-            durationToUse,
+            isFatal ? fatalDuration : duration,
             height,
             floatSpeed,
             isFatal
         );
 
-        Destroy(popup, durationToUse + 0.5f);
-
-        Debug.Log($"✅ {(isFatal ? "DANO FATAL" : "Dano")} mostrado: {damage}");
+        Destroy(popup, (isFatal ? fatalDuration : duration) + 0.5f);
     }
 
     void SetupText(GameObject popup, float damage, bool isCrit, bool isFatal)
@@ -161,53 +139,30 @@ public class DamageNumberManager : MonoBehaviour
             {
                 textUI.color = fatalColor;
                 textUI.fontSize = fatalFontSize;
-                textUI.text = "💀 " + textUI.text + " 💀";
                 textUI.fontStyle = FontStyles.Bold;
-                textUI.outlineWidth = 0.4f;
-                textUI.outlineColor = Color.black;
             }
             else if (isCrit)
             {
                 textUI.color = critColor;
                 textUI.fontSize = critFontSize;
                 textUI.fontStyle = FontStyles.Bold;
-                textUI.outlineWidth = 0.3f;
-                textUI.outlineColor = Color.black;
             }
             else
             {
                 textUI.color = normalColor;
                 textUI.fontSize = normalFontSize;
-                textUI.outlineWidth = 0.2f;
-                textUI.outlineColor = Color.black;
             }
 
             textUI.alignment = TextAlignmentOptions.Center;
             textUI.enabled = true;
-            popup.transform.SetAsLastSibling();
-        }
-    }
-
-    [ContextMenu("🎮 Testar Dano Fatal")]
-    public void TestFatalDamage()
-    {
-        if (Application.isPlaying)
-        {
-            GameObject testTarget = new GameObject("TestFatalTarget");
-            testTarget.transform.position = new Vector3(0, 0, 0);
-
-            ShowDamageFatal(testTarget.transform, 9999, true);
-
-            Destroy(testTarget, 3f);
-            Debug.Log("✅ Teste de dano fatal executado!");
         }
     }
 }
 
-// ✅ ANIMAÇÃO ATUALIZADA
-public class DamagePopup : MonoBehaviour
+// ✅ ANIMAÇÃO DO POPUP
+public class DamagePopupAnimator : MonoBehaviour
 {
-    private Transform target;
+    private Vector3 startPosition;
     private Color originalColor;
     private float duration;
     private float floatHeight;
@@ -215,30 +170,18 @@ public class DamagePopup : MonoBehaviour
     private bool isFatal;
     private float timer = 0f;
     private TextMeshProUGUI textMesh;
-    private Vector3 startPosition;
 
-    public void Initialize(Transform targetTransform, Color color,
-                          float duration, float floatHeight, float floatSpeed, bool isFatal = false)
+    public void Initialize(Vector3 startPos, Color color, float duration,
+                          float floatHeight, float floatSpeed, bool isFatal = false)
     {
-        this.target = targetTransform;
+        this.startPosition = startPos;
         this.originalColor = color;
         this.duration = duration;
         this.floatHeight = floatHeight;
         this.floatSpeed = floatSpeed;
         this.isFatal = isFatal;
-        this.startPosition = targetTransform != null ? targetTransform.position : Vector3.zero;
 
         textMesh = GetComponentInChildren<TextMeshProUGUI>();
-
-        // Se o target for destruído, usamos a posição inicial
-        if (target == null)
-        {
-            Debug.LogWarning("⚠️ Target é nulo no início da animação!");
-        }
-    }
-
-    void Start()
-    {
         UpdatePosition();
     }
 
@@ -255,28 +198,13 @@ public class DamagePopup : MonoBehaviour
 
     void UpdatePosition()
     {
-        Vector3 currentTargetPos;
-
-        if (target != null && target.gameObject != null)
-        {
-            // Ainda existe, acompanha
-            currentTargetPos = target.position;
-        }
-        else
-        {
-            // Já foi destruído, usa posição inicial + flutuação
-            currentTargetPos = startPosition;
-        }
-
         float currentHeight = floatHeight + (floatSpeed * timer);
 
         transform.position = new Vector3(
-            currentTargetPos.x,
-            currentTargetPos.y + currentHeight,
-            currentTargetPos.z
+            startPosition.x,
+            startPosition.y + currentHeight,
+            startPosition.z
         );
-
-        transform.rotation = Quaternion.identity;
     }
 
     void UpdateAnimation(float t)
@@ -289,22 +217,9 @@ public class DamagePopup : MonoBehaviour
             textMesh.color = color;
         }
 
-        // Efeitos especiais para dano fatal
-        if (isFatal)
-        {
-            // Pulsação
-            float pulse = 1f + Mathf.Sin(t * 20f) * 0.15f;
-            transform.localScale = Vector3.one * pulse;
-
-            // Rotação leve
-            float rotation = Mathf.Sin(t * 10f) * 5f;
-            transform.rotation = Quaternion.Euler(0, 0, rotation);
-        }
-        else
-        {
-            // Escala normal
-            float scale = 1f + Mathf.Sin(t * Mathf.PI) * 0.1f;
-            transform.localScale = Vector3.one * scale;
-        }
+        // Escala
+        float scale = 1f + Mathf.Sin(t * Mathf.PI) * 0.1f;
+        if (isFatal) scale += 0.2f;
+        transform.localScale = Vector3.one * scale;
     }
 }

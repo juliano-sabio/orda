@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,13 +19,11 @@ public class InimigoController : MonoBehaviour
     public float xpPorOrbe = 5f;
     public float forcaDrop = 2f;
 
-    [Header("Dano Flutuante - Ajustes")]
+    [Header("Dano Flutuante")]
     public float alturaDanoFlutuante = 2f;
     public bool mostrarDanoAposMorte = true;
 
-    // Para controlar morte
-    private bool estaMorto = false;
-    private GameObject ultimoPopupDano;
+    private bool estaMorrendo = false;
 
     void Start()
     {
@@ -59,33 +58,33 @@ public class InimigoController : MonoBehaviour
         gameObject.name = dadosInimigo.nomeInimigo;
     }
 
-    // ✅ MÉTODO CORRIGIDO - Mostra dano mesmo em hit fatal
+    // ✅ MÉTODO PARA RECEBER DANO
     public void ReceberDano(float dano, bool isCrit = false)
     {
-        if (estaMorto) return; // Já está morto
+        if (estaMorrendo) return;
 
         vidaAtual -= dano;
 
-        Debug.Log($"💥 Dano recebido: {dano} | Vida restante: {vidaAtual} | Crítico: {isCrit}");
+        Debug.Log($"💥 Dano: {dano} | Vida: {vidaAtual} | Morrendo: {estaMorrendo}");
 
-        // 🔥 MOSTRAR DANO FLUTUANTE (IMPORTANTE: antes de verificar morte)
+        // Mostrar dano flutuante
         MostrarDanoFlutuante(dano, isCrit);
 
-        // Verifica se morreu
-        if (vidaAtual <= 0 && !estaMorto)
+        // Verificar morte
+        if (vidaAtual <= 0)
         {
-            // 🔥 DANO FATAL - mostra dano especial
+            estaMorrendo = true; // Setar como morrendo AQUI
+            Debug.Log($"💀 Vida zerada! Chamando Morrer()...");
+
+            // Mostrar dano fatal
             MostrarDanoFatal(dano, isCrit);
 
-            // Marca como morto e agenda destruição
-            estaMorto = true;
-
-            // Destrói após um pequeno delay para garantir que o dano apareça
-            StartCoroutine(MorrerComDelay(0.3f));
+            // Morrer
+            Morrer();
         }
     }
 
-    // ✅ MÉTODO PARA MOSTRAR DANO NORMAL
+    // ✅ MOSTRAR DANO FLUTUANTE
     private void MostrarDanoFlutuante(float dano, bool isCrit)
     {
         if (DamageNumberManager.Instance != null)
@@ -98,35 +97,39 @@ public class InimigoController : MonoBehaviour
         }
     }
 
-    // ✅ MÉTODO PARA MOSTRAR DANO FATAL (especial)
+    // ✅ MOSTRAR DANO FATAL
     private void MostrarDanoFatal(float danoFinal, bool isCrit)
     {
-        Debug.Log($"💀 DANO FATAL: {danoFinal} em {name}");
+        Debug.Log($"💀 DANO FATAL: {danoFinal}");
 
         if (mostrarDanoAposMorte)
         {
+            // Cria um alvo temporário
+            GameObject dummyTarget = new GameObject("DummyTarget");
+            dummyTarget.transform.position = this.transform.position;
+
             if (DamageNumberManager.Instance != null)
             {
-                // Usa o sistema principal com ajustes para dano fatal
                 DamageNumberManager.Instance.ShowDamageFatal(
-                    this.transform,
+                    dummyTarget.transform,
                     danoFinal,
                     isCrit
                 );
             }
             else
             {
-                // Cria dano fatal local
                 CriarDanoLocal(danoFinal, isCrit, true);
             }
+
+            Destroy(dummyTarget, 2f);
         }
     }
 
-    // ✅ MÉTODO PARA CRIAR DANO LOCAL (fallback)
+    // ✅ CRIAR DANO LOCAL (fallback)
     private void CriarDanoLocal(float dano, bool isCrit, bool isFatal)
     {
-        // Encontra ou cria Canvas
-        Canvas canvas = FindAnyObjectByType<Canvas>();
+        // Usando FindFirstObjectByType em vez do obsoleto
+        Canvas canvas = FindFirstObjectByType<Canvas>();
         if (canvas == null || canvas.renderMode != RenderMode.ScreenSpaceOverlay)
         {
             GameObject canvasObj = new GameObject("LocalDamageCanvas");
@@ -136,89 +139,69 @@ public class InimigoController : MonoBehaviour
             canvasObj.AddComponent<GraphicRaycaster>();
         }
 
-        // Cria o texto
         GameObject textObj = new GameObject(isFatal ? "DanoFatal" : "DanoNormal");
         textObj.transform.SetParent(canvas.transform, false);
 
-        // Converte posição
         Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
         screenPos.y += 60;
         textObj.transform.position = screenPos;
 
-        // TextMeshProUGUI
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
         text.text = Mathf.RoundToInt(dano).ToString();
         text.alignment = TextAlignmentOptions.Center;
 
         if (isFatal)
         {
-            // Estilo para dano fatal
             text.fontSize = 48;
             text.color = Color.red;
-            text.text = "💀 " + text.text + " 💀";
+            text.text = "💀 " + text.text;
             text.fontStyle = FontStyles.Bold;
-            text.outlineWidth = 0.4f;
-            text.outlineColor = Color.black;
         }
         else if (isCrit)
         {
             text.fontSize = 36;
             text.color = Color.yellow;
             text.fontStyle = FontStyles.Bold;
-            text.outlineWidth = 0.3f;
-            text.outlineColor = Color.black;
         }
         else
         {
             text.fontSize = 28;
             text.color = Color.white;
-            text.outlineWidth = 0.2f;
-            text.outlineColor = Color.black;
         }
 
-        // Animação
-        textObj.AddComponent<LocalDamageAnimator>().Initialize(isFatal);
+        // Adiciona animação local
+        textObj.AddComponent<DamageAnimatorLocal>().Initialize(isFatal);
 
-        Destroy(textObj, isFatal ? 1.5f : 1f);
+        Destroy(textObj, isFatal ? 2f : 1f);
     }
 
-    // ✅ MÉTODO PARA MORRER COM DELAY (garante que dano apareça)
-    private System.Collections.IEnumerator MorrerComDelay(float delay)
-    {
-        // Opcional: efeito visual de morte
-        SpriteRenderer sprite = GetComponent<SpriteRenderer>();
-        if (sprite != null)
-        {
-            Color originalColor = sprite.color;
-            sprite.color = Color.red;
-            yield return new WaitForSeconds(delay * 0.5f);
-            sprite.color = originalColor;
-        }
-
-        yield return new WaitForSeconds(delay);
-
-        // Agora sim morre
-        Morrer();
-    }
-
-    // ✅ MÉTODO CHAMADO QUANDO O INIMIGO MORRE
+    // ✅ MÉTODO PARA MORRER
     public void Morrer()
     {
-        if (estaMorto) return; // Já está processando morte
+        if (estaMorrendo && vidaAtual <= 0) // Adicionei verificação extra
+        {
+            Debug.Log($"☠️ {dadosInimigo?.nomeInimigo} MORTO! Destruindo...");
 
-        estaMorto = true;
-        Debug.Log($"☠️ {dadosInimigo.nomeInimigo} morreu!");
+            // Dropar XP
+            DroparOrbesXP();
 
-        DroparOrbesXP();
-
-        // Destrói o GameObject
-        Destroy(gameObject);
+            // Destruir
+            Destroy(gameObject);
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ Tentativa de Morrer() bloqueada. estaMorrendo: {estaMorrendo}, vidaAtual: {vidaAtual}");
+        }
     }
 
-    // ✅ MÉTODO PARA DROPAR ORBES DE XP
-    public void DroparOrbesXP()
+    // ✅ DROPAR ORBES DE XP
+    private void DroparOrbesXP()
     {
-        if (xpOrbPrefab == null) return;
+        if (xpOrbPrefab == null)
+        {
+            Debug.LogWarning("⚠️ xpOrbPrefab não configurado!");
+            return;
+        }
 
         int quantidadeOrbes = UnityEngine.Random.Range(minOrbs, maxOrbs + 1);
 
@@ -242,17 +225,19 @@ public class InimigoController : MonoBehaviour
                 rb.AddForce(direcaoAleatoria * forcaDrop, ForceMode2D.Impulse);
             }
         }
+
+        Debug.Log($"💫 Dropou {quantidadeOrbes} orbes de XP!");
     }
 
-    // ✅ MÉTODO PARA CONFIGURAR DROP PERSONALIZADO
-    public void ConfigurarDrop(int minOrbes, int maxOrbes, float xpPorOrbe)
+    // ✅ CONFIGURAR DROP
+    public void ConfigurarDrop(int novoMinOrbes, int novoMaxOrbes, float novoXpPorOrbe)
     {
-        this.minOrbs = minOrbes;
-        this.maxOrbs = maxOrbes;
-        this.xpPorOrbe = xpPorOrbe;
+        this.minOrbs = novoMinOrbes;
+        this.maxOrbs = novoMaxOrbes;
+        this.xpPorOrbe = novoXpPorOrbe;
     }
 
-    // ✅ MÉTODO COM VERIFICAÇÃO DE SEGURANÇA
+    // ✅ APLICAR DIFICULDADE
     public void AplicarDificuldade(float multiplicador)
     {
         if (dadosInimigo == null) return;
@@ -268,8 +253,8 @@ public class InimigoController : MonoBehaviour
     }
 }
 
-// ✅ ANIMAÇÃO PARA DANO LOCAL
-public class LocalDamageAnimator : MonoBehaviour
+// ✅ CLASSE DE ANIMAÇÃO LOCAL (nome corrigido)
+public class DamageAnimatorLocal : MonoBehaviour
 {
     private TextMeshProUGUI textMesh;
     private bool isFatal = false;
@@ -289,7 +274,7 @@ public class LocalDamageAnimator : MonoBehaviour
 
         timer += Time.deltaTime;
 
-        // Move para cima mais rápido se for fatal
+        // Move para cima
         float speed = isFatal ? 120f : 80f;
         transform.position = startPos + new Vector3(0, speed * timer, 0);
 
