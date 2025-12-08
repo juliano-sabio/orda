@@ -133,14 +133,13 @@ MonoBehaviour:
   dadosInimigo: {fileID: 11400000, guid: 7fc3fa49b321338499a24b9535a6c71f, type: 2}
   vidaAtual: 70
   danoAtual: 10
-  xpOrbPrefab: {fileID: 0}
+  xpOrbPrefab: {fileID: 5474482276103127882, guid: 29d7f5f9a2eead4459f01468bb1bb4bf, type: 3}
   minOrbs: 1
   maxOrbs: 3
   xpPorOrbe: 5
   forcaDrop: 2
-  damageNumberHeight: 2
-  normalDamageColor: {r: 1, g: 1, b: 1, a: 1}
-  critDamageColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  alturaDanoFlutuante: 2
+  mostrarDanoAposMorte: 1
 --- !u!114 &4536141257480560677
 MonoBehaviour:
   m_ObjectHideFlags: 0

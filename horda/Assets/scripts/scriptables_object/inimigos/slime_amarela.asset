@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: slime_amarela
   m_EditorClassIdentifier: Assembly-CSharp::InimigoData
   nomeInimigo: slime_amarela
-  prefab: {fileID: 0}
+  prefab: {fileID: 660073927140639537, guid: 9b5bea019ec35b845a7fac66039f36e0, type: 3}
   icon: {fileID: 0}
   vidaBase: 70
   danoBase: 10

@@ -1,83 +1,84 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class XPOrb : MonoBehaviour
 {
-    [Header("Configurações da Orbe de XP")]
+    [Header("ConfiguraÃ§Ãµes")]
     public float xpValue = 10f;
-    public float attractionSpeed = 5f;
-    public float collectionRadius = 2f;
+    public float moveSpeed = 3f;
     public AudioClip collectSound;
-
-    [Header("Efeitos Visuais")]
     public ParticleSystem collectParticles;
+
+    [Header("Visual")]
     public float rotationSpeed = 100f;
-    public float floatAmplitude = 0.2f;
-    public float floatFrequency = 2f;
 
     private Transform player;
     private bool isAttracted = false;
-    private Vector3 startPosition;
-    private float startTime;
+    private PlayerStats playerStats;
 
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        startPosition = transform.position;
-        startTime = Time.time;
+        if (player != null)
+        {
+            playerStats = player.GetComponent<PlayerStats>();
+            Debug.Log($"ðŸŽ¯ Orbe criada. Player em: ({player.position.x:F1}, {player.position.y:F1})");
+        }
     }
 
     void Update()
     {
-        // Animação de flutuação
-        FloatAnimation();
+        // 1. RotaÃ§Ã£o visual
+        transform.Rotate(0, 0, rotationSpeed * Time.deltaTime);
 
-        // Rotação
-        transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+        // 2. Verificar se deve mover
+        if (!isAttracted && player != null)
+        {
+            CheckDistance();
+        }
 
-        // Atração para o jogador
+        // 3. MOVER se atraÃ­da
         if (isAttracted && player != null)
         {
-            MoveTowardsPlayer();
-        }
-        else if (player != null)
-        {
-            CheckPlayerProximity();
+            MoveToPlayer();
         }
     }
 
-    private void FloatAnimation()
+    void CheckDistance()
     {
-        float newY = startPosition.y + Mathf.Sin((Time.time - startTime) * floatFrequency) * floatAmplitude;
-        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
-    }
+        if (playerStats == null) return;
 
-    private void CheckPlayerProximity()
-    {
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        PlayerStats playerStats = player.GetComponent<PlayerStats>();
+        float distX = player.position.x - transform.position.x;
+        float distY = player.position.y - transform.position.y;
+        float distance = Mathf.Sqrt(distX * distX + distY * distY);
 
-        if (playerStats != null && distanceToPlayer <= playerStats.GetXpCollectionRadius())
+        if (distance <= playerStats.GetXpCollectionRadius())
         {
             isAttracted = true;
+            Debug.Log($"ðŸŽ¯ ATRAINDO! DistÃ¢ncia: {distance:F1}");
         }
     }
 
-    private void MoveTowardsPlayer()
+    void MoveToPlayer()
     {
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * attractionSpeed * Time.deltaTime;
+        // MOVIMENTO SIMPLES DIRETO
+        Vector3 moveDirection = (player.position - transform.position).normalized;
 
-        // Verifica se chegou perto o suficiente do jogador para coletar
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        if (distanceToPlayer <= 0.5f)
+        // DEBUG: Mostrar direÃ§Ã£o
+        Debug.Log($"âž¡ï¸ Movendo - DireÃ§Ã£o: ({moveDirection.x:F2}, {moveDirection.y:F2})");
+
+        // APLICAR MOVIMENTO
+        transform.position += moveDirection * moveSpeed * Time.deltaTime;
+
+        // Verificar se chegou
+        float distance = Vector3.Distance(transform.position, player.position);
+        if (distance < 0.5f)
         {
             Collect();
         }
     }
 
-    private void Collect()
+    void Collect()
     {
-        PlayerStats playerStats = player.GetComponent<PlayerStats>();
         if (playerStats != null)
         {
             playerStats.GainXP(xpValue);
@@ -86,16 +87,29 @@ public class XPOrb : MonoBehaviour
                 AudioSource.PlayClipAtPoint(collectSound, transform.position);
 
             if (collectParticles != null)
+            {
                 Instantiate(collectParticles, transform.position, Quaternion.identity);
+            }
 
+            Debug.Log($"ðŸ’« Coletada! +{xpValue} XP");
             Destroy(gameObject);
         }
     }
 
-    void OnDrawGizmosSelected()
+    void OnTriggerEnter2D(Collider2D other)
     {
-        // Visualização do raio de atração no Editor
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, 0.5f);
+        if (other.CompareTag("Player"))
+        {
+            Collect();
+        }
+    }
+
+    void OnDrawGizmos()
+    {
+        if (player != null)
+        {
+            Gizmos.color = isAttracted ? Color.green : Color.yellow;
+            Gizmos.DrawLine(transform.position, player.position);
+        }
     }
 }
