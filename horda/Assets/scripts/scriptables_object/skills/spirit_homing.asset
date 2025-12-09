@@ -116,8 +116,8 @@ MonoBehaviour:
   projectileSpread: 0
   homingProjectile: 1
   homingStrength: 2
-  pierceEnemies: 0
-  pierceCount: 1
+  pierceEnemies: 1
+  pierceCount: 3
   bounceBetweenEnemies: 0
   bounceCount: 0
   explodeOnImpact: 0
