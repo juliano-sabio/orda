@@ -29,7 +29,13 @@ public class InimigoData : ScriptableObject
     public TipoComportamento comportamento = TipoComportamento.Melee;
     public float distanciaAtaque = 2f;
     public float distanciaPerseguicao = 8f;
+
+    [Header("Habilidades de Suporte")]
+    public bool temCuraEmArea = false;
+    public float taxaCuraBase = 10f;
+    public float raioCuraBase = 5f;
 }
+
 
 public enum TipoComportamento
 {

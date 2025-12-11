@@ -4,23 +4,27 @@ using UnityEngine.UI;
 
 public class DamageNumberManager : MonoBehaviour
 {
-    [Header("🔧 PREFAB")]
+    [Header("🔧 PREFABS")]
     public GameObject damagePrefab;
+    public GameObject healPrefab; // NOVO: Prefab para cura
 
     [Header("📏 CONFIGURAÇÃO")]
     public float canvasScale = 0.15f;
     public int normalFontSize = 24;
     public int critFontSize = 32;
     public int fatalFontSize = 48;
+    public int healFontSize = 28; // NOVO: Tamanho para cura
 
     [Header("🎨 CORES")]
     public Color normalColor = Color.white;
     public Color critColor = Color.yellow;
     public Color fatalColor = Color.red;
+    public Color healColor = Color.green; // NOVO: Cor para cura
 
     [Header("⏱️ TEMPO")]
     public float duration = 1f;
     public float fatalDuration = 1.5f;
+    public float healDuration = 1f; // NOVO: Duração para cura
     public float floatSpeed = 2f;
     public float floatHeight = 1.5f;
 
@@ -33,7 +37,6 @@ public class DamageNumberManager : MonoBehaviour
         {
             if (_instance == null)
             {
-                // 🔥 Usando FindFirstObjectByType
                 _instance = FindFirstObjectByType<DamageNumberManager>();
             }
             return _instance;
@@ -54,7 +57,6 @@ public class DamageNumberManager : MonoBehaviour
 
     void CreateCanvas()
     {
-        // 🔥 Usando FindObjectsByType
         Canvas[] oldCanvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
         foreach (Canvas canvas in oldCanvases)
         {
@@ -87,7 +89,7 @@ public class DamageNumberManager : MonoBehaviour
         if (targetTransform == null || worldCanvas == null || damagePrefab == null)
             return;
 
-        CreatePopup(targetTransform.position, damage, isCrit, false);
+        CreatePopup(targetTransform.position, damage, isCrit, false, false);
     }
 
     // ✅ DANO FATAL
@@ -96,59 +98,100 @@ public class DamageNumberManager : MonoBehaviour
         if (targetTransform == null || worldCanvas == null || damagePrefab == null)
             return;
 
-        CreatePopup(targetTransform.position, damage, isCrit, true);
+        CreatePopup(targetTransform.position, damage, isCrit, true, false);
     }
 
-    // ✅ CRIAR POPUP
-    private void CreatePopup(Vector3 position, float damage, bool isCrit, bool isFatal)
+    // ✅ NOVO: MOSTRAR CURA
+    public void ShowHeal(Transform targetTransform, float healAmount)
     {
-        GameObject popup = Instantiate(damagePrefab, worldCanvas.transform);
+        if (targetTransform == null || worldCanvas == null)
+            return;
+
+        // Usar healPrefab se existir, senão usar damagePrefab
+        GameObject prefabToUse = healPrefab != null ? healPrefab : damagePrefab;
+        if (prefabToUse == null) return;
+
+        CreatePopup(targetTransform.position, healAmount, false, false, true);
+    }
+
+    // ✅ CRIAR POPUP (ATUALIZADO)
+    private void CreatePopup(Vector3 position, float value, bool isCrit, bool isFatal, bool isHeal)
+    {
+        GameObject prefab = isHeal ? (healPrefab != null ? healPrefab : damagePrefab) : damagePrefab;
+        if (prefab == null) return;
+
+        GameObject popup = Instantiate(prefab, worldCanvas.transform);
 
         float height = isFatal ? floatHeight * 1.5f : floatHeight;
-        Vector3 popupPos = position + (Vector3.up * height);
+        if (isHeal) height += 0.3f; // Cura aparece um pouco mais alto
 
+        Vector3 popupPos = position + (Vector3.up * height);
         popup.transform.position = popupPos;
         popup.transform.rotation = Quaternion.identity;
 
         // Configurar texto
-        SetupText(popup, damage, isCrit, isFatal);
+        SetupText(popup, value, isCrit, isFatal, isHeal);
 
         // Adicionar animação
         DamagePopupAnimator anim = popup.AddComponent<DamagePopupAnimator>();
         anim.Initialize(
             popupPos,
-            isFatal ? fatalColor : (isCrit ? critColor : normalColor),
-            isFatal ? fatalDuration : duration,
+            GetColor(isCrit, isFatal, isHeal),
+            GetDuration(isFatal, isHeal),
             height,
             floatSpeed,
-            isFatal
+            isFatal,
+            isHeal
         );
 
-        Destroy(popup, (isFatal ? fatalDuration : duration) + 0.5f);
+        Destroy(popup, GetDuration(isFatal, isHeal) + 0.5f);
     }
 
-    void SetupText(GameObject popup, float damage, bool isCrit, bool isFatal)
+    Color GetColor(bool isCrit, bool isFatal, bool isHeal)
+    {
+        if (isHeal) return healColor;
+        if (isFatal) return fatalColor;
+        if (isCrit) return critColor;
+        return normalColor;
+    }
+
+    float GetDuration(bool isFatal, bool isHeal)
+    {
+        if (isHeal) return healDuration;
+        if (isFatal) return fatalDuration;
+        return duration;
+    }
+
+    void SetupText(GameObject popup, float value, bool isCrit, bool isFatal, bool isHeal)
     {
         TextMeshProUGUI textUI = popup.GetComponentInChildren<TextMeshProUGUI>();
 
         if (textUI != null)
         {
-            textUI.text = Mathf.RoundToInt(damage).ToString();
-
-            if (isFatal)
+            // Formatar texto baseado no tipo
+            if (isHeal)
             {
+                textUI.text = "+" + Mathf.RoundToInt(value).ToString();
+                textUI.color = healColor;
+                textUI.fontSize = healFontSize;
+            }
+            else if (isFatal)
+            {
+                textUI.text = "💀 " + Mathf.RoundToInt(value).ToString();
                 textUI.color = fatalColor;
                 textUI.fontSize = fatalFontSize;
                 textUI.fontStyle = FontStyles.Bold;
             }
             else if (isCrit)
             {
+                textUI.text = Mathf.RoundToInt(value).ToString();
                 textUI.color = critColor;
                 textUI.fontSize = critFontSize;
                 textUI.fontStyle = FontStyles.Bold;
             }
             else
             {
+                textUI.text = Mathf.RoundToInt(value).ToString();
                 textUI.color = normalColor;
                 textUI.fontSize = normalFontSize;
             }
@@ -159,7 +202,7 @@ public class DamageNumberManager : MonoBehaviour
     }
 }
 
-// ✅ ANIMAÇÃO DO POPUP
+// ✅ ANIMAÇÃO DO POPUP (ATUALIZADA)
 public class DamagePopupAnimator : MonoBehaviour
 {
     private Vector3 startPosition;
@@ -168,11 +211,13 @@ public class DamagePopupAnimator : MonoBehaviour
     private float floatHeight;
     private float floatSpeed;
     private bool isFatal;
+    private bool isHeal;
     private float timer = 0f;
     private TextMeshProUGUI textMesh;
 
     public void Initialize(Vector3 startPos, Color color, float duration,
-                          float floatHeight, float floatSpeed, bool isFatal = false)
+                          float floatHeight, float floatSpeed,
+                          bool isFatal = false, bool isHeal = false)
     {
         this.startPosition = startPos;
         this.originalColor = color;
@@ -180,6 +225,7 @@ public class DamagePopupAnimator : MonoBehaviour
         this.floatHeight = floatHeight;
         this.floatSpeed = floatSpeed;
         this.isFatal = isFatal;
+        this.isHeal = isHeal;
 
         textMesh = GetComponentInChildren<TextMeshProUGUI>();
         UpdatePosition();
@@ -199,7 +245,6 @@ public class DamagePopupAnimator : MonoBehaviour
     void UpdatePosition()
     {
         float currentHeight = floatHeight + (floatSpeed * timer);
-
         transform.position = new Vector3(
             startPosition.x,
             startPosition.y + currentHeight,
@@ -217,9 +262,25 @@ public class DamagePopupAnimator : MonoBehaviour
             textMesh.color = color;
         }
 
-        // Escala
-        float scale = 1f + Mathf.Sin(t * Mathf.PI) * 0.1f;
-        if (isFatal) scale += 0.2f;
+        // Efeitos especiais
+        float scale = 1f;
+
+        if (isHeal)
+        {
+            // Pulso suave para cura
+            scale = 1f + Mathf.Sin(t * Mathf.PI * 2) * 0.1f;
+        }
+        else if (isFatal)
+        {
+            // Pulso mais forte para fatal
+            scale = 1f + Mathf.Sin(t * Mathf.PI * 3) * 0.2f;
+        }
+        else
+        {
+            // Leve pulso para dano normal
+            scale = 1f + Mathf.Sin(t * Mathf.PI) * 0.05f;
+        }
+
         transform.localScale = Vector3.one * scale;
     }
 }

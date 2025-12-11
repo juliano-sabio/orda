@@ -11,6 +11,7 @@ public class InimigoController : MonoBehaviour
     [Header("Status Atuais")]
     public float vidaAtual;
     public float danoAtual;
+    public float vidaMaxima;
 
     [Header("Sistema de Drop de XP")]
     public GameObject xpOrbPrefab;
@@ -23,10 +24,32 @@ public class InimigoController : MonoBehaviour
     public float alturaDanoFlutuante = 2f;
     public bool mostrarDanoAposMorte = true;
 
+    [Header("Sistema de Cura")]
+    public bool podeReceberCura = true;
+    public float multiplicadorCuraRecebida = 1f;
+    public bool mostrarCuraFlutuante = true;
+    public Color corCura = Color.green;
+    private bool temInimigoSuporte = false;
+    private InimigoSuporte suporteComponent;
+
+    [Header("Efeitos de Status")]
+    public bool temBuffDefesa = false;
+    public float bonusDefesa = 0f;
+    public float tempoRestanteBuff = 0f;
+    private float danoOriginal;
+
     private bool estaMorrendo = false;
+    private SpriteRenderer spriteRenderer;
+    private Color corOriginal;
 
     void Start()
     {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            corOriginal = spriteRenderer.color;
+        }
+
         InicializarComData();
     }
 
@@ -39,7 +62,9 @@ public class InimigoController : MonoBehaviour
         }
 
         vidaAtual = dadosInimigo.vidaBase;
+        vidaMaxima = dadosInimigo.vidaBase;
         danoAtual = dadosInimigo.danoBase;
+        danoOriginal = danoAtual;
 
         DanoInimigo danoComponent = GetComponent<DanoInimigo>();
         if (danoComponent != null)
@@ -48,7 +73,6 @@ public class InimigoController : MonoBehaviour
             danoComponent.intervaloAtaque = dadosInimigo.intervaloAtaque;
         }
 
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null && dadosInimigo.icon != null)
         {
             spriteRenderer.sprite = dadosInimigo.icon;
@@ -56,35 +80,138 @@ public class InimigoController : MonoBehaviour
 
         transform.localScale = Vector3.one * dadosInimigo.tamanho;
         gameObject.name = dadosInimigo.nomeInimigo;
+
+        suporteComponent = GetComponent<InimigoSuporte>();
+        temInimigoSuporte = (suporteComponent != null);
+
+        Debug.Log($"⚙️ {gameObject.name} inicializado | Vida: {vidaAtual}/{vidaMaxima} | Tem Suporte: {temInimigoSuporte}");
     }
 
-    // ✅ MÉTODO PARA RECEBER DANO
     public void ReceberDano(float dano, bool isCrit = false)
     {
         if (estaMorrendo) return;
 
+        if (temBuffDefesa && bonusDefesa > 0)
+        {
+            float reducao = dano * bonusDefesa;
+            dano -= reducao;
+            Debug.Log($"🛡️ Defesa reduziu {reducao:F1} de dano. Dano final: {dano:F1}");
+        }
+
         vidaAtual -= dano;
 
-        Debug.Log($"💥 Dano: {dano} | Vida: {vidaAtual} | Morrendo: {estaMorrendo}");
+        Debug.Log($"💥 Dano: {dano:F1} | Vida: {vidaAtual:F1}/{vidaMaxima:F1}");
 
-        // Mostrar dano flutuante
         MostrarDanoFlutuante(dano, isCrit);
+        StartCoroutine(EfeitoVisualDano());
 
-        // Verificar morte
         if (vidaAtual <= 0)
         {
-            estaMorrendo = true; // Setar como morrendo AQUI
+            vidaAtual = 0;
+            estaMorrendo = true;
             Debug.Log($"💀 Vida zerada! Chamando Morrer()...");
 
-            // Mostrar dano fatal
             MostrarDanoFatal(dano, isCrit);
-
-            // Morrer
             Morrer();
         }
     }
 
-    // ✅ MOSTRAR DANO FLUTUANTE
+    public void ReceberCura(float quantidadeCura, bool mostrarEfeito = true)
+    {
+        if (estaMorrendo || !podeReceberCura || vidaAtual >= vidaMaxima) return;
+
+        float curaFinal = quantidadeCura * multiplicadorCuraRecebida;
+        float vidaAntes = vidaAtual;
+
+        vidaAtual = Mathf.Min(vidaAtual + curaFinal, vidaMaxima);
+        float curaReal = vidaAtual - vidaAntes;
+
+        Debug.Log($"💚 Cura: +{curaReal:F1} | Vida: {vidaAtual:F1}/{vidaMaxima:F1}");
+
+        if (mostrarEfeito && mostrarCuraFlutuante)
+        {
+            MostrarCuraFlutuante(curaReal);
+            StartCoroutine(EfeitoVisualCura());
+        }
+    }
+
+    public void AplicarBuffDefesa(float bonus, float duracao)
+    {
+        if (estaMorrendo) return;
+
+        bonusDefesa = bonus;
+        tempoRestanteBuff = duracao;
+
+        if (!temBuffDefesa)
+        {
+            temBuffDefesa = true;
+            danoOriginal = danoAtual;
+            danoAtual = danoOriginal * (1f - bonusDefesa);
+
+            DanoInimigo danoComponent = GetComponent<DanoInimigo>();
+            if (danoComponent != null)
+            {
+                danoComponent.SetDano(danoAtual);
+            }
+        }
+
+        Debug.Log($"🛡️ Buff de defesa aplicado: +{bonus * 100}% | Duração: {duracao}s");
+
+        StopCoroutine("GerenciarBuffDefesa");
+        StartCoroutine(GerenciarBuffDefesa(duracao));
+
+        StartCoroutine(EfeitoVisualBuff());
+    }
+
+    private IEnumerator GerenciarBuffDefesa(float duracao)
+    {
+        tempoRestanteBuff = duracao;
+
+        while (tempoRestanteBuff > 0)
+        {
+            yield return null;
+            tempoRestanteBuff -= Time.deltaTime;
+
+            if (tempoRestanteBuff < 3f && tempoRestanteBuff > 0)
+            {
+                float pingPong = Mathf.PingPong(Time.time * 10f, 1f);
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.color = Color.Lerp(corOriginal, new Color(0.5f, 0.5f, 1f, 1f), pingPong);
+                }
+            }
+        }
+
+        RemoverBuffDefesa();
+    }
+
+    private void RemoverBuffDefesa()
+    {
+        temBuffDefesa = false;
+        bonusDefesa = 0f;
+        tempoRestanteBuff = 0f;
+        danoAtual = danoOriginal;
+
+        DanoInimigo danoComponent = GetComponent<DanoInimigo>();
+        if (danoComponent != null)
+        {
+            danoComponent.SetDano(danoAtual);
+        }
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = corOriginal;
+        }
+
+        Debug.Log($"🛡️ Buff de defesa removido");
+    }
+
+    private void MostrarCuraFlutuante(float quantidade)
+    {
+        // Sistema alternativo já que seu DamageNumberManager não tem ShowHeal
+        CriarTextoFlutuante(quantidade, corCura, "+", 24);
+    }
+
     private void MostrarDanoFlutuante(float dano, bool isCrit)
     {
         if (DamageNumberManager.Instance != null)
@@ -93,99 +220,115 @@ public class InimigoController : MonoBehaviour
         }
         else
         {
-            CriarDanoLocal(dano, isCrit, false);
+            CriarTextoFlutuante(dano, isCrit ? Color.yellow : Color.white, "", 28);
         }
     }
 
-    // ✅ MOSTRAR DANO FATAL
     private void MostrarDanoFatal(float danoFinal, bool isCrit)
     {
         Debug.Log($"💀 DANO FATAL: {danoFinal}");
 
         if (mostrarDanoAposMorte)
         {
-            // Cria um alvo temporário
             GameObject dummyTarget = new GameObject("DummyTarget");
             dummyTarget.transform.position = this.transform.position;
 
             if (DamageNumberManager.Instance != null)
             {
-                DamageNumberManager.Instance.ShowDamageFatal(
-                    dummyTarget.transform,
-                    danoFinal,
-                    isCrit
-                );
+                DamageNumberManager.Instance.ShowDamageFatal(dummyTarget.transform, danoFinal, isCrit);
             }
             else
             {
-                CriarDanoLocal(danoFinal, isCrit, true);
+                CriarTextoFlutuante(danoFinal, Color.red, "💀 ", 48);
             }
 
             Destroy(dummyTarget, 2f);
         }
     }
 
-    // ✅ CRIAR DANO LOCAL (fallback)
-    private void CriarDanoLocal(float dano, bool isCrit, bool isFatal)
+    private void CriarTextoFlutuante(float valor, Color cor, string prefixo = "", int fontSize = 24)
     {
-        // Usando FindFirstObjectByType em vez do obsoleto
         Canvas canvas = FindFirstObjectByType<Canvas>();
-        if (canvas == null || canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+        if (canvas == null)
         {
-            GameObject canvasObj = new GameObject("LocalDamageCanvas");
+            GameObject canvasObj = new GameObject("TempCanvas");
             canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvasObj.AddComponent<CanvasScaler>();
             canvasObj.AddComponent<GraphicRaycaster>();
         }
 
-        GameObject textObj = new GameObject(isFatal ? "DanoFatal" : "DanoNormal");
+        GameObject textObj = new GameObject("TextoFlutuante");
         textObj.transform.SetParent(canvas.transform, false);
 
         Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-        screenPos.y += 60;
+        screenPos.y += 80;
         textObj.transform.position = screenPos;
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-        text.text = Mathf.RoundToInt(dano).ToString();
+        text.text = prefixo + Mathf.RoundToInt(valor).ToString();
         text.alignment = TextAlignmentOptions.Center;
+        text.fontSize = fontSize;
+        text.color = cor;
+        text.fontStyle = FontStyles.Bold;
 
-        if (isFatal)
-        {
-            text.fontSize = 48;
-            text.color = Color.red;
-            text.text = "💀 " + text.text;
-            text.fontStyle = FontStyles.Bold;
-        }
-        else if (isCrit)
-        {
-            text.fontSize = 36;
-            text.color = Color.yellow;
-            text.fontStyle = FontStyles.Bold;
-        }
-        else
-        {
-            text.fontSize = 28;
-            text.color = Color.white;
-        }
+        // Adicionar animação simples
+        textObj.AddComponent<AnimacaoTextoFlutuante>().Initialize(screenPos);
 
-        // Adiciona animação local
-        textObj.AddComponent<DamageAnimatorLocal>().Initialize(isFatal);
-
-        Destroy(textObj, isFatal ? 2f : 1f);
+        Destroy(textObj, 1.5f);
     }
 
-    // ✅ MÉTODO PARA MORRER
+    private IEnumerator EfeitoVisualDano()
+    {
+        if (spriteRenderer == null) yield break;
+
+        spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(0.1f);
+
+        if (!estaMorrendo)
+        {
+            spriteRenderer.color = corOriginal;
+        }
+    }
+
+    private IEnumerator EfeitoVisualCura()
+    {
+        if (spriteRenderer == null) yield break;
+
+        spriteRenderer.color = corCura;
+        yield return new WaitForSeconds(0.2f);
+
+        if (!estaMorrendo)
+        {
+            spriteRenderer.color = corOriginal;
+        }
+    }
+
+    private IEnumerator EfeitoVisualBuff()
+    {
+        if (spriteRenderer == null) yield break;
+
+        for (int i = 0; i < 3; i++)
+        {
+            spriteRenderer.color = new Color(0.5f, 0.5f, 1f, 1f);
+            yield return new WaitForSeconds(0.1f);
+            spriteRenderer.color = corOriginal;
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
     public void Morrer()
     {
-        if (estaMorrendo && vidaAtual <= 0) // Adicionei verificação extra
+        if (estaMorrendo && vidaAtual <= 0)
         {
             Debug.Log($"☠️ {dadosInimigo?.nomeInimigo} MORTO! Destruindo...");
 
-            // Dropar XP
-            DroparOrbesXP();
+            if (suporteComponent != null)
+            {
+                suporteComponent.AtivarCura(false);
+            }
 
-            // Destruir
+            DroparOrbesXP();
             Destroy(gameObject);
         }
         else
@@ -194,7 +337,6 @@ public class InimigoController : MonoBehaviour
         }
     }
 
-    // ✅ DROPAR ORBES DE XP
     private void DroparOrbesXP()
     {
         if (xpOrbPrefab == null)
@@ -229,7 +371,6 @@ public class InimigoController : MonoBehaviour
         Debug.Log($"💫 Dropou {quantidadeOrbes} orbes de XP!");
     }
 
-    // ✅ CONFIGURAR DROP
     public void ConfigurarDrop(int novoMinOrbes, int novoMaxOrbes, float novoXpPorOrbe)
     {
         this.minOrbs = novoMinOrbes;
@@ -237,13 +378,14 @@ public class InimigoController : MonoBehaviour
         this.xpPorOrbe = novoXpPorOrbe;
     }
 
-    // ✅ APLICAR DIFICULDADE
     public void AplicarDificuldade(float multiplicador)
     {
         if (dadosInimigo == null) return;
 
         vidaAtual = dadosInimigo.vidaBase * multiplicador;
+        vidaMaxima = vidaAtual;
         danoAtual = dadosInimigo.danoBase * multiplicador;
+        danoOriginal = danoAtual;
 
         DanoInimigo danoComponent = GetComponent<DanoInimigo>();
         if (danoComponent != null)
@@ -251,21 +393,57 @@ public class InimigoController : MonoBehaviour
             danoComponent.dano = danoAtual;
         }
     }
+
+    public float GetPorcentagemVida()
+    {
+        if (vidaMaxima <= 0) return 0f;
+        return vidaAtual / vidaMaxima;
+    }
+
+    public void SetPodeReceberCura(bool podeReceber)
+    {
+        podeReceberCura = podeReceber;
+        Debug.Log($"💚 {gameObject.name} pode receber cura: {podeReceberCura}");
+    }
+
+    public void SetMultiplicadorCura(float multiplicador)
+    {
+        multiplicadorCuraRecebida = Mathf.Max(0, multiplicador);
+        Debug.Log($"💚 {gameObject.name} multiplicador de cura: {multiplicadorCuraRecebida}x");
+    }
+
+    public void RestaurarVidaCompleta()
+    {
+        vidaAtual = vidaMaxima;
+        Debug.Log($"💚 {gameObject.name} vida completamente restaurada: {vidaAtual}/{vidaMaxima}");
+    }
+
+    [ContextMenu("📊 Debug Status")]
+    public void DebugStatus()
+    {
+        Debug.Log($"=== STATUS {gameObject.name.ToUpper()} ===");
+        Debug.Log($"❤️ Vida: {vidaAtual:F1}/{vidaMaxima:F1} ({GetPorcentagemVida() * 100:F1}%)");
+        Debug.Log($"🗡️ Dano: {danoAtual:F1} (Original: {danoOriginal:F1})");
+        Debug.Log($"🛡️ Buff Defesa: {temBuffDefesa} ({bonusDefesa * 100:F1}%) | Tempo: {tempoRestanteBuff:F1}s");
+        Debug.Log($"💚 Pode Receber Cura: {podeReceberCura}");
+        Debug.Log($"💚 Multiplicador Cura: {multiplicadorCuraRecebida}x");
+        Debug.Log($"✨ Tem Suporte: {temInimigoSuporte}");
+        Debug.Log($"💀 Morrendo: {estaMorrendo}");
+        Debug.Log("=============================");
+    }
 }
 
-// ✅ CLASSE DE ANIMAÇÃO LOCAL (nome corrigido)
-public class DamageAnimatorLocal : MonoBehaviour
+// Classe separada para animação de texto flutuante
+public class AnimacaoTextoFlutuante : MonoBehaviour
 {
     private TextMeshProUGUI textMesh;
-    private bool isFatal = false;
-    private float timer = 0f;
     private Vector3 startPos;
+    private float timer = 0f;
 
-    public void Initialize(bool fatal)
+    public void Initialize(Vector3 startPosition)
     {
-        this.isFatal = fatal;
         textMesh = GetComponent<TextMeshProUGUI>();
-        startPos = transform.position;
+        startPos = startPosition;
     }
 
     void Update()
@@ -275,22 +453,15 @@ public class DamageAnimatorLocal : MonoBehaviour
         timer += Time.deltaTime;
 
         // Move para cima
-        float speed = isFatal ? 120f : 80f;
+        float speed = 80f;
         transform.position = startPos + new Vector3(0, speed * timer, 0);
 
         // Fade out
         Color color = textMesh.color;
-        color.a = 1f - (timer / (isFatal ? 1.5f : 1f));
+        color.a = 1f - (timer / 1f);
         textMesh.color = color;
 
-        // Efeito especial para fatal
-        if (isFatal)
-        {
-            float scale = 1f + Mathf.Sin(timer * 10f) * 0.2f;
-            transform.localScale = Vector3.one * scale;
-        }
-
-        if (timer >= (isFatal ? 1.5f : 1f))
+        if (timer >= 1f)
             Destroy(gameObject);
     }
 }

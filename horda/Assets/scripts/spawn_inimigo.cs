@@ -68,18 +68,21 @@ public class EnemySpawnerCompleto : MonoBehaviour
     public int tamanhoGrupoMax = 5;
     public float intervaloEntreGrupos = 5f;
 
-    // Variáveis privadas
+    // Variáveis privadas - SIMPLIFICADO
     private float tempoDesdeUltimoSpawn = 0f;
     private float tempoTotalJogo = 0f;
     private float tempoDesdeUltimoGrupo = 0f;
     private List<GameObject> inimigosAtivos = new List<GameObject>();
     private List<TipoInimigo> inimigosDisponiveis = new List<TipoInimigo>();
 
-    // Variáveis de wave - ✅ CORRIGIDO: INICIALIZAÇÃO CORRETA
-    private int waveAtualIndex = -1; // ✅ Começa em -1 para a primeira wave ser 0
+    // Variáveis de wave - SIMPLIFICADO
+    private int waveAtualIndex = 0;
     private float tempoWaveAtual = 0f;
     private bool waveAtiva = false;
     private bool esperandoProximaWave = false;
+
+    // SIMPLIFICAÇÃO: Usar apenas tempoTotalJogo para tudo
+    private float tempoInicioWave = 0f;
 
     // Eventos
     public System.Action<int, string> OnWaveIniciada;
@@ -87,39 +90,20 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("=== INICIANDO SPAWNER COMPLETO ===");
+        Debug.Log("=== INICIANDO SPAWNER SIMPLIFICADO ===");
 
         if (player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null)
-            {
-                player = playerObj.transform;
-                Debug.Log("Player encontrado automaticamente!");
-            }
-            else
-            {
-                Debug.LogError("Player não encontrado! Certifique-se de ter um objeto com tag 'Player'");
-            }
+            if (playerObj != null) player = playerObj.transform;
         }
 
         VerificarPrefabs();
 
-        if (centroArea == Vector2.zero)
-        {
-            centroArea = transform.position;
-        }
-
-        // ✅ CORREÇÃO: INICIALIZAÇÃO CORRETA DAS WAVES
         if (usarWaves && waves.Count > 0)
         {
-            // Começa esperando a primeira wave
-            esperandoProximaWave = true;
-            waveAtiva = false;
-            waveAtualIndex = -1;
-            tempoWaveAtual = 0f;
-
-            Debug.Log("⏳ Aguardando início da primeira wave...");
+            waveAtualIndex = 0;
+            IniciarWave(0);
         }
         else
         {
@@ -129,16 +113,11 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
         StartCoroutine(LimparListaInimigos());
 
-        if (limitarAreaAtuacao && manterInimigosDentroArea)
+        // DEBUG INICIAL
+        Debug.Log("=== CONFIGURAÇÃO INICIAL ===");
+        foreach (var inimigo in tiposInimigos)
         {
-            StartCoroutine(ManterInimigosNaArea());
-        }
-
-        Debug.Log($"Spawner pronto! {tiposInimigos.Count} tipos de inimigos configurados.");
-
-        if (limitarAreaAtuacao)
-        {
-            Debug.Log($"📍 Área limitada: Centro {centroArea}, Tamanho {tamanhoArea}");
+            Debug.Log($"- {inimigo.nome}: Aparece em {inimigo.tempoParaAparecer}s, Peso: {inimigo.peso}");
         }
     }
 
@@ -149,14 +128,15 @@ public class EnemySpawnerCompleto : MonoBehaviour
         tempoTotalJogo += Time.deltaTime;
         tempoDesdeUltimoSpawn += Time.deltaTime;
 
+        // ATUALIZAÇÃO SIMPLES: Sempre usa tempoTotalJogo
+        AtualizarInimigosDisponiveis();
+
         if (usarWaves)
         {
             GerenciarWaves();
         }
         else
         {
-            AtualizarInimigosDisponiveis();
-
             if (PodeSpawnarInimigo())
             {
                 if (spawnEmGrupo && PodeSpawnarGrupo())
@@ -170,27 +150,18 @@ public class EnemySpawnerCompleto : MonoBehaviour
                     tempoDesdeUltimoSpawn = 0f;
                 }
             }
-
-            if (aumentaDificuldade && tempoTotalJogo >= tempoParaAumentarDificuldade)
-            {
-                AumentarDificuldade();
-                tempoTotalJogo = 0f;
-            }
         }
 
         tempoDesdeUltimoGrupo += Time.deltaTime;
     }
 
-    // ✅ CORREÇÃO COMPLETA DO SISTEMA DE WAVES
     void GerenciarWaves()
     {
         if (waveAtiva)
         {
-            // WAVE ATIVA - spawna inimigos e conta o tempo
             tempoWaveAtual += Time.deltaTime;
 
-            // Spawn durante a wave
-            if (tempoDesdeUltimoSpawn >= tempoEntreSpawns)
+            if (tempoDesdeUltimoSpawn >= tempoEntreSpawns && inimigosDisponiveis.Count > 0)
             {
                 if (spawnEmGrupo && PodeSpawnarGrupo())
                 {
@@ -204,7 +175,6 @@ public class EnemySpawnerCompleto : MonoBehaviour
                 tempoDesdeUltimoSpawn = 0f;
             }
 
-            // Verifica se a wave terminou
             if (tempoWaveAtual >= waves[waveAtualIndex].duracao)
             {
                 TerminarWave();
@@ -212,116 +182,73 @@ public class EnemySpawnerCompleto : MonoBehaviour
         }
         else if (esperandoProximaWave)
         {
-            // ESPERANDO PRÓXIMA WAVE - conta o tempo entre waves
             tempoWaveAtual += Time.deltaTime;
-
             if (tempoWaveAtual >= tempoEntreWaves)
             {
-                IniciarProximaWave();
+                waveAtualIndex++;
+                if (waveAtualIndex < waves.Count)
+                {
+                    IniciarWave(waveAtualIndex);
+                }
+                else
+                {
+                    CriarWaveProcedural();
+                    IniciarWave(waveAtualIndex);
+                }
             }
-        }
-        else
-        {
-            // NENHUMA WAVE ATIVA - inicia a primeira wave
-            IniciarProximaWave();
         }
     }
 
-    // ✅ CORREÇÃO: INICIAR WAVE COM VERIFICAÇÕES
     void IniciarWave(int index)
     {
         if (index < 0 || index >= waves.Count)
         {
-            Debug.LogError($"❌ Índice de wave inválido: {index}");
+            Debug.LogError($"Índice de wave inválido: {index}");
             return;
         }
 
-        waveAtualIndex = index;
         waveAtiva = true;
         esperandoProximaWave = false;
         tempoWaveAtual = 0f;
 
-        Wave wave = waves[waveAtualIndex];
-
-        // ✅ CORREÇÃO: USA OS VALORES DA WAVE ATUAL
+        Wave wave = waves[index];
         tempoEntreSpawns = wave.intervaloSpaw;
         limiteInimigos = wave.maxInimigos;
+        tempoInicioWave = tempoTotalJogo;
 
-        AtualizarInimigosDisponiveis();
-
-        Debug.Log($"🚀 INICIANDO {wave.nome}!");
+        Debug.Log($"=== INICIANDO WAVE {index + 1} ===");
+        Debug.Log($"📊 Nome: {wave.nome}");
         Debug.Log($"⏱️ Duração: {wave.duracao}s");
-        Debug.Log($"🎯 Inimigos: {wave.maxInimigos}");
-        Debug.Log($"⚡ Spawn: {wave.intervaloSpaw}s");
-        Debug.Log($"📈 Dificuldade: x{wave.multiplicadorDificuldade}");
+        Debug.Log($"🎯 Max Inimigos: {wave.maxInimigos}");
+        Debug.Log($"⚡ Intervalo Spawn: {wave.intervaloSpaw}s");
 
-        OnWaveIniciada?.Invoke(waveAtualIndex, wave.nome);
+        OnWaveIniciada?.Invoke(index, wave.nome);
     }
 
-    // ✅ CORREÇÃO: TERMINAR WAVE
     void TerminarWave()
     {
-        if (waveAtualIndex < 0 || waveAtualIndex >= waves.Count) return;
-
         waveAtiva = false;
         esperandoProximaWave = true;
         tempoWaveAtual = 0f;
 
-        string nomeWave = waves[waveAtualIndex].nome;
-        Debug.Log($"✅ WAVE {nomeWave} CONCLUÍDA!");
+        Debug.Log($"✅ WAVE {waveAtualIndex + 1} CONCLUÍDA!");
+        Debug.Log($"⏰ Tempo total de jogo: {tempoTotalJogo:F1}s");
 
         OnWaveTerminada?.Invoke(waveAtualIndex);
-
-        // Verifica se há mais waves
-        if (waveAtualIndex >= waves.Count - 1)
-        {
-            Debug.Log("🏁 Todas as waves completas! Criando wave procedural...");
-            CriarWaveProcedural();
-        }
-        else
-        {
-            Debug.Log($"⏳ Próxima wave em {tempoEntreWaves} segundos...");
-        }
     }
 
-    // ✅ CORREÇÃO: INICIAR PRÓXIMA WAVE
-    void IniciarProximaWave()
-    {
-        int proximoIndex = waveAtualIndex + 1;
-
-        if (proximoIndex >= waves.Count)
-        {
-            Debug.LogWarning("⚠️ Tentando iniciar wave além do limite! Criando procedural...");
-            CriarWaveProcedural();
-            proximoIndex = waves.Count - 1; // Usa a última wave criada
-        }
-
-        IniciarWave(proximoIndex);
-    }
-
-    // ✅ CORREÇÃO: CRIAR WAVE PROCEDURAL
     void CriarWaveProcedural()
     {
-        if (waves.Count == 0)
-        {
-            Debug.LogError("❌ Não há waves para criar wave procedural!");
-            return;
-        }
-
         Wave ultimaWave = waves[waves.Count - 1];
         Wave novaWave = new Wave
         {
             nome = $"Wave {waves.Count + 1}",
             duracao = ultimaWave.duracao + 15f,
             maxInimigos = ultimaWave.maxInimigos + 10,
-            intervaloSpaw = Mathf.Max(0.5f, ultimaWave.intervaloSpaw - 0.1f), // ✅ Redução mais suave
-            multiplicadorDificuldade = ultimaWave.multiplicadorDificuldade + 0.15f, // ✅ Aumento mais suave
-            waveEspecial = (waves.Count % 3 == 0)
+            intervaloSpaw = Mathf.Max(0.5f, ultimaWave.intervaloSpaw - 0.1f),
+            multiplicadorDificuldade = ultimaWave.multiplicadorDificuldade + 0.15f
         };
-
         waves.Add(novaWave);
-        Debug.Log($"🆕 Wave procedural criada: {novaWave.nome}");
-        Debug.Log($"📊 Stats: {novaWave.duracao}s, {novaWave.maxInimigos} inimigos, x{novaWave.multiplicadorDificuldade} dificuldade");
     }
 
     void VerificarPrefabs()
@@ -330,48 +257,75 @@ public class EnemySpawnerCompleto : MonoBehaviour
         {
             if (tiposInimigos[i].prefab == null)
             {
-                Debug.LogWarning($"Removendo inimigo sem prefab: {tiposInimigos[i].nome}");
+                Debug.LogWarning($"Removendo {tiposInimigos[i].nome} (prefab nulo)");
                 tiposInimigos.RemoveAt(i);
             }
         }
-
-        if (tiposInimigos.Count == 0)
-        {
-            Debug.LogError("Nenhum prefab de inimigo foi atribuído! O spawner não funcionará.");
-        }
-        else
-        {
-            Debug.Log($"✅ {tiposInimigos.Count} tipos de inimigos configurados com prefabs");
-        }
     }
 
-    void AplicarDificuldadeNoInimigo(GameObject inimigo, int waveIndex)
+    void AtualizarInimigosDisponiveis()
     {
-        if (inimigo == null) return;
+        // ✅ SIMPLIFICAÇÃO TOTAL: Usa apenas tempoTotalJogo
+        float tempoAtual = tempoTotalJogo;
 
-        InimigoController controller = inimigo.GetComponent<InimigoController>();
-        if (controller != null && controller.dadosInimigo != null)
+        inimigosDisponiveis.Clear();
+
+        foreach (TipoInimigo inimigo in tiposInimigos)
         {
-            if (usarWaves && waveIndex >= 0 && waveIndex < waves.Count)
+            // ✅ VERIFICAÇÃO SIMPLES: tempoTotalJogo >= tempoParaAparecer
+            if (tempoAtual >= inimigo.tempoParaAparecer)
             {
-                float multiplicador = waves[waveIndex].multiplicadorDificuldade;
-                controller.AplicarDificuldade(multiplicador);
+                inimigosDisponiveis.Add(inimigo);
+            }
+        }
+
+        // DEBUG a cada 10 segundos
+        if (Time.time % 10f < 0.1f)
+        {
+            Debug.Log($"=== DISPONÍVEIS em {tempoAtual:F1}s ===");
+            foreach (var inimigo in inimigosDisponiveis)
+            {
+                Debug.Log($"✅ {inimigo.nome} (Aparece em: {inimigo.tempoParaAparecer}s)");
+            }
+            if (inimigosDisponiveis.Count == 0)
+            {
+                Debug.LogWarning("⚠️ NENHUM inimigo disponível!");
             }
         }
     }
 
-    GameObject CriarInimigoSeguro(TipoInimigo tipo, Vector2 posicao)
+    void SpawnarInimigo()
     {
-        if (tipo.prefab == null) return null;
-        return Instantiate(tipo.prefab, posicao, Quaternion.identity);
+        if (inimigosDisponiveis.Count == 0)
+        {
+            Debug.LogError("Tentando spawnar sem inimigos disponíveis!");
+            return;
+        }
+
+        TipoInimigo tipoEscolhido = EscolherTipoInimigoPorPeso();
+
+        if (tipoEscolhido == null || tipoEscolhido.prefab == null)
+        {
+            Debug.LogError("Tipo de inimigo inválido!");
+            return;
+        }
+
+        Vector2 posicao = CalcularPosicaoSpawn();
+        GameObject novoInimigo = Instantiate(tipoEscolhido.prefab, posicao, Quaternion.identity);
+
+        if (novoInimigo != null)
+        {
+            inimigosAtivos.Add(novoInimigo);
+
+            // DEBUG do spawn
+            Debug.Log($"🎯 SPAWN: {tipoEscolhido.nome} em {tempoTotalJogo:F1}s");
+        }
     }
 
     void SpawnarGrupo()
     {
         int tamanhoGrupo = Random.Range(tamanhoGrupoMin, tamanhoGrupoMax + 1);
         Vector2 posicaoBase = CalcularPosicaoSpawn();
-
-        int inimigosSpawnados = 0;
 
         for (int i = 0; i < tamanhoGrupo; i++)
         {
@@ -380,164 +334,75 @@ public class EnemySpawnerCompleto : MonoBehaviour
             Vector2 offset = new Vector2(Random.Range(-2f, 2f), Random.Range(-2f, 2f));
             Vector2 posicaoSpawn = posicaoBase + offset;
 
-            if (limitarAreaAtuacao)
-            {
-                posicaoSpawn = ManterDentroDaArea(posicaoSpawn);
-            }
-
             TipoInimigo tipoEscolhido = EscolherTipoInimigoPorPeso();
 
-            // ✅ CORREÇÃO: VERIFICAR SE O TIPO ESCOLHIDO É VÁLIDO
-            if (tipoEscolhido == null || tipoEscolhido.prefab == null)
+            if (tipoEscolhido != null && tipoEscolhido.prefab != null)
             {
-                Debug.LogWarning("⚠️ Tipo de inimigo inválido para spawn em grupo");
-                continue;
-            }
-
-            GameObject novoInimigo = CriarInimigoSeguro(tipoEscolhido, posicaoSpawn);
-            if (novoInimigo != null)
-            {
-                inimigosAtivos.Add(novoInimigo);
-                AplicarDificuldadeNoInimigo(novoInimigo, waveAtualIndex);
-                inimigosSpawnados++;
-            }
-        }
-
-        if (inimigosSpawnados > 0)
-        {
-            Debug.Log($"👥 Grupo de {inimigosSpawnados} inimigos spawnado!");
-        }
-    }
-
-    void SpawnarInimigo()
-    {
-        TipoInimigo tipoEscolhido = EscolherTipoInimigoPorPeso();
-
-        // ✅ CORREÇÃO: VERIFICAR SE O TIPO ESCOLHIDO É VÁLIDO ANTES DE USAR
-        if (tipoEscolhido == null)
-        {
-            Debug.LogWarning("⚠️ Nenhum tipo de inimigo disponível para spawn!");
-            return;
-        }
-
-        if (tipoEscolhido.prefab != null)
-        {
-            Vector2 posicaoSpawn = CalcularPosicaoSpawn();
-            GameObject novoInimigo = CriarInimigoSeguro(tipoEscolhido, posicaoSpawn);
-
-            if (novoInimigo != null)
-            {
-                inimigosAtivos.Add(novoInimigo);
-                AplicarDificuldadeNoInimigo(novoInimigo, waveAtualIndex);
-
-                if (Time.time % 10f < 0.1f)
+                GameObject novoInimigo = Instantiate(tipoEscolhido.prefab, posicaoSpawn, Quaternion.identity);
+                if (novoInimigo != null)
                 {
-                    Debug.Log($"🎯 Spawn: {tipoEscolhido.nome} | Wave: {waveAtualIndex + 1}");
+                    inimigosAtivos.Add(novoInimigo);
+                    Debug.Log($"👥 Spawn em grupo: {tipoEscolhido.nome}");
                 }
             }
         }
-        else
-        {
-            Debug.LogError($"❌ Prefab ausente para: {tipoEscolhido.nome}");
-        }
-    }
-
-    public bool EstaDentroDaArea(Vector2 posicao)
-    {
-        if (!limitarAreaAtuacao) return true;
-        Vector2 min = centroArea - tamanhoArea / 2f;
-        Vector2 max = centroArea + tamanhoArea / 2f;
-        return posicao.x >= min.x && posicao.x <= max.x && posicao.y >= min.y && posicao.y <= max.y;
-    }
-
-    public Vector2 ObterPosicaoAleatoriaNaArea()
-    {
-        Vector2 min = centroArea - tamanhoArea / 2f;
-        Vector2 max = centroArea + tamanhoArea / 2f;
-        return new Vector2(Random.Range(min.x, max.x), Random.Range(min.y, max.y));
-    }
-
-    public Vector2 ManterDentroDaArea(Vector2 posicao)
-    {
-        if (!limitarAreaAtuacao) return posicao;
-        Vector2 min = centroArea - tamanhoArea / 2f;
-        Vector2 max = centroArea + tamanhoArea / 2f;
-        posicao.x = Mathf.Clamp(posicao.x, min.x, max.x);
-        posicao.y = Mathf.Clamp(posicao.y, min.y, max.y);
-        return posicao;
-    }
-
-    IEnumerator ManterInimigosNaArea()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1f);
-            for (int i = inimigosAtivos.Count - 1; i >= 0; i--)
-            {
-                if (inimigosAtivos[i] != null && !EstaDentroDaArea(inimigosAtivos[i].transform.position))
-                {
-                    inimigosAtivos[i].transform.position = ManterDentroDaArea(inimigosAtivos[i].transform.position);
-                }
-            }
-        }
-    }
-
-    Vector2 CalcularPosicaoSpawn()
-    {
-        if (limitarAreaAtuacao) return ObterPosicaoAleatoriaNaArea();
-
-        float angulo = Random.Range(0f, 360f);
-        Vector2 direcao = new Vector2(Mathf.Cos(angulo * Mathf.Deg2Rad), Mathf.Sin(angulo * Mathf.Deg2Rad));
-        float distancia = Random.Range(distanciaMinima, distanciaMaxima);
-        Vector2 posicao = (Vector2)player.position + direcao * distancia;
-
-        return manterInimigosDentroArea ? ManterDentroDaArea(posicao) : posicao;
-    }
-
-    bool PodeSpawnarGrupo()
-    {
-        return tempoDesdeUltimoGrupo >= intervaloEntreGrupos && inimigosAtivos.Count < limiteInimigos - tamanhoGrupoMin;
-    }
-
-    void AtualizarInimigosDisponiveis()
-    {
-        inimigosDisponiveis.Clear();
-        foreach (TipoInimigo inimigo in tiposInimigos)
-        {
-            if (tempoTotalJogo >= inimigo.tempoParaAparecer && inimigo.prefab != null)
-            {
-                inimigosDisponiveis.Add(inimigo);
-            }
-        }
-    }
-
-    bool PodeSpawnarInimigo()
-    {
-        return tempoDesdeUltimoSpawn >= tempoEntreSpawns && inimigosAtivos.Count < limiteInimigos && inimigosDisponiveis.Count > 0;
     }
 
     TipoInimigo EscolherTipoInimigoPorPeso()
     {
         if (inimigosDisponiveis.Count == 0) return null;
-        float pesoTotal = 0f;
-        foreach (TipoInimigo inimigo in inimigosDisponiveis) pesoTotal += inimigo.peso;
-        if (pesoTotal <= 0) return null;
 
-        float valorAleatorio = Random.Range(0f, pesoTotal);
-        float pesoAcumulado = 0f;
-        foreach (TipoInimigo inimigo in inimigosDisponiveis)
+        // Calcular peso total
+        float pesoTotal = 0f;
+        foreach (var inimigo in inimigosDisponiveis)
         {
-            pesoAcumulado += inimigo.peso;
-            if (valorAleatorio <= pesoAcumulado) return inimigo;
+            pesoTotal += inimigo.peso;
         }
+
+        // Escolher baseado no peso
+        float random = Random.Range(0f, pesoTotal);
+        float acumulado = 0f;
+
+        foreach (var inimigo in inimigosDisponiveis)
+        {
+            acumulado += inimigo.peso;
+            if (random <= acumulado)
+            {
+                return inimigo;
+            }
+        }
+
         return inimigosDisponiveis[0];
     }
 
-    void AumentarDificuldade()
+    Vector2 CalcularPosicaoSpawn()
     {
-        tempoEntreSpawns = Mathf.Max(0.3f, tempoEntreSpawns - reducaoTempoSpawn);
-        limiteInimigos += 2;
-        Debug.Log($"📈 Dificuldade Aumentada! Spawn: {tempoEntreSpawns:F1}s | Limite: {limiteInimigos}");
+        if (limitarAreaAtuacao)
+        {
+            Vector2 min = centroArea - tamanhoArea / 2f;
+            Vector2 max = centroArea + tamanhoArea / 2f;
+            return new Vector2(Random.Range(min.x, max.x), Random.Range(min.y, max.y));
+        }
+        else
+        {
+            float angulo = Random.Range(0f, 360f);
+            Vector2 direcao = new Vector2(Mathf.Cos(angulo * Mathf.Deg2Rad), Mathf.Sin(angulo * Mathf.Deg2Rad));
+            float distancia = Random.Range(distanciaMinima, distanciaMaxima);
+            return (Vector2)player.position + direcao * distancia;
+        }
+    }
+
+    bool PodeSpawnarInimigo()
+    {
+        return tempoDesdeUltimoSpawn >= tempoEntreSpawns &&
+               inimigosAtivos.Count < limiteInimigos &&
+               inimigosDisponiveis.Count > 0;
+    }
+
+    bool PodeSpawnarGrupo()
+    {
+        return tempoDesdeUltimoGrupo >= intervaloEntreGrupos &&
+               inimigosAtivos.Count < limiteInimigos - tamanhoGrupoMin;
     }
 
     IEnumerator LimparListaInimigos()
@@ -545,19 +410,14 @@ public class EnemySpawnerCompleto : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(3f);
-            int countAntes = inimigosAtivos.Count;
             inimigosAtivos.RemoveAll(inimigo => inimigo == null);
-            if (countAntes != inimigosAtivos.Count)
-            {
-                Debug.Log($"🧹 Limpeza: {countAntes} → {inimigosAtivos.Count} inimigos");
-            }
         }
     }
 
-    // Métodos de debug e informações
+    // Métodos públicos para UI
     public int GetWaveAtualIndex() => waveAtualIndex;
-    public string GetNomeWaveAtual() => waveAtualIndex >= 0 && waveAtualIndex < waves.Count ? waves[waveAtualIndex].nome : "Nenhuma";
+    public string GetNomeWaveAtual() => waveAtualIndex < waves.Count ? waves[waveAtualIndex].nome : "Nenhuma";
     public int GetInimigosAtivosCount() => inimigosAtivos.Count;
-    public int GetInimigosDisponiveisCount() => inimigosDisponiveis.Count;
+    public float GetTempoTotalJogo() => tempoTotalJogo;
     public bool IsWaveAtiva() => waveAtiva;
 }

@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 751179304906468814}
   - component: {fileID: 4211932022869786133}
   - component: {fileID: 1271100660801019675}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: slime_amarela
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -133,6 +133,7 @@ MonoBehaviour:
   dadosInimigo: {fileID: 11400000, guid: 7fc3fa49b321338499a24b9535a6c71f, type: 2}
   vidaAtual: 70
   danoAtual: 10
+  vidaMaxima: 0
   xpOrbPrefab: {fileID: 5474482276103127882, guid: 29d7f5f9a2eead4459f01468bb1bb4bf, type: 3}
   minOrbs: 1
   maxOrbs: 3
@@ -140,6 +141,13 @@ MonoBehaviour:
   forcaDrop: 2
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 1
+  podeReceberCura: 1
+  multiplicadorCuraRecebida: 1
+  mostrarCuraFlutuante: 1
+  corCura: {r: 0, g: 1, b: 0, a: 1}
+  temBuffDefesa: 0
+  bonusDefesa: 0
+  tempoRestanteBuff: 0
 --- !u!114 &4536141257480560677
 MonoBehaviour:
   m_ObjectHideFlags: 0

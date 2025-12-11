@@ -16,9 +16,9 @@ GameObject:
   - component: {fileID: 1606773225910129396}
   - component: {fileID: 1023412617740727289}
   - component: {fileID: 8507956792960013668}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: slime_azul
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -237,6 +237,7 @@ MonoBehaviour:
   dadosInimigo: {fileID: 0}
   vidaAtual: 0
   danoAtual: 0
+  vidaMaxima: 0
   xpOrbPrefab: {fileID: 5474482276103127882, guid: 29d7f5f9a2eead4459f01468bb1bb4bf, type: 3}
   minOrbs: 1
   maxOrbs: 3
@@ -244,3 +245,10 @@ MonoBehaviour:
   forcaDrop: 2
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 1
+  podeReceberCura: 1
+  multiplicadorCuraRecebida: 1
+  mostrarCuraFlutuante: 1
+  corCura: {r: 0, g: 1, b: 0, a: 1}
+  temBuffDefesa: 0
+  bonusDefesa: 0
+  tempoRestanteBuff: 0
