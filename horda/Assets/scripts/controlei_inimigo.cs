@@ -38,7 +38,9 @@ public class InimigoController : MonoBehaviour
     public float tempoRestanteBuff = 0f;
     private float danoOriginal;
 
-    private bool estaMorrendo = false;
+    // ✅ Variável pública para acesso externo
+    public bool estaMorrendo = false;
+
     private SpriteRenderer spriteRenderer;
     private Color corOriginal;
 
@@ -208,7 +210,18 @@ public class InimigoController : MonoBehaviour
 
     private void MostrarCuraFlutuante(float quantidade)
     {
-        // Sistema alternativo já que seu DamageNumberManager não tem ShowHeal
+        if (DamageNumberManager.Instance != null && DamageNumberManager.Instance is DamageNumberManager manager)
+        {
+            // Usar reflexão para verificar se o método existe
+            var method = manager.GetType().GetMethod("ShowHeal");
+            if (method != null)
+            {
+                method.Invoke(manager, new object[] { this.transform, quantidade });
+                return;
+            }
+        }
+
+        // Fallback
         CriarTextoFlutuante(quantidade, corCura, "+", 24);
     }
 
@@ -272,9 +285,7 @@ public class InimigoController : MonoBehaviour
         text.color = cor;
         text.fontStyle = FontStyles.Bold;
 
-        // Adicionar animação simples
         textObj.AddComponent<AnimacaoTextoFlutuante>().Initialize(screenPos);
-
         Destroy(textObj, 1.5f);
     }
 
@@ -433,7 +444,6 @@ public class InimigoController : MonoBehaviour
     }
 }
 
-// Classe separada para animação de texto flutuante
 public class AnimacaoTextoFlutuante : MonoBehaviour
 {
     private TextMeshProUGUI textMesh;
@@ -452,11 +462,9 @@ public class AnimacaoTextoFlutuante : MonoBehaviour
 
         timer += Time.deltaTime;
 
-        // Move para cima
         float speed = 80f;
         transform.position = startPos + new Vector3(0, speed * timer, 0);
 
-        // Fade out
         Color color = textMesh.color;
         color.a = 1f - (timer / 1f);
         textMesh.color = color;
