@@ -12,6 +12,10 @@ public class InimigoSuporte : MonoBehaviour
     public bool curaContinuamente = true;
     public int maximoAlvosPorVez = 3;
 
+    [Header("Animação Independente (Objeto Filho)")]
+    public Animator areaCuraAnimator; // Arraste o objeto FILHO aqui
+    public string triggerCura = "Cura"; // Nome do Trigger no Animator do filho
+
     [Header("Efeitos Visuais")]
     public GameObject efeitoCuraPrefab;
     public Color corAreaCura = new Color(0f, 1f, 0f, 0.3f);
@@ -51,7 +55,6 @@ public class InimigoSuporte : MonoBehaviour
 
     void InicializarComponentes()
     {
-        // AudioSource
         audioSource = GetComponent<AudioSource>();
 
         if (audioSource == null && somCura != null)
@@ -62,7 +65,6 @@ public class InimigoSuporte : MonoBehaviour
             audioSource.playOnAwake = false;
         }
 
-        // Partículas
         if (particulasCura != null)
         {
             GameObject particulas = Instantiate(particulasCura, transform);
@@ -100,6 +102,12 @@ public class InimigoSuporte : MonoBehaviour
     {
         if (!estaAtivo) return;
 
+        // ✅ DISPARA A ANIMAÇÃO NO FILHO SEM PARAR O PAI
+        if (areaCuraAnimator != null)
+        {
+            areaCuraAnimator.SetTrigger(triggerCura);
+        }
+
         Collider2D[] alvosNaArea = Physics2D.OverlapCircleAll(
             transform.position,
             raioCura,
@@ -116,7 +124,7 @@ public class InimigoSuporte : MonoBehaviour
             if (inimigo != null &&
                 inimigo != this.GetComponent<InimigoController>() &&
                 inimigo.podeReceberCura &&
-                !inimigo.estaMorrendo && // ✅ Agora pode acessar diretamente
+                !inimigo.estaMorrendo &&
                 inimigo.vidaAtual < inimigo.vidaMaxima)
             {
                 alvosParaCurar.Add(inimigo);
@@ -144,21 +152,13 @@ public class InimigoSuporte : MonoBehaviour
         {
             audioSource.PlayOneShot(somCura);
         }
-
-        Debug.Log($"✨ {gameObject.name} curou {alvosACurar} alvos!");
     }
 
     void CurarInimigo(InimigoController inimigo)
     {
-        // ✅ Agora pode acessar diretamente: inimigo.estaMorrendo
         if (inimigo == null || inimigo.estaMorrendo) return;
 
-        float vidaAntes = inimigo.vidaAtual;
-
         inimigo.ReceberCura(taxaCura);
-
-        Debug.Log($"💚 Curando {inimigo.gameObject.name}: +{taxaCura} HP " +
-                  $"({vidaAntes:F0} -> {inimigo.vidaAtual:F0}/{inimigo.vidaMaxima:F0})");
 
         if (aplicarBuff && inimigo != null)
         {
@@ -196,43 +196,9 @@ public class InimigoSuporte : MonoBehaviour
         }
     }
 
-    public void CurarUmaVez()
-    {
-        if (!estaAtivo) return;
-        ExecutarCuraEmArea();
-    }
-
-    public void ConfigurarCura(float novaTaxa, float novoIntervalo, float novoRaio)
-    {
-        taxaCura = novaTaxa;
-        intervaloCura = novoIntervalo;
-        raioCura = novoRaio;
-    }
-
-    public void AumentarPoderCura(float bonus)
-    {
-        taxaCura += bonus;
-        Debug.Log($"✨ Poder de cura aumentado para: {taxaCura}");
-    }
-
     void OnDrawGizmosSelected()
     {
         Gizmos.color = corAreaCura;
         Gizmos.DrawWireSphere(transform.position, raioCura);
-
-        Gizmos.color = new Color(corAreaCura.r, corAreaCura.g, corAreaCura.b, 0.1f);
-        Gizmos.DrawSphere(transform.position, raioCura);
-    }
-
-    void OnDestroy()
-    {
-        foreach (GameObject efeito in efeitosAtivos.ToArray())
-        {
-            if (efeito != null)
-            {
-                Destroy(efeito);
-            }
-        }
-        efeitosAtivos.Clear();
     }
 }

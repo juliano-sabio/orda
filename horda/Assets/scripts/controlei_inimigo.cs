@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class InimigoController : MonoBehaviour
 {
@@ -382,68 +383,14 @@ public class InimigoController : MonoBehaviour
         Debug.Log($"💫 Dropou {quantidadeOrbes} orbes de XP!");
     }
 
-    public void ConfigurarDrop(int novoMinOrbes, int novoMaxOrbes, float novoXpPorOrbe)
-    {
-        this.minOrbs = novoMinOrbes;
-        this.maxOrbs = novoMaxOrbes;
-        this.xpPorOrbe = novoXpPorOrbe;
-    }
-
-    public void AplicarDificuldade(float multiplicador)
-    {
-        if (dadosInimigo == null) return;
-
-        vidaAtual = dadosInimigo.vidaBase * multiplicador;
-        vidaMaxima = vidaAtual;
-        danoAtual = dadosInimigo.danoBase * multiplicador;
-        danoOriginal = danoAtual;
-
-        DanoInimigo danoComponent = GetComponent<DanoInimigo>();
-        if (danoComponent != null)
-        {
-            danoComponent.dano = danoAtual;
-        }
-    }
-
     public float GetPorcentagemVida()
     {
         if (vidaMaxima <= 0) return 0f;
         return vidaAtual / vidaMaxima;
     }
-
-    public void SetPodeReceberCura(bool podeReceber)
-    {
-        podeReceberCura = podeReceber;
-        Debug.Log($"💚 {gameObject.name} pode receber cura: {podeReceberCura}");
-    }
-
-    public void SetMultiplicadorCura(float multiplicador)
-    {
-        multiplicadorCuraRecebida = Mathf.Max(0, multiplicador);
-        Debug.Log($"💚 {gameObject.name} multiplicador de cura: {multiplicadorCuraRecebida}x");
-    }
-
-    public void RestaurarVidaCompleta()
-    {
-        vidaAtual = vidaMaxima;
-        Debug.Log($"💚 {gameObject.name} vida completamente restaurada: {vidaAtual}/{vidaMaxima}");
-    }
-
-    [ContextMenu("📊 Debug Status")]
-    public void DebugStatus()
-    {
-        Debug.Log($"=== STATUS {gameObject.name.ToUpper()} ===");
-        Debug.Log($"❤️ Vida: {vidaAtual:F1}/{vidaMaxima:F1} ({GetPorcentagemVida() * 100:F1}%)");
-        Debug.Log($"🗡️ Dano: {danoAtual:F1} (Original: {danoOriginal:F1})");
-        Debug.Log($"🛡️ Buff Defesa: {temBuffDefesa} ({bonusDefesa * 100:F1}%) | Tempo: {tempoRestanteBuff:F1}s");
-        Debug.Log($"💚 Pode Receber Cura: {podeReceberCura}");
-        Debug.Log($"💚 Multiplicador Cura: {multiplicadorCuraRecebida}x");
-        Debug.Log($"✨ Tem Suporte: {temInimigoSuporte}");
-        Debug.Log($"💀 Morrendo: {estaMorrendo}");
-        Debug.Log("=============================");
-    }
 }
 
+// ✅ Classe de animação de texto mantida no mesmo arquivo para evitar erros
 public class AnimacaoTextoFlutuante : MonoBehaviour
 {
     private TextMeshProUGUI textMesh;
