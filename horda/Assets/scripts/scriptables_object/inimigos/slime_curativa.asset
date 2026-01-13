@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: slime_curativa
   m_EditorClassIdentifier: Assembly-CSharp::InimigoData
   nomeInimigo: slime_curativa
-  prefab: {fileID: 6105083231319735307, guid: 7ba1e053bf8a9ce4da7685fd4841f8f2, type: 3}
+  prefab: {fileID: 7137502516410988737, guid: 57b0afd25cb60074982d37e2963b7c3a, type: 3}
   icon: {fileID: 0}
   vidaBase: 30
   danoBase: 10
