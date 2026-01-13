@@ -119,6 +119,7 @@ public class SkillData : ScriptableObject
     public float boomerangSeekRadius = 5f;
     public int boomerangMaxHitsPerThrow = 5;
 
+
     // MÉTODOS EXISTENTES (mantidos intactos)
     public string GetElementIcon() { return GetElementIcon(this.element); }
 

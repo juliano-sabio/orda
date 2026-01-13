@@ -673,7 +673,9 @@ public class PlayerStats : MonoBehaviour
                 float finalDamage = CalculateElementalDamage(totalDamage, attackElement, Element.None);
 
                 Debug.Log($"⚔️ {skill.skillName} ativada! Dano: {finalDamage} | Elemento: {attackElement}");
-                ApplyAreaDamage(finalDamage, attackElement);
+
+                // APENAS ATIVA AS SKILLS MAS NÃO APLICA DANO EM ÁREA AUTOMÁTICO
+                // O dano será aplicado pelos próprios comportamentos das skills (projéteis, etc.)
 
                 skill.StartCooldown();
             }
@@ -732,27 +734,32 @@ public class PlayerStats : MonoBehaviour
         return finalDamage;
     }
 
-    void ApplyAreaDamage(float damage, Element element)
+    // MÉTODO PARA APLICAR DANO (chamado por outras habilidades)
+    public void ApplyDamageToTarget(GameObject target, float damage, Element element = Element.None, bool isCrit = false)
     {
-        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 3f);
-        foreach (var hitCollider in hitColliders)
-        {
-            if (hitCollider.gameObject == gameObject) continue;
-            if (hitCollider.CompareTag("Enemy"))
-            {
-                InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
-                if (inimigo != null)
-                {
-                    // Verifica se é crítico (exemplo: 10% de chance)
-                    bool isCrit = UnityEngine.Random.value < 0.1f;
-                    float finalDamage = isCrit ? damage * 2f : damage;
+        if (target == null || target == gameObject) return;
 
-                    // Usa o método com dano flutuante
-                    inimigo.ReceberDano(finalDamage, isCrit);
+        if (target.CompareTag("Enemy"))
+        {
+            InimigoController inimigo = target.GetComponent<InimigoController>();
+            if (inimigo != null)
+            {
+                // Aplica cálculo de crítico
+                if (!isCrit)
+                {
+                    isCrit = UnityEngine.Random.value < 0.1f; // 10% chance de crítico
                 }
 
-                elementSystem.ApplyElementalEffect(element, hitCollider.gameObject);
-                Debug.Log($"💥 Dano {damage} aplicado no inimigo {hitCollider.name} | Elemento: {element}");
+                float finalDamage = isCrit ? damage * 2f : damage;
+                inimigo.ReceberDano(finalDamage, isCrit);
+
+                // Aplica efeito elemental
+                if (element != Element.None)
+                {
+                    elementSystem.ApplyElementalEffect(element, target);
+                }
+
+                Debug.Log($"🎯 Dano aplicado: {finalDamage} no {target.name} | Crítico: {isCrit}");
             }
         }
     }
@@ -874,6 +881,7 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"🚀 ULTIMATE ATIVADA: {ultimateSkill.skillName}! Dano: {finalDamage} | Elemento: {ultimateElement}");
 
+        // APLICA DANO EM ÁREA NA ULTIMATE (isso é permitido pois é uma habilidade especial)
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, ultimateSkill.areaOfEffect);
         foreach (var hitCollider in hitColliders)
         {
