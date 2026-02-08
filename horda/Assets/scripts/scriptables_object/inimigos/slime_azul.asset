@@ -18,7 +18,7 @@ MonoBehaviour:
   vidaBase: 50
   danoBase: 10
   velocidadeBase: 5
-  tamanho: 7
+  tamanho: 5
   intervaloAtaque: 1
   xpDrop: 10
   isBoss: 0
@@ -29,3 +29,10 @@ MonoBehaviour:
   comportamento: 0
   distanciaAtaque: 2
   distanciaPerseguicao: 8
+  temCuraEmArea: 0
+  taxaCuraBase: 10
+  raioCuraBase: 5
+  deixaPocaoVeneno: 0
+  danoVenenoTick: 5
+  raioVeneno: 3
+  duracaoVeneno: 5

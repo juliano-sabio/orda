@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d95cf877d4ba9b428c9bfeb03732ab0, type: 3}
+  m_Name: slime_venenosa
+  m_EditorClassIdentifier: Assembly-CSharp::InimigoData
+  nomeInimigo: slime_venenosa
+  prefab: {fileID: 974165137946397724, guid: 176473164514fa74db3290d0d02f424a, type: 3}
+  icon: {fileID: 0}
+  vidaBase: 50
+  danoBase: 10
+  velocidadeBase: 3
+  tamanho: 7
+  intervaloAtaque: 1
+  xpDrop: 10
+  isBoss: 0
+  chanceSpawn: 1
+  efeitoMorte: {fileID: 0}
+  somMorte: {fileID: 0}
+  corDestaque: {r: 1, g: 1, b: 1, a: 1}
+  comportamento: 0
+  distanciaAtaque: 2
+  distanciaPerseguicao: 8
+  temCuraEmArea: 0
+  taxaCuraBase: 10
+  raioCuraBase: 5
+  deixaPocaoVeneno: 0
+  danoVenenoTick: 5
+  raioVeneno: 3
+  duracaoVeneno: 5
