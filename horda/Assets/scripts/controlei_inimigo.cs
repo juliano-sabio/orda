@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
+// Se InimigoData estiver em um namespace diferente, adicione:
+// using Survivor; // ou o namespace onde InimigoData está
+
 public class InimigoController : MonoBehaviour
 {
     [Header("Dados do Inimigo")]
@@ -39,15 +42,24 @@ public class InimigoController : MonoBehaviour
     public float tempoRestanteBuff = 0f;
     private float danoOriginal;
 
+    [Header("Configurações de Movimento")]
+    public float velocidadeBase = 3f;
+    public float velocidadeAtual;
+    public bool estaAtordoado = false;
+    public float tempoAtordoado = 0f;
+
     // ✅ Variável pública para acesso externo
     public bool estaMorrendo = false;
 
     private SpriteRenderer spriteRenderer;
     private Color corOriginal;
+    private Rigidbody2D rb;
 
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
+
         if (spriteRenderer != null)
         {
             corOriginal = spriteRenderer.color;
@@ -68,6 +80,8 @@ public class InimigoController : MonoBehaviour
         vidaMaxima = dadosInimigo.vidaBase;
         danoAtual = dadosInimigo.danoBase;
         danoOriginal = danoAtual;
+        velocidadeBase = dadosInimigo.velocidadeBase;
+        velocidadeAtual = velocidadeBase;
 
         DanoInimigo danoComponent = GetComponent<DanoInimigo>();
         if (danoComponent != null)
@@ -166,6 +180,123 @@ public class InimigoController : MonoBehaviour
         StartCoroutine(EfeitoVisualBuff());
     }
 
+    // 🆕 NOVO MÉTODO: Aplicar Slow (redução de velocidade)
+    public void AplicarSlow(float reducaoVelocidade, float duracao)
+    {
+        if (estaMorrendo || reducaoVelocidade <= 0) return;
+
+        Debug.Log($"🐌 Slow aplicado ao inimigo {name}: -{reducaoVelocidade * 100}% por {duracao}s");
+
+        // Calcula a redução
+        float reducaoAplicada = velocidadeAtual * reducaoVelocidade;
+        velocidadeAtual -= reducaoAplicada;
+
+        // Garante que não fique negativo
+        velocidadeAtual = Mathf.Max(0.5f, velocidadeAtual);
+
+        // Restaura após a duração
+        StartCoroutine(RestaurarVelocidade(reducaoAplicada, duracao));
+
+        // Efeito visual
+        StartCoroutine(EfeitoVisualSlow());
+    }
+
+    private IEnumerator RestaurarVelocidade(float reducao, float duracao)
+    {
+        yield return new WaitForSeconds(duracao);
+        velocidadeAtual += reducao;
+        Debug.Log($"🏃 Velocidade do inimigo {name} restaurada para {velocidadeAtual}");
+    }
+
+    private IEnumerator EfeitoVisualSlow()
+    {
+        if (spriteRenderer == null) yield break;
+
+        Color corSlow = new Color(0.2f, 0.6f, 1f, 1f); // Azul para slow
+        spriteRenderer.color = corSlow;
+        yield return new WaitForSeconds(0.2f);
+
+        if (!estaMorrendo)
+        {
+            spriteRenderer.color = corOriginal;
+        }
+    }
+
+    // 🆕 NOVO MÉTODO: Aplicar Stun (atordoamento)
+    public void AplicarStun(float duracao)
+    {
+        if (estaMorrendo) return;
+
+        Debug.Log($"💫 Stun aplicado ao inimigo {name} por {duracao}s");
+
+        estaAtordoado = true;
+        tempoAtordoado = duracao;
+
+        // Pode adicionar lógica para parar movimento/ataques aqui
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        StartCoroutine(RemoverStun(duracao));
+        StartCoroutine(EfeitoVisualStun());
+    }
+
+    private IEnumerator RemoverStun(float duracao)
+    {
+        yield return new WaitForSeconds(duracao);
+        estaAtordoado = false;
+        tempoAtordoado = 0f;
+        Debug.Log($"🌀 Stun removido do inimigo {name}");
+    }
+
+    private IEnumerator EfeitoVisualStun()
+    {
+        if (spriteRenderer == null) yield break;
+
+        while (estaAtordoado && tempoAtordoado > 0)
+        {
+            spriteRenderer.color = Color.yellow;
+            yield return new WaitForSeconds(0.2f);
+            spriteRenderer.color = corOriginal;
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        if (!estaMorrendo)
+        {
+            spriteRenderer.color = corOriginal;
+        }
+    }
+
+    // 🆕 NOVO MÉTODO: Aplicar Veneno (dano contínuo)
+    public void AplicarVeneno(float danoPorTick, float intervalo, int quantidadeTicks, Color corVeneno)
+    {
+        if (estaMorrendo) return;
+
+        Debug.Log($"☠️ Veneno aplicado ao inimigo {name}: {danoPorTick}/tick por {quantidadeTicks} ticks");
+
+        StartCoroutine(EfeitoVenenoCoroutine(danoPorTick, intervalo, quantidadeTicks, corVeneno));
+    }
+
+    private IEnumerator EfeitoVenenoCoroutine(float danoPorTick, float intervalo, int quantidadeTicks, Color corVeneno)
+    {
+        for (int i = 0; i < quantidadeTicks && !estaMorrendo; i++)
+        {
+            // Aplica dano
+            ReceberDano(danoPorTick, false);
+
+            // Efeito visual
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = corVeneno;
+                yield return new WaitForSeconds(0.1f);
+                spriteRenderer.color = corOriginal;
+            }
+
+            yield return new WaitForSeconds(intervalo);
+        }
+    }
+
     private IEnumerator GerenciarBuffDefesa(float duracao)
     {
         tempoRestanteBuff = duracao;
@@ -213,7 +344,6 @@ public class InimigoController : MonoBehaviour
     {
         if (DamageNumberManager.Instance != null && DamageNumberManager.Instance is DamageNumberManager manager)
         {
-            // Usar reflexão para verificar se o método existe
             var method = manager.GetType().GetMethod("ShowHeal");
             if (method != null)
             {
@@ -388,9 +518,16 @@ public class InimigoController : MonoBehaviour
         if (vidaMaxima <= 0) return 0f;
         return vidaAtual / vidaMaxima;
     }
+
+    // 🆕 GETTERS para status
+    public float GetVelocidadeAtual() => velocidadeAtual;
+    public bool EstaAtordoado() => estaAtordoado;
+    public float GetTempoAtordoado() => tempoAtordoado;
+    public bool TemBuffDefesaAtivo() => temBuffDefesa;
+    public float GetBonusDefesa() => bonusDefesa;
 }
 
-// ✅ Classe de animação de texto mantida no mesmo arquivo para evitar erros
+// ✅ Classe de animação de texto mantida no mesmo arquivo
 public class AnimacaoTextoFlutuante : MonoBehaviour
 {
     private TextMeshProUGUI textMesh;

@@ -34,8 +34,13 @@ public class InimigoData : ScriptableObject
     public bool temCuraEmArea = false;
     public float taxaCuraBase = 10f;
     public float raioCuraBase = 5f;
-}
 
+    [Header("Habilidades Especiais")]
+    public bool deixaPocaoVeneno = false;
+    public float danoVenenoTick = 5f;
+    public float raioVeneno = 3f;
+    public float duracaoVeneno = 5f;
+}
 
 public enum TipoComportamento
 {
@@ -43,5 +48,7 @@ public enum TipoComportamento
     Ranged,
     Tank,
     Fast,
-    Boss
+    Boss,
+    Suporte,
+    Venenoso
 }

@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5d95cf877d4ba9b428c9bfeb03732ab0, type: 3}
-  m_Name: slime_azul
+  m_Name: slime_venenosa
   m_EditorClassIdentifier: Assembly-CSharp::InimigoData
-  nomeInimigo: slime_azul
-  prefab: {fileID: 3536106678951210780, guid: 34aa55fb4bda94f418bc264506a2b64b, type: 3}
+  nomeInimigo: slime_venenosa
+  prefab: {fileID: 974165137946397724, guid: 176473164514fa74db3290d0d02f424a, type: 3}
   icon: {fileID: 0}
   vidaBase: 50
   danoBase: 10
-  velocidadeBase: 5
-  tamanho: 5
+  velocidadeBase: 3
+  tamanho: 7
   intervaloAtaque: 1
   xpDrop: 10
   isBoss: 0

@@ -1274,7 +1274,24 @@ public class PlayerStats : MonoBehaviour
 
         return 0f;
     }
+    public void AplicarSlow(float reducao, float duracao)
+    {
+        // Reduz a velocidade temporariamente
+        float reducaoAplicada = speed * reducao;
+        speed -= reducaoAplicada;
 
+        Debug.Log($"🐌 Slow aplicado ao jogador: -{reducao * 100}% por {duracao}s");
+
+        // Restaura após a duração
+        StartCoroutine(RestaurarVelocidade(reducaoAplicada, duracao));
+    }
+
+    private IEnumerator RestaurarVelocidade(float reducao, float duracao)
+    {
+        yield return new WaitForSeconds(duracao);
+        speed += reducao;
+        Debug.Log($"🏃 Velocidade do jogador restaurada!");
+    }
     void OnDrawGizmosSelected()
     {
         if (showCollectionRadius)
