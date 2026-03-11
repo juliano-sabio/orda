@@ -133,4 +133,21 @@ MonoBehaviour:
   maxOrbitalProjectiles: 3
   orbitalTargetingMode: 3
   autoAcquireTargets: 1
-  targetAcquisitionRange: 8
+  targetAcquisitionRange: 0
+  boomerangThrowRange: 8
+  boomerangReturnRange: 1.5
+  boomerangThrowSpeed: 15
+  boomerangReturnSpeed: 20
+  boomerangMaxTargets: 3
+  boomerangRotationSpeed: 720
+  boomerangPierceThrough: 0
+  boomerangLifetime: 5
+  boomerangHealOnReturn: 1
+  boomerangHealPercent: 0.1
+  boomerangBuffOnReturn: 0
+  boomerangBuffDuration: 3
+  boomerangBuffMultiplier: 1.2
+  boomerangBehavior: 0
+  boomerangSeekNewTargets: 1
+  boomerangSeekRadius: 5
+  boomerangMaxHitsPerThrow: 5
