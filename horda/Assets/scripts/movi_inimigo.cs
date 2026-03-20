@@ -60,8 +60,8 @@ public class movi_inimigo : MonoBehaviour
             tempoUltimaAtualização = Time.time;
         }
 
-        // 🔄 DESVIO SUAVE
-        if (usarDesvioObstaculos)
+        // 🔄 DESVIO SUAVE
+        if (usarDesvioObstaculos)
         {
             CalcularDesvioSuave();
         }
@@ -69,35 +69,35 @@ public class movi_inimigo : MonoBehaviour
         AplicarMovimentoSuave();
     }
 
-    // 🔄 SISTEMA DE DESVIO SUAVE
-    void CalcularDesvioSuave()
+    // 🔄 SISTEMA DE DESVIO SUAVE
+    void CalcularDesvioSuave()
     {
         direcaoDesvio = Vector2.zero;
         intensidadeDesvio = 0f;
 
         if (direcaoDesejada == Vector2.zero) return;
 
-        // Detecta obstáculos usando sphere cast para mais naturalidade
-        RaycastHit2D[] hits = Physics2D.CircleCastAll(
-            transform.position,
-            0.5f, // Raio pequeno para detectar perto do inimigo
-            direcaoDesejada,
-            distanciaDetecaoObstaculos,
-            camadaObstaculos
-        );
+        // Detecta obstáculos usando sphere cast para mais naturalidade
+        RaycastHit2D[] hits = Physics2D.CircleCastAll(
+      transform.position,
+      0.5f, // Raio pequeno para detectar perto do inimigo
+            direcaoDesejada,
+      distanciaDetecaoObstaculos,
+      camadaObstaculos
+    );
 
         foreach (RaycastHit2D hit in hits)
         {
             if (hit.collider != null &&
-                hit.collider.gameObject != this.gameObject &&
-                !hit.collider.CompareTag("Player"))
+              hit.collider.gameObject != this.gameObject &&
+              !hit.collider.CompareTag("Player"))
             {
-                // Calcula intensidade baseada na distância (mais perto = mais intenso)
-                float intensidade = 1f - (hit.distance / distanciaDetecaoObstaculos);
+                // Calcula intensidade baseada na distância (mais perto = mais intenso)
+                float intensidade = 1f - (hit.distance / distanciaDetecaoObstaculos);
                 intensidade = Mathf.Clamp01(intensidade);
 
-                // Direção de desvio é perpendicular ao obstáculo
-                Vector2 direcaoObstaculo = (transform.position - hit.collider.transform.position).normalized;
+                // Direção de desvio é perpendicular ao obstáculo
+                Vector2 direcaoObstaculo = (transform.position - hit.collider.transform.position).normalized;
                 direcaoDesvio += direcaoObstaculo * intensidade;
                 intensidadeDesvio = Mathf.Max(intensidadeDesvio, intensidade);
 
@@ -105,27 +105,27 @@ public class movi_inimigo : MonoBehaviour
             }
         }
 
-        // 🔄 RAYCAST FRONTAL PARA DETECÇÃO ANTECIPADA
-        RaycastHit2D hitFrente = Physics2D.Raycast(
-            transform.position,
-            direcaoDesejada,
-            distanciaDetecaoObstaculos,
-            camadaObstaculos
-        );
+        // 🔄 RAYCAST FRONTAL PARA DETECÇÃO ANTECIPADA
+        RaycastHit2D hitFrente = Physics2D.Raycast(
+      transform.position,
+      direcaoDesejada,
+      distanciaDetecaoObstaculos,
+      camadaObstaculos
+    );
 
         if (hitFrente.collider != null &&
-            hitFrente.collider.gameObject != this.gameObject &&
-            !hitFrente.collider.CompareTag("Player"))
+          hitFrente.collider.gameObject != this.gameObject &&
+          !hitFrente.collider.CompareTag("Player"))
         {
             float intensidadeFrente = 1f - (hitFrente.distance / distanciaDetecaoObstaculos);
             intensidadeFrente = Mathf.Clamp01(intensidadeFrente);
 
-            // Para obstáculos na frente, usa desvio mais forte mas ainda suave
-            Vector2 direita = Quaternion.Euler(0, 0, -anguloDesvio) * direcaoDesejada;
+            // Para obstáculos na frente, usa desvio mais forte mas ainda suave
+            Vector2 direita = Quaternion.Euler(0, 0, -anguloDesvio) * direcaoDesejada;
             Vector2 esquerda = Quaternion.Euler(0, 0, anguloDesvio) * direcaoDesejada;
 
-            // Escolhe a direção que mais se afasta do obstáculo
-            float dotDireita = Vector2.Dot(direita, hitFrente.normal);
+            // Escolhe a direção que mais se afasta do obstáculo
+            float dotDireita = Vector2.Dot(direita, hitFrente.normal);
             float dotEsquerda = Vector2.Dot(esquerda, hitFrente.normal);
 
             Vector2 direcaoEvasao = dotDireita > dotEsquerda ? direita : esquerda;
@@ -135,51 +135,51 @@ public class movi_inimigo : MonoBehaviour
             Debug.DrawRay(transform.position, direcaoEvasao * intensidadeFrente * 2f, Color.cyan);
         }
 
-        // Normaliza e aplica força
-        if (direcaoDesvio != Vector2.zero)
+        // Normaliza e aplica força
+        if (direcaoDesvio != Vector2.zero)
         {
             direcaoDesvio = direcaoDesvio.normalized * forcaDesvio * intensidadeDesvio;
         }
     }
 
-    // 🔄 MOVIMENTO SUAVE COMBINANDO DIREÇÕES
-    void AplicarMovimentoSuave()
+    // 🔄 MOVIMENTO SUAVE COMBINANDO DIREÇÕES
+    void AplicarMovimentoSuave()
     {
         Vector2 direcaoFinal = direcaoDesejada;
 
-        // Combina direção desejada com desvio de forma suave
-        if (direcaoDesvio != Vector2.zero)
+        // Combina direção desejada com desvio de forma suave
+        if (direcaoDesvio != Vector2.zero)
         {
             direcaoFinal = (direcaoDesejada + direcaoDesvio).normalized;
 
-            // Interpolação suave entre direções
-            direcaoMovimento = Vector2.Lerp(direcaoMovimento, direcaoFinal, Time.deltaTime * suavizacaoDesvio);
+            // Interpolação suave entre direções
+            direcaoMovimento = Vector2.Lerp(direcaoMovimento, direcaoFinal, Time.deltaTime * suavizacaoDesvio);
         }
         else
         {
-            // Sem desvio, volta suavemente para direção desejada
-            direcaoMovimento = Vector2.Lerp(direcaoMovimento, direcaoDesejada, Time.deltaTime * suavizacaoDesvio);
+            // Sem desvio, volta suavemente para direção desejada
+            direcaoMovimento = Vector2.Lerp(direcaoMovimento, direcaoDesejada, Time.deltaTime * suavizacaoDesvio);
         }
 
-        // Aplica movimento
-        if (direcaoMovimento != Vector2.zero)
+        // Aplica movimento
+        if (direcaoMovimento != Vector2.zero)
         {
             rb.linearVelocity = direcaoMovimento * velocidade;
 
-            // Rotação suave
-            if (direcaoMovimento.x != 0)
+            // Rotação suave
+            if (direcaoMovimento.x != 0)
             {
                 float escalaX = Mathf.Abs(transform.localScale.x);
                 float direcaoDesejada = Mathf.Sign(direcaoMovimento.x);
                 float direcaoAtual = Mathf.Sign(transform.localScale.x);
 
-                // Suaviza a rotação também
-                if (Mathf.Abs(direcaoDesejada - direcaoAtual) > 0.1f)
+                // Suaviza a rotação também
+                if (Mathf.Abs(direcaoDesejada - direcaoAtual) > 0.1f)
                 {
                     transform.localScale = new Vector3(
-                        direcaoDesejada * escalaX,
-                        transform.localScale.y,
-                        transform.localScale.z
+                      direcaoDesejada * escalaX,
+                      transform.localScale.y,
+                      transform.localScale.z
                     );
                 }
             }
@@ -261,15 +261,15 @@ public class movi_inimigo : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // 🔄 REAÇÃO SUAVE A COLISÕES
-        if (!collision.collider.CompareTag("Player"))
+        // 🔄 REAÇÃO SUAVE A COLISÕES
+        if (!collision.collider.CompareTag("Player"))
         {
             Debug.Log($"💥 Colisão suave com: {collision.collider.name}");
 
-            // Direção de repulsão suave
-            Vector2 direcaoRepulsao = (transform.position - collision.transform.position).normalized;
+            // Direção de repulsão suave
+            Vector2 direcaoRepulsao = (transform.position - collision.transform.position).normalized;
             direcaoDesvio += direcaoRepulsao * forcaDesvio * 0.5f; // Força reduzida para suavidade
-        }
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -285,8 +285,8 @@ public class movi_inimigo : MonoBehaviour
         Vector2 velocidadeOriginal = rb.linearVelocity;
         float tempo = 0f;
 
-        // Para suavemente
-        while (tempo < 0.3f)
+        // Para suavemente
+        while (tempo < 0.3f)
         {
             rb.linearVelocity = Vector2.Lerp(velocidadeOriginal, Vector2.zero, tempo / 0.3f);
             tempo += Time.deltaTime;
@@ -296,8 +296,8 @@ public class movi_inimigo : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         yield return new WaitForSeconds(0.3f);
 
-        // Retoma suavemente
-        tempo = 0f;
+        // Retoma suavemente
+        tempo = 0f;
         while (tempo < 0.3f && rb != null)
         {
             rb.linearVelocity = Vector2.Lerp(Vector2.zero, direcaoMovimento * velocidade, tempo / 0.3f);
@@ -306,8 +306,8 @@ public class movi_inimigo : MonoBehaviour
         }
     }
 
-    // 🔄 MÉTODOS DE CONFIGURAÇÃO SUAVE
-    [ContextMenu("🔄 Aumentar Suavização")]
+    // 🔄 MÉTODOS DE CONFIGURAÇÃO SUAVE
+    [ContextMenu("🔄 Aumentar Suavização")]
     public void AumentarSuavizacao()
     {
         suavizacaoDesvio += 1f;
@@ -342,40 +342,40 @@ public class movi_inimigo : MonoBehaviour
         Debug.Log($"⚡ Suavização: {suavizacaoDesvio}");
     }
 
-    // 🔄 GIZMOS SUAVES
-    void OnDrawGizmos()
+    // 🔄 GIZMOS SUAVES
+    void OnDrawGizmos()
     {
-        // Área de detecção do player (amarelo suave)
-        Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
+        // Área de detecção do player (amarelo suave)
+        Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
         Gizmos.DrawWireSphere(transform.position, distanciaDetecção);
 
-        // Área de detecção de obstáculos (azul suave)
-        Gizmos.color = new Color(0f, 1f, 1f, 0.3f);
+        // Área de detecção de obstáculos (azul suave)
+        Gizmos.color = new Color(0f, 1f, 1f, 0.3f);
         Gizmos.DrawWireSphere(transform.position, distanciaDetecaoObstaculos);
 
-        // Direção desejada (verde)
-        if (direcaoDesejada != Vector2.zero)
+        // Direção desejada (verde)
+        if (direcaoDesejada != Vector2.zero)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawRay(transform.position, direcaoDesejada * 1.5f);
         }
 
-        // Direção atual (azul)
-        if (direcaoMovimento != Vector2.zero)
+        // Direção atual (azul)
+        if (direcaoMovimento != Vector2.zero)
         {
             Gizmos.color = Color.blue;
             Gizmos.DrawRay(transform.position, direcaoMovimento * 1.5f);
         }
 
-        // Direção de desvio (magenta)
-        if (direcaoDesvio != Vector2.zero)
+        // Direção de desvio (magenta)
+        if (direcaoDesvio != Vector2.zero)
         {
             Gizmos.color = Color.magenta;
             Gizmos.DrawRay(transform.position, direcaoDesvio * 0.5f);
         }
 
-        // Linha até o player (branco/vermelho)
-        if (player != null)
+        // Linha até o player (branco/vermelho)
+        if (player != null)
         {
             Gizmos.color = perseguindoPlayer ? Color.red : Color.white;
             Gizmos.DrawLine(transform.position, player.position);
@@ -384,11 +384,11 @@ public class movi_inimigo : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        // Gizmos mais destacados quando selecionado
-        OnDrawGizmos();
+        // Gizmos mais destacados quando selecionado
+        OnDrawGizmos();
 
-        // Adiciona sphere sólida para área de obstáculos quando selecionado
-        Gizmos.color = new Color(0f, 1f, 1f, 0.1f);
+        // Adiciona sphere sólida para área de obstáculos quando selecionado
+        Gizmos.color = new Color(0f, 1f, 1f, 0.1f);
         Gizmos.DrawSphere(transform.position, distanciaDetecaoObstaculos);
     }
 }

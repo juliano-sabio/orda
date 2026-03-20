@@ -20,93 +20,46 @@ public class EnemySpawnerCompleto : MonoBehaviour
         public float duracao = 30f;
         public int maxInimigos = 20;
         public float intervaloSpaw = 2f;
-        public bool waveEspecial = false;
-        public float multiplicadorDificuldade = 1f;
     }
 
     [Header("REFERÊNCIAS")]
     public Transform player;
 
+    [Header("CAMADAS PROIBIDAS (IMPORTANTE)")]
+    [Tooltip("Selecione aqui as Layers que os inimigos NÃO podem nascer em cima (ex: Obstacles, Paredes, Agua)")]
+    public LayerMask camadasBloqueadas;
+    [Tooltip("O tamanho do 'corpo' do inimigo para checar se cabe no lugar")]
+    public float raioDeChecagem = 0.5f;
+    [Tooltip("Quantas vezes ele tenta sortear um lugar novo se o primeiro estiver ocupado")]
+    public int tentativasMaximas = 15;
+
     [Header("LISTA DE INIMIGOS")]
-    public List<TipoInimigo> tiposInimigos = new List<TipoInimigo>()
-    {
-        new TipoInimigo { nome = "Zumbi Basico", tempoParaAparecer = 0, peso = 3f },
-        new TipoInimigo { nome = "Corredor", tempoParaAparecer = 30, peso = 2f },
-        new TipoInimigo { nome = "Tanque", tempoParaAparecer = 60, peso = 1f }
-    };
+    public List<TipoInimigo> tiposInimigos = new List<TipoInimigo>();
 
     [Header("SISTEMA DE WAVES")]
-    public List<Wave> waves = new List<Wave>()
-    {
-        new Wave { nome = "Wave 1", duracao = 30f, maxInimigos = 15, intervaloSpaw = 3f, multiplicadorDificuldade = 1f },
-        new Wave { nome = "Wave 2", duracao = 45f, maxInimigos = 25, intervaloSpaw = 2f, multiplicadorDificuldade = 1.2f },
-        new Wave { nome = "Wave 3", duracao = 60f, maxInimigos = 35, intervaloSpaw = 1.5f, multiplicadorDificuldade = 1.5f }
-    };
+    public List<Wave> waves = new List<Wave>();
     public bool usarWaves = true;
     public float tempoEntreWaves = 5f;
 
-    [Header("CONFIGURAÇÕES DE SPAWN")]
-    [SerializeField] private float tempoEntreSpawns = 2f;
-    [SerializeField] private float distanciaMinima = 5f;
-    [SerializeField] private float distanciaMaxima = 10f;
-    [SerializeField] private int limiteInimigos = 20;
+    [Header("CONFIGURAÇÕES DE DISTÂNCIA")]
+    [SerializeField] private float distanciaMinima = 8f;
+    [SerializeField] private float distanciaMaxima = 15f;
+    [SerializeField] private int limiteInimigosGlobal = 30;
 
-    [Header("DETECÇÃO DE COLISÃO")]
-    [Tooltip("Layer dos objetos que impedem o spawn (Paredes, Obstáculos)")]
-    public LayerMask camadasObstrutivas;
-    [Tooltip("Tamanho do raio de checagem (ajuste conforme o tamanho do inimigo)")]
-    public float raioChecagemInimigo = 0.5f;
-    [Tooltip("Quantas vezes tentar sortear um lugar vazio antes de desistir")]
-    public int maxTentativasSpawn = 10;
-
-    [Header("LIMITE DE ÁREA DE ATUAÇÃO")]
-    public bool limitarAreaAtuacao = false;
-    public Vector2 centroArea = Vector2.zero;
-    public Vector2 tamanhoArea = new Vector2(20f, 20f);
-
-    [Header("SPAWN EM GRUPO")]
-    public bool spawnEmGrupo = false;
-    public int tamanhoGrupoMin = 2;
-    public int tamanhoGrupoMax = 5;
-    public float intervaloEntreGrupos = 5f;
-
-    // Variáveis privadas
-    private float tempoDesdeUltimoSpawn = 0f;
+    // Variáveis de controle interno
     private float tempoTotalJogo = 0f;
-    private float tempoDesdeUltimoGrupo = 0f;
+    private float cronometroSpawn = 0f;
+    private int waveAtualIndex = 0;
+    private bool waveAtiva = false;
     private List<GameObject> inimigosAtivos = new List<GameObject>();
     private List<TipoInimigo> inimigosDisponiveis = new List<TipoInimigo>();
 
-    private int waveAtualIndex = 0;
-    private float tempoWaveAtual = 0f;
-    private bool waveAtiva = false;
-    private bool esperandoProximaWave = false;
-
-    // Eventos
-    public System.Action<int, string> OnWaveIniciada;
-    public System.Action<int> OnWaveTerminada;
-
     void Start()
     {
-        if (player == null)
-        {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null) player = playerObj.transform;
-        }
+        if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
-        VerificarPrefabs();
-
-        if (usarWaves && waves.Count > 0)
-        {
-            waveAtualIndex = 0;
-            IniciarWave(0);
-        }
-        else
-        {
-            AtualizarInimigosDisponiveis();
-        }
-
-        StartCoroutine(LimparListaInimigos());
+        if (usarWaves && waves.Count > 0) IniciarWave(0);
+        StartCoroutine(LimpezaAutomatica());
     }
 
     void Update()
@@ -114,173 +67,87 @@ public class EnemySpawnerCompleto : MonoBehaviour
         if (player == null) return;
 
         tempoTotalJogo += Time.deltaTime;
-        tempoDesdeUltimoSpawn += Time.deltaTime;
-        tempoDesdeUltimoGrupo += Time.deltaTime;
+        cronometroSpawn += Time.deltaTime;
 
         AtualizarInimigosDisponiveis();
 
-        if (usarWaves)
-            GerenciarWaves();
-        else
-            ProcessarSpawnNormal();
+        if (usarWaves) GerenciarSistemaWaves();
+        else LógicaSpawnSimples();
     }
 
-    void ProcessarSpawnNormal()
-    {
-        if (PodeSpawnarInimigo())
-        {
-            if (spawnEmGrupo && PodeSpawnarGrupo())
-            {
-                SpawnarGrupo();
-                tempoDesdeUltimoGrupo = 0f;
-            }
-            else
-            {
-                SpawnarInimigo();
-                tempoDesdeUltimoSpawn = 0f;
-            }
-        }
-    }
-
-    void GerenciarWaves()
+    void GerenciarSistemaWaves()
     {
         if (waveAtiva)
         {
-            tempoWaveAtual += Time.deltaTime;
-
-            if (tempoDesdeUltimoSpawn >= tempoEntreSpawns)
+            if (cronometroSpawn >= waves[waveAtualIndex].intervaloSpaw)
             {
-                if (spawnEmGrupo && PodeSpawnarGrupo())
-                {
-                    SpawnarGrupo();
-                    tempoDesdeUltimoGrupo = 0f;
-                }
-                else
-                {
-                    SpawnarInimigo();
-                }
-                tempoDesdeUltimoSpawn = 0f;
+                TentarSpawnar();
+                cronometroSpawn = 0;
             }
-
-            if (tempoWaveAtual >= waves[waveAtualIndex].duracao)
-                TerminarWave();
         }
-        else if (esperandoProximaWave)
+    }
+
+    void LógicaSpawnSimples()
+    {
+        if (cronometroSpawn >= 2f) // Intervalo padrão se não houver wave
         {
-            tempoWaveAtual += Time.deltaTime;
-            if (tempoWaveAtual >= tempoEntreWaves)
-            {
-                waveAtualIndex++;
-                if (waveAtualIndex < waves.Count)
-                    IniciarWave(waveAtualIndex);
-                else
-                {
-                    CriarWaveProcedural();
-                    IniciarWave(waveAtualIndex);
-                }
-            }
+            TentarSpawnar();
+            cronometroSpawn = 0;
         }
     }
 
-    void IniciarWave(int index)
+    void TentarSpawnar()
     {
-        waveAtiva = true;
-        esperandoProximaWave = false;
-        tempoWaveAtual = 0f;
+        if (inimigosAtivos.Count >= limiteInimigosGlobal || inimigosDisponiveis.Count == 0) return;
 
-        Wave wave = waves[index];
-        tempoEntreSpawns = wave.intervaloSpaw;
-        limiteInimigos = wave.maxInimigos;
-
-        Debug.Log($"=== INICIANDO {wave.nome} ===");
-        OnWaveIniciada?.Invoke(index, wave.nome);
-    }
-
-    void TerminarWave()
-    {
-        waveAtiva = false;
-        esperandoProximaWave = true;
-        tempoWaveAtual = 0f;
-        Debug.Log($"✅ WAVE {waveAtualIndex + 1} CONCLUÍDA!");
-        OnWaveTerminada?.Invoke(waveAtualIndex);
-    }
-
-    void SpawnarInimigo()
-    {
-        if (inimigosDisponiveis.Count == 0) return;
-
-        Vector2? posicaoValida = CalcularPosicaoSpawnLivre();
+        // Tenta encontrar uma posição válida
+        Vector2? posicaoValida = ObterPosicaoLivre();
 
         if (posicaoValida.HasValue)
         {
-            TipoInimigo tipoEscolhido = EscolherTipoInimigoPorPeso();
-            GameObject novoInimigo = Instantiate(tipoEscolhido.prefab, posicaoValida.Value, Quaternion.identity);
-            if (novoInimigo != null) inimigosAtivos.Add(novoInimigo);
+            TipoInimigo tipo = EscolherInimigoPorPeso();
+            GameObject novoInimigo = Instantiate(tipo.prefab, posicaoValida.Value, Quaternion.identity);
+            inimigosAtivos.Add(novoInimigo);
         }
     }
 
-    void SpawnarGrupo()
+    // A FUNÇÃO QUE RESOLVE SEU PROBLEMA
+    Vector2? ObterPosicaoLivre()
     {
-        int tamanhoGrupo = Random.Range(tamanhoGrupoMin, tamanhoGrupoMax + 1);
-
-        for (int i = 0; i < tamanhoGrupo; i++)
+        for (int i = 0; i < tentativasMaximas; i++)
         {
-            if (inimigosAtivos.Count >= limiteInimigos) break;
+            // 1. Sorteia uma posição ao redor do player
+            float angulo = Random.Range(0f, 360f);
+            Vector2 direcao = new Vector2(Mathf.Cos(angulo * Mathf.Deg2Rad), Mathf.Sin(angulo * Mathf.Deg2Rad));
+            float distancia = Random.Range(distanciaMinima, distanciaMaxima);
+            Vector2 pontoSorteado = (Vector2)player.position + (direcao * distancia);
 
-            Vector2? posicaoValida = CalcularPosicaoSpawnLivre();
+            // 2. Checa se nesse ponto existe algum colisor das camadas bloqueadas
+            // O OverlapCircle retorna qualquer colisor que tocar esse círculo
+            Collider2D colisorEncontrado = Physics2D.OverlapCircle(pontoSorteado, raioDeChecagem, camadasBloqueadas);
 
-            if (posicaoValida.HasValue)
+            if (colisorEncontrado == null)
             {
-                TipoInimigo tipoEscolhido = EscolherTipoInimigoPorPeso();
-                GameObject novoInimigo = Instantiate(tipoEscolhido.prefab, posicaoValida.Value, Quaternion.identity);
-                if (novoInimigo != null) inimigosAtivos.Add(novoInimigo);
-            }
-        }
-    }
-
-    // A MÁGICA ACONTECE AQUI: Tenta encontrar um lugar sem colisão
-    Vector2? CalcularPosicaoSpawnLivre()
-    {
-        for (int i = 0; i < maxTentativasSpawn; i++)
-        {
-            Vector2 posicaoSorteada = Vector2.zero;
-
-            if (limitarAreaAtuacao)
-            {
-                Vector2 min = centroArea - tamanhoArea / 2f;
-                Vector2 max = centroArea + tamanhoArea / 2f;
-                posicaoSorteada = new Vector2(Random.Range(min.x, max.x), Random.Range(min.y, max.y));
-            }
-            else
-            {
-                float angulo = Random.Range(0f, 360f);
-                Vector2 direcao = new Vector2(Mathf.Cos(angulo * Mathf.Deg2Rad), Mathf.Sin(angulo * Mathf.Deg2Rad));
-                float distancia = Random.Range(distanciaMinima, distanciaMaxima);
-                posicaoSorteada = (Vector2)player.position + direcao * distancia;
+                // Se for null, o caminho está livre!
+                return pontoSorteado;
             }
 
-            // Checa se existe colisor de "Obstaculos" no ponto sorteado
-            Collider2D colisorObstrutor = Physics2D.OverlapCircle(posicaoSorteada, raioChecagemInimigo, camadasObstrutivas);
-
-            if (colisorObstrutor == null)
-                return posicaoSorteada; // Lugar limpo encontrado!
+            // Se chegou aqui, ele bateu em algo e o loop vai tentar de novo (até o limite de tentativasMaximas)
         }
 
-        return null; // Não achou lugar vazio após as tentativas
+        return null; // Falhou em achar um lugar limpo
     }
 
-    TipoInimigo EscolherTipoInimigoPorPeso()
+    TipoInimigo EscolherInimigoPorPeso()
     {
-        float pesoTotal = 0f;
+        float pesoTotal = 0;
         foreach (var inimigo in inimigosDisponiveis) pesoTotal += inimigo.peso;
-
-        float random = Random.Range(0f, pesoTotal);
-        float acumulado = 0f;
-
+        float sorteio = Random.Range(0, pesoTotal);
+        float acumulado = 0;
         foreach (var inimigo in inimigosDisponiveis)
         {
             acumulado += inimigo.peso;
-            if (random <= acumulado) return inimigo;
+            if (sorteio <= acumulado) return inimigo;
         }
         return inimigosDisponiveis[0];
     }
@@ -288,52 +155,30 @@ public class EnemySpawnerCompleto : MonoBehaviour
     void AtualizarInimigosDisponiveis()
     {
         inimigosDisponiveis.Clear();
-        foreach (TipoInimigo inimigo in tiposInimigos)
-        {
-            if (tempoTotalJogo >= inimigo.tempoParaAparecer)
-                inimigosDisponiveis.Add(inimigo);
-        }
+        foreach (var inimigo in tiposInimigos)
+            if (tempoTotalJogo >= inimigo.tempoParaAparecer) inimigosDisponiveis.Add(inimigo);
     }
 
-    bool PodeSpawnarInimigo() => tempoDesdeUltimoSpawn >= tempoEntreSpawns && inimigosAtivos.Count < limiteInimigos && inimigosDisponiveis.Count > 0;
-    bool PodeSpawnarGrupo() => tempoDesdeUltimoGrupo >= intervaloEntreGrupos && inimigosAtivos.Count < limiteInimigos - tamanhoGrupoMin;
+    void IniciarWave(int index)
+    {
+        waveAtualIndex = index;
+        waveAtiva = true;
+        Debug.Log("Iniciando: " + waves[index].nome);
+    }
 
-    IEnumerator LimparListaInimigos()
+    IEnumerator LimpezaAutomatica()
     {
         while (true)
         {
-            yield return new WaitForSeconds(3f);
-            inimigosAtivos.RemoveAll(inimigo => inimigo == null);
+            yield return new WaitForSeconds(2f);
+            inimigosAtivos.RemoveAll(item => item == null);
         }
     }
 
-    void CriarWaveProcedural()
-    {
-        Wave ultimaWave = waves[waves.Count - 1];
-        waves.Add(new Wave
-        {
-            nome = $"Wave {waves.Count + 1}",
-            duracao = ultimaWave.duracao + 15f,
-            maxInimigos = ultimaWave.maxInimigos + 10,
-            intervaloSpaw = Mathf.Max(0.5f, ultimaWave.intervaloSpaw - 0.1f)
-        });
-    }
-
-    void VerificarPrefabs()
-    {
-        for (int i = tiposInimigos.Count - 1; i >= 0; i--)
-            if (tiposInimigos[i].prefab == null) tiposInimigos.RemoveAt(i);
-    }
-
-    // Desenha as áreas no Editor para facilitar o ajuste
+    // Visualização no Editor
     void OnDrawGizmosSelected()
     {
-        if (limitarAreaAtuacao)
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireCube(centroArea, tamanhoArea);
-        }
-        else if (player != null)
+        if (player != null)
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(player.position, distanciaMinima);
