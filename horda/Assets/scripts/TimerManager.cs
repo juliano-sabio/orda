@@ -2,16 +2,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System;
+using TMPro; // Adicionado para TextMeshPro
 
 public class TimerManager : MonoBehaviour
 {
     [Header("Configurações do Timer")]
-    public float levelDuration = 180f; // Duração total do level em segundos
+    public float levelDuration = 180f;
     public float currentTime;
 
     [Header("Referências UI")]
     public Slider timeBar;
-    public Text timeText;
+    public TextMeshProUGUI timeText; // Alterado para TextMeshProUGUI
     public Image timeBarFill;
 
     [Header("Eventos Temporizados")]
@@ -22,10 +23,9 @@ public class TimerManager : MonoBehaviour
     public Color normalColor = Color.green;
     public Color warningColor = Color.yellow;
     public Color criticalColor = Color.red;
-    public float warningThreshold = 0.3f; // 30% do tempo
-    public float criticalThreshold = 0.1f; // 10% do tempo
+    public float warningThreshold = 0.3f;
+    public float criticalThreshold = 0.1f;
 
-    // Eventos
     public static event Action OnTimeUp;
     public static event Action<string> OnEventTriggered;
     public static event Action<string> OnBossSpawn;
@@ -45,9 +45,8 @@ public class TimerManager : MonoBehaviour
         UpdateTimeBar();
         isRunning = true;
 
-        // Ordena eventos por tempo
-        Array.Sort(timedEvents, (a, b) => a.triggerTime.CompareTo(b.triggerTime));
-        Array.Sort(bossEvents, (a, b) => a.triggerTime.CompareTo(b.triggerTime));
+        Array.Sort(timedEvents, (a, b) => b.triggerTime.CompareTo(a.triggerTime));
+        Array.Sort(bossEvents, (a, b) => b.triggerTime.CompareTo(a.triggerTime));
     }
 
     void Update()
@@ -59,34 +58,20 @@ public class TimerManager : MonoBehaviour
         CheckEvents();
         CheckBossEvents();
 
-        if (currentTime <= 0)
-        {
-            TimeUp();
-        }
+        if (currentTime <= 0) TimeUp();
     }
 
     void UpdateTimeBar()
     {
         float timeRatio = currentTime / levelDuration;
+        if (timeBar != null) timeBar.value = timeRatio;
+        if (timeText != null) timeText.text = FormatTime(currentTime);
 
-        // Atualiza slider
-        timeBar.value = timeRatio;
-
-        // Atualiza texto
-        timeText.text = FormatTime(currentTime);
-
-        // Muda cor baseada no tempo restante
-        if (timeRatio <= criticalThreshold)
+        if (timeBarFill != null)
         {
-            timeBarFill.color = criticalColor;
-        }
-        else if (timeRatio <= warningThreshold)
-        {
-            timeBarFill.color = warningColor;
-        }
-        else
-        {
-            timeBarFill.color = normalColor;
+            if (timeRatio <= criticalThreshold) timeBarFill.color = criticalColor;
+            else if (timeRatio <= warningThreshold) timeBarFill.color = warningColor;
+            else timeBarFill.color = normalColor;
         }
     }
 
@@ -100,13 +85,9 @@ public class TimerManager : MonoBehaviour
     void CheckEvents()
     {
         if (currentEventIndex >= timedEvents.Length) return;
-
-        TimedEvent nextEvent = timedEvents[currentEventIndex];
-        float timeRatio = currentTime / levelDuration;
-
-        if (timeRatio <= nextEvent.triggerTime)
+        if ((currentTime / levelDuration) <= timedEvents[currentEventIndex].triggerTime)
         {
-            TriggerEvent(nextEvent);
+            TriggerEvent(timedEvents[currentEventIndex]);
             currentEventIndex++;
         }
     }
@@ -114,43 +95,23 @@ public class TimerManager : MonoBehaviour
     void CheckBossEvents()
     {
         if (currentBossIndex >= bossEvents.Length) return;
-
-        BossEvent nextBoss = bossEvents[currentBossIndex];
-        float timeRatio = currentTime / levelDuration;
-
-        if (timeRatio <= nextBoss.triggerTime)
+        if ((currentTime / levelDuration) <= bossEvents[currentBossIndex].triggerTime)
         {
-            TriggerBossEvent(nextBoss);
+            TriggerBossEvent(bossEvents[currentBossIndex]);
             currentBossIndex++;
         }
     }
 
     void TriggerEvent(TimedEvent timedEvent)
     {
-        // Executa o evento
-        if (timedEvent.onTrigger != null)
-        {
-            timedEvent.onTrigger.Invoke();
-        }
-
-        // Dispara evento global
+        if (timedEvent.onTrigger != null) timedEvent.onTrigger.Invoke();
         OnEventTriggered?.Invoke(timedEvent.eventName);
-
-        Debug.Log($"Evento disparado: {timedEvent.eventName}");
     }
 
     void TriggerBossEvent(BossEvent bossEvent)
     {
-        // Instancia o boss
-        if (bossEvent.bossPrefab != null)
-        {
-            Instantiate(bossEvent.bossPrefab, bossEvent.spawnPosition, Quaternion.identity);
-        }
-
-        // Dispara evento global
+        if (bossEvent.bossPrefab != null) Instantiate(bossEvent.bossPrefab, bossEvent.spawnPosition, Quaternion.identity);
         OnBossSpawn?.Invoke(bossEvent.bossName);
-
-        Debug.Log($"Boss apareceu: {bossEvent.bossName}");
     }
 
     void TimeUp()
@@ -158,44 +119,17 @@ public class TimerManager : MonoBehaviour
         currentTime = 0;
         isRunning = false;
         OnTimeUp?.Invoke();
-        Debug.Log("Tempo esgotado!");
     }
 
-    // Métodos públicos para controle externo
-    public void AddTime(float seconds)
-    {
-        currentTime += seconds;
-        if (currentTime > levelDuration) currentTime = levelDuration;
-    }
-
-    public void SubtractTime(float seconds)
-    {
-        currentTime -= seconds;
-        if (currentTime < 0) currentTime = 0;
-    }
-
-    public void PauseTimer()
-    {
-        isRunning = false;
-    }
-
-    public void ResumeTimer()
-    {
-        isRunning = true;
-    }
-
-    public float GetTimeRatio()
-    {
-        return currentTime / levelDuration;
-    }
+    public float GetTimeRatio() => currentTime / levelDuration;
 }
 
+// AS CLASSES ABAIXO DEVEM FICAR FORA DA CLASSE TIMERMANAGER, MAS NO MESMO ARQUIVO
 [System.Serializable]
 public class TimedEvent
 {
     public string eventName;
-    [Range(0f, 1f)]
-    public float triggerTime; // 0-1 representando porcentagem do tempo total
+    [Range(0f, 1f)] public float triggerTime;
     public UnityEngine.Events.UnityEvent onTrigger;
 }
 
@@ -203,8 +137,7 @@ public class TimedEvent
 public class BossEvent
 {
     public string bossName;
-    [Range(0f, 1f)]
-    public float triggerTime; // 0-1 representando porcentagem do tempo total
+    [Range(0f, 1f)] public float triggerTime;
     public GameObject bossPrefab;
     public Vector2 spawnPosition;
 }
