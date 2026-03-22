@@ -69,7 +69,8 @@ public class DamageNumberManager : MonoBehaviour
         GameObject canvasObj = new GameObject("DamageCanvas");
         worldCanvas = canvasObj.AddComponent<Canvas>();
         worldCanvas.renderMode = RenderMode.WorldSpace;
-
+        worldCanvas.sortingLayerName = "UI"; // Ou o nome de uma layer que esteja na frente
+        worldCanvas.sortingOrder = 999;
         canvasObj.transform.position = Vector3.zero;
         canvasObj.transform.localScale = new Vector3(canvasScale, canvasScale, canvasScale);
 

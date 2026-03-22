@@ -62,6 +62,7 @@ Animator:
   m_WriteDefaultValuesOnDisable: 0
 --- !u!212 &344746289004317083
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -106,7 +107,8 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 4
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -5109462437978143707, guid: 0369f7bc28213d443b66873e9d50d1a7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -116,7 +118,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &7208258075032607586
 MonoBehaviour:
@@ -130,6 +131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98995dd6b8d65214e8782c485920b5e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PassiveProjectileSkill2D
+  playerStats: {fileID: 0}
   projectilePrefab: {fileID: 0}
   activationInterval: 2
   searchRange: 10
@@ -149,11 +151,18 @@ MonoBehaviour:
   lifeTime: 5
   damage: 25
   element: 0
+  isOrbiting: 0
+  allowMovement: 1
+  ignoreTargetsDuringOrbit: 1
+  orbitalDamageEnabled: 1
+  orbitalDamageInterval: 0.3
+  orbitalDamageRadius: 1.5
+  debugDamage: 1
   hitEffect: {fileID: 0}
   trailRenderer: {fileID: 0}
 --- !u!96 &7134715489112898854
 TrailRenderer:
-  serializedVersion: 3
+  serializedVersion: 4
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -199,6 +208,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
+  m_MaskInteraction: 0
   m_Time: 5
   m_PreviewTimeScale: 1
   m_Parameters:
@@ -257,7 +267,6 @@ TrailRenderer:
     shadowBias: 0.5
     generateLightingData: 0
   m_MinVertexDistance: 0.1
-  m_MaskInteraction: 0
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1

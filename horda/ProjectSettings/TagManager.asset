@@ -44,5 +44,8 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: dano_ui
+    uniqueID: 1173689823
+    locked: 0
   m_RenderingLayers:
   - Default

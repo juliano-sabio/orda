@@ -40,6 +40,9 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI damageText;
     public TextMeshProUGUI speedText;
     public TextMeshProUGUI defenseText;
+    public TextMeshProUGUI maxHealthStatusText; // Vida Máxima no painel
+    public TextMeshProUGUI critChanceText;      // Chance de Crítico
+    public TextMeshProUGUI healthRegenText;
     public TextMeshProUGUI attackSpeedText;
     public TextMeshProUGUI elementInfoText;
     public TextMeshProUGUI inventoryText;
@@ -173,10 +176,13 @@ public class UIManager : MonoBehaviour
             Debug.Log("✅ PauseManager encontrado na cena");
         }
     }
+    // --- INICIALIZAÇÃO DA UI (CHAMADA NO START) ---
     void InitializeUI()
     {
+        // Atualiza as barras de vida e XP logo no início
         UpdatePlayerStatus();
 
+        // 1. Esconde todos os painéis para não começarem abertos na tela
         if (skillAcquiredPanel != null) skillAcquiredPanel.SetActive(false);
         if (statusPanel != null) statusPanel.SetActive(false);
         if (skillSelectionPanel != null) skillSelectionPanel.SetActive(false);
@@ -184,8 +190,22 @@ public class UIManager : MonoBehaviour
         if (elementAdvantagePanel != null) elementAdvantagePanel.SetActive(false);
         if (xpGainText != null) xpGainText.gameObject.SetActive(false);
 
+        // 2. Preenche os textos fixos do Painel de Status
+        if (maxHealthStatusText != null)
+            maxHealthStatusText.text = $"❤️ Vida Máxima: {playerStats.GetMaxHealth():F0}";
+
+        if (critChanceText != null)
+            // Multiplicamos por 100 para exibir como porcentagem (ex: 0.1 -> 10%)
+            critChanceText.text = $"🎯 Crítico: {playerStats.GetCritChance() * 100f:F1}%";
+
+        if (healthRegenText != null)
+            healthRegenText.text = $"♻️ Regen. Vida: {playerStats.GetHealthRegen():F1}/s";
+
+        if (attackSpeedText != null)
+            attackSpeedText.text = $"⚡ Vel. Ataque: {playerStats.GetAttackActivationInterval():F1}s";
+
         Debug.Log("✅ UIManager inicializado com TextMeshPro!");
-    }
+    } // Final da função
 
     void Update()
     {

@@ -1292,6 +1292,24 @@ public class PlayerStats : MonoBehaviour
         speed += reducao;
         Debug.Log($"🏃 Velocidade do jogador restaurada!");
     }
+    // --- NOVOS MÉTODOS PARA O UIMANAGER ---
+
+    // Retorna a chance de crítico atual
+    public float GetCritChance()
+    {
+        // Como o seu sistema de crítico usa um valor fixo de 0.1f (10%) no ApplyDamageToTarget,
+        // retornamos esse valor aqui para a UI. 
+        // Se você criar uma variável 'public float critChance' no futuro, troque o 0.1f por ela.
+        return 0.1f;
+    }
+
+    // Retorna a regeneração de vida (o UIManager está procurando por este nome específico)
+    public float GetHealthRegen()
+    {
+        return healthRegenRate;
+    }
+
+    // Caso o UIManager peça o dano base do jogador:
     void OnDrawGizmosSelected()
     {
         if (showCollectionRadius)
@@ -1303,4 +1321,5 @@ public class PlayerStats : MonoBehaviour
             Gizmos.DrawSphere(transform.position, xpCollectionRadius);
         }
     }
+
 }
