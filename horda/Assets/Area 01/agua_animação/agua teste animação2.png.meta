@@ -1,0 +1,3601 @@
+fileFormatVersion: 2
+guid: e15260537896056498ff614d8e2b769b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5179126153216127008
+    second: "agua teste anima\xE7\xE3o2_0"
+  - first:
+      213: -3443311349240139443
+    second: "agua teste anima\xE7\xE3o2_1"
+  - first:
+      213: 8574109006197790915
+    second: "agua teste anima\xE7\xE3o2_2"
+  - first:
+      213: -7984118208642694017
+    second: "agua teste anima\xE7\xE3o2_3"
+  - first:
+      213: 6615196132427943902
+    second: "agua teste anima\xE7\xE3o2_4"
+  - first:
+      213: -1691150547395846003
+    second: "agua teste anima\xE7\xE3o2_5"
+  - first:
+      213: -4868015960223930323
+    second: "agua teste anima\xE7\xE3o2_6"
+  - first:
+      213: -7224408506528770141
+    second: "agua teste anima\xE7\xE3o2_7"
+  - first:
+      213: 498372459583917209
+    second: "agua teste anima\xE7\xE3o2_8"
+  - first:
+      213: 7594063304861450781
+    second: "agua teste anima\xE7\xE3o2_9"
+  - first:
+      213: -8301546769523670368
+    second: "agua teste anima\xE7\xE3o2_10"
+  - first:
+      213: -6519024676317940103
+    second: "agua teste anima\xE7\xE3o2_11"
+  - first:
+      213: 305110644453274517
+    second: "agua teste anima\xE7\xE3o2_12"
+  - first:
+      213: 6409829523679984822
+    second: "agua teste anima\xE7\xE3o2_13"
+  - first:
+      213: -7707700335833306526
+    second: "agua teste anima\xE7\xE3o2_14"
+  - first:
+      213: -1544953747900064688
+    second: "agua teste anima\xE7\xE3o2_15"
+  - first:
+      213: -3526914821558769669
+    second: "agua teste anima\xE7\xE3o2_16"
+  - first:
+      213: 640762085092652021
+    second: "agua teste anima\xE7\xE3o2_17"
+  - first:
+      213: 5956648523155822273
+    second: "agua teste anima\xE7\xE3o2_18"
+  - first:
+      213: 3615961785721198639
+    second: "agua teste anima\xE7\xE3o2_19"
+  - first:
+      213: 7094055767150611960
+    second: "agua teste anima\xE7\xE3o2_20"
+  - first:
+      213: 8061983452541909913
+    second: "agua teste anima\xE7\xE3o2_21"
+  - first:
+      213: -8688532585210586244
+    second: "agua teste anima\xE7\xE3o2_22"
+  - first:
+      213: 1854006124120122195
+    second: "agua teste anima\xE7\xE3o2_23"
+  - first:
+      213: -8396949518196545547
+    second: "agua teste anima\xE7\xE3o2_24"
+  - first:
+      213: 6390984489406991955
+    second: "agua teste anima\xE7\xE3o2_25"
+  - first:
+      213: 1818323990851677568
+    second: "agua teste anima\xE7\xE3o2_26"
+  - first:
+      213: 1830392950628745971
+    second: "agua teste anima\xE7\xE3o2_27"
+  - first:
+      213: -8398259223674207093
+    second: "agua teste anima\xE7\xE3o2_28"
+  - first:
+      213: -2342050686543278070
+    second: "agua teste anima\xE7\xE3o2_29"
+  - first:
+      213: -8347897695253244957
+    second: "agua teste anima\xE7\xE3o2_30"
+  - first:
+      213: 1201569976791762255
+    second: "agua teste anima\xE7\xE3o2_31"
+  - first:
+      213: -6338801149093313426
+    second: "agua teste anima\xE7\xE3o2_32"
+  - first:
+      213: -2165496327595361304
+    second: "agua teste anima\xE7\xE3o2_33"
+  - first:
+      213: 4626187057921706682
+    second: "agua teste anima\xE7\xE3o2_34"
+  - first:
+      213: 5544694655932939680
+    second: "agua teste anima\xE7\xE3o2_35"
+  - first:
+      213: 8247909131857304861
+    second: "agua teste anima\xE7\xE3o2_36"
+  - first:
+      213: 7773657363857258837
+    second: "agua teste anima\xE7\xE3o2_37"
+  - first:
+      213: -3367271885294013924
+    second: "agua teste anima\xE7\xE3o2_38"
+  - first:
+      213: 7222624672845886826
+    second: "agua teste anima\xE7\xE3o2_39"
+  - first:
+      213: 2083623036414414558
+    second: "agua teste anima\xE7\xE3o2_40"
+  - first:
+      213: 6230272190683056567
+    second: "agua teste anima\xE7\xE3o2_41"
+  - first:
+      213: 3331463863268247625
+    second: "agua teste anima\xE7\xE3o2_42"
+  - first:
+      213: 3485176157716756224
+    second: "agua teste anima\xE7\xE3o2_43"
+  - first:
+      213: -6743793570613721103
+    second: "agua teste anima\xE7\xE3o2_44"
+  - first:
+      213: 1323432291567993114
+    second: "agua teste anima\xE7\xE3o2_45"
+  - first:
+      213: -1979652810762444331
+    second: "agua teste anima\xE7\xE3o2_46"
+  - first:
+      213: -8943176476779424164
+    second: "agua teste anima\xE7\xE3o2_47"
+  - first:
+      213: 1679097484052972977
+    second: "agua teste anima\xE7\xE3o2_48"
+  - first:
+      213: 4441293822007450624
+    second: "agua teste anima\xE7\xE3o2_49"
+  - first:
+      213: -3634149658564088137
+    second: "agua teste anima\xE7\xE3o2_50"
+  - first:
+      213: 1717497829065250063
+    second: "agua teste anima\xE7\xE3o2_51"
+  - first:
+      213: -3389014256466342054
+    second: "agua teste anima\xE7\xE3o2_52"
+  - first:
+      213: 4349692947061233990
+    second: "agua teste anima\xE7\xE3o2_53"
+  - first:
+      213: 9221088531174093270
+    second: "agua teste anima\xE7\xE3o2_54"
+  - first:
+      213: 42651979547481029
+    second: "agua teste anima\xE7\xE3o2_55"
+  - first:
+      213: -5971482289639656707
+    second: "agua teste anima\xE7\xE3o2_56"
+  - first:
+      213: -6291274258510659386
+    second: "agua teste anima\xE7\xE3o2_57"
+  - first:
+      213: 2767589147738399520
+    second: "agua teste anima\xE7\xE3o2_58"
+  - first:
+      213: -3936674231948925810
+    second: "agua teste anima\xE7\xE3o2_59"
+  - first:
+      213: -9089873505876952414
+    second: "agua teste anima\xE7\xE3o2_60"
+  - first:
+      213: -6321165589039352873
+    second: "agua teste anima\xE7\xE3o2_61"
+  - first:
+      213: 2705514827812138095
+    second: "agua teste anima\xE7\xE3o2_62"
+  - first:
+      213: 6893354251623213386
+    second: "agua teste anima\xE7\xE3o2_63"
+  - first:
+      213: 7900495420438351159
+    second: "agua teste anima\xE7\xE3o2_64"
+  - first:
+      213: -8809948565447463216
+    second: "agua teste anima\xE7\xE3o2_65"
+  - first:
+      213: 2229597098780526613
+    second: "agua teste anima\xE7\xE3o2_66"
+  - first:
+      213: 6643885828408146531
+    second: "agua teste anima\xE7\xE3o2_67"
+  - first:
+      213: -4930857841289288550
+    second: "agua teste anima\xE7\xE3o2_68"
+  - first:
+      213: -7679541418054900564
+    second: "agua teste anima\xE7\xE3o2_69"
+  - first:
+      213: 3866394502755111230
+    second: "agua teste anima\xE7\xE3o2_70"
+  - first:
+      213: 1321957653735490246
+    second: "agua teste anima\xE7\xE3o2_71"
+  - first:
+      213: 5715536945943921659
+    second: "agua teste anima\xE7\xE3o2_72"
+  - first:
+      213: 1222845180417572231
+    second: "agua teste anima\xE7\xE3o2_73"
+  - first:
+      213: -2675135924769080825
+    second: "agua teste anima\xE7\xE3o2_74"
+  - first:
+      213: 8737229947011119891
+    second: "agua teste anima\xE7\xE3o2_75"
+  - first:
+      213: 7077138413445074061
+    second: "agua teste anima\xE7\xE3o2_76"
+  - first:
+      213: 6629330603481965336
+    second: "agua teste anima\xE7\xE3o2_77"
+  - first:
+      213: -3724239241120414184
+    second: "agua teste anima\xE7\xE3o2_78"
+  - first:
+      213: 2275677274015821393
+    second: "agua teste anima\xE7\xE3o2_79"
+  - first:
+      213: -7966887985186751799
+    second: "agua teste anima\xE7\xE3o2_80"
+  - first:
+      213: 8187691461100829392
+    second: "agua teste anima\xE7\xE3o2_81"
+  - first:
+      213: 133464576737241860
+    second: "agua teste anima\xE7\xE3o2_82"
+  - first:
+      213: 2237022870447016910
+    second: "agua teste anima\xE7\xE3o2_83"
+  - first:
+      213: 3910648797526033576
+    second: "agua teste anima\xE7\xE3o2_84"
+  - first:
+      213: 1079689094724385647
+    second: "agua teste anima\xE7\xE3o2_85"
+  - first:
+      213: -7136160339714738140
+    second: "agua teste anima\xE7\xE3o2_86"
+  - first:
+      213: -1213876936182984430
+    second: "agua teste anima\xE7\xE3o2_87"
+  - first:
+      213: -4368115205933424299
+    second: "agua teste anima\xE7\xE3o2_88"
+  - first:
+      213: -8681426948098685288
+    second: "agua teste anima\xE7\xE3o2_89"
+  - first:
+      213: 3941275566590941979
+    second: "agua teste anima\xE7\xE3o2_90"
+  - first:
+      213: 305203777835506213
+    second: "agua teste anima\xE7\xE3o2_91"
+  - first:
+      213: 5757836821931727570
+    second: "agua teste anima\xE7\xE3o2_92"
+  - first:
+      213: -1611211934982321943
+    second: "agua teste anima\xE7\xE3o2_93"
+  - first:
+      213: 682166089262393256
+    second: "agua teste anima\xE7\xE3o2_94"
+  - first:
+      213: 5721525560362538519
+    second: "agua teste anima\xE7\xE3o2_95"
+  - first:
+      213: 5071253408719330544
+    second: "agua teste anima\xE7\xE3o2_96"
+  - first:
+      213: -6674299081932315503
+    second: "agua teste anima\xE7\xE3o2_97"
+  - first:
+      213: 8407146739473262998
+    second: "agua teste anima\xE7\xE3o2_98"
+  - first:
+      213: 6352088597970640665
+    second: "agua teste anima\xE7\xE3o2_99"
+  - first:
+      213: -6710803212442128033
+    second: "agua teste anima\xE7\xE3o2_100"
+  - first:
+      213: -5539633425225046135
+    second: "agua teste anima\xE7\xE3o2_101"
+  - first:
+      213: 6225675316416742367
+    second: "agua teste anima\xE7\xE3o2_102"
+  - first:
+      213: 6749649895715384256
+    second: "agua teste anima\xE7\xE3o2_103"
+  - first:
+      213: -1744360488346766665
+    second: "agua teste anima\xE7\xE3o2_104"
+  - first:
+      213: -4234914627234207406
+    second: "agua teste anima\xE7\xE3o2_105"
+  - first:
+      213: 7181664719631253477
+    second: "agua teste anima\xE7\xE3o2_106"
+  - first:
+      213: 9028126806754871999
+    second: "agua teste anima\xE7\xE3o2_107"
+  - first:
+      213: 4932304227186766738
+    second: "agua teste anima\xE7\xE3o2_108"
+  - first:
+      213: -6686627162702099551
+    second: "agua teste anima\xE7\xE3o2_109"
+  - first:
+      213: 4596672656045335442
+    second: "agua teste anima\xE7\xE3o2_110"
+  - first:
+      213: -3218282643941575112
+    second: "agua teste anima\xE7\xE3o2_111"
+  - first:
+      213: -6533534258149845063
+    second: "agua teste anima\xE7\xE3o2_112"
+  - first:
+      213: 4062491693353905393
+    second: "agua teste anima\xE7\xE3o2_113"
+  - first:
+      213: 4019744774183468114
+    second: "agua teste anima\xE7\xE3o2_114"
+  - first:
+      213: -717996764947338771
+    second: "agua teste anima\xE7\xE3o2_115"
+  - first:
+      213: -7762449882718771881
+    second: "agua teste anima\xE7\xE3o2_116"
+  - first:
+      213: 6030959826459557520
+    second: "agua teste anima\xE7\xE3o2_117"
+  - first:
+      213: -3345455182952783063
+    second: "agua teste anima\xE7\xE3o2_118"
+  - first:
+      213: 4465447051838423547
+    second: "agua teste anima\xE7\xE3o2_119"
+  - first:
+      213: 1635700864912798777
+    second: "agua teste anima\xE7\xE3o2_120"
+  - first:
+      213: 5606132889243886813
+    second: "agua teste anima\xE7\xE3o2_121"
+  - first:
+      213: -7317670462701318194
+    second: "agua teste anima\xE7\xE3o2_122"
+  - first:
+      213: 474267703511137621
+    second: "agua teste anima\xE7\xE3o2_123"
+  - first:
+      213: -8453852242293076117
+    second: "agua teste anima\xE7\xE3o2_124"
+  - first:
+      213: -4688509953278901957
+    second: "agua teste anima\xE7\xE3o2_125"
+  - first:
+      213: -6271055523917591488
+    second: "agua teste anima\xE7\xE3o2_126"
+  - first:
+      213: -7598873282337796377
+    second: "agua teste anima\xE7\xE3o2_127"
+  - first:
+      213: -4613032702087127862
+    second: "agua teste anima\xE7\xE3o2_128"
+  - first:
+      213: 1949226466051363862
+    second: "agua teste anima\xE7\xE3o2_129"
+  - first:
+      213: 1589163594398249310
+    second: "agua teste anima\xE7\xE3o2_130"
+  - first:
+      213: -8449858118298991197
+    second: "agua teste anima\xE7\xE3o2_131"
+  - first:
+      213: 5023605779983727276
+    second: "agua teste anima\xE7\xE3o2_132"
+  - first:
+      213: -7963392835578169732
+    second: "agua teste anima\xE7\xE3o2_133"
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_0"
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 1207
+        width: 19
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 020f161dbc3ffd740800000000000000
+      internalID: 5179126153216127008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_1"
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 1198
+        width: 233
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4178714296e630d0800000000000000
+      internalID: -3443311349240139443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_2"
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 1203
+        width: 32
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c895eba6ba5df670800000000000000
+      internalID: 8574109006197790915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_3"
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 1207
+        width: 118
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f74cf197ac6b23190800000000000000
+      internalID: -7984118208642694017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_4"
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 1196
+        width: 74
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edfc7e865d5edcb50800000000000000
+      internalID: 6615196132427943902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_5"
+      rect:
+        serializedVersion: 2
+        x: 517
+        y: 1206
+        width: 53
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8063c88983d788e0800000000000000
+      internalID: -1691150547395846003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_6"
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 1201
+        width: 25
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d28abe9a645517cb0800000000000000
+      internalID: -4868015960223930323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_7"
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 1189
+        width: 64
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a7da086dbebdbb90800000000000000
+      internalID: -7224408506528770141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_8"
+      rect:
+        serializedVersion: 2
+        x: 155
+        y: 1194
+        width: 23
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99c465b8c139ae600800000000000000
+      internalID: 498372459583917209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_9"
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 1197
+        width: 53
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1288183758836960800000000000000
+      internalID: 7594063304861450781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_10"
+      rect:
+        serializedVersion: 2
+        x: 357
+        y: 1190
+        width: 31
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a20044523bfacc80800000000000000
+      internalID: -8301546769523670368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_11"
+      rect:
+        serializedVersion: 2
+        x: 467
+        y: 1174
+        width: 42
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 976301e9895c785a0800000000000000
+      internalID: -6519024676317940103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_12"
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 1129
+        width: 179
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 593f3dbb388fb3400800000000000000
+      internalID: 305110644453274517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_13"
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 1138
+        width: 115
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bcb1c5bdf944f850800000000000000
+      internalID: 6409829523679984822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_14"
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 1144
+        width: 71
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26a2f77b16fb80590800000000000000
+      internalID: -7707700335833306526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_15"
+      rect:
+        serializedVersion: 2
+        x: 533
+        y: 1141
+        width: 23
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05c120670c83f8ae0800000000000000
+      internalID: -1544953747900064688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_16"
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 1100
+        width: 99
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf7edebf7a1ed0fc0800000000000000
+      internalID: -3526914821558769669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_17"
+      rect:
+        serializedVersion: 2
+        x: 447
+        y: 1098
+        width: 40
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f37c73b8b174e800800000000000000
+      internalID: 640762085092652021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_18"
+      rect:
+        serializedVersion: 2
+        x: 468
+        y: 1104
+        width: 28
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c6de8aa5444aa250800000000000000
+      internalID: 5956648523155822273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_19"
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 1074
+        width: 198
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f289c4ff51a7e2230800000000000000
+      internalID: 3615961785721198639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_20"
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 1095
+        width: 24
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fdc2d16226237260800000000000000
+      internalID: 7094055767150611960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_21"
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 999
+        width: 21
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99b76d16c3be1ef60800000000000000
+      internalID: 8061983452541909913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_22"
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 986
+        width: 235
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7bdd17c5a12c6780800000000000000
+      internalID: -8688532585210586244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_23"
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 996
+        width: 34
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35324973fb0cab910800000000000000
+      internalID: 1854006124120122195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_24"
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 999
+        width: 120
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f7e103f6ea087b80800000000000000
+      internalID: -8396949518196545547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_25"
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 988
+        width: 76
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35e8220488651b850800000000000000
+      internalID: 6390984489406991955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_26"
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 999
+        width: 55
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08de849290cfb3910800000000000000
+      internalID: 1818323990851677568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_27"
+      rect:
+        serializedVersion: 2
+        x: 549
+        y: 994
+        width: 25
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f20b95d0bcd66910800000000000000
+      internalID: 1830392950628745971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_28"
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 981
+        width: 66
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8440416bb3637b80800000000000000
+      internalID: -8398259223674207093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_29"
+      rect:
+        serializedVersion: 2
+        x: 331
+        y: 990
+        width: 55
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a00d0ae2f4d5f7fd0800000000000000
+      internalID: -2342050686543278070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_30"
+      rect:
+        serializedVersion: 2
+        x: 356
+        y: 982
+        width: 33
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e3d025764f462c80800000000000000
+      internalID: -8347897695253244957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_31"
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 966
+        width: 44
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4582771785dca010800000000000000
+      internalID: 1201569976791762255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_32"
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 921
+        width: 182
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e64847670fd0808a0800000000000000
+      internalID: -6338801149093313426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_33"
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 938
+        width: 117
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ebf347309c92f1e0800000000000000
+      internalID: -2165496327595361304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_34"
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 936
+        width: 69
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abaceeb5e94833040800000000000000
+      internalID: 4626187057921706682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_35"
+      rect:
+        serializedVersion: 2
+        x: 451
+        y: 947
+        width: 30
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0adb3ea9966b2fc40800000000000000
+      internalID: 5544694655932939680
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_36"
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 930
+        width: 70
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1d1e08f7a5767270800000000000000
+      internalID: 8247909131857304861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_37"
+      rect:
+        serializedVersion: 2
+        x: 532
+        y: 933
+        width: 25
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 559bf429f2491eb60800000000000000
+      internalID: 7773657363857258837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_38"
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 892
+        width: 101
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c12f3e69f0c0541d0800000000000000
+      internalID: -3367271885294013924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_39"
+      rect:
+        serializedVersion: 2
+        x: 446
+        y: 890
+        width: 43
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6573f27fdaeb3460800000000000000
+      internalID: 7222624672845886826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_40"
+      rect:
+        serializedVersion: 2
+        x: 467
+        y: 896
+        width: 30
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ede4d43bc148aec10800000000000000
+      internalID: 2083623036414414558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_41"
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 866
+        width: 200
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b988ab4c8f567650800000000000000
+      internalID: 6230272190683056567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_42"
+      rect:
+        serializedVersion: 2
+        x: 361
+        y: 887
+        width: 26
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94887289bbcbb3e20800000000000000
+      internalID: 3331463863268247625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_43"
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 790
+        width: 23
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0073e5c0045dd5030800000000000000
+      internalID: 3485176157716756224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_44"
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 782
+        width: 237
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f781094a7b3962a0800000000000000
+      internalID: -6743793570613721103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_45"
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 788
+        width: 36
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a11013748a6cd5210800000000000000
+      internalID: 1323432291567993114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_46"
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 791
+        width: 122
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d1a6ebd14cd684e0800000000000000
+      internalID: -1979652810762444331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_47"
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 789
+        width: 57
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c56dee9906473e380800000000000000
+      internalID: -8943176476779424164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_48"
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 791
+        width: 57
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b5ca38f34a5d4710800000000000000
+      internalID: 1679097484052972977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_49"
+      rect:
+        serializedVersion: 2
+        x: 548
+        y: 785
+        width: 27
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00c14eb3335a2ad30800000000000000
+      internalID: 4441293822007450624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_50"
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 773
+        width: 68
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7be2eacd328e09dc0800000000000000
+      internalID: -3634149658564088137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_51"
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 778
+        width: 27
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0550f30d27c5d710800000000000000
+      internalID: 1717497829065250063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_52"
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 782
+        width: 54
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5fc6905d7dc7f0d0800000000000000
+      internalID: -3389014256466342054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_53"
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 781
+        width: 63
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6495b9f80b63d5c30800000000000000
+      internalID: 4349692947061233990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_54"
+      rect:
+        serializedVersion: 2
+        x: 355
+        y: 774
+        width: 35
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d17f07e923e7ff70800000000000000
+      internalID: 9221088531174093270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_55"
+      rect:
+        serializedVersion: 2
+        x: 465
+        y: 758
+        width: 46
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c315e9dfb7879000800000000000000
+      internalID: 42651979547481029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_56"
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 713
+        width: 184
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df2fd7fee78012da0800000000000000
+      internalID: -5971482289639656707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_57"
+      rect:
+        serializedVersion: 2
+        x: 263
+        y: 731
+        width: 119
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c0c9ecf467e0b8a0800000000000000
+      internalID: -6291274258510659386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_58"
+      rect:
+        serializedVersion: 2
+        x: 407
+        y: 728
+        width: 71
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0236c23aaa3786620800000000000000
+      internalID: 2767589147738399520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_59"
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 738
+        width: 32
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e842048b4af1e59c0800000000000000
+      internalID: -3936674231948925810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_60"
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 722
+        width: 72
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2aa38f4e4384ad180800000000000000
+      internalID: -9089873505876952414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_61"
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 725
+        width: 27
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d3f2e24365b648a0800000000000000
+      internalID: -6321165589039352873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_62"
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 684
+        width: 103
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6c6b46c66beb8520800000000000000
+      internalID: 2705514827812138095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_63"
+      rect:
+        serializedVersion: 2
+        x: 445
+        y: 682
+        width: 45
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a492ee65b2d1aaf50800000000000000
+      internalID: 6893354251623213386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_64"
+      rect:
+        serializedVersion: 2
+        x: 467
+        y: 688
+        width: 31
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73d04dce9b234ad60800000000000000
+      internalID: 7900495420438351159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_65"
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 658
+        width: 202
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0deaa03f476ccb580800000000000000
+      internalID: -8809948565447463216
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_66"
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 679
+        width: 28
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5180e099fbe11fe10800000000000000
+      internalID: 2229597098780526613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_67"
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 574
+        width: 241
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36af48ac5f2d33c50800000000000000
+      internalID: 6643885828408146531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_68"
+      rect:
+        serializedVersion: 2
+        x: 304
+        y: 583
+        width: 124
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a94a00c0be2129bb0800000000000000
+      internalID: -4930857841289288550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_69"
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 581
+        width: 58
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca420faa4c9cc6590800000000000000
+      internalID: -7679541418054900564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_70"
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 584
+        width: 59
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e31dd32b05138a530800000000000000
+      internalID: 3866394502755111230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_71"
+      rect:
+        serializedVersion: 2
+        x: 329
+        y: 573
+        width: 50
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c243076b79885210800000000000000
+      internalID: 1321957653735490246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_72"
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 573
+        width: 63
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf3cb93f19aa15f40800000000000000
+      internalID: 5715536945943921659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_73"
+      rect:
+        serializedVersion: 2
+        x: 547
+        y: 577
+        width: 29
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78d7612763b68f010800000000000000
+      internalID: 1222845180417572231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_74"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 566
+        width: 71
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70ab046cc0200ead0800000000000000
+      internalID: -2675135924769080825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_75"
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 570
+        width: 31
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31bb0805850e04970800000000000000
+      internalID: 8737229947011119891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_76"
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 566
+        width: 38
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8c4aa704eb073260800000000000000
+      internalID: 7077138413445074061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_77"
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 550
+        width: 48
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8132b276f0d100c50800000000000000
+      internalID: 6629330603481965336
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_78"
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 505
+        width: 186
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 816827e5428d05cc0800000000000000
+      internalID: -3724239241120414184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_79"
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 523
+        width: 121
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15e64257c64d49f10800000000000000
+      internalID: 2275677274015821393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_80"
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 514
+        width: 73
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cabd9d769def6190800000000000000
+      internalID: -7966887985186751799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_81"
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 520
+        width: 77
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0daf96de00680a170800000000000000
+      internalID: 8187691461100829392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_82"
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 517
+        width: 29
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40b658e43592ad100800000000000000
+      internalID: 133464576737241860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_83"
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 476
+        width: 105
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecb4b6bc2708b0f10800000000000000
+      internalID: 2237022870447016910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_84"
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 478
+        width: 25
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a409d1ac5a654630800000000000000
+      internalID: 3910648797526033576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_85"
+      rect:
+        serializedVersion: 2
+        x: 468
+        y: 481
+        width: 31
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6bf8eed283dbfe00800000000000000
+      internalID: 1079689094724385647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_86"
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 455
+        width: 204
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4287213eaf347fc90800000000000000
+      internalID: -7136160339714738140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_87"
+      rect:
+        serializedVersion: 2
+        x: 359
+        y: 471
+        width: 28
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21116c1ab51772fe0800000000000000
+      internalID: -1213876936182984430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_88"
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 474
+        width: 41
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5512b5c0d565163c0800000000000000
+      internalID: -4368115205933424299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_89"
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 450
+        width: 55
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8960317df20658780800000000000000
+      internalID: -8681426948098685288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_90"
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 375
+        width: 22
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1b549cfe3932b630800000000000000
+      internalID: 3941275566590941979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_91"
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 366
+        width: 239
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52a1ef9083d4c3400800000000000000
+      internalID: 305203777835506213
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_92"
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 375
+        width: 124
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2da97ed4512f7ef40800000000000000
+      internalID: 5757836821931727570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_93"
+      rect:
+        serializedVersion: 2
+        x: 403
+        y: 372
+        width: 61
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e8428d1843d3a9e0800000000000000
+      internalID: -1611211934982321943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_94"
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 375
+        width: 61
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a76d44a17a877900800000000000000
+      internalID: 682166089262393256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_95"
+      rect:
+        serializedVersion: 2
+        x: 547
+        y: 369
+        width: 30
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7161ab6ee21f66f40800000000000000
+      internalID: 5721525560362538519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_96"
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 357
+        width: 72
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fc54b84b16b06640800000000000000
+      internalID: 5071253408719330544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_97"
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 362
+        width: 28
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19465b0d8502063a0800000000000000
+      internalID: -6674299081932315503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_98"
+      rect:
+        serializedVersion: 2
+        x: 329
+        y: 365
+        width: 52
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69923e4aa6f2ca470800000000000000
+      internalID: 8407146739473262998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_99"
+      rect:
+        serializedVersion: 2
+        x: 355
+        y: 358
+        width: 37
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91f59dfcce6272850800000000000000
+      internalID: 6352088597970640665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_100"
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 364
+        width: 60
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5136dc98007ed2a0800000000000000
+      internalID: -6710803212442128033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_101"
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 342
+        width: 48
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 987a49fffb44f13b0800000000000000
+      internalID: -5539633425225046135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_102"
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 297
+        width: 190
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd300f917ba066650800000000000000
+      internalID: 6225675316416742367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_103"
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 322
+        width: 23
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cb2e58a1d29bad50800000000000000
+      internalID: 6749649895715384256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_104"
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 306
+        width: 118
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b23ddbb069cac7e0800000000000000
+      internalID: -1744360488346766665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_105"
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 312
+        width: 74
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2596995859f8a35c0800000000000000
+      internalID: -4234914627234207406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_106"
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 323
+        width: 33
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ef739d23066aa360800000000000000
+      internalID: 7181664719631253477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_107"
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 309
+        width: 29
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fba4ec76f795a4d70800000000000000
+      internalID: 9028126806754871999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_108"
+      rect:
+        serializedVersion: 2
+        x: 278
+        y: 268
+        width: 105
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 293ff99ef80137440800000000000000
+      internalID: 4932304227186766738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_109"
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 266
+        width: 47
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1abc9a5d5045433a0800000000000000
+      internalID: -6686627162702099551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_110"
+      rect:
+        serializedVersion: 2
+        x: 469
+        y: 272
+        width: 28
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 293655c2d69aacf30800000000000000
+      internalID: 4596672656045335442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_111"
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 242
+        width: 205
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 836be0d8cfc5653d0800000000000000
+      internalID: -3218282643941575112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_112"
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 263
+        width: 25
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b7122755393455a0800000000000000
+      internalID: -6533534258149845063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_113"
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 167
+        width: 19
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fca55dcbaed06830800000000000000
+      internalID: 4062491693353905393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_114"
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 158
+        width: 236
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25c30f8139009c730800000000000000
+      internalID: 4019744774183468114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_115"
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 167
+        width: 121
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de92f631fb92906f0800000000000000
+      internalID: -717996764947338771
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_116"
+      rect:
+        serializedVersion: 2
+        x: 387
+        y: 156
+        width: 74
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75566c975fc364490800000000000000
+      internalID: -7762449882718771881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_117"
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 166
+        width: 56
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09ef5ce320642b350800000000000000
+      internalID: 6030959826459557520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_118"
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 161
+        width: 26
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9232c107c3e8291d0800000000000000
+      internalID: -3345455182952783063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_119"
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 149
+        width: 68
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf105284f6478fd30800000000000000
+      internalID: 4465447051838423547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_120"
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 154
+        width: 26
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9343de3354d23b610800000000000000
+      internalID: 1635700864912798777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_121"
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 157
+        width: 53
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd42403092cfccd40800000000000000
+      internalID: 5606132889243886813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_122"
+      rect:
+        serializedVersion: 2
+        x: 356
+        y: 150
+        width: 34
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecfc15f1c79627a90800000000000000
+      internalID: -7317670462701318194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_123"
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 134
+        width: 44
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55db83ca6ffe49600800000000000000
+      internalID: 474267703511137621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_124"
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 89
+        width: 185
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6f4b721d22edaa80800000000000000
+      internalID: -8453852242293076117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_125"
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 98
+        width: 116
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b318decc9011feeb0800000000000000
+      internalID: -4688509953278901957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_126"
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 104
+        width: 70
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04c042af93cb8f8a0800000000000000
+      internalID: -6271055523917591488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_127"
+      rect:
+        serializedVersion: 2
+        x: 451
+        y: 115
+        width: 29
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ee8c01a2016b8690800000000000000
+      internalID: -7598873282337796377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_128"
+      rect:
+        serializedVersion: 2
+        x: 532
+        y: 101
+        width: 25
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: acc16d6c2373bffb0800000000000000
+      internalID: -4613032702087127862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_129"
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 60
+        width: 103
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61418c7b42b0d0b10800000000000000
+      internalID: 1949226466051363862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_130"
+      rect:
+        serializedVersion: 2
+        x: 446
+        y: 58
+        width: 42
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e51371e8ed7dd0610800000000000000
+      internalID: 1589163594398249310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_131"
+      rect:
+        serializedVersion: 2
+        x: 469
+        y: 64
+        width: 26
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a586588fc21cba80800000000000000
+      internalID: -8449858118298991197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_132"
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 35
+        width: 201
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: caa778737de67b540800000000000000
+      internalID: 5023605779983727276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "agua teste anima\xE7\xE3o2_133"
+      rect:
+        serializedVersion: 2
+        x: 361
+        y: 55
+        width: 23
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c76f87c68685c7190800000000000000
+      internalID: -7963392835578169732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      "agua teste anima\xE7\xE3o2_0": 5179126153216127008
+      "agua teste anima\xE7\xE3o2_1": -3443311349240139443
+      "agua teste anima\xE7\xE3o2_10": -8301546769523670368
+      "agua teste anima\xE7\xE3o2_100": -6710803212442128033
+      "agua teste anima\xE7\xE3o2_101": -5539633425225046135
+      "agua teste anima\xE7\xE3o2_102": 6225675316416742367
+      "agua teste anima\xE7\xE3o2_103": 6749649895715384256
+      "agua teste anima\xE7\xE3o2_104": -1744360488346766665
+      "agua teste anima\xE7\xE3o2_105": -4234914627234207406
+      "agua teste anima\xE7\xE3o2_106": 7181664719631253477
+      "agua teste anima\xE7\xE3o2_107": 9028126806754871999
+      "agua teste anima\xE7\xE3o2_108": 4932304227186766738
+      "agua teste anima\xE7\xE3o2_109": -6686627162702099551
+      "agua teste anima\xE7\xE3o2_11": -6519024676317940103
+      "agua teste anima\xE7\xE3o2_110": 4596672656045335442
+      "agua teste anima\xE7\xE3o2_111": -3218282643941575112
+      "agua teste anima\xE7\xE3o2_112": -6533534258149845063
+      "agua teste anima\xE7\xE3o2_113": 4062491693353905393
+      "agua teste anima\xE7\xE3o2_114": 4019744774183468114
+      "agua teste anima\xE7\xE3o2_115": -717996764947338771
+      "agua teste anima\xE7\xE3o2_116": -7762449882718771881
+      "agua teste anima\xE7\xE3o2_117": 6030959826459557520
+      "agua teste anima\xE7\xE3o2_118": -3345455182952783063
+      "agua teste anima\xE7\xE3o2_119": 4465447051838423547
+      "agua teste anima\xE7\xE3o2_12": 305110644453274517
+      "agua teste anima\xE7\xE3o2_120": 1635700864912798777
+      "agua teste anima\xE7\xE3o2_121": 5606132889243886813
+      "agua teste anima\xE7\xE3o2_122": -7317670462701318194
+      "agua teste anima\xE7\xE3o2_123": 474267703511137621
+      "agua teste anima\xE7\xE3o2_124": -8453852242293076117
+      "agua teste anima\xE7\xE3o2_125": -4688509953278901957
+      "agua teste anima\xE7\xE3o2_126": -6271055523917591488
+      "agua teste anima\xE7\xE3o2_127": -7598873282337796377
+      "agua teste anima\xE7\xE3o2_128": -4613032702087127862
+      "agua teste anima\xE7\xE3o2_129": 1949226466051363862
+      "agua teste anima\xE7\xE3o2_13": 6409829523679984822
+      "agua teste anima\xE7\xE3o2_130": 1589163594398249310
+      "agua teste anima\xE7\xE3o2_131": -8449858118298991197
+      "agua teste anima\xE7\xE3o2_132": 5023605779983727276
+      "agua teste anima\xE7\xE3o2_133": -7963392835578169732
+      "agua teste anima\xE7\xE3o2_14": -7707700335833306526
+      "agua teste anima\xE7\xE3o2_15": -1544953747900064688
+      "agua teste anima\xE7\xE3o2_16": -3526914821558769669
+      "agua teste anima\xE7\xE3o2_17": 640762085092652021
+      "agua teste anima\xE7\xE3o2_18": 5956648523155822273
+      "agua teste anima\xE7\xE3o2_19": 3615961785721198639
+      "agua teste anima\xE7\xE3o2_2": 8574109006197790915
+      "agua teste anima\xE7\xE3o2_20": 7094055767150611960
+      "agua teste anima\xE7\xE3o2_21": 8061983452541909913
+      "agua teste anima\xE7\xE3o2_22": -8688532585210586244
+      "agua teste anima\xE7\xE3o2_23": 1854006124120122195
+      "agua teste anima\xE7\xE3o2_24": -8396949518196545547
+      "agua teste anima\xE7\xE3o2_25": 6390984489406991955
+      "agua teste anima\xE7\xE3o2_26": 1818323990851677568
+      "agua teste anima\xE7\xE3o2_27": 1830392950628745971
+      "agua teste anima\xE7\xE3o2_28": -8398259223674207093
+      "agua teste anima\xE7\xE3o2_29": -2342050686543278070
+      "agua teste anima\xE7\xE3o2_3": -7984118208642694017
+      "agua teste anima\xE7\xE3o2_30": -8347897695253244957
+      "agua teste anima\xE7\xE3o2_31": 1201569976791762255
+      "agua teste anima\xE7\xE3o2_32": -6338801149093313426
+      "agua teste anima\xE7\xE3o2_33": -2165496327595361304
+      "agua teste anima\xE7\xE3o2_34": 4626187057921706682
+      "agua teste anima\xE7\xE3o2_35": 5544694655932939680
+      "agua teste anima\xE7\xE3o2_36": 8247909131857304861
+      "agua teste anima\xE7\xE3o2_37": 7773657363857258837
+      "agua teste anima\xE7\xE3o2_38": -3367271885294013924
+      "agua teste anima\xE7\xE3o2_39": 7222624672845886826
+      "agua teste anima\xE7\xE3o2_4": 6615196132427943902
+      "agua teste anima\xE7\xE3o2_40": 2083623036414414558
+      "agua teste anima\xE7\xE3o2_41": 6230272190683056567
+      "agua teste anima\xE7\xE3o2_42": 3331463863268247625
+      "agua teste anima\xE7\xE3o2_43": 3485176157716756224
+      "agua teste anima\xE7\xE3o2_44": -6743793570613721103
+      "agua teste anima\xE7\xE3o2_45": 1323432291567993114
+      "agua teste anima\xE7\xE3o2_46": -1979652810762444331
+      "agua teste anima\xE7\xE3o2_47": -8943176476779424164
+      "agua teste anima\xE7\xE3o2_48": 1679097484052972977
+      "agua teste anima\xE7\xE3o2_49": 4441293822007450624
+      "agua teste anima\xE7\xE3o2_5": -1691150547395846003
+      "agua teste anima\xE7\xE3o2_50": -3634149658564088137
+      "agua teste anima\xE7\xE3o2_51": 1717497829065250063
+      "agua teste anima\xE7\xE3o2_52": -3389014256466342054
+      "agua teste anima\xE7\xE3o2_53": 4349692947061233990
+      "agua teste anima\xE7\xE3o2_54": 9221088531174093270
+      "agua teste anima\xE7\xE3o2_55": 42651979547481029
+      "agua teste anima\xE7\xE3o2_56": -5971482289639656707
+      "agua teste anima\xE7\xE3o2_57": -6291274258510659386
+      "agua teste anima\xE7\xE3o2_58": 2767589147738399520
+      "agua teste anima\xE7\xE3o2_59": -3936674231948925810
+      "agua teste anima\xE7\xE3o2_6": -4868015960223930323
+      "agua teste anima\xE7\xE3o2_60": -9089873505876952414
+      "agua teste anima\xE7\xE3o2_61": -6321165589039352873
+      "agua teste anima\xE7\xE3o2_62": 2705514827812138095
+      "agua teste anima\xE7\xE3o2_63": 6893354251623213386
+      "agua teste anima\xE7\xE3o2_64": 7900495420438351159
+      "agua teste anima\xE7\xE3o2_65": -8809948565447463216
+      "agua teste anima\xE7\xE3o2_66": 2229597098780526613
+      "agua teste anima\xE7\xE3o2_67": 6643885828408146531
+      "agua teste anima\xE7\xE3o2_68": -4930857841289288550
+      "agua teste anima\xE7\xE3o2_69": -7679541418054900564
+      "agua teste anima\xE7\xE3o2_7": -7224408506528770141
+      "agua teste anima\xE7\xE3o2_70": 3866394502755111230
+      "agua teste anima\xE7\xE3o2_71": 1321957653735490246
+      "agua teste anima\xE7\xE3o2_72": 5715536945943921659
+      "agua teste anima\xE7\xE3o2_73": 1222845180417572231
+      "agua teste anima\xE7\xE3o2_74": -2675135924769080825
+      "agua teste anima\xE7\xE3o2_75": 8737229947011119891
+      "agua teste anima\xE7\xE3o2_76": 7077138413445074061
+      "agua teste anima\xE7\xE3o2_77": 6629330603481965336
+      "agua teste anima\xE7\xE3o2_78": -3724239241120414184
+      "agua teste anima\xE7\xE3o2_79": 2275677274015821393
+      "agua teste anima\xE7\xE3o2_8": 498372459583917209
+      "agua teste anima\xE7\xE3o2_80": -7966887985186751799
+      "agua teste anima\xE7\xE3o2_81": 8187691461100829392
+      "agua teste anima\xE7\xE3o2_82": 133464576737241860
+      "agua teste anima\xE7\xE3o2_83": 2237022870447016910
+      "agua teste anima\xE7\xE3o2_84": 3910648797526033576
+      "agua teste anima\xE7\xE3o2_85": 1079689094724385647
+      "agua teste anima\xE7\xE3o2_86": -7136160339714738140
+      "agua teste anima\xE7\xE3o2_87": -1213876936182984430
+      "agua teste anima\xE7\xE3o2_88": -4368115205933424299
+      "agua teste anima\xE7\xE3o2_89": -8681426948098685288
+      "agua teste anima\xE7\xE3o2_9": 7594063304861450781
+      "agua teste anima\xE7\xE3o2_90": 3941275566590941979
+      "agua teste anima\xE7\xE3o2_91": 305203777835506213
+      "agua teste anima\xE7\xE3o2_92": 5757836821931727570
+      "agua teste anima\xE7\xE3o2_93": -1611211934982321943
+      "agua teste anima\xE7\xE3o2_94": 682166089262393256
+      "agua teste anima\xE7\xE3o2_95": 5721525560362538519
+      "agua teste anima\xE7\xE3o2_96": 5071253408719330544
+      "agua teste anima\xE7\xE3o2_97": -6674299081932315503
+      "agua teste anima\xE7\xE3o2_98": 8407146739473262998
+      "agua teste anima\xE7\xE3o2_99": 6352088597970640665
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
