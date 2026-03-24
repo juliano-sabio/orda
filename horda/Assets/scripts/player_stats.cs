@@ -7,6 +7,9 @@ using static PlayerStats;
 
 public class PlayerStats : MonoBehaviour
 {
+    [Header("Configuração de Dados (ScriptableObject)")]
+    public CharacterData characterData;
+
     [Header("Status do Jogador")]
     public float health = 100f;
     public float maxHealth = 100f;
@@ -76,6 +79,54 @@ public class PlayerStats : MonoBehaviour
     private SkillManager skillManager;
     private StatusCardSystem cardSystem;
 
+    void Awake()
+    {
+        if (characterData != null)
+        {
+            ApplyCharacterData();
+        }
+    }
+
+    public void ApplyCharacterData()
+    {
+        if (characterData == null) return;
+
+        // --- Status Base ---
+        maxHealth = characterData.maxHealth;
+        health = maxHealth;
+        attack = characterData.baseAttack;
+        defense = characterData.baseDefense;
+        speed = characterData.baseSpeed;
+
+        // --- Sistema de Regeneração ---
+        healthRegenRate = characterData.baseHealthRegen;
+        healthRegenDelay = characterData.baseRegenDelay;
+
+        // --- Sistema de Cooldowns/Intervalos ---
+        attackActivationInterval = characterData.baseAttackCooldown;
+        defenseActivationInterval = characterData.baseDefenseCooldown;
+
+        // --- Progressão ---
+        xpMultiplier = characterData.xpMultiplier;
+
+        // --- Sistema de Elementos ---
+        // Aqui usamos o ChangeElement para já aplicar os bônus que você configurou no script anterior
+        ChangeElement(characterData.baseElement);
+
+        // --- Ultimate ---
+        if (characterData.HasUltimate())
+        {
+            ultimateSkill.skillName = characterData.ultimateSkill.ultimateName;
+            ultimateSkill.baseDamage = characterData.ultimateSkill.baseDamage;
+            ultimateSkill.areaOfEffect = characterData.ultimateSkill.areaOfEffect;
+            ultimateSkill.duration = characterData.ultimateSkill.duration;
+            ultimateSkill.element = characterData.ultimateSkill.element;
+            ultimateSkill.isActive = true;
+        }
+
+        Debug.Log($"👤 Personagem {characterData.characterName} carregado com sucesso!");
+        UpdateUI();
+    }
     public enum Element
     {
         None,
