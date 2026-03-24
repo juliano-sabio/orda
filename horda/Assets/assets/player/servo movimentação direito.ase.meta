@@ -129,7 +129,7 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: Frame_0
     originalName: 
-    pivot: {x: 0.52380955, y: 0}
+    pivot: {x: 0.54343235, y: 0.31249467}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -150,7 +150,7 @@ ScriptedImporter:
     uvTransform: {x: 37, y: 41}
   - name: Frame_1
     originalName: 
-    pivot: {x: 0.52380955, y: 0}
+    pivot: {x: 0.54343235, y: 0.32966462}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -171,7 +171,7 @@ ScriptedImporter:
     uvTransform: {x: 37, y: 79}
   - name: Frame_2
     originalName: 
-    pivot: {x: 0.52380955, y: 0}
+    pivot: {x: 0.54878634, y: 0.3234471}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -192,7 +192,7 @@ ScriptedImporter:
     uvTransform: {x: 68, y: 4}
   - name: Frame_3
     originalName: 
-    pivot: {x: 0.52380955, y: 0}
+    pivot: {x: 0.54343235, y: 0.3159288}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -213,7 +213,7 @@ ScriptedImporter:
     uvTransform: {x: 68, y: 42}
   - name: Frame_4
     originalName: 
-    pivot: {x: 0.5217391, y: 0}
+    pivot: {x: 0.49644852, y: 0.31591535}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -234,7 +234,7 @@ ScriptedImporter:
     uvTransform: {x: 4, y: 76}
   - name: Frame_5
     originalName: 
-    pivot: {x: 0.5217391, y: 0}
+    pivot: {x: 0.52554005, y: 0.30747065}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -255,7 +255,7 @@ ScriptedImporter:
     uvTransform: {x: 37, y: 4}
   - name: Frame_6
     originalName: 
-    pivot: {x: 0.52, y: 0}
+    pivot: {x: 0.5234968, y: 0.3122076}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -276,7 +276,7 @@ ScriptedImporter:
     uvTransform: {x: 4, y: 4}
   - name: Frame_7
     originalName: 
-    pivot: {x: 0.52, y: 0}
+    pivot: {x: 0.53236234, y: 0.31274006}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
