@@ -1,13 +1,21 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections;
 
 public class MenuManager : MonoBehaviour
 {
     [Header("Painéis do Menu")]
     public GameObject mainMenuPanel;
     public GameObject optionsPanel;
-    public GameObject characterSelectionPanel; // 🆕 Painel para seleção de personagens
+    public GameObject characterSelectionPanel;
+
+    [Header("Componentes de Controle")]
+    [Tooltip("Arraste o Animator do MainMenuPanel aqui")]
+    public Animator mainMenuAnimator;
+
+    [Tooltip("Adicione um CanvasGroup ao MainMenuPanel e arraste aqui")]
+    public CanvasGroup mainMenuCanvasGroup;
 
     [Header("Botões do Menu Principal")]
     public Button playButton;
@@ -20,65 +28,89 @@ public class MenuManager : MonoBehaviour
     public Toggle fullscreenToggle;
 
     [Header("Configurações de Cenas")]
-    public string characterSelectionSceneName = "CharacterSelection"; // 🆕 Nome da cena do lobby
-    public string gameSceneName = "Gameplay"; // Nome da cena do jogo
+    public string characterSelectionSceneName = "CharacterSelection";
+    public string gameSceneName = "Gameplay"; // Corrigido: Variável restaurada
 
     void Start()
     {
-        // Configurar listeners dos botões do menu principal
-        playButton.onClick.AddListener(PlayGame);
-        optionsButton.onClick.AddListener(ShowOptions);
-        exitButton.onClick.AddListener(ExitGame);
+        // Configurar listeners dos botões
+        if (playButton) playButton.onClick.AddListener(PlayGame);
+        if (optionsButton) optionsButton.onClick.AddListener(ShowOptions);
+        if (exitButton) exitButton.onClick.AddListener(ExitGame);
 
-        // Configurar listeners do painel de opções
-        optionsBackButton.onClick.AddListener(ShowMainMenu);
-        volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
-        fullscreenToggle.onValueChanged.AddListener(OnFullscreenToggle);
+        if (optionsBackButton) optionsBackButton.onClick.AddListener(ShowMainMenu);
+        if (volumeSlider) volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
+        if (fullscreenToggle) fullscreenToggle.onValueChanged.AddListener(OnFullscreenToggle);
 
-        // Carregar configurações salvas
         LoadSettings();
 
-        // Garantir que o menu principal está visível
+        // Garante o estado inicial correto
         ShowMainMenu();
     }
 
-    void PlayGame()
+    public void ShowMainMenu()
     {
-        Debug.Log("🎮 Indo para seleção de personagens...");
+        Debug.Log("🏠 Mostrando Menu Principal...");
 
-        // 🆕 VAI PARA O LOBBY (SELEÇÃO DE PERSONAGENS)
+        // Fecha outros painéis
+        if (optionsPanel) optionsPanel.SetActive(false);
+        if (characterSelectionPanel) characterSelectionPanel.SetActive(false);
+
+        // Ativa o painel principal
+        mainMenuPanel.SetActive(true);
+
+        // Reativa interação (cliques) no menu principal
+        if (mainMenuCanvasGroup != null)
+        {
+            mainMenuCanvasGroup.interactable = true;
+            mainMenuCanvasGroup.blocksRaycasts = true;
+            mainMenuCanvasGroup.alpha = 1f;
+        }
+
+        // Dispara animação de entrada
+        if (mainMenuAnimator != null)
+        {
+            mainMenuAnimator.SetTrigger("Entrar");
+        }
+    }
+
+    public void ShowOptions()
+    {
+        if (optionsPanel != null)
+        {
+            optionsPanel.SetActive(true);
+            // Esta linha joga o objeto para o último lugar da hierarquia em tempo de execução
+            optionsPanel.transform.SetAsLastSibling();
+        }
+
+        if (mainMenuCanvasGroup != null)
+        {
+            mainMenuCanvasGroup.interactable = false;
+            mainMenuCanvasGroup.blocksRaycasts = false;
+        }
+    }
+
+    public void PlayGame()
+    {
         if (!string.IsNullOrEmpty(characterSelectionSceneName))
         {
             SceneManager.LoadScene(characterSelectionSceneName);
         }
         else
         {
-            // Fallback: vai direto para o gameplay
-            Debug.LogWarning("⚠️ Nome da cena de seleção não configurado! Indo direto para gameplay...");
+            Debug.LogWarning("⚠️ Cena de seleção não definida. Indo para Gameplay...");
             SceneManager.LoadScene(gameSceneName);
         }
     }
 
-    void ShowOptions()
+    public void StartGameDirectly()
     {
-        Debug.Log("⚙️ Abrindo opções...");
-        mainMenuPanel.SetActive(false);
-        optionsPanel.SetActive(true);
+        SceneManager.LoadScene(gameSceneName);
     }
 
-    void ShowMainMenu()
+    public void ExitGame()
     {
-        Debug.Log("🏠 Voltando ao menu principal...");
-        optionsPanel.SetActive(false);
-        if (characterSelectionPanel != null)
-            characterSelectionPanel.SetActive(false);
-        mainMenuPanel.SetActive(true);
-    }
-
-    void ExitGame()
-    {
-        Debug.Log("👋 Saindo do jogo...");
-
+        Debug.Log("👋 Saindo...");
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -86,44 +118,28 @@ public class MenuManager : MonoBehaviour
 #endif
     }
 
+    // --- Persistência e Configurações ---
+
     void OnVolumeChanged(float value)
     {
         AudioListener.volume = value;
         PlayerPrefs.SetFloat("MasterVolume", value);
-        Debug.Log($"🔊 Volume alterado para: {value}");
     }
 
     void OnFullscreenToggle(bool isFullscreen)
     {
         Screen.fullScreen = isFullscreen;
         PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
-        Debug.Log($"🖥️ Tela cheia: {isFullscreen}");
     }
 
     void LoadSettings()
     {
-        // Carregar volume
         float savedVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
-        volumeSlider.value = savedVolume;
+        if (volumeSlider) volumeSlider.value = savedVolume;
         AudioListener.volume = savedVolume;
 
-        // Carregar configuração de tela cheia
         bool savedFullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
-        fullscreenToggle.isOn = savedFullscreen;
+        if (fullscreenToggle) fullscreenToggle.isOn = savedFullscreen;
         Screen.fullScreen = savedFullscreen;
-    }
-
-    // 🆕 MÉTODO PARA INICIAR DIRETO NO GAMEPLAY (PARA TESTES)
-    public void StartGameDirectly()
-    {
-        Debug.Log("🚀 Iniciando jogo diretamente...");
-        SceneManager.LoadScene(gameSceneName);
-    }
-
-    // 🆕 MÉTODO PARA VOLTAR AO MENU PRINCIPAL
-    public void BackToMainMenu()
-    {
-        Debug.Log("↩️ Voltando ao menu principal...");
-        SceneManager.LoadScene("MainMenu"); // Ou o nome da sua cena de menu
     }
 }
