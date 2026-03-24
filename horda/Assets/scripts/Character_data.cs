@@ -12,17 +12,17 @@ public class CharacterData : ScriptableObject
     public GameObject characterPrefab;
 
     [Header("Status Base")]
-    [Range(50, 200)]
+    [Range(50, 500)]
     public float maxHealth = 100f;
 
-    [Range(5, 30)]
+    [Range(5, 100)]
     public float baseAttack = 10f;
 
-    [Range(1, 15)]
+    [Range(1, 50)]
     public float baseDefense = 5f;
 
-    [Range(5, 12)]
-    public float baseSpeed = 8f;
+    [Range(5, 50)]
+    public float baseSpeed = 15f;
 
     [Header("🆕 Sistema de Regeneração")]
     [Range(0.5f, 5f)]
@@ -44,7 +44,7 @@ public class CharacterData : ScriptableObject
     public List<PlayerStats.Element> weakAgainst = new List<PlayerStats.Element>();
 
     [Header("Ultimate Específica")]
-    public UltimateData ultimateSkill;
+    public UltimateData ultimateSkill; // Se isso for nulo, HasUltimate retorna false
 
     [Header("Comportamentos Especiais")]
     public SkillBehavior specialSkillBehavior;
@@ -55,16 +55,13 @@ public class CharacterData : ScriptableObject
     public float xpMultiplier = 1.5f;
 
     [Header("🆕 Bônus por Elemento")]
-    [Range(0f, 10f)]
+    [Range(0f, 20f)]
     public float elementAttackBonus = 0f;
-
-    [Range(0f, 10f)]
+    [Range(0f, 20f)]
     public float elementDefenseBonus = 0f;
-
-    [Range(0f, 5f)]
+    [Range(0f, 10f)]
     public float elementSpeedBonus = 0f;
-
-    [Range(0f, 2f)]
+    [Range(0f, 0.5f)]
     public float elementCooldownReduction = 0f;
 
     [Header("Customização Visual")]
@@ -72,12 +69,14 @@ public class CharacterData : ScriptableObject
     public ParticleSystem.MinMaxGradient auraColor;
     public RuntimeAnimatorController animatorController;
 
-    // 🆕 MÉTODOS DE CONVENIÊNCIA ATUALIZADOS
-    public string GetElementIcon()
+    // --- MÉTODOS DE CONVENIÊNCIA (Obrigatórios para o seu sistema) ---
+
+    public bool HasUltimate()
     {
-        return GetElementIcon(baseElement);
+        return ultimateSkill != null;
     }
 
+    public string GetElementIcon() => GetElementIcon(baseElement);
     public static string GetElementIcon(PlayerStats.Element element)
     {
         switch (element)
@@ -92,11 +91,7 @@ public class CharacterData : ScriptableObject
         }
     }
 
-    public Color GetElementColor()
-    {
-        return GetElementColor(baseElement);
-    }
-
+    public Color GetElementColor() => GetElementColor(baseElement);
     public static Color GetElementColor(PlayerStats.Element element)
     {
         switch (element)
@@ -112,64 +107,14 @@ public class CharacterData : ScriptableObject
         }
     }
 
-    public bool HasUltimate()
-    {
-        return ultimateSkill != null;
-    }
-
-    // 🆕 MÉTODOS PARA BÔNUS DE ELEMENTO
-    public float GetElementAttackBonus()
-    {
-        return elementAttackBonus;
-    }
-
-    public float GetElementDefenseBonus()
-    {
-        return elementDefenseBonus;
-    }
-
-    public float GetElementSpeedBonus()
-    {
-        return elementSpeedBonus;
-    }
-
-    public float GetElementCooldownReduction()
-    {
-        return elementCooldownReduction;
-    }
-
-    // 🆕 MÉTODO PARA OBTER TODOS OS STATUS BASE
-    public Dictionary<string, float> GetBaseStats()
-    {
-        return new Dictionary<string, float>
-        {
-            { "Health", maxHealth },
-            { "Attack", baseAttack },
-            { "Defense", baseDefense },
-            { "Speed", baseSpeed },
-            { "HealthRegen", baseHealthRegen },
-            { "AttackCooldown", baseAttackCooldown },
-            { "DefenseCooldown", baseDefenseCooldown }
-        };
-    }
-
-    // 🆕 MÉTODO PARA OBTER DESCRIÇÃO DOS BÔNUS DO ELEMENTO
     public string GetElementBonusDescription()
     {
-        if (baseElement == PlayerStats.Element.None)
-            return "Sem bônus elemental";
-
+        if (baseElement == PlayerStats.Element.None) return "Sem bônus elemental";
         List<string> bonuses = new List<string>();
-
-        if (elementAttackBonus > 0)
-            bonuses.Add($"+{elementAttackBonus} Ataque");
-        if (elementDefenseBonus > 0)
-            bonuses.Add($"+{elementDefenseBonus} Defesa");
-        if (elementSpeedBonus > 0)
-            bonuses.Add($"+{elementSpeedBonus} Velocidade");
-        if (elementCooldownReduction > 0)
-            bonuses.Add($"-{elementCooldownReduction * 100}% Cooldown");
-
-        return bonuses.Count > 0 ? string.Join(" | ", bonuses) : "Bônus elemental passivo";
+        if (elementAttackBonus > 0) bonuses.Add($"+{elementAttackBonus} ATK");
+        if (elementDefenseBonus > 0) bonuses.Add($"+{elementDefenseBonus} DEF");
+        if (elementSpeedBonus > 0) bonuses.Add($"+{elementSpeedBonus} VEL");
+        if (elementCooldownReduction > 0) bonuses.Add($"-{elementCooldownReduction * 100}% CD");
+        return string.Join(" | ", bonuses);
     }
 }

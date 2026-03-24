@@ -20,7 +20,7 @@ MonoBehaviour:
   maxHealth: 84
   baseAttack: 10
   baseDefense: 5
-  baseSpeed: 8
+  baseSpeed: 14.2
   baseHealthRegen: 1
   baseRegenDelay: 5
   baseAttackCooldown: 2

@@ -6,7 +6,7 @@ public class moviment_player2 : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
 
-    // Variável para guardar o tamanho original do seu Player
+    private Vector2 moveInput;
     private Vector3 originalScale;
 
     private void Start()
@@ -15,32 +15,32 @@ public class moviment_player2 : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
 
-        // ✅ SALVA A ESCALA ATUAL (aquela que você definiu no Inspector)
         originalScale = transform.localScale;
 
-        if (playerStats == null) Debug.LogError("PlayerStats não encontrado!");
-        if (rb == null) Debug.LogError("Rigidbody2D não encontrado!");
+        // Garante que o Rigidbody2D não tenha atrito impedindo o movimento
+        if (rb != null)
+        {
+            rb.gravityScale = 0; // Se for jogo Top-Down
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate; // Suaviza o movimento
+        }
     }
 
     private void Update()
     {
         if (playerStats == null || rb == null) return;
 
+        // 1. CAPTURA DE INPUT (Melhor no Update)
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
+        moveInput = new Vector2(horizontal, vertical).normalized;
 
-        Vector2 movement = new Vector2(horizontal, vertical).normalized;
-        float currentSpeed = playerStats.GetSpeed();
-
-        rb.linearVelocity = movement * currentSpeed;
-
-        // Animação
+        // 2. ANIMAÇÃO
         if (anim != null)
         {
-            anim.SetFloat("Speed", movement.sqrMagnitude);
+            anim.SetFloat("Speed", moveInput.sqrMagnitude);
         }
 
-        // ✅ FLIP CORRIGIDO: Mantém o tamanho original e só inverte o X
+        // 3. FLIP (Apenas quando houver movimento horizontal)
         if (horizontal > 0)
         {
             transform.localScale = originalScale;
@@ -48,6 +48,16 @@ public class moviment_player2 : MonoBehaviour
         else if (horizontal < 0)
         {
             transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        // 4. MOVIMENTAÇÃO FÍSICA (Sempre no FixedUpdate para evitar lentidão/stuttering)
+        if (playerStats != null && rb != null)
+        {
+            float speed = playerStats.GetSpeed();
+            rb.linearVelocity = moveInput * speed;
         }
     }
 }
