@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   characterName: servo
   description: 
-  icon: {fileID: 0}
+  icon: {fileID: -3745306912610426398, guid: 0273d57e95b5be74d8fcba6fe6031430, type: 3}
   unlocked: 1
   characterPrefab: {fileID: 2605273054779499284, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}
   maxHealth: 84

@@ -4,20 +4,26 @@ using TMPro;
 
 public class CharacterIconUI : MonoBehaviour
 {
-    [Header("Referências UI")]
+    [Header("Referências UI Base")]
     public Image characterIcon;
     public TextMeshProUGUI characterName;
     public GameObject selectedIndicator;
     public GameObject lockedOverlay;
     public TextMeshProUGUI requiredLevelText;
 
-    [Header("Cores")]
+    [Header("Referências Elementais (Novo)")]
+    public TextMeshProUGUI elementIconText; // Para exibir o emoji 🔥, ❄️, etc.
+    public Image elementBackground;        // Para mudar a cor do frame conforme o elemento
+
+    [Header("Cores do Sistema")]
     public Color normalColor = Color.white;
     public Color selectedColor = Color.green;
-    public Color lockedColor = Color.red;
+    public Color lockedColor = new Color(0.3f, 0.3f, 0.3f, 1f); // Cinza escuro para bloqueados
 
-    public CharacterData characterData; // 🆕 AGORA USA CharacterData
+    [Header("Dados")]
+    public CharacterData characterData;
     public int characterIndex;
+
     private CharacterSelectionManagerIntegrated characterSelectionManager;
     private Button button;
     private Image backgroundImage;
@@ -31,13 +37,23 @@ public class CharacterIconUI : MonoBehaviour
         button = GetComponent<Button>();
         backgroundImage = GetComponent<Image>();
 
-        // CONFIGURA UI
-        if (characterIcon != null && data.icon != null)
-            characterIcon.sprite = data.icon;
+        // 1. Configura Nome e Ícone
+        if (characterName != null) characterName.text = data.characterName;
+        if (characterIcon != null && data.icon != null) characterIcon.sprite = data.icon;
 
-        if (characterName != null)
-            characterName.text = data.characterName;
+        // 2. Configura Elemento (Usando seus novos métodos do CharacterData)
+        if (elementIconText != null)
+        {
+            elementIconText.text = data.GetElementIcon();
+            elementIconText.color = data.GetElementColor();
+        }
 
+        if (elementBackground != null)
+        {
+            elementBackground.color = data.GetElementColor();
+        }
+
+        // 3. Atualiza Status de Bloqueio e Botão
         UpdateUnlockStatus();
         ConfigureButton();
         UpdateVisuals();
@@ -45,13 +61,15 @@ public class CharacterIconUI : MonoBehaviour
 
     void UpdateUnlockStatus()
     {
+        bool isUnlocked = characterData.unlocked;
+
         if (lockedOverlay != null)
-            lockedOverlay.SetActive(!characterData.unlocked);
+            lockedOverlay.SetActive(!isUnlocked);
 
         if (requiredLevelText != null)
         {
             requiredLevelText.text = $"Nv. {characterData.unlockLevel}";
-            requiredLevelText.gameObject.SetActive(!characterData.unlocked);
+            requiredLevelText.gameObject.SetActive(!isUnlocked);
         }
     }
 
@@ -60,8 +78,11 @@ public class CharacterIconUI : MonoBehaviour
         if (button != null)
         {
             button.onClick.RemoveAllListeners();
+
+            // O botão só funciona se o personagem estiver desbloqueado
             if (characterData.unlocked)
             {
+                button.interactable = true;
                 button.onClick.AddListener(OnClick);
             }
             else
@@ -76,38 +97,39 @@ public class CharacterIconUI : MonoBehaviour
         if (selectedIndicator != null)
             selectedIndicator.SetActive(selected);
 
+        // Feedback visual de seleção no fundo do ícone
         if (backgroundImage != null)
         {
             backgroundImage.color = selected ? selectedColor : normalColor;
         }
 
-        RectTransform rect = GetComponent<RectTransform>();
-        if (rect != null)
-        {
-            rect.localScale = selected ? Vector3.one * 1.05f : Vector3.one;
-        }
+        // Efeito de "Pop" ao selecionar
+        transform.localScale = selected ? Vector3.one * 1.1f : Vector3.one;
     }
 
     void UpdateVisuals()
     {
         if (characterIcon != null)
         {
-            characterIcon.color = characterData.unlocked ? normalColor : lockedColor;
+            // Se estiver bloqueado, o ícone fica escurecido (lockedColor)
+            characterIcon.color = characterData.unlocked ? Color.white : lockedColor;
         }
     }
 
     private void OnClick()
     {
-        if (characterData.unlocked)
+        // Só dispara o evento se estiver desbloqueado (segurança extra)
+        if (characterData.unlocked && characterSelectionManager != null)
         {
             characterSelectionManager.OnCharacterIconClicked(characterIndex);
         }
     }
 
+    // Chamado pelo Manager se algo mudar globalmente (ex: jogador subiu de nível)
     public void RefreshStatus()
     {
         UpdateUnlockStatus();
-        UpdateVisuals();
         ConfigureButton();
+        UpdateVisuals();
     }
 }
