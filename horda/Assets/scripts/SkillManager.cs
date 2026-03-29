@@ -720,6 +720,13 @@ public class SkillManager : MonoBehaviour
 
         PassiveProjectileSkill2D projectileBehavior = playerStats.gameObject.AddComponent<PassiveProjectileSkill2D>();
 
+        // Se for a espada, podemos configurar o comportamento direto aqui
+        // sem precisar de classes novas.
+        if (skill.skillName.Contains("Espada"))
+        {
+            projectileBehavior.activationInterval = skill.activationInterval;
+            // Se o seu PassiveProjectile já tem um método Setup ou Initialize, use-o.
+        }
         bool initialized = false;
 
         try
@@ -1326,7 +1333,8 @@ public class SkillManager : MonoBehaviour
         CycleEquippedSkill();
         Debug.Log($"🎮 Skill equipada: {currentlyEquippedSkill?.skillName}");
     }
-
+    // ✅ MÉTODO PARA SKILLS DE CORTE / MELEE (ESPADA)
+   
     [ContextMenu("🔄 Limpar Todas as Skills")]
     public void ClearAllSkills()
     {

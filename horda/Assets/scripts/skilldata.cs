@@ -12,6 +12,9 @@ public class SkillData : ScriptableObject
     [Header("🎨 Prefab do Card")]
     public GameObject cardPrefab;
 
+    [Header("Configurações de Visual/Prefab")]
+    public GameObject projectilePrefab; //
+
     [Header("📊 Bônus de Status")]
     public float healthBonus = 0f;
     public float attackBonus = 0f;

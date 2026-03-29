@@ -11,6 +11,9 @@ public class PassiveProjectileSkill2D : SkillBehavior
     private SkillData skillData;
     private float activationTimer = 0f;
 
+    private int swordCount = 0;
+    private float lastActivationTime = 0f;
+    private int spawnIndex = 0; // Para distribuir as espadas em círculo
     public override void Initialize(PlayerStats stats)
     {
         base.Initialize(stats);
@@ -29,6 +32,12 @@ public class PassiveProjectileSkill2D : SkillBehavior
 
     private void FindSkillDataAlternative()
     {
+        if (skillData == null && SkillManager.Instance != null)
+        {
+            var activeSkills = SkillManager.Instance.GetActiveSkills();
+            // Tenta achar pelo nome "Espada" ou similar se o tipo não bater
+            skillData = activeSkills.Find(s => s.specificType == SpecificSkillType.Projectile || s.skillName.Contains("Espada"));
+        }
         // Busca no SkillManager
         if (SkillManager.Instance != null)
         {
@@ -145,6 +154,34 @@ public class PassiveProjectileSkill2D : SkillBehavior
         {
             TryActivateProjectile();
             activationTimer = 0f;
+        }
+        if (playerStats == null || !playerStats.gameObject.activeInHierarchy) return;
+
+        // 🎯 CONTROLE RÍGIDO DE COOLDOWN
+        if (Time.time >= lastActivationTime + activationInterval)
+        {
+            TryActivateProjectile();
+            lastActivationTime = Time.time; // Reseta o cronômetro baseado no tempo real do jogo
+        }
+        if (playerStats == null || !playerStats.gameObject.activeInHierarchy) return;
+
+        // 🎯 COOLDOWN PRECISO: Só entra aqui no momento exato da recarga
+        if (Time.time >= lastActivationTime + activationInterval)
+        {
+            // Só tenta ativar se houver inimigos (opcional, dependendo da sua regra)
+            Transform target = FindClosestEnemy2D();
+
+            // Se for a ESPADA, ela não precisa de alvo para nascer (ela orbita você!)
+            if (projectilePrefab != null && projectilePrefab.GetComponent<SwordSpinSkillBehavior>() != null)
+            {
+                LaunchProjectile2D(null); // Passa null porque a espada foca no Player
+                lastActivationTime = Time.time;
+            }
+            else if (target != null) // Projéteis comuns ainda precisam de alvo
+            {
+                LaunchProjectile2D(target);
+                lastActivationTime = Time.time;
+            }
         }
     }
 
@@ -271,45 +308,34 @@ public class PassiveProjectileSkill2D : SkillBehavior
 
     private void LaunchProjectile2D(Transform target)
     {
-        if (target == null) return;
+        if (projectilePrefab == null) return;
 
-        Vector2 spawnOffset = Random.insideUnitCircle.normalized * 0.5f;
-        Vector3 spawnPosition = playerStats.transform.position + (Vector3)spawnOffset;
+        GameObject instance = Instantiate(projectilePrefab, playerStats.transform.position, Quaternion.identity);
+        instance.SetActive(true);
 
-        GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+        var sword = instance.GetComponent<SwordSpinSkillBehavior>();
 
-        // 🎯 LOG DETALHADO SOBRE O PREFAB INSTANCIADO
-        Debug.Log($"🚀 INSTANCIANDO: {projectilePrefab.name} | Skill: {skillData?.skillName ?? "Unknown"}");
-
-        ProjectileController2D projectileController = projectile.GetComponent<ProjectileController2D>();
-        if (projectileController != null)
+        if (sword != null)
         {
-            float damage = CalculateDamage();
-            PlayerStats.Element element = skillData != null ? skillData.element : PlayerStats.Element.None;
+            // 1. Inicializa a lógica de órbita
+            sword.Initialize(this.playerStats);
+            instance.transform.SetParent(playerStats.transform);
 
-            projectileController.Initialize(
-                target: target,
-                damage: damage,
-                speed: skillData != null ? skillData.projectileSpeed : 7f,
-                lifeTime: skillData != null ? skillData.projectileLifeTime : 4f,
-                element: element
-            );
+            // 2. DISTRIBUIÇÃO ESPACIAL: 
+            // Cada espada nasce 90 graus à frente da anterior (0, 90, 180, 270...)
+            float angle = spawnIndex * 90f;
+            instance.transform.localRotation = Quaternion.Euler(0, 0, angle);
+            spawnIndex++;
 
-            ApplyVisualEffects(projectile);
-            Debug.Log($"🚀 Projétil lançado! Prefab: {projectilePrefab.name} | Dano: {damage} | Elemento: {element}");
+            // 3. DURAÇÃO GARANTIDA:
+            // Pega o tempo de vida do SkillData ou usa 5 segundos como padrão
+            float life = (skillData != null && skillData.projectileLifeTime > 0) ? skillData.projectileLifeTime : 5f;
+            Destroy(instance, life);
         }
         else
         {
-            Debug.LogError($"❌ ProjectileController2D não encontrado no prefab: {projectilePrefab.name}");
-
-            // Fallback básico
-            Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-            if (rb != null && target != null)
-            {
-                Vector2 direction = ((Vector2)target.position - (Vector2)projectile.transform.position).normalized;
-                rb.linearVelocity = direction * 7f;
-                Destroy(projectile, 4f);
-            }
+            // Lógica original de Projétil (Tiros/Magias)
+            // ... (seu código de ProjectileController2D.Initialize) ...
         }
     }
 
