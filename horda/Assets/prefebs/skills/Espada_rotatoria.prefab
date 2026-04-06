@@ -141,13 +141,12 @@ MonoBehaviour:
   ignoreTargetsDuringOrbit: 1
   orbitalDamageEnabled: 1
   orbitalDamageInterval: 0.3
-  orbitalDamageRadius: 1.5
+  orbitalDamageRadius: 0
   debugDamage: 1
   hitEffect: {fileID: 0}
   trailRenderer: {fileID: 0}
   rotationSpeed: 360
   orbitRadius: 2
-  damageInterval: 0.5
 --- !u!68 &8436153009813774660
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -185,17 +184,18 @@ EdgeCollider2D:
   m_Offset: {x: 0, y: 0}
   m_EdgeRadius: 0
   m_Points:
-  - {x: -0.0030794553, y: 0.4813842}
-  - {x: -0.05011042, y: 0.435935}
-  - {x: -0.060625672, y: 0.26359084}
-  - {x: -0.026344575, y: 0.21051416}
-  - {x: -0.03027016, y: 0.13750513}
-  - {x: -0.002156513, y: 0.11461285}
-  - {x: 0.029972555, y: 0.13646579}
-  - {x: 0.025549522, y: 0.21053483}
-  - {x: 0.058415473, y: 0.27388936}
-  - {x: 0.046682373, y: 0.43739042}
-  - {x: 0.0002193451, y: 0.478707}
+  - {x: 0.0028156512, y: 0.35604373}
+  - {x: -0.006027018, y: 0.35323763}
+  - {x: -0.05109295, y: 0.31246525}
+  - {x: -0.055713095, y: 0.25984928}
+  - {x: -0.055819973, y: 0.143167}
+  - {x: -0.02634011, y: 0.092607036}
+  - {x: -0.009034148, y: -0.0069861263}
+  - {x: 0.0073747262, y: -0.01132372}
+  - {x: 0.024566993, y: 0.08987126}
+  - {x: 0.060380466, y: 0.14293663}
+  - {x: 0.05159495, y: 0.31111455}
+  - {x: 0.0041493936, y: 0.3552373}
   m_AdjacentStartPoint: {x: 0, y: 0}
   m_AdjacentEndPoint: {x: 0, y: 0}
   m_UseAdjacentStartPoint: 0

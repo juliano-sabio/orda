@@ -151,7 +151,7 @@ ScriptedImporter:
   spriteSheetImportData:
   - name: teste spell espada_0
     originalName: 
-    pivot: {x: 0.5060587, y: -0.32405522}
+    pivot: {x: 0.49999905, y: 0.021320807}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
