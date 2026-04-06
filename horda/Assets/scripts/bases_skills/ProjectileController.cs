@@ -27,24 +27,26 @@ public class ProjectileController2D : MonoBehaviour
     public GameObject hitEffect;
     public TrailRenderer trailRenderer;
 
-    private Transform target;
-    private bool hasHit = false;
-    private Rigidbody2D rb;
-    private float spawnTime;
-    private Dictionary<GameObject, float> lastDamageTime = new Dictionary<GameObject, float>(); // 🆕 Controlar intervalo de dano
+    protected Transform target;
+    protected bool hasHit = false;
+    protected Rigidbody2D rb;
+    protected float spawnTime;
+    protected bool isInitialized = false;
+    protected Dictionary<GameObject, float> lastDamageTime = new Dictionary<GameObject, float>(); // 🆕 Controlar intervalo de dano
 
-    void Awake()
+    protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
-    public void Initialize(Transform target, float damage, float speed, float lifeTime, PlayerStats.Element element)
+    public virtual void Initialize(Transform target, float damage, float speed, float lifeTime, PlayerStats.Element element)
     {
         this.target = target;
         this.damage = damage;
         this.speed = speed;
         this.lifeTime = lifeTime;
         this.element = element;
+        this.isInitialized = true;
 
         SetupVisuals();
 
@@ -129,21 +131,30 @@ public class ProjectileController2D : MonoBehaviour
         }
     }
 
-    void Update()
+    protected virtual void Update()
     {
-        if (isOrbiting && Time.time - spawnTime > lifeTime * 2f)
+        // 1. GERENCIAMENTO ORBITAL (A TRAVA)
+        if (isOrbiting)
         {
-            DestroyProjectile();
+            // Verifica tempo de vida para orbitais
+            if (Time.time - spawnTime > lifeTime * 2f)
+            {
+                DestroyProjectile();
+                return;
+            }
+
+            // Aplica dano sem mover o objeto
+            if (orbitalDamageEnabled && !hasHit)
+            {
+                CheckOrbitalDamage();
+            }
+
+            // CRÍTICO: Este return impede que a espada execute QUALQUER lógica de movimento abaixo
             return;
         }
 
-        // 🆕 VERIFICAR DANO ORBITAL CONTINUAMENTE
-        if (isOrbiting && orbitalDamageEnabled && !hasHit)
-        {
-            CheckOrbitalDamage();
-        }
-
-        if (!allowMovement || isOrbiting || hasHit) return;
+        // 2. MOVIMENTO DE PROJÉTEIS COMUNS (Flechas, etc)
+        if (!allowMovement || hasHit) return;
 
         if (target != null)
         {
@@ -158,6 +169,7 @@ public class ProjectileController2D : MonoBehaviour
                 transform.position += (Vector3)direction * speed * Time.deltaTime;
             }
 
+            // Rotação visual para o alvo
             if (direction != Vector2.zero)
             {
                 float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
@@ -168,6 +180,8 @@ public class ProjectileController2D : MonoBehaviour
         }
         else
         {
+            // Este era o vilão: ele dava velocidade se o rb estivesse parado
+            // Agora ele só roda se NÃO for orbital (devido ao return lá no topo)
             if (rb != null && rb.linearVelocity == Vector2.zero)
             {
                 Vector2 currentDirection = transform.right;
@@ -177,7 +191,8 @@ public class ProjectileController2D : MonoBehaviour
             CheckCollision();
         }
 
-        if (Time.time - spawnTime >= lifeTime && !isOrbiting)
+        // Tempo de vida para projéteis normais
+        if (Time.time - spawnTime >= lifeTime)
         {
             DestroyProjectile();
         }

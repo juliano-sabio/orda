@@ -128,19 +128,31 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
             return;
         }
 
-        // 🎯 POSIÇÃO ALEATÓRIA NA ÓRBITA
-        float randomStartAngle = Random.Range(0f, 360f);
-        Vector2 spawnPosition = CalculateOrbitPosition(randomStartAngle);
-
-        DebugLog($"🎲 Spawnando projétil - Ângulo: {randomStartAngle}° | Posição: {spawnPosition} | Voltas necessárias: {numberOfOrbits}");
-
-        // 🆕 USAR PREFAB DA SKILL DATA
+        // 🆕 PEGAR O PREFAB PRIMEIRO PARA CHECAR O TIPO
         GameObject projectilePrefab = GetProjectilePrefab();
         if (projectilePrefab == null)
         {
             Debug.LogWarning("⚠️ Nenhum prefab de projétil encontrado!");
             return;
         }
+
+        // --- 🎯 LÓGICA DE ÂNGULO INICIAL (Topo para Espada, Aleatório para outros) ---
+        float startAngle;
+        bool isSword = projectilePrefab.GetComponent<SwordOrbitalController>() != null;
+
+        if (isSword)
+        {
+            startAngle = 90f; // 90 graus é o topo exato (Cima)
+            DebugLog("⚔️ Espada detectada: Começando o giro pelo TOPO (90°)");
+        }
+        else
+        {
+            startAngle = Random.Range(0f, 360f); // Comportamento original para outras skills
+        }
+
+        Vector2 spawnPosition = CalculateOrbitPosition(startAngle);
+
+        DebugLog($"🎲 Spawnando projétil - Ângulo: {startAngle}° | Posição: {spawnPosition} | Voltas necessárias: {numberOfOrbits}");
 
         // Criar projétil na posição orbital
         GameObject newProjectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
@@ -150,7 +162,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         ProjectileController2D projectileController = newProjectile.GetComponent<ProjectileController2D>();
         if (projectileController != null)
         {
-            // 🆕 ENCONTRAR TARGET BASEADO NO MODO DE TARGETING
             Transform target = FindTargetForOrbital();
 
             projectileController.SetAsOrbiting();
@@ -162,13 +173,10 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
                 projectileElement
             );
 
-            // ⚡ CONFIGURAR DANO ORBITAL
             projectileController.orbitalDamageEnabled = enableOrbitalDamage;
             projectileController.orbitalDamageInterval = orbitalDamageInterval;
             projectileController.orbitalDamageRadius = orbitalDamageRadius;
             projectileController.debugDamage = showDebugInfo;
-
-            DebugLog($"⚡ Projétil configurado para dano orbital - Raio: {orbitalDamageRadius}, Intervalo: {orbitalDamageInterval}s");
         }
         else
         {
@@ -185,11 +193,12 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         }
 
         // 🎯 CRIAR OBJETO ORBITAL
-        OrbitingProjectile orbital = new OrbitingProjectile(newProjectile, randomStartAngle);
-        orbital.target = FindTargetForOrbital(); // 🆕 Atribuir target específico
+        // Passamos o startAngle definido acima (seja 90 ou aleatório)
+        OrbitingProjectile orbital = new OrbitingProjectile(newProjectile, startAngle);
+        orbital.target = FindTargetForOrbital();
         activeOrbitals.Add(orbital);
 
-        DebugLog($"🌀 Projétil orbital spawnado - Ângulo: {randomStartAngle}° | Target: {orbital.target?.name ?? "None"} | Total: {activeOrbitals.Count}/{maxProjectiles}");
+        DebugLog($"🌀 Projétil orbital spawnado - Ângulo: {startAngle}° | Target: {orbital.target?.name ?? "None"} | Total: {activeOrbitals.Count}/{maxProjectiles}");
     }
 
     // 🆕 MÉTODO PARA ENCONTRAR TARGET BASEADO NO MODO CONFIGURADO
@@ -400,6 +409,27 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         // VERIFICAR SE COMPLETOU O NÚMERO REQUERIDO DE VOLTAS
         if (completedOrbits >= numberOfOrbits)
         {
+            LaunchProjectile(orbital);
+        }
+        if (completedOrbits >= numberOfOrbits)
+        {
+            // 🎯 A TRAVA DEFINITIVA:
+            // Verificamos se o script na espada é o SwordOrbitalController
+            // ou se o nome do prefab contém "Sword" ou "Espada"
+            bool isSword = orbital.projectileObject.GetComponent<SwordOrbitalController>() != null;
+
+            if (isSword)
+            {
+                // Se for espada, ela morre aqui. Não deixamos chegar no LaunchProjectile.
+                Debug.Log("⚔️ Espada detectada: Destruindo em vez de lançar.");
+
+                // Remove da lista e destrói o objeto
+                activeOrbitals.Remove(orbital);
+                Destroy(orbital.projectileObject);
+                return; // 🛑 SAI DO MÉTODO AQUI
+            }
+
+            // Se NÃO for espada (ex: flecha), lança normalmente
             LaunchProjectile(orbital);
         }
     }

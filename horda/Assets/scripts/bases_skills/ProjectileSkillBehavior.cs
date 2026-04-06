@@ -150,16 +150,24 @@ public class PassiveProjectileSkill2D : SkillBehavior
 
     private void TryActivateProjectile()
     {
-        if (projectilePrefab == null)
-        {
-            Debug.LogWarning("⚠️ Prefab do projétil não atribuído!");
-            return;
-        }
+        if (projectilePrefab == null) return;
 
-        Transform target = FindClosestEnemy2D();
-        if (target != null)
+        // 1. CHECAGEM DIRETA NO PREFAB: Se o prefab tem o script de órbita, 
+        // ele NÃO deve buscar alvo para lançar.
+        bool isOrbitalPrefab = projectilePrefab.GetComponent<SwordOrbitalController>() != null;
+        bool isOrbitalData = skillData != null && skillData.isOrbitalProjectile;
+
+        if (isOrbitalPrefab || isOrbitalData)
         {
-            LaunchProjectile2D(target);
+            LaunchProjectile2D(null); // Lança sem alvo para não dar impulso
+        }
+        else
+        {
+            Transform target = FindClosestEnemy2D();
+            if (target != null)
+            {
+                LaunchProjectile2D(target);
+            }
         }
     }
 
@@ -271,45 +279,29 @@ public class PassiveProjectileSkill2D : SkillBehavior
 
     private void LaunchProjectile2D(Transform target)
     {
-        if (target == null) return;
+        if (projectilePrefab == null) return;
 
-        Vector2 spawnOffset = Random.insideUnitCircle.normalized * 0.5f;
-        Vector3 spawnPosition = playerStats.transform.position + (Vector3)spawnOffset;
+        // Instancia no player
+        GameObject projectile = Instantiate(projectilePrefab, playerStats.transform.position, Quaternion.identity);
 
-        GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+        // Tenta pegar o controlador (seja orbital ou comum)
+        ProjectileController2D pc = projectile.GetComponent<ProjectileController2D>();
 
-        // 🎯 LOG DETALHADO SOBRE O PREFAB INSTANCIADO
-        Debug.Log($"🚀 INSTANCIANDO: {projectilePrefab.name} | Skill: {skillData?.skillName ?? "Unknown"}");
-
-        ProjectileController2D projectileController = projectile.GetComponent<ProjectileController2D>();
-        if (projectileController != null)
+        if (pc != null)
         {
-            float damage = CalculateDamage();
-            PlayerStats.Element element = skillData != null ? skillData.element : PlayerStats.Element.None;
-
-            projectileController.Initialize(
-                target: target,
-                damage: damage,
-                speed: skillData != null ? skillData.projectileSpeed : 7f,
-                lifeTime: skillData != null ? skillData.projectileLifeTime : 4f,
-                element: element
+            // Se o alvo for nulo, a velocidade será zero no Initialize do Controller,
+            // impedindo que a espada saia voando.
+            pc.Initialize(
+                target,
+                CalculateDamage(),
+                skillData?.projectileSpeed ?? 7f,
+                skillData?.projectileLifeTime ?? 4f,
+                skillData?.element ?? PlayerStats.Element.None
             );
-
-            ApplyVisualEffects(projectile);
-            Debug.Log($"🚀 Projétil lançado! Prefab: {projectilePrefab.name} | Dano: {damage} | Elemento: {element}");
         }
         else
         {
-            Debug.LogError($"❌ ProjectileController2D não encontrado no prefab: {projectilePrefab.name}");
-
-            // Fallback básico
-            Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-            if (rb != null && target != null)
-            {
-                Vector2 direction = ((Vector2)target.position - (Vector2)projectile.transform.position).normalized;
-                rb.linearVelocity = direction * 7f;
-                Destroy(projectile, 4f);
-            }
+            Destroy(projectile);
         }
     }
 

@@ -1,409 +1,412 @@
 fileFormatVersion: 2
-guid: e15260537896056498ff614d8e2b769b
+guid: 0618ac100ab88d14f87efdc8db3ec515
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5179126153216127008
-    second: "agua teste anima\xE7\xE3o2_0"
+      213: -6487848460486613316
+    second: water_detilazation_v2_0
   - first:
-      213: -3443311349240139443
-    second: "agua teste anima\xE7\xE3o2_1"
+      213: -6176151524402178121
+    second: water_detilazation_v2_1
   - first:
-      213: 8574109006197790915
-    second: "agua teste anima\xE7\xE3o2_2"
+      213: -7643683551665344794
+    second: water_detilazation_v2_2
   - first:
-      213: -7984118208642694017
-    second: "agua teste anima\xE7\xE3o2_3"
+      213: 7192075921782464042
+    second: water_detilazation_v2_3
   - first:
-      213: 6615196132427943902
-    second: "agua teste anima\xE7\xE3o2_4"
+      213: 1669644055975939238
+    second: water_detilazation_v2_4
   - first:
-      213: -1691150547395846003
-    second: "agua teste anima\xE7\xE3o2_5"
+      213: -1210549678770318665
+    second: water_detilazation_v2_5
   - first:
-      213: -4868015960223930323
-    second: "agua teste anima\xE7\xE3o2_6"
+      213: -6842192468294394923
+    second: water_detilazation_v2_6
   - first:
-      213: -7224408506528770141
-    second: "agua teste anima\xE7\xE3o2_7"
+      213: -6928341694640410788
+    second: water_detilazation_v2_7
   - first:
-      213: 498372459583917209
-    second: "agua teste anima\xE7\xE3o2_8"
+      213: 874546107518476910
+    second: water_detilazation_v2_8
   - first:
-      213: 7594063304861450781
-    second: "agua teste anima\xE7\xE3o2_9"
+      213: 897277006198824104
+    second: water_detilazation_v2_9
   - first:
-      213: -8301546769523670368
-    second: "agua teste anima\xE7\xE3o2_10"
+      213: 7485248441549814285
+    second: water_detilazation_v2_10
   - first:
-      213: -6519024676317940103
-    second: "agua teste anima\xE7\xE3o2_11"
+      213: 3757182244247698157
+    second: water_detilazation_v2_11
   - first:
-      213: 305110644453274517
-    second: "agua teste anima\xE7\xE3o2_12"
+      213: 7952343750254203294
+    second: water_detilazation_v2_12
   - first:
-      213: 6409829523679984822
-    second: "agua teste anima\xE7\xE3o2_13"
+      213: 706449793785572618
+    second: water_detilazation_v2_13
   - first:
-      213: -7707700335833306526
-    second: "agua teste anima\xE7\xE3o2_14"
+      213: 8999282617018855299
+    second: water_detilazation_v2_14
   - first:
-      213: -1544953747900064688
-    second: "agua teste anima\xE7\xE3o2_15"
+      213: -6777097890453873862
+    second: water_detilazation_v2_15
   - first:
-      213: -3526914821558769669
-    second: "agua teste anima\xE7\xE3o2_16"
+      213: -4211536625221064474
+    second: water_detilazation_v2_16
   - first:
-      213: 640762085092652021
-    second: "agua teste anima\xE7\xE3o2_17"
+      213: 1318740241228969824
+    second: water_detilazation_v2_17
   - first:
-      213: 5956648523155822273
-    second: "agua teste anima\xE7\xE3o2_18"
+      213: 8967958482445703531
+    second: water_detilazation_v2_18
   - first:
-      213: 3615961785721198639
-    second: "agua teste anima\xE7\xE3o2_19"
+      213: -863965452752681758
+    second: water_detilazation_v2_19
   - first:
-      213: 7094055767150611960
-    second: "agua teste anima\xE7\xE3o2_20"
+      213: -6365763171539296099
+    second: water_detilazation_v2_20
   - first:
-      213: 8061983452541909913
-    second: "agua teste anima\xE7\xE3o2_21"
+      213: 4453686004382643286
+    second: water_detilazation_v2_21
   - first:
-      213: -8688532585210586244
-    second: "agua teste anima\xE7\xE3o2_22"
+      213: -4328301181268286390
+    second: water_detilazation_v2_22
   - first:
-      213: 1854006124120122195
-    second: "agua teste anima\xE7\xE3o2_23"
+      213: 7744365566536487030
+    second: water_detilazation_v2_23
   - first:
-      213: -8396949518196545547
-    second: "agua teste anima\xE7\xE3o2_24"
+      213: 1970881802704879005
+    second: water_detilazation_v2_24
   - first:
-      213: 6390984489406991955
-    second: "agua teste anima\xE7\xE3o2_25"
+      213: -1974226024711580451
+    second: water_detilazation_v2_25
   - first:
-      213: 1818323990851677568
-    second: "agua teste anima\xE7\xE3o2_26"
+      213: -8108721259099858956
+    second: water_detilazation_v2_26
   - first:
-      213: 1830392950628745971
-    second: "agua teste anima\xE7\xE3o2_27"
+      213: -1834760876971110103
+    second: water_detilazation_v2_27
   - first:
-      213: -8398259223674207093
-    second: "agua teste anima\xE7\xE3o2_28"
+      213: -7732265574409956125
+    second: water_detilazation_v2_28
   - first:
-      213: -2342050686543278070
-    second: "agua teste anima\xE7\xE3o2_29"
+      213: -3163838172380497221
+    second: water_detilazation_v2_29
   - first:
-      213: -8347897695253244957
-    second: "agua teste anima\xE7\xE3o2_30"
+      213: -6399855583103027190
+    second: water_detilazation_v2_30
   - first:
-      213: 1201569976791762255
-    second: "agua teste anima\xE7\xE3o2_31"
+      213: 2169325940055350979
+    second: water_detilazation_v2_31
   - first:
-      213: -6338801149093313426
-    second: "agua teste anima\xE7\xE3o2_32"
+      213: 4337589992499515237
+    second: water_detilazation_v2_32
   - first:
-      213: -2165496327595361304
-    second: "agua teste anima\xE7\xE3o2_33"
+      213: -8144125188037290884
+    second: water_detilazation_v2_33
   - first:
-      213: 4626187057921706682
-    second: "agua teste anima\xE7\xE3o2_34"
+      213: 1977633289602484136
+    second: water_detilazation_v2_34
   - first:
-      213: 5544694655932939680
-    second: "agua teste anima\xE7\xE3o2_35"
+      213: 8624018553256604461
+    second: water_detilazation_v2_35
   - first:
-      213: 8247909131857304861
-    second: "agua teste anima\xE7\xE3o2_36"
+      213: -4762610677347772145
+    second: water_detilazation_v2_36
   - first:
-      213: 7773657363857258837
-    second: "agua teste anima\xE7\xE3o2_37"
+      213: -152090741011863793
+    second: water_detilazation_v2_37
   - first:
-      213: -3367271885294013924
-    second: "agua teste anima\xE7\xE3o2_38"
+      213: 2385411699928515835
+    second: water_detilazation_v2_38
   - first:
-      213: 7222624672845886826
-    second: "agua teste anima\xE7\xE3o2_39"
+      213: 2116863054626577313
+    second: water_detilazation_v2_39
   - first:
-      213: 2083623036414414558
-    second: "agua teste anima\xE7\xE3o2_40"
+      213: 1306193524183808008
+    second: water_detilazation_v2_40
   - first:
-      213: 6230272190683056567
-    second: "agua teste anima\xE7\xE3o2_41"
+      213: 48745192738156020
+    second: water_detilazation_v2_41
   - first:
-      213: 3331463863268247625
-    second: "agua teste anima\xE7\xE3o2_42"
+      213: 7849732680997004288
+    second: water_detilazation_v2_42
   - first:
-      213: 3485176157716756224
-    second: "agua teste anima\xE7\xE3o2_43"
+      213: -7860938355053721408
+    second: water_detilazation_v2_43
   - first:
-      213: -6743793570613721103
-    second: "agua teste anima\xE7\xE3o2_44"
+      213: -908178931295641635
+    second: water_detilazation_v2_44
   - first:
-      213: 1323432291567993114
-    second: "agua teste anima\xE7\xE3o2_45"
+      213: 2865022074021116036
+    second: water_detilazation_v2_45
   - first:
-      213: -1979652810762444331
-    second: "agua teste anima\xE7\xE3o2_46"
+      213: -1527731164681602022
+    second: water_detilazation_v2_46
   - first:
-      213: -8943176476779424164
-    second: "agua teste anima\xE7\xE3o2_47"
+      213: -9089992578229857585
+    second: water_detilazation_v2_47
   - first:
-      213: 1679097484052972977
-    second: "agua teste anima\xE7\xE3o2_48"
+      213: -5581496374021606184
+    second: water_detilazation_v2_48
   - first:
-      213: 4441293822007450624
-    second: "agua teste anima\xE7\xE3o2_49"
+      213: -3588241920163515474
+    second: water_detilazation_v2_49
   - first:
-      213: -3634149658564088137
-    second: "agua teste anima\xE7\xE3o2_50"
+      213: 1186849138268367579
+    second: water_detilazation_v2_50
   - first:
-      213: 1717497829065250063
-    second: "agua teste anima\xE7\xE3o2_51"
+      213: -2632390881206702510
+    second: water_detilazation_v2_51
   - first:
-      213: -3389014256466342054
-    second: "agua teste anima\xE7\xE3o2_52"
+      213: 6430494660379719804
+    second: water_detilazation_v2_52
   - first:
-      213: 4349692947061233990
-    second: "agua teste anima\xE7\xE3o2_53"
+      213: 572272954788643039
+    second: water_detilazation_v2_53
   - first:
-      213: 9221088531174093270
-    second: "agua teste anima\xE7\xE3o2_54"
+      213: 5450317716236226466
+    second: water_detilazation_v2_54
   - first:
-      213: 42651979547481029
-    second: "agua teste anima\xE7\xE3o2_55"
+      213: -2596015935969246109
+    second: water_detilazation_v2_55
   - first:
-      213: -5971482289639656707
-    second: "agua teste anima\xE7\xE3o2_56"
+      213: 907445091364067578
+    second: water_detilazation_v2_56
   - first:
-      213: -6291274258510659386
-    second: "agua teste anima\xE7\xE3o2_57"
+      213: -8472205230306189201
+    second: water_detilazation_v2_57
   - first:
-      213: 2767589147738399520
-    second: "agua teste anima\xE7\xE3o2_58"
+      213: -2510391685396113445
+    second: water_detilazation_v2_58
   - first:
-      213: -3936674231948925810
-    second: "agua teste anima\xE7\xE3o2_59"
+      213: 3852254354902182315
+    second: water_detilazation_v2_59
   - first:
-      213: -9089873505876952414
-    second: "agua teste anima\xE7\xE3o2_60"
+      213: -6765368533463449199
+    second: water_detilazation_v2_60
   - first:
-      213: -6321165589039352873
-    second: "agua teste anima\xE7\xE3o2_61"
+      213: -5397165458921233993
+    second: water_detilazation_v2_61
   - first:
-      213: 2705514827812138095
-    second: "agua teste anima\xE7\xE3o2_62"
+      213: 7411454246011751408
+    second: water_detilazation_v2_62
   - first:
-      213: 6893354251623213386
-    second: "agua teste anima\xE7\xE3o2_63"
+      213: -6039189029602686461
+    second: water_detilazation_v2_63
   - first:
-      213: 7900495420438351159
-    second: "agua teste anima\xE7\xE3o2_64"
+      213: -2026170178554038634
+    second: water_detilazation_v2_64
   - first:
-      213: -8809948565447463216
-    second: "agua teste anima\xE7\xE3o2_65"
+      213: 5734806718093163535
+    second: water_detilazation_v2_65
   - first:
-      213: 2229597098780526613
-    second: "agua teste anima\xE7\xE3o2_66"
+      213: -4906297991227391536
+    second: water_detilazation_v2_66
   - first:
-      213: 6643885828408146531
-    second: "agua teste anima\xE7\xE3o2_67"
+      213: 7275113226006474241
+    second: water_detilazation_v2_67
   - first:
-      213: -4930857841289288550
-    second: "agua teste anima\xE7\xE3o2_68"
+      213: -632824010217417289
+    second: water_detilazation_v2_68
   - first:
-      213: -7679541418054900564
-    second: "agua teste anima\xE7\xE3o2_69"
+      213: -3887693980252430259
+    second: water_detilazation_v2_69
   - first:
-      213: 3866394502755111230
-    second: "agua teste anima\xE7\xE3o2_70"
+      213: 7867199794205525580
+    second: water_detilazation_v2_70
   - first:
-      213: 1321957653735490246
-    second: "agua teste anima\xE7\xE3o2_71"
+      213: 5132859752763924705
+    second: water_detilazation_v2_71
   - first:
-      213: 5715536945943921659
-    second: "agua teste anima\xE7\xE3o2_72"
+      213: -3221875268861834786
+    second: water_detilazation_v2_72
   - first:
-      213: 1222845180417572231
-    second: "agua teste anima\xE7\xE3o2_73"
+      213: 1081630277520028666
+    second: water_detilazation_v2_73
   - first:
-      213: -2675135924769080825
-    second: "agua teste anima\xE7\xE3o2_74"
+      213: -4023598023483822651
+    second: water_detilazation_v2_74
   - first:
-      213: 8737229947011119891
-    second: "agua teste anima\xE7\xE3o2_75"
+      213: 38218750023247054
+    second: water_detilazation_v2_75
   - first:
-      213: 7077138413445074061
-    second: "agua teste anima\xE7\xE3o2_76"
+      213: 2371065455939361923
+    second: water_detilazation_v2_76
   - first:
-      213: 6629330603481965336
-    second: "agua teste anima\xE7\xE3o2_77"
+      213: 7702993445373785944
+    second: water_detilazation_v2_77
   - first:
-      213: -3724239241120414184
-    second: "agua teste anima\xE7\xE3o2_78"
+      213: 7404346886295000866
+    second: water_detilazation_v2_78
   - first:
-      213: 2275677274015821393
-    second: "agua teste anima\xE7\xE3o2_79"
+      213: 4962410548462472344
+    second: water_detilazation_v2_79
   - first:
-      213: -7966887985186751799
-    second: "agua teste anima\xE7\xE3o2_80"
+      213: 4903126201104201498
+    second: water_detilazation_v2_80
   - first:
-      213: 8187691461100829392
-    second: "agua teste anima\xE7\xE3o2_81"
+      213: -3320733348553391090
+    second: water_detilazation_v2_81
   - first:
-      213: 133464576737241860
-    second: "agua teste anima\xE7\xE3o2_82"
+      213: -7044399993054951491
+    second: water_detilazation_v2_82
   - first:
-      213: 2237022870447016910
-    second: "agua teste anima\xE7\xE3o2_83"
+      213: 6485276135767724355
+    second: water_detilazation_v2_83
   - first:
-      213: 3910648797526033576
-    second: "agua teste anima\xE7\xE3o2_84"
+      213: -7871643370208804792
+    second: water_detilazation_v2_84
   - first:
-      213: 1079689094724385647
-    second: "agua teste anima\xE7\xE3o2_85"
+      213: 5408870080563032943
+    second: water_detilazation_v2_85
   - first:
-      213: -7136160339714738140
-    second: "agua teste anima\xE7\xE3o2_86"
+      213: -1370119913840388378
+    second: water_detilazation_v2_86
   - first:
-      213: -1213876936182984430
-    second: "agua teste anima\xE7\xE3o2_87"
+      213: -4588065475688702863
+    second: water_detilazation_v2_87
   - first:
-      213: -4368115205933424299
-    second: "agua teste anima\xE7\xE3o2_88"
+      213: -8314218005673934253
+    second: water_detilazation_v2_88
   - first:
-      213: -8681426948098685288
-    second: "agua teste anima\xE7\xE3o2_89"
+      213: -2083179909425773875
+    second: water_detilazation_v2_89
   - first:
-      213: 3941275566590941979
-    second: "agua teste anima\xE7\xE3o2_90"
+      213: -2273763866387746919
+    second: water_detilazation_v2_90
   - first:
-      213: 305203777835506213
-    second: "agua teste anima\xE7\xE3o2_91"
+      213: 1645359411089017376
+    second: water_detilazation_v2_91
   - first:
-      213: 5757836821931727570
-    second: "agua teste anima\xE7\xE3o2_92"
+      213: 2854871303238320757
+    second: water_detilazation_v2_92
   - first:
-      213: -1611211934982321943
-    second: "agua teste anima\xE7\xE3o2_93"
+      213: -130059223264613879
+    second: water_detilazation_v2_93
   - first:
-      213: 682166089262393256
-    second: "agua teste anima\xE7\xE3o2_94"
+      213: -8435363718418792847
+    second: water_detilazation_v2_94
   - first:
-      213: 5721525560362538519
-    second: "agua teste anima\xE7\xE3o2_95"
+      213: 7505996012803561539
+    second: water_detilazation_v2_95
   - first:
-      213: 5071253408719330544
-    second: "agua teste anima\xE7\xE3o2_96"
+      213: 2621499756628943249
+    second: water_detilazation_v2_96
   - first:
-      213: -6674299081932315503
-    second: "agua teste anima\xE7\xE3o2_97"
+      213: -7241008761788401048
+    second: water_detilazation_v2_97
   - first:
-      213: 8407146739473262998
-    second: "agua teste anima\xE7\xE3o2_98"
+      213: 5620594639084992733
+    second: water_detilazation_v2_98
   - first:
-      213: 6352088597970640665
-    second: "agua teste anima\xE7\xE3o2_99"
+      213: 1556624489245769224
+    second: water_detilazation_v2_99
   - first:
-      213: -6710803212442128033
-    second: "agua teste anima\xE7\xE3o2_100"
+      213: 8712520051724204621
+    second: water_detilazation_v2_100
   - first:
-      213: -5539633425225046135
-    second: "agua teste anima\xE7\xE3o2_101"
+      213: 2548905537412178997
+    second: water_detilazation_v2_101
   - first:
-      213: 6225675316416742367
-    second: "agua teste anima\xE7\xE3o2_102"
+      213: 7931193741130473040
+    second: water_detilazation_v2_102
   - first:
-      213: 6749649895715384256
-    second: "agua teste anima\xE7\xE3o2_103"
+      213: 6503584750069239701
+    second: water_detilazation_v2_103
   - first:
-      213: -1744360488346766665
-    second: "agua teste anima\xE7\xE3o2_104"
+      213: 2810846960574789766
+    second: water_detilazation_v2_104
   - first:
-      213: -4234914627234207406
-    second: "agua teste anima\xE7\xE3o2_105"
+      213: -7171039723819195898
+    second: water_detilazation_v2_105
   - first:
-      213: 7181664719631253477
-    second: "agua teste anima\xE7\xE3o2_106"
+      213: -8799930078620937966
+    second: water_detilazation_v2_106
   - first:
-      213: 9028126806754871999
-    second: "agua teste anima\xE7\xE3o2_107"
+      213: 5595734831578224020
+    second: water_detilazation_v2_107
   - first:
-      213: 4932304227186766738
-    second: "agua teste anima\xE7\xE3o2_108"
+      213: 5242336058597897737
+    second: water_detilazation_v2_108
   - first:
-      213: -6686627162702099551
-    second: "agua teste anima\xE7\xE3o2_109"
+      213: -5651505961227049883
+    second: water_detilazation_v2_109
   - first:
-      213: 4596672656045335442
-    second: "agua teste anima\xE7\xE3o2_110"
+      213: -3567354081779449933
+    second: water_detilazation_v2_110
   - first:
-      213: -3218282643941575112
-    second: "agua teste anima\xE7\xE3o2_111"
+      213: -721158577030479952
+    second: water_detilazation_v2_111
   - first:
-      213: -6533534258149845063
-    second: "agua teste anima\xE7\xE3o2_112"
+      213: 1886112840009322912
+    second: water_detilazation_v2_112
   - first:
-      213: 4062491693353905393
-    second: "agua teste anima\xE7\xE3o2_113"
+      213: -55639256119006072
+    second: water_detilazation_v2_113
   - first:
-      213: 4019744774183468114
-    second: "agua teste anima\xE7\xE3o2_114"
+      213: 8106046586207965528
+    second: water_detilazation_v2_114
   - first:
-      213: -717996764947338771
-    second: "agua teste anima\xE7\xE3o2_115"
+      213: -9028197528116205016
+    second: water_detilazation_v2_115
   - first:
-      213: -7762449882718771881
-    second: "agua teste anima\xE7\xE3o2_116"
+      213: -8350760515694994102
+    second: water_detilazation_v2_116
   - first:
-      213: 6030959826459557520
-    second: "agua teste anima\xE7\xE3o2_117"
+      213: -8391132605286186220
+    second: water_detilazation_v2_117
   - first:
-      213: -3345455182952783063
-    second: "agua teste anima\xE7\xE3o2_118"
+      213: 6869818198117555426
+    second: water_detilazation_v2_118
   - first:
-      213: 4465447051838423547
-    second: "agua teste anima\xE7\xE3o2_119"
+      213: -8163451161921679934
+    second: water_detilazation_v2_119
   - first:
-      213: 1635700864912798777
-    second: "agua teste anima\xE7\xE3o2_120"
+      213: 6361562531156274883
+    second: water_detilazation_v2_120
   - first:
-      213: 5606132889243886813
-    second: "agua teste anima\xE7\xE3o2_121"
+      213: -4145529008099546525
+    second: water_detilazation_v2_121
   - first:
-      213: -7317670462701318194
-    second: "agua teste anima\xE7\xE3o2_122"
+      213: -818557435993017905
+    second: water_detilazation_v2_122
   - first:
-      213: 474267703511137621
-    second: "agua teste anima\xE7\xE3o2_123"
+      213: 6896601772436688130
+    second: water_detilazation_v2_123
   - first:
-      213: -8453852242293076117
-    second: "agua teste anima\xE7\xE3o2_124"
+      213: -5929517083108893022
+    second: water_detilazation_v2_124
   - first:
-      213: -4688509953278901957
-    second: "agua teste anima\xE7\xE3o2_125"
+      213: -5738919992629023948
+    second: water_detilazation_v2_125
   - first:
-      213: -6271055523917591488
-    second: "agua teste anima\xE7\xE3o2_126"
+      213: 7747015435904712956
+    second: water_detilazation_v2_126
   - first:
-      213: -7598873282337796377
-    second: "agua teste anima\xE7\xE3o2_127"
+      213: -4151387597976318161
+    second: water_detilazation_v2_127
   - first:
-      213: -4613032702087127862
-    second: "agua teste anima\xE7\xE3o2_128"
+      213: 3266806526803121466
+    second: water_detilazation_v2_128
   - first:
-      213: 1949226466051363862
-    second: "agua teste anima\xE7\xE3o2_129"
+      213: -5475071835271995677
+    second: water_detilazation_v2_129
   - first:
-      213: 1589163594398249310
-    second: "agua teste anima\xE7\xE3o2_130"
+      213: -369249667842605140
+    second: water_detilazation_v2_130
   - first:
-      213: -8449858118298991197
-    second: "agua teste anima\xE7\xE3o2_131"
+      213: 4157562813539826114
+    second: water_detilazation_v2_131
   - first:
-      213: 5023605779983727276
-    second: "agua teste anima\xE7\xE3o2_132"
+      213: -3282339488543823222
+    second: water_detilazation_v2_132
   - first:
-      213: -7963392835578169732
-    second: "agua teste anima\xE7\xE3o2_133"
+      213: -5377457608724720409
+    second: water_detilazation_v2_133
+  - first:
+      213: -4747434897326766534
+    second: water_detilazation_v2_134
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -436,7 +439,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -450,7 +453,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -474,7 +477,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -495,11 +498,111 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: VisionOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: tvOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_0"
+      name: water_detilazation_v2_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1231
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb66124033886f5a0800000000000000
+      internalID: -6487848460486613316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: water_detilazation_v2_1
       rect:
         serializedVersion: 2
         x: 17
@@ -514,14 +617,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 020f161dbc3ffd740800000000000000
-      internalID: 5179126153216127008
+      spriteID: 7b7550549e6e94aa0800000000000000
+      internalID: -6176151524402178121
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_1"
+      name: water_detilazation_v2_2
       rect:
         serializedVersion: 2
         x: 18
@@ -536,14 +639,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d4178714296e630d0800000000000000
-      internalID: -3443311349240139443
+      spriteID: 6eead77ce4e2ce590800000000000000
+      internalID: -7643683551665344794
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_2"
+      name: water_detilazation_v2_3
       rect:
         serializedVersion: 2
         x: 220
@@ -558,14 +661,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3c895eba6ba5df670800000000000000
-      internalID: 8574109006197790915
+      spriteID: a2edb7312f26fc360800000000000000
+      internalID: 7192075921782464042
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_3"
+      name: water_detilazation_v2_4
       rect:
         serializedVersion: 2
         x: 307
@@ -580,14 +683,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f74cf197ac6b23190800000000000000
-      internalID: -7984118208642694017
+      spriteID: 6acc9c93c64cb2710800000000000000
+      internalID: 1669644055975939238
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_4"
+      name: water_detilazation_v2_5
       rect:
         serializedVersion: 2
         x: 386
@@ -602,14 +705,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: edfc7e865d5edcb50800000000000000
-      internalID: 6615196132427943902
+      spriteID: 7b29eed1b73433fe0800000000000000
+      internalID: -1210549678770318665
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_5"
+      name: water_detilazation_v2_6
       rect:
         serializedVersion: 2
         x: 517
@@ -624,14 +727,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d8063c88983d788e0800000000000000
-      internalID: -1691150547395846003
+      spriteID: 5db957a9336ab01a0800000000000000
+      internalID: -6842192468294394923
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_6"
+      name: water_detilazation_v2_7
       rect:
         serializedVersion: 2
         x: 550
@@ -646,14 +749,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d28abe9a645517cb0800000000000000
-      internalID: -4868015960223930323
+      spriteID: c5f2e68cfe599df90800000000000000
+      internalID: -6928341694640410788
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_7"
+      name: water_detilazation_v2_8
       rect:
         serializedVersion: 2
         x: 57
@@ -668,14 +771,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3a7da086dbebdbb90800000000000000
-      internalID: -7224408506528770141
+      spriteID: e62e65e1d03032c00800000000000000
+      internalID: 874546107518476910
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_8"
+      name: water_detilazation_v2_9
       rect:
         serializedVersion: 2
         x: 155
@@ -690,14 +793,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 99c465b8c139ae600800000000000000
-      internalID: 498372459583917209
+      spriteID: 8ac5b93eea4c37c00800000000000000
+      internalID: 897277006198824104
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_9"
+      name: water_detilazation_v2_10
       rect:
         serializedVersion: 2
         x: 332
@@ -712,14 +815,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d1288183758836960800000000000000
-      internalID: 7594063304861450781
+      spriteID: d0a7f1e8cc1f0e760800000000000000
+      internalID: 7485248441549814285
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_10"
+      name: water_detilazation_v2_11
       rect:
         serializedVersion: 2
         x: 357
@@ -734,14 +837,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0a20044523bfacc80800000000000000
-      internalID: -8301546769523670368
+      spriteID: deaf9c04851342430800000000000000
+      internalID: 3757182244247698157
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_11"
+      name: water_detilazation_v2_12
       rect:
         serializedVersion: 2
         x: 467
@@ -756,14 +859,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 976301e9895c785a0800000000000000
-      internalID: -6519024676317940103
+      spriteID: e9113bde1866c5e60800000000000000
+      internalID: 7952343750254203294
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_12"
+      name: water_detilazation_v2_13
       rect:
         serializedVersion: 2
         x: 28
@@ -778,14 +881,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 593f3dbb388fb3400800000000000000
-      internalID: 305110644453274517
+      spriteID: a0dac323850ddc900800000000000000
+      internalID: 706449793785572618
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_13"
+      name: water_detilazation_v2_14
       rect:
         serializedVersion: 2
         x: 265
@@ -800,14 +903,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6bcb1c5bdf944f850800000000000000
-      internalID: 6409829523679984822
+      spriteID: 38fa1c42cdfd3ec70800000000000000
+      internalID: 8999282617018855299
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_14"
+      name: water_detilazation_v2_15
       rect:
         serializedVersion: 2
         x: 409
@@ -822,14 +925,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 26a2f77b16fb80590800000000000000
-      internalID: -7707700335833306526
+      spriteID: a3b927f0069e2f1a0800000000000000
+      internalID: -6777097890453873862
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_15"
+      name: water_detilazation_v2_16
       rect:
         serializedVersion: 2
         x: 533
@@ -844,14 +947,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 05c120670c83f8ae0800000000000000
-      internalID: -1544953747900064688
+      spriteID: 6e8a627c0cd9d85c0800000000000000
+      internalID: -4211536625221064474
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_16"
+      name: water_detilazation_v2_17
       rect:
         serializedVersion: 2
         x: 282
@@ -866,14 +969,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bf7edebf7a1ed0fc0800000000000000
-      internalID: -3526914821558769669
+      spriteID: 067377d234b1d4210800000000000000
+      internalID: 1318740241228969824
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_17"
+      name: water_detilazation_v2_18
       rect:
         serializedVersion: 2
         x: 447
@@ -888,14 +991,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5f37c73b8b174e800800000000000000
-      internalID: 640762085092652021
+      spriteID: b6990aab9b6947c70800000000000000
+      internalID: 8967958482445703531
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_18"
+      name: water_detilazation_v2_19
       rect:
         serializedVersion: 2
         x: 468
@@ -910,14 +1013,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1c6de8aa5444aa250800000000000000
-      internalID: 5956648523155822273
+      spriteID: 2e4877a8ff39204f0800000000000000
+      internalID: -863965452752681758
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_19"
+      name: water_detilazation_v2_20
       rect:
         serializedVersion: 2
         x: 20
@@ -932,14 +1035,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f289c4ff51a7e2230800000000000000
-      internalID: 3615961785721198639
+      spriteID: d90e22c6f1448a7a0800000000000000
+      internalID: -6365763171539296099
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_20"
+      name: water_detilazation_v2_21
       rect:
         serializedVersion: 2
         x: 362
@@ -954,14 +1057,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8fdc2d16226237260800000000000000
-      internalID: 7094055767150611960
+      spriteID: 6543b5803dbaecd30800000000000000
+      internalID: 4453686004382643286
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_21"
+      name: water_detilazation_v2_22
       rect:
         serializedVersion: 2
         x: 16
@@ -976,14 +1079,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 99b76d16c3be1ef60800000000000000
-      internalID: 8061983452541909913
+      spriteID: a44a9990209cee3c0800000000000000
+      internalID: -4328301181268286390
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_22"
+      name: water_detilazation_v2_23
       rect:
         serializedVersion: 2
         x: 17
@@ -998,14 +1101,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c7bdd17c5a12c6780800000000000000
-      internalID: -8688532585210586244
+      spriteID: 6709c2c8373897b60800000000000000
+      internalID: 7744365566536487030
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_23"
+      name: water_detilazation_v2_24
       rect:
         serializedVersion: 2
         x: 219
@@ -1020,14 +1123,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 35324973fb0cab910800000000000000
-      internalID: 1854006124120122195
+      spriteID: d9d7180be8af95b10800000000000000
+      internalID: 1970881802704879005
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_24"
+      name: water_detilazation_v2_25
       rect:
         serializedVersion: 2
         x: 306
@@ -1042,14 +1145,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5f7e103f6ea087b80800000000000000
-      internalID: -8396949518196545547
+      spriteID: dd41cb2f3e32a94e0800000000000000
+      internalID: -1974226024711580451
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_25"
+      name: water_detilazation_v2_26
       rect:
         serializedVersion: 2
         x: 385
@@ -1064,14 +1167,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 35e8220488651b850800000000000000
-      internalID: 6390984489406991955
+      spriteID: 4f7d1b80af8087f80800000000000000
+      internalID: -8108721259099858956
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_26"
+      name: water_detilazation_v2_27
       rect:
         serializedVersion: 2
         x: 516
@@ -1086,14 +1189,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 08de849290cfb3910800000000000000
-      internalID: 1818323990851677568
+      spriteID: 9215a5014be9986e0800000000000000
+      internalID: -1834760876971110103
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_27"
+      name: water_detilazation_v2_28
       rect:
         serializedVersion: 2
         x: 549
@@ -1108,14 +1211,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3f20b95d0bcd66910800000000000000
-      internalID: 1830392950628745971
+      spriteID: 3e410586d6971b490800000000000000
+      internalID: -7732265574409956125
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_28"
+      name: water_detilazation_v2_29
       rect:
         serializedVersion: 2
         x: 56
@@ -1130,14 +1233,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b8440416bb3637b80800000000000000
-      internalID: -8398259223674207093
+      spriteID: bba7078e1f9c714d0800000000000000
+      internalID: -3163838172380497221
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_29"
+      name: water_detilazation_v2_30
       rect:
         serializedVersion: 2
         x: 331
@@ -1152,14 +1255,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a00d0ae2f4d5f7fd0800000000000000
-      internalID: -2342050686543278070
+      spriteID: a08f75b41452f27a0800000000000000
+      internalID: -6399855583103027190
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_30"
+      name: water_detilazation_v2_31
       rect:
         serializedVersion: 2
         x: 356
@@ -1174,14 +1277,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3e3d025764f462c80800000000000000
-      internalID: -8347897695253244957
+      spriteID: 3ce1a0be27efa1e10800000000000000
+      internalID: 2169325940055350979
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_31"
+      name: water_detilazation_v2_32
       rect:
         serializedVersion: 2
         x: 466
@@ -1196,14 +1299,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f4582771785dca010800000000000000
-      internalID: 1201569976791762255
+      spriteID: 56f093cdd17323c30800000000000000
+      internalID: 4337589992499515237
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_32"
+      name: water_detilazation_v2_33
       rect:
         serializedVersion: 2
         x: 27
@@ -1218,14 +1321,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e64847670fd0808a0800000000000000
-      internalID: -6338801149093313426
+      spriteID: c74d9b87a414afe80800000000000000
+      internalID: -8144125188037290884
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_33"
+      name: water_detilazation_v2_34
       rect:
         serializedVersion: 2
         x: 264
@@ -1240,14 +1343,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8ebf347309c92f1e0800000000000000
-      internalID: -2165496327595361304
+      spriteID: 8a74ebabff6f17b10800000000000000
+      internalID: 1977633289602484136
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_34"
+      name: water_detilazation_v2_35
       rect:
         serializedVersion: 2
         x: 408
@@ -1262,14 +1365,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: abaceeb5e94833040800000000000000
-      internalID: 4626187057921706682
+      spriteID: d23fc33ae2baea770800000000000000
+      internalID: 8624018553256604461
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_35"
+      name: water_detilazation_v2_36
       rect:
         serializedVersion: 2
         x: 451
@@ -1284,14 +1387,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0adb3ea9966b2fc40800000000000000
-      internalID: 5544694655932939680
+      spriteID: f09143582dec7edb0800000000000000
+      internalID: -4762610677347772145
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_36"
+      name: water_detilazation_v2_37
       rect:
         serializedVersion: 2
         x: 297
@@ -1306,14 +1409,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d1d1e08f7a5767270800000000000000
-      internalID: 8247909131857304861
+      spriteID: f07ac50e64aa3edf0800000000000000
+      internalID: -152090741011863793
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_37"
+      name: water_detilazation_v2_38
       rect:
         serializedVersion: 2
         x: 532
@@ -1328,14 +1431,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 559bf429f2491eb60800000000000000
-      internalID: 7773657363857258837
+      spriteID: bf4cc497d4faa1120800000000000000
+      internalID: 2385411699928515835
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_38"
+      name: water_detilazation_v2_39
       rect:
         serializedVersion: 2
         x: 281
@@ -1350,14 +1453,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c12f3e69f0c0541d0800000000000000
-      internalID: -3367271885294013924
+      spriteID: 1ab5a298bbb906d10800000000000000
+      internalID: 2116863054626577313
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_39"
+      name: water_detilazation_v2_40
       rect:
         serializedVersion: 2
         x: 446
@@ -1372,14 +1475,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a6573f27fdaeb3460800000000000000
-      internalID: 7222624672845886826
+      spriteID: 80834e8f618802210800000000000000
+      internalID: 1306193524183808008
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_40"
+      name: water_detilazation_v2_41
       rect:
         serializedVersion: 2
         x: 467
@@ -1394,14 +1497,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ede4d43bc148aec10800000000000000
-      internalID: 2083623036414414558
+      spriteID: 4fd6aa99e7d2da000800000000000000
+      internalID: 48745192738156020
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_41"
+      name: water_detilazation_v2_42
       rect:
         serializedVersion: 2
         x: 19
@@ -1416,14 +1519,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7b988ab4c8f567650800000000000000
-      internalID: 6230272190683056567
+      spriteID: 004e990a84adfec60800000000000000
+      internalID: 7849732680997004288
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_42"
+      name: water_detilazation_v2_43
       rect:
         serializedVersion: 2
         x: 361
@@ -1438,14 +1541,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 94887289bbcbb3e20800000000000000
-      internalID: 3331463863268247625
+      spriteID: 0c887c1173658e290800000000000000
+      internalID: -7860938355053721408
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_43"
+      name: water_detilazation_v2_44
       rect:
         serializedVersion: 2
         x: 15
@@ -1460,14 +1563,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0073e5c0045dd5030800000000000000
-      internalID: 3485176157716756224
+      spriteID: ddf11afd2108563f0800000000000000
+      internalID: -908178931295641635
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_44"
+      name: water_detilazation_v2_45
       rect:
         serializedVersion: 2
         x: 16
@@ -1482,14 +1585,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1f781094a7b3962a0800000000000000
-      internalID: -6743793570613721103
+      spriteID: 4887ea3956a92c720800000000000000
+      internalID: 2865022074021116036
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_45"
+      name: water_detilazation_v2_46
       rect:
         serializedVersion: 2
         x: 218
@@ -1504,14 +1607,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a11013748a6cd5210800000000000000
-      internalID: 1323432291567993114
+      spriteID: a1cfbd899986ccae0800000000000000
+      internalID: -1527731164681602022
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_46"
+      name: water_detilazation_v2_47
       rect:
         serializedVersion: 2
         x: 305
@@ -1526,14 +1629,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5d1a6ebd14cd684e0800000000000000
-      internalID: -1979652810762444331
+      spriteID: fc21ca339ebd9d180800000000000000
+      internalID: -9089992578229857585
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_47"
+      name: water_detilazation_v2_48
       rect:
         serializedVersion: 2
         x: 405
@@ -1548,14 +1651,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c56dee9906473e380800000000000000
-      internalID: -8943176476779424164
+      spriteID: 8d4bf4fae9a8a82b0800000000000000
+      internalID: -5581496374021606184
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_48"
+      name: water_detilazation_v2_49
       rect:
         serializedVersion: 2
         x: 515
@@ -1570,14 +1673,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1b5ca38f34a5d4710800000000000000
-      internalID: 1679097484052972977
+      spriteID: ea3fc742cf0043ec0800000000000000
+      internalID: -3588241920163515474
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_49"
+      name: water_detilazation_v2_50
       rect:
         serializedVersion: 2
         x: 548
@@ -1592,14 +1695,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 00c14eb3335a2ad30800000000000000
-      internalID: 4441293822007450624
+      spriteID: bdae678c009887010800000000000000
+      internalID: 1186849138268367579
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_50"
+      name: water_detilazation_v2_51
       rect:
         serializedVersion: 2
         x: 55
@@ -1614,14 +1717,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7be2eacd328e09dc0800000000000000
-      internalID: -3634149658564088137
+      spriteID: 25e62b7c07ed77bd0800000000000000
+      internalID: -2632390881206702510
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_51"
+      name: water_detilazation_v2_52
       rect:
         serializedVersion: 2
         x: 153
@@ -1636,14 +1739,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f0550f30d27c5d710800000000000000
-      internalID: 1717497829065250063
+      spriteID: c78baf9c2d4bd3950800000000000000
+      internalID: 6430494660379719804
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_52"
+      name: water_detilazation_v2_53
       rect:
         serializedVersion: 2
         x: 330
@@ -1658,14 +1761,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a5fc6905d7dc7f0d0800000000000000
-      internalID: -3389014256466342054
+      spriteID: fd08db8683f11f700800000000000000
+      internalID: 572272954788643039
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_53"
+      name: water_detilazation_v2_54
       rect:
         serializedVersion: 2
         x: 386
@@ -1680,14 +1783,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6495b9f80b63d5c30800000000000000
-      internalID: 4349692947061233990
+      spriteID: 2af474df51b63ab40800000000000000
+      internalID: 5450317716236226466
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_54"
+      name: water_detilazation_v2_55
       rect:
         serializedVersion: 2
         x: 355
@@ -1702,14 +1805,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6d17f07e923e7ff70800000000000000
-      internalID: 9221088531174093270
+      spriteID: 364cc41b24919fbd0800000000000000
+      internalID: -2596015935969246109
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_55"
+      name: water_detilazation_v2_56
       rect:
         serializedVersion: 2
         x: 465
@@ -1724,14 +1827,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5c315e9dfb7879000800000000000000
-      internalID: 42651979547481029
+      spriteID: af85de3b084e79c00800000000000000
+      internalID: 907445091364067578
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_56"
+      name: water_detilazation_v2_57
       rect:
         serializedVersion: 2
         x: 26
@@ -1746,14 +1849,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: df2fd7fee78012da0800000000000000
-      internalID: -5971482289639656707
+      spriteID: f60a46f0b3eac6a80800000000000000
+      internalID: -8472205230306189201
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_57"
+      name: water_detilazation_v2_58
       rect:
         serializedVersion: 2
         x: 263
@@ -1768,14 +1871,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6c0c9ecf467e0b8a0800000000000000
-      internalID: -6291274258510659386
+      spriteID: bd7ded0101c492dd0800000000000000
+      internalID: -2510391685396113445
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_58"
+      name: water_detilazation_v2_59
       rect:
         serializedVersion: 2
         x: 407
@@ -1790,14 +1893,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0236c23aaa3786620800000000000000
-      internalID: 2767589147738399520
+      spriteID: ba96568fce4f57530800000000000000
+      internalID: 3852254354902182315
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_59"
+      name: water_detilazation_v2_60
       rect:
         serializedVersion: 2
         x: 450
@@ -1812,14 +1915,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e842048b4af1e59c0800000000000000
-      internalID: -3936674231948925810
+      spriteID: 1914e4cc9259c12a0800000000000000
+      internalID: -6765368533463449199
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_60"
+      name: water_detilazation_v2_61
       rect:
         serializedVersion: 2
         x: 296
@@ -1834,14 +1937,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2aa38f4e4384ad180800000000000000
-      internalID: -9089873505876952414
+      spriteID: 7b1edfa4c9a6915b0800000000000000
+      internalID: -5397165458921233993
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_61"
+      name: water_detilazation_v2_62
       rect:
         serializedVersion: 2
         x: 531
@@ -1856,14 +1959,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7d3f2e24365b648a0800000000000000
-      internalID: -6321165589039352873
+      spriteID: 0fb47928e56cad660800000000000000
+      internalID: 7411454246011751408
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_62"
+      name: water_detilazation_v2_63
       rect:
         serializedVersion: 2
         x: 280
@@ -1878,14 +1981,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f6c6b46c66beb8520800000000000000
-      internalID: 2705514827812138095
+      spriteID: 30a8817139d703ca0800000000000000
+      internalID: -6039189029602686461
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_63"
+      name: water_detilazation_v2_64
       rect:
         serializedVersion: 2
         x: 445
@@ -1900,14 +2003,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a492ee65b2d1aaf50800000000000000
-      internalID: 6893354251623213386
+      spriteID: 696fbcc25f891e3e0800000000000000
+      internalID: -2026170178554038634
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_64"
+      name: water_detilazation_v2_65
       rect:
         serializedVersion: 2
         x: 467
@@ -1922,14 +2025,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 73d04dce9b234ad60800000000000000
-      internalID: 7900495420438351159
+      spriteID: f0c77776350269f40800000000000000
+      internalID: 5734806718093163535
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_65"
+      name: water_detilazation_v2_66
       rect:
         serializedVersion: 2
         x: 18
@@ -1944,14 +2047,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0deaa03f476ccb580800000000000000
-      internalID: -8809948565447463216
+      spriteID: 0d1cdaeb8f359ebb0800000000000000
+      internalID: -4906297991227391536
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_66"
+      name: water_detilazation_v2_67
       rect:
         serializedVersion: 2
         x: 360
@@ -1966,14 +2069,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5180e099fbe11fe10800000000000000
-      internalID: 2229597098780526613
+      spriteID: 10eacd01fe466f460800000000000000
+      internalID: 7275113226006474241
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_67"
+      name: water_detilazation_v2_68
       rect:
         serializedVersion: 2
         x: 14
@@ -1988,14 +2091,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 36af48ac5f2d33c50800000000000000
-      internalID: 6643885828408146531
+      spriteID: 7b517a16ae1c737f0800000000000000
+      internalID: -632824010217417289
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_68"
+      name: water_detilazation_v2_69
       rect:
         serializedVersion: 2
         x: 304
@@ -2010,14 +2113,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a94a00c0be2129bb0800000000000000
-      internalID: -4930857841289288550
+      spriteID: d4021af3ce22c0ac0800000000000000
+      internalID: -3887693980252430259
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_69"
+      name: water_detilazation_v2_70
       rect:
         serializedVersion: 2
         x: 405
@@ -2032,14 +2135,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ca420faa4c9cc6590800000000000000
-      internalID: -7679541418054900564
+      spriteID: c4685a6d788ed2d60800000000000000
+      internalID: 7867199794205525580
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_70"
+      name: water_detilazation_v2_71
       rect:
         serializedVersion: 2
         x: 514
@@ -2054,14 +2157,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e31dd32b05138a530800000000000000
-      internalID: 3866394502755111230
+      spriteID: 1e0a46500c49b3740800000000000000
+      internalID: 5132859752763924705
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_71"
+      name: water_detilazation_v2_72
       rect:
         serializedVersion: 2
         x: 329
@@ -2076,14 +2179,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6c243076b79885210800000000000000
-      internalID: 1321957653735490246
+      spriteID: ed9cfd063899943d0800000000000000
+      internalID: -3221875268861834786
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_72"
+      name: water_detilazation_v2_73
       rect:
         serializedVersion: 2
         x: 388
@@ -2098,14 +2201,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bf3cb93f19aa15f40800000000000000
-      internalID: 5715536945943921659
+      spriteID: af373e5b109b20f00800000000000000
+      internalID: 1081630277520028666
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_73"
+      name: water_detilazation_v2_74
       rect:
         serializedVersion: 2
         x: 547
@@ -2120,14 +2223,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 78d7612763b68f010800000000000000
-      internalID: 1222845180417572231
+      spriteID: 5cd68436aee4928c0800000000000000
+      internalID: -4023598023483822651
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_74"
+      name: water_detilazation_v2_75
       rect:
         serializedVersion: 2
         x: 53
@@ -2142,14 +2245,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 70ab046cc0200ead0800000000000000
-      internalID: -2675135924769080825
+      spriteID: ec425ea20c7c78000800000000000000
+      internalID: 38218750023247054
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_75"
+      name: water_detilazation_v2_76
       rect:
         serializedVersion: 2
         x: 151
@@ -2164,14 +2267,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 31bb0805850e04970800000000000000
-      internalID: 8737229947011119891
+      spriteID: 38c17704877b7e020800000000000000
+      internalID: 2371065455939361923
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_76"
+      name: water_detilazation_v2_77
       rect:
         serializedVersion: 2
         x: 353
@@ -2186,14 +2289,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d8c4aa704eb073260800000000000000
-      internalID: 7077138413445074061
+      spriteID: 857baa2f9b786ea60800000000000000
+      internalID: 7702993445373785944
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_77"
+      name: water_detilazation_v2_78
       rect:
         serializedVersion: 2
         x: 464
@@ -2208,14 +2311,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8132b276f0d100c50800000000000000
-      internalID: 6629330603481965336
+      spriteID: 227126f534681c660800000000000000
+      internalID: 7404346886295000866
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_78"
+      name: water_detilazation_v2_79
       rect:
         serializedVersion: 2
         x: 25
@@ -2230,14 +2333,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 816827e5428d05cc0800000000000000
-      internalID: -3724239241120414184
+      spriteID: 89cc1c21a160ed440800000000000000
+      internalID: 4962410548462472344
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_79"
+      name: water_detilazation_v2_80
       rect:
         serializedVersion: 2
         x: 262
@@ -2252,14 +2355,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 15e64257c64d49f10800000000000000
-      internalID: 2275677274015821393
+      spriteID: a17f9b15d476b0440800000000000000
+      internalID: 4903126201104201498
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_80"
+      name: water_detilazation_v2_81
       rect:
         serializedVersion: 2
         x: 296
@@ -2274,14 +2377,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9cabd9d769def6190800000000000000
-      internalID: -7966887985186751799
+      spriteID: e048ead0d926ae1d0800000000000000
+      internalID: -3320733348553391090
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_81"
+      name: water_detilazation_v2_82
       rect:
         serializedVersion: 2
         x: 406
@@ -2296,14 +2399,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0daf96de00680a170800000000000000
-      internalID: 8187691461100829392
+      spriteID: db7023677834d3e90800000000000000
+      internalID: -7044399993054951491
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_82"
+      name: water_detilazation_v2_83
       rect:
         serializedVersion: 2
         x: 530
@@ -2318,14 +2421,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 40b658e43592ad100800000000000000
-      internalID: 133464576737241860
+      spriteID: 341d0c6f844500a50800000000000000
+      internalID: 6485276135767724355
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_83"
+      name: water_detilazation_v2_84
       rect:
         serializedVersion: 2
         x: 279
@@ -2340,14 +2443,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ecb4b6bc2708b0f10800000000000000
-      internalID: 2237022870447016910
+      spriteID: 84045208f0e42c290800000000000000
+      internalID: -7871643370208804792
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_84"
+      name: water_detilazation_v2_85
       rect:
         serializedVersion: 2
         x: 444
@@ -2362,14 +2465,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a409d1ac5a654630800000000000000
-      internalID: 3910648797526033576
+      spriteID: f63b23c4eaa201b40800000000000000
+      internalID: 5408870080563032943
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_85"
+      name: water_detilazation_v2_86
       rect:
         serializedVersion: 2
         x: 468
@@ -2384,14 +2487,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f6bf8eed283dbfe00800000000000000
-      internalID: 1079689094724385647
+      spriteID: 6e6dad3923b5cfce0800000000000000
+      internalID: -1370119913840388378
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_86"
+      name: water_detilazation_v2_87
       rect:
         serializedVersion: 2
         x: 17
@@ -2406,14 +2509,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4287213eaf347fc90800000000000000
-      internalID: -7136160339714738140
+      spriteID: 17c575b22cae350c0800000000000000
+      internalID: -4588065475688702863
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_87"
+      name: water_detilazation_v2_88
       rect:
         serializedVersion: 2
         x: 359
@@ -2428,14 +2531,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 21116c1ab51772fe0800000000000000
-      internalID: -1213876936182984430
+      spriteID: 35206a246c6fd9c80800000000000000
+      internalID: -8314218005673934253
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_88"
+      name: water_detilazation_v2_89
       rect:
         serializedVersion: 2
         x: 450
@@ -2450,14 +2553,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5512b5c0d565163c0800000000000000
-      internalID: -4368115205933424299
+      spriteID: dc24277d8ee0713e0800000000000000
+      internalID: -2083179909425773875
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_89"
+      name: water_detilazation_v2_90
       rect:
         serializedVersion: 2
         x: 78
@@ -2472,14 +2575,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8960317df20658780800000000000000
-      internalID: -8681426948098685288
+      spriteID: 99fe6d87fc7f170e0800000000000000
+      internalID: -2273763866387746919
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_90"
+      name: water_detilazation_v2_91
       rect:
         serializedVersion: 2
         x: 14
@@ -2494,14 +2597,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b1b549cfe3932b630800000000000000
-      internalID: 3941275566590941979
+      spriteID: 02a8ec9baad75d610800000000000000
+      internalID: 1645359411089017376
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_91"
+      name: water_detilazation_v2_92
       rect:
         serializedVersion: 2
         x: 15
@@ -2516,14 +2619,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 52a1ef9083d4c3400800000000000000
-      internalID: 305203777835506213
+      spriteID: 5720af4135a8e9720800000000000000
+      internalID: 2854871303238320757
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_92"
+      name: water_detilazation_v2_93
       rect:
         serializedVersion: 2
         x: 305
@@ -2538,14 +2641,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2da97ed4512f7ef40800000000000000
-      internalID: 5757836821931727570
+      spriteID: 90aac8553dfe13ef0800000000000000
+      internalID: -130059223264613879
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_93"
+      name: water_detilazation_v2_94
       rect:
         serializedVersion: 2
         x: 403
@@ -2560,14 +2663,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9e8428d1843d3a9e0800000000000000
-      internalID: -1611211934982321943
+      spriteID: 17efd6cf3619fea80800000000000000
+      internalID: -8435363718418792847
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_94"
+      name: water_detilazation_v2_95
       rect:
         serializedVersion: 2
         x: 514
@@ -2582,14 +2685,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a76d44a17a877900800000000000000
-      internalID: 682166089262393256
+      spriteID: 34897acea97aa2860800000000000000
+      internalID: 7505996012803561539
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_95"
+      name: water_detilazation_v2_96
       rect:
         serializedVersion: 2
         x: 547
@@ -2604,14 +2707,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7161ab6ee21f66f40800000000000000
-      internalID: 5721525560362538519
+      spriteID: 19124aca320716420800000000000000
+      internalID: 2621499756628943249
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_96"
+      name: water_detilazation_v2_97
       rect:
         serializedVersion: 2
         x: 53
@@ -2626,14 +2729,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0fc54b84b16b06640800000000000000
-      internalID: 5071253408719330544
+      spriteID: 86a7c1a45e4c28b90800000000000000
+      internalID: -7241008761788401048
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_97"
+      name: water_detilazation_v2_98
       rect:
         serializedVersion: 2
         x: 152
@@ -2648,14 +2751,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 19465b0d8502063a0800000000000000
-      internalID: -6674299081932315503
+      spriteID: dd830298b0d500e40800000000000000
+      internalID: 5620594639084992733
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_98"
+      name: water_detilazation_v2_99
       rect:
         serializedVersion: 2
         x: 329
@@ -2670,14 +2773,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 69923e4aa6f2ca470800000000000000
-      internalID: 8407146739473262998
+      spriteID: 80efa22c9bd3a9510800000000000000
+      internalID: 1556624489245769224
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_99"
+      name: water_detilazation_v2_100
       rect:
         serializedVersion: 2
         x: 355
@@ -2692,14 +2795,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 91f59dfcce6272850800000000000000
-      internalID: 6352088597970640665
+      spriteID: d4a3d7d73d619e870800000000000000
+      internalID: 8712520051724204621
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_100"
+      name: water_detilazation_v2_101
       rect:
         serializedVersion: 2
         x: 389
@@ -2714,14 +2817,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f5136dc98007ed2a0800000000000000
-      internalID: -6710803212442128033
+      spriteID: 534aa73e4188f5320800000000000000
+      internalID: 2548905537412178997
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_101"
+      name: water_detilazation_v2_102
       rect:
         serializedVersion: 2
         x: 464
@@ -2736,14 +2839,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 987a49fffb44f13b0800000000000000
-      internalID: -5539633425225046135
+      spriteID: 05e12e0bfa2411e60800000000000000
+      internalID: 7931193741130473040
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_102"
+      name: water_detilazation_v2_103
       rect:
         serializedVersion: 2
         x: 23
@@ -2758,14 +2861,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fd300f917ba066650800000000000000
-      internalID: 6225675316416742367
+      spriteID: 59f468a6fdf514a50800000000000000
+      internalID: 6503584750069239701
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_103"
+      name: water_detilazation_v2_104
       rect:
         serializedVersion: 2
         x: 262
@@ -2780,14 +2883,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0cb2e58a1d29bad50800000000000000
-      internalID: 6749649895715384256
+      spriteID: 688fb0b0b62220720800000000000000
+      internalID: 2810846960574789766
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_104"
+      name: water_detilazation_v2_105
       rect:
         serializedVersion: 2
         x: 265
@@ -2802,14 +2905,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7b23ddbb069cac7e0800000000000000
-      internalID: -1744360488346766665
+      spriteID: 602aa8f6d595b7c90800000000000000
+      internalID: -7171039723819195898
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_105"
+      name: water_detilazation_v2_106
       rect:
         serializedVersion: 2
         x: 406
@@ -2824,14 +2927,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2596995859f8a35c0800000000000000
-      internalID: -4234914627234207406
+      spriteID: 211168fa73e50e580800000000000000
+      internalID: -8799930078620937966
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_106"
+      name: water_detilazation_v2_107
       rect:
         serializedVersion: 2
         x: 449
@@ -2846,14 +2949,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5ef739d23066aa360800000000000000
-      internalID: 7181664719631253477
+      spriteID: 495108d8e2b08ad40800000000000000
+      internalID: 5595734831578224020
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_107"
+      name: water_detilazation_v2_108
       rect:
         serializedVersion: 2
         x: 530
@@ -2868,14 +2971,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fba4ec76f795a4d70800000000000000
-      internalID: 9028126806754871999
+      spriteID: 906f2f5ced480c840800000000000000
+      internalID: 5242336058597897737
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_108"
+      name: water_detilazation_v2_109
       rect:
         serializedVersion: 2
         x: 278
@@ -2890,14 +2993,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 293ff99ef80137440800000000000000
-      internalID: 4932304227186766738
+      spriteID: 5642f0f6541d191b0800000000000000
+      internalID: -5651505961227049883
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_109"
+      name: water_detilazation_v2_110
       rect:
         serializedVersion: 2
         x: 444
@@ -2912,14 +3015,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1abc9a5d5045433a0800000000000000
-      internalID: -6686627162702099551
+      spriteID: 3bffe7ffc563e7ec0800000000000000
+      internalID: -3567354081779449933
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_110"
+      name: water_detilazation_v2_111
       rect:
         serializedVersion: 2
         x: 469
@@ -2934,14 +3037,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 293655c2d69aacf30800000000000000
-      internalID: 4596672656045335442
+      spriteID: 0bf3f55581eedf5f0800000000000000
+      internalID: -721158577030479952
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_111"
+      name: water_detilazation_v2_112
       rect:
         serializedVersion: 2
         x: 17
@@ -2956,14 +3059,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 836be0d8cfc5653d0800000000000000
-      internalID: -3218282643941575112
+      spriteID: 0a11f0b82a1dc2a10800000000000000
+      internalID: 1886112840009322912
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_112"
+      name: water_detilazation_v2_113
       rect:
         serializedVersion: 2
         x: 360
@@ -2978,14 +3081,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9b7122755393455a0800000000000000
-      internalID: -6533534258149845063
+      spriteID: 88ca57f24645a3ff0800000000000000
+      internalID: -55639256119006072
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_113"
+      name: water_detilazation_v2_114
       rect:
         serializedVersion: 2
         x: 15
@@ -3000,14 +3103,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1fca55dcbaed06830800000000000000
-      internalID: 4062491693353905393
+      spriteID: 85191b72c667e7070800000000000000
+      internalID: 8106046586207965528
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_114"
+      name: water_detilazation_v2_115
       rect:
         serializedVersion: 2
         x: 16
@@ -3022,14 +3125,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 25c30f8139009c730800000000000000
-      internalID: 4019744774183468114
+      spriteID: 82ae29e7e2665b280800000000000000
+      internalID: -9028197528116205016
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_115"
+      name: water_detilazation_v2_116
       rect:
         serializedVersion: 2
         x: 306
@@ -3044,14 +3147,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: de92f631fb92906f0800000000000000
-      internalID: -717996764947338771
+      spriteID: a4d54a12e832c1c80800000000000000
+      internalID: -8350760515694994102
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_116"
+      name: water_detilazation_v2_117
       rect:
         serializedVersion: 2
         x: 387
@@ -3066,14 +3169,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 75566c975fc364490800000000000000
-      internalID: -7762449882718771881
+      spriteID: 41308b68a55bc8b80800000000000000
+      internalID: -8391132605286186220
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_117"
+      name: water_detilazation_v2_118
       rect:
         serializedVersion: 2
         x: 516
@@ -3088,14 +3191,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 09ef5ce320642b350800000000000000
-      internalID: 6030959826459557520
+      spriteID: 2ec9f4ad04f765f50800000000000000
+      internalID: 6869818198117555426
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_118"
+      name: water_detilazation_v2_119
       rect:
         serializedVersion: 2
         x: 550
@@ -3110,14 +3213,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9232c107c3e8291d0800000000000000
-      internalID: -3345455182952783063
+      spriteID: 2cd88688b6895be80800000000000000
+      internalID: -8163451161921679934
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_119"
+      name: water_detilazation_v2_120
       rect:
         serializedVersion: 2
         x: 55
@@ -3132,14 +3235,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bf105284f6478fd30800000000000000
-      internalID: 4465447051838423547
+      spriteID: 3ce2106ca6fc84850800000000000000
+      internalID: 6361562531156274883
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_120"
+      name: water_detilazation_v2_121
       rect:
         serializedVersion: 2
         x: 153
@@ -3154,14 +3257,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9343de3354d23b610800000000000000
-      internalID: 1635700864912798777
+      spriteID: 36a2622c45f1876c0800000000000000
+      internalID: -4145529008099546525
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_121"
+      name: water_detilazation_v2_122
       rect:
         serializedVersion: 2
         x: 330
@@ -3176,14 +3279,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: dd42403092cfccd40800000000000000
-      internalID: 5606132889243886813
+      spriteID: fc1b16f4956e3a4f0800000000000000
+      internalID: -818557435993017905
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_122"
+      name: water_detilazation_v2_123
       rect:
         serializedVersion: 2
         x: 356
@@ -3198,14 +3301,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ecfc15f1c79627a90800000000000000
-      internalID: -7317670462701318194
+      spriteID: 20d0b63b5c6a5bf50800000000000000
+      internalID: 6896601772436688130
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_123"
+      name: water_detilazation_v2_124
       rect:
         serializedVersion: 2
         x: 466
@@ -3220,14 +3323,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 55db83ca6ffe49600800000000000000
-      internalID: 474267703511137621
+      spriteID: 2ae1fabf0af16bda0800000000000000
+      internalID: -5929517083108893022
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_124"
+      name: water_detilazation_v2_125
       rect:
         serializedVersion: 2
         x: 25
@@ -3242,14 +3345,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b6f4b721d22edaa80800000000000000
-      internalID: -8453852242293076117
+      spriteID: 43ba5fc3ca24b50b0800000000000000
+      internalID: -5738919992629023948
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_125"
+      name: water_detilazation_v2_126
       rect:
         serializedVersion: 2
         x: 265
@@ -3264,14 +3367,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b318decc9011feeb0800000000000000
-      internalID: -4688509953278901957
+      spriteID: cf081965e7de28b60800000000000000
+      internalID: 7747015435904712956
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_126"
+      name: water_detilazation_v2_127
       rect:
         serializedVersion: 2
         x: 408
@@ -3286,14 +3389,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04c042af93cb8f8a0800000000000000
-      internalID: -6271055523917591488
+      spriteID: f2fc8a189fe4366c0800000000000000
+      internalID: -4151387597976318161
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_127"
+      name: water_detilazation_v2_128
       rect:
         serializedVersion: 2
         x: 451
@@ -3308,14 +3411,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7ee8c01a2016b8690800000000000000
-      internalID: -7598873282337796377
+      spriteID: a3517045a37065d20800000000000000
+      internalID: 3266806526803121466
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_128"
+      name: water_detilazation_v2_129
       rect:
         serializedVersion: 2
         x: 532
@@ -3330,14 +3433,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: acc16d6c2373bffb0800000000000000
-      internalID: -4613032702087127862
+      spriteID: 3eeddda8c23a404b0800000000000000
+      internalID: -5475071835271995677
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_129"
+      name: water_detilazation_v2_130
       rect:
         serializedVersion: 2
         x: 279
@@ -3352,14 +3455,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 61418c7b42b0d0b10800000000000000
-      internalID: 1949226466051363862
+      spriteID: caf7fca226920eaf0800000000000000
+      internalID: -369249667842605140
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_130"
+      name: water_detilazation_v2_131
       rect:
         serializedVersion: 2
         x: 446
@@ -3374,14 +3477,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e51371e8ed7dd0610800000000000000
-      internalID: 1589163594398249310
+      spriteID: 2c93a68e951a2b930800000000000000
+      internalID: 4157562813539826114
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_131"
+      name: water_detilazation_v2_132
       rect:
         serializedVersion: 2
         x: 469
@@ -3396,14 +3499,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3a586588fc21cba80800000000000000
-      internalID: -8449858118298991197
+      spriteID: a8aab1130a9c272d0800000000000000
+      internalID: -3282339488543823222
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_132"
+      name: water_detilazation_v2_133
       rect:
         serializedVersion: 2
         x: 19
@@ -3418,14 +3521,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: caa778737de67b540800000000000000
-      internalID: 5023605779983727276
+      spriteID: 7e4dd3dbbce6f55b0800000000000000
+      internalID: -5377457608724720409
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "agua teste anima\xE7\xE3o2_133"
+      name: water_detilazation_v2_134
       rect:
         serializedVersion: 2
         x: 361
@@ -3440,8 +3543,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c76f87c68685c7190800000000000000
-      internalID: -7963392835578169732
+      spriteID: a368b862d19bd1eb0800000000000000
+      internalID: -4747434897326766534
       vertices: []
       indices: 
       edges: []
@@ -3460,140 +3563,141 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "agua teste anima\xE7\xE3o2_0": 5179126153216127008
-      "agua teste anima\xE7\xE3o2_1": -3443311349240139443
-      "agua teste anima\xE7\xE3o2_10": -8301546769523670368
-      "agua teste anima\xE7\xE3o2_100": -6710803212442128033
-      "agua teste anima\xE7\xE3o2_101": -5539633425225046135
-      "agua teste anima\xE7\xE3o2_102": 6225675316416742367
-      "agua teste anima\xE7\xE3o2_103": 6749649895715384256
-      "agua teste anima\xE7\xE3o2_104": -1744360488346766665
-      "agua teste anima\xE7\xE3o2_105": -4234914627234207406
-      "agua teste anima\xE7\xE3o2_106": 7181664719631253477
-      "agua teste anima\xE7\xE3o2_107": 9028126806754871999
-      "agua teste anima\xE7\xE3o2_108": 4932304227186766738
-      "agua teste anima\xE7\xE3o2_109": -6686627162702099551
-      "agua teste anima\xE7\xE3o2_11": -6519024676317940103
-      "agua teste anima\xE7\xE3o2_110": 4596672656045335442
-      "agua teste anima\xE7\xE3o2_111": -3218282643941575112
-      "agua teste anima\xE7\xE3o2_112": -6533534258149845063
-      "agua teste anima\xE7\xE3o2_113": 4062491693353905393
-      "agua teste anima\xE7\xE3o2_114": 4019744774183468114
-      "agua teste anima\xE7\xE3o2_115": -717996764947338771
-      "agua teste anima\xE7\xE3o2_116": -7762449882718771881
-      "agua teste anima\xE7\xE3o2_117": 6030959826459557520
-      "agua teste anima\xE7\xE3o2_118": -3345455182952783063
-      "agua teste anima\xE7\xE3o2_119": 4465447051838423547
-      "agua teste anima\xE7\xE3o2_12": 305110644453274517
-      "agua teste anima\xE7\xE3o2_120": 1635700864912798777
-      "agua teste anima\xE7\xE3o2_121": 5606132889243886813
-      "agua teste anima\xE7\xE3o2_122": -7317670462701318194
-      "agua teste anima\xE7\xE3o2_123": 474267703511137621
-      "agua teste anima\xE7\xE3o2_124": -8453852242293076117
-      "agua teste anima\xE7\xE3o2_125": -4688509953278901957
-      "agua teste anima\xE7\xE3o2_126": -6271055523917591488
-      "agua teste anima\xE7\xE3o2_127": -7598873282337796377
-      "agua teste anima\xE7\xE3o2_128": -4613032702087127862
-      "agua teste anima\xE7\xE3o2_129": 1949226466051363862
-      "agua teste anima\xE7\xE3o2_13": 6409829523679984822
-      "agua teste anima\xE7\xE3o2_130": 1589163594398249310
-      "agua teste anima\xE7\xE3o2_131": -8449858118298991197
-      "agua teste anima\xE7\xE3o2_132": 5023605779983727276
-      "agua teste anima\xE7\xE3o2_133": -7963392835578169732
-      "agua teste anima\xE7\xE3o2_14": -7707700335833306526
-      "agua teste anima\xE7\xE3o2_15": -1544953747900064688
-      "agua teste anima\xE7\xE3o2_16": -3526914821558769669
-      "agua teste anima\xE7\xE3o2_17": 640762085092652021
-      "agua teste anima\xE7\xE3o2_18": 5956648523155822273
-      "agua teste anima\xE7\xE3o2_19": 3615961785721198639
-      "agua teste anima\xE7\xE3o2_2": 8574109006197790915
-      "agua teste anima\xE7\xE3o2_20": 7094055767150611960
-      "agua teste anima\xE7\xE3o2_21": 8061983452541909913
-      "agua teste anima\xE7\xE3o2_22": -8688532585210586244
-      "agua teste anima\xE7\xE3o2_23": 1854006124120122195
-      "agua teste anima\xE7\xE3o2_24": -8396949518196545547
-      "agua teste anima\xE7\xE3o2_25": 6390984489406991955
-      "agua teste anima\xE7\xE3o2_26": 1818323990851677568
-      "agua teste anima\xE7\xE3o2_27": 1830392950628745971
-      "agua teste anima\xE7\xE3o2_28": -8398259223674207093
-      "agua teste anima\xE7\xE3o2_29": -2342050686543278070
-      "agua teste anima\xE7\xE3o2_3": -7984118208642694017
-      "agua teste anima\xE7\xE3o2_30": -8347897695253244957
-      "agua teste anima\xE7\xE3o2_31": 1201569976791762255
-      "agua teste anima\xE7\xE3o2_32": -6338801149093313426
-      "agua teste anima\xE7\xE3o2_33": -2165496327595361304
-      "agua teste anima\xE7\xE3o2_34": 4626187057921706682
-      "agua teste anima\xE7\xE3o2_35": 5544694655932939680
-      "agua teste anima\xE7\xE3o2_36": 8247909131857304861
-      "agua teste anima\xE7\xE3o2_37": 7773657363857258837
-      "agua teste anima\xE7\xE3o2_38": -3367271885294013924
-      "agua teste anima\xE7\xE3o2_39": 7222624672845886826
-      "agua teste anima\xE7\xE3o2_4": 6615196132427943902
-      "agua teste anima\xE7\xE3o2_40": 2083623036414414558
-      "agua teste anima\xE7\xE3o2_41": 6230272190683056567
-      "agua teste anima\xE7\xE3o2_42": 3331463863268247625
-      "agua teste anima\xE7\xE3o2_43": 3485176157716756224
-      "agua teste anima\xE7\xE3o2_44": -6743793570613721103
-      "agua teste anima\xE7\xE3o2_45": 1323432291567993114
-      "agua teste anima\xE7\xE3o2_46": -1979652810762444331
-      "agua teste anima\xE7\xE3o2_47": -8943176476779424164
-      "agua teste anima\xE7\xE3o2_48": 1679097484052972977
-      "agua teste anima\xE7\xE3o2_49": 4441293822007450624
-      "agua teste anima\xE7\xE3o2_5": -1691150547395846003
-      "agua teste anima\xE7\xE3o2_50": -3634149658564088137
-      "agua teste anima\xE7\xE3o2_51": 1717497829065250063
-      "agua teste anima\xE7\xE3o2_52": -3389014256466342054
-      "agua teste anima\xE7\xE3o2_53": 4349692947061233990
-      "agua teste anima\xE7\xE3o2_54": 9221088531174093270
-      "agua teste anima\xE7\xE3o2_55": 42651979547481029
-      "agua teste anima\xE7\xE3o2_56": -5971482289639656707
-      "agua teste anima\xE7\xE3o2_57": -6291274258510659386
-      "agua teste anima\xE7\xE3o2_58": 2767589147738399520
-      "agua teste anima\xE7\xE3o2_59": -3936674231948925810
-      "agua teste anima\xE7\xE3o2_6": -4868015960223930323
-      "agua teste anima\xE7\xE3o2_60": -9089873505876952414
-      "agua teste anima\xE7\xE3o2_61": -6321165589039352873
-      "agua teste anima\xE7\xE3o2_62": 2705514827812138095
-      "agua teste anima\xE7\xE3o2_63": 6893354251623213386
-      "agua teste anima\xE7\xE3o2_64": 7900495420438351159
-      "agua teste anima\xE7\xE3o2_65": -8809948565447463216
-      "agua teste anima\xE7\xE3o2_66": 2229597098780526613
-      "agua teste anima\xE7\xE3o2_67": 6643885828408146531
-      "agua teste anima\xE7\xE3o2_68": -4930857841289288550
-      "agua teste anima\xE7\xE3o2_69": -7679541418054900564
-      "agua teste anima\xE7\xE3o2_7": -7224408506528770141
-      "agua teste anima\xE7\xE3o2_70": 3866394502755111230
-      "agua teste anima\xE7\xE3o2_71": 1321957653735490246
-      "agua teste anima\xE7\xE3o2_72": 5715536945943921659
-      "agua teste anima\xE7\xE3o2_73": 1222845180417572231
-      "agua teste anima\xE7\xE3o2_74": -2675135924769080825
-      "agua teste anima\xE7\xE3o2_75": 8737229947011119891
-      "agua teste anima\xE7\xE3o2_76": 7077138413445074061
-      "agua teste anima\xE7\xE3o2_77": 6629330603481965336
-      "agua teste anima\xE7\xE3o2_78": -3724239241120414184
-      "agua teste anima\xE7\xE3o2_79": 2275677274015821393
-      "agua teste anima\xE7\xE3o2_8": 498372459583917209
-      "agua teste anima\xE7\xE3o2_80": -7966887985186751799
-      "agua teste anima\xE7\xE3o2_81": 8187691461100829392
-      "agua teste anima\xE7\xE3o2_82": 133464576737241860
-      "agua teste anima\xE7\xE3o2_83": 2237022870447016910
-      "agua teste anima\xE7\xE3o2_84": 3910648797526033576
-      "agua teste anima\xE7\xE3o2_85": 1079689094724385647
-      "agua teste anima\xE7\xE3o2_86": -7136160339714738140
-      "agua teste anima\xE7\xE3o2_87": -1213876936182984430
-      "agua teste anima\xE7\xE3o2_88": -4368115205933424299
-      "agua teste anima\xE7\xE3o2_89": -8681426948098685288
-      "agua teste anima\xE7\xE3o2_9": 7594063304861450781
-      "agua teste anima\xE7\xE3o2_90": 3941275566590941979
-      "agua teste anima\xE7\xE3o2_91": 305203777835506213
-      "agua teste anima\xE7\xE3o2_92": 5757836821931727570
-      "agua teste anima\xE7\xE3o2_93": -1611211934982321943
-      "agua teste anima\xE7\xE3o2_94": 682166089262393256
-      "agua teste anima\xE7\xE3o2_95": 5721525560362538519
-      "agua teste anima\xE7\xE3o2_96": 5071253408719330544
-      "agua teste anima\xE7\xE3o2_97": -6674299081932315503
-      "agua teste anima\xE7\xE3o2_98": 8407146739473262998
-      "agua teste anima\xE7\xE3o2_99": 6352088597970640665
+      water_detilazation_v2_0: -6487848460486613316
+      water_detilazation_v2_1: -6176151524402178121
+      water_detilazation_v2_10: 7485248441549814285
+      water_detilazation_v2_100: 8712520051724204621
+      water_detilazation_v2_101: 2548905537412178997
+      water_detilazation_v2_102: 7931193741130473040
+      water_detilazation_v2_103: 6503584750069239701
+      water_detilazation_v2_104: 2810846960574789766
+      water_detilazation_v2_105: -7171039723819195898
+      water_detilazation_v2_106: -8799930078620937966
+      water_detilazation_v2_107: 5595734831578224020
+      water_detilazation_v2_108: 5242336058597897737
+      water_detilazation_v2_109: -5651505961227049883
+      water_detilazation_v2_11: 3757182244247698157
+      water_detilazation_v2_110: -3567354081779449933
+      water_detilazation_v2_111: -721158577030479952
+      water_detilazation_v2_112: 1886112840009322912
+      water_detilazation_v2_113: -55639256119006072
+      water_detilazation_v2_114: 8106046586207965528
+      water_detilazation_v2_115: -9028197528116205016
+      water_detilazation_v2_116: -8350760515694994102
+      water_detilazation_v2_117: -8391132605286186220
+      water_detilazation_v2_118: 6869818198117555426
+      water_detilazation_v2_119: -8163451161921679934
+      water_detilazation_v2_12: 7952343750254203294
+      water_detilazation_v2_120: 6361562531156274883
+      water_detilazation_v2_121: -4145529008099546525
+      water_detilazation_v2_122: -818557435993017905
+      water_detilazation_v2_123: 6896601772436688130
+      water_detilazation_v2_124: -5929517083108893022
+      water_detilazation_v2_125: -5738919992629023948
+      water_detilazation_v2_126: 7747015435904712956
+      water_detilazation_v2_127: -4151387597976318161
+      water_detilazation_v2_128: 3266806526803121466
+      water_detilazation_v2_129: -5475071835271995677
+      water_detilazation_v2_13: 706449793785572618
+      water_detilazation_v2_130: -369249667842605140
+      water_detilazation_v2_131: 4157562813539826114
+      water_detilazation_v2_132: -3282339488543823222
+      water_detilazation_v2_133: -5377457608724720409
+      water_detilazation_v2_134: -4747434897326766534
+      water_detilazation_v2_14: 8999282617018855299
+      water_detilazation_v2_15: -6777097890453873862
+      water_detilazation_v2_16: -4211536625221064474
+      water_detilazation_v2_17: 1318740241228969824
+      water_detilazation_v2_18: 8967958482445703531
+      water_detilazation_v2_19: -863965452752681758
+      water_detilazation_v2_2: -7643683551665344794
+      water_detilazation_v2_20: -6365763171539296099
+      water_detilazation_v2_21: 4453686004382643286
+      water_detilazation_v2_22: -4328301181268286390
+      water_detilazation_v2_23: 7744365566536487030
+      water_detilazation_v2_24: 1970881802704879005
+      water_detilazation_v2_25: -1974226024711580451
+      water_detilazation_v2_26: -8108721259099858956
+      water_detilazation_v2_27: -1834760876971110103
+      water_detilazation_v2_28: -7732265574409956125
+      water_detilazation_v2_29: -3163838172380497221
+      water_detilazation_v2_3: 7192075921782464042
+      water_detilazation_v2_30: -6399855583103027190
+      water_detilazation_v2_31: 2169325940055350979
+      water_detilazation_v2_32: 4337589992499515237
+      water_detilazation_v2_33: -8144125188037290884
+      water_detilazation_v2_34: 1977633289602484136
+      water_detilazation_v2_35: 8624018553256604461
+      water_detilazation_v2_36: -4762610677347772145
+      water_detilazation_v2_37: -152090741011863793
+      water_detilazation_v2_38: 2385411699928515835
+      water_detilazation_v2_39: 2116863054626577313
+      water_detilazation_v2_4: 1669644055975939238
+      water_detilazation_v2_40: 1306193524183808008
+      water_detilazation_v2_41: 48745192738156020
+      water_detilazation_v2_42: 7849732680997004288
+      water_detilazation_v2_43: -7860938355053721408
+      water_detilazation_v2_44: -908178931295641635
+      water_detilazation_v2_45: 2865022074021116036
+      water_detilazation_v2_46: -1527731164681602022
+      water_detilazation_v2_47: -9089992578229857585
+      water_detilazation_v2_48: -5581496374021606184
+      water_detilazation_v2_49: -3588241920163515474
+      water_detilazation_v2_5: -1210549678770318665
+      water_detilazation_v2_50: 1186849138268367579
+      water_detilazation_v2_51: -2632390881206702510
+      water_detilazation_v2_52: 6430494660379719804
+      water_detilazation_v2_53: 572272954788643039
+      water_detilazation_v2_54: 5450317716236226466
+      water_detilazation_v2_55: -2596015935969246109
+      water_detilazation_v2_56: 907445091364067578
+      water_detilazation_v2_57: -8472205230306189201
+      water_detilazation_v2_58: -2510391685396113445
+      water_detilazation_v2_59: 3852254354902182315
+      water_detilazation_v2_6: -6842192468294394923
+      water_detilazation_v2_60: -6765368533463449199
+      water_detilazation_v2_61: -5397165458921233993
+      water_detilazation_v2_62: 7411454246011751408
+      water_detilazation_v2_63: -6039189029602686461
+      water_detilazation_v2_64: -2026170178554038634
+      water_detilazation_v2_65: 5734806718093163535
+      water_detilazation_v2_66: -4906297991227391536
+      water_detilazation_v2_67: 7275113226006474241
+      water_detilazation_v2_68: -632824010217417289
+      water_detilazation_v2_69: -3887693980252430259
+      water_detilazation_v2_7: -6928341694640410788
+      water_detilazation_v2_70: 7867199794205525580
+      water_detilazation_v2_71: 5132859752763924705
+      water_detilazation_v2_72: -3221875268861834786
+      water_detilazation_v2_73: 1081630277520028666
+      water_detilazation_v2_74: -4023598023483822651
+      water_detilazation_v2_75: 38218750023247054
+      water_detilazation_v2_76: 2371065455939361923
+      water_detilazation_v2_77: 7702993445373785944
+      water_detilazation_v2_78: 7404346886295000866
+      water_detilazation_v2_79: 4962410548462472344
+      water_detilazation_v2_8: 874546107518476910
+      water_detilazation_v2_80: 4903126201104201498
+      water_detilazation_v2_81: -3320733348553391090
+      water_detilazation_v2_82: -7044399993054951491
+      water_detilazation_v2_83: 6485276135767724355
+      water_detilazation_v2_84: -7871643370208804792
+      water_detilazation_v2_85: 5408870080563032943
+      water_detilazation_v2_86: -1370119913840388378
+      water_detilazation_v2_87: -4588065475688702863
+      water_detilazation_v2_88: -8314218005673934253
+      water_detilazation_v2_89: -2083179909425773875
+      water_detilazation_v2_9: 897277006198824104
+      water_detilazation_v2_90: -2273763866387746919
+      water_detilazation_v2_91: 1645359411089017376
+      water_detilazation_v2_92: 2854871303238320757
+      water_detilazation_v2_93: -130059223264613879
+      water_detilazation_v2_94: -8435363718418792847
+      water_detilazation_v2_95: 7505996012803561539
+      water_detilazation_v2_96: 2621499756628943249
+      water_detilazation_v2_97: -7241008761788401048
+      water_detilazation_v2_98: 5620594639084992733
+      water_detilazation_v2_99: 1556624489245769224
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

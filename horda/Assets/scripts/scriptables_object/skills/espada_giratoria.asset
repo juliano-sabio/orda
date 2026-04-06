@@ -112,7 +112,7 @@ MonoBehaviour:
   isToggleable: 0
   projectilePrefab2D: {fileID: 4978191380080517333, guid: 0971045b04b09a04ba11ca2e36374e4d, type: 3}
   projectileSpeed: 8
-  projectileLifeTime: 4
+  projectileLifeTime: 8
   projectileCount: 1
   projectileSpread: 0
   homingProjectile: 0
@@ -123,16 +123,16 @@ MonoBehaviour:
   bounceCount: 0
   explodeOnImpact: 0
   explosionRadius: 2
-  isOrbitalProjectile: 0
+  isOrbitalProjectile: 1
   orbitRadius: 2
   orbitSpeed: 180
   numberOfOrbits: 1
-  continuousOrbitalSpawning: 0
+  continuousOrbitalSpawning: 1
   orbitalSpawnInterval: 2
   orbitalLaunchSpeed: 10
   maxOrbitalLaunchDistance: 15
   maxOrbitalProjectiles: 3
-  orbitalTargetingMode: 0
+  orbitalTargetingMode: 2
   autoAcquireTargets: 1
   targetAcquisitionRange: 8
   boomerangThrowRange: 8

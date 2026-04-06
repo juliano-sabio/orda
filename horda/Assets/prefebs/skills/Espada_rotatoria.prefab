@@ -132,10 +132,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dcb27eeca4869a46920aaeed9051be7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwordSpinSkillBehavior
-  playerStats: {fileID: 0}
+  speed: 8
+  lifeTime: 5
+  damage: 25
+  element: 0
+  isOrbiting: 1
+  allowMovement: 1
+  ignoreTargetsDuringOrbit: 1
+  orbitalDamageEnabled: 1
+  orbitalDamageInterval: 0.3
+  orbitalDamageRadius: 1.5
+  debugDamage: 1
+  hitEffect: {fileID: 0}
+  trailRenderer: {fileID: 0}
   rotationSpeed: 360
-  orbitDistance: 2
-  damageMultiplier: 1
+  orbitRadius: 2
+  damageInterval: 0.5
 --- !u!68 &8436153009813774660
 EdgeCollider2D:
   m_ObjectHideFlags: 0
