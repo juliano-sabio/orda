@@ -566,6 +566,24 @@ public class SkillManager : MonoBehaviour
                 AddBoomerangBehaviorToPlayer(skill);
                 break;
 
+            case SpecificSkillType.Shield:
+                // Garante que estamos falando com o Player que está na tela agora
+                if (playerStats == null)
+                {
+                    playerStats = FindAnyObjectByType<PlayerStats>();
+                }
+
+                if (playerStats != null)
+                {
+                    Debug.Log("🚀 [SkillManager] Enviando comando para o PlayerStats REAL da cena.");
+                    playerStats.AddShieldAuraBehavior(skill);
+                }
+                else
+                {
+                    Debug.LogError("❌ [SkillManager] Não consegui encontrar nenhum PlayerStats na cena!");
+                }
+                break;
+
             case SpecificSkillType.HealthRegen:
                 Debug.Log($"🔄 Skill de regeneração: {skill.skillName}");
                 playerStats.healthRegenRate += skill.healthRegenBonus;
@@ -580,7 +598,6 @@ public class SkillManager : MonoBehaviour
                 break;
         }
     }
-
     // ✅ MÉTODO NOVO: Adiciona bumerangue ao Player
     void AddBoomerangBehaviorToPlayer(SkillData skill)
     {

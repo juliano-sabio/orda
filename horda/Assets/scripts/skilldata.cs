@@ -176,6 +176,12 @@ public class SkillData : ScriptableObject
         if (speedBonus != 0) sb.AppendLine($"🏃 Velocidade: {FormatBonus(speedBonus)}");
         if (healthRegenBonus != 0) sb.AppendLine($"💚 Regeneração: {FormatBonus(healthRegenBonus)}/s");
         if (attackSpeedMultiplier != 1.0f) sb.AppendLine($"⚡ Vel. Ataque: {attackSpeedMultiplier}x");
+        // 🆕 ADICIONAR ESTE BLOCO DENTRO DE GetFullDescription()
+        if (specificType == SpecificSkillType.Shield)
+        {
+            sb.AppendLine($"🛡️ Escudo Ativo: Bloqueia 1 hit");
+            if (cooldown > 0) sb.AppendLine($"🔄 Recarga: {cooldown}s");
+        }
 
         // 🆕 DESCRIÇÕES PARA BUMERANGUE
         if (specificType == SpecificSkillType.Boomerang)
@@ -241,7 +247,6 @@ public class SkillData : ScriptableObject
             case SpecificSkillType.MovementSpeed: return $"Velocidade de Movimento: +{specialValue}%";
             case SpecificSkillType.AttackSpeed: return $"Velocidade de Ataque: +{specialValue}%";
             case SpecificSkillType.AreaDamage: return $"Dano em Área: +{specialValue}%";
-            case SpecificSkillType.Shield: return $"Escudo: {specialValue} de defesa";
             case SpecificSkillType.Heal: return $"Cura: {specialValue} de vida";
             case SpecificSkillType.Projectile:
                 if (isOrbitalProjectile)
@@ -258,6 +263,8 @@ public class SkillData : ScriptableObject
             case SpecificSkillType.IceBarrier: return $"Barreira de Gelo: {specialValue} de defesa";
             case SpecificSkillType.WindDash: return $"Dash de Vento: +{specialValue}% de velocidade";
             case SpecificSkillType.EarthStomp: return $"Pisada da Terra: {specialValue} de dano em área";
+            case SpecificSkillType.Shield:
+                return $"Escudo: Bloqueia dano a cada {cooldown}s";
             default: return specificType.ToString();
         }
     }
@@ -448,6 +455,11 @@ public class SkillData : ScriptableObject
     public float GetHealAmount(float damageDealt)
     {
         return damageDealt * boomerangHealPercent;
+    }
+    // 🆕 ADICIONAR JUNTO AOS OUTROS MÉTODOS "Is..." (como IsProjectileSkill)
+    public bool IsShieldSkill()
+    {
+        return specificType == SpecificSkillType.Shield;
     }
 }
 

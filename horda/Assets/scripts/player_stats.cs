@@ -878,6 +878,15 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        // 🛡️ ADICIONADO: Verifica bloqueio da auréola antes de qualquer cálculo
+        ShieldAuraBehavior shield = GetComponentInChildren<ShieldAuraBehavior>();
+        if (shield != null && shield.TryBlockDamage())
+        {
+            if (uiManager != null) uiManager.ShowElementChanged("BLOQUEADO!");
+            return; // Sai da função sem executar o resto (mantém vida intacta)
+        }
+
+        // --- DAQUI PRA BAIXO TUDO IGUAL (Sua lógica original) ---
         float reducedDamage = Mathf.Max(0, damage - defense * 0.5f);
         health -= reducedDamage;
 
@@ -1132,6 +1141,10 @@ public class PlayerStats : MonoBehaviour
             case SpecificSkillType.CriticalStrike:
                 AddCriticalStrikeBehavior(skill);
                 break;
+            // 🆕 NOVO CASO:
+            case SpecificSkillType.Shield:
+                AddShieldAuraBehavior(skill);
+                break;
         }
     }
 
@@ -1335,6 +1348,32 @@ public class PlayerStats : MonoBehaviour
 
         // Restaura após a duração
         StartCoroutine(RestaurarVelocidade(reducaoAplicada, duracao));
+    }
+    public void AddShieldAuraBehavior(SkillData skill)
+    {
+        if (GetComponentInChildren<ShieldAuraBehavior>() != null) return;
+
+        if (skill.visualEffect != null)
+        {
+            // 1. Instancia
+            GameObject auraObj = Instantiate(skill.visualEffect);
+
+            // 2. Torna filho do Player (this.transform)
+            auraObj.transform.SetParent(this.transform, false);
+
+            // --- AQUI ESTÁ O AJUSTE DE ALTURA ---
+            // Ajuste o 1.5f para mais ou para menos até ficar perfeito na cabeça
+            auraObj.transform.localPosition = new Vector3(1.5f, 1.2f, 1.8f);
+            // ------------------------------------
+
+            auraObj.transform.localRotation = Quaternion.identity;
+
+            // Mantemos o reset da escala que funcionou para você
+            auraObj.transform.localScale = Vector3.one;
+
+            ShieldAuraBehavior behavior = auraObj.GetComponent<ShieldAuraBehavior>();
+            if (behavior != null) behavior.Initialize(this);
+        }
     }
 
     private IEnumerator RestaurarVelocidade(float reducao, float duracao)
