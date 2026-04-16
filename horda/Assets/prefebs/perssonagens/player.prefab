@@ -96,7 +96,7 @@ SpriteRenderer:
   m_Size: {x: 0.21, y: 0.3}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!50 &4059499282829631403
 Rigidbody2D:
@@ -137,11 +137,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cd32a3beeee98b4e9ee1f6e6247201c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  characterData: {fileID: 0}
   health: 100
   maxHealth: 100
   attack: 10
   defense: 5
-  speed: 8
+  speed: 20
   healthRegenRate: 1
   healthRegenDelay: 5
   level: 1
