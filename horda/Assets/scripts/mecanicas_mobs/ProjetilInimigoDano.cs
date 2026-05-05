@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class ProjetilInimigoDano : MonoBehaviour
 {
-    [Header("Configurações de Movimento")]
+    [Header("Configuraï¿½ï¿½es de Movimento")]
     public float velocidade = 10f;
     public float tempoMaximoVida = 5f;
 
-    [Header("Configurações de Dano")]
+    [Header("Configuraï¿½ï¿½es de Dano")]
     public float dano = 10f;
 
     [Header("Ajuste de Visual")]
@@ -34,15 +34,15 @@ public class ProjetilInimigoDano : MonoBehaviour
         }
     }
 
-    // Usamos LateUpdate para garantir que a rotação aconteça DEPOIS do movimento
+    // Usamos LateUpdate para garantir que a rotaï¿½ï¿½o aconteï¿½a DEPOIS do movimento
     void LateUpdate()
     {
         if (rb != null && rb.linearVelocity.sqrMagnitude > 0.1f)
         {
-            // Calcula o ângulo baseado na velocidade real do objeto
+            // Calcula o ï¿½ngulo baseado na velocidade real do objeto
             float angulo = Mathf.Atan2(rb.linearVelocity.y, rb.linearVelocity.x) * Mathf.Rad2Deg;
 
-            // Aplica a rotação somando o seu ajuste
+            // Aplica a rotaï¿½ï¿½o somando o seu ajuste
             transform.rotation = Quaternion.Euler(0, 0, angulo + ajusteAngular);
         }
     }
@@ -55,7 +55,7 @@ public class ProjetilInimigoDano : MonoBehaviour
         {
             jaAcertou = true;
             PlayerStats stats = other.GetComponent<PlayerStats>();
-            if (stats != null) stats.health -= dano;
+            if (stats != null) stats.TakeDamage(dano);
             Destroy(gameObject);
         }
         else if (other.CompareTag("Chao") || other.CompareTag("Obstacles"))

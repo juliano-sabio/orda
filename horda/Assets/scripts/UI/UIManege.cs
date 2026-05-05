@@ -1254,10 +1254,13 @@ public class UIManager : MonoBehaviour
     {
         if (playerStats == null) return;
 
-        UpdateSkillElementIcon(attackSkill1ElementIcon, playerStats.GetAttackSkills()[0]);
-        UpdateSkillElementIcon(attackSkill2ElementIcon, playerStats.GetAttackSkills()[1]);
-        UpdateSkillElementIcon(defenseSkill1ElementIcon, playerStats.GetDefenseSkills()[0]);
-        UpdateSkillElementIcon(defenseSkill2ElementIcon, playerStats.GetDefenseSkills()[1]);
+        var attackSkills = playerStats.GetAttackSkills();
+        if (attackSkills.Count > 0) UpdateSkillElementIcon(attackSkill1ElementIcon, attackSkills[0]);
+        if (attackSkills.Count > 1) UpdateSkillElementIcon(attackSkill2ElementIcon, attackSkills[1]);
+
+        var defenseSkills = playerStats.GetDefenseSkills();
+        if (defenseSkills.Count > 0) UpdateSkillElementIcon(defenseSkill1ElementIcon, defenseSkills[0]);
+        if (defenseSkills.Count > 1) UpdateSkillElementIcon(defenseSkill2ElementIcon, defenseSkills[1]);
 
         if (playerStats.HasUltimate())
         {

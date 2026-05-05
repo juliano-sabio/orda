@@ -790,7 +790,7 @@ public class PlayerStats : MonoBehaviour
     {
         if (target == null || target == gameObject) return;
 
-        if (target.CompareTag("Enemy"))
+        if (target.CompareTag("Enemy") || target.CompareTag("enemy"))
         {
             InimigoController inimigo = target.GetComponent<InimigoController>();
             if (inimigo != null)
@@ -946,7 +946,7 @@ public class PlayerStats : MonoBehaviour
         foreach (var hitCollider in hitColliders)
         {
             if (hitCollider.gameObject == gameObject) continue;
-            if (hitCollider.CompareTag("Enemy"))
+            if (hitCollider.CompareTag("Enemy") || hitCollider.CompareTag("enemy"))
             {
                 InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
                 if (inimigo != null)

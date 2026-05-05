@@ -313,6 +313,8 @@ public class BoomerangSkillBehavior : SkillBehavior
         {
             if (boomerang != null)
             {
+                BoomerangController controller = boomerang.GetComponent<BoomerangController>();
+                if (controller != null) controller.OnBoomerangDestroyed = null;
                 Destroy(boomerang);
             }
         }
