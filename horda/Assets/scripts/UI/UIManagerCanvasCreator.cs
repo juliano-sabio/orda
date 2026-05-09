@@ -267,7 +267,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // XP Text (TMP)
         GameObject xpText = CreateTMPText(levelHUD, "XPText", new Vector2(0, 0), new Vector2(280, 25));
         TextMeshProUGUI xpTextComponent = xpText.GetComponent<TextMeshProUGUI>();
-        xpTextComponent.text = "📊 XP: 0/100";
+        xpTextComponent.text = "XP: 0/100";
         xpTextComponent.color = Color.cyan;
         xpTextComponent.fontSize = 14;
         xpTextComponent.alignment = TextAlignmentOptions.TopRight;
@@ -391,7 +391,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Título (TMP)
         GameObject title = CreateTMPText(statusPanel, "Title", new Vector2(0, 280), new Vector2(430, 40));
         TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
-        titleText.text = "📊 STATUS DO JOGADOR";
+        titleText.text = "STATUS DO JOGADOR";
         titleText.color = Color.yellow;
         titleText.fontSize = 24;
         titleText.fontStyle = FontStyles.Bold;

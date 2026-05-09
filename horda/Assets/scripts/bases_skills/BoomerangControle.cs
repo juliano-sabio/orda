@@ -127,13 +127,6 @@ public class BoomerangController : MonoBehaviour
 
         // Destruir após tempo limite (segurança)
         Destroy(gameObject, 15f);
-
-        Debug.Log($"✅ [BoomerangController] Inicializado com sucesso!");
-        Debug.Log($"   • Player: {player.name}");
-        Debug.Log($"   • Direção: {throwDirection}");
-        Debug.Log($"   • Velocidade: {throwSpeed}");
-        Debug.Log($"   • Alcance: {maxRange}m");
-        Debug.Log($"   • Estado inicial: {currentState}");
     }
 
     void Update()
@@ -202,8 +195,6 @@ public class BoomerangController : MonoBehaviour
             currentState = BoomerangState.ReachingMax;
             if (rb != null) rb.linearVelocity = Vector2.zero;
 
-            Debug.Log($"🌀 [Boomerang] Alcance máximo atingido ({currentDistance:F1}/{maxRange}m)");
-
             // Iniciar retorno após breve pausa
             StartCoroutine(StartReturningAfterDelay(0.3f));
         }
@@ -255,8 +246,8 @@ public class BoomerangController : MonoBehaviour
         if (currentState == BoomerangState.ReachingMax)
         {
             currentState = BoomerangState.Returning;
-            UpdateAnimation(); // ✅ Atualizar animação para estado de retorno
-            Debug.Log($"↩️ [Boomerang] Iniciando retorno ao jogador");
+            hitEnemies.Clear(); // Permite acertar os mesmos inimigos novamente na volta
+            UpdateAnimation();
         }
     }
 
@@ -329,8 +320,6 @@ public class BoomerangController : MonoBehaviour
         currentTargets++;
         hasHitEnemy = true;
 
-        Debug.Log($"🎯 [Boomerang] Acertou {enemy.name} ({currentTargets}/{maxTargets})");
-
         // Se atingiu número máximo de alvos durante o lançamento, iniciar retorno
         if (currentState == BoomerangState.Throwing && currentTargets >= maxTargets)
         {
@@ -348,9 +337,6 @@ public class BoomerangController : MonoBehaviour
         if (inimigo != null)
         {
             inimigo.ReceberDano(damage);
-            Debug.Log($"💥 [Boomerang] {damage} de dano em {enemy.name}");
-
-            // Aplicar efeito elemental
             ApplyElementalEffect(enemy);
         }
         else
@@ -366,13 +352,10 @@ public class BoomerangController : MonoBehaviour
         switch (element)
         {
             case PlayerStats.Element.Fire:
-                Debug.Log($"🔥 {enemy.name} queimando");
                 break;
             case PlayerStats.Element.Ice:
-                Debug.Log($"❄️ {enemy.name} congelado");
                 break;
             case PlayerStats.Element.Lightning:
-                Debug.Log($"⚡ {enemy.name} eletrocutado");
                 break;
             case PlayerStats.Element.Wind:
                 // Empurrar inimigo
@@ -388,14 +371,11 @@ public class BoomerangController : MonoBehaviour
 
     private void OnReturnToPlayer()
     {
-        Debug.Log($"↩️ [Boomerang] Retornou ao jogador");
-
         // Cura ao retornar
         if (healOnReturn && hasHitEnemy && playerStats != null && currentTargets > 0)
         {
             float healAmount = damage * healPercent * currentTargets;
             playerStats.health = Mathf.Min(playerStats.health + healAmount, playerStats.maxHealth);
-            Debug.Log($"💚 [Boomerang] Curou {healAmount:F1} HP");
         }
 
         // ✅ Trigger de animação de retorno completo

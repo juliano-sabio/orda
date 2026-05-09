@@ -125,7 +125,7 @@ public class SkillCardRuntimeManager : MonoBehaviour
         if (SkillData.defenseBonus != 0) sb.Append($"🛡️{SkillData.defenseBonus} ");
         if (SkillData.speedBonus != 0) sb.Append($"🏃{SkillData.speedBonus} ");
 
-        if (sb.Length == 0) sb.Append("💎 Bônus Passivo");
+        if (sb.Length == 0) sb.Append("Bônus Passivo");
 
         return sb.ToString();
     }

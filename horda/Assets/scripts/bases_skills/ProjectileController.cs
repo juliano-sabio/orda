@@ -143,13 +143,8 @@ public class ProjectileController2D : MonoBehaviour
                 return;
             }
 
-            // Aplica dano sem mover o objeto
-            if (orbitalDamageEnabled && !hasHit)
-            {
-                CheckOrbitalDamage();
-            }
-
-            // CRÍTICO: Este return impede que a espada execute QUALQUER lógica de movimento abaixo
+            // Dano orbital é tratado exclusivamente pelos triggers (OnTriggerEnter2D / OnTriggerStay2D)
+            // para garantir que o hitbox bata exatamente com o collider do sprite
             return;
         }
 

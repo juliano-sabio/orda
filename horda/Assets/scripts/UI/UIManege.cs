@@ -453,7 +453,7 @@ public class UIManager : MonoBehaviour
         if (skill.healthBonus != 0) sb.AppendLine($"❤️ Vida: +{skill.healthBonus}");
         if (skill.speedBonus != 0) sb.AppendLine($"🏃 Velocidade: +{skill.speedBonus}");
 
-        if (sb.Length == 0) sb.AppendLine("💎 Bônus Passivo");
+        if (sb.Length == 0) sb.AppendLine("Bônus Passivo");
 
         return sb.ToString();
     }
@@ -870,7 +870,7 @@ public class UIManager : MonoBehaviour
             levelText.text = $"⭐ Level: {playerStats.GetLevel()}";
 
         if (xpText != null)
-            xpText.text = $"📊 XP: {playerStats.GetCurrentXP():F0}/{playerStats.GetXPToNextLevel():F0}";
+            xpText.text = $"XP: {playerStats.GetCurrentXP():F0}/{playerStats.GetXPToNextLevel():F0}";
 
         if (ultimateChargeText != null)
         {

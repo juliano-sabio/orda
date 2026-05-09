@@ -106,7 +106,7 @@ public class SkillCardInstance : MonoBehaviour
         if (currentSkillData.defenseBonus != 0) sb.Append($"🛡️{currentSkillData.defenseBonus} ");
         if (currentSkillData.speedBonus != 0) sb.Append($"🏃{currentSkillData.speedBonus} ");
 
-        if (sb.Length == 0) sb.Append("💎 Bônus Passivo");
+        if (sb.Length == 0) sb.Append("Bônus Passivo");
 
         return sb.ToString();
     }

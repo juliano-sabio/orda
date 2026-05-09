@@ -4,7 +4,7 @@ public class DanoInimigo : MonoBehaviour
 {
     [Header("Configurações de Dano")]
     public float dano = 10f;
-    public float intervaloAtaque = 1f;
+    public float intervaloAtaque = 2.5f;
     public bool danoContinuo = false;
 
     private float proximoAtaque = 0f;
@@ -19,22 +19,17 @@ public class DanoInimigo : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if (!danoContinuo)
-            {
-                AplicarDano(other.GetComponent<PlayerStats>());
-            }
+            AplicarDano(other.GetComponent<PlayerStats>());
+            proximoAtaque = Time.time + intervaloAtaque;
         }
     }
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if (other.CompareTag("Player") && danoContinuo)
+        if (other.CompareTag("Player") && Time.time >= proximoAtaque)
         {
-            if (Time.time >= proximoAtaque)
-            {
-                AplicarDano(other.GetComponent<PlayerStats>());
-                proximoAtaque = Time.time + intervaloAtaque;
-            }
+            AplicarDano(other.GetComponent<PlayerStats>());
+            proximoAtaque = Time.time + intervaloAtaque;
         }
     }
 
@@ -42,33 +37,24 @@ public class DanoInimigo : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            if (!danoContinuo)
-            {
-                AplicarDano(collision.gameObject.GetComponent<PlayerStats>());
-            }
+            AplicarDano(collision.gameObject.GetComponent<PlayerStats>());
+            proximoAtaque = Time.time + intervaloAtaque;
         }
     }
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player") && danoContinuo)
+        if (collision.gameObject.CompareTag("Player") && Time.time >= proximoAtaque)
         {
-            if (Time.time >= proximoAtaque)
-            {
-                AplicarDano(collision.gameObject.GetComponent<PlayerStats>());
-                proximoAtaque = Time.time + intervaloAtaque;
-            }
+            AplicarDano(collision.gameObject.GetComponent<PlayerStats>());
+            proximoAtaque = Time.time + intervaloAtaque;
         }
     }
 
     private void AplicarDano(PlayerStats stats)
     {
         if (stats != null)
-        {
-            // Use o método correto - TakeDamage em vez de ReceberDano
             stats.TakeDamage(dano);
-            Debug.Log($"💥 Inimigo causou {dano} de dano no jogador!");
-        }
     }
 
     // Método para configurar o dano dinamicamente

@@ -30,6 +30,9 @@ public class SkillChoiceUI : MonoBehaviour
     [Header("Todas as Skills Disponíveis")]
     public List<SkillData> allAvailableSkills = new List<SkillData>();
 
+    // Quando true, a próxima chamada mostra apenas skills de ataque (resetado automaticamente)
+    [HideInInspector] public bool somenteSkillsDeAtaque = false;
+
     private List<SkillData> currentChoices;
     private System.Action<SkillData> onSkillChosen;
     private List<GameObject> currentButtons = new List<GameObject>();
@@ -126,6 +129,14 @@ public class SkillChoiceUI : MonoBehaviour
 
         // 🎯 ATUALIZAR SKILLS DO SKILLMANAGER SEMPRE ANTES DE MOSTRAR
         LoadSkillsFromSkillManager();
+
+        // Filtra apenas skills de ataque na primeira escolha
+        if (somenteSkillsDeAtaque)
+        {
+            allAvailableSkills = allAvailableSkills.FindAll(s => s.EhSkillDeAtaque());
+            somenteSkillsDeAtaque = false;
+            Debug.Log($"🎯 Primeira escolha: mostrando apenas {allAvailableSkills.Count} skills de ataque");
+        }
 
         if (allAvailableSkills == null || allAvailableSkills.Count == 0)
         {
@@ -354,7 +365,7 @@ public class SkillChoiceUI : MonoBehaviour
             case PlayerStats.Element.Earth: return "🌍";
             case PlayerStats.Element.Wind: return "💨";
             case PlayerStats.Element.None: return "⭐";
-            default: return "💎";
+            default: return "*";
         }
     }
 
@@ -443,7 +454,7 @@ public class SkillChoiceUI : MonoBehaviour
         if (skill.speedBonus != 0) sb.Append($"🏃{skill.speedBonus} ");
         if (skill.healthRegenBonus != 0) sb.Append($"💚{skill.healthRegenBonus} ");
 
-        if (sb.Length == 0) sb.Append("💎 Bônus Passivo");
+        if (sb.Length == 0) sb.Append("Bônus Passivo");
 
         return sb.ToString();
     }

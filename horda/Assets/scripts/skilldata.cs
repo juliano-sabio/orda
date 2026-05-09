@@ -122,6 +122,12 @@ public class SkillData : ScriptableObject
     public float boomerangSeekRadius = 5f;
     public int boomerangMaxHitsPerThrow = 5;
 
+    [Header("🛡️ Configurações do Escudo Rotativo")]
+    public GameObject escudoPrefabVisual;       // Sprite da parentese que orbita o player
+    // projectilePrefab2D é usado como prefab do projétil refletido
+    public float escudoVelocidadeRotacao = 120f;
+    public float escudoRaioOrbita = 1.8f;
+    public int escudoQuantidade = 1;
 
     // MÉTODOS EXISTENTES (mantidos intactos)
     public string GetElementIcon() { return GetElementIcon(this.element); }
@@ -230,7 +236,7 @@ public class SkillData : ScriptableObject
         if (cooldown > 0) sb.AppendLine($"⏱️ Cooldown: {cooldown}s");
         if (duration > 0) sb.AppendLine($"⏰ Duração: {duration}s");
 
-        sb.AppendLine($"💎 Raridade: {rarity}");
+        sb.AppendLine($"Raridade: {rarity}");
 
         return sb.ToString().Trim();
     }
@@ -330,6 +336,36 @@ public class SkillData : ScriptableObject
     {
         Debug.Log($"💨 Aplicando efeito de Vento em {target.name}");
         // Implementar repulsão
+    }
+
+    public bool EhSkillDeAtaque()
+    {
+        // Skills defensivas nunca contam como ataque, mesmo com attackBonus
+        switch (specificType)
+        {
+            case SpecificSkillType.EscudoRotativo:
+            case SpecificSkillType.Shield:
+            case SpecificSkillType.IceBarrier:
+            case SpecificSkillType.Heal:
+            case SpecificSkillType.HealthRegen:
+                return false;
+        }
+
+        if (attackBonus > 0) return true;
+
+        switch (specificType)
+        {
+            case SpecificSkillType.Projectile:
+            case SpecificSkillType.Boomerang:
+            case SpecificSkillType.EarthStomp:
+            case SpecificSkillType.ChainLightning:
+            case SpecificSkillType.PoisonCloud:
+            case SpecificSkillType.FireAura:
+            case SpecificSkillType.AreaDamage:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public bool IsValid() => !string.IsNullOrEmpty(skillName);
@@ -517,6 +553,7 @@ public enum SpecificSkillType
     EarthStomp,
     Ultimate,
     Boomerang, // 🆕 NOVO TIPO DE SKILL
+    EscudoRotativo, // 🆕 Escudos orbitais que refletem projéteis inimigos
 }
 
 // 🆕 NOVO ENUM PARA TARGETING ORBITAL

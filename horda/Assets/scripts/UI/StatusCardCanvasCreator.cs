@@ -241,7 +241,7 @@ public class StatusCardCanvasCreator : EditorWindow
         row1.transform.SetParent(infoPanel.transform);
         SetupInfoRow(row1);
 
-        CreateTextElement(row1, "Cost", "💎 Custo: 1",
+        CreateTextElement(row1, "Cost", "Custo: 1",
                          Vector2.zero, new Vector2(90, 20),
                          Color.yellow, 11, FontStyles.Bold, TextAlignmentOptions.Left);
 
@@ -252,7 +252,7 @@ public class StatusCardCanvasCreator : EditorWindow
         // Linha 2: Nível Requerido
         GameObject row2 = new GameObject("Row2", typeof(RectTransform));
         row2.transform.SetParent(infoPanel.transform);
-        CreateTextElement(row2, "LevelReq", "📊 Nível: 1",
+        CreateTextElement(row2, "LevelReq", "Nível: 1",
                          Vector2.zero, new Vector2(180, 18),
                          Color.cyan, 10, FontStyles.Normal, TextAlignmentOptions.Center);
 

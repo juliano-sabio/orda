@@ -173,9 +173,7 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
                 projectileElement
             );
 
-            projectileController.orbitalDamageEnabled = enableOrbitalDamage;
             projectileController.orbitalDamageInterval = orbitalDamageInterval;
-            projectileController.orbitalDamageRadius = orbitalDamageRadius;
             projectileController.debugDamage = showDebugInfo;
         }
         else

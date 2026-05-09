@@ -53,8 +53,6 @@ public class SkillManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("🔄 SkillManager iniciando...");
-
         playerStats = FindFirstObjectByType<PlayerStats>();
         skillChoiceUI = FindSkillChoiceUIInUIManager();
 
@@ -66,14 +64,8 @@ public class SkillManager : MonoBehaviour
 
         if (skillChoiceUI != null)
         {
-            Debug.Log($"✅ SkillChoiceUI encontrado: {skillChoiceUI.gameObject.name}");
-
-            // CONFIGURAR SKILLS NO SKILLCHOICEUI
             if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
-            {
-                Debug.Log("🔄 Configurando skills no SkillChoiceUI...");
                 skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
-            }
         }
         else
         {
@@ -82,9 +74,6 @@ public class SkillManager : MonoBehaviour
 
         SceneManager.sceneLoaded += OnSceneLoaded;
         LoadSkillData();
-
-        Debug.Log("✅ SkillManager inicializado!");
-
         StartCoroutine(DelayedInitialCheck());
     }
 
@@ -111,33 +100,25 @@ public class SkillManager : MonoBehaviour
         }
 
         CheckForInitialSkillChoice();
-
-        // NÃO adicionar skills automaticamente - player começa SEM skills (exceto ultimate)
-        Debug.Log("🎯 Player começa sem skills (ultimate já está configurada)");
     }
 
     private void CheckForInitialSkillChoice()
     {
-        Debug.Log($"🔍 Verificando escolha inicial - Level: {playerStats?.level}, JáOferecida: {initialChoiceOffered}");
-
         bool level1IsMilestone = System.Array.Exists(levelUpMilestones, milestone => milestone == 1);
 
         if (!initialChoiceOffered && playerStats != null && playerStats.level == 1 && level1IsMilestone)
         {
-            Debug.Log("🎯 Player começou no nível 1 (milestone) - oferecendo escolha inicial de 3 skills!");
             initialChoiceOffered = true;
-
             StartCoroutine(DelayedInitialChoice());
-        }
-        else if (playerStats != null && playerStats.level == 1)
-        {
-            Debug.Log($"ℹ️ Level 1 não é milestone - sem escolha inicial. Milestones: {string.Join(", ", levelUpMilestones)}");
         }
     }
 
     private IEnumerator DelayedInitialChoice()
     {
         yield return new WaitForSeconds(1.5f);
+        // Primeira escolha: só permite skills de ataque para o player não ficar sem dano
+        if (skillChoiceUI != null)
+            skillChoiceUI.somenteSkillsDeAtaque = true;
         OfferSkillChoice();
     }
 
@@ -147,21 +128,11 @@ public class SkillManager : MonoBehaviour
 
         if (uiManager != null)
         {
-            Debug.Log($"✅ UIManager encontrado: {uiManager.gameObject.name}");
-
             SkillChoiceUI skillUI = uiManager.GetComponent<SkillChoiceUI>();
-            if (skillUI != null)
-            {
-                Debug.Log("✅ SkillChoiceUI encontrado como componente do UIManager");
-                return skillUI;
-            }
+            if (skillUI != null) return skillUI;
 
             skillUI = uiManager.GetComponentInChildren<SkillChoiceUI>(true);
-            if (skillUI != null)
-            {
-                Debug.Log("✅ SkillChoiceUI encontrado nos children do UIManager");
-                return skillUI;
-            }
+            if (skillUI != null) return skillUI;
 
             Debug.LogWarning("⚠️ SkillChoiceUI não encontrado como componente ou child do UIManager");
         }
@@ -175,20 +146,13 @@ public class SkillManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"🔄 SkillManager: Cena carregada - {scene.name}");
-
         playerStats = FindFirstObjectByType<PlayerStats>();
         skillChoiceUI = FindSkillChoiceUIInUIManager();
 
         if (skillChoiceUI != null)
         {
-            Debug.Log("✅ SkillChoiceUI reconectado após carregar cena");
-
-            // CONFIGURAR SKILLS NO SKILLCHOICEUI
             if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
-            {
                 skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
-            }
         }
 
         // RECONECTAR SKILL EQUIPADA APÓS CARREGAR CENA
@@ -204,8 +168,6 @@ public class SkillManager : MonoBehaviour
 
     public void OnPlayerLevelUp(int newLevel)
     {
-        Debug.Log($"📈 Player atingiu nível {newLevel} - Verificando milestones...");
-
         if (playerStats == null)
         {
             playerStats = FindFirstObjectByType<PlayerStats>();
@@ -217,17 +179,9 @@ public class SkillManager : MonoBehaviour
         }
 
         bool isMilestone = System.Array.Exists(levelUpMilestones, milestone => milestone == newLevel);
-        Debug.Log($"🎯 Level {newLevel} é milestone: {isMilestone}");
 
         if (isMilestone)
-        {
-            Debug.Log($"🎯 Oferecendo escolha de 3 skills aleatórias para milestone nível {newLevel}");
             StartCoroutine(OfferSkillChoiceWithDelay());
-        }
-        else
-        {
-            Debug.Log($"ℹ️ Level {newLevel} não é milestone - sem escolha de skills");
-        }
 
         ApplyLevelBonusToSkills(newLevel);
     }
@@ -240,8 +194,6 @@ public class SkillManager : MonoBehaviour
 
     void OfferSkillChoice()
     {
-        Debug.Log("🎯 Iniciando OfferSkillChoice para milestone...");
-
         if (playerStats == null)
         {
             Debug.LogError("❌ PlayerStats null no OfferSkillChoice!");
@@ -254,24 +206,15 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        // MÉTODO CORRETO: Chamar ShowRandomSkillChoice DIRETAMENTE
-        Debug.Log($"🎯 Chamando ShowRandomSkillChoice DIRETAMENTE - {skillChoiceUI.allAvailableSkills?.Count ?? 0} skills disponíveis");
-
-        // VERIFICAR E CONFIGURAR SKILLS SE NECESSÁRIO
         if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
-        {
-            Debug.Log("🔄 Configurando skills no SkillChoiceUI...");
             skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
-        }
 
-        // VERIFICAR SE TEM SKILLS SUFICIENTES
         if (skillChoiceUI.allAvailableSkills.Count < 3)
         {
             Debug.LogWarning($"⚠️ Apenas {skillChoiceUI.allAvailableSkills.Count} skills disponíveis! Criando skills de teste...");
             CreateEmergencyTestSkills();
         }
 
-        // CHAMAR O MÉTODO QUE MOSTRA 3 SKILLS ALEATÓRIAS
         skillChoiceUI.ShowRandomSkillChoice(OnSkillSelectedFromChoice);
     }
 
@@ -279,14 +222,9 @@ public class SkillManager : MonoBehaviour
     {
         if (selectedSkill != null)
         {
-            Debug.Log($"✅ Skill selecionada: {selectedSkill.skillName}");
             AddSkill(selectedSkill);
-
-            // EQUIPAR AUTOMATICAMENTE A NOVA SKILL
             if (currentlyEquippedSkill == null)
-            {
                 EquipSkill(selectedSkill);
-            }
         }
         else
         {
@@ -371,7 +309,6 @@ public class SkillManager : MonoBehaviour
 
         if (availableChoices.Count < count && recentlyOfferedSkills.Count > 0)
         {
-            Debug.Log("🔄 Poucas skills disponíveis - resetando lista de skills recentes");
             recentlyOfferedSkills.Clear();
             availableChoices = new List<SkillData>(availableSkills);
             availableChoices.RemoveAll(skill => activeSkills.Exists(s => s.skillName == skill.skillName));
@@ -393,7 +330,6 @@ public class SkillManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"🔍 {choices.Count} skills aleatórias selecionadas de {availableSkills.Count} disponíveis");
         return choices;
     }
 
@@ -440,8 +376,6 @@ public class SkillManager : MonoBehaviour
 
             OnSkillAcquired?.Invoke(skill);
 
-            Debug.Log($"✅ Skill adquirida: {skill.skillName}");
-
             // SE É A PRIMEIRA SKILL, EQUIPAR AUTOMATICAMENTE
             if (activeSkills.Count == 1 || currentlyEquippedSkill == null)
             {
@@ -460,8 +394,6 @@ public class SkillManager : MonoBehaviour
 
         currentlyEquippedSkill = skill;
         selectedSkillIndex = activeSkills.IndexOf(skill);
-
-        Debug.Log($"🎯 Skill equipada: {skill.skillName}");
         OnSkillEquippedChanged?.Invoke(skill);
 
         // Aplicar efeitos visuais da skill equipada
@@ -501,11 +433,7 @@ public class SkillManager : MonoBehaviour
     private void ApplyEquippedSkillEffects(SkillData skill)
     {
         if (playerStats == null) return;
-
-        // Aplicar bônus temporários ou efeitos da skill equipada
         StartCoroutine(EquippedSkillHighlight(skill));
-
-        Debug.Log($"✨ Efeitos da skill equipada aplicados: {skill.skillName}");
     }
 
     private IEnumerator EquippedSkillHighlight(SkillData skill)
@@ -521,7 +449,6 @@ public class SkillManager : MonoBehaviour
         try
         {
             skill.ApplyToPlayer(playerStats);
-            Debug.Log($"✨ Skill {skill.skillName} aplicada ao player");
         }
         catch (System.Exception e)
         {
@@ -532,15 +459,12 @@ public class SkillManager : MonoBehaviour
     // ✅ MÉTODO CONFIGURESKILLBEHAVIOR CORRIGIDO
     void ConfigureSkillBehavior(SkillData skill)
     {
-        Debug.Log($"⚙️ [yEngine] Configurando comportamento: {skill.skillName} ({skill.specificType})");
-
         if (playerStats == null)
         {
             Debug.LogError("❌ [yEngine] PlayerStats é null!");
             return;
         }
 
-        // VERIFICAR SE A SKILL JÁ FOI CONFIGURADA
         int sameSkillCount = activeSkills.Count(s => s.skillName == skill.skillName);
         if (sameSkillCount > 1)
         {
@@ -566,44 +490,34 @@ public class SkillManager : MonoBehaviour
                 AddBoomerangBehaviorToPlayer(skill);
                 break;
 
+            case SpecificSkillType.EscudoRotativo:
+                AddEscudoRotativoBehaviorToPlayer(skill);
+                break;
+
             case SpecificSkillType.Shield:
-                // Garante que estamos falando com o Player que está na tela agora
                 if (playerStats == null)
-                {
                     playerStats = FindAnyObjectByType<PlayerStats>();
-                }
 
                 if (playerStats != null)
-                {
-                    Debug.Log("🚀 [SkillManager] Enviando comando para o PlayerStats REAL da cena.");
                     playerStats.AddShieldAuraBehavior(skill);
-                }
                 else
-                {
                     Debug.LogError("❌ [SkillManager] Não consegui encontrar nenhum PlayerStats na cena!");
-                }
                 break;
 
             case SpecificSkillType.HealthRegen:
-                Debug.Log($"🔄 Skill de regeneração: {skill.skillName}");
                 playerStats.healthRegenRate += skill.healthRegenBonus;
                 break;
 
             case SpecificSkillType.CriticalStrike:
-                Debug.Log($"🎯 Skill de crítico: {skill.skillName}");
                 break;
 
             default:
-                Debug.Log($"ℹ️ Skill genérica: {skill.skillName}");
                 break;
         }
     }
     // ✅ MÉTODO NOVO: Adiciona bumerangue ao Player
     void AddBoomerangBehaviorToPlayer(SkillData skill)
     {
-        Debug.Log($"🎯 [yEngine] Adicionando BoomerangSkillBehavior ao Player...");
-
-        // 1. Verificar PlayerStats
         if (playerStats == null)
         {
             playerStats = FindFirstObjectByType<PlayerStats>();
@@ -614,18 +528,10 @@ public class SkillManager : MonoBehaviour
             }
         }
 
-        // 2. Remover comportamento antigo se existir
         var oldBehaviors = playerStats.GetComponents<BoomerangSkillBehavior>();
-        if (oldBehaviors.Length > 0)
-        {
-            Debug.Log($"🔄 [yEngine] Removendo {oldBehaviors.Length} comportamentos antigos de bumerangue");
-            foreach (var oldBehavior in oldBehaviors)
-            {
-                Destroy(oldBehavior);
-            }
-        }
+        foreach (var oldBehavior in oldBehaviors)
+            Destroy(oldBehavior);
 
-        // 3. Adicionar novo comportamento AO PLAYER
         BoomerangSkillBehavior newBehavior = playerStats.gameObject.AddComponent<BoomerangSkillBehavior>();
 
         if (newBehavior == null)
@@ -634,22 +540,9 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        // 4. Inicializar com PlayerStats
         newBehavior.Initialize(playerStats);
-
-        // 5. Configurar com dados da skill
         newBehavior.UpdateFromSkillData(skill);
-
-        // 6. Ativar
         newBehavior.SetActive(true);
-
-        Debug.Log($"✅ [yEngine] Comportamento adicionado ao Player {playerStats.name}");
-        Debug.Log($"   • Skill: {skill.skillName}");
-        Debug.Log($"   • Dano: {newBehavior.damage}");
-        Debug.Log($"   • Alcance: {newBehavior.throwRange}");
-        Debug.Log($"   • Ativo: {newBehavior.enabled}");
-
-        // 7. Testar imediatamente
         StartCoroutine(TestBoomerangAfterDelay(newBehavior));
     }
 
@@ -659,8 +552,6 @@ public class SkillManager : MonoBehaviour
 
         if (behavior != null)
         {
-            Debug.Log("🧪 [yEngine] Testando bumerangue...");
-
             // Usar reflexão para acessar método privado TestBoomerang
             var testMethod = typeof(BoomerangSkillBehavior).GetMethod("TestBoomerang",
                 System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
@@ -677,6 +568,30 @@ public class SkillManager : MonoBehaviour
         }
     }
 
+    void AddEscudoRotativoBehaviorToPlayer(SkillData skill)
+    {
+        if (playerStats == null)
+        {
+            playerStats = FindFirstObjectByType<PlayerStats>();
+            if (playerStats == null)
+            {
+                Debug.LogError("❌ [yEngine] PlayerStats não encontrado na cena!");
+                return;
+            }
+        }
+
+        var oldBehaviors = playerStats.GetComponents<EscudoRotativoSkillBehavior>();
+        foreach (var old in oldBehaviors)
+        {
+            old.RemoveEffect();
+            Destroy(old);
+        }
+
+        EscudoRotativoSkillBehavior behavior = playerStats.gameObject.AddComponent<EscudoRotativoSkillBehavior>();
+        behavior.UpdateFromSkillData(skill);
+        behavior.Initialize(playerStats);
+    }
+
     // ✅ MÉTODO CORRIGIDO: PROJÉTEIS ORBITAIS
     void AddOrbitingProjectileBehavior(SkillData skill)
     {
@@ -689,24 +604,15 @@ public class SkillManager : MonoBehaviour
         var existingBehaviors = playerStats.GetComponents<OrbitingProjectileSkillBehavior>();
         if (existingBehaviors.Length > 0)
         {
-            // Se já existe, apenas atualiza o primeiro e remove extras
-            Debug.Log($"🌀 Comportamento orbital já existe - atualizando...");
             existingBehaviors[0].UpdateFromSkillData(skill);
-
-            // Remove comportamentos duplicados
             for (int i = 1; i < existingBehaviors.Length; i++)
-            {
                 Destroy(existingBehaviors[i]);
-                Debug.Log($"🧹 Removido comportamento orbital duplicado #{i}");
-            }
             return;
         }
 
         OrbitingProjectileSkillBehavior orbitalBehavior = playerStats.gameObject.AddComponent<OrbitingProjectileSkillBehavior>();
         orbitalBehavior.Initialize(playerStats);
         orbitalBehavior.UpdateFromSkillData(skill);
-
-        Debug.Log($"🌀 Comportamento orbital adicionado AO PLAYER: {skill.skillName}");
     }
 
     // ✅ MÉTODO CORRIGIDO: PROJÉTEIS NORMAIS
@@ -722,16 +628,9 @@ public class SkillManager : MonoBehaviour
         var existingBehaviors = playerStats.GetComponents<PassiveProjectileSkill2D>();
         if (existingBehaviors.Length > 0)
         {
-            // Se já existe, apenas melhora o primeiro e remove extras
-            Debug.Log($"⚡ Comportamento de projétil já existe no player - melhorando...");
             existingBehaviors[0].activationInterval = Mathf.Max(0.5f, existingBehaviors[0].activationInterval * 0.8f);
-
-            // Remove comportamentos duplicados
             for (int i = 1; i < existingBehaviors.Length; i++)
-            {
                 Destroy(existingBehaviors[i]);
-                Debug.Log($"🧹 Removido comportamento de projétil duplicado #{i}");
-            }
             return;
         }
 
@@ -753,7 +652,6 @@ public class SkillManager : MonoBehaviour
             {
                 initializeMethod.Invoke(projectileBehavior, new object[] { playerStats, skill });
                 initialized = true;
-                Debug.Log($"✅ Comportamento inicializado com InitializeWithSkillData");
             }
         }
         catch (System.Exception e)
@@ -769,12 +667,9 @@ public class SkillManager : MonoBehaviour
 
                 var updateMethod = projectileBehavior.GetType().GetMethod("UpdateFromSkillData");
                 if (updateMethod != null)
-                {
                     updateMethod.Invoke(projectileBehavior, new object[] { skill });
-                }
 
                 initialized = true;
-                Debug.Log($"✅ Comportamento inicializado com Initialize + UpdateFromSkillData");
             }
             catch (System.Exception e)
             {
@@ -783,12 +678,7 @@ public class SkillManager : MonoBehaviour
         }
 
         if (!initialized)
-        {
             projectileBehavior.Initialize(playerStats);
-            Debug.Log($"✅ Comportamento inicializado com método básico");
-        }
-
-        Debug.Log($"✅ Comportamento de projétil 2D adicionado AO PLAYER: {skill.skillName}");
     }
 
     void ApplyElementalEffects(SkillData skill)
@@ -884,20 +774,7 @@ public class SkillManager : MonoBehaviour
         }
 
         if (availableSkills.Count == 0)
-        {
             Debug.LogWarning("⚠️ Nenhuma skill encontrada em Resources/Skills/");
-        }
-        else
-        {
-            Debug.Log($"✅ {availableSkills.Count} skills carregadas");
-
-            // Verificar se tem skills de bumerangue
-            int boomerangCount = availableSkills.FindAll(s => s.specificType == SpecificSkillType.Boomerang).Count;
-            if (boomerangCount > 0)
-            {
-                Debug.Log($"🌀 {boomerangCount} skills de bumerangue carregadas");
-            }
-        }
     }
 
     void SaveActiveSkills()
@@ -1619,7 +1496,6 @@ public class SkillManager : MonoBehaviour
     public void ClearRecentlyOfferedSkills()
     {
         recentlyOfferedSkills.Clear();
-        Debug.Log("🔄 Lista de skills recentemente oferecidas foi limpa");
     }
 
     void OnApplicationQuit()

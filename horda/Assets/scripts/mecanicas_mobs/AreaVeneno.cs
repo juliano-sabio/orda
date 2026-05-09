@@ -7,6 +7,7 @@ public class AreaVeneno : MonoBehaviour
     private float duracao;
     private float raio;
     private LayerMask layerParaAcertar;
+    private LayerMask layerInimigos = 1 << 7; // layer Enemy
 
     private float timerTick;
     private float timerVida;
@@ -78,13 +79,23 @@ public class AreaVeneno : MonoBehaviour
 
     void AplicarDano()
     {
+        // Dano ao player
         Collider2D[] alvos = Physics2D.OverlapCircleAll(transform.position, raio, layerParaAcertar);
         foreach (Collider2D col in alvos)
         {
             if (col.TryGetComponent<PlayerStats>(out PlayerStats player))
             {
                 player.TakeDamage(dano);
-                Debug.Log("Dano de veneno aplicado!");
+            }
+        }
+
+        // Dano aos inimigos que pisam na poça
+        Collider2D[] inimigos = Physics2D.OverlapCircleAll(transform.position, raio, layerInimigos);
+        foreach (Collider2D col in inimigos)
+        {
+            if (col.TryGetComponent<InimigoController>(out InimigoController inimigo) && !inimigo.estaMorrendo)
+            {
+                inimigo.ReceberDano(dano);
             }
         }
     }
