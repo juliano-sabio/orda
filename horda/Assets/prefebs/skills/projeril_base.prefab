@@ -133,8 +133,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PassiveProjectileSkill2D
   playerStats: {fileID: 0}
   projectilePrefab: {fileID: 0}
-  activationInterval: 2
-  searchRange: 10
+  activationInterval: 1
+  searchRange: 30
 --- !u!114 &8747674188362044853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -147,9 +147,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e065cd13aa866cb47967672d2eba024d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileController2D
-  speed: 8
+  speed: 9
   lifeTime: 5
-  damage: 25
+  damage: 90
   element: 0
   isOrbiting: 0
   allowMovement: 1
@@ -157,7 +157,6 @@ MonoBehaviour:
   orbitalDamageEnabled: 1
   orbitalDamageInterval: 0.3
   orbitalDamageRadius: 1.5
-  debugDamage: 1
   hitEffect: {fileID: 0}
   trailRenderer: {fileID: 0}
 --- !u!96 &7134715489112898854

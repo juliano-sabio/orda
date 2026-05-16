@@ -118,9 +118,8 @@ public class projetil_inimigo : MonoBehaviour
             // Destrói o projétil
             Destroy(gameObject);
         }
-        else if (other.CompareTag("Chao") || other.CompareTag("Obstacles"))
+        else if (other.tag != "Player" && other.tag != "Enemy" && other.tag != "enemy")
         {
-            // Opcional: destruir ao bater em paredes/chão
             Destroy(gameObject);
         }
     }

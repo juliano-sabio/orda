@@ -24,6 +24,10 @@ public class InimigoController : MonoBehaviour
     public float xpPorOrbe = 5f;
     public float forcaDrop = 2f;
 
+    [Header("Drop de Powerup (Raio/Velocidade)")]
+    public GameObject radiusBoostPrefab;
+    [Range(0f, 1f)] public float chanceDropPowerup = 0.1f;
+
     [Header("Dano Flutuante")]
     public float alturaDanoFlutuante = 2f;
     public bool mostrarDanoAposMorte = true;
@@ -457,6 +461,7 @@ public class InimigoController : MonoBehaviour
             }
 
             DroparOrbesXP();
+            DroparPowerup();
             Destroy(gameObject);
         }
         else
@@ -496,6 +501,21 @@ public class InimigoController : MonoBehaviour
             }
         }
 
+    }
+
+    private void DroparPowerup()
+    {
+        if (radiusBoostPrefab == null)
+        {
+            Debug.LogWarning("⚠️ radiusBoostPrefab não atribuído no inimigo!");
+            return;
+        }
+
+        float roll = UnityEngine.Random.value;
+        Debug.Log($"🎲 Drop roll: {roll:F2} | Chance: {chanceDropPowerup:F2} | Dropou: {roll <= chanceDropPowerup}");
+
+        if (roll <= chanceDropPowerup)
+            Instantiate(radiusBoostPrefab, transform.position, Quaternion.identity);
     }
 
     public float GetPorcentagemVida()

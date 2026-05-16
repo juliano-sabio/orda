@@ -31,7 +31,9 @@ public class PlayerStats : MonoBehaviour
 
     [Header("📦 Sistema de Coleta de XP")]
     public float xpCollectionRadius = 3f;
+    public float orbMoveSpeedMultiplier = 1f;
     public bool autoCollectXP = true;
+
 
     [Header("Visualização da Área de Coleta")]
     public bool showCollectionRadius = true;
@@ -1192,6 +1194,18 @@ public class PlayerStats : MonoBehaviour
         xpCollectionRadius -= boostAmount;
     }
 
+    public void BoostOrbSpeed(float multiplier, float duration)
+    {
+        StartCoroutine(TemporaryOrbSpeedBoost(multiplier, duration));
+    }
+
+    private IEnumerator TemporaryOrbSpeedBoost(float multiplier, float duration)
+    {
+        orbMoveSpeedMultiplier *= multiplier;
+        yield return new WaitForSeconds(duration);
+        orbMoveSpeedMultiplier /= multiplier;
+    }
+
     public void ForceUIUpdate()
     {
         UpdateUI();
@@ -1199,6 +1213,13 @@ public class PlayerStats : MonoBehaviour
 
     private void Die()
     {
+        GetComponent<PlayerDeathEffect>()?.Executar();
+        StartCoroutine(MorteComEfeito());
+    }
+
+    private IEnumerator MorteComEfeito()
+    {
+        yield return new WaitForSecondsRealtime(1.2f);
         Time.timeScale = 0f;
     }
 

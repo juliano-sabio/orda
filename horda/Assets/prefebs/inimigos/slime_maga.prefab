@@ -173,6 +173,8 @@ MonoBehaviour:
   maxOrbs: 3
   xpPorOrbe: 5
   forcaDrop: 2
+  radiusBoostPrefab: {fileID: 1039466315607258041, guid: 756ebba4d22251e4786e5c07befcfde7, type: 3}
+  chanceDropPowerup: 0.114
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 1
   podeReceberCura: 1
@@ -200,19 +202,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::movi_inimigo_manter_distancia
   velocidade: 3
-  "distanciaDetec\xE7\xE3o": 25
+  suavizacao: 8
   distanciaDesejada: 10
   toleranciaDistancia: 0.5
-  "intervaloAtualiza\xE7\xE3oCaminho": 0.5
-  usarDesvioObstaculos: 1
-  distanciaDetecaoObstaculos: 3
-  camadaObstaculos:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  forcaDesvio: 2
-  suavizacaoDesvio: 3
-  anguloDesvio: 45
-  fugirSeMuitoPerto: 1
   distanciaFuga: 2.5
   velocidadeFuga: 4
   orbitarAoRedor: 1
@@ -225,7 +217,6 @@ MonoBehaviour:
   podeAtirar: 1
   tempoRecargaAposFuga: 1
   player: {fileID: 0}
-  pontosCaminho: []
 --- !u!50 &2117315808568981484
 Rigidbody2D:
   serializedVersion: 5

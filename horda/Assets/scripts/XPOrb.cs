@@ -64,7 +64,7 @@ public class XPOrb : MonoBehaviour
         // DEBUG: Mostrar direção
 
         // APLICAR MOVIMENTO
-        transform.position += moveDirection * moveSpeed * Time.deltaTime;
+        transform.position += moveDirection * moveSpeed * playerStats.orbMoveSpeedMultiplier * Time.deltaTime;
 
         // Verificar se chegou
         float distance = Vector3.Distance(transform.position, player.position);

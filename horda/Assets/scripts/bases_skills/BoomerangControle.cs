@@ -287,7 +287,7 @@ public class BoomerangController : MonoBehaviour
         {
             if (!string.IsNullOrEmpty(obj.tag))
             {
-                if (obj.CompareTag("Enemy") || obj.CompareTag("enemy"))
+                if (obj.tag == "Enemy" || obj.tag == "enemy")
                 {
                     return true;
                 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using System.Collections;
+using UnityEngine;
 
 public class moviment_player2 : MonoBehaviour
 {
@@ -9,19 +10,29 @@ public class moviment_player2 : MonoBehaviour
     private Vector2 moveInput;
     private Vector3 originalScale;
 
+    [Header("Dash")]
+    public float dashSpeed = 20f;
+    public float dashDuration = 0.15f;
+    public float dashCooldown = 1f;
+
+    private bool isDashing = false;
+    private float dashCooldownTimer = 0f;
+    private Vector2 dashDirection;
+    private DashEffect dashEffect;
+
     private void Start()
     {
         playerStats = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        dashEffect = GetComponent<DashEffect>();
 
         originalScale = transform.localScale;
 
-        // Garante que o Rigidbody2D não tenha atrito impedindo o movimento
         if (rb != null)
         {
-            rb.gravityScale = 0; // Se for jogo Top-Down
-            rb.interpolation = RigidbodyInterpolation2D.Interpolate; // Suaviza o movimento
+            rb.gravityScale = 0;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         }
     }
 
@@ -29,35 +40,45 @@ public class moviment_player2 : MonoBehaviour
     {
         if (playerStats == null || rb == null) return;
 
-        // 1. CAPTURA DE INPUT (Melhor no Update)
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
         moveInput = new Vector2(horizontal, vertical).normalized;
 
-        // 2. ANIMAÇÃO
         if (anim != null)
-        {
             anim.SetFloat("Speed", moveInput.sqrMagnitude);
-        }
 
-        // 3. FLIP (Apenas quando houver movimento horizontal)
         if (horizontal > 0)
-        {
             transform.localScale = originalScale;
-        }
         else if (horizontal < 0)
-        {
             transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
+
+        dashCooldownTimer -= Time.deltaTime;
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && dashCooldownTimer <= 0f)
+        {
+            dashDirection = moveInput != Vector2.zero ? moveInput : new Vector2(transform.localScale.x > 0 ? 1f : -1f, 0f);
+            StartCoroutine(DashCoroutine());
         }
     }
 
     private void FixedUpdate()
     {
-        // 4. MOVIMENTAÇÃO FÍSICA (Sempre no FixedUpdate para evitar lentidão/stuttering)
-        if (playerStats != null && rb != null)
-        {
-            float speed = playerStats.GetSpeed();
-            rb.linearVelocity = moveInput * speed;
-        }
+        if (playerStats == null || rb == null) return;
+
+        if (isDashing)
+            rb.linearVelocity = dashDirection * dashSpeed;
+        else
+            rb.linearVelocity = moveInput * playerStats.GetSpeed();
+    }
+
+    private IEnumerator DashCoroutine()
+    {
+        isDashing = true;
+        dashCooldownTimer = dashCooldown;
+        dashEffect?.IniciarEfeito();
+
+        yield return new WaitForSeconds(dashDuration);
+
+        isDashing = false;
+        dashEffect?.PararEfeito();
     }
 }
