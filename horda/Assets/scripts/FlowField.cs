@@ -19,11 +19,15 @@ public class FlowField : MonoBehaviour
     [Header("Atualização")]
     [Tooltip("Intervalo em segundos para recalcular o campo.")]
     public float intervaloAtualizacao = 0.2f;
+    [Tooltip("Intervalo mínimo entre reconstruções do grid (quando player sai da área).")]
+    public float intervaloReconstrucao = 0.5f;
 
     private Vector2[,] vetores;
     private bool[,] caminhavel;
     private Vector2Int gridTamanho;
     private Vector2 gridOrigem;
+    private Vector2 gridCentroAtual;
+    private float tempoUltimaReconstrucao = -999f;
     private Transform playerTransform;
 
     private static readonly Vector2Int[] dirs8 = {
@@ -45,25 +49,27 @@ public class FlowField : MonoBehaviour
 
     void ConstruirGrid()
     {
-        // Usa os limites da câmera + padding para definir a área da grade
-        float h = 100f;
-        float w = 100f;
-        Vector2 centro = Vector2.zero;
+        Vector2 centro = Camera.main != null ? (Vector2)Camera.main.transform.position : Vector2.zero;
+        ConstruirGridEmTorno(centro);
+    }
 
+    void ConstruirGridEmTorno(Vector2 centro)
+    {
+        float h = 100f, w = 100f;
         if (Camera.main != null)
         {
             Camera cam = Camera.main;
             h = cam.orthographicSize * 2f + padding * 2f;
             w = h * cam.aspect + padding * 2f;
-            centro = cam.transform.position;
         }
 
         gridOrigem = centro - new Vector2(w / 2f, h / 2f);
+        gridCentroAtual = centro;
         gridTamanho = new Vector2Int(
             Mathf.CeilToInt(w / tamanhoCelula),
             Mathf.CeilToInt(h / tamanhoCelula));
 
-        vetores   = new Vector2[gridTamanho.x, gridTamanho.y];
+        vetores    = new Vector2[gridTamanho.x, gridTamanho.y];
         caminhavel = new bool[gridTamanho.x, gridTamanho.y];
 
         Vector2 metadeCelula = Vector2.one * (tamanhoCelula * 0.85f);
@@ -79,8 +85,17 @@ public class FlowField : MonoBehaviour
     {
         if (playerTransform == null)
             playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (playerTransform != null)
-            Recalcular();
+        if (playerTransform == null) return;
+
+        // Quando o player sair da área do grid, recentra o grid nele
+        if (!Valido(MundoParaCelula(playerTransform.position))
+            && Time.time - tempoUltimaReconstrucao >= intervaloReconstrucao)
+        {
+            ConstruirGridEmTorno(playerTransform.position);
+            tempoUltimaReconstrucao = Time.time;
+        }
+
+        Recalcular();
     }
 
     void Recalcular()
