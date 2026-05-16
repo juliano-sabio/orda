@@ -30,7 +30,6 @@ public class SkillCardRuntimeManager : MonoBehaviour
         // 🎯 Aplica dados APENAS em runtime
         ApplySkillDataToUI();
 
-        Debug.Log($"✅ Runtime Manager inicializado: {skillData.skillName}");
     }
 
     private void FindAllReferences()
@@ -120,10 +119,10 @@ public class SkillCardRuntimeManager : MonoBehaviour
     {
         StringBuilder sb = new StringBuilder();
 
-        if (SkillData.healthBonus != 0) sb.Append($"❤️{SkillData.healthBonus} ");
-        if (SkillData.attackBonus != 0) sb.Append($"⚔️{SkillData.attackBonus} ");
-        if (SkillData.defenseBonus != 0) sb.Append($"🛡️{SkillData.defenseBonus} ");
-        if (SkillData.speedBonus != 0) sb.Append($"🏃{SkillData.speedBonus} ");
+        if (SkillData.healthBonus != 0) sb.Append($"HP:{SkillData.healthBonus} ");
+        if (SkillData.attackBonus != 0) sb.Append($"ATQ:{SkillData.attackBonus} ");
+        if (SkillData.defenseBonus != 0) sb.Append($"DEF:{SkillData.defenseBonus} ");
+        if (SkillData.speedBonus != 0) sb.Append($"Vel:{SkillData.speedBonus} ");
 
         if (sb.Length == 0) sb.Append("Bônus Passivo");
 

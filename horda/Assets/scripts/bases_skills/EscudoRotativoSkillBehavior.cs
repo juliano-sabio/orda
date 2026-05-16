@@ -74,7 +74,7 @@ public class EscudoRotativoSkillBehavior : SkillBehavior
             // RB kinematic independente (necessário para OnTriggerEnter2D em EscudoPeca)
             Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
             if (rb == null) rb = obj.AddComponent<Rigidbody2D>();
-            rb.isKinematic = true;
+            rb.bodyType = RigidbodyType2D.Kinematic;
             rb.gravityScale = 0f;
 
             EscudoPeca peca = obj.GetComponent<EscudoPeca>();

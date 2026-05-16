@@ -41,8 +41,6 @@ public class UIManagerCanvasCreator : EditorWindow
         // Selecionar o Canvas criado
         Selection.activeGameObject = canvasGO;
 
-        Debug.Log("✅ Canvas UIManager COMPLETO criado com sucesso!");
-        Debug.Log("🎮 Controles: Tab (Status), K (Skills), C (Cards), R (Ultimate)");
     }
 
     // 🆕 MÉTODO PARA CRIAR TEXTO DE GANHO DE XP
@@ -258,7 +256,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Level Text (TMP)
         GameObject levelText = CreateTMPText(levelHUD, "LevelText", new Vector2(0, 30), new Vector2(280, 30));
         TextMeshProUGUI levelTextComponent = levelText.GetComponent<TextMeshProUGUI>();
-        levelTextComponent.text = "⭐ Level: 1";
+        levelTextComponent.text = "Level: 1";
         levelTextComponent.color = Color.white;
         levelTextComponent.fontSize = 20;
         levelTextComponent.fontStyle = FontStyles.Bold;
@@ -296,7 +294,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Ultimate Charge Text (TMP)
         GameObject chargeText = CreateTMPText(ultimateHUD, "UltimateChargeText", new Vector2(0, -10), new Vector2(250, 30));
         TextMeshProUGUI chargeTextComponent = chargeText.GetComponent<TextMeshProUGUI>();
-        chargeTextComponent.text = "🚀 ULTIMATE: 0%";
+        chargeTextComponent.text = "ULTIMATE: 0%";
         chargeTextComponent.color = Color.white;
         chargeTextComponent.fontSize = 14;
         chargeTextComponent.alignment = TextAlignmentOptions.Center;
@@ -332,7 +330,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Current Element Text (TMP)
         GameObject elementText = CreateTMPText(elementHUD, "CurrentElementText", new Vector2(70, 0), new Vector2(160, 40));
         TextMeshProUGUI textComponent = elementText.GetComponent<TextMeshProUGUI>();
-        textComponent.text = "⚡ Elemento: None";
+        textComponent.text = "Elem: None";
         textComponent.color = Color.white;
         textComponent.fontSize = 14;
         textComponent.alignment = TextAlignmentOptions.Left;
@@ -401,15 +399,15 @@ public class UIManagerCanvasCreator : EditorWindow
         float startY = 230;
         float spacing = -30;
 
-        uiManager.damageText = CreateTMPStatusText(statusPanel, "DamageText", "⚔️ Ataque: 10.0", new Vector2(0, startY));
-        uiManager.speedText = CreateTMPStatusText(statusPanel, "SpeedText", "🏃 Velocidade: 8.0", new Vector2(0, startY + spacing));
-        uiManager.defenseText = CreateTMPStatusText(statusPanel, "DefenseText", "🛡️ Defesa: 5", new Vector2(0, startY + spacing * 2));
-        uiManager.attackSpeedText = CreateTMPStatusText(statusPanel, "AttackSpeedText", "⚡ Vel. Ataque: 2.0s", new Vector2(0, startY + spacing * 3));
-        uiManager.elementInfoText = CreateTMPStatusText(statusPanel, "ElementInfoText", "⚡ Elemento: None\n📈 Bônus: 1.2x", new Vector2(0, startY + spacing * 4), new Vector2(400, 60));
+        uiManager.damageText = CreateTMPStatusText(statusPanel, "DamageText", "ATQ: 10.0", new Vector2(0, startY));
+        uiManager.speedText = CreateTMPStatusText(statusPanel, "SpeedText", "Vel: 8.0", new Vector2(0, startY + spacing));
+        uiManager.defenseText = CreateTMPStatusText(statusPanel, "DefenseText", "DEF: 5", new Vector2(0, startY + spacing * 2));
+        uiManager.attackSpeedText = CreateTMPStatusText(statusPanel, "AttackSpeedText", "Vel.Atq: 2.0s", new Vector2(0, startY + spacing * 3));
+        uiManager.elementInfoText = CreateTMPStatusText(statusPanel, "ElementInfoText", "Elem: None\nBonus: 1.2x", new Vector2(0, startY + spacing * 4), new Vector2(400, 60));
         uiManager.inventoryText = CreateTMPStatusText(statusPanel, "InventoryText", "🎒 Itens: Nenhum", new Vector2(0, startY + spacing * 6));
-        uiManager.attackSkillsText = CreateTMPStatusText(statusPanel, "AttackSkillsText", "⚔️ Skills de Ataque:\n- Ataque Automático", new Vector2(-200, startY + spacing * 7), new Vector2(180, 100));
-        uiManager.defenseSkillsText = CreateTMPStatusText(statusPanel, "DefenseSkillsText", "🛡️ Skills de Defesa:\n- Proteção Passiva", new Vector2(200, startY + spacing * 7), new Vector2(180, 100));
-        uiManager.ultimateSkillsText = CreateTMPStatusText(statusPanel, "UltimateSkillsText", "🚀 Ultimate:\n🔒 Disponível no Level 5", new Vector2(0, startY + spacing * 11), new Vector2(400, 80));
+        uiManager.attackSkillsText = CreateTMPStatusText(statusPanel, "AttackSkillsText", "Skills ATQ:\n- Ataque Automático", new Vector2(-200, startY + spacing * 7), new Vector2(180, 100));
+        uiManager.defenseSkillsText = CreateTMPStatusText(statusPanel, "DefenseSkillsText", "Skills DEF:\n- Proteção Passiva", new Vector2(200, startY + spacing * 7), new Vector2(180, 100));
+        uiManager.ultimateSkillsText = CreateTMPStatusText(statusPanel, "UltimateSkillsText", "Ultimate:\n🔒 Disponível no Level 5", new Vector2(0, startY + spacing * 11), new Vector2(400, 80));
 
         uiManager.statusPanel = statusPanel;
     }
@@ -444,7 +442,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Título (TMP)
         GameObject title = CreateTMPText(selectionPanel, "Title", new Vector2(0, 230), new Vector2(680, 40));
         TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
-        titleText.text = "🎯 SELEÇÃO DE SKILLS";
+        titleText.text = "SELECAO DE SKILLS";
         titleText.color = Color.yellow;
         titleText.fontSize = 28;
         titleText.fontStyle = FontStyles.Bold;
@@ -453,7 +451,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Available Skills Text (TMP)
         GameObject availableText = CreateTMPText(selectionPanel, "AvailableSkillsText", new Vector2(0, 190), new Vector2(680, 30));
         TextMeshProUGUI availableTextComponent = availableText.GetComponent<TextMeshProUGUI>();
-        availableTextComponent.text = "📚 Skills Disponíveis: 0 | ✅ Skills Ativas: 0";
+        availableTextComponent.text = "Disponiveis: 0 | Ativas: 0";
         availableTextComponent.color = Color.cyan;
         availableTextComponent.fontSize = 16;
         availableTextComponent.alignment = TextAlignmentOptions.Center;
@@ -505,7 +503,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Título (TMP)
         GameObject title = CreateTMPText(panel, "Title", new Vector2(0, 250), new Vector2(600, 60));
         TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
-        titleText.text = "🃏 CARTAS DE STATUS";
+        titleText.text = "CARTAS DE STATUS";
         titleText.color = Color.yellow;
         titleText.fontSize = 32;
         titleText.fontStyle = FontStyles.Bold;
@@ -514,7 +512,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Status Points Text (TMP)
         GameObject pointsText = CreateTMPText(panel, "StatusPointsText", new Vector2(300, 200), new Vector2(300, 40));
         TextMeshProUGUI pointsTextComponent = pointsText.GetComponent<TextMeshProUGUI>();
-        pointsTextComponent.text = "🎯 Pontos Disponíveis: 0";
+        pointsTextComponent.text = "Pontos Disponiveis: 0";
         pointsTextComponent.color = Color.white;
         pointsTextComponent.fontSize = 18;
         pointsTextComponent.fontStyle = FontStyles.Bold;
@@ -539,7 +537,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Bônus Ativos (TMP)
         GameObject bonusesText = CreateTMPText(panel, "ActiveBonusesText", new Vector2(-350, 0), new Vector2(250, 300));
         TextMeshProUGUI bonusesTextComponent = bonusesText.GetComponent<TextMeshProUGUI>();
-        bonusesTextComponent.text = "✅ BÔNUS ATIVOS:\nNenhum";
+        bonusesTextComponent.text = "BONUS ATIVOS:\nNenhum";
         bonusesTextComponent.color = Color.green;
         bonusesTextComponent.fontSize = 14;
         bonusesTextComponent.alignment = TextAlignmentOptions.TopLeft;

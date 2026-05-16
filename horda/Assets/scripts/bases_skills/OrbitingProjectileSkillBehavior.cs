@@ -31,7 +31,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
     public float targetAcquisitionRange = 8f;
 
     [Header("🔧 Debug")]
-    public bool showDebugInfo = true;
 
     // Referências
     private Transform playerTransform;
@@ -75,12 +74,10 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
             UpdateFromSkillData(currentSkillData);
         }
 
-        DebugLog($"🌀 Skill Orbital Inicializada: {orbitSpeed}°/s, {numberOfOrbits} voltas, {maxProjectiles} projéteis máx");
     }
 
     public override void ApplyEffect()
     {
-        DebugLog($"🌀 Aplicando efeito orbital - Contínuo: {continuousSpawning}");
 
         // 🆕 ATUALIZAR CONFIGURAÇÕES DA SKILL
         if (currentSkillData != null && currentSkillData.IsOrbitalProjectileSkill())
@@ -102,7 +99,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
 
     private IEnumerator ContinuousSpawning()
     {
-        DebugLog("🔄 Iniciando spawn contínuo de projéteis orbitais");
 
         while (true)
         {
@@ -124,7 +120,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
 
         if (activeOrbitals.Count >= maxProjectiles)
         {
-            DebugLog($"🎯 Máximo de {maxProjectiles} projéteis atingido");
             return;
         }
 
@@ -143,7 +138,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         if (isSword)
         {
             startAngle = 90f; // 90 graus é o topo exato (Cima)
-            DebugLog("⚔️ Espada detectada: Começando o giro pelo TOPO (90°)");
         }
         else
         {
@@ -152,7 +146,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
 
         Vector2 spawnPosition = CalculateOrbitPosition(startAngle);
 
-        DebugLog($"🎲 Spawnando projétil - Ângulo: {startAngle}° | Posição: {spawnPosition} | Voltas necessárias: {numberOfOrbits}");
 
         // Criar projétil na posição orbital
         GameObject newProjectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
@@ -174,7 +167,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
             );
 
             projectileController.orbitalDamageInterval = orbitalDamageInterval;
-            projectileController.debugDamage = showDebugInfo;
         }
         else
         {
@@ -196,7 +188,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         orbital.target = FindTargetForOrbital();
         activeOrbitals.Add(orbital);
 
-        DebugLog($"🌀 Projétil orbital spawnado - Ângulo: {startAngle}° | Target: {orbital.target?.name ?? "None"} | Total: {activeOrbitals.Count}/{maxProjectiles}");
     }
 
     // 🆕 MÉTODO PARA ENCONTRAR TARGET BASEADO NO MODO CONFIGURADO
@@ -390,11 +381,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         // VERIFICAR SE COMPLETOU VOLTAS SUFICIENTES
         float completedOrbits = orbital.totalRotation / 360f;
 
-        if (showDebugInfo && completedOrbits >= orbital.orbitsCompleted + 0.5f)
-        {
-            Debug.Log($"🔄 Projétil completou {completedOrbits:F1} voltas | Necessárias: {numberOfOrbits}");
-        }
-
         // Calcular e aplicar posição orbital
         Vector2 orbitPosition = CalculateOrbitPosition(orbital.currentAngle);
         orbital.transform.position = orbitPosition;
@@ -419,7 +405,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
             if (isSword)
             {
                 // Se for espada, ela morre aqui. Não deixamos chegar no LaunchProjectile.
-                Debug.Log("⚔️ Espada detectada: Destruindo em vez de lançar.");
 
                 // Remove da lista e destrói o objeto
                 activeOrbitals.Remove(orbital);
@@ -441,7 +426,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         // 🎯 CALCULAR DIREÇÃO DE LANÇAMENTO
         Vector2 launchDir = CalculateLaunchDirection(orbital);
 
-        DebugLog($"🚀 LANÇANDO PROJÉTIL - Voltas: {orbital.totalRotation / 360f:F1} | Direção: {launchDir} | Target: {orbital.target?.name ?? "None"}");
 
         // 🔧 CONFIGURAR PROJÉTIL PARA CAUSAR DANO
         if (orbital.projectileController != null)
@@ -502,7 +486,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
             Vector2.Distance(playerTransform.position, orbital.transform.position) > maxLaunchDistance)
         {
             activeOrbitals.RemoveAt(index);
-            DebugLog("🗑️ Projétil orbital removido");
         }
     }
 
@@ -606,13 +589,6 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
 
         StopAllCoroutines();
 
-        Debug.Log("🌀 Skill Orbital removida");
-    }
-
-    // 🔧 MÉTODOS DE DEBUG
-    private void DebugLog(string message)
-    {
-        if (showDebugInfo) Debug.Log(message);
     }
 
     public int GetActiveOrbitalsCount()
@@ -623,24 +599,13 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
     [ContextMenu("🎯 Testar Spawn Orbital")]
     public void TestOrbitalSpawn()
     {
-        Debug.Log("=== 🧪 TESTE DE SPAWN ORBITAL ===");
-        Debug.Log($"📍 Posição do Player: {playerTransform.position}");
-        Debug.Log($"🔄 Voltas necessárias: {numberOfOrbits}");
-        Debug.Log($"⚡ Dano orbital: {enableOrbitalDamage} (Raio: {orbitalDamageRadius}, Intervalo: {orbitalDamageInterval}s)");
-        Debug.Log($"🎯 Modo de Targeting: {orbitalTargetingMode}");
 
         SpawnOrbitingProjectile();
-        Debug.Log("=== FIM DO TESTE ===");
     }
 
     [ContextMenu("🔍 Diagnóstico Completo Orbital")]
     public void CompleteOrbitalDiagnostic()
     {
-        Debug.Log("=== 🔍 DIAGNÓSTICO COMPLETO ORBITAL ===");
-        Debug.Log($"📊 Configurações - Raio: {orbitRadius}, Velocidade: {orbitSpeed}, Voltas: {numberOfOrbits}");
-        Debug.Log($"⚡ Dano Orbital - Ativo: {enableOrbitalDamage}, Raio: {orbitalDamageRadius}, Intervalo: {orbitalDamageInterval}s");
-        Debug.Log($"🎯 Targeting - Modo: {orbitalTargetingMode}, Alcance: {targetAcquisitionRange}, Auto: {autoAcquireTargets}");
-        Debug.Log($"🎯 Projéteis ativos: {activeOrbitals.Count}");
 
         for (int i = 0; i < activeOrbitals.Count; i++)
         {
@@ -648,25 +613,21 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
             if (orbital != null && orbital.projectileObject != null)
             {
                 float completedOrbits = orbital.totalRotation / 360f;
-                Debug.Log($"   #{i} - Ângulo: {orbital.currentAngle:F1}° | Voltas: {completedOrbits:F1}/{numberOfOrbits} | Lançando: {orbital.isLaunching} | Target: {orbital.target?.name ?? "None"}");
             }
         }
 
-        Debug.Log("=== FIM DO DIAGNÓSTICO ===");
     }
 
     [ContextMenu("🔄 Alterar Modo de Targeting")]
     public void CycleTargetingMode()
     {
         orbitalTargetingMode = (OrbitalTargetingMode)(((int)orbitalTargetingMode + 1) % 4);
-        Debug.Log($"🎯 Modo de Targeting alterado para: {orbitalTargetingMode}");
     }
 
     [ContextMenu("⚡ Ativar/Desativar Dano Orbital")]
     public void ToggleOrbitalDamage()
     {
         enableOrbitalDamage = !enableOrbitalDamage;
-        Debug.Log($"⚡ Dano orbital {(enableOrbitalDamage ? "ATIVADO" : "DESATIVADO")}");
 
         // Aplicar a todos os projéteis existentes
         foreach (var orbital in activeOrbitals)
@@ -710,9 +671,5 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         // orbitalDamageInterval = skillData.orbitalDamageInterval;
         // orbitalDamageRadius = skillData.orbitalDamageRadius;
 
-        DebugLog($"🔄 Comportamento orbital atualizado da SkillData: {skillData.skillName}");
-        DebugLog($"📊 Raio: {orbitRadius}m, Velocidade: {orbitSpeed}°/s, Voltas: {numberOfOrbits}");
-        DebugLog($"🎯 Targeting: {orbitalTargetingMode}, Alcance: {targetAcquisitionRange}");
-        DebugLog($"💥 Dano: {projectileDamage}, Elemento: {projectileElement}");
     }
 }

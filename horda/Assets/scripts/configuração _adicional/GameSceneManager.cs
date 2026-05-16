@@ -27,19 +27,16 @@ public class GameSceneManager : MonoBehaviour
     // 🎯 MÉTODOS PÚBLICOS PARA NAVEGAÇÃO - CORRIGIDOS
     public void GoToMainMenu()
     {
-        Debug.Log("🏠 Indo para Menu Principal...");
         SceneManager.LoadScene(mainMenuScene);
     }
 
     public void GoToCharacterSelection()
     {
-        Debug.Log("🎮 Indo para Seleção de Personagens...");
         SceneManager.LoadScene(characterSelectionScene);
     }
 
     public void StartGameplay()
     {
-        Debug.Log("🚀 Iniciando Gameplay...");
         SceneManager.LoadScene(gameplayScene);
 
         // 🆕 CORREÇÃO: Inicialização mais robusta
@@ -61,11 +58,9 @@ public class GameSceneManager : MonoBehaviour
             if (selectionManager != null)
             {
                 selectionManager.ApplyCharacterToPlayerSystems(playerStats, skillManager);
-                Debug.Log("✅ Personagem selecionado aplicado ao gameplay!");
             }
             else
             {
-                Debug.Log("⚠️ Iniciando sem seleção de personagem (modo padrão)");
                 // Inicializa com stats padrão
                 playerStats.InitializeDefaultSkills();
             }
@@ -82,7 +77,6 @@ public class GameSceneManager : MonoBehaviour
     // 🆕 MÉTODO MELHORADO PARA INICIAR COM PERSONAGEM ESPECÍFICO
     public void StartGameplayWithCharacter(int characterIndex)
     {
-        Debug.Log($"🚀 Iniciando Gameplay com personagem índice: {characterIndex}");
 
         // 🆕 VALIDAÇÃO DE ÍNDICE
         if (characterIndex < 0)
@@ -113,7 +107,6 @@ public class GameSceneManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"📁 Carregando cena: {sceneName}");
         SceneManager.LoadScene(sceneName);
     }
 
@@ -130,7 +123,6 @@ public class GameSceneManager : MonoBehaviour
 
     public void QuitGame()
     {
-        Debug.Log("👋 Saindo do jogo...");
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -141,7 +133,6 @@ public class GameSceneManager : MonoBehaviour
     public void RestartCurrentScene()
     {
         string currentScene = SceneManager.GetActiveScene().name;
-        Debug.Log($"🔄 Reiniciando cena: {currentScene}");
         SceneManager.LoadScene(currentScene);
     }
 
@@ -161,15 +152,11 @@ public class GameSceneManager : MonoBehaviour
     [ContextMenu("Debug Scene Info")]
     public void DebugSceneInfo()
     {
-        Debug.Log("🔍 Informações das Cenas:");
-        Debug.Log($"Cena Atual: {SceneManager.GetActiveScene().name}");
-        Debug.Log($"Total de Cenas no Build: {SceneManager.sceneCountInBuildSettings}");
 
         for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
         {
             string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
             string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
-            Debug.Log($"Cena [{i}]: {sceneName}");
         }
 
         // 🆕 CORREÇÃO: Usa CharacterSelectionManagerIntegrated
@@ -177,8 +164,5 @@ public class GameSceneManager : MonoBehaviour
         CharacterSelectionManagerIntegrated manager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
         SkillManager skillManager = SkillManager.Instance;
 
-        Debug.Log($"PlayerStats: {(playerStats != null ? "✅ Encontrado" : "❌ Não encontrado")}");
-        Debug.Log($"CharacterSelectionManagerIntegrated: {(manager != null ? "✅ Encontrado" : "❌ Não encontrado")}");
-        Debug.Log($"SkillManager: {(skillManager != null ? "✅ Encontrado" : "❌ Não encontrado")}");
     }
 }

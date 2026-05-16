@@ -74,10 +74,10 @@ public class CharacterData : ScriptableObject
         {
             case PlayerStats.Element.Fire: return "🔥";
             case PlayerStats.Element.Ice: return "❄️";
-            case PlayerStats.Element.Lightning: return "⚡";
-            case PlayerStats.Element.Poison: return "☠️";
-            case PlayerStats.Element.Earth: return "🌍";
-            case PlayerStats.Element.Wind: return "💨";
+            case PlayerStats.Element.Lightning: return "";
+            case PlayerStats.Element.Poison: return "";
+            case PlayerStats.Element.Earth: return "";
+            case PlayerStats.Element.Wind: return "";
             default: return "⚪";
         }
     }

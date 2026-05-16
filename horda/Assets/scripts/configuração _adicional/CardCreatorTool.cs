@@ -41,7 +41,6 @@ public class CardCreatorTool : EditorWindow
         GameObject card = CreateCardStructureClean();
         SaveCardAsEditablePrefab(card, "SkillCard_Clean");
 
-        Debug.Log("✅ PREFAB LIMPO CRIADO! O sistema adicionará SkillCardInstance automaticamente!");
     }
 
     private void CreateCardsFolder()
@@ -156,7 +155,6 @@ public class CardCreatorTool : EditorWindow
         // Borda de Seleção
         CreateSelectionBorder(card);
 
-        Debug.Log("✅ Estrutura do card criada - Pronta para SkillCardInstance automático!");
     }
 
     private GameObject CreateCardSection(GameObject parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 offset, Color color)
@@ -250,12 +248,6 @@ public class CardCreatorTool : EditorWindow
         if (prefab != null)
         {
             Selection.activeGameObject = card;
-            Debug.Log($"✅ PREFAB LIMPO CRIADO: {prefabPath}");
-            Debug.Log("🎯 SISTEMA DE INSTÂNCIAS:");
-            Debug.Log("1. Use este prefab no campo 'cardPrefab' do SkillData");
-            Debug.Log("2. SkillChoiceUI adicionará SkillCardInstance AUTOMATICAMENTE");
-            Debug.Log("3. Dados preenchidos apenas em RUNTIME - Prefab SEGURO!");
-            Debug.Log("4. Seu prefab original NUNCA será modificado!");
         }
         else
         {
@@ -286,11 +278,9 @@ public class CardCreatorTool : EditorWindow
 
         if (prefabGuids.Length == 0)
         {
-            Debug.Log("ℹ️ Nenhum prefab encontrado na pasta Cards");
             return;
         }
 
-        Debug.Log($"🔍 Encontrados {prefabGuids.Length} prefabs:");
 
         foreach (string guid in prefabGuids)
         {
@@ -303,10 +293,8 @@ public class CardCreatorTool : EditorWindow
                 var controllerType = System.Type.GetType("SkillCardController");
                 bool hasController = controllerType != null && prefab.GetComponent(controllerType) != null;
 
-                Debug.Log($"📁 {prefab.name}: Controller = {hasController}");
             }
         }
 
-        Debug.Log("✅ Use 'Criar Prefab Limpo' para criar prefabs seguros!");
     }
 }

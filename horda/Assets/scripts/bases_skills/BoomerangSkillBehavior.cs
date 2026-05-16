@@ -36,7 +36,6 @@ public class BoomerangSkillBehavior : SkillBehavior
         {
             playerTransform = playerStats.transform;
 
-            Debug.Log($"🌀 [Boomerang] Inicializado para {playerStats.name}");
         }
         else
         {
@@ -72,7 +71,6 @@ public class BoomerangSkillBehavior : SkillBehavior
         if (skillData.projectilePrefab2D != null)
         {
             boomerangPrefab = skillData.projectilePrefab2D;
-            Debug.Log($"✅ [Boomerang] Usando prefab: {boomerangPrefab.name}");
 
             // Garantir que o prefab tenha os componentes necessários
             PreparePrefab();
@@ -82,11 +80,6 @@ public class BoomerangSkillBehavior : SkillBehavior
             Debug.LogError("❌ [Boomerang] Nenhum prefab encontrado no SkillData!");
         }
 
-        Debug.Log($"🔄 [Boomerang] Configurado:");
-        Debug.Log($"   • Dano: {damage}");
-        Debug.Log($"   • Alcance: {throwRange}m");
-        Debug.Log($"   • Velocidade: {throwSpeed}");
-        Debug.Log($"   • Alvos máx.: {maxTargets}");
     }
 
     private void PreparePrefab()
@@ -101,10 +94,6 @@ public class BoomerangSkillBehavior : SkillBehavior
         bool hasRigidbody = tempInstance.GetComponent<Rigidbody2D>() != null;
         bool hasCollider = tempInstance.GetComponent<Collider2D>() != null;
 
-        Debug.Log($"🔍 [Boomerang] Verificação do prefab:");
-        Debug.Log($"   • BoomerangController: {(hasController ? "✅" : "❌")}");
-        Debug.Log($"   • Rigidbody2D: {(hasRigidbody ? "✅" : "❌")}");
-        Debug.Log($"   • Collider2D: {(hasCollider ? "✅" : "❌")}");
 
         // Destruir instância temporária
         Destroy(tempInstance);
@@ -112,7 +101,6 @@ public class BoomerangSkillBehavior : SkillBehavior
         if (!hasController)
         {
             Debug.LogWarning($"⚠️ [Boomerang] O prefab {boomerangPrefab.name} não tem BoomerangController!");
-            Debug.Log($"ℹ️ O controller será adicionado dinamicamente durante o jogo.");
         }
     }
 
@@ -133,7 +121,6 @@ public class BoomerangSkillBehavior : SkillBehavior
     {
         if (activeBoomerangs.Count >= 3)
         {
-            if (debugMode) Debug.Log($"ℹ️ [Boomerang] Já tem {activeBoomerangs.Count} bumerangues ativos");
             return;
         }
 
@@ -141,7 +128,6 @@ public class BoomerangSkillBehavior : SkillBehavior
 
         if (nearestEnemy != null)
         {
-            if (debugMode) Debug.Log($"🎯 [Boomerang] Inimigo encontrado: {nearestEnemy.name}");
             ThrowBoomerang(nearestEnemy.transform);
         }
         else
@@ -149,7 +135,6 @@ public class BoomerangSkillBehavior : SkillBehavior
             Vector2 randomDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
             if (randomDirection == Vector2.zero) randomDirection = Vector2.right;
 
-            if (debugMode) Debug.Log($"🌀 [Boomerang] Nenhum inimigo, lançando aleatório");
             ThrowBoomerangInDirection(randomDirection);
         }
     }
@@ -277,7 +262,6 @@ public class BoomerangSkillBehavior : SkillBehavior
                 activeBoomerangs.Remove(boomerangObj);
             };
 
-            Debug.Log($"✅ [Boomerang] Instância configurada com sucesso!");
         }
         else
         {
@@ -294,9 +278,6 @@ public class BoomerangSkillBehavior : SkillBehavior
 
         if (debugMode)
         {
-            Debug.Log($"🌀 [Boomerang] Lançado!");
-            Debug.Log($"   • Direção: {direction}");
-            Debug.Log($"   • Alvos ativos: {activeBoomerangs.Count}");
         }
     }
 
@@ -320,14 +301,12 @@ public class BoomerangSkillBehavior : SkillBehavior
         }
         activeBoomerangs.Clear();
 
-        Debug.Log("🌀 [Boomerang] Todos os bumerangues foram removidos");
     }
 
     // ✅ MÉTODO SetActive ADICIONADO
     public void SetActive(bool active)
     {
         isActive = active;
-        Debug.Log($"🌀 [Boomerang] {(active ? "ativado" : "desativado")}");
     }
 
     // ✅ MÉTODO TestBoomerang SEGURO
@@ -352,29 +331,18 @@ public class BoomerangSkillBehavior : SkillBehavior
             return;
         }
 
-        Debug.Log("🧪 [Boomerang] Teste SEGURO iniciado...");
 
         // Teste simples - lançar para a direita
         ThrowBoomerangInDirection(Vector2.right);
 
-        Debug.Log("✅ Teste SEGURO: Bumerangue lançado para direita");
     }
 
     [ContextMenu("🔍 Diagnosticar Estado")]
     public void DiagnoseState()
     {
-        Debug.Log($"=== 🔍 DIAGNÓSTICO DO BUMERANGUE ===");
-        Debug.Log($"• isActive: {isActive}");
-        Debug.Log($"• PlayerStats: {(playerStats != null ? "✅" : "❌")}");
-        Debug.Log($"• PlayerTransform: {(playerTransform != null ? "✅" : "❌")}");
-        Debug.Log($"• BoomerangPrefab: {(boomerangPrefab != null ? boomerangPrefab.name : "❌ Nulo")}");
-        Debug.Log($"• Active Boomerangs: {activeBoomerangs.Count}");
-        Debug.Log($"• Next Activation: {Mathf.Max(0, nextActivationTime - Time.time):F1}s");
 
         if (playerStats != null)
         {
-            Debug.Log($"• Player Name: {playerStats.name}");
-            Debug.Log($"• Player Health: {playerStats.health}/{playerStats.maxHealth}");
         }
     }
 

@@ -18,7 +18,6 @@ public static class UIPauseCreator
         // 3. Configurar Audio Sources
         SetupAudioSources();
 
-        Debug.Log("✅ Sistema de Pause criado com sucesso!");
 
         // 4. Mostrar instruções
         ShowInstructions();
@@ -31,7 +30,6 @@ public static class UIPauseCreator
         PauseManager existingManager = Object.FindAnyObjectByType<PauseManager>();
         if (existingManager != null)
         {
-            Debug.Log("ℹ️ PauseManager já existe na cena.");
             Selection.activeObject = existingManager.gameObject;
             return;
         }
@@ -54,7 +52,6 @@ public static class UIPauseCreator
         pauseManager.unpauseSound = unpauseSound;
         pauseManager.buttonClickSound = buttonClickSound;
 
-        Debug.Log("✅ PauseManager criado com sucesso!");
         Selection.activeObject = pauseManagerGO;
     }
 
@@ -73,7 +70,6 @@ public static class UIPauseCreator
         // Configurar referências no PauseManager
         SetupPauseManagerReferences(pausePanel, settingsPanel);
 
-        Debug.Log("✅ UI do Pause Menu criada com sucesso!");
     }
 
     private static Canvas FindOrCreateCanvas()
@@ -95,7 +91,6 @@ public static class UIPauseCreator
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0.5f;
 
-            Debug.Log("✅ Canvas criado automaticamente");
         }
 
         return canvas;
@@ -360,7 +355,6 @@ public static class UIPauseCreator
         if (pauseManager == null)
         {
             Debug.LogWarning("⚠️ PauseManager não encontrado para configurar referências.");
-            Debug.Log("💡 Execute 'Criar Apenas PauseManager' primeiro.");
             return;
         }
 
@@ -393,7 +387,6 @@ public static class UIPauseCreator
         if (pauseManager.sfxVolumeSlider == null) Debug.LogWarning("❌ SFXVolumeSlider não encontrado");
         if (pauseManager.fullscreenToggle == null) Debug.LogWarning("❌ FullscreenToggle não encontrado");
 
-        Debug.Log("✅ Referências do PauseManager configuradas!");
     }
 
     private static Button FindButton(GameObject parent, string path)
@@ -437,16 +430,10 @@ public static class UIPauseCreator
 
     private static void SetupAudioSources()
     {
-        Debug.Log("🔊 Audio Sources configurados - Adicione seus AudioClips manualmente");
     }
 
     private static void ShowInstructions()
     {
-        Debug.Log("🎮 INSTRUÇÕES DO SISTEMA DE PAUSE:");
-        Debug.Log("1. Pressione ESC para pausar/despausar");
-        Debug.Log("2. Configure os AudioClips no PauseManager");
-        Debug.Log("3. Defina o nome da cena do menu principal no PauseManager");
-        Debug.Log("4. Teste com '⏸️ Testar Sistema de Pause' no UIManager");
     }
 
     [MenuItem("Tools/UI System/🔧 Corrigir Referências do PauseManager", false, 103)]
@@ -488,10 +475,8 @@ public static class UIPauseCreator
             if (obj != null)
             {
                 Object.DestroyImmediate(obj);
-                Debug.Log($"🗑️ Deletado: {obj.name}");
             }
         }
 
-        Debug.Log("✅ Sistema de Pause limpo!");
     }
 }

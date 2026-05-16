@@ -139,7 +139,6 @@ public class UIManager : MonoBehaviour
 
         ConnectToEquippedSkill();
 
-        Debug.Log("✅ UIManager conectado ao sistema de skills equipadas");
     }
 
     // 🆕 MÉTODO PARA ENCONTRAR/CRIAR PAUSE MANAGER
@@ -149,7 +148,6 @@ public class UIManager : MonoBehaviour
         pauseManager = FindAnyObjectByType<PauseManager>();
         if (pauseManager == null)
         {
-            Debug.Log("⏸️ PauseManager não encontrado. Criando automaticamente...");
 
             // Criar um GameObject para o PauseManager
             GameObject pauseManagerGO = new GameObject("PauseManager");
@@ -159,11 +157,9 @@ public class UIManager : MonoBehaviour
             if (Application.isPlaying)
             {
                 DontDestroyOnLoad(pauseManagerGO);
-                Debug.Log("✅ PauseManager criado e configurado com DontDestroyOnLoad");
             }
             else
             {
-                Debug.Log("✅ PauseManager criado (DontDestroyOnLoad será configurado em runtime)");
             }
         }
         else
@@ -173,7 +169,6 @@ public class UIManager : MonoBehaviour
             {
                 DontDestroyOnLoad(pauseManager.gameObject);
             }
-            Debug.Log("✅ PauseManager encontrado na cena");
         }
     }
     // --- INICIALIZAÇÃO DA UI (CHAMADA NO START) ---
@@ -192,19 +187,18 @@ public class UIManager : MonoBehaviour
 
         // 2. Preenche os textos fixos do Painel de Status
         if (maxHealthStatusText != null)
-            maxHealthStatusText.text = $"❤️ Vida Máxima: {playerStats.GetMaxHealth():F0}";
+            maxHealthStatusText.text = $"Vida Max: {playerStats.GetMaxHealth():F0}";
 
         if (critChanceText != null)
             // Multiplicamos por 100 para exibir como porcentagem (ex: 0.1 -> 10%)
-            critChanceText.text = $"🎯 Crítico: {playerStats.GetCritChance() * 100f:F1}%";
+            critChanceText.text = $"Critico: {playerStats.GetCritChance() * 100f:F1}%";
 
         if (healthRegenText != null)
-            healthRegenText.text = $"♻️ Regen. Vida: {playerStats.GetHealthRegen():F1}/s";
+            healthRegenText.text = $"Regen: {playerStats.GetHealthRegen():F1}/s";
 
         if (attackSpeedText != null)
-            attackSpeedText.text = $"⚡ Vel. Ataque: {playerStats.GetAttackActivationInterval():F1}s";
+            attackSpeedText.text = $"Vel.Atq: {playerStats.GetAttackActivationInterval():F1}s";
 
-        Debug.Log("✅ UIManager inicializado com TextMeshPro!");
     } // Final da função
 
     void Update()
@@ -288,7 +282,6 @@ public class UIManager : MonoBehaviour
 
     private void OnSkillEquippedChanged(SkillData equippedSkill)
     {
-        Debug.Log($"🔄 Skill equipada mudou: {equippedSkill?.skillName}");
         UpdateSkillManagerWithEquippedSkill(equippedSkill);
     }
 
@@ -340,7 +333,6 @@ public class UIManager : MonoBehaviour
         // 🆕 ATUALIZAR SKILL HUD!
         UpdateSkillHUDWithEquippedSkill(equippedSkill);
 
-        Debug.Log($"🎯 UI do Skill Manager conectada à: {equippedSkill.skillName}");
     }
 
     // 🆕 MÉTODO PARA ATUALIZAR O SKILL HUD COM A SKILL EQUIPADA
@@ -348,7 +340,6 @@ public class UIManager : MonoBehaviour
     {
         if (equippedSkill == null) return;
 
-        Debug.Log($"🎯 Atualizando Skill HUD com: {equippedSkill.skillName}");
 
         // 🎯 DEFINIR EM QUAL SLOT DA HUD COLOCAR A SKILL EQUIPADA
         Image targetSlot = attackSkill1Icon;
@@ -373,25 +364,16 @@ public class UIManager : MonoBehaviour
             StartCoroutine(HighlightSkillSlotCoroutine(targetSlot));
         }
 
-        // 📝 ATUALIZAR TEXTO DE COOLDOWN (se aplicável)
         if (targetCooldown != null)
         {
-            if (equippedSkill.cooldown > 0)
-            {
-                targetCooldown.text = $"{equippedSkill.cooldown}s";
-                targetCooldown.color = Color.yellow;
-            }
-            else
-            {
-                targetCooldown.text = "PRONTO";
-                targetCooldown.color = Color.green;
-            }
+            float cd = playerStats != null ? playerStats.GetAttackActivationInterval() : equippedSkill.cooldown;
+            targetCooldown.text  = $"{cd:F1}s";
+            targetCooldown.color = Color.yellow;
         }
 
         // ✨ ATUALIZAR ELEMENTO PRINCIPAL NA HUD
         UpdateElementIcon();
 
-        Debug.Log($"✅ Skill HUD atualizada com: {equippedSkill.skillName}");
     }
 
     // 🆕 MÉTODO PARA DESTACAR O SLOT DA SKILL EQUIPADA
@@ -448,10 +430,10 @@ public class UIManager : MonoBehaviour
     {
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-        if (skill.attackBonus != 0) sb.AppendLine($"⚔️ Ataque: +{skill.attackBonus}");
-        if (skill.defenseBonus != 0) sb.AppendLine($"🛡️ Defesa: +{skill.defenseBonus}");
-        if (skill.healthBonus != 0) sb.AppendLine($"❤️ Vida: +{skill.healthBonus}");
-        if (skill.speedBonus != 0) sb.AppendLine($"🏃 Velocidade: +{skill.speedBonus}");
+        if (skill.attackBonus != 0) sb.AppendLine($"ATQ: +{skill.attackBonus}");
+        if (skill.defenseBonus != 0) sb.AppendLine($"DEF: +{skill.defenseBonus}");
+        if (skill.healthBonus != 0) sb.AppendLine($"Vida: +{skill.healthBonus}");
+        if (skill.speedBonus != 0) sb.AppendLine($"Vel: +{skill.speedBonus}");
 
         if (sb.Length == 0) sb.AppendLine("Bônus Passivo");
 
@@ -567,7 +549,6 @@ public class UIManager : MonoBehaviour
     {
         if (playerStats == null) return;
 
-        Debug.Log("🔄 Atualizando ícones da barra de habilidades...");
 
         UpdateAttackSkillIcons();
         UpdateDefenseSkillIcons();
@@ -864,10 +845,14 @@ public class UIManager : MonoBehaviour
         }
 
         if (healthText != null)
-            healthText.text = $"{playerStats.GetCurrentHealth():F0}/{playerStats.GetMaxHealth():F0}";
+        {
+            float sp = playerStats.GetShieldPoints();
+            string shieldStr = sp > 0.5f ? $" +{sp:F0}" : "";
+            healthText.text = $"{playerStats.GetCurrentHealth():F0}/{playerStats.GetMaxHealth():F0}{shieldStr}";
+        }
 
         if (levelText != null)
-            levelText.text = $"⭐ Level: {playerStats.GetLevel()}";
+            levelText.text = $"Level: {playerStats.GetLevel()}";
 
         if (xpText != null)
             xpText.text = $"XP: {playerStats.GetCurrentXP():F0}/{playerStats.GetXPToNextLevel():F0}";
@@ -876,12 +861,12 @@ public class UIManager : MonoBehaviour
         {
             float chargePercent = (playerStats.GetUltimateChargeTime() / playerStats.GetUltimateCooldown()) * 100f;
             ultimateChargeText.text = playerStats.IsUltimateReady() ?
-                "🚀 ULTIMATE PRONTA!" :
-                $"🚀 ULTIMATE: {chargePercent:F0}%";
+                "ULTIMATE PRONTA!" :
+                $"ULTIMATE: {chargePercent:F0}%";
         }
 
         if (currentElementText != null)
-            currentElementText.text = $"⚡ Elemento: {playerStats.GetCurrentElement()}";
+            currentElementText.text = $"Elem: {playerStats.GetCurrentElement()}";
 
         if (ultimateReadyEffect != null)
             ultimateReadyEffect.SetActive(playerStats.IsUltimateReady());
@@ -896,32 +881,39 @@ public class UIManager : MonoBehaviour
     {
         if (playerStats == null) return;
 
+        float remaining  = playerStats.GetAttackCooldownRemaining();
+        float totalCD    = playerStats.GetAttackActivationInterval();
+
         if (attackCooldownText1 != null)
         {
-            float cooldown1 = playerStats.GetSkillCooldown("Ataque Automático");
-            attackCooldownText1.text = cooldown1 > 0 ? $"{cooldown1:F1}s" : "PRONTO";
-            attackCooldownText1.color = cooldown1 > 0 ? Color.red : Color.green;
+            attackCooldownText1.text  = remaining > 0.05f ? $"{remaining:F1}s" : "PRONTO";
+            attackCooldownText1.color = remaining > 0.05f ? Color.red : Color.green;
         }
 
         if (attackCooldownText2 != null)
         {
-            float cooldown2 = playerStats.GetSkillCooldown("Golpe Contínuo");
-            attackCooldownText2.text = cooldown2 > 0 ? $"{cooldown2:F1}s" : "PRONTO";
-            attackCooldownText2.color = cooldown2 > 0 ? Color.red : Color.green;
+            attackCooldownText2.text  = $"{totalCD:F1}s";
+            attackCooldownText2.color = Color.yellow;
         }
 
         if (defenseCooldownText1 != null)
         {
-            float cooldown1 = playerStats.GetSkillCooldown("Proteção Passiva");
-            defenseCooldownText1.text = cooldown1 > 0 ? $"{cooldown1:F1}s" : "PRONTO";
-            defenseCooldownText1.color = cooldown1 > 0 ? Color.red : Color.green;
+            if (playerStats.defenseSkills.Count > 0)
+            {
+                var skill = playerStats.defenseSkills[0];
+                defenseCooldownText1.text  = skill.IsOnCooldown ? $"{skill.currentCooldown:F1}s" : "PRONTO";
+                defenseCooldownText1.color = skill.IsOnCooldown ? Color.red : Color.green;
+            }
         }
 
         if (defenseCooldownText2 != null)
         {
-            float cooldown2 = playerStats.GetSkillCooldown("Escudo Automático");
-            defenseCooldownText2.text = cooldown2 > 0 ? $"{cooldown2:F1}s" : "PRONTO";
-            defenseCooldownText2.color = cooldown2 > 0 ? Color.red : Color.green;
+            if (playerStats.defenseSkills.Count > 1)
+            {
+                var skill = playerStats.defenseSkills[1];
+                defenseCooldownText2.text  = skill.IsOnCooldown ? $"{skill.currentCooldown:F1}s" : "PRONTO";
+                defenseCooldownText2.color = skill.IsOnCooldown ? Color.red : Color.green;
+            }
         }
 
         if (ultimateCooldownText != null)
@@ -958,19 +950,24 @@ public class UIManager : MonoBehaviour
         if (playerStats == null || !statusPanelVisible) return;
 
         if (damageText != null)
-            damageText.text = $"⚔️ Ataque: {playerStats.GetAttack():F1}";
+            damageText.text = $"ATQ: {playerStats.GetAttack():F1}";
 
         if (speedText != null)
-            speedText.text = $"🏃 Velocidade: {playerStats.GetSpeed():F1}";
+            speedText.text = $"Vel: {playerStats.GetSpeed():F1}";
 
         if (defenseText != null)
-            defenseText.text = $"🛡️ Defesa: {playerStats.GetDefense():F1}";
+        {
+            float sp = playerStats.GetShieldPoints();
+            float mp = playerStats.GetMaxShieldPoints();
+            string shieldStr = mp > 0f ? $" | Escudo: {sp:F0}/{mp:F0}" : "";
+            defenseText.text = $"DEF: {playerStats.GetDefense():F1}{shieldStr}";
+        }
 
         if (attackSpeedText != null)
-            attackSpeedText.text = $"⚡ Vel. Ataque: {playerStats.GetAttackActivationInterval():F1}s";
+            attackSpeedText.text = $"Vel.Atq: {playerStats.GetAttackActivationInterval():F1}s";
 
         if (elementInfoText != null)
-            elementInfoText.text = $"⚡ Elemento: {playerStats.GetCurrentElement()}\n📈 Bônus: {playerStats.GetElementalBonus():F1}x";
+            elementInfoText.text = $"Elem: {playerStats.GetCurrentElement()}\nBonus: {playerStats.GetElementalBonus():F1}x";
 
         if (inventoryText != null)
         {
@@ -982,7 +979,7 @@ public class UIManager : MonoBehaviour
         if (attackSkillsText != null)
         {
             var attackSkills = playerStats.GetAttackSkills();
-            string attackStr = "⚔️ Skills de Ataque:\n";
+            string attackStr = "Skills ATQ:\n";
             foreach (var skill in attackSkills)
             {
                 string status = skill.isActive ? "✅" : "❌";
@@ -994,7 +991,7 @@ public class UIManager : MonoBehaviour
         if (defenseSkillsText != null)
         {
             var defenseSkills = playerStats.GetDefenseSkills();
-            string defenseStr = "🛡️ Skills de Defesa:\n";
+            string defenseStr = "Skills DEF:\n";
             foreach (var skill in defenseSkills)
             {
                 string status = skill.isActive ? "✅" : "❌";
@@ -1006,12 +1003,12 @@ public class UIManager : MonoBehaviour
         if (ultimateSkillsText != null)
         {
             var ultimate = playerStats.GetUltimateSkill();
-            string ultimateStr = "🚀 Ultimate:\n";
+            string ultimateStr = "Ultimate:\n";
             if (ultimate.isActive)
             {
                 ultimateStr += $"✅ {ultimate.skillName}\n";
                 ultimateStr += $"Dano: {ultimate.baseDamage:F1}\n";
-                ultimateStr += playerStats.IsUltimateReady() ? "⭐ PRONTA PARA USAR!" : "⏳ CARREGANDO...";
+                ultimateStr += playerStats.IsUltimateReady() ? "PRONTA PARA USAR!" : "⏳ CARREGANDO...";
             }
             else
             {
@@ -1049,7 +1046,7 @@ public class UIManager : MonoBehaviour
 
         if (availableSkillsText != null)
         {
-            availableSkillsText.text = "📚 Sistema de Skills - Use Q/E para trocar skills equipadas";
+            availableSkillsText.text = "Sistema de Skills - Use Q/E para trocar skills equipadas";
         }
 
         CreateSkillSelectionPlaceholders();
@@ -1123,12 +1120,12 @@ public class UIManager : MonoBehaviour
 
         if (statusPointsText != null)
         {
-            statusPointsText.text = "🎯 Sistema de Cartas - Use C para abrir/fechar";
+            statusPointsText.text = "Sistema de Cartas - Use C para abrir/fechar";
         }
 
         if (activeBonusesText != null)
         {
-            activeBonusesText.text = "✅ BÔNUS ATIVOS:\nSistema de cartas de status";
+            activeBonusesText.text = "BONUS ATIVOS:\nSistema de cartas de status";
         }
 
         CreateStatusCardPlaceholders();
@@ -1194,7 +1191,6 @@ public class UIManager : MonoBehaviour
 
     private void OnStatusCardClicked(string cardName)
     {
-        Debug.Log($"🃏 Carta clicada: {cardName}");
         ShowSkillAcquired($"Carta {cardName}", "Recurso de cartas de status ativado!");
     }
 
@@ -1221,7 +1217,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowUltimateAcquired(string ultimateName, string description)
     {
-        ShowSkillAcquired($"⭐ {ultimateName}", description);
+        ShowSkillAcquired($"{ultimateName}", description);
     }
 
     public void ShowModifierAcquired(string modifierName, string targetSkill)
@@ -1231,7 +1227,6 @@ public class UIManager : MonoBehaviour
 
     public void ShowElementChanged(string elementName)
     {
-        Debug.Log($"⚡ Elemento alterado para: {elementName}");
     }
 
     public void OnUltimateActivated()
@@ -1345,7 +1340,6 @@ public class UIManager : MonoBehaviour
         if (elementIcon != null)
             elementIcon.gameObject.SetActive(false);
 
-        Debug.Log("🧹 Todos os ícones de skills foram limpos");
     }
 
     private void ClearSkillIcon(Image mainIcon, Image elementIcon)
@@ -1403,13 +1397,11 @@ public class UIManager : MonoBehaviour
     [ContextMenu("🎯 Testar Skill HUD")]
     public void TestSkillHUD()
     {
-        Debug.Log("🧪 Testando atualização da Skill HUD...");
 
         if (skillManager != null && skillManager.GetActiveSkills().Count > 0)
         {
             var testSkill = skillManager.GetActiveSkills()[0];
             UpdateSkillHUDWithEquippedSkill(testSkill);
-            Debug.Log($"✅ HUD testada com: {testSkill.skillName}");
         }
         else
         {
@@ -1420,21 +1412,13 @@ public class UIManager : MonoBehaviour
     [ContextMenu("🔍 Verificar Estado da HUD")]
     public void DebugHUDState()
     {
-        Debug.Log("🔍 DIAGNÓSTICO DA HUD:");
 
-        Debug.Log($"• attackSkill1Icon: {(attackSkill1Icon != null ? "✅" : "❌")}");
-        Debug.Log($"• attackSkill1ElementIcon: {(attackSkill1ElementIcon != null ? "✅" : "❌")}");
-        Debug.Log($"• attackCooldownText1: {(attackCooldownText1 != null ? "✅" : "❌")}");
 
         if (attackSkill1Icon != null)
         {
-            Debug.Log($"• Ícone sprite: {attackSkill1Icon.sprite?.name ?? "NULL"}");
-            Debug.Log($"• Ícone cor: {attackSkill1Icon.color}");
-            Debug.Log($"• Ícone ativo: {attackSkill1Icon.gameObject.activeInHierarchy}");
         }
 
         var equippedSkill = skillManager?.GetEquippedSkill();
-        Debug.Log($"• Skill equipada: {equippedSkill?.skillName ?? "Nenhuma"}");
     }
 
     [ContextMenu("🔄 Forçar Atualização de Skill Equipada")]
@@ -1511,8 +1495,6 @@ public class UIManager : MonoBehaviour
     {
         if (pauseManager != null)
         {
-            Debug.Log($"⏸️ Estado do Pause: {(pauseManager.IsGamePaused() ? "PAUSADO" : "RODANDO")}");
-            Debug.Log($"⏸️ TimeScale: {Time.timeScale}");
         }
         else
         {

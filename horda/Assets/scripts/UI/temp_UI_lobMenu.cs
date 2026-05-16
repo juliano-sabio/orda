@@ -68,19 +68,16 @@ public class temp_UI_lobMenu : MonoBehaviour
 
     void OnPlayButtonClicked()
     {
-        Debug.Log("🎮 Indo para seleção de personagem...");
         SceneManager.LoadScene("CharacterSelection");
     }
 
     void OnOptionsButtonClicked()
     {
-        Debug.Log("⚙️ Abrindo opções...");
         // Sua lógica de opções aqui
     }
 
     void OnExitButtonClicked()
     {
-        Debug.Log("👋 Saindo do jogo...");
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -133,27 +130,20 @@ public class temp_UI_lobMenu : MonoBehaviour
     [ContextMenu("Verificar Status do Lobby")]
     public void CheckLobbyStatus()
     {
-        Debug.Log("🔍 Status do Lobby:");
 
         // 🆕 CORREÇÃO: Usa CharacterSelectionManagerIntegrated
         CharacterSelectionManagerIntegrated charManager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
 
-        Debug.Log($"CharacterSelectionManagerIntegrated: {(charManager != null ? "✅ Encontrado" : "❌ Não encontrado")}");
 
         if (charManager != null && charManager.characters != null)
         {
-            Debug.Log($"Personagens disponíveis: {charManager.characters.Length}");
             for (int i = 0; i < charManager.characters.Length; i++)
             {
                 if (charManager.characters[i] != null)
                 {
-                    Debug.Log($"• {i}: {charManager.characters[i].characterName} ({(charManager.characters[i].unlocked ? "🔓" : "🔒")})");
                 }
             }
         }
 
-        Debug.Log($"Moedas: {PlayerPrefs.GetInt("PlayerCoins", 1000)}");
-        Debug.Log($"Nível: {PlayerPrefs.GetInt("PlayerLevel", 1)}");
-        Debug.Log($"Personagem selecionado: {PlayerPrefs.GetInt("SelectedCharacter", 0)}");
     }
 }

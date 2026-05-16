@@ -20,9 +20,6 @@ public class ProjectileController2D : MonoBehaviour
     public float orbitalDamageInterval = 0.3f; // 🆕 Intervalo entre danos no mesmo inimigo
     public float orbitalDamageRadius = 1.5f; // 🆕 Raio de detecção durante órbita
 
-    [Header("🔧 Debug Dano")]
-    public bool debugDamage = true;
-
     [Header("Efeitos Visuais")]
     public GameObject hitEffect;
     public TrailRenderer trailRenderer;
@@ -92,7 +89,6 @@ public class ProjectileController2D : MonoBehaviour
         spawnTime = Time.time;
         Destroy(gameObject, lifeTime);
 
-        if (debugDamage) Debug.Log($"🎯 Projétil ativado - Movimento: {allowMovement}, Orbital: {isOrbiting}");
     }
 
     public void LaunchInDirection(Vector2 direction, float launchSpeed)
@@ -111,7 +107,6 @@ public class ProjectileController2D : MonoBehaviour
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
-        if (debugDamage) Debug.Log($"🚀 Projétil lançado - Direção: {direction}, Velocidade: {launchSpeed}, Dano: {damage}");
     }
 
     private IEnumerator MoveInDirection(Vector2 direction, float moveSpeed)
@@ -276,14 +271,8 @@ public class ProjectileController2D : MonoBehaviour
     {
         if (obj == null) return false;
 
-        try
-        {
-            if (obj.CompareTag("Enemy") || obj.CompareTag("enemy"))
-            {
-                return true;
-            }
-        }
-        catch (UnityException) { }
+        if (obj.tag == "Enemy" || obj.tag == "enemy")
+            return true;
 
         if (obj.GetComponent<InimigoController>() != null)
         {
@@ -315,10 +304,6 @@ public class ProjectileController2D : MonoBehaviour
         {
             ApplyDamageToEnemy(targetEnemy, "LANÇAMENTO");
         }
-        else
-        {
-            if (debugDamage) Debug.Log("🎯 Projétil atingiu mas não encontrou GameObject de inimigo");
-        }
 
         if (hitEffect != null)
         {
@@ -331,18 +316,11 @@ public class ProjectileController2D : MonoBehaviour
     // 🆕 MÉTODO UNIFICADO PARA APLICAR DANO
     private void ApplyDamageToEnemy(GameObject enemy, string damageType)
     {
-        if (debugDamage) Debug.Log($"🎯 Tentando causar {damage} de dano ({damageType}) em: {enemy.name}");
-
         InimigoController inimigo = enemy.GetComponent<InimigoController>();
         if (inimigo != null)
-        {
             inimigo.ReceberDano(damage);
-            if (debugDamage) Debug.Log($"💥 DANO {damageType}: {damage} em {enemy.name} | Elemento: {element}");
-        }
         else
-        {
-            if (debugDamage) Debug.LogError($"❌ InimigoController não encontrado em: {enemy.name}");
-        }
+            Debug.LogWarning($"[ProjectileController] InimigoController não encontrado em: {enemy.name}");
 
         ApplyElementalEffect(enemy);
     }
@@ -362,30 +340,7 @@ public class ProjectileController2D : MonoBehaviour
         }
     }
 
-    private void ApplyBasicElementalEffect(GameObject enemy)
-    {
-        switch (element)
-        {
-            case PlayerStats.Element.Fire:
-                Debug.Log($"🔥 {enemy.name} está queimando!");
-                break;
-            case PlayerStats.Element.Ice:
-                Debug.Log($"❄️ {enemy.name} está congelado!");
-                break;
-            case PlayerStats.Element.Lightning:
-                Debug.Log($"⚡ {enemy.name} está eletrocutado!");
-                break;
-            case PlayerStats.Element.Poison:
-                Debug.Log($"☠️ {enemy.name} está envenenado!");
-                break;
-            case PlayerStats.Element.Earth:
-                Debug.Log($"🌍 {enemy.name} está atordoado!");
-                break;
-            case PlayerStats.Element.Wind:
-                Debug.Log($"💨 {enemy.name} está sendo empurrado!");
-                break;
-        }
-    }
+    private void ApplyBasicElementalEffect(GameObject enemy) { }
 
     void SetupVisuals()
     {

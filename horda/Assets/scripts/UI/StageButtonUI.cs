@@ -49,7 +49,6 @@ public class StageButtonUI : MonoBehaviour
             stageButton.onClick.AddListener(OnStageButtonClicked);
         }
 
-        Debug.Log($"🎯 Stage Button inicializado: {data.stageName}");
     }
 
     private void UpdateUI()
@@ -130,11 +129,9 @@ public class StageButtonUI : MonoBehaviour
         {
             selectionManager.OnStageSelected(stageIndex);
             SetSelected(true);
-            Debug.Log($"🎯 Stage selecionado: {stageData.stageName}");
         }
         else if (!stageData.unlocked)
         {
-            Debug.Log($"🔒 Stage bloqueado: {stageData.stageName} - Requer Nv. {stageData.requiredLevel}");
         }
     }
 
@@ -155,7 +152,6 @@ public class StageButtonUI : MonoBehaviour
     public void RefreshStatus()
     {
         UpdateUI();
-        Debug.Log($"🔄 Stage Button atualizado: {stageData.stageName} - Unlocked: {stageData.unlocked}");
     }
 
     private string GetDifficultyText(int difficulty)

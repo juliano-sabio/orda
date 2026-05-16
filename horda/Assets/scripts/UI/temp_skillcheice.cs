@@ -38,7 +38,6 @@ public class SkillChoiceUICreator : EditorWindow
         // Selecionar o Canvas criado
         Selection.activeGameObject = canvasGO;
 
-        Debug.Log("✅ Skill Choice UI criada com sistema de instâncias!");
     }
 
     private static void CreateChoicePanel(GameObject parent, SkillChoiceUI skillChoiceUI)
@@ -60,7 +59,7 @@ public class SkillChoiceUICreator : EditorWindow
         // Título
         GameObject title = CreateTextTMP(panel, "TitleText", new Vector2(0, 280), new Vector2(1000, 80));
         TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
-        titleText.text = "🎯 ESCOLHA UMA SKILL";
+        titleText.text = "ESCOLHA UMA SKILL";
         titleText.color = Color.yellow;
         titleText.fontSize = 36;
         titleText.fontStyle = FontStyles.Bold;
@@ -124,7 +123,6 @@ public class SkillChoiceUICreator : EditorWindow
         // Salvar como prefab
         SaveAutoCardPrefab(prefab, "SkillCard_Auto");
 
-        Debug.Log("✅ Prefab fallback criado SEM Controller! Agora use o sistema de instâncias.");
     }
 
     private static void SetupCardComponents(GameObject card)
@@ -216,7 +214,6 @@ public class SkillChoiceUICreator : EditorWindow
         // Borda de seleção
         CreateSelectionBorder(card);
 
-        Debug.Log("✅ Estrutura do card criada SEM Controller!");
     }
 
     private static GameObject CreateCardSection(GameObject parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 offset, Color color)
@@ -318,7 +315,6 @@ public class SkillChoiceUICreator : EditorWindow
 
         if (prefab != null)
         {
-            Debug.Log($"✅ Prefab fallback salvo: {prefabPath}");
         }
         else
         {
@@ -412,7 +408,6 @@ public class SkillChoiceUICreator : EditorWindow
                 if (fitter != null)
                 {
                     DestroyImmediate(fitter);
-                    Debug.Log("✅ ContentSizeFitter removido do container");
                 }
 
                 // Configurar Layout Group destravado
@@ -421,7 +416,6 @@ public class SkillChoiceUICreator : EditorWindow
                 {
                     layout.childControlWidth = false;
                     layout.childControlHeight = false;
-                    Debug.Log("✅ Layout Group destravado");
                 }
 
                 // Configurar tamanho fixo do container
@@ -429,11 +423,9 @@ public class SkillChoiceUICreator : EditorWindow
                 if (rect != null)
                 {
                     rect.sizeDelta = new Vector2(1200, 500);
-                    Debug.Log("✅ Container com tamanho fixo configurado");
                 }
             }
 
-            Debug.Log("✅ SkillChoiceUI atualizado para sistema de instâncias!");
         }
         else
         {
@@ -462,11 +454,6 @@ public class SkillChoiceUICreator : EditorWindow
         if (savedPrefab != null)
         {
             Selection.activeObject = savedPrefab;
-            Debug.Log($"✅ Template de card LIMPO criado: {prefabPath}");
-            Debug.Log("🎯 Agora você pode:");
-            Debug.Log("1. Customizar este template visualmente");
-            Debug.Log("2. Atribuí-lo no campo 'cardPrefab' do seu SkillData");
-            Debug.Log("3. O sistema usará SkillCardInstance automaticamente!");
         }
     }
 
@@ -522,7 +509,6 @@ public class SkillChoiceUICreator : EditorWindow
                     {
                         DestroyImmediate(controller, true);
                         cleanedCount++;
-                        Debug.Log($"🧹 Removido SkillCardController de: {prefab.name}");
                     }
                 }
 
@@ -533,11 +519,9 @@ public class SkillChoiceUICreator : EditorWindow
 
         if (cleanedCount > 0)
         {
-            Debug.Log($"✅ {cleanedCount} prefabs limpos! Agora use o sistema de instâncias.");
         }
         else
         {
-            Debug.Log("✅ Nenhum SkillCardController encontrado nos prefabs.");
         }
 
         AssetDatabase.Refresh();

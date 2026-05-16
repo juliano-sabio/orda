@@ -1,21 +1,20 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-// CLASSE ABSTRATA - outras skills vão herdar dela
+// CLASSE ABSTRATA - outras skills vï¿½o herdar dela
 public abstract class SkillBehavior : MonoBehaviour
 {
-    [Header("Referências")]
+    [Header("Referï¿½ncias")]
     public PlayerStats playerStats; // Mudei de protected para public
 
-    // MÉTODO CHAMADO QUANDO A SKILL É ADQUIRIDA
+    // Mï¿½TODO CHAMADO QUANDO A SKILL ï¿½ ADQUIRIDA
     public virtual void Initialize(PlayerStats stats)
     {
         playerStats = stats;
-        Debug.Log($"Inicializando comportamento: {GetType().Name}");
     }
 
-    // MÉTODO OBRIGATÓRIO - aplica o efeito especial
+    // Mï¿½TODO OBRIGATï¿½RIO - aplica o efeito especial
     public abstract void ApplyEffect();
 
-    // MÉTODO OPCIONAL - remove o efeito (para skills temporárias)
+    // Mï¿½TODO OPCIONAL - remove o efeito (para skills temporï¿½rias)
     public virtual void RemoveEffect() { }
 }

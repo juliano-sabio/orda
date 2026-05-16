@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public enum StatusCardType
@@ -8,18 +7,34 @@ public enum StatusCardType
     Defense,
     Speed,
     Regen,
-    Elemental,
-    Cooldown
+    CriticalChance,
+    AttackSpeed
 }
 
 public enum CardRarity
 {
     Common,
     Rare,
-    Epic,
-    Legendary
+    Mystic,
+    Curse
 }
 
+// Runtime card data — generated procedurally, not a ScriptableObject
+[System.Serializable]
+public class StatusCardInfo
+{
+    public string cardName;
+    public string description;
+    public StatusCardType statType;
+    public CardRarity rarity;
+    public float bonus;
+    // Curse cards also remove stats (future)
+    public StatusCardType penaltyStatType;
+    public float penalty;
+    public bool HasPenalty => penalty > 0f;
+}
+
+// ScriptableObject kept for backwards compatibility with existing assets
 [CreateAssetMenu(fileName = "New Status Card", menuName = "Game/Status Card")]
 [System.Serializable]
 public class StatusCardData : ScriptableObject

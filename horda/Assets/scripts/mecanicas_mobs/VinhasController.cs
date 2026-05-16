@@ -10,7 +10,7 @@ public class VinhasController : MonoBehaviour
 
     private float tempoInicio;
     private SpriteRenderer spriteRenderer;
-    private ParticleSystem particleSystem;
+    private new ParticleSystem particleSystem;
 
     void Start()
     {
@@ -22,10 +22,8 @@ public class VinhasController : MonoBehaviour
         if (particleSystem != null)
         {
             particleSystem.Play();
-            Debug.Log("🎆 Partículas iniciadas");
         }
 
-        Debug.Log($"🌱 Vinhas criadas - duração: {duracao}s");
     }
 
     void Update()
@@ -65,6 +63,5 @@ public class VinhasController : MonoBehaviour
     {
         duracao = novaDuracao;
         tempoInicio = Time.time;
-        Debug.Log($"🌱 Vinhas reiniciadas - nova duração: {duracao}s");
     }
 }

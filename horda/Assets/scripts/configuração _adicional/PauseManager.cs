@@ -70,69 +70,58 @@ public class PauseManager : MonoBehaviour
     // 🆕 MÉTODO PARA PROCURAR REFERÊNCIAS AUTOMATICAMENTE
     private void FindUIReferences()
     {
-        Debug.Log("🔍 Procurando referências de UI automaticamente...");
 
         // Procurar painéis
         if (pausePanel == null)
         {
             pausePanel = GameObject.Find("PausePanel");
-            if (pausePanel != null) Debug.Log("✅ PausePanel encontrado automaticamente");
         }
 
         if (settingsPanel == null)
         {
             settingsPanel = GameObject.Find("SettingsPanel");
-            if (settingsPanel != null) Debug.Log("✅ SettingsPanel encontrado automaticamente");
         }
 
         // Procurar botões do pause
         if (resumeButton == null && pausePanel != null)
         {
             resumeButton = FindButtonInChildren(pausePanel.transform, "ResumeButton");
-            if (resumeButton != null) Debug.Log("✅ ResumeButton encontrado automaticamente");
         }
 
         if (settingsButton == null && pausePanel != null)
         {
             settingsButton = FindButtonInChildren(pausePanel.transform, "SettingsButton");
-            if (settingsButton != null) Debug.Log("✅ SettingsButton encontrado automaticamente");
         }
 
         if (exitButton == null && pausePanel != null)
         {
             exitButton = FindButtonInChildren(pausePanel.transform, "ExitButton");
-            if (exitButton != null) Debug.Log("✅ ExitButton encontrado automaticamente");
         }
 
         // Procurar elementos das configurações
         if (backButton == null && settingsPanel != null)
         {
             backButton = FindButtonInChildren(settingsPanel.transform, "BackButton");
-            if (backButton != null) Debug.Log("✅ BackButton encontrado automaticamente");
         }
 
         if (settingsBackButton == null && settingsPanel != null)
         {
             settingsBackButton = FindButtonInChildren(settingsPanel.transform, "BackButton");
-            if (settingsBackButton != null) Debug.Log("✅ SettingsBackButton encontrado automaticamente");
         }
 
         if (musicVolumeSlider == null && settingsPanel != null)
         {
             musicVolumeSlider = FindSliderInChildren(settingsPanel.transform, "MusicSlider/Slider");
-            if (musicVolumeSlider != null) Debug.Log("✅ MusicVolumeSlider encontrado automaticamente");
         }
 
         if (sfxVolumeSlider == null && settingsPanel != null)
         {
             sfxVolumeSlider = FindSliderInChildren(settingsPanel.transform, "SFXSlider/Slider");
-            if (sfxVolumeSlider != null) Debug.Log("✅ SFXVolumeSlider encontrado automaticamente");
         }
 
         if (fullscreenToggle == null && settingsPanel != null)
         {
             fullscreenToggle = FindToggleInChildren(settingsPanel.transform, "FullscreenToggle/Toggle");
-            if (fullscreenToggle != null) Debug.Log("✅ FullscreenToggle encontrado automaticamente");
         }
 
         // 🆕 VERIFICAR SE AINDA FALTAM REFERÊNCIAS
@@ -168,28 +157,24 @@ public class PauseManager : MonoBehaviour
 
     void InitializePauseMenu()
     {
-        Debug.Log("🎮 Inicializando menu de pause...");
 
         // 🎯 CONFIGURAR BOTÕES PRINCIPAIS
         if (resumeButton != null)
         {
             resumeButton.onClick.RemoveAllListeners();
             resumeButton.onClick.AddListener(ResumeGame);
-            Debug.Log("✅ ResumeButton configurado - FUNCIONANDO");
         }
 
         if (settingsButton != null)
         {
             settingsButton.onClick.RemoveAllListeners();
             settingsButton.onClick.AddListener(OpenSettings);
-            Debug.Log("✅ SettingsButton configurado - FUNCIONANDO");
         }
 
         if (exitButton != null)
         {
             exitButton.onClick.RemoveAllListeners();
             exitButton.onClick.AddListener(ExitToMenu);
-            Debug.Log("✅ ExitButton configurado - FUNCIONANDO");
         }
 
         // 🎯 CONFIGURAR BOTÕES DE CONFIGURAÇÕES
@@ -197,14 +182,12 @@ public class PauseManager : MonoBehaviour
         {
             backButton.onClick.RemoveAllListeners();
             backButton.onClick.AddListener(CloseSettings);
-            Debug.Log("✅ BackButton configurado - FUNCIONANDO");
         }
 
         if (settingsBackButton != null)
         {
             settingsBackButton.onClick.RemoveAllListeners();
             settingsBackButton.onClick.AddListener(CloseSettings);
-            Debug.Log("✅ SettingsBackButton configurado - FUNCIONANDO");
         }
 
         // 🎯 CONFIGURAR CONFIGURAÇÕES
@@ -212,28 +195,24 @@ public class PauseManager : MonoBehaviour
         {
             musicVolumeSlider.onValueChanged.RemoveAllListeners();
             musicVolumeSlider.onValueChanged.AddListener(SetMusicVolume);
-            Debug.Log("✅ MusicVolumeSlider configurado - FUNCIONANDO");
         }
 
         if (sfxVolumeSlider != null)
         {
             sfxVolumeSlider.onValueChanged.RemoveAllListeners();
             sfxVolumeSlider.onValueChanged.AddListener(SetSFXVolume);
-            Debug.Log("✅ SFXVolumeSlider configurado - FUNCIONANDO");
         }
 
         if (fullscreenToggle != null)
         {
             fullscreenToggle.onValueChanged.RemoveAllListeners();
             fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
-            Debug.Log("✅ FullscreenToggle configurado - FUNCIONANDO");
         }
 
         // 🎯 ESCONDER PAINÉIS INICIALMENTE
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
-            Debug.Log("✅ PausePanel escondido");
         }
         else
         {
@@ -243,14 +222,12 @@ public class PauseManager : MonoBehaviour
         if (settingsPanel != null)
         {
             settingsPanel.SetActive(false);
-            Debug.Log("✅ SettingsPanel escondido");
         }
         else
         {
             Debug.LogError("❌ SettingsPanel é NULL - não pode esconder");
         }
 
-        Debug.Log("✅ PauseManager inicializado completamente!");
     }
 
     void HandlePauseInput()
@@ -290,7 +267,6 @@ public class PauseManager : MonoBehaviour
         // 🎯 MOSTRAR MENU DE PAUSE
         ShowPauseMenu();
 
-        Debug.Log("⏸️ Jogo pausado");
     }
 
     public void ResumeGame()
@@ -307,7 +283,6 @@ public class PauseManager : MonoBehaviour
         // 🎯 ESCONDER MENU DE PAUSE
         HidePauseMenu();
 
-        Debug.Log("▶️ Jogo despausado");
     }
 
     private void ShowPauseMenu()
@@ -334,7 +309,6 @@ public class PauseManager : MonoBehaviour
         else
         {
             Debug.LogError("❌ PausePanel não atribuído! Não é possível mostrar o menu de pause.");
-            Debug.Log("💡 Execute 'Criar Sistema de Pause Completo' no UIManager");
         }
     }
 
@@ -375,13 +349,11 @@ public class PauseManager : MonoBehaviour
         {
             resumeButton.Select();
             resumeButton.OnSelect(null);
-            Debug.Log("🎯 ResumeButton selecionado");
         }
         else if (settingsButton != null)
         {
             settingsButton.Select();
             settingsButton.OnSelect(null);
-            Debug.Log("🎯 SettingsButton selecionado");
         }
     }
 
@@ -401,7 +373,6 @@ public class PauseManager : MonoBehaviour
                 settingsBackButton.OnSelect(null);
             }
 
-            Debug.Log("⚙️ Painel de configurações aberto - FUNCIONANDO");
         }
         else
         {
@@ -425,28 +396,24 @@ public class PauseManager : MonoBehaviour
                 resumeButton.OnSelect(null);
             }
 
-            Debug.Log("⚙️ Painel de configurações fechado - FUNCIONANDO");
         }
     }
 
-    // ⚙️ CONFIGURAÇÕES DE AUDIO/VIDEO - AGORA FUNCIONANDO
+    // CONFIGURACOES DE AUDIO/VIDEO - AGORA FUNCIONANDO
     private void SetMusicVolume(float volume)
     {
         // Implementar seu sistema de audio aqui
         AudioListener.volume = volume;
-        Debug.Log($"🎵 Volume de música: {volume} - FUNCIONANDO");
     }
 
     private void SetSFXVolume(float volume)
     {
         // Implementar SFX separado se tiver
-        Debug.Log($"🔊 Volume SFX: {volume} - FUNCIONANDO");
     }
 
     private void SetFullscreen(bool isFullscreen)
     {
         Screen.fullScreen = isFullscreen;
-        Debug.Log($"🖥️ Tela cheia: {isFullscreen} - FUNCIONANDO");
     }
 
     private void LoadSettings()
@@ -463,7 +430,6 @@ public class PauseManager : MonoBehaviour
             if (fullscreenToggle != null)
                 fullscreenToggle.isOn = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
 
-            Debug.Log("⚙️ Configurações carregadas");
         }
         catch (System.Exception e)
         {
@@ -486,7 +452,6 @@ public class PauseManager : MonoBehaviour
                 PlayerPrefs.SetInt("Fullscreen", fullscreenToggle.isOn ? 1 : 0);
 
             PlayerPrefs.Save();
-            Debug.Log("💾 Configurações salvas");
         }
         catch (System.Exception e)
         {
@@ -499,7 +464,6 @@ public class PauseManager : MonoBehaviour
     {
         PlayButtonClickSound();
 
-        Debug.Log("🚪 Saindo para o menu principal... - FUNCIONANDO");
 
         // Despausar antes de sair
         ResumeGame();
@@ -510,12 +474,10 @@ public class PauseManager : MonoBehaviour
             try
             {
                 SceneManager.LoadScene(mainMenuSceneName);
-                Debug.Log($"🎮 Carregando cena: {mainMenuSceneName}");
             }
             catch (System.Exception e)
             {
                 Debug.LogError($"❌ Erro ao carregar cena {mainMenuSceneName}: {e.Message}");
-                Debug.Log("💡 Verifique se o nome da cena está correto no PauseManager");
             }
         }
         else
@@ -528,7 +490,6 @@ public class PauseManager : MonoBehaviour
     {
         PlayButtonClickSound();
 
-        Debug.Log("🛑 Saindo do jogo... - FUNCIONANDO");
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -573,7 +534,6 @@ public class PauseManager : MonoBehaviour
     public void SetMainMenuScene(string sceneName)
     {
         mainMenuSceneName = sceneName;
-        Debug.Log($"🎮 Cena do menu principal definida: {sceneName}");
     }
 
     [ContextMenu("⏸️ Testar Pause")]
@@ -582,12 +542,10 @@ public class PauseManager : MonoBehaviour
         if (!isPaused)
         {
             PauseGame();
-            Debug.Log("🧪 Teste: Jogo pausado");
         }
         else
         {
             ResumeGame();
-            Debug.Log("🧪 Teste: Jogo despausado");
         }
     }
 
@@ -598,29 +556,17 @@ public class PauseManager : MonoBehaviour
             PauseGame();
 
         OpenSettings();
-        Debug.Log("🧪 Teste: Configurações abertas");
     }
 
     [ContextMenu("🚪 Testar Saída para Menu")]
     public void TestExitToMenu()
     {
-        Debug.Log("🧪 Testando saída para menu...");
         // Não executar realmente, só mostrar que funciona
-        Debug.Log("✅ ExitToMenu funcionando! (Não executado em teste)");
     }
 
     [ContextMenu("🔍 Verificar Referências")]
     public void DebugReferences()
     {
-        Debug.Log($"🔍 REFERÊNCIAS DO PAUSEMANAGER:");
-        Debug.Log($"• PausePanel: {(pausePanel != null ? "✅" : "❌")}");
-        Debug.Log($"• SettingsPanel: {(settingsPanel != null ? "✅" : "❌")}");
-        Debug.Log($"• ResumeButton: {(resumeButton != null ? "✅" : "❌")}");
-        Debug.Log($"• SettingsButton: {(settingsButton != null ? "✅" : "❌")}");
-        Debug.Log($"• ExitButton: {(exitButton != null ? "✅" : "❌")}");
-        Debug.Log($"• MusicVolumeSlider: {(musicVolumeSlider != null ? "✅" : "❌")}");
-        Debug.Log($"• FullscreenToggle: {(fullscreenToggle != null ? "✅" : "❌")}");
-        Debug.Log($"• Cena do Menu: {mainMenuSceneName}");
     }
 
     void OnDestroy()

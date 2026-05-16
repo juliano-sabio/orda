@@ -137,7 +137,6 @@ public class projetil_inimigo : MonoBehaviour
         // Aplica o efeito
         efeito.AplicarLentidao(duracaoLentidao, fatorLentidao, corEfeito);
 
-        Debug.Log($"🐌 Lentidão aplicada ao player por {duracaoLentidao}s");
     }
 
     void CriarVinhas(GameObject player)

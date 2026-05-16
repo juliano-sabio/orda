@@ -101,7 +101,6 @@ public class InimigoController : MonoBehaviour
         suporteComponent = GetComponent<InimigoSuporte>();
         temInimigoSuporte = (suporteComponent != null);
 
-        Debug.Log($"⚙️ {gameObject.name} inicializado | Vida: {vidaAtual}/{vidaMaxima} | Tem Suporte: {temInimigoSuporte}");
     }
 
     public void ReceberDano(float dano, bool isCrit = false)
@@ -112,12 +111,10 @@ public class InimigoController : MonoBehaviour
         {
             float reducao = dano * bonusDefesa;
             dano -= reducao;
-            Debug.Log($"🛡️ Defesa reduziu {reducao:F1} de dano. Dano final: {dano:F1}");
         }
 
         vidaAtual -= dano;
 
-        Debug.Log($"💥 Dano: {dano:F1} | Vida: {vidaAtual:F1}/{vidaMaxima:F1}");
 
         MostrarDanoFlutuante(dano, isCrit);
         StartCoroutine(EfeitoVisualDano());
@@ -126,7 +123,6 @@ public class InimigoController : MonoBehaviour
         {
             vidaAtual = 0;
             estaMorrendo = true;
-            Debug.Log($"💀 Vida zerada! Chamando Morrer()...");
 
             MostrarDanoFatal(dano, isCrit);
             Morrer();
@@ -143,7 +139,6 @@ public class InimigoController : MonoBehaviour
         vidaAtual = Mathf.Min(vidaAtual + curaFinal, vidaMaxima);
         float curaReal = vidaAtual - vidaAntes;
 
-        Debug.Log($"💚 Cura: +{curaReal:F1} | Vida: {vidaAtual:F1}/{vidaMaxima:F1}");
 
         if (mostrarEfeito && mostrarCuraFlutuante)
         {
@@ -172,7 +167,6 @@ public class InimigoController : MonoBehaviour
             }
         }
 
-        Debug.Log($"🛡️ Buff de defesa aplicado: +{bonus * 100}% | Duração: {duracao}s");
 
         StopCoroutine("GerenciarBuffDefesa");
         StartCoroutine(GerenciarBuffDefesa(duracao));
@@ -185,7 +179,6 @@ public class InimigoController : MonoBehaviour
     {
         if (estaMorrendo || reducaoVelocidade <= 0) return;
 
-        Debug.Log($"🐌 Slow aplicado ao inimigo {name}: -{reducaoVelocidade * 100}% por {duracao}s");
 
         // Calcula a redução
         float reducaoAplicada = velocidadeAtual * reducaoVelocidade;
@@ -205,7 +198,6 @@ public class InimigoController : MonoBehaviour
     {
         yield return new WaitForSeconds(duracao);
         velocidadeAtual += reducao;
-        Debug.Log($"🏃 Velocidade do inimigo {name} restaurada para {velocidadeAtual}");
     }
 
     private IEnumerator EfeitoVisualSlow()
@@ -227,7 +219,6 @@ public class InimigoController : MonoBehaviour
     {
         if (estaMorrendo) return;
 
-        Debug.Log($"💫 Stun aplicado ao inimigo {name} por {duracao}s");
 
         estaAtordoado = true;
         tempoAtordoado = duracao;
@@ -247,7 +238,6 @@ public class InimigoController : MonoBehaviour
         yield return new WaitForSeconds(duracao);
         estaAtordoado = false;
         tempoAtordoado = 0f;
-        Debug.Log($"🌀 Stun removido do inimigo {name}");
     }
 
     private IEnumerator EfeitoVisualStun()
@@ -273,7 +263,6 @@ public class InimigoController : MonoBehaviour
     {
         if (estaMorrendo) return;
 
-        Debug.Log($"☠️ Veneno aplicado ao inimigo {name}: {danoPorTick}/tick por {quantidadeTicks} ticks");
 
         StartCoroutine(EfeitoVenenoCoroutine(danoPorTick, intervalo, quantidadeTicks, corVeneno));
     }
@@ -337,7 +326,6 @@ public class InimigoController : MonoBehaviour
             spriteRenderer.color = corOriginal;
         }
 
-        Debug.Log($"🛡️ Buff de defesa removido");
     }
 
     private void MostrarCuraFlutuante(float quantidade)
@@ -370,7 +358,6 @@ public class InimigoController : MonoBehaviour
 
     private void MostrarDanoFatal(float danoFinal, bool isCrit)
     {
-        Debug.Log($"💀 DANO FATAL: {danoFinal}");
 
         if (mostrarDanoAposMorte)
         {
@@ -463,7 +450,6 @@ public class InimigoController : MonoBehaviour
     {
         if (estaMorrendo && vidaAtual <= 0)
         {
-            Debug.Log($"☠️ {dadosInimigo?.nomeInimigo} MORTO! Destruindo...");
 
             if (suporteComponent != null)
             {
@@ -510,7 +496,6 @@ public class InimigoController : MonoBehaviour
             }
         }
 
-        Debug.Log($"💫 Dropou {quantidadeOrbes} orbes de XP!");
     }
 
     public float GetPorcentagemVida()

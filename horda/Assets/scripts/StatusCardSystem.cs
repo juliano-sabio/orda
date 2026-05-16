@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,322 +7,230 @@ public class StatusCardSystem : MonoBehaviour
 {
     public static StatusCardSystem Instance;
 
-    [Header("Configurações do Sistema")]
-    public int statusPointsPerLevel = 2;
-    public int currentStatusPoints = 0;
-    public int cardsPerChoice = 3;
+    // Bonus per stat per rarity: [statIndex][rarityIndex] — Common, Rare, Mystic, Curse
+    private static readonly float[][] BonusTable =
+    {
+        new float[] { 15f,   30f,   50f,   80f   }, // Health
+        new float[] { 3f,    6f,    12f,   20f   }, // Attack
+        new float[] { 2f,    5f,    8f,    15f   }, // Defense
+        new float[] { 0.3f,  0.7f,  1.2f,  2.0f  }, // Speed
+        new float[] { 0.3f,  0.7f,  1.5f,  2.5f  }, // Regen
+        new float[] { 0.02f, 0.05f, 0.10f, 0.20f }, // CriticalChance (+% por raridade)
+        new float[] { 0.1f,  0.2f,  0.4f,  0.7f  }, // AttackSpeed (redução em segundos)
+    };
 
-    // 🆕 Níveis que ativam a ESCOLHA DE CARDS
-    public int[] cardChoiceLevels = { 2, 4, 6, 8, 10, 12, 14, 16, 18, 20 };
+    // Rarity weights: Common 60%, Rare 30%, Mystic 10% — Curse excluded (future system)
+    private static readonly float[] RarityWeights = { 60f, 30f, 10f };
 
-    [Header("Prefabs e Referências")]
-    public GameObject statusCardPrefab;
-    public Transform cardsContainer;
-    public GameObject cardChoicePanel;
-
-    [Header("Cards de Status Disponíveis")]
-    public List<StatusCardData> allStatusCards = new List<StatusCardData>();
-    private List<StatusCardData> availableCards = new List<StatusCardData>();
-
-    [Header("Status Aplicados")]
-    public List<ActiveStatusBonus> activeBonuses = new List<ActiveStatusBonus>();
+    private static readonly string[] CardTitles =
+    {
+        "Vitalidade", "Forca", "Resistencia", "Agilidade",
+        "Regeneracao", "Precisao", "Reflexos"
+    };
+    private static readonly string[] StatLabels =
+    {
+        "Vida", "ATQ", "DEF", "Vel",
+        "Regen", "Critico", "Vel.Atq"
+    };
+    private static readonly string[] RarityLabels = { "Comum", "Raro", "Mistico", "Amaldicoado" };
 
     private PlayerStats playerStats;
-    private UIManager uiManager;
+    private StatusCardChoiceUI choiceUI;
 
     void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
+        else Destroy(gameObject);
     }
 
     void Start()
     {
         playerStats = FindAnyObjectByType<PlayerStats>();
-        uiManager = UIManager.Instance;
-
-        LoadStatusCards();
-        Debug.Log("✅ StatusCardSystem inicializado!");
+        choiceUI    = FindAnyObjectByType<StatusCardChoiceUI>(FindObjectsInactive.Include);
     }
 
-    void LoadStatusCards()
-    {
-        availableCards = new List<StatusCardData>(allStatusCards);
-        Debug.Log($"🎴 {allStatusCards.Count} cartas de status carregadas!");
-    }
-
-    // 🆕 MÉTODO ATUALIZADO: Ganha pontos sempre, cards só em níveis específicos
     public void OnPlayerLevelUp(int newLevel)
     {
-        // 🆕 SEMPRE ganha pontos de status
-        currentStatusPoints += statusPointsPerLevel;
-
-        // 🆕 Verifica se este nível deve oferecer ESCOLHA DE CARDS
-        bool shouldOfferCards = Array.Exists(cardChoiceLevels, level => level == newLevel);
-
-        if (shouldOfferCards)
-        {
-            OfferStatusCardChoice();
-        }
-
-        Debug.Log($"🎯 Level {newLevel}: +{statusPointsPerLevel} pontos! Total: {currentStatusPoints}");
-
-        if (shouldOfferCards)
-        {
-            Debug.Log($"🎴 Nível {newLevel} oferece escolha de cards!");
-        }
-
-        if (uiManager != null)
-        {
-            uiManager.ShowStatusPointsGained(statusPointsPerLevel);
-
-            // 🆕 Atualiza a UI para mostrar pontos disponíveis
-            uiManager.UpdateStatusCardsUI(); // ✅ AGORA FUNCIONA!
-        }
+        StartCoroutine(DelayedOffer());
     }
 
-    // 🆕 OFERECER ESCOLHA DE CARDS (automático apenas nos níveis determinados)
-    void OfferStatusCardChoice()
+    private IEnumerator DelayedOffer()
     {
-        List<StatusCardData> choices = GetRandomStatusCardChoices(cardsPerChoice);
-
-        if (choices.Count > 0 && cardChoicePanel != null)
-        {
-            DisplayCardChoice(choices);
-
-            // Mostra automaticamente o painel
-            cardChoicePanel.SetActive(true);
-
-            Debug.Log($"🎴 Oferecendo {choices.Count} cards no nível {playerStats.GetLevel()}");
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ Nenhum card disponível para escolha!");
-        }
+        yield return new WaitForSeconds(0.5f);
+        OfferCardChoice();
     }
 
-    // 🆕 MÉTODO PÚBLICO para usar pontos manualmente (infinito)
-    public void ApplyStatusCardManually(StatusCardData cardData)
+    public void OfferCardChoice()
     {
-        if (cardData == null || currentStatusPoints < cardData.cost)
+        if (choiceUI == null) choiceUI = FindAnyObjectByType<StatusCardChoiceUI>(FindObjectsInactive.Include);
+        if (choiceUI == null)
         {
-            Debug.LogWarning($"❌ Pontos insuficientes! Necessário: {cardData.cost}, Disponível: {currentStatusPoints}");
+            Debug.LogWarning("[StatusCardSystem] StatusCardChoiceUI nao encontrado na cena");
             return;
         }
 
-        currentStatusPoints -= cardData.cost;
-        ApplyCardBonus(cardData);
+        choiceUI.Show(GenerateChoices(3), ApplyCard);
+    }
 
-        ActiveStatusBonus newBonus = new ActiveStatusBonus
+    List<StatusCardInfo> GenerateChoices(int count)
+    {
+        var result    = new List<StatusCardInfo>();
+        var usedStats = new List<int>();
+        int statCount = Enum.GetValues(typeof(StatusCardType)).Length;
+
+        for (int i = 0; i < count; i++)
         {
-            cardData = cardData,
-            appliedTime = Time.time
+            CardRarity rarity  = RollRarity();
+            int statIdx        = PickUnusedStat(usedStats, statCount);
+            usedStats.Add(statIdx);
+            result.Add(BuildCard((StatusCardType)statIdx, rarity));
+        }
+
+        return result;
+    }
+
+    CardRarity RollRarity()
+    {
+        float total = 0f;
+        foreach (float w in RarityWeights) total += w;
+        float roll = UnityEngine.Random.Range(0f, total);
+        float cum  = 0f;
+        for (int i = 0; i < RarityWeights.Length; i++)
+        {
+            cum += RarityWeights[i];
+            if (roll < cum) return (CardRarity)i;
+        }
+        return CardRarity.Common;
+    }
+
+    int PickUnusedStat(List<int> used, int total)
+    {
+        var available = new List<int>();
+        for (int i = 0; i < total; i++)
+            if (!used.Contains(i)) available.Add(i);
+        if (available.Count == 0) return UnityEngine.Random.Range(0, total);
+        return available[UnityEngine.Random.Range(0, available.Count)];
+    }
+
+    StatusCardInfo BuildCard(StatusCardType statType, CardRarity rarity)
+    {
+        int si      = (int)statType;
+        int ri      = (int)rarity;
+        float bonus = BonusTable[si][ri];
+
+        string desc = BuildDescription(statType, bonus);
+
+        return new StatusCardInfo
+        {
+            cardName    = CardTitles[si],
+            description = desc,
+            statType    = statType,
+            rarity      = rarity,
+            bonus       = bonus
         };
-        activeBonuses.Add(newBonus);
-
-        Debug.Log($"✅ Card aplicado manualmente: {cardData.cardName} | Pontos restantes: {currentStatusPoints}");
-
-        if (uiManager != null)
-        {
-            uiManager.ShowStatusCardApplied(cardData.cardName, cardData.description);
-            uiManager.UpdateStatusCardsUI(); // ✅ AGORA FUNCIONA!
-        }
-
-        UpdatePlayerUI();
     }
 
-    List<StatusCardData> GetRandomStatusCardChoices(int count)
+    string BuildDescription(StatusCardType statType, float bonus)
     {
-        List<StatusCardData> choices = new List<StatusCardData>();
-        List<StatusCardData> availableChoices = new List<StatusCardData>();
+        if (playerStats == null)
+            playerStats = FindAnyObjectByType<PlayerStats>();
 
-        if (playerStats == null) return choices;
+        if (playerStats == null)
+            return $"{StatLabels[(int)statType]}: +{bonus}";
 
-        foreach (var card in availableCards)
-        {
-            if (MeetsCardRequirements(card, playerStats.level, currentStatusPoints))
-            {
-                availableChoices.Add(card);
-            }
-        }
-
-        availableChoices = ShuffleList(availableChoices);
-
-        for (int i = 0; i < Mathf.Min(count, availableChoices.Count); i++)
-        {
-            choices.Add(availableChoices[i]);
-        }
-
-        return choices;
-    }
-
-    List<StatusCardData> ShuffleList(List<StatusCardData> list)
-    {
-        List<StatusCardData> shuffled = new List<StatusCardData>(list);
-
-        for (int i = 0; i < shuffled.Count; i++)
-        {
-            StatusCardData temp = shuffled[i];
-            int randomIndex = UnityEngine.Random.Range(i, shuffled.Count);
-            shuffled[i] = shuffled[randomIndex];
-            shuffled[randomIndex] = temp;
-        }
-
-        return shuffled;
-    }
-
-    bool MeetsCardRequirements(StatusCardData card, int playerLevel, int availablePoints)
-    {
-        return card.requiredLevel <= playerLevel &&
-               card.cost <= availablePoints &&
-               !activeBonuses.Exists(bonus => bonus.cardData.cardName == card.cardName);
-    }
-
-    void DisplayCardChoice(List<StatusCardData> cards)
-    {
-        // Limpa cards anteriores
-        foreach (Transform child in cardsContainer)
-        {
-            Destroy(child.gameObject);
-        }
-
-        // Cria os novos cards
-        foreach (var cardData in cards)
-        {
-            GameObject cardObj = Instantiate(statusCardPrefab, cardsContainer);
-            StatusCardUI cardUI = cardObj.GetComponent<StatusCardUI>();
-
-            if (cardUI != null)
-            {
-                cardUI.Initialize(cardData, this);
-            }
-        }
-
-        Debug.Log($"🃏 Displaying {cards.Count} cards for player choice");
-    }
-
-    // 🆕 MÉTODO ATUALIZADO: Fecha automaticamente após escolha (apenas para escolha automática)
-    public void ApplyStatusCard(StatusCardData cardData)
-    {
-        if (cardData == null || currentStatusPoints < cardData.cost) return;
-
-        currentStatusPoints -= cardData.cost;
-        ApplyCardBonus(cardData);
-
-        ActiveStatusBonus newBonus = new ActiveStatusBonus
-        {
-            cardData = cardData,
-            appliedTime = Time.time
-        };
-        activeBonuses.Add(newBonus);
-
-        Debug.Log($"✅ Card aplicado: {cardData.cardName} | Pontos restantes: {currentStatusPoints}");
-
-        if (uiManager != null)
-        {
-            uiManager.ShowStatusCardApplied(cardData.cardName, cardData.description);
-            uiManager.UpdateStatusCardsUI(); // ✅ AGORA FUNCIONA!
-        }
-
-        // 🆕 FECHA AUTOMATICAMENTE O PAINEL (apenas para escolha automática)
-        if (cardChoicePanel != null)
-        {
-            cardChoicePanel.SetActive(false);
-        }
-
-        UpdatePlayerUI();
-    }
-
-    void ApplyCardBonus(StatusCardData cardData)
-    {
-        if (playerStats == null) return;
-
-        switch (cardData.cardType)
+        switch (statType)
         {
             case StatusCardType.Health:
-                playerStats.maxHealth += cardData.statBonus;
-                playerStats.health += cardData.statBonus;
-                Debug.Log($"❤️ Vida aumentada em {cardData.statBonus}");
-                break;
+            {
+                float atual = playerStats.maxHealth;
+                return $"Vida Max: {atual:F0} → {atual + bonus:F0}";
+            }
             case StatusCardType.Attack:
-                playerStats.attack += cardData.statBonus;
-                Debug.Log($"⚔️ Ataque aumentado em {cardData.statBonus}");
-                break;
+            {
+                float atual = playerStats.attack;
+                return $"ATQ: {atual:F1} → {atual + bonus:F1}";
+            }
             case StatusCardType.Defense:
-                playerStats.defense += cardData.statBonus;
-                Debug.Log($"🛡️ Defesa aumentada em {cardData.statBonus}");
-                break;
+            {
+                float atual = playerStats.defense;
+                return $"DEF: {atual:F1} → {atual + bonus:F1}";
+            }
             case StatusCardType.Speed:
-                playerStats.speed += cardData.statBonus;
-                Debug.Log($"🏃 Velocidade aumentada em {cardData.statBonus}");
-                break;
+            {
+                float atual = playerStats.speed;
+                return $"Vel: {atual:F1} → {atual + bonus:F1}";
+            }
             case StatusCardType.Regen:
-                playerStats.healthRegenRate += cardData.statBonus;
-                Debug.Log($"💚 Regeneração aumentada em {cardData.statBonus}");
+            {
+                float atual = playerStats.healthRegenRate;
+                return $"Regen: {atual:F1}/s → {atual + bonus:F1}/s";
+            }
+            case StatusCardType.CriticalChance:
+            {
+                float atual = playerStats.critChance * 100f;
+                float novo  = Mathf.Clamp(playerStats.critChance + bonus, 0f, 0.95f) * 100f;
+                return $"Critico: {atual:F0}% → {novo:F0}%";
+            }
+            case StatusCardType.AttackSpeed:
+            {
+                float atual = playerStats.attackActivationInterval;
+                float novo  = Mathf.Max(0.2f, atual - bonus);
+                return $"Vel.Atq: {atual:F1}s → {novo:F1}s";
+            }
+            default:
+                return $"{StatLabels[(int)statType]}: +{bonus}";
+        }
+    }
+
+    public void ApplyCard(StatusCardInfo card)
+    {
+        if (playerStats == null) playerStats = FindAnyObjectByType<PlayerStats>();
+        if (playerStats == null) return;
+
+        switch (card.statType)
+        {
+            case StatusCardType.Health:
+                playerStats.maxHealth += card.bonus;
+                playerStats.health    += card.bonus;
+                break;
+            case StatusCardType.Attack:  playerStats.attack          += card.bonus; break;
+            case StatusCardType.Defense: playerStats.defense         += card.bonus; break;
+            case StatusCardType.Speed:   playerStats.speed           += card.bonus; break;
+            case StatusCardType.Regen:   playerStats.healthRegenRate += card.bonus; break;
+            case StatusCardType.CriticalChance:
+                playerStats.critChance = Mathf.Clamp(playerStats.critChance + card.bonus, 0f, 0.95f);
+                break;
+            case StatusCardType.AttackSpeed:
+                playerStats.attackActivationInterval =
+                    Mathf.Max(0.2f, playerStats.attackActivationInterval - card.bonus);
                 break;
         }
+
+        playerStats.ForceUIUpdate();
     }
 
-    void UpdatePlayerUI()
-    {
-        if (playerStats != null)
-        {
-            playerStats.ForceUIUpdate();
-        }
-    }
+    // ── Context menu helpers ────────────────────────────────────────────────
 
-    // 🆕 GETTER para verificar se pode comprar card
-    public bool CanAffordCard(StatusCardData card)
-    {
-        return currentStatusPoints >= card.cost &&
-               !activeBonuses.Exists(bonus => bonus.cardData.cardName == card.cardName);
-    }
+    [ContextMenu("Forcar Escolha de Cards (Teste)")]
+    public void ForceCardChoice() => OfferCardChoice();
 
-    public int GetCurrentStatusPoints() => currentStatusPoints;
-    public List<ActiveStatusBonus> GetActiveBonuses() => new List<ActiveStatusBonus>(activeBonuses);
-    public List<StatusCardData> GetAvailableCards() => new List<StatusCardData>(availableCards);
+    // ── Backwards-compat stubs (used by UIManege / StatusCardCanvasCreator) ─
 
-    [ContextMenu("Adicionar 5 Pontos de Status")]
-    public void AddTestPoints()
-    {
-        currentStatusPoints += 5;
-        Debug.Log($"🎯 +5 pontos de status! Total: {currentStatusPoints}");
+    public bool CanAffordCard(StatusCardData card)    => false;
+    public int  GetCurrentStatusPoints()              => 0;
+    public List<StatusCardData>    GetAvailableCards() => new List<StatusCardData>();
+    public List<ActiveStatusBonus> GetActiveBonuses()  => new List<ActiveStatusBonus>();
+    public void AddTestPoints()        { }
+    public void UpdateStatusCardsUI()  { }
+    public void ShowStatusPointsGained(int v) { }
+    public void ShowStatusCardApplied(string n, string d) { }
+    public void ApplyStatusCard(StatusCardData c)        { }
+    public void ApplyStatusCardManually(StatusCardData c) { }
+    public void OpenManualPanel()  { }
 
-        if (uiManager != null)
-            uiManager.UpdateStatusCardsUI(); // ✅ AGORA FUNCIONA!
-    }
-
-    [ContextMenu("Forçar Escolha de Cards (Teste)")]
-    public void ForceCardChoice()
-    {
-        OfferStatusCardChoice();
-    }
-
-    [ContextMenu("Abrir Painel Manual (Teste)")]
-    public void OpenManualPanel()
-    {
-        if (cardChoicePanel != null)
-        {
-            List<StatusCardData> allAvailable = GetRandomStatusCardChoices(6);
-            DisplayCardChoice(allAvailable);
-            cardChoicePanel.SetActive(true);
-        }
-    }
-
-    [ContextMenu("Debug - Listar Cards Carregados")]
-    public void DebugListCards()
-    {
-        Debug.Log($"📋 Total de cards carregados: {allStatusCards.Count}");
-        foreach (var card in allStatusCards)
-        {
-            Debug.Log($"→ {card.cardName} | {card.cardType} | Nv.{card.requiredLevel} | Custo: {card.cost}");
-        }
-    }
+    // Keep allStatusCards list so existing Inspector wiring doesn't break
+    [HideInInspector] public List<StatusCardData> allStatusCards = new List<StatusCardData>();
+    [HideInInspector] public GameObject statusCardPrefab;
+    [HideInInspector] public Transform  cardsContainer;
+    [HideInInspector] public GameObject cardChoicePanel;
 }

@@ -29,7 +29,6 @@ public class SkillManager : MonoBehaviour
     public bool alwaysOfferInitialChoice = false;
 
     // Eventos
-    public event System.Action<List<SkillData>, System.Action<SkillData>> OnSkillChoiceRequired;
     public event System.Action<SkillData> OnSkillAcquired;
     public event System.Action<SkillModifier> OnModifierAcquired;
 
@@ -166,6 +165,11 @@ public class SkillManager : MonoBehaviour
         }
     }
 
+    public bool IsSkillLevel(int level)
+    {
+        return System.Array.Exists(levelUpMilestones, m => m == level);
+    }
+
     public void OnPlayerLevelUp(int newLevel)
     {
         if (playerStats == null)
@@ -235,7 +239,6 @@ public class SkillManager : MonoBehaviour
     // MÉTODO PARA CRIAR SKILLS DE EMERGÊNCIA
     private void CreateEmergencyTestSkills()
     {
-        Debug.Log("🚨 CRIANDO SKILLS DE EMERGÊNCIA!");
 
         skillChoiceUI.allAvailableSkills.Clear();
 
@@ -292,7 +295,6 @@ public class SkillManager : MonoBehaviour
             skillChoiceUI.allAvailableSkills.Add(testSkill);
         }
 
-        Debug.Log($"🧪 {skillChoiceUI.allAvailableSkills.Count} skills de emergência criadas");
     }
 
     List<SkillData> GetRandomSkillChoices(int count)
@@ -738,7 +740,6 @@ public class SkillManager : MonoBehaviour
     [ContextMenu("🌀 Criar Skill Orbital de Teste")]
     public void CreateTestOrbitalSkill()
     {
-        Debug.Log("🌀 Criando Skill Orbital de Teste...");
 
         // Cria skill temporária apenas para teste
         SkillData orbitalSkill = ScriptableObject.CreateInstance<SkillData>();
@@ -759,7 +760,6 @@ public class SkillManager : MonoBehaviour
 
         // Adiciona TEMPORARIAMENTE
         AddSkill(orbitalSkill);
-        Debug.Log("🌀 Skill orbital de TESTE criada (some ao reiniciar)");
     }
 
     void LoadSkillData()
@@ -834,27 +834,20 @@ public class SkillManager : MonoBehaviour
     // yEngine - SISTEMA DE DIAGNÓSTICO
     public void yEngine()
     {
-        Debug.Log("=== 🚀 yEngine DIAGNOSTICO COMPLETO ===");
 
         // 1. Verificar Player
-        Debug.Log($"🎯 Player: {(playerStats != null ? playerStats.name : "NULL")}");
 
         // 2. Verificar Skills disponíveis
-        Debug.Log($"📚 Skills disponíveis: {availableSkills.Count}");
         foreach (var skill in availableSkills)
         {
-            Debug.Log($"   • {skill.skillName} - {skill.specificType}");
         }
 
         // 3. Verificar Skills ativas
-        Debug.Log($"⚡ Skills ativas: {activeSkills.Count}");
         foreach (var skill in activeSkills)
         {
-            Debug.Log($"   • {skill.skillName} - {skill.specificType}");
         }
 
         // 4. Verificar Skill equipada
-        Debug.Log($"🎯 Skill equipada: {currentlyEquippedSkill?.skillName ?? "NENHUMA"}");
 
         // 5. Verificar componentes no Player
         if (playerStats != null)
@@ -888,14 +881,12 @@ public class SkillManager : MonoBehaviour
         // Adicionar skill
         AddSkill(testSkill);
 
-        Debug.Log("✅ yEngine: Skill de teste adicionada!");
     }
 
     // ✅ NOVO MÉTODO DE VERIFICAÇÃO DE DUPLICADOS
     [ContextMenu("🔍 Verificar Projéteis Duplicados")]
     public void CheckForDuplicateProjectiles()
     {
-        Debug.Log("=== 🔍 VERIFICAÇÃO DE PROJÉTEIS DUPLICADOS ===");
 
         if (playerStats == null)
         {
@@ -909,10 +900,6 @@ public class SkillManager : MonoBehaviour
             var orbitalBehaviors = playerStats.GetComponents<OrbitingProjectileSkillBehavior>();
             var boomerangBehaviors = playerStats.GetComponents<BoomerangSkillBehavior>();
 
-            Debug.Log($"🎯 Player: {playerStats.name}");
-            Debug.Log($"• PassiveProjectileSkill2D: {projectileBehaviors.Length} instância(s)");
-            Debug.Log($"• OrbitingProjectileSkillBehavior: {orbitalBehaviors.Length} instância(s)");
-            Debug.Log($"• BoomerangSkillBehavior: {boomerangBehaviors.Length} instância(s)");
 
             bool foundDuplicates = false;
 
@@ -936,7 +923,6 @@ public class SkillManager : MonoBehaviour
 
             if (!foundDuplicates)
             {
-                Debug.Log("✅ Nenhum comportamento duplicado encontrado!");
             }
         }
         else
@@ -948,7 +934,6 @@ public class SkillManager : MonoBehaviour
     [ContextMenu("🎯 Testar Adição de Bumerangue ao Player")]
     public void TestBoomerangOnPlayer()
     {
-        Debug.Log("🧪 Testando adição de bumerangue ao Player...");
 
         // Criar skill de teste
         SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
@@ -969,9 +954,6 @@ public class SkillManager : MonoBehaviour
             var behaviors = playerStats.GetComponents<BoomerangSkillBehavior>();
             if (behaviors.Length > 0)
             {
-                Debug.Log($"✅ SUCESSO: {behaviors.Length} BoomerangSkillBehavior encontrado(s) no Player!");
-                Debug.Log($"   • Componente ativo: {behaviors[0].enabled}");
-                Debug.Log($"   • Dano configurado: {behaviors[0].damage}");
 
                 // Testar lançamento
                 behaviors[0].TestBoomerang();
@@ -982,7 +964,6 @@ public class SkillManager : MonoBehaviour
                     for (int i = 1; i < behaviors.Length; i++)
                     {
                         Destroy(behaviors[i]);
-                        Debug.Log($"🧹 Removido bumerangue duplicado #{i}");
                     }
                 }
             }
@@ -1002,13 +983,11 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("=== 🔍 COMPONENTES NO PLAYER ===");
 
         // Verificar todos os componentes
         var components = playerStats.GetComponents<Component>();
         foreach (var comp in components)
         {
-            Debug.Log($"• {comp.GetType().Name}");
         }
 
         // Verificar específicos
@@ -1016,10 +995,6 @@ public class SkillManager : MonoBehaviour
         var projectiles = playerStats.GetComponents<PassiveProjectileSkill2D>();
         var orbitals = playerStats.GetComponents<OrbitingProjectileSkillBehavior>();
 
-        Debug.Log($"=== ESPECÍFICOS ===");
-        Debug.Log($"• BoomerangSkillBehavior: {boomerangs.Length} instância(s)");
-        Debug.Log($"• PassiveProjectileSkill2D: {projectiles.Length} instância(s)");
-        Debug.Log($"• OrbitingProjectileSkillBehavior: {orbitals.Length} instância(s)");
     }
 
 #if UNITY_EDITOR
@@ -1062,13 +1037,11 @@ public class SkillManager : MonoBehaviour
 
         // Adiciona TEMPORARIAMENTE
         AddSkill(boomerangSkill);
-        Debug.Log("🌀 Skill de bumerangue de TESTE criada (some ao reiniciar)");
     }
 
     [ContextMenu("🎯 Adicionar Skill de Teste")]
     public void AddTestSkills()
     {
-        Debug.Log("🧪 Adicionando skill de TESTE (apenas desenvolvimento)");
 
         SkillData testSkill = ScriptableObject.CreateInstance<SkillData>();
         testSkill.skillName = "Projétil de Teste (EDITOR)";
@@ -1079,7 +1052,6 @@ public class SkillManager : MonoBehaviour
         testSkill.element = PlayerStats.Element.Fire;
 
         AddSkill(testSkill);
-        Debug.Log("✅ Skill de teste adicionada (apenas editor)");
     }
 
     [ContextMenu("Adicionar Modificador Aleatório")]
@@ -1101,7 +1073,6 @@ public class SkillManager : MonoBehaviour
         };
 
         AddSkillModifier(modifier);
-        Debug.Log($"✨ Modificador aleatório adicionado: {randomName} para {randomTarget}");
     }
 
     [ContextMenu("Adicionar Skill Aleatória")]
@@ -1125,30 +1096,22 @@ public class SkillManager : MonoBehaviour
     [ContextMenu("🚨 DIAGNÓSTICO URGENTE: Verificar Sistema de 3 Skills")]
     public void UrgentDiagnosis()
     {
-        Debug.Log("🚨 DIAGNÓSTICO URGENTE DO SISTEMA DE 3 SKILLS");
 
         // 1. Verificar SkillChoiceUI
         if (skillChoiceUI == null)
         {
             Debug.LogError("❌ SKILLCHOICEUI NULL!");
             skillChoiceUI = FindFirstObjectByType<SkillChoiceUI>();
-            Debug.Log($"🔍 Tentativa de encontrar: {(skillChoiceUI != null ? "✅ Encontrado" : "❌ Não encontrado")}");
         }
         else
         {
-            Debug.Log($"✅ SkillChoiceUI: {skillChoiceUI.gameObject.name}");
-            Debug.Log($"📋 Skills no UI: {skillChoiceUI.allAvailableSkills?.Count ?? 0}");
-            Debug.Log($"🎯 Método ShowRandomSkillChoice existe: {skillChoiceUI.GetType().GetMethod("ShowRandomSkillChoice") != null}");
         }
 
         // 2. Verificar availableSkills
-        Debug.Log($"📚 AvailableSkills no Manager: {availableSkills.Count}");
 
         // Verificar tipos específicos
-        Debug.Log($"🌀 Skills de bumerangue disponíveis: {availableSkills.FindAll(s => s.specificType == SpecificSkillType.Boomerang).Count}");
 
         // 3. Forçar teste do sistema
-        Debug.Log("🔄 FORÇANDO TESTE DO SISTEMA...");
         StartCoroutine(ForceThreeSkillsTest());
     }
 
@@ -1159,9 +1122,7 @@ public class SkillManager : MonoBehaviour
         // Chamar o sistema CORRETO
         if (skillChoiceUI != null)
         {
-            Debug.Log("🎯 CHAMANDO ShowRandomSkillChoice DIRETAMENTE...");
             skillChoiceUI.ShowRandomSkillChoice((selectedSkill) => {
-                Debug.Log($"✅ RESULTADO: Skill escolhida - {selectedSkill?.skillName ?? "NULL"}");
             });
         }
         else
@@ -1173,19 +1134,16 @@ public class SkillManager : MonoBehaviour
     [ContextMenu("🎯 Forçar Escolha de 3 Skills")]
     public void ForceThreeSkillsChoice()
     {
-        Debug.Log("🎯 FORÇANDO ESCOLHA DE 3 SKILLS...");
         OfferSkillChoice();
     }
 
     [ContextMenu("🔧 Forçar Configuração de Skills")]
     public void ForceSkillConfiguration()
     {
-        Debug.Log("🔧 Forçando configuração de skills...");
 
         if (skillChoiceUI != null)
         {
             skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
-            Debug.Log($"✅ Configuradas {skillChoiceUI.allAvailableSkills.Count} skills no SkillChoiceUI");
         }
         else
         {
@@ -1196,22 +1154,12 @@ public class SkillManager : MonoBehaviour
     [ContextMenu("🔍 Diagnosticar Problema de Escolha")]
     public void DiagnoseChoiceProblem()
     {
-        Debug.Log("🔍 DIAGNÓSTICO DO PROBLEMA DE ESCOLHA:");
 
-        Debug.Log($"1. PlayerStats: {(playerStats != null ? "✅ Encontrado" : "❌ Não encontrado")}");
-        Debug.Log($"2. SkillChoiceUI: {(skillChoiceUI != null ? "✅ Encontrado" : "❌ Não encontrado")}");
-        Debug.Log($"3. Skills disponíveis: {availableSkills.Count}");
-        Debug.Log($"4. Skills ativas: {activeSkills.Count}");
-        Debug.Log($"5. Milestones: {string.Join(", ", levelUpMilestones)}");
-        Debug.Log($"6. Player Level: {playerStats?.level}");
 
         if (skillChoiceUI != null)
         {
-            Debug.Log($"7. Skills no UI: {skillChoiceUI.allAvailableSkills?.Count ?? 0}");
-            Debug.Log($"8. ShowRandomSkillChoice existe: {skillChoiceUI.GetType().GetMethod("ShowRandomSkillChoice") != null}");
         }
 
-        Debug.Log("9. Testando oferta de escolha...");
         OfferSkillChoice();
     }
 
@@ -1225,7 +1173,6 @@ public class SkillManager : MonoBehaviour
         }
 
         CycleEquippedSkill();
-        Debug.Log($"🎮 Skill equipada: {currentlyEquippedSkill?.skillName}");
     }
     // ✅ MÉTODO PARA SKILLS DE CORTE / MELEE (ESPADA)
    
@@ -1257,37 +1204,29 @@ public class SkillManager : MonoBehaviour
             var projectileBehaviors = playerStats.GetComponents<PassiveProjectileSkill2D>();
             foreach (var behavior in projectileBehaviors) Destroy(behavior);
 
-            Debug.Log($"🧹 {orbitalBehaviors.Length + boomerangBehaviors.Length + projectileBehaviors.Length} comportamentos removidos do player");
         }
 
-        Debug.Log("🧹 TODAS as skills foram removidas - player resetado");
     }
 
     [ContextMenu("🔍 Ver Skills Disponíveis")]
     public void LogAvailableSkills()
     {
-        Debug.Log($"📚 Skills disponíveis no total: {availableSkills.Count}");
         foreach (var skill in availableSkills)
         {
-            Debug.Log($"   • {skill.skillName} ({skill.element}) - {skill.specificType}");
         }
     }
 
     [ContextMenu("🔍 Ver Skills Ativas")]
     public void LogActiveSkills()
     {
-        Debug.Log($"📚 Skills ativas: {activeSkills.Count}");
         foreach (var skill in activeSkills)
         {
-            Debug.Log($"   • {skill.skillName} ({skill.element}) - {skill.specificType}");
         }
     }
 
     [ContextMenu("🔍 Ver Milestones Configurados")]
     public void LogMilestones()
     {
-        Debug.Log($"🎯 Milestones configurados: {string.Join(", ", levelUpMilestones)}");
-        Debug.Log($"🎯 Próximo milestone: {GetNextMilestone()}");
     }
 
     [ContextMenu("🔄 Simular Level Up para Próximo Milestone")]
@@ -1298,38 +1237,24 @@ public class SkillManager : MonoBehaviour
         int nextMilestone = GetNextMilestone();
         if (nextMilestone != -1)
         {
-            Debug.Log($"🎯 Simulando level up para milestone {nextMilestone}");
             playerStats.level = nextMilestone - 1;
             OnPlayerLevelUp(nextMilestone);
         }
         else
         {
-            Debug.Log("ℹ️ Não há mais milestones disponíveis");
         }
     }
 
     [ContextMenu("Verificar Status da Integração")]
     public void CheckIntegrationStatus()
     {
-        Debug.Log("🔍 Status da Integração do SkillManager:");
-        Debug.Log($"• Skills Disponíveis: {availableSkills.Count}");
-        Debug.Log($"• Skills Ativas: {activeSkills.Count}");
-        Debug.Log($"• Skill Equipada: {(currentlyEquippedSkill != null ? currentlyEquippedSkill.skillName : "Nenhuma")}");
-        Debug.Log($"• PlayerStats: {(playerStats != null ? "✅ Conectado" : "❌ Não encontrado")}");
-        Debug.Log($"• SkillChoiceUI: {(skillChoiceUI != null ? "✅ Conectado" : "❌ Não encontrado")}");
-        Debug.Log($"• Skills no UI: {(skillChoiceUI != null ? skillChoiceUI.allAvailableSkills?.Count.ToString() ?? "0" : "N/A")}");
-        Debug.Log($"• Milestones: {string.Join(", ", levelUpMilestones)}");
-        Debug.Log($"• Próximo Milestone: {GetNextMilestone()}");
 
         // Informações específicas
-        Debug.Log($"• Skills de Bumerangue: {GetSkillCountBySpecificType(SpecificSkillType.Boomerang)}");
-        Debug.Log($"• Comportamentos Ativos: {GetActiveBehaviorsCount()}");
     }
 
     [ContextMenu("🚨 DEBUG URGENTE - Verificar destruição")]
     public void UrgentDestructionDebug()
     {
-        Debug.Log("=== 🚨 DEBUG URGENTE - VERIFICAÇÃO DE DESTRUIÇÃO ===");
 
         // 1. Criar objeto teste
         GameObject testObj = new GameObject("URGENT_TEST_OBJECT");
@@ -1345,7 +1270,6 @@ public class SkillManager : MonoBehaviour
     [ContextMenu("🔍 ENCONTRAR DESTRUIDORES")]
     public void FindDestroyers()
     {
-        Debug.Log("=== 🔍 BUSCANDO SCRIPTS DESTRUIDORES ===");
 
         var allBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
         var destroyers = new List<MonoBehaviour>();
@@ -1367,7 +1291,6 @@ public class SkillManager : MonoBehaviour
                     {
                         destroyers.Add(behaviour);
                         Debug.LogWarning($"⚠️ Possível destruidor: {type.Name} em {behaviour.gameObject.name}");
-                        Debug.Log($"   Método suspeito: {method.Name}");
                     }
                 }
             }
@@ -1375,14 +1298,12 @@ public class SkillManager : MonoBehaviour
 
         if (destroyers.Count == 0)
         {
-            Debug.Log("✅ Nenhum script destruidor óbvio encontrado");
         }
     }
 
     [ContextMenu("🎯 TESTE ULTRA SIMPLES")]
     public void UltraSimpleTest()
     {
-        Debug.Log("=== 🎯 TESTE ULTRA SIMPLES ===");
 
         // 1. Criar objeto na posição do jogador
         GameObject testObj = new GameObject("TEST_DIRECT");
@@ -1409,9 +1330,6 @@ public class SkillManager : MonoBehaviour
         testObj.transform.localScale = new Vector3(2f, 2f, 1f);
 
         // 4. Não destruir
-        Debug.Log($"✅ Objeto criado em: {testObj.transform.position}");
-        Debug.Log($"🎯 Nome: {testObj.name}");
-        Debug.Log($"📏 Escala: {testObj.transform.localScale}");
 
         // 5. Verificar em 5 segundos
         StartCoroutine(CheckTestObject(testObj));
@@ -1442,13 +1360,11 @@ public class SkillManager : MonoBehaviour
             }
             else
             {
-                Debug.Log($"✅ Objeto ainda existe após {time}s: {obj.name}");
             }
         }
 
         if (obj != null)
         {
-            Debug.Log($"🎉 Objeto sobreviveu a todos os checks!");
             Destroy(obj, 10f); // Limpar depois
         }
     }
@@ -1463,8 +1379,6 @@ public class SkillManager : MonoBehaviour
         }
         else
         {
-            Debug.Log($"✅ Objeto ainda existe: {obj.name}");
-            Debug.Log($"📍 Posição: {obj.transform.position}");
         }
     }
 
@@ -1505,7 +1419,6 @@ public class SkillManager : MonoBehaviour
 
     void OnDestroy()
     {
-        OnSkillChoiceRequired = null;
         OnSkillAcquired = null;
         OnModifierAcquired = null;
         OnSkillEquippedChanged = null;

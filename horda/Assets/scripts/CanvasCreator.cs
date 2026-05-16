@@ -78,7 +78,6 @@ public class CanvasCreator : EditorWindow
         CriarBotao("BtnVoltar", pStages.transform, new Vector2(0, -250), "VOLTAR", Color.red).GetComponent<Button>().onClick.AddListener(() => manager.ToggleStages(false));
 
         Selection.activeGameObject = canvasGO;
-        Debug.Log("✅ TUDO GERADO: Slots, Detalhes, Upgrades e Fases prontos!");
     }
 
     // --- FUNÇÕES DE CONSTRUÇÃO ---

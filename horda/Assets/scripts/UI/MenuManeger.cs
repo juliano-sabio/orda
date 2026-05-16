@@ -50,7 +50,6 @@ public class MenuManager : MonoBehaviour
 
     public void ShowMainMenu()
     {
-        Debug.Log("🏠 Mostrando Menu Principal...");
 
         // Fecha outros painéis
         if (optionsPanel) optionsPanel.SetActive(false);
@@ -110,7 +109,6 @@ public class MenuManager : MonoBehaviour
 
     public void ExitGame()
     {
-        Debug.Log("👋 Saindo...");
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else

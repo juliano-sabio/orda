@@ -29,7 +29,6 @@ public class SkillCardInstance : MonoBehaviour
         }
 
         FillCardData();
-        Debug.Log($"✅ Instância inicializada: {skillData.skillName}");
     }
 
     private void FillCardData()
@@ -101,10 +100,10 @@ public class SkillCardInstance : MonoBehaviour
     {
         StringBuilder sb = new StringBuilder();
 
-        if (currentSkillData.healthBonus != 0) sb.Append($"❤️{currentSkillData.healthBonus} ");
-        if (currentSkillData.attackBonus != 0) sb.Append($"⚔️{currentSkillData.attackBonus} ");
-        if (currentSkillData.defenseBonus != 0) sb.Append($"🛡️{currentSkillData.defenseBonus} ");
-        if (currentSkillData.speedBonus != 0) sb.Append($"🏃{currentSkillData.speedBonus} ");
+        if (currentSkillData.healthBonus != 0) sb.Append($"HP:{currentSkillData.healthBonus} ");
+        if (currentSkillData.attackBonus != 0) sb.Append($"ATQ:{currentSkillData.attackBonus} ");
+        if (currentSkillData.defenseBonus != 0) sb.Append($"DEF:{currentSkillData.defenseBonus} ");
+        if (currentSkillData.speedBonus != 0) sb.Append($"Vel:{currentSkillData.speedBonus} ");
 
         if (sb.Length == 0) sb.Append("Bônus Passivo");
 

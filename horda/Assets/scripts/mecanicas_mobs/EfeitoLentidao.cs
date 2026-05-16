@@ -76,7 +76,6 @@ public class EfeitoLentidao : MonoBehaviour
             spriteRenderer.color = corEfeito;
         }
 
-        Debug.Log($"🐌 Efeito de lentidão aplicado (fator: {fator})");
     }
 
     void RemoverLentidao()
@@ -101,6 +100,5 @@ public class EfeitoLentidao : MonoBehaviour
             spriteRenderer.color = corOriginal;
         }
 
-        Debug.Log("✅ Efeito de lentidão removido");
     }
 }

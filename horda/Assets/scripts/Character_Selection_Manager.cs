@@ -77,7 +77,6 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         // playerStats.baseDefense = data.baseDefense * (1 + upgradeLevels[2] * 0.05f);
         // playerStats.baseSpeed = data.baseSpeed * (1 + upgradeLevels[3] * 0.05f);
 
-        Debug.Log($"Personagem {data.characterName} aplicado com sucesso!");
     }
 
     // ✅ CORREÇÃO: Método chamado ao selecionar uma fase
@@ -87,7 +86,6 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         {
             PlayerPrefs.SetInt("SelectedStageIndex", index);
             PlayerPrefs.Save();
-            Debug.Log($"Fase selecionada: {stages[index].stageName}");
         }
     }
 

@@ -86,8 +86,6 @@ public class MenuManagerCanvasCreator : EditorWindow
         // Forçar o salvamento das mudanças
         EditorUtility.SetDirty(menuManager);
 
-        Debug.Log("✅ Canvas do MenuManager criado com sucesso!");
-        Debug.Log("📍 Todas as referências foram conectadas automaticamente");
 
         // Selecionar o Canvas criado
         Selection.activeGameObject = canvasGO;
@@ -154,7 +152,7 @@ public class MenuManagerCanvasCreator : EditorWindow
         // Título das opções
         GameObject title = CreateText(panel, "Title", new Vector2(0, 180), new Vector2(500, 60));
         Text titleText = title.GetComponent<Text>();
-        titleText.text = "⚙️ CONFIGURAÇÕES";
+        titleText.text = "CONFIGURACOES";
         titleText.color = Color.white;
         titleText.fontSize = 36;
         titleText.fontStyle = FontStyle.Bold;
@@ -170,7 +168,7 @@ public class MenuManagerCanvasCreator : EditorWindow
 
         // Tela Cheia
         GameObject fullscreenText = CreateText(panel, "FullscreenText", new Vector2(-150, 20), new Vector2(200, 30));
-        fullscreenText.GetComponent<Text>().text = "🖥️ TELA CHEIA";
+        fullscreenText.GetComponent<Text>().text = "TELA CHEIA";
         fullscreenText.GetComponent<Text>().alignment = TextAnchor.MiddleLeft;
         fullscreenText.GetComponent<Text>().fontSize = 18;
 

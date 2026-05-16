@@ -8,7 +8,6 @@ public class StatusCardCanvasCreator : EditorWindow
     [MenuItem("Tools/UI Manager/Create Status Card System")]
     public static void CreateCompleteSystem()
     {
-        Debug.Log("🚀 Criando Sistema Completo de Cards com Scriptable Objects...");
 
         // 1. Criar ou encontrar o Canvas
         GameObject canvas = CreateOrFindCanvas();
@@ -31,10 +30,6 @@ public class StatusCardCanvasCreator : EditorWindow
         // 7. Configurar todas as referências
         SetupAllReferences(canvas, uiManager, cardPrefab);
 
-        Debug.Log("✅ SISTEMA COMPLETO CRIADO COM SUCESSO!");
-        Debug.Log("🎮 Pressione C para abrir o menu de Cards");
-        Debug.Log("📈 Ganhe pontos subindo de nível (2, 4, 6...)");
-        Debug.Log("🃏 Scriptable Objects de exemplo criados na pasta Assets/Data/StatusCards/");
 
         // Selecionar o sistema criado para fácil acesso
         Selection.activeGameObject = GameObject.Find("StatusCardSystem");
@@ -46,12 +41,10 @@ public class StatusCardCanvasCreator : EditorWindow
         Canvas existingCanvas = Object.FindAnyObjectByType<Canvas>();
         if (existingCanvas != null)
         {
-            Debug.Log("✅ Canvas encontrado: " + existingCanvas.gameObject.name);
             return existingCanvas.gameObject;
         }
 
         // Criar novo Canvas
-        Debug.Log("📝 Criando novo Canvas...");
         GameObject canvasGO = new GameObject("UIManager_Canvas");
 
         // Canvas
@@ -66,7 +59,6 @@ public class StatusCardCanvasCreator : EditorWindow
         // Graphic Raycaster
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        Debug.Log("✅ Novo Canvas criado!");
         return canvasGO;
     }
 
@@ -76,11 +68,9 @@ public class StatusCardCanvasCreator : EditorWindow
         if (uiManager == null)
         {
             uiManager = canvas.AddComponent<UIManager>();
-            Debug.Log("✅ UIManager adicionado ao Canvas");
         }
         else
         {
-            Debug.Log("✅ UIManager já existe no Canvas");
         }
         return uiManager;
     }
@@ -92,7 +82,6 @@ public class StatusCardCanvasCreator : EditorWindow
         if (oldPanel != null)
         {
             DestroyImmediate(oldPanel.gameObject);
-            Debug.Log("🗑️ Painel antigo removido");
         }
 
         // Criar o painel principal
@@ -115,12 +104,12 @@ public class StatusCardCanvasCreator : EditorWindow
         bg.type = Image.Type.Sliced;
 
         // Título
-        CreateTextElement(panel, "Title", "🃏 CARTAS DE STATUS",
+        CreateTextElement(panel, "Title", "CARTAS DE STATUS",
                          new Vector2(0, 250), new Vector2(600, 60),
                          Color.yellow, 32, FontStyles.Bold, TextAlignmentOptions.Center);
 
         // Pontos de Status
-        CreateTextElement(panel, "StatusPointsText", "🎯 Pontos Disponíveis: 0",
+        CreateTextElement(panel, "StatusPointsText", "Pontos Disponiveis: 0",
                          new Vector2(300, 200), new Vector2(300, 40),
                          Color.white, 18, FontStyles.Bold, TextAlignmentOptions.Right);
 
@@ -143,14 +132,13 @@ public class StatusCardCanvasCreator : EditorWindow
         layout.childControlHeight = false;
 
         // Bônus Ativos
-        CreateTextElement(panel, "ActiveBonusesText", "✅ BÔNUS ATIVOS:\nNenhum",
+        CreateTextElement(panel, "ActiveBonusesText", "BONUS ATIVOS:\nNenhum",
                          new Vector2(-350, 0), new Vector2(250, 300),
                          Color.green, 14, FontStyles.Normal, TextAlignmentOptions.TopLeft);
 
         // Botão Fechar
         CreateCloseButton(panel);
 
-        Debug.Log("✅ Painel de Cards criado!");
     }
 
     private static GameObject CreateCardPrefab()
@@ -163,12 +151,10 @@ public class StatusCardCanvasCreator : EditorWindow
             GameObject existingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             if (existingPrefab != null)
             {
-                Debug.Log("✅ Prefab encontrado: " + path);
                 return existingPrefab;
             }
         }
 
-        Debug.Log("📝 Criando novo Prefab de Card...");
 
         // Criar GameObject para o card
         GameObject card = new GameObject("StatusCardPrefab",
@@ -295,7 +281,6 @@ public class StatusCardCanvasCreator : EditorWindow
 
         if (savedPrefab != null)
         {
-            Debug.Log("✅ Prefab salvo: " + prefabPath);
             DestroyImmediate(card);
             return savedPrefab;
         }
@@ -313,7 +298,6 @@ public class StatusCardCanvasCreator : EditorWindow
         if (oldSystem != null)
         {
             DestroyImmediate(oldSystem.gameObject);
-            Debug.Log("🗑️ Sistema antigo removido");
         }
 
         // Criar novo sistema
@@ -329,7 +313,6 @@ public class StatusCardCanvasCreator : EditorWindow
         // REMOVIDO: DontDestroyOnLoad não pode ser usado no Editor
         // DontDestroyOnLoad(systemGO);
 
-        Debug.Log("✅ StatusCardSystem criado!");
     }
 
     private static void CreateExampleScriptableObjects()
@@ -353,7 +336,6 @@ public class StatusCardCanvasCreator : EditorWindow
         CreateStatusCardSO("Card_Velocidade_Rara", "Agilidade Avançada", "Aumenta velocidade em 2",
                           StatusCardType.Speed, CardRarity.Rare, 2f, 0, 2, 4);
 
-        Debug.Log("✅ Scriptable Objects de exemplo criados!");
     }
 
     private static void CreateStatusCardSO(string fileName, string cardName, string description,
@@ -372,7 +354,6 @@ public class StatusCardCanvasCreator : EditorWindow
 
         string path = $"Assets/Data/StatusCards/{fileName}.asset";
         AssetDatabase.CreateAsset(card, path);
-        Debug.Log($"🃏 {cardName} criado em: {path}");
     }
 
     private static void SetupAllReferences(GameObject canvas, UIManager uiManager, GameObject cardPrefab)
@@ -412,10 +393,8 @@ public class StatusCardCanvasCreator : EditorWindow
                 }
             }
 
-            Debug.Log($"✅ {system.allStatusCards.Count} Scriptable Objects carregados no sistema");
         }
 
-        Debug.Log("✅ Todas as referências configuradas!");
     }
 
     // Método auxiliar para criar textos (COM CORREÇÃO DA PROPRIEDADE OBSOLETA)
@@ -495,7 +474,6 @@ public class StatusCardCanvasCreator : EditorWindow
             {
                 system.AddTestPoints();
                 system.ForceCardChoice();
-                Debug.Log("🧪 Sistema testado - Cards devem aparecer!");
             }
             else
             {
@@ -505,7 +483,6 @@ public class StatusCardCanvasCreator : EditorWindow
         else
         {
             Debug.LogWarning("⚠️ O teste do sistema só funciona em Play Mode!");
-            Debug.Log("🎮 Entre em Play Mode e pressione C para testar o sistema de cards");
         }
     }
 
@@ -515,14 +492,13 @@ public class StatusCardCanvasCreator : EditorWindow
         CreateStatusCardSO("Card_Regen_Basico", "Cura Básica", "Aumenta regeneração de vida em 0.5",
                           StatusCardType.Regen, CardRarity.Common, 0.5f, 0, 1, 2);
 
-        CreateStatusCardSO("Card_Ataque_Epico", "Fúria do Guerreiro", "Aumenta ataque em 15 e velocidade em 10%",
-                          StatusCardType.Attack, CardRarity.Epic, 15f, 0.1f, 3, 5);
+        CreateStatusCardSO("Card_Ataque_Mistico", "Furia do Guerreiro", "Aumenta ataque em 15 e velocidade em 10%",
+                          StatusCardType.Attack, CardRarity.Mystic, 15f, 0.1f, 3, 5);
 
-        CreateStatusCardSO("Card_Defesa_Lendaria", "Barreira Impenetrável", "Aumenta defesa em 10 e reduz dano em 5%",
-                          StatusCardType.Defense, CardRarity.Legendary, 10f, 0.05f, 4, 8);
+        CreateStatusCardSO("Card_Defesa_Amaldicoada", "Barreira Impenetravel", "Aumenta defesa em 10 e reduz dano em 5%",
+                          StatusCardType.Defense, CardRarity.Curse, 10f, 0.05f, 4, 8);
 
         AssetDatabase.Refresh();
-        Debug.Log("✅ Cards adicionais criados!");
     }
 
     [MenuItem("Tools/UI Manager/Add DontDestroyOnLoad Script")]
@@ -533,7 +509,6 @@ public class StatusCardCanvasCreator : EditorWindow
         if (system != null && system.gameObject.GetComponent<DontDestroyOnLoadComponent>() == null)
         {
             system.gameObject.AddComponent<DontDestroyOnLoadComponent>();
-            Debug.Log("✅ Componente DontDestroyOnLoad adicionado (será ativado em Play Mode)");
         }
     }
 }
@@ -547,7 +522,6 @@ public class DontDestroyOnLoadComponent : MonoBehaviour
         if (Application.isPlaying)
         {
             DontDestroyOnLoad(gameObject);
-            Debug.Log("🔄 StatusCardSystem marcado como DontDestroyOnLoad");
         }
     }
 }

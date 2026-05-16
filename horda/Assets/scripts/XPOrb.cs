@@ -21,7 +21,6 @@ public class XPOrb : MonoBehaviour
         if (player != null)
         {
             playerStats = player.GetComponent<PlayerStats>();
-            Debug.Log($"🎯 Orbe criada. Player em: ({player.position.x:F1}, {player.position.y:F1})");
         }
     }
 
@@ -54,7 +53,6 @@ public class XPOrb : MonoBehaviour
         if (distance <= playerStats.GetXpCollectionRadius())
         {
             isAttracted = true;
-            Debug.Log($"🎯 ATRAINDO! Distância: {distance:F1}");
         }
     }
 
@@ -64,7 +62,6 @@ public class XPOrb : MonoBehaviour
         Vector3 moveDirection = (player.position - transform.position).normalized;
 
         // DEBUG: Mostrar direção
-        Debug.Log($"➡️ Movendo - Direção: ({moveDirection.x:F2}, {moveDirection.y:F2})");
 
         // APLICAR MOVIMENTO
         transform.position += moveDirection * moveSpeed * Time.deltaTime;
@@ -91,7 +88,6 @@ public class XPOrb : MonoBehaviour
                 Instantiate(collectParticles, transform.position, Quaternion.identity);
             }
 
-            Debug.Log($"💫 Coletada! +{xpValue} XP");
             Destroy(gameObject);
         }
     }

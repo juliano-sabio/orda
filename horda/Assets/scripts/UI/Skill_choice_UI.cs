@@ -48,7 +48,6 @@ public class SkillChoiceUI : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("🔄 SkillChoiceUI iniciando...");
         StartCoroutine(InitializeWithDelay());
     }
 
@@ -60,7 +59,6 @@ public class SkillChoiceUI : MonoBehaviour
         // 🎯 CARREGAR SKILLS DO SKILLMANAGER
         LoadSkillsFromSkillManager();
 
-        Debug.Log("✅ SkillChoiceUI inicializado completamente");
     }
 
     // 🆕 MÉTODO: Carregar skills do SkillManager
@@ -74,7 +72,6 @@ public class SkillChoiceUI : MonoBehaviour
             {
                 allAvailableSkills.Clear();
                 allAvailableSkills.AddRange(managerSkills);
-                Debug.Log($"✅ Carregadas {allAvailableSkills.Count} skills do SkillManager");
             }
             else
             {
@@ -119,13 +116,11 @@ public class SkillChoiceUI : MonoBehaviour
             containerRect.pivot = new Vector2(0.5f, 0.5f);
         }
 
-        Debug.Log("✅ Layout horizontal configurado");
     }
 
     // 🆕 MÉTODO PRINCIPAL CORRIGIDO: Mostra 3 skills aleatórias
     public void ShowRandomSkillChoice(System.Action<SkillData> callback)
     {
-        Debug.Log("🎯 ShowRandomSkillChoice chamado!");
 
         // 🎯 ATUALIZAR SKILLS DO SKILLMANAGER SEMPRE ANTES DE MOSTRAR
         LoadSkillsFromSkillManager();
@@ -135,7 +130,6 @@ public class SkillChoiceUI : MonoBehaviour
         {
             allAvailableSkills = allAvailableSkills.FindAll(s => s.EhSkillDeAtaque());
             somenteSkillsDeAtaque = false;
-            Debug.Log($"🎯 Primeira escolha: mostrando apenas {allAvailableSkills.Count} skills de ataque");
         }
 
         if (allAvailableSkills == null || allAvailableSkills.Count == 0)
@@ -147,10 +141,8 @@ public class SkillChoiceUI : MonoBehaviour
         // 🎯 SELECIONAR 3 SKILLS ALEATÓRIAS
         List<SkillData> randomSkills = SelectRandomSkills(numberOfSkillsToShow);
 
-        Debug.Log($"🎲 {randomSkills.Count} skills selecionadas aleatoriamente de {allAvailableSkills.Count} disponíveis:");
         foreach (var skill in randomSkills)
         {
-            Debug.Log($"   ➡️ {skill.skillName} (Raridade: {skill.rarity}, Elemento: {skill.element})");
         }
 
         // 🎯 AGORA mostra as 3 skills para o player escolher
@@ -166,7 +158,6 @@ public class SkillChoiceUI : MonoBehaviour
         if (allAvailableSkills.Count <= count)
         {
             selectedSkills.AddRange(allAvailableSkills);
-            Debug.Log($"ℹ️ Mostrando todas as {allAvailableSkills.Count} skills disponíveis");
         }
         else
         {
@@ -198,7 +189,6 @@ public class SkillChoiceUI : MonoBehaviour
     // MÉTODO ORIGINAL (mantido para compatibilidade)
     public void ShowSkillChoice(List<SkillData> skills, System.Action<SkillData> callback)
     {
-        Debug.Log($"🎯 ShowSkillChoice chamado com {skills.Count} skills!");
 
         if (skills == null || skills.Count == 0)
         {
@@ -228,11 +218,9 @@ public class SkillChoiceUI : MonoBehaviour
         if (choicePanel != null)
         {
             choicePanel.SetActive(true);
-            Debug.Log("✅ Painel de escolha ativado");
         }
 
         UpdateTitleText();
-        Debug.Log($"📋 Mostrando escolha de {skills.Count} skills");
 
         // 🎯 INICIAR COROUTINE COM SEGURANÇA
         if (gameObject.activeInHierarchy)
@@ -255,7 +243,6 @@ public class SkillChoiceUI : MonoBehaviour
             CreateSkillButtonWithSpecificPrefab(skills[i], i);
         }
 
-        Debug.Log($"✅ {skills.Count} cards criados com prefabs específicos");
 
         yield return StartCoroutine(ForceLayoutRefresh());
     }
@@ -291,7 +278,6 @@ public class SkillChoiceUI : MonoBehaviour
         SetupCardTransform(cardObj);
         InitializeCardWithSkillData(cardObj, skill);
 
-        Debug.Log($"✅ Card criado: {skill.skillName} | Prefab: {cardPrefabToUse.name}");
     }
 
     private void InitializeCardWithSkillData(GameObject cardObj, SkillData skill)
@@ -320,7 +306,6 @@ public class SkillChoiceUI : MonoBehaviour
             button.interactable = true;
         }
 
-        Debug.Log($"✅ Card configurado (APENAS TEXTO): {skill.skillName}");
     }
 
     private void SetupCardTextsOnly(GameObject cardObj, SkillData skill)
@@ -360,11 +345,11 @@ public class SkillChoiceUI : MonoBehaviour
         {
             case PlayerStats.Element.Fire: return "🔥";
             case PlayerStats.Element.Ice: return "❄️";
-            case PlayerStats.Element.Lightning: return "⚡";
-            case PlayerStats.Element.Poison: return "☠️";
-            case PlayerStats.Element.Earth: return "🌍";
-            case PlayerStats.Element.Wind: return "💨";
-            case PlayerStats.Element.None: return "⭐";
+            case PlayerStats.Element.Lightning: return "";
+            case PlayerStats.Element.Poison: return "";
+            case PlayerStats.Element.Earth: return "";
+            case PlayerStats.Element.Wind: return "";
+            case PlayerStats.Element.None: return "";
             default: return "*";
         }
     }
@@ -448,13 +433,13 @@ public class SkillChoiceUI : MonoBehaviour
     {
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-        if (skill.healthBonus != 0) sb.Append($"❤️{skill.healthBonus} ");
-        if (skill.attackBonus != 0) sb.Append($"⚔️{skill.attackBonus} ");
-        if (skill.defenseBonus != 0) sb.Append($"🛡️{skill.defenseBonus} ");
-        if (skill.speedBonus != 0) sb.Append($"🏃{skill.speedBonus} ");
-        if (skill.healthRegenBonus != 0) sb.Append($"💚{skill.healthRegenBonus} ");
+        if (skill.healthBonus != 0) sb.Append($"HP:{skill.healthBonus} ");
+        if (skill.attackBonus != 0) sb.Append($"ATQ:{skill.attackBonus} ");
+        if (skill.defenseBonus != 0) sb.Append($"DEF:{skill.defenseBonus} ");
+        if (skill.speedBonus != 0) sb.Append($"Vel:{skill.speedBonus} ");
+        if (skill.healthRegenBonus != 0) sb.Append($"Regen:{skill.healthRegenBonus} ");
 
-        if (sb.Length == 0) sb.Append("Bônus Passivo");
+        if (sb.Length == 0) sb.Append("Bonus Passivo");
 
         return sb.ToString();
     }
@@ -472,7 +457,6 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void OnSkillSelected(SkillData selectedSkill)
     {
-        Debug.Log($"🎯 Skill selecionada: {selectedSkill.skillName}");
 
         if (selectedSkill != null)
         {
@@ -540,7 +524,7 @@ public class SkillChoiceUI : MonoBehaviour
     {
         PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
         int currentLevel = playerStats != null ? playerStats.level : 1;
-        string title = $"ESCOLHA UMA SKILL (Nível {currentLevel})";
+        string title = $"ESCOLHA UMA SKILL (Nivel {currentLevel})";
 
         if (titleTextTMP != null)
         {
@@ -574,24 +558,20 @@ public class SkillChoiceUI : MonoBehaviour
     [ContextMenu("🎯 Testar Sistema de 3 Skills Aleatórias")]
     public void TestRandomThreeSkills()
     {
-        Debug.Log("🧪 Testando sistema de 3 skills aleatórias...");
 
         // 🎯 ATUALIZAR SKILLS ANTES DO TESTE
         LoadSkillsFromSkillManager();
 
         ShowRandomSkillChoice((selectedSkill) => {
-            Debug.Log($"✅ Sistema funcionando! Skill escolhida: {selectedSkill.skillName}");
         });
     }
 
     [ContextMenu("🔍 Verificar Skills Disponíveis")]
     public void DebugAvailableSkills()
     {
-        Debug.Log($"📊 Total de Skills Disponíveis: {allAvailableSkills.Count}");
 
         foreach (var skill in allAvailableSkills)
         {
-            Debug.Log($"   ➡️ {skill.skillName} (Raridade: {skill.rarity}, Elemento: {skill.element})");
         }
     }
 
@@ -599,7 +579,6 @@ public class SkillChoiceUI : MonoBehaviour
     public void RefreshSkillsFromManager()
     {
         LoadSkillsFromSkillManager();
-        Debug.Log($"🔄 Skills atualizadas: {allAvailableSkills.Count} disponíveis");
     }
 
     void OnDestroy()
@@ -610,21 +589,11 @@ public class SkillChoiceUI : MonoBehaviour
     [ContextMenu("🔧 Verificar Configuração")]
     public void CheckConfiguration()
     {
-        Debug.Log("🔍 Verificando configuração do SkillChoiceUI...");
-        Debug.Log($"📊 Choice Panel: {choicePanel != null}");
-        Debug.Log($"📦 Skills Container: {skillsContainer != null}");
-        Debug.Log($"🎯 Skill Prefab: {skillChoicePrefab != null}");
-        Debug.Log($"🔄 Horizontal Layout: {useHorizontalLayout}");
-        Debug.Log($"📐 Card Size: {cardSize}");
-        Debug.Log($"📏 Card Spacing: {cardSpacing}");
-        Debug.Log($"🎲 Skills to Show: {numberOfSkillsToShow}");
-        Debug.Log($"📋 Available Skills: {allAvailableSkills.Count}");
 
         // 🎯 VERIFICAR SKILLMANAGER
         SkillManager skillManager = SkillManager.Instance;
         if (skillManager != null)
         {
-            Debug.Log($"📚 Skills no SkillManager: {skillManager.GetAvailableSkills().Count}");
         }
         else
         {
@@ -636,8 +605,6 @@ public class SkillChoiceUI : MonoBehaviour
             HorizontalLayoutGroup layout = skillsContainer.GetComponent<HorizontalLayoutGroup>();
             ContentSizeFitter fitter = skillsContainer.GetComponent<ContentSizeFitter>();
 
-            Debug.Log($"📐 Layout Group: {layout != null}");
-            Debug.Log($"🔒 ContentSizeFitter: {fitter != null} (deve ser NULL)");
         }
     }
 
@@ -654,7 +621,6 @@ public class SkillChoiceUI : MonoBehaviour
         if (fitter != null)
         {
             DestroyImmediate(fitter);
-            Debug.Log("✅ ContentSizeFitter removido!");
         }
 
         HorizontalLayoutGroup layout = skillsContainer.GetComponent<HorizontalLayoutGroup>();
@@ -662,23 +628,19 @@ public class SkillChoiceUI : MonoBehaviour
         {
             layout.childControlWidth = false;
             layout.childControlHeight = false;
-            Debug.Log("✅ Layout Group destravado!");
         }
 
         RectTransform rect = skillsContainer as RectTransform;
         if (rect != null)
         {
             rect.sizeDelta = new Vector2(1200, 500);
-            Debug.Log($"✅ Container configurado - Tamanho: {rect.sizeDelta}");
         }
 
-        Debug.Log("🎯 Container destravado e configurado manualmente!");
     }
 
     [ContextMenu("🔍 Verificar Container e Cards")]
     public void DebugContainerAndCards()
     {
-        Debug.Log("=== 🔍 VERIFICAÇÃO DO CONTAINER E CARDS ===");
 
         if (skillsContainer == null)
         {
@@ -690,50 +652,36 @@ public class SkillChoiceUI : MonoBehaviour
         RectTransform containerRect = skillsContainer as RectTransform;
         if (containerRect != null)
         {
-            Debug.Log($"📐 Container - Tamanho: {containerRect.sizeDelta}");
-            Debug.Log($"📍 Container - Posição: {containerRect.anchoredPosition}");
-            Debug.Log($"🎯 Container - Ativo: {containerRect.gameObject.activeInHierarchy}");
         }
 
         // Verificar Layout Group
         HorizontalLayoutGroup layout = skillsContainer.GetComponent<HorizontalLayoutGroup>();
         if (layout != null)
         {
-            Debug.Log($"📏 Layout - Espaçamento: {layout.spacing}");
-            Debug.Log($"🔧 Layout - Child Control: {layout.childControlWidth} x {layout.childControlHeight}");
         }
 
         // Verificar cards existentes
         int childCount = skillsContainer.childCount;
-        Debug.Log($"🎴 Total de cards no container: {childCount}");
 
         for (int i = 0; i < childCount; i++)
         {
             Transform child = skillsContainer.GetChild(i);
             GameObject childObj = child.gameObject;
 
-            Debug.Log($"\n🎴 Card {i}: {child.name}");
-            Debug.Log($"   👀 Ativo: {childObj.activeSelf}");
-            Debug.Log($"   🏷️ Tag: {childObj.tag}");
-            Debug.Log($"   🎯 Layer: {childObj.layer}");
 
             // Verificar componentes
             RectTransform rect = child.GetComponent<RectTransform>();
             if (rect != null)
             {
-                Debug.Log($"   📐 Tamanho: {rect.sizeDelta}");
-                Debug.Log($"   📍 Posição: {rect.anchoredPosition}");
             }
 
             // Verificar se é prefab instance
 #if UNITY_EDITOR
             bool isPrefabInstance = PrefabUtility.IsPartOfPrefabInstance(childObj);
-            Debug.Log($"   📁 É Prefab Instance: {isPrefabInstance}");
 
             if (isPrefabInstance)
             {
                 GameObject prefabSource = PrefabUtility.GetCorrespondingObjectFromSource(childObj);
-                Debug.Log($"   🔗 Prefab Original: {prefabSource?.name ?? "NONE"}");
             }
 #endif
 
@@ -741,21 +689,17 @@ public class SkillChoiceUI : MonoBehaviour
             Image image = child.GetComponent<Image>();
             if (image != null)
             {
-                Debug.Log($"   🎨 Image - Cor: {image.color}");
-                Debug.Log($"   🖼️ Image - Sprite: {image.sprite?.name ?? "NULL"}");
             }
 
             Button button = child.GetComponent<Button>();
             if (button != null)
             {
-                Debug.Log($"   🔘 Button - Interactable: {button.interactable}");
             }
 
             // Verificar textos nos filhos
             TextMeshProUGUI[] texts = child.GetComponentsInChildren<TextMeshProUGUI>();
             foreach (var text in texts)
             {
-                Debug.Log($"   📝 {text.name}: '{text.text}' | Cor: {text.color}");
             }
 
             // Verificar imagens nos filhos
@@ -764,12 +708,10 @@ public class SkillChoiceUI : MonoBehaviour
             {
                 if (img.transform != child) // Não é o componente principal
                 {
-                    Debug.Log($"   🖼️ {img.name}: Sprite '{img.sprite?.name ?? "NULL"}' | Cor: {img.color}");
                 }
             }
         }
 
-        Debug.Log("=== FIM DA VERIFICAÇÃO ===");
     }
 
     [ContextMenu("🎯 Verificar Prefabs das Skills Atuais")]
@@ -777,19 +719,13 @@ public class SkillChoiceUI : MonoBehaviour
     {
         if (currentChoices == null || currentChoices.Count == 0)
         {
-            Debug.Log("ℹ️ Nenhuma skill carregada no momento");
             return;
         }
 
-        Debug.Log("=== 🔍 VERIFICAÇÃO DE PREFABS DAS SKILLS ATUAIS ===");
 
         for (int i = 0; i < currentChoices.Count; i++)
         {
             SkillData skill = currentChoices[i];
-            Debug.Log($"🎴 Skill {i}: {skill.skillName}");
-            Debug.Log($"   📁 Prefab: {skill.cardPrefab?.name ?? "NULL"}");
-            Debug.Log($"   🖼️ Ícone: {skill.icon?.name ?? "NULL"}");
-            Debug.Log($"   ⚡ Elemento: {skill.element}");
 
             if (skill.cardPrefab == null)
             {
@@ -797,6 +733,5 @@ public class SkillChoiceUI : MonoBehaviour
             }
         }
 
-        Debug.Log("=== FIM DA VERIFICAÇÃO ===");
     }
 }

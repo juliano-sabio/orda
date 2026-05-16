@@ -163,7 +163,6 @@ public class EnemySpawnerCompleto : MonoBehaviour
     {
         waveAtualIndex = index;
         waveAtiva = true;
-        Debug.Log("Iniciando: " + waves[index].nome);
     }
 
     IEnumerator LimpezaAutomatica()

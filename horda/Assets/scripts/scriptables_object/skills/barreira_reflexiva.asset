@@ -155,4 +155,4 @@ MonoBehaviour:
   escudoPrefabVisual: {fileID: 5427179984161860115, guid: f1822ed74d6925e48a07fd91b4e816ba, type: 3}
   escudoVelocidadeRotacao: 120
   escudoRaioOrbita: 1.8
-  escudoQuantidade: 2
+  escudoQuantidade: 1

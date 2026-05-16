@@ -16,7 +16,6 @@ public class PassiveProjectileSkill2D : SkillBehavior
         base.Initialize(stats);
         FindSkillDataAlternative();
         SetupProjectilePrefab();
-        Debug.Log($"✅ Projétil 2D Passivo inicializado: {skillData?.skillName ?? "Sem SkillData"}");
     }
 
     public void InitializeWithSkillData(PlayerStats stats, SkillData skill)
@@ -24,7 +23,6 @@ public class PassiveProjectileSkill2D : SkillBehavior
         base.Initialize(stats);
         this.skillData = skill;
         SetupProjectilePrefab();
-        Debug.Log($"✅ Projétil 2D Passivo inicializado: {skillData.skillName}");
     }
 
     private void FindSkillDataAlternative()
@@ -52,13 +50,11 @@ public class PassiveProjectileSkill2D : SkillBehavior
 
     private void SetupProjectilePrefab()
     {
-        Debug.Log("🔍 Buscando prefab do projétil...");
 
         // 🎯 PRIORIDADE 1: Prefab específico do SkillData (ProjectilePrefab2D)
         if (skillData != null && skillData.projectilePrefab2D != null)
         {
             projectilePrefab = skillData.projectilePrefab2D;
-            Debug.Log($"✅ 🎯 Usando PREFAB ESPECÍFICO do SkillData: {skillData.projectilePrefab2D.name}");
             return; // Para aqui se encontrou o prefab específico
         }
 
@@ -66,7 +62,6 @@ public class PassiveProjectileSkill2D : SkillBehavior
         if (skillData != null && skillData.visualEffect != null)
         {
             projectilePrefab = skillData.visualEffect;
-            Debug.Log($"✅ 🎨 Usando VisualEffect do SkillData: {skillData.visualEffect.name}");
             return; // Para aqui se encontrou o visual effect
         }
 
@@ -74,19 +69,16 @@ public class PassiveProjectileSkill2D : SkillBehavior
         projectilePrefab = Resources.Load<GameObject>("Skills/ProjectileBase2D");
         if (projectilePrefab != null)
         {
-            Debug.Log($"✅ 📁 Prefab carregado de Resources/Skills/ProjectileBase2D: {projectilePrefab.name}");
             return; // Para aqui se carregou do Resources
         }
 
         // 🎯 PRIORIDADE 4: Criar fallback automático (ÚLTIMA OPÇÃO)
         projectilePrefab = CreateFallbackProjectile();
-        Debug.Log($"⚠️ 🔧 Prefab fallback criado automaticamente (nenhum prefab encontrado)");
 
         // Configura intervalo baseado na skill
         if (skillData != null && skillData.activationInterval > 0)
         {
             activationInterval = skillData.activationInterval;
-            Debug.Log($"⏱️ Intervalo configurado para: {activationInterval}s");
         }
     }
 
@@ -332,12 +324,10 @@ public class PassiveProjectileSkill2D : SkillBehavior
 
     public override void ApplyEffect()
     {
-        Debug.Log($"🎯 Projétil 2D Passivo ativado: {skillData?.skillName} | Prefab: {projectilePrefab?.name}");
     }
 
     public override void RemoveEffect()
     {
-        Debug.Log($"🔴 Projétil 2D Passivo desativado");
         activationTimer = 0f;
     }
 
@@ -356,13 +346,6 @@ public class PassiveProjectileSkill2D : SkillBehavior
     [ContextMenu("🔍 Verificar Configuração do Projétil")]
     public void DebugProjectileConfig()
     {
-        Debug.Log("🔍 CONFIGURAÇÃO DO PROJÉTIL:");
-        Debug.Log($"• Skill: {skillData?.skillName ?? "None"}");
-        Debug.Log($"• Prefab Atual: {projectilePrefab?.name ?? "None"}");
-        Debug.Log($"• Tem Prefab no SkillData: {skillData?.projectilePrefab2D?.name ?? "None"}");
-        Debug.Log($"• Tem VisualEffect: {skillData?.visualEffect?.name ?? "None"}");
-        Debug.Log($"• Intervalo: {activationInterval}s");
-        Debug.Log($"• Alcance: {searchRange}m");
     }
 
     void OnDrawGizmosSelected()

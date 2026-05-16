@@ -21,7 +21,6 @@ public class DamageNumberPrefab : MonoBehaviour
             damageText = GetComponent<TextMeshProUGUI>();
         }
 
-        Debug.Log($"✅ Prefab DamageNumber inicializado. Texto: {damageText?.text}");
     }
 
     public void SetupDamage(float damage, Color color, int fontSize = 24)
@@ -45,6 +44,5 @@ public class DamageNumberPrefab : MonoBehaviour
             damageText.fontSize = fontSize;
         }
 
-        Debug.Log($"🎨 Prefab configurado: {damage}");
     }
 }

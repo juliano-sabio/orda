@@ -66,8 +66,8 @@ public class StatusCardUI : MonoBehaviour
         {
             case CardRarity.Common: return commonColor;
             case CardRarity.Rare: return rareColor;
-            case CardRarity.Epic: return epicColor;
-            case CardRarity.Legendary: return legendaryColor;
+            case CardRarity.Mystic: return epicColor;
+            case CardRarity.Curse: return legendaryColor;
             default: return Color.white;
         }
     }
