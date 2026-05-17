@@ -9,6 +9,8 @@ using System.Collections.Generic;
 
 public class InimigoController : MonoBehaviour
 {
+    public static event System.Action OnInimigoDerrotado;
+
     [Header("Dados do Inimigo")]
     public InimigoData dadosInimigo;
 
@@ -462,6 +464,7 @@ public class InimigoController : MonoBehaviour
 
             DroparOrbesXP();
             DroparPowerup();
+            OnInimigoDerrotado?.Invoke();
             Destroy(gameObject);
         }
         else

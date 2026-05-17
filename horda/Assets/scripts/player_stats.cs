@@ -7,6 +7,10 @@ using static PlayerStats;
 
 public class PlayerStats : MonoBehaviour
 {
+    public static event System.Action OnDanoRecebido;
+    public static event System.Action<float> OnXPColetado;
+    public static event System.Action OnUltimateAtivada;
+
     [Header("Configuração de Dados (ScriptableObject)")]
     public CharacterData characterData;
 
@@ -50,6 +54,12 @@ public class PlayerStats : MonoBehaviour
     public float ultimateCooldown = 30f;
     public float ultimateChargeTime = 0f;
     public bool ultimateReady = false;
+
+    [Header("🔵 Ultimate de Marcação de Posição")]
+    public bool usarUltimateMarcacao = true;
+    private bool temPosicaoMarcada = false;
+    private Vector2 posicaoMarcada;
+    private GameObject marcadorVisual;
 
     [Header("Configurações de Ativação")]
     public float attackActivationInterval = 2f;
@@ -555,7 +565,17 @@ public class PlayerStats : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R) && ultimateReady && ultimateSkill.isActive)
         {
-            ActivateUltimate();
+            if (usarUltimateMarcacao)
+            {
+                if (!temPosicaoMarcada)
+                    MarcarPosicao();
+                else
+                    TeleportarParaMarcacao();
+            }
+            else
+            {
+                ActivateUltimate();
+            }
         }
 
         HandleSkillToggleInput();
@@ -803,6 +823,7 @@ public class PlayerStats : MonoBehaviour
     public void GainXP(float xpAmount)
     {
         currentXP += xpAmount;
+        OnXPColetado?.Invoke(xpAmount);
 
         if (uiManager != null)
             uiManager.ShowXPGained(xpAmount);
@@ -874,6 +895,8 @@ public class PlayerStats : MonoBehaviour
         }
 
         health -= remaining;
+        if (remaining > 0f)
+            OnDanoRecebido?.Invoke();
         timeSinceLastDamage = 0f;
         isRegenerating = false;
 
@@ -911,6 +934,7 @@ public class PlayerStats : MonoBehaviour
     {
         if (!ultimateReady || !ultimateSkill.isActive) return;
 
+        OnUltimateAtivada?.Invoke();
         float totalDamage = ultimateSkill.CalculateTotalDamage();
         Element ultimateElement = ultimateSkill.GetEffectiveElement();
         float finalDamage = CalculateElementalDamage(totalDamage, ultimateElement, Element.None);
@@ -944,6 +968,50 @@ public class PlayerStats : MonoBehaviour
         {
             uiManager.OnUltimateActivated();
             uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Ultimate ativada!");
+        }
+    }
+
+    private void MarcarPosicao()
+    {
+        posicaoMarcada = transform.position;
+        temPosicaoMarcada = true;
+        ultimateReady = false;
+        ultimateChargeTime = 0f;
+
+        if (marcadorVisual != null)
+            Destroy(marcadorVisual);
+
+        marcadorVisual = new GameObject("MarcadorUltimate");
+        marcadorVisual.transform.position = posicaoMarcada;
+        marcadorVisual.AddComponent<MarcadorUltimate>();
+
+        if (uiManager != null)
+        {
+            uiManager.OnUltimateActivated();
+            uiManager.ShowUltimateAcquired("Ponto Marcado", "Recarregue e pressione R para retornar!");
+        }
+    }
+
+    private void TeleportarParaMarcacao()
+    {
+        transform.position = posicaoMarcada;
+        temPosicaoMarcada = false;
+        ultimateReady = false;
+        ultimateChargeTime = 0f;
+
+        if (marcadorVisual != null)
+        {
+            Destroy(marcadorVisual);
+            marcadorVisual = null;
+        }
+
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
+
+        if (uiManager != null)
+        {
+            uiManager.OnUltimateActivated();
+            uiManager.ShowUltimateAcquired("Retorno!", "Voltou ao ponto marcado!");
         }
     }
 
