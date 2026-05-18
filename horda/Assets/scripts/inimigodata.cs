@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Inimigo", menuName = "Survivor/Inimigo Data")]
 public class InimigoData : ScriptableObject
 {
-    [Header("Identificação")]
+    [Header("Identificaï¿½ï¿½o")]
     public string nomeInimigo;
     public GameObject prefab;
     public Sprite icon;
@@ -14,7 +14,7 @@ public class InimigoData : ScriptableObject
     public float velocidadeBase = 3f;
     public float tamanho = 1f;
 
-    [Header("Configurações de Spawn")]
+    [Header("Configuraï¿½ï¿½es de Spawn")]
     public float intervaloAtaque = 1f;
     public int xpDrop = 10;
     public bool isBoss = false;
@@ -40,6 +40,9 @@ public class InimigoData : ScriptableObject
     public float danoVenenoTick = 5f;
     public float raioVeneno = 3f;
     public float duracaoVeneno = 5f;
+
+    [Header("Drops ao Morrer")]
+    public DropEntry[] dropsPossiveis;
 }
 
 public enum TipoComportamento

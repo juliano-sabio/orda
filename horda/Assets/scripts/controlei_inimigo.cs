@@ -513,6 +513,16 @@ public class InimigoController : MonoBehaviour
             if (UnityEngine.Random.value <= drop.chance)
                 Instantiate(drop.prefab, transform.position, Quaternion.identity);
         }
+
+        if (dadosInimigo != null && dadosInimigo.dropsPossiveis != null)
+        {
+            foreach (var drop in dadosInimigo.dropsPossiveis)
+            {
+                if (drop.prefab == null) continue;
+                if (UnityEngine.Random.value <= drop.chance)
+                    Instantiate(drop.prefab, transform.position, Quaternion.identity);
+            }
+        }
     }
 
     public float GetPorcentagemVida()

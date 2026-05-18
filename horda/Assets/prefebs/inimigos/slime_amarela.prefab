@@ -142,7 +142,7 @@ MonoBehaviour:
   forcaDrop: 2
   drops:
   - prefab: {fileID: 1039466315607258041, guid: 756ebba4d22251e4786e5c07befcfde7, type: 3}
-    chance: 0.132
+    chance: 0.014
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 1
   podeReceberCura: 1
