@@ -326,6 +326,7 @@ public class SkillData : ScriptableObject
         switch (specificType)
         {
             case SpecificSkillType.EscudoRotativo:
+            case SpecificSkillType.EscudoEspinhoso:
             case SpecificSkillType.Shield:
             case SpecificSkillType.IceBarrier:
             case SpecificSkillType.Heal:
@@ -534,6 +535,7 @@ public enum SpecificSkillType
     Ultimate,
     Boomerang, // 🆕 NOVO TIPO DE SKILL
     EscudoRotativo, // 🆕 Escudos orbitais que refletem projéteis inimigos
+    EscudoEspinhoso, // Escudo de espinho que causa dano ao tocar inimigos e desativa por um tempo
 }
 
 // 🆕 NOVO ENUM PARA TARGETING ORBITAL

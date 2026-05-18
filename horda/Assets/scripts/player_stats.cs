@@ -680,6 +680,7 @@ public class PlayerStats : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F8)) skillManager.AddRandomModifier();
         if (Input.GetKeyDown(KeyCode.F9)) skillManager.CreateTestOrbitalSkill();
         if (Input.GetKeyDown(KeyCode.F10)) skillManager.CheckIntegrationStatus();
+        if (Input.GetKeyDown(KeyCode.F11)) GainXP(xpToNextLevel - currentXP);
 #endif
     }
 

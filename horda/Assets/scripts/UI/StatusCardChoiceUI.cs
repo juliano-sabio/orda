@@ -209,6 +209,7 @@ public class StatusCardChoiceUI : MonoBehaviour
         if (choicePanel != null) choicePanel.SetActive(false);
         ClearCards();
         onCardChosen?.Invoke(card);
+        gameObject.SetActive(false);
     }
 
     private void ClearCards()

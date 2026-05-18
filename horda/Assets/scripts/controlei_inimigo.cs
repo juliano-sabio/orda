@@ -24,9 +24,8 @@ public class InimigoController : MonoBehaviour
     public float xpPorOrbe = 5f;
     public float forcaDrop = 2f;
 
-    [Header("Drop de Powerup (Raio/Velocidade)")]
-    public GameObject radiusBoostPrefab;
-    [Range(0f, 1f)] public float chanceDropPowerup = 0.1f;
+    [Header("Drops Adicionais")]
+    public List<DropEntry> drops = new List<DropEntry>();
 
     [Header("Dano Flutuante")]
     public float alturaDanoFlutuante = 2f;
@@ -505,17 +504,12 @@ public class InimigoController : MonoBehaviour
 
     private void DroparPowerup()
     {
-        if (radiusBoostPrefab == null)
+        foreach (var drop in drops)
         {
-            Debug.LogWarning("⚠️ radiusBoostPrefab não atribuído no inimigo!");
-            return;
+            if (drop.prefab == null) continue;
+            if (UnityEngine.Random.value <= drop.chance)
+                Instantiate(drop.prefab, transform.position, Quaternion.identity);
         }
-
-        float roll = UnityEngine.Random.value;
-        Debug.Log($"🎲 Drop roll: {roll:F2} | Chance: {chanceDropPowerup:F2} | Dropou: {roll <= chanceDropPowerup}");
-
-        if (roll <= chanceDropPowerup)
-            Instantiate(radiusBoostPrefab, transform.position, Quaternion.identity);
     }
 
     public float GetPorcentagemVida()
@@ -530,6 +524,13 @@ public class InimigoController : MonoBehaviour
     public float GetTempoAtordoado() => tempoAtordoado;
     public bool TemBuffDefesaAtivo() => temBuffDefesa;
     public float GetBonusDefesa() => bonusDefesa;
+}
+
+[System.Serializable]
+public class DropEntry
+{
+    public GameObject prefab;
+    [Range(0f, 1f)] public float chance = 0.1f;
 }
 
 // ✅ Classe de animação de texto mantida no mesmo arquivo

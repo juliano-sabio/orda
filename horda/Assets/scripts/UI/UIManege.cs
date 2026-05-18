@@ -565,103 +565,44 @@ public class UIManager : MonoBehaviour
 
     private void UpdateAttackSkillIcons()
     {
-        var attackSkills = playerStats.GetAttackSkills();
+        var skills = skillManager?.GetActiveSkills();
+        if (skills == null) return;
 
-        if (attackSkill1Icon != null)
-        {
-            if (attackSkills.Count > 0 && attackSkills[0].isActive)
-            {
-                attackSkill1Icon.sprite = GetSkillIcon(attackSkills[0].skillName);
-                attackSkill1Icon.color = Color.white;
-                attackSkill1Icon.gameObject.SetActive(true);
-
-                if (attackSkill1ElementIcon != null)
-                {
-                    attackSkill1ElementIcon.color = GetElementColor(attackSkills[0].element);
-                    attackSkill1ElementIcon.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                attackSkill1Icon.sprite = defaultSkillIcon;
-                attackSkill1Icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
-                if (attackSkill1ElementIcon != null)
-                    attackSkill1ElementIcon.gameObject.SetActive(false);
-            }
-        }
-
-        if (attackSkill2Icon != null)
-        {
-            if (attackSkills.Count > 1 && attackSkills[1].isActive)
-            {
-                attackSkill2Icon.sprite = GetSkillIcon(attackSkills[1].skillName);
-                attackSkill2Icon.color = Color.white;
-                attackSkill2Icon.gameObject.SetActive(true);
-
-                if (attackSkill2ElementIcon != null)
-                {
-                    attackSkill2ElementIcon.color = GetElementColor(attackSkills[1].element);
-                    attackSkill2ElementIcon.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                attackSkill2Icon.sprite = defaultSkillIcon;
-                attackSkill2Icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
-                if (attackSkill2ElementIcon != null)
-                    attackSkill2ElementIcon.gameObject.SetActive(false);
-            }
-        }
+        SetSkillSlot(attackSkill1Icon, attackSkill1ElementIcon, skills.Count > 0 ? skills[0] : null);
+        SetSkillSlot(attackSkill2Icon, attackSkill2ElementIcon, skills.Count > 1 ? skills[1] : null);
     }
 
     private void UpdateDefenseSkillIcons()
     {
-        var defenseSkills = playerStats.GetDefenseSkills();
+        var skills = skillManager?.GetActiveSkills();
+        if (skills == null) return;
 
-        if (defenseSkill1Icon != null)
+        SetSkillSlot(defenseSkill1Icon, defenseSkill1ElementIcon, skills.Count > 2 ? skills[2] : null);
+        SetSkillSlot(defenseSkill2Icon, defenseSkill2ElementIcon, skills.Count > 3 ? skills[3] : null);
+    }
+
+    private void SetSkillSlot(Image icon, Image elementIcon, SkillData skill)
+    {
+        if (icon == null) return;
+
+        if (skill != null)
         {
-            if (defenseSkills.Count > 0 && defenseSkills[0].isActive)
-            {
-                defenseSkill1Icon.sprite = GetSkillIcon(defenseSkills[0].skillName);
-                defenseSkill1Icon.color = Color.white;
-                defenseSkill1Icon.gameObject.SetActive(true);
+            icon.sprite = skill.icon != null ? skill.icon : defaultSkillIcon;
+            icon.color = Color.white;
+            icon.gameObject.SetActive(true);
 
-                if (defenseSkill1ElementIcon != null)
-                {
-                    defenseSkill1ElementIcon.color = GetElementColor(defenseSkills[0].element);
-                    defenseSkill1ElementIcon.gameObject.SetActive(true);
-                }
-            }
-            else
+            if (elementIcon != null)
             {
-                defenseSkill1Icon.sprite = defaultSkillIcon;
-                defenseSkill1Icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
-                if (defenseSkill1ElementIcon != null)
-                    defenseSkill1ElementIcon.gameObject.SetActive(false);
+                elementIcon.color = GetElementColor(skill.element);
+                elementIcon.gameObject.SetActive(true);
             }
         }
-
-        if (defenseSkill2Icon != null)
+        else
         {
-            if (defenseSkills.Count > 1 && defenseSkills[1].isActive)
-            {
-                defenseSkill2Icon.sprite = GetSkillIcon(defenseSkills[1].skillName);
-                defenseSkill2Icon.color = Color.white;
-                defenseSkill2Icon.gameObject.SetActive(true);
-
-                if (defenseSkill2ElementIcon != null)
-                {
-                    defenseSkill2ElementIcon.color = GetElementColor(defenseSkills[1].element);
-                    defenseSkill2ElementIcon.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                defenseSkill2Icon.sprite = defaultSkillIcon;
-                defenseSkill2Icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
-                if (defenseSkill2ElementIcon != null)
-                    defenseSkill2ElementIcon.gameObject.SetActive(false);
-            }
+            icon.sprite = defaultSkillIcon;
+            icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+            if (elementIcon != null)
+                elementIcon.gameObject.SetActive(false);
         }
     }
 

@@ -496,6 +496,10 @@ public class SkillManager : MonoBehaviour
                 AddEscudoRotativoBehaviorToPlayer(skill);
                 break;
 
+            case SpecificSkillType.EscudoEspinhoso:
+                AddEscudoEspinhosoBehaviorToPlayer(skill);
+                break;
+
             case SpecificSkillType.Shield:
                 if (playerStats == null)
                     playerStats = FindAnyObjectByType<PlayerStats>();
@@ -590,6 +594,26 @@ public class SkillManager : MonoBehaviour
         }
 
         EscudoRotativoSkillBehavior behavior = playerStats.gameObject.AddComponent<EscudoRotativoSkillBehavior>();
+        behavior.UpdateFromSkillData(skill);
+        behavior.Initialize(playerStats);
+    }
+
+    void AddEscudoEspinhosoBehaviorToPlayer(SkillData skill)
+    {
+        if (playerStats == null)
+        {
+            playerStats = FindFirstObjectByType<PlayerStats>();
+            if (playerStats == null)
+            {
+                Debug.LogError("❌ [SkillManager] PlayerStats não encontrado para EscudoEspinhoso!");
+                return;
+            }
+        }
+
+        var old = playerStats.GetComponents<EscudoEspinhosoSkillBehavior>();
+        foreach (var b in old) { b.RemoveEffect(); Destroy(b); }
+
+        EscudoEspinhosoSkillBehavior behavior = playerStats.gameObject.AddComponent<EscudoEspinhosoSkillBehavior>();
         behavior.UpdateFromSkillData(skill);
         behavior.Initialize(playerStats);
     }
@@ -803,6 +827,12 @@ public class SkillManager : MonoBehaviour
     public List<SkillData> GetActiveSkills()
     {
         return new List<SkillData>(activeSkills);
+    }
+
+    public Sprite GetSkillIcon(string skillName)
+    {
+        var skill = activeSkills.Find(s => s.skillName == skillName);
+        return skill?.icon;
     }
 
     public List<SkillModifier> GetActiveModifiers()
