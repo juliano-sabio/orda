@@ -41,6 +41,7 @@ public class CharacterData : ScriptableObject
 
     [Header("Habilidades (Scripts Adicionais)")]
     public UltimateData ultimateSkill;
+    public UltimateData[] ultimatesDisponiveis;
     public SkillBehavior specialSkillBehavior;
     public UltimateBehavior ultimateBehavior;
 
@@ -62,6 +63,14 @@ public class CharacterData : ScriptableObject
     // --- MÉTODOS DE UTILIDADE PARA A UI ---
 
     public bool HasUltimate() => ultimateSkill != null;
+    public bool HasUltimatesDisponiveis() => ultimatesDisponiveis != null && ultimatesDisponiveis.Length > 0;
+
+    public UltimateData GetUltimate(int index)
+    {
+        if (HasUltimatesDisponiveis() && index >= 0 && index < ultimatesDisponiveis.Length)
+            return ultimatesDisponiveis[index];
+        return ultimateSkill;
+    }
 
     public string GetElementIcon()
     {

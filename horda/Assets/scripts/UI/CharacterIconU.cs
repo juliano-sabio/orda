@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
-public class CharacterIconUI : MonoBehaviour
+public class CharacterIconUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Referências UI Base")]
     public Image characterIcon;
@@ -12,13 +13,14 @@ public class CharacterIconUI : MonoBehaviour
     public TextMeshProUGUI requiredLevelText;
 
     [Header("Referências Elementais (Novo)")]
-    public TextMeshProUGUI elementIconText; // Para exibir o emoji 🔥, ❄️, etc.
-    public Image elementBackground;        // Para mudar a cor do frame conforme o elemento
+    public TextMeshProUGUI elementIconText;
+    public Image elementBackground;
 
     [Header("Cores do Sistema")]
     public Color normalColor = Color.white;
     public Color selectedColor = Color.green;
-    public Color lockedColor = new Color(0.3f, 0.3f, 0.3f, 1f); // Cinza escuro para bloqueados
+    public Color hoverColor = new Color(0.85f, 0.85f, 1f, 1f);
+    public Color lockedColor = new Color(0.3f, 0.3f, 0.3f, 1f);
 
     [Header("Dados")]
     public CharacterData characterData;
@@ -27,6 +29,7 @@ public class CharacterIconUI : MonoBehaviour
     private CharacterSelectionManagerIntegrated characterSelectionManager;
     private Button button;
     private Image backgroundImage;
+    private bool isSelected = false;
 
     public void Initialize(CharacterData data, int index, CharacterSelectionManagerIntegrated manager)
     {
@@ -77,9 +80,9 @@ public class CharacterIconUI : MonoBehaviour
     {
         if (button != null)
         {
+            button.transition = Selectable.Transition.None;
             button.onClick.RemoveAllListeners();
 
-            // O botão só funciona se o personagem estiver desbloqueado
             if (characterData.unlocked)
             {
                 button.interactable = true;
@@ -94,17 +97,35 @@ public class CharacterIconUI : MonoBehaviour
 
     public void SetSelected(bool selected)
     {
+        isSelected = selected;
+
         if (selectedIndicator != null)
             selectedIndicator.SetActive(selected);
 
-        // Feedback visual de seleção no fundo do ícone
         if (backgroundImage != null)
-        {
             backgroundImage.color = selected ? selectedColor : normalColor;
-        }
 
-        // Efeito de "Pop" ao selecionar
         transform.localScale = selected ? Vector3.one * 1.1f : Vector3.one;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (characterData == null || !characterData.unlocked || isSelected) return;
+
+        if (backgroundImage != null)
+            backgroundImage.color = hoverColor;
+
+        transform.localScale = Vector3.one * 1.05f;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (characterData == null || !characterData.unlocked || isSelected) return;
+
+        if (backgroundImage != null)
+            backgroundImage.color = normalColor;
+
+        transform.localScale = Vector3.one;
     }
 
     void UpdateVisuals()

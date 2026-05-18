@@ -130,13 +130,17 @@ public class PlayerStats : MonoBehaviour
         ChangeElement(characterData.baseElement);
 
         // --- Ultimate ---
-        if (characterData.HasUltimate())
+        int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        int ultimateIndex = PlayerPrefs.GetInt($"SelectedUltimate_{charIndex}", 0);
+        UltimateData ultimateData = characterData.GetUltimate(ultimateIndex);
+
+        if (ultimateData != null)
         {
-            ultimateSkill.skillName = characterData.ultimateSkill.ultimateName;
-            ultimateSkill.baseDamage = characterData.ultimateSkill.baseDamage;
-            ultimateSkill.areaOfEffect = characterData.ultimateSkill.areaOfEffect;
-            ultimateSkill.duration = characterData.ultimateSkill.duration;
-            ultimateSkill.element = characterData.ultimateSkill.element;
+            ultimateSkill.skillName = ultimateData.ultimateName;
+            ultimateSkill.baseDamage = ultimateData.baseDamage;
+            ultimateSkill.areaOfEffect = ultimateData.areaOfEffect;
+            ultimateSkill.duration = ultimateData.duration;
+            ultimateSkill.element = ultimateData.element;
             ultimateSkill.isActive = true;
         }
 

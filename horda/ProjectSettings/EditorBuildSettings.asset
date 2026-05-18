@@ -14,6 +14,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/primeira_fase.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/escolher terreno.unity
+    guid: d4eea8aad0d01954ca4764154698ddf7
+  - enabled: 1
+    path: Assets/Scenes/segunda_fase.unity
+    guid: 298c12c378c9ca843a6ba0763dd5e317
+  - enabled: 1
+    path: Assets/Scenes/terceira_fase.unity
+    guid: 38142259e486d5a40b06fd35fc4c3c95
+  - enabled: 1
+    path: Assets/Scenes/Modo_sobrevivencia.unity
+    guid: 7b40721174728754ea1ca47384aa9211
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

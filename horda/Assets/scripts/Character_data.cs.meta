@@ -1,2 +1,17 @@
 fileFormatVersion: 2
 guid: 227619ca6a352bd4b8662f00ca1a329f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - icon: {instanceID: 0}
+  - characterPrefab: {instanceID: 0}
+  - ultimateSkill: {fileID: 11400000, guid: b1b9c3d07bb21c44182199b323fef48e, type: 2}
+  - specialSkillBehavior: {instanceID: 0}
+  - ultimateBehavior: {instanceID: 0}
+  - animatorController: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
