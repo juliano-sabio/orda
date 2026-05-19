@@ -303,12 +303,19 @@ public class MenuInicialUI : MonoBehaviour
         ph.alignment = TextAlignmentOptions.Left;
 
         BotaoSimples(painel,"CRIAR SALA",new Vector2(0.05f,0.23f),new Vector2(0.47f,0.37f),
-            new Color(0.10f,0.35f,0.65f),()=>AvisoPopup(painel,"Em desenvolvimento..."));
+            new Color(0.10f,0.35f,0.65f),()=>{
+                PlayerPrefs.SetInt("LobbyHost",1);
+                PlayerPrefs.SetString("LobbyCode","SPIRIT-" + GerarCodigoSala());
+                SceneManager.LoadScene("lobby");
+            });
         BotaoSimples(painel,"ENTRAR NA SALA",new Vector2(0.53f,0.23f),new Vector2(0.95f,0.37f),
-            new Color(0.10f,0.45f,0.25f),()=>AvisoPopup(painel,"Em desenvolvimento..."));
+            new Color(0.10f,0.45f,0.25f),()=>{
+                PlayerPrefs.SetInt("LobbyHost",0);
+                SceneManager.LoadScene("lobby");
+            });
 
         CriarTexto(painel,"Aviso",new Vector2(0.05f,0.10f),new Vector2(0.95f,0.22f),
-            "⚠  Em breve disponível!",11f,FontStyles.Italic,new Color(0.8f,0.7f,0.3f));
+            "⚠  Multiplayer visual apenas (sem rede)",11f,FontStyles.Italic,new Color(0.8f,0.7f,0.3f));
         BotaoSimples(painel,"← VOLTAR",new Vector2(0.10f,0.02f),new Vector2(0.90f,0.10f),
             new Color(0.28f,0.08f,0.08f),()=>painelMulti.SetActive(false));
     }
@@ -473,6 +480,15 @@ public class MenuInicialUI : MonoBehaviour
     }
 
     // ── Sair ─────────────────────────────────────────────────────────────
+    string GerarCodigoSala()
+    {
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        string cod = "";
+        for (int i = 0; i < 4; i++)
+            cod += chars[Random.Range(0, chars.Length)];
+        return cod;
+    }
+
     void Sair()
     {
 #if UNITY_EDITOR

@@ -21,6 +21,14 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     public TextMeshProUGUI characterDescriptionText;
     public TextMeshProUGUI elementBonusText;
 
+    [Header("📊 UI - Habilidades")]
+    public TextMeshProUGUI ultimateInfoText;
+    public TextMeshProUGUI passivasInfoText;
+
+    [Header("🖼️ UI - Preview")]
+    public TextMeshProUGUI      characterPreviewName;
+    public CharacterSelectionUI selectionUI;
+
     [Header("🔋 UI - Status")]
     public Slider[] statusSliders;
 
@@ -142,6 +150,75 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
         for (int i = 0; i < upgradeLevelTexts.Length; i++)
             if (upgradeLevelTexts[i]) upgradeLevelTexts[i].text = $"Nv. {upgradeLevels[i]}";
+
+        AtualizarUltimateInfo(data);
+        AtualizarPassivasInfo(data);
+        AtualizarPreview(data);
+    }
+
+    void AtualizarUltimateInfo(CharacterData data)
+    {
+        if (ultimateInfoText == null) return;
+
+        UltimateData u = data.ultimateSkill;
+        if (u == null && data.HasUltimatesDisponiveis()) u = data.ultimatesDisponiveis[0];
+
+        if (u != null)
+        {
+            string elem = u.element != PlayerStats.Element.None
+                ? $"{u.GetElementIcon()} {u.element}  |  " : "";
+            ultimateInfoText.text =
+                $"<b>{u.ultimateName}</b>\n" +
+                $"{elem}CD: {u.cooldown}s\n" +
+                $"DMG: {u.baseDamage}  |  Área: {u.areaOfEffect}m  |  Dur: {u.duration}s\n\n" +
+                u.description +
+                (string.IsNullOrEmpty(u.specialEffect) ? "" : $"\n\n<i>{u.specialEffect}</i>");
+            ultimateInfoText.color = u.GetElementColor();
+        }
+        else
+        {
+            ultimateInfoText.text  = "Nenhuma ultimate\ndisponível para\neste personagem.";
+            ultimateInfoText.color = new Color(0.5f, 0.5f, 0.5f);
+        }
+    }
+
+    void AtualizarPassivasInfo(CharacterData data)
+    {
+        if (passivasInfoText == null) return;
+
+        var sb = new System.Text.StringBuilder();
+
+        string bonuses = data.GetElementBonusDescription();
+        if (!string.IsNullOrEmpty(bonuses) && bonuses != "Sem bônus elemental")
+            sb.AppendLine(bonuses);
+
+        sb.AppendLine($"Regen HP: <color=#88ff88>+{data.baseHealthRegen}/s</color>  (delay {data.baseRegenDelay}s)");
+
+        string efeito = GetElementEffectDescription(data.baseElement);
+        if (!string.IsNullOrEmpty(efeito))
+            sb.Append($"\n<i>{efeito}</i>");
+
+        passivasInfoText.text = sb.ToString().TrimStart('\n');
+    }
+
+    void AtualizarPreview(CharacterData data)
+    {
+        if (selectionUI != null) selectionUI.AtualizarPreviewPrefab(data);
+        if (characterPreviewName != null) characterPreviewName.text = data.characterName;
+    }
+
+    string GetElementEffectDescription(PlayerStats.Element element)
+    {
+        switch (element)
+        {
+            case PlayerStats.Element.Fire:      return "Inimigos atingidos sofrem queimadura contínua.";
+            case PlayerStats.Element.Ice:       return "Ataques têm chance de lentificar inimigos.";
+            case PlayerStats.Element.Lightning: return "Dano em cadeia entre inimigos próximos.";
+            case PlayerStats.Element.Poison:    return "Aplica veneno com dano por segundo.";
+            case PlayerStats.Element.Earth:     return "Ataques pesados têm chance de atordoar.";
+            case PlayerStats.Element.Wind:      return "Bônus de velocidade e repulsão ao colidir.";
+            default:                            return "";
+        }
     }
 
     public void ToggleStages(bool open) => painelStages.SetActive(open);

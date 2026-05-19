@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 
 // Adicione este script a um GameObject vazio na cena CharacterSelection.
-// Ele cria toda a UI de selecao de personagem em runtime automaticamente.
 public class CharacterSelectionUI : MonoBehaviour
 {
     [Header("Personagens disponíveis")]
@@ -13,332 +13,692 @@ public class CharacterSelectionUI : MonoBehaviour
     [Header("Configurações")]
     public int numSlots = 6;
 
-    // Referências internas
-    private CharacterSelectionManagerIntegrated manager;
-    private Canvas canvas;
+    // ── Refs do manager ────────────────────────────────────────────────
+    CharacterSelectionManagerIntegrated manager;
+    Canvas canvas;
 
-    private TextMeshProUGUI txtNome, txtElemento, txtDesc, txtBonus, txtMoedas;
-    private Slider[] sliders = new Slider[4];
-    private Button[] upgradeButtons = new Button[4];
-    private TextMeshProUGUI[] upgradeLevelTexts = new TextMeshProUGUI[4];
-    private CharacterIconUI[] iconesArray;
-    private GameObject painelUltimates;
+    TextMeshProUGUI txtNome, txtElemento, txtDesc, txtBonus, txtMoedas;
+    TextMeshProUGUI txtUltimateInfo, txtPassivasInfo, txtNomePreview;
+    Slider[]         sliders         = new Slider[4];
+    Button[]         upgradeButtons  = new Button[4];
+    TextMeshProUGUI[] upgradeLevelTexts = new TextMeshProUGUI[4];
+    CharacterIconUI[] iconesArray;
+    GameObject[]     painelAbaInfo  = new GameObject[3];
+    Button[]         botoesAbaInfo  = new Button[3];
 
+    // ── Preview com RenderTexture ──────────────────────────────────────
+    RawImage         previewRawImage;
+    RenderTexture    previewRT;
+    Camera           previewCamera;
+    GameObject       previewPersonagem;
+    static readonly Vector3 PREVIEW_POS = new Vector3(9999f, 0f, 0f);
+
+    // ── Refs de animação ───────────────────────────────────────────────
+    Image   glowFundo;
+    Image   glowPreview;
+    GameObject painelPreview;
+
+    // partículas
+    const int QTD_P = 16;
+    RectTransform[] pRT   = new RectTransform[QTD_P];
+    Image[]         pImg  = new Image[QTD_P];
+    Vector2[]       pOrig = new Vector2[QTD_P];
+    float[]         pFase = new float[QTD_P];
+    float[]         pVel  = new float[QTD_P];
+
+    Color corAtualGlow = new Color(0.55f, 0.15f, 0.85f);
+
+    // ── Paleta base ────────────────────────────────────────────────────
+    static readonly Color corFundo  = new Color(0.04f, 0.03f, 0.10f);
+    static readonly Color corPainel = new Color(0.08f, 0.06f, 0.16f);
+    static readonly Color corAcento = new Color(0.55f, 0.15f, 0.85f);
+
+    // ──────────────────────────────────────────────────────────────────
     void Start()
     {
+        // Remove qualquer canvas pré-criado pelo editor tool
+        var antigo = GameObject.Find("CanvasPrincipal");
+        if (antigo != null) Destroy(antigo);
+
         CriarCanvas();
         CriarUI();
         ConectarManager();
+        StartCoroutine(AnimarParticulas());
+        StartCoroutine(AnimarGlow());
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 1. Canvas
-
+    // ── Canvas ─────────────────────────────────────────────────────────
     void CriarCanvas()
     {
-        GameObject canvasGO = new GameObject("CanvasPrincipal");
+        var canvasGO = new GameObject("CanvasPrincipal");
         canvas = canvasGO.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.renderMode  = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 0;
-
-        CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
-        scaler.matchWidthOrHeight = 0.5f;
-
+        var cs = canvasGO.AddComponent<CanvasScaler>();
+        cs.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        cs.referenceResolution = new Vector2(1920, 1080);
+        cs.matchWidthOrHeight  = 0.5f;
         canvasGO.AddComponent<GraphicRaycaster>();
-
         manager = canvasGO.AddComponent<CharacterSelectionManagerIntegrated>();
         manager.characters = characters;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 2. UI
-
+    // ── UI principal ───────────────────────────────────────────────────
     void CriarUI()
     {
-        GameObject root = canvas.gameObject;
+        var root = canvas.gameObject;
 
-        // Fundo
-        CriarImagem(root, "Fundo",
-            Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
-            new Color(0.06f, 0.06f, 0.12f));
-
-        // Título
-        var titulo = CriarTMP(root, "Titulo",
-            new Vector2(0f, 1f), new Vector2(1f, 1f),
-            new Vector2(0f, -15f), new Vector2(0f, -65f),
-            34f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
-        titulo.text = "SELEÇÃO DE PERSONAGEM";
-
-        // Painel de ícones
+        CriarFundo(root);
+        CriarParticulas(root);
+        CriarTitulo(root);
         CriarPainelIcones(root);
-
-        // Painel central
-        CriarPainelCentral(root);
-
-        // Rodapé (moedas + botões)
+        CriarAreaCentral(root);
         CriarRodape(root);
     }
 
+    // ── Fundo com glow dinâmico ────────────────────────────────────────
+    void CriarFundo(GameObject root)
+    {
+        Img(root, "Fundo", Vector2.zero, Vector2.one, corFundo);
+
+        // glow central (muda de cor com o elemento)
+        var g = Img(root, "GlowFundo", new Vector2(0.15f,0.15f), new Vector2(0.85f,0.85f),
+            new Color(corAcento.r, corAcento.g, corAcento.b, 0.07f));
+        glowFundo = g.GetComponent<Image>();
+
+        // faixa topo
+        Img(root, "FaixaTopo", new Vector2(0f,0.92f), Vector2.one,
+            new Color(corAcento.r, corAcento.g, corAcento.b, 0.12f));
+
+        // faixa rodapé
+        Img(root, "FaixaBot", Vector2.zero, new Vector2(1f, 0.08f),
+            new Color(0f, 0f, 0f, 0.50f));
+    }
+
+    // ── Partículas flutuantes ──────────────────────────────────────────
+    void CriarParticulas(GameObject root)
+    {
+        for (int i = 0; i < QTD_P; i++)
+        {
+            float sz = Random.Range(3f, 10f);
+            var go   = Img(root, $"P{i}", Vector2.zero, Vector2.zero,
+                new Color(corAcento.r, corAcento.g, corAcento.b, 0.12f));
+            var rt   = go.GetComponent<RectTransform>();
+            Vector2 pos = new Vector2(Random.Range(0f,1f), Random.Range(0.08f,0.92f));
+            rt.anchorMin = rt.anchorMax = pos;
+            rt.pivot     = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(sz, sz);
+            pRT[i]   = rt;
+            pImg[i]  = go.GetComponent<Image>();
+            pOrig[i] = pos;
+            pFase[i] = Random.Range(0f, Mathf.PI * 2f);
+            pVel[i]  = Random.Range(0.2f, 0.7f);
+        }
+    }
+
+    // ── Título animado ─────────────────────────────────────────────────
+    void CriarTitulo(GameObject root)
+    {
+        var linha = Img(root, "LinhaT",
+            new Vector2(0.02f, 0.905f), new Vector2(0.98f, 0.905f),
+            new Color(corAcento.r, corAcento.g, corAcento.b, 0.5f));
+        linha.GetComponent<RectTransform>().offsetMax = new Vector2(0f, 2f);
+
+        var t = TMP(root, "Titulo",
+            new Vector2(0f,0.93f), new Vector2(1f, 1f),
+            "SELEÇÃO DE PERSONAGEM", 26f, FontStyles.Bold, Color.white);
+        t.alignment = TextAlignmentOptions.Center;
+
+        StartCoroutine(PulsarTitulo(t));
+    }
+
+    // ── Faixa de ícones ────────────────────────────────────────────────
     void CriarPainelIcones(GameObject root)
     {
-        GameObject painel = CriarImagem(root, "PainelIcones",
-            new Vector2(0f, 1f), new Vector2(1f, 1f),
-            new Vector2(10f, -75f), new Vector2(-10f, -225f),
-            new Color(0.08f, 0.08f, 0.18f));
+        var painel = Img(root, "PainelIcones",
+            new Vector2(0f, 0.78f), new Vector2(1f, 0.93f),
+            corPainel);
+        var rt = painel.GetComponent<RectTransform>();
+        rt.offsetMin = new Vector2(8f, 0f); rt.offsetMax = new Vector2(-8f, 0f);
 
-        HorizontalLayoutGroup hlg = painel.AddComponent<HorizontalLayoutGroup>();
-        hlg.childAlignment = TextAnchor.MiddleCenter;
-        hlg.spacing = 15f;
-        hlg.padding = new RectOffset(15, 15, 8, 8);
-        hlg.childForceExpandWidth = false;
+        var hlg = painel.AddComponent<HorizontalLayoutGroup>();
+        hlg.childAlignment       = TextAnchor.MiddleCenter;
+        hlg.spacing              = 12f;
+        hlg.padding              = new RectOffset(12, 12, 6, 6);
+        hlg.childForceExpandWidth  = false;
         hlg.childForceExpandHeight = false;
 
         int slots = Mathf.Max(numSlots, characters != null ? characters.Length : 1);
         iconesArray = new CharacterIconUI[slots];
         for (int i = 0; i < slots; i++)
-            iconesArray[i] = CriarIconePersonagem(painel, i);
+            iconesArray[i] = CriarIcone(painel, i);
     }
 
-    CharacterIconUI CriarIconePersonagem(GameObject parent, int index)
+    CharacterIconUI CriarIcone(GameObject parent, int index)
     {
-        GameObject go = new GameObject($"Icone_{index}");
+        var go = new GameObject($"Icone_{index}");
         go.transform.SetParent(parent.transform, false);
+        var le = go.AddComponent<LayoutElement>();
+        le.preferredWidth  = 110f;
+        le.preferredHeight = 110f;
 
-        LayoutElement le = go.AddComponent<LayoutElement>();
-        le.preferredWidth = 120f;
-        le.preferredHeight = 120f;
-
-        Image bgImg = go.AddComponent<Image>();
-        bgImg.color = new Color(0.12f, 0.12f, 0.25f);
-        Button btn = go.AddComponent<Button>();
+        var bgImg = go.AddComponent<Image>();
+        bgImg.color = new Color(0.12f, 0.10f, 0.22f);
+        var btn = go.AddComponent<Button>();
         btn.targetGraphic = bgImg;
 
-        CharacterIconUI iconUI = go.AddComponent<CharacterIconUI>();
+        var iconUI = go.AddComponent<CharacterIconUI>();
 
-        // Sprite do personagem
-        GameObject iconGO = new GameObject("Icon");
+        // ícone sprite
+        var iconGO  = new GameObject("Icon");
         iconGO.transform.SetParent(go.transform, false);
-        SetAnchors(iconGO, new Vector2(0.1f, 0.3f), new Vector2(0.9f, 0.95f));
-        Image iconImg = iconGO.AddComponent<Image>();
-        iconImg.color = new Color(0.5f, 0.5f, 0.5f, 0.4f);
+        var iconImg = iconGO.AddComponent<Image>();
+        iconImg.color = new Color(0.5f,0.5f,0.5f,0.4f);
+        Anchors(iconGO, new Vector2(0.08f,0.28f), new Vector2(0.92f,0.94f));
         iconUI.characterIcon = iconImg;
 
-        // Nome
-        iconUI.characterName = CriarTMP(go, "Nome",
-            new Vector2(0f, 0f), new Vector2(1f, 0.3f),
-            Vector2.zero, Vector2.zero,
-            11f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
+        // nome
+        iconUI.characterName = TMP(go, "Nome",
+            new Vector2(0f,0f), new Vector2(1f,0.28f),
+            "", 10f, FontStyles.Bold, Color.white);
+        iconUI.characterName.alignment = TextAlignmentOptions.Center;
 
-        // Elemento
-        iconUI.elementIconText = CriarTMP(go, "Elem",
-            new Vector2(0f, 0.85f), new Vector2(1f, 1f),
-            Vector2.zero, Vector2.zero,
-            13f, FontStyles.Normal, Color.yellow, TextAlignmentOptions.Center);
+        // elemento
+        iconUI.elementIconText = TMP(go, "Elem",
+            new Vector2(0f,0.84f), new Vector2(1f,1f),
+            "", 13f, FontStyles.Normal, Color.yellow);
+        iconUI.elementIconText.alignment = TextAlignmentOptions.Center;
 
-        // Fundo elemento
-        GameObject elemBg = new GameObject("ElemBG");
+        // bg elemento
+        var elemBg = new GameObject("ElemBG");
         elemBg.transform.SetParent(go.transform, false);
-        SetAnchors(elemBg, Vector2.zero, Vector2.one);
-        Image elemBgImg = elemBg.AddComponent<Image>();
-        elemBgImg.color = new Color(1f, 1f, 1f, 0f);
-        iconUI.elementBackground = elemBgImg;
+        iconUI.elementBackground = elemBg.AddComponent<Image>();
+        iconUI.elementBackground.color = new Color(1f,1f,1f,0f);
+        Anchors(elemBg, Vector2.zero, Vector2.one);
 
-        // Indicador selecionado
-        GameObject sel = new GameObject("Selecionado");
+        // indicador selecionado (borda colorida)
+        var sel = new GameObject("Sel");
         sel.transform.SetParent(go.transform, false);
-        RectTransform selR = sel.AddComponent<RectTransform>();
-        selR.anchorMin = Vector2.zero;
-        selR.anchorMax = Vector2.one;
-        selR.offsetMin = new Vector2(-3f, -3f);
-        selR.offsetMax = new Vector2(3f, 3f);
-        sel.AddComponent<Image>().color = new Color(0.2f, 1f, 0.4f, 0.35f);
+        var rs = sel.AddComponent<RectTransform>();
+        rs.anchorMin = Vector2.zero; rs.anchorMax = Vector2.one;
+        rs.offsetMin = new Vector2(-3f,-3f); rs.offsetMax = new Vector2(3f,3f);
+        sel.AddComponent<Image>().color = new Color(0.3f,1f,0.5f,0.40f);
         sel.SetActive(false);
         iconUI.selectedIndicator = sel;
 
         return iconUI;
     }
 
-    void CriarPainelCentral(GameObject root)
+    // ── Área central: preview + info + status ──────────────────────────
+    void CriarAreaCentral(GameObject root)
     {
-        GameObject centro = new GameObject("PainelCentro");
-        centro.transform.SetParent(root.transform, false);
-        SetAnchors(centro, new Vector2(0f, 0.18f), new Vector2(1f, 0.78f),
-                   new Vector2(10f, 4f), new Vector2(-10f, -4f));
+        // ── preview (centro) ──
+        painelPreview = new GameObject("Preview");
+        painelPreview.transform.SetParent(root.transform, false);
+        painelPreview.AddComponent<RectTransform>(); // cria RectTransform antes de Anchors
+        Anchors(painelPreview, new Vector2(0.32f,0.10f), new Vector2(0.68f,0.78f));
 
-        // Info (esquerda)
-        GameObject info = CriarImagem(centro, "PainelInfo",
-            new Vector2(0f, 0f), new Vector2(0.44f, 1f),
-            Vector2.zero, new Vector2(-4f, 0f),
-            new Color(0.08f, 0.08f, 0.18f));
+        // glow atrás do preview
+        var glowGO = Img(painelPreview, "GlowPreview",
+            new Vector2(-0.2f,-0.1f), new Vector2(1.2f,1.1f),
+            new Color(corAcento.r, corAcento.g, corAcento.b, 0.10f));
+        glowPreview = glowGO.GetComponent<Image>();
 
-        txtNome = CriarTMP(info, "Nome",
-            new Vector2(0f, 1f), new Vector2(1f, 1f),
-            new Vector2(8f, -12f), new Vector2(-8f, -46f),
-            24f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
+        // RawImage que mostra o personagem via RenderTexture
+        var prevGO = new GameObject("PrevRender");
+        prevGO.transform.SetParent(painelPreview.transform, false);
+        previewRawImage = prevGO.AddComponent<RawImage>();
+        previewRawImage.color = Color.white;
+        Anchors(prevGO, new Vector2(0.05f, 0.08f), new Vector2(0.95f, 0.88f));
+        ConfigurarCameraPreview();
 
-        txtElemento = CriarTMP(info, "Elemento",
-            new Vector2(0f, 1f), new Vector2(1f, 1f),
-            new Vector2(8f, -52f), new Vector2(-8f, -82f),
-            16f, FontStyles.Normal, Color.yellow, TextAlignmentOptions.Center);
+        // nome grande no preview
+        txtNomePreview = TMP(painelPreview, "NomePrev",
+            new Vector2(0f,0.88f), new Vector2(1f,1f),
+            "", 18f, FontStyles.Bold, Color.white);
+        txtNomePreview.alignment = TextAlignmentOptions.Center;
 
-        txtDesc = CriarTMP(info, "Descricao",
-            new Vector2(0f, 0.3f), new Vector2(1f, 0.82f),
-            new Vector2(10f, 0f), new Vector2(-10f, 0f),
-            12f, FontStyles.Normal, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center);
-        txtDesc.enableWordWrapping = true;
+        // ── info (esquerda) ──
+        var info = Img(root, "PainelInfo",
+            new Vector2(0.01f,0.10f), new Vector2(0.31f,0.78f),
+            corPainel);
+        BarraTopo(info, corAcento);
 
-        txtBonus = CriarTMP(info, "Bonus",
-            new Vector2(0f, 0f), new Vector2(1f, 0.28f),
-            new Vector2(8f, 4f), new Vector2(-8f, -4f),
-            11f, FontStyles.Normal, new Color(0.5f, 1f, 0.5f), TextAlignmentOptions.Center);
-        txtBonus.enableWordWrapping = true;
+        var lblInfo = TMP(info, "LblInfo",
+            new Vector2(0f,0.93f), new Vector2(1f,1f),
+            "PERSONAGEM", 12f, FontStyles.Bold,
+            new Color(0.7f,0.6f,1f));
+        lblInfo.alignment = TextAlignmentOptions.Center;
 
-        // Status (direita)
-        GameObject status = CriarImagem(centro, "PainelStatus",
-            new Vector2(0.56f, 0f), new Vector2(1f, 1f),
-            new Vector2(4f, 0f), Vector2.zero,
-            new Color(0.08f, 0.08f, 0.18f));
+        txtNome = TMP(info, "Nome",
+            new Vector2(0f,0.81f), new Vector2(1f,0.93f),
+            "—", 20f, FontStyles.Bold, Color.white);
+        txtNome.alignment = TextAlignmentOptions.Center;
 
-        string[] labels = { "Vida", "Ataque", "Defesa", "Velocidade" };
+        txtElemento = TMP(info, "Elemento",
+            new Vector2(0f,0.71f), new Vector2(1f,0.81f),
+            "—", 14f, FontStyles.Normal, Color.yellow);
+        txtElemento.alignment = TextAlignmentOptions.Center;
+
+        // linha divisória
+        var ln = Img(info, "Ln",
+            new Vector2(0.05f,0.705f), new Vector2(0.95f,0.705f),
+            new Color(1f,1f,1f,0.08f));
+        ln.GetComponent<RectTransform>().offsetMax = new Vector2(0f,1f);
+
+        // Abas INFO / ULTIMATE / PASSIVAS
+        CriarAbasInfo(info);
+
+        // ── status (direita) ──
+        var status = Img(root, "PainelStatus",
+            new Vector2(0.69f,0.10f), new Vector2(0.99f,0.78f),
+            corPainel);
+        BarraTopo(status, corAcento);
+
+        var lblSt = TMP(status, "LblSt",
+            new Vector2(0f,0.92f), new Vector2(1f,1f),
+            "STATUS", 12f, FontStyles.Bold, new Color(0.7f,0.6f,1f));
+        lblSt.alignment = TextAlignmentOptions.Center;
+
+        string[] labels = { "VIDA", "ATK", "DEF", "VEL" };
+        Color[]  cores  = {
+            new Color(0.9f,0.3f,0.3f),
+            new Color(1.0f,0.6f,0.1f),
+            new Color(0.3f,0.6f,1.0f),
+            new Color(0.3f,0.9f,0.5f),
+        };
+
         for (int i = 0; i < 4; i++)
         {
-            float yMin = 0.75f - i * 0.25f;
-            float yMax = 1.00f - i * 0.25f;
+            float yMax = 0.88f - i * 0.22f;
+            float yMin = yMax  - 0.18f;
 
-            GameObject linha = new GameObject($"Linha_{i}");
+            var linha = new GameObject($"Linha_{i}");
             linha.transform.SetParent(status.transform, false);
-            SetAnchors(linha, new Vector2(0f, yMin), new Vector2(1f, yMax),
-                       new Vector2(10f, 4f), new Vector2(-10f, -4f));
+            Anchors(linha, new Vector2(0.04f, yMin), new Vector2(0.96f, yMax));
 
-            // Label
-            var lbl = CriarTMP(linha, "Label",
-                new Vector2(0f, 0f), new Vector2(0.22f, 1f),
-                Vector2.zero, Vector2.zero,
-                12f, FontStyles.Bold, Color.white, TextAlignmentOptions.MidlineLeft);
-            lbl.text = labels[i];
+            // label
+            var lbl = TMP(linha, "Lbl",
+                new Vector2(0f,0.5f), new Vector2(0.28f,1f),
+                labels[i], 11f, FontStyles.Bold, cores[i]);
+            lbl.alignment = TextAlignmentOptions.MidlineLeft;
 
-            // Slider
-            GameObject slGO = new GameObject("Slider");
+            // slider
+            var slGO = new GameObject("Slider");
             slGO.transform.SetParent(linha.transform, false);
-            SetAnchors(slGO, new Vector2(0.22f, 0.2f), new Vector2(0.72f, 0.8f));
-            sliders[i] = CriarSlider(slGO);
+            Anchors(slGO, new Vector2(0.28f,0.25f), new Vector2(0.74f,0.75f));
+            sliders[i] = CriarSlider(slGO, cores[i]);
 
-            // Nível
-            upgradeLevelTexts[i] = CriarTMP(linha, "Nivel",
-                new Vector2(0.72f, 0f), new Vector2(0.85f, 1f),
-                Vector2.zero, Vector2.zero,
-                11f, FontStyles.Normal, new Color(0.7f, 0.7f, 1f), TextAlignmentOptions.Center);
-            upgradeLevelTexts[i].text = "Nv.0";
+            // nível
+            upgradeLevelTexts[i] = TMP(linha, "Nv",
+                new Vector2(0.74f,0f), new Vector2(0.87f,1f),
+                "Nv.0", 10f, FontStyles.Normal, new Color(0.7f,0.7f,1f));
+            upgradeLevelTexts[i].alignment = TextAlignmentOptions.Center;
 
-            // Botão +
+            // botão +
             int cap = i;
-            GameObject btnGO = new GameObject("BtnUpgrade");
+            var btnGO = new GameObject("BtnUp");
             btnGO.transform.SetParent(linha.transform, false);
-            SetAnchors(btnGO, new Vector2(0.86f, 0.1f), new Vector2(1f, 0.9f));
-            Image bImg = btnGO.AddComponent<Image>();
-            bImg.color = new Color(0.15f, 0.5f, 0.15f);
-            Button b = btnGO.AddComponent<Button>();
+            Anchors(btnGO, new Vector2(0.88f,0.10f), new Vector2(1f,0.90f));
+            var bImg = btnGO.AddComponent<Image>();
+            bImg.color = new Color(0.15f,0.45f,0.15f);
+            var b = btnGO.AddComponent<Button>();
             b.targetGraphic = bImg;
             b.onClick.AddListener(() => manager?.BuyUpgrade(cap));
-            var bTxt = CriarTMP(btnGO, "Txt",
-                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
-                16f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
-            bTxt.text = "+";
+            TMP(btnGO, "T",
+                Vector2.zero, Vector2.one,
+                "+", 18f, FontStyles.Bold, Color.white)
+                .alignment = TextAlignmentOptions.Center;
             upgradeButtons[i] = b;
         }
     }
 
+    // ── Rodapé ─────────────────────────────────────────────────────────
     void CriarRodape(GameObject root)
     {
-        GameObject rodape = new GameObject("Rodape");
+        var rodape = new GameObject("Rodape");
         rodape.transform.SetParent(root.transform, false);
-        SetAnchors(rodape, new Vector2(0f, 0f), new Vector2(1f, 0.16f),
-                   new Vector2(10f, 8f), new Vector2(-10f, -8f));
+        Anchors(rodape, new Vector2(0f,0f), new Vector2(1f,0.10f),
+                new Vector2(8f,6f), new Vector2(-8f,-6f));
 
-        // Moedas
-        txtMoedas = CriarTMP(rodape, "Moedas",
-            new Vector2(0f, 0f), new Vector2(0.25f, 1f),
-            new Vector2(8f, 0f), Vector2.zero,
-            22f, FontStyles.Bold, Color.yellow, TextAlignmentOptions.MidlineLeft);
-        txtMoedas.text = "💰 0";
+        txtMoedas = TMP(rodape, "Moedas",
+            new Vector2(0f,0f), new Vector2(0.22f,1f),
+            "💰 0", 20f, FontStyles.Bold, Color.yellow);
+        txtMoedas.alignment = TextAlignmentOptions.MidlineLeft;
 
-        // Botão VOLTAR
-        CriarBotao(rodape, "BotaoVoltar",
-            new Vector2(0f, 0.1f), new Vector2(0.18f, 0.9f),
-            "← VOLTAR", new Color(0.5f, 0.1f, 0.1f),
-            () => {
+        CriarBotao(rodape, "BtnVoltar",
+            new Vector2(0f,0.08f), new Vector2(0.18f,0.92f),
+            "← VOLTAR", new Color(0.45f,0.08f,0.08f), () =>
+            {
                 if (GameSceneManager.Instance != null)
                     GameSceneManager.Instance.GoToMainMenu();
                 else
                     UnityEngine.SceneManagement.SceneManager.LoadScene("menu_inicial");
             });
 
-        // Botão JOGAR
-        CriarBotao(rodape, "BotaoJogar",
-            new Vector2(0.72f, 0.05f), new Vector2(1f, 0.95f),
-            "JOGAR ▶", new Color(0.1f, 0.55f, 0.15f),
-            () => {
+        // botão MISSÕES
+        CriarBotao(rodape, "BtnMissoes",
+            new Vector2(0.40f,0.08f), new Vector2(0.60f,0.92f),
+            "MISSÕES", new Color(0.20f,0.10f,0.40f), () => { });
+
+        CriarBotao(rodape, "BtnJogar",
+            new Vector2(0.72f,0.04f), new Vector2(1f,0.96f),
+            "JOGAR  ▶", new Color(0.10f,0.50f,0.15f), () =>
+            {
                 if (GameSceneManager.Instance != null)
                     GameSceneManager.Instance.StartGameplay();
                 else
-                    UnityEngine.SceneManagement.SceneManager.LoadScene("primeira_fase");
-            }, 26f);
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("escolher terreno");
+            }, 24f);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 3. Conecta ao manager
+    // ── Abas do painel de info ─────────────────────────────────────────
+    void CriarAbasInfo(GameObject info)
+    {
+        string[] nomes  = { "INFO", "ULTIMATE", "PASSIVAS" };
+        Color corAtiva  = new Color(0.22f, 0.10f, 0.48f);
+        Color corInativa = new Color(0.06f, 0.04f, 0.14f);
 
+        for (int i = 0; i < 3; i++)
+        {
+            float xMin = i * (1f / 3f);
+            float xMax = (i + 1) * (1f / 3f);
+            int idx = i;
+
+            var tabGO  = new GameObject($"Tab_{nomes[i]}");
+            tabGO.transform.SetParent(info.transform, false);
+            var tabImg = tabGO.AddComponent<Image>();
+            tabImg.color = i == 0 ? corAtiva : corInativa;
+            var tabRT  = tabGO.GetComponent<RectTransform>();
+            tabRT.anchorMin = new Vector2(xMin, 0.62f);
+            tabRT.anchorMax = new Vector2(xMax, 0.70f);
+            tabRT.offsetMin = new Vector2(i > 0 ? 1f : 0f, 0f);
+            tabRT.offsetMax = new Vector2(i < 2 ? -1f : 0f, 0f);
+            var btn = tabGO.AddComponent<Button>();
+            btn.targetGraphic = tabImg;
+            btn.transition = Selectable.Transition.None;
+            btn.onClick.AddListener(() => MostrarAbaInfo(idx));
+            TMP(tabGO, "T", Vector2.zero, Vector2.one,
+                nomes[i], 9f, FontStyles.Bold, Color.white).alignment = TextAlignmentOptions.Center;
+            botoesAbaInfo[i] = btn;
+        }
+
+        // ── Painel INFO ──────────────────────────────────────────────
+        painelAbaInfo[0] = new GameObject("ConteudoInfo");
+        painelAbaInfo[0].transform.SetParent(info.transform, false);
+        painelAbaInfo[0].AddComponent<RectTransform>();
+        Anchors(painelAbaInfo[0], Vector2.zero, new Vector2(1f, 0.62f));
+
+        txtDesc = TMP(painelAbaInfo[0], "Desc",
+            new Vector2(0.04f, 0.26f), new Vector2(0.96f, 0.96f),
+            "—", 11f, FontStyles.Normal, new Color(0.78f, 0.75f, 0.88f));
+        txtDesc.enableWordWrapping = true;
+        txtDesc.alignment = TextAlignmentOptions.Top;
+
+        txtBonus = TMP(painelAbaInfo[0], "Bonus",
+            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.24f),
+            "—", 10f, FontStyles.Normal, new Color(0.5f, 1f, 0.6f));
+        txtBonus.enableWordWrapping = true;
+        txtBonus.alignment = TextAlignmentOptions.Center;
+
+        // ── Painel ULTIMATE ──────────────────────────────────────────
+        painelAbaInfo[1] = new GameObject("ConteudoUltimate");
+        painelAbaInfo[1].transform.SetParent(info.transform, false);
+        painelAbaInfo[1].AddComponent<RectTransform>();
+        Anchors(painelAbaInfo[1], Vector2.zero, new Vector2(1f, 0.62f));
+
+        var lblU = TMP(painelAbaInfo[1], "LblU",
+            new Vector2(0f, 0.88f), new Vector2(1f, 0.98f),
+            "⚡ ULTIMATE", 10f, FontStyles.Bold, new Color(1f, 0.85f, 0.2f));
+        lblU.alignment = TextAlignmentOptions.Center;
+
+        txtUltimateInfo = TMP(painelAbaInfo[1], "UltInfo",
+            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.86f),
+            "—", 10.5f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.95f));
+        txtUltimateInfo.enableWordWrapping = true;
+        txtUltimateInfo.alignment = TextAlignmentOptions.Top;
+
+        // ── Painel PASSIVAS ──────────────────────────────────────────
+        painelAbaInfo[2] = new GameObject("ConteudoPassivas");
+        painelAbaInfo[2].transform.SetParent(info.transform, false);
+        painelAbaInfo[2].AddComponent<RectTransform>();
+        Anchors(painelAbaInfo[2], Vector2.zero, new Vector2(1f, 0.62f));
+
+        var lblP = TMP(painelAbaInfo[2], "LblP",
+            new Vector2(0f, 0.88f), new Vector2(1f, 0.98f),
+            "🛡 PASSIVAS", 10f, FontStyles.Bold, new Color(0.4f, 0.9f, 0.6f));
+        lblP.alignment = TextAlignmentOptions.Center;
+
+        txtPassivasInfo = TMP(painelAbaInfo[2], "PassInfo",
+            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.86f),
+            "—", 10.5f, FontStyles.Normal, new Color(0.75f, 0.90f, 0.75f));
+        txtPassivasInfo.enableWordWrapping = true;
+        txtPassivasInfo.alignment = TextAlignmentOptions.Top;
+
+        MostrarAbaInfo(0);
+    }
+
+    void MostrarAbaInfo(int idx)
+    {
+        Color corAtiva   = new Color(0.22f, 0.10f, 0.48f);
+        Color corInativa = new Color(0.06f, 0.04f, 0.14f);
+        for (int i = 0; i < 3; i++)
+        {
+            if (painelAbaInfo[i] != null) painelAbaInfo[i].SetActive(i == idx);
+            if (botoesAbaInfo[i] != null)
+                botoesAbaInfo[i].GetComponent<Image>().color = i == idx ? corAtiva : corInativa;
+        }
+    }
+
+    // ── Animações ──────────────────────────────────────────────────────
+    IEnumerator PulsarTitulo(TextMeshProUGUI t)
+    {
+        float tempo = 0f;
+        while (t != null)
+        {
+            tempo += Time.deltaTime * 1.2f;
+            float brilho = 0.88f + Mathf.Sin(tempo) * 0.12f;
+            t.color = new Color(brilho, brilho, brilho, 1f);
+            yield return null;
+        }
+    }
+
+    IEnumerator AnimarParticulas()
+    {
+        float t = 0f;
+        while (true)
+        {
+            t += Time.deltaTime;
+            for (int i = 0; i < QTD_P; i++)
+            {
+                if (pRT[i] == null) yield break;
+                float ox = pOrig[i].x + Mathf.Sin(t * pVel[i] + pFase[i]) * 0.022f;
+                float oy = pOrig[i].y + Mathf.Cos(t * pVel[i] * 0.7f + pFase[i]) * 0.028f;
+                pRT[i].anchorMin = pRT[i].anchorMax = new Vector2(ox, oy);
+
+                // cor segue o glow atual
+                float a = Mathf.Abs(Mathf.Sin(t * pVel[i] + pFase[i])) * 0.18f + 0.03f;
+                pImg[i].color = new Color(corAtualGlow.r, corAtualGlow.g, corAtualGlow.b, a);
+            }
+            yield return null;
+        }
+    }
+
+    IEnumerator AnimarGlow()
+    {
+        float t = 0f;
+        while (true)
+        {
+            t += Time.deltaTime * 0.8f;
+            float a = 0.06f + Mathf.Sin(t) * 0.03f;
+            if (glowFundo  != null) glowFundo.color  = new Color(corAtualGlow.r, corAtualGlow.g, corAtualGlow.b, a);
+            if (glowPreview != null) glowPreview.color = new Color(corAtualGlow.r, corAtualGlow.g, corAtualGlow.b, a * 1.5f);
+            yield return null;
+        }
+    }
+
+    // Chamado pelo manager quando o personagem muda
+    public void AtualizarCorElemento(Color cor)
+    {
+        corAtualGlow = cor;
+        StartCoroutine(TransicaoCor(cor));
+    }
+
+    IEnumerator TransicaoCor(Color alvo)
+    {
+        Color inicio = corAtualGlow;
+        float dur = 0.4f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            corAtualGlow = Color.Lerp(inicio, alvo, t / dur);
+            yield return null;
+        }
+        corAtualGlow = alvo;
+    }
+
+    public IEnumerator AnimarBarras(float[] valores)
+    {
+        float dur = 0.45f;
+        float[] origens = new float[4];
+        for (int i = 0; i < 4; i++)
+            origens[i] = sliders[i] != null ? sliders[i].value : 0f;
+
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            float ease = 1f - Mathf.Pow(1f - t / dur, 3f);
+            for (int i = 0; i < 4; i++)
+                if (sliders[i] != null)
+                    sliders[i].value = Mathf.Lerp(origens[i], valores[i], ease);
+            yield return null;
+        }
+        for (int i = 0; i < 4; i++)
+            if (sliders[i] != null)
+                sliders[i].value = valores[i];
+    }
+
+    // ── Manager connection ──────────────────────────────────────────────
     void ConectarManager()
     {
-        manager.characterNameText    = txtNome;
-        manager.characterElementText = txtElemento;
+        manager.characterNameText        = txtNome;
+        manager.characterElementText     = txtElemento;
         manager.characterDescriptionText = txtDesc;
-        manager.elementBonusText     = txtBonus;
-        manager.coinsText            = txtMoedas;
-        manager.statusSliders        = sliders;
-        manager.upgradeButtons       = upgradeButtons;
-        manager.upgradeLevelTexts    = upgradeLevelTexts;
-        manager.characterIcons       = iconesArray;
+        manager.elementBonusText         = txtBonus;
+        manager.coinsText                = txtMoedas;
+        manager.statusSliders            = sliders;
+        manager.upgradeButtons           = upgradeButtons;
+        manager.upgradeLevelTexts        = upgradeLevelTexts;
+        manager.characterIcons           = iconesArray;
+        manager.ultimateInfoText         = txtUltimateInfo;
+        manager.passivasInfoText         = txtPassivasInfo;
+        manager.characterPreviewName     = txtNomePreview;
+        manager.selectionUI              = this;
 
-        // Painel stages vazio (obrigatório para não dar null ref)
-        GameObject stagePlaceholder = new GameObject("PainelStages");
+        var stagePlaceholder = new GameObject("PainelStages");
         stagePlaceholder.transform.SetParent(canvas.transform, false);
         stagePlaceholder.AddComponent<RectTransform>();
         stagePlaceholder.SetActive(false);
         manager.painelStages = stagePlaceholder;
-
-        // Inicia o manager (ele chama LoadProgress e SelectCharacter internamente)
-        // O manager.Start() é chamado automaticamente pelo Unity
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Helpers
-
-    Slider CriarSlider(GameObject go)
+    // ── Preview com RenderTexture ──────────────────────────────────────
+    void ConfigurarCameraPreview()
     {
-        go.AddComponent<Image>().color = new Color(0.18f, 0.18f, 0.18f);
+        previewRT = new RenderTexture(512, 768, 16);
+        previewRT.antiAliasing = 2;
+        previewRawImage.texture = previewRT;
 
-        GameObject fillArea = new GameObject("FillArea");
-        fillArea.transform.SetParent(go.transform, false);
-        SetAnchors(fillArea, new Vector2(0f, 0.2f), new Vector2(1f, 0.8f),
-                   new Vector2(4f, 0f), new Vector2(-4f, 0f));
+        var camGO = new GameObject("PreviewCamera");
+        previewCamera = camGO.AddComponent<Camera>();
+        previewCamera.orthographic     = true;
+        previewCamera.orthographicSize = 3.5f;
+        previewCamera.clearFlags       = CameraClearFlags.SolidColor;
+        previewCamera.backgroundColor  = corFundo;
+        previewCamera.targetTexture    = previewRT;
+        previewCamera.transform.position = PREVIEW_POS + new Vector3(0f, 0f, -10f);
+        previewCamera.depth = -5;
+    }
 
-        GameObject fill = new GameObject("Fill");
-        fill.transform.SetParent(fillArea.transform, false);
-        RectTransform fillRT = fill.AddComponent<RectTransform>();
-        fillRT.anchorMin = Vector2.zero;
-        fillRT.anchorMax = new Vector2(0f, 1f);
-        fillRT.sizeDelta = new Vector2(8f, 0f);
-        fill.AddComponent<Image>().color = new Color(0.2f, 0.6f, 1f);
+    public void AtualizarPreviewPrefab(CharacterData data)
+    {
+        if (previewPersonagem != null) Destroy(previewPersonagem);
+        if (data == null || data.characterPrefab == null) return;
 
-        Slider s = go.AddComponent<Slider>();
-        s.fillRect = fillRT;
-        s.direction = Slider.Direction.LeftToRight;
-        s.minValue = 0f;
-        s.maxValue = 1f;
-        s.value = 0.5f;
+        previewPersonagem = Instantiate(data.characterPrefab, PREVIEW_POS, Quaternion.identity);
+
+        // Desativa físicas e scripts, mantém Renderer e Animator
+        foreach (var rb  in previewPersonagem.GetComponentsInChildren<Rigidbody2D>())
+            rb.simulated = false;
+        foreach (var col in previewPersonagem.GetComponentsInChildren<Collider2D>())
+            col.enabled = false;
+        foreach (var mb  in previewPersonagem.GetComponentsInChildren<MonoBehaviour>())
+        {
+            if (mb is Animator) continue;
+            mb.enabled = false;
+        }
+
+        // Aplica cor do personagem
+        foreach (var sr in previewPersonagem.GetComponentsInChildren<SpriteRenderer>())
+            sr.color = data.characterColor;
+
+        AdicionarSombraBlob(previewPersonagem);
+    }
+
+    void AdicionarSombraBlob(GameObject personagem)
+    {
+        // Cria textura de gradiente circular para a sombra
+        int sz = 64;
+        var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        var pixels = new Color[sz * sz];
+        var centro = new Vector2(sz * 0.5f, sz * 0.5f);
+        float raio = sz * 0.5f;
+        for (int y = 0; y < sz; y++)
+            for (int x = 0; x < sz; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x, y), centro) / raio;
+                float a = Mathf.Clamp01(1f - d);
+                pixels[y * sz + x] = new Color(0f, 0f, 0f, a * a * 0.55f);
+            }
+        tex.SetPixels(pixels);
+        tex.Apply();
+
+        var sombra = new GameObject("BlobShadow");
+        sombra.transform.SetParent(personagem.transform, false);
+        sombra.transform.localPosition = new Vector3(0f, -0.75f, 0.1f);
+        sombra.transform.localScale    = new Vector3(1.4f, 0.35f, 1f);
+
+        var sr = sombra.AddComponent<SpriteRenderer>();
+        sr.sprite       = Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
+        sr.sortingOrder = -1;
+        sr.color        = Color.white;
+    }
+
+    void OnDestroy()
+    {
+        if (previewPersonagem != null) Destroy(previewPersonagem);
+        if (previewCamera    != null) Destroy(previewCamera.gameObject);
+        if (previewRT        != null) { previewRT.Release(); Destroy(previewRT); }
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────
+    Slider CriarSlider(GameObject go, Color corFill)
+    {
+        go.AddComponent<Image>().color = new Color(0.12f, 0.10f, 0.20f);
+
+        var fillArea = new GameObject("FA"); fillArea.transform.SetParent(go.transform, false);
+        fillArea.AddComponent<Image>().color = new Color(0f,0f,0f,0f); // cria RectTransform
+        Anchors(fillArea, new Vector2(0f,0.15f), new Vector2(1f,0.85f),
+                new Vector2(3f,0f), new Vector2(-3f,0f));
+
+        var fill = new GameObject("Fi"); fill.transform.SetParent(fillArea.transform, false);
+        fill.AddComponent<Image>().color = corFill; // cria RectTransform
+        var rf = fill.GetComponent<RectTransform>();
+        rf.anchorMin = Vector2.zero; rf.anchorMax = new Vector2(0f,1f);
+        rf.sizeDelta = new Vector2(6f,0f);
+
+        var s = go.AddComponent<Slider>();
+        s.fillRect   = rf;
+        s.direction  = Slider.Direction.LeftToRight;
+        s.minValue   = 0f; s.maxValue = 1f; s.value = 0f;
         s.interactable = false;
         return s;
     }
@@ -346,56 +706,58 @@ public class CharacterSelectionUI : MonoBehaviour
     void CriarBotao(GameObject parent, string nome,
         Vector2 ancMin, Vector2 ancMax,
         string texto, Color cor, UnityEngine.Events.UnityAction acao,
-        float fontSize = 20f)
+        float fontSize = 18f)
     {
-        GameObject go = new GameObject(nome);
+        var go  = new GameObject(nome);
         go.transform.SetParent(parent.transform, false);
-        SetAnchors(go, ancMin, ancMax);
-        Image img = go.AddComponent<Image>();
-        img.color = cor;
-        Button btn = go.AddComponent<Button>();
-        btn.targetGraphic = img;
+        Anchors(go, ancMin, ancMax);
+        var img = go.AddComponent<Image>(); img.color = cor;
+        var btn = go.AddComponent<Button>(); btn.targetGraphic = img;
         btn.onClick.AddListener(acao);
-        var txt = CriarTMP(go, "Txt",
-            Vector2.zero, Vector2.one, new Vector2(4f, 0f), new Vector2(-4f, 0f),
-            fontSize, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
-        txt.text = texto;
+        TMP(go, "T", Vector2.zero, Vector2.one,
+            texto, fontSize, FontStyles.Bold, Color.white)
+            .alignment = TextAlignmentOptions.Center;
     }
 
-    GameObject CriarImagem(GameObject parent, string nome,
-        Vector2 ancMin, Vector2 ancMax, Vector2 offMin, Vector2 offMax, Color cor)
+    void BarraTopo(GameObject pai, Color cor)
     {
-        GameObject go = new GameObject(nome);
+        var b = new GameObject("BT"); b.transform.SetParent(pai.transform, false);
+        b.AddComponent<Image>().color = cor; // Image cria RectTransform
+        var rb = b.GetComponent<RectTransform>();
+        rb.anchorMin = new Vector2(0f,1f); rb.anchorMax = Vector2.one;
+        rb.offsetMin = Vector2.zero; rb.offsetMax = new Vector2(0f,4f);
+    }
+
+    GameObject Img(GameObject parent, string nome,
+        Vector2 ancMin, Vector2 ancMax, Color cor)
+    {
+        var go = new GameObject(nome);
         go.transform.SetParent(parent.transform, false);
-        SetAnchors(go, ancMin, ancMax, offMin, offMax);
-        go.AddComponent<Image>().color = cor;
+        go.AddComponent<Image>().color = cor; // Image cria RectTransform automaticamente
+        Anchors(go, ancMin, ancMax);
         return go;
     }
 
-    TextMeshProUGUI CriarTMP(GameObject parent, string nome,
-        Vector2 ancMin, Vector2 ancMax, Vector2 offMin, Vector2 offMax,
-        float size, FontStyles style, Color cor, TextAlignmentOptions align)
+    TextMeshProUGUI TMP(GameObject parent, string nome,
+        Vector2 ancMin, Vector2 ancMax,
+        string texto, float size, FontStyles style, Color cor)
     {
-        GameObject go = new GameObject(nome);
+        var go = new GameObject(nome);
         go.transform.SetParent(parent.transform, false);
-        SetAnchors(go, ancMin, ancMax, offMin, offMax);
-        TextMeshProUGUI t = go.AddComponent<TextMeshProUGUI>();
-        t.fontSize = size;
-        t.fontStyle = style;
-        t.color = cor;
-        t.alignment = align;
+        var t = go.AddComponent<TextMeshProUGUI>(); // TMP cria RectTransform automaticamente
+        t.text = texto; t.fontSize = size;
+        t.fontStyle = style; t.color = cor;
         t.enableWordWrapping = false;
+        Anchors(go, ancMin, ancMax);
         return t;
     }
 
-    void SetAnchors(GameObject go, Vector2 ancMin, Vector2 ancMax,
-                    Vector2 offMin = default, Vector2 offMax = default)
+    void Anchors(GameObject go, Vector2 mn, Vector2 mx,
+        Vector2 offMin = default, Vector2 offMax = default)
     {
-        RectTransform r = go.GetComponent<RectTransform>();
+        var r = go.GetComponent<RectTransform>();
         if (r == null) r = go.AddComponent<RectTransform>();
-        r.anchorMin = ancMin;
-        r.anchorMax = ancMax;
-        r.offsetMin = offMin;
-        r.offsetMax = offMax;
+        r.anchorMin = mn; r.anchorMax = mx;
+        r.offsetMin = offMin; r.offsetMax = offMax;
     }
 }

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using System.Collections;
 
 // Adicione num GameObject vazio na cena CharacterSelection.
 // Ele cria o painel de missões com 3 abas: Personagens, Ultimates, Passivas.
@@ -26,8 +27,11 @@ public class MissoesUI : MonoBehaviour
     Button[] botoesAba = new Button[3];
     bool aberto = false;
 
-    void Start()
+    IEnumerator Start()
     {
+        // Espera um frame para CharacterSelectionUI terminar de criar o canvas
+        yield return null;
+
         if (FindObjectOfType<EventSystem>() == null)
         {
             var es = new GameObject("EventSystem");
@@ -35,11 +39,12 @@ public class MissoesUI : MonoBehaviour
             es.AddComponent<StandaloneInputModule>();
         }
 
-        Canvas canvas = FindObjectOfType<Canvas>();
-        if (canvas == null) return;
+        // Busca pelo nome para garantir que é o canvas criado pelo CharacterSelectionUI
+        var canvasGO = GameObject.Find("CanvasPrincipal");
+        if (canvasGO == null) yield break;
 
-        CriarBotaoAbrirFechar(canvas.gameObject);
-        CriarPainel(canvas.gameObject);
+        CriarBotaoAbrirFechar(canvasGO);
+        CriarPainel(canvasGO);
     }
 
     // ── Botão flutuante para abrir ───────────────────────────────

@@ -158,6 +158,16 @@ public class LoadingScreenUI : MonoBehaviour
     {
         float inicio = Time.time;
         AsyncOperation op = SceneManager.LoadSceneAsync(cena);
+
+        // cena não está no Build Profiles
+        if (op == null)
+        {
+            Debug.LogError($"[LoadingScreen] Cena '{cena}' nao encontrada. Adicione em File > Build Profiles.");
+            yield return new WaitForSeconds(1f);
+            SceneManager.LoadScene(0);
+            yield break;
+        }
+
         op.allowSceneActivation = false;
 
         while (!op.isDone)
@@ -178,6 +188,7 @@ public class LoadingScreenUI : MonoBehaviour
             yield return null;
         }
     }
+
 
     void AtualizarBarra(float p)
     {
