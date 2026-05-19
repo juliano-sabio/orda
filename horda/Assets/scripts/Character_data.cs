@@ -48,6 +48,8 @@ public class CharacterData : ScriptableObject
     [Header("Progressão")]
     public int unlockLevel = 1;
     public float xpMultiplier = 1.0f;
+    [TextArea(1,2)]
+    public string missaoDesbloqueio = "Alcance o nível necessário para desbloquear.";
 
     [Header("Bônus Elementais Ativos")]
     [Range(0f, 50f)] public float elementAttackBonus = 0f;

@@ -846,6 +846,8 @@ public class PlayerStats : MonoBehaviour
         currentXP -= xpToNextLevel;
         xpToNextLevel = CalculateXPForNextLevel();
 
+        GetComponent<LevelUpEffect>()?.Executar(level);
+
         maxHealth += 10f;
         health = maxHealth;
         attack += 2f;

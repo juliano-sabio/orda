@@ -149,7 +149,8 @@ public class EscolherTerrenoUI : MonoBehaviour
             {
                 Debug.Log($"[EscolherTerreno] Indo para: {cena}");
                 Time.timeScale = 1f;
-                SceneManager.LoadScene(cena);
+                PlayerPrefs.SetString("ProximaCena", cena);
+                SceneManager.LoadScene("loading_screen");
             });
 
             ColorBlock cb  = btn.colors;
