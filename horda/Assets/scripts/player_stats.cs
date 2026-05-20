@@ -33,10 +33,17 @@ public class PlayerStats : MonoBehaviour
     public float xpToNextLevel = 100f;
     public float xpMultiplier = 1.5f;
 
+    [Header("💨 Sistema de Dash")]
+    public int dashCharges = 0;
+    public int maxDashCharges = 3;
+
     [Header("📦 Sistema de Coleta de XP")]
     public float xpCollectionRadius = 3f;
     public float orbMoveSpeedMultiplier = 1f;
     public bool autoCollectXP = true;
+
+    [Header("📦 Sistema de Coleta de Itens")]
+    public float itemCollectionRadius = 2f;
 
 
     [Header("Visualização da Área de Coleta")]
@@ -1243,10 +1250,8 @@ public class PlayerStats : MonoBehaviour
         return acquiredSkills.Exists(s => s.skillName == skillName);
     }
 
-    public float GetXpCollectionRadius()
-    {
-        return xpCollectionRadius;
-    }
+    public float GetXpCollectionRadius() => xpCollectionRadius;
+    public float GetItemCollectionRadius() => itemCollectionRadius;
 
     public void SetXpCollectionRadius(float newRadius)
     {
@@ -1295,7 +1300,30 @@ public class PlayerStats : MonoBehaviour
     private IEnumerator MorteComEfeito()
     {
         yield return new WaitForSecondsRealtime(1.2f);
+        if (Camera.main != null)
+            Camera.main.backgroundColor = new Color(0.04f, 0.03f, 0.07f);
+        yield return new WaitForEndOfFrame();
+        Texture2D screenshot = ScreenCapture.CaptureScreenshotAsTexture();
         Time.timeScale = 0f;
+        GameOverUI.Mostrar(screenshot);
+    }
+
+    public bool HasDashCharge() => dashCharges > 0;
+
+    public bool AddDashCharge()
+    {
+        if (dashCharges >= maxDashCharges) return false;
+        dashCharges++;
+        UpdateUI();
+        return true;
+    }
+
+    public bool ConsumeDashCharge()
+    {
+        if (dashCharges <= 0) return false;
+        dashCharges--;
+        UpdateUI();
+        return true;
     }
 
     // GETTERS

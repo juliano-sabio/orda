@@ -13,10 +13,8 @@ public class moviment_player2 : MonoBehaviour
     [Header("Dash")]
     public float dashSpeed = 20f;
     public float dashDuration = 0.15f;
-    public float dashCooldown = 1f;
 
     private bool isDashing = false;
-    private float dashCooldownTimer = 0f;
     private Vector2 dashDirection;
     private DashEffect dashEffect;
 
@@ -52,10 +50,10 @@ public class moviment_player2 : MonoBehaviour
         else if (horizontal < 0)
             transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
 
-        dashCooldownTimer -= Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && dashCooldownTimer <= 0f)
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && playerStats.HasDashCharge())
         {
             dashDirection = moveInput != Vector2.zero ? moveInput : new Vector2(transform.localScale.x > 0 ? 1f : -1f, 0f);
+            playerStats.ConsumeDashCharge();
             StartCoroutine(DashCoroutine());
         }
     }
@@ -73,7 +71,6 @@ public class moviment_player2 : MonoBehaviour
     private IEnumerator DashCoroutine()
     {
         isDashing = true;
-        dashCooldownTimer = dashCooldown;
         dashEffect?.IniciarEfeito();
 
         yield return new WaitForSeconds(dashDuration);

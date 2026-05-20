@@ -29,17 +29,35 @@ public class GerenciadorEventos : MonoBehaviour
 {
     public static GerenciadorEventos Instance { get; private set; }
 
-    [Header("Intervalos entre Eventos (segundos)")]
-    public float intervaloMin = 40f;
-    public float intervaloMax = 90f;
+    [Header("Sincronização com TimerManager")]
+    public float delayInicial     = 30f;   // segundos de jogo antes do primeiro evento
+    public float intervaloEventos = 60f;   // intervalo fixo entre eventos (segundos)
 
     [Header("Eventos Disponíveis")]
     public List<EventoAleatorio> eventos = new List<EventoAleatorio>();
 
+    [Header("Visual — Painel")]
+    public Vector2 tamanhoDoPanel    = new Vector2(330f, 110f);
+    public Vector2 posicaoVisivel    = new Vector2(-10f, -10f);
+    public Color   corFundo          = new Color(0.04f, 0.04f, 0.12f, 0.92f);
+    public Color   corBorda          = new Color(0.3f, 0.5f, 1f, 0.4f);
+
+    [Header("Visual — Textos")]
+    public float   tamanhoFonteNome  = 16f;
+    public Color   corNome           = Color.yellow;
+    public float   tamanhoFonteDesc  = 11f;
+    public Color   corDesc           = new Color(0.85f, 0.85f, 0.85f);
+    public float   tamanhoFonteTimer = 14f;
+
+    [Header("Visual — Barra de Progresso")]
+    public Color   corBarraAtiva     = new Color(0.2f, 0.8f, 0.3f);
+    public Color   corBarraSucesso   = new Color(0.2f, 0.9f, 0.3f);
+    public Color   corBarraFalha     = new Color(0.9f, 0.2f, 0.2f);
+
     // Estado do evento
     private bool eventoAtivo;
     private EventoAleatorio eventoAtual;
-    private float timerProximoEvento;
+    private float proximoEventoTempo;   // tempo absoluto do relógio para o próximo evento
     private float timerContagem;
     private int progresso;
     private float xpAcumulada;
@@ -47,15 +65,21 @@ public class GerenciadorEventos : MonoBehaviour
     // Referências
     private PlayerStats playerStats;
     private UIManager uiManager;
+    private TimerManager timerManager;
 
     // UI criada em runtime
     private GameObject painelEvento;
+    private RectTransform painelRT;
+    private CanvasGroup painelCG;
     private TextMeshProUGUI textoNome;
     private TextMeshProUGUI textoDesc;
     private TextMeshProUGUI textoTimer;
     private TextMeshProUGUI textoProgresso;
     private RectTransform barraFill;
     private Image barraFillImg;
+
+    private Vector2 POS_VISIVEL  => posicaoVisivel;
+    private static readonly Vector2 POS_ESCONDIDO = new Vector2(360f, -10f);
 
     void Reset()
     {
@@ -72,11 +96,12 @@ public class GerenciadorEventos : MonoBehaviour
 
     void Start()
     {
-        playerStats = FindObjectOfType<PlayerStats>();
-        uiManager = FindObjectOfType<UIManager>();
+        playerStats   = FindObjectOfType<PlayerStats>();
+        uiManager     = FindObjectOfType<UIManager>();
+        timerManager  = FindObjectOfType<TimerManager>();
 
         CriarPainelUI();
-        AgendarProximoEvento();
+        proximoEventoTempo = delayInicial; // não usa TempoDecorrido() aqui — TimerManager ainda não inicializou
 
         InimigoController.OnInimigoDerrotado += OnInimigoDerrotado;
         PlayerStats.OnDanoRecebido += OnDanoRecebido;
@@ -94,10 +119,11 @@ public class GerenciadorEventos : MonoBehaviour
 
     void Update()
     {
+        float tempoDecorrido = TempoDecorrido();
+
         if (!eventoAtivo)
         {
-            timerProximoEvento -= Time.deltaTime;
-            if (timerProximoEvento <= 0f)
+            if (tempoDecorrido >= proximoEventoTempo)
                 TentarIniciarEvento();
             return;
         }
@@ -107,6 +133,14 @@ public class GerenciadorEventos : MonoBehaviour
 
         if (timerContagem <= 0f)
             EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver);
+    }
+
+    // Tempo decorrido desde o início — usa TimerManager se disponível
+    float TempoDecorrido()
+    {
+        if (timerManager != null)
+            return timerManager.levelDuration - timerManager.currentTime;
+        return Time.timeSinceLevelLoad;
     }
 
     // ──────────────────────────────────────────────────────────
@@ -142,14 +176,13 @@ public class GerenciadorEventos : MonoBehaviour
 
     IEnumerator MostrarResultado(bool sucesso)
     {
-        // Painel permanece visível mostrando o resultado
-        painelEvento?.SetActive(true);
-        if (textoNome != null) { textoNome.text = sucesso ? "✔ SUCESSO!" : "✘ FALHOU!"; textoNome.color = sucesso ? new Color(0.2f, 1f, 0.3f) : new Color(1f, 0.3f, 0.3f); }
-        if (textoDesc != null) textoDesc.text = sucesso ? eventoAtual.recompensaDescricao : "Evento não completado.";
-        if (textoTimer != null) { textoTimer.text = "0s"; textoTimer.color = Color.white; }
+        // Painel já está visível — só atualiza o conteúdo
+        if (textoNome   != null) { textoNome.text = sucesso ? "✔ SUCESSO!" : "✘ FALHOU!"; textoNome.color = sucesso ? new Color(0.2f, 1f, 0.3f) : new Color(1f, 0.3f, 0.3f); }
+        if (textoDesc   != null) textoDesc.text = sucesso ? eventoAtual.recompensaDescricao : "Evento não completado.";
+        if (textoTimer  != null) { textoTimer.text = ""; textoTimer.color = Color.white; }
         if (textoProgresso != null) textoProgresso.text = "";
-        if (barraFill != null) barraFill.anchorMax = new Vector2(sucesso ? 1f : 0f, 1f);
-        if (barraFillImg != null) barraFillImg.color = sucesso ? new Color(0.2f, 0.9f, 0.3f) : new Color(0.9f, 0.2f, 0.2f);
+        if (barraFill   != null) barraFill.anchorMax = new Vector2(sucesso ? 1f : 0f, 1f);
+        if (barraFillImg != null) barraFillImg.color = sucesso ? corBarraSucesso : corBarraFalha;
 
         yield return new WaitForSeconds(3f);
         MostrarPainel(false);
@@ -157,20 +190,68 @@ public class GerenciadorEventos : MonoBehaviour
 
     void AgendarProximoEvento()
     {
-        timerProximoEvento = UnityEngine.Random.Range(intervaloMin, intervaloMax);
+        float agora = TempoDecorrido();
+        // Primeira chamada (Start): espera só delayInicial
+        // Após um evento encerrar: espera intervaloEventos a partir de agora
+        proximoEventoTempo = agora < delayInicial
+            ? delayInicial
+            : agora + intervaloEventos;
     }
 
     void MostrarPainel(bool mostrar)
     {
-        painelEvento?.SetActive(mostrar);
-
-        if (mostrar && textoNome != null)
+        if (mostrar)
         {
-            textoNome.text = eventoAtual.nome;
-            textoNome.color = Color.yellow;
-            if (textoDesc != null) textoDesc.text = eventoAtual.descricao;
-            if (barraFillImg != null) barraFillImg.color = new Color(0.2f, 0.8f, 0.3f);
+            if (textoNome  != null) { textoNome.text = eventoAtual.nome; textoNome.color = Color.yellow; }
+            if (textoDesc  != null) textoDesc.text = eventoAtual.descricao;
+            if (barraFillImg != null) barraFillImg.color = corBarraAtiva; //new Color(0.2f, 0.8f, 0.3f);
+            StopCoroutine("AnimarSaida");
+            StartCoroutine("AnimarEntrada");
         }
+        else
+        {
+            StopCoroutine("AnimarEntrada");
+            StartCoroutine("AnimarSaida");
+        }
+    }
+
+    IEnumerator AnimarEntrada()
+    {
+        painelEvento.SetActive(true);
+        float t = 0f;
+        while (t < 1f)
+        {
+            t = Mathf.Min(t + Time.unscaledDeltaTime / 0.35f, 1f);
+            float ease = EaseOutBack(t);
+            painelRT.anchoredPosition = Vector2.Lerp(POS_ESCONDIDO, POS_VISIVEL, ease);
+            painelCG.alpha = Mathf.Lerp(0f, 1f, t * 2f);
+            yield return null;
+        }
+        painelRT.anchoredPosition = POS_VISIVEL;
+        painelCG.alpha = 1f;
+    }
+
+    IEnumerator AnimarSaida()
+    {
+        float t = 0f;
+        while (t < 1f)
+        {
+            t = Mathf.Min(t + Time.unscaledDeltaTime / 0.25f, 1f);
+            float ease = t * t;
+            painelRT.anchoredPosition = Vector2.Lerp(POS_VISIVEL, POS_ESCONDIDO, ease);
+            painelCG.alpha = Mathf.Lerp(1f, 0f, t);
+            yield return null;
+        }
+        painelEvento.SetActive(false);
+        painelRT.anchoredPosition = POS_ESCONDIDO;
+        painelCG.alpha = 0f;
+    }
+
+    float EaseOutBack(float t)
+    {
+        const float c1 = 1.70158f;
+        const float c3 = c1 + 1f;
+        return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
     }
 
     void AtualizarUI()
@@ -364,15 +445,18 @@ public class GerenciadorEventos : MonoBehaviour
         painelEvento = new GameObject("EventoPainel");
         painelEvento.transform.SetParent(canvasGO.transform, false);
 
-        RectTransform rectPainel = painelEvento.AddComponent<RectTransform>();
-        rectPainel.anchorMin = new Vector2(1f, 1f);
-        rectPainel.anchorMax = new Vector2(1f, 1f);
-        rectPainel.pivot    = new Vector2(1f, 1f);
-        rectPainel.anchoredPosition = new Vector2(-10f, -10f);
-        rectPainel.sizeDelta = new Vector2(330f, 110f);
+        painelRT = painelEvento.AddComponent<RectTransform>();
+        painelRT.anchorMin = new Vector2(1f, 1f);
+        painelRT.anchorMax = new Vector2(1f, 1f);
+        painelRT.pivot     = new Vector2(1f, 1f);
+        painelRT.anchoredPosition = POS_ESCONDIDO;
+        painelRT.sizeDelta = tamanhoDoPanel;
+
+        painelCG = painelEvento.AddComponent<CanvasGroup>();
+        painelCG.alpha = 0f;
 
         Image fundo = painelEvento.AddComponent<Image>();
-        fundo.color = new Color(0.04f, 0.04f, 0.12f, 0.92f);
+        fundo.color = corFundo;
 
         // Borda colorida (painel interno levemente menor)
         GameObject borda = new GameObject("Borda");
@@ -383,37 +467,35 @@ public class GerenciadorEventos : MonoBehaviour
         rectBorda.offsetMin = new Vector2(2f, 2f);
         rectBorda.offsetMax = new Vector2(-2f, -2f);
         Image imgBorda = borda.AddComponent<Image>();
-        imgBorda.color = new Color(0.3f, 0.5f, 1f, 0.4f);
+        imgBorda.color = corBorda;
 
         // Nome do evento
         textoNome = CriarTMP(painelEvento, "NomeEvento",
             anchorMin: new Vector2(0f, 1f), anchorMax: new Vector2(1f, 1f),
             pivot: new Vector2(0.5f, 1f),
             anchoredPos: new Vector2(0f, -6f), size: new Vector2(0f, 26f),
-            fontSize: 16f, style: FontStyles.Bold,
-            color: Color.yellow, align: TextAlignmentOptions.Center);
+            fontSize: tamanhoFonteNome, style: FontStyles.Bold,
+            color: corNome, align: TextAlignmentOptions.Center);
 
-        // Descrição
         textoDesc = CriarTMP(painelEvento, "DescEvento",
             anchorMin: new Vector2(0f, 1f), anchorMax: new Vector2(1f, 1f),
             pivot: new Vector2(0.5f, 1f),
             anchoredPos: new Vector2(0f, -34f), size: new Vector2(-16f, 36f),
-            fontSize: 11f, style: FontStyles.Normal,
-            color: new Color(0.85f, 0.85f, 0.85f), align: TextAlignmentOptions.Center);
+            fontSize: tamanhoFonteDesc, style: FontStyles.Normal,
+            color: corDesc, align: TextAlignmentOptions.Center);
 
-        // Timer e progresso (linha inferior)
         textoTimer = CriarTMP(painelEvento, "TimerEvento",
             anchorMin: new Vector2(0f, 0f), anchorMax: new Vector2(0.4f, 0f),
             pivot: new Vector2(0f, 0f),
             anchoredPos: new Vector2(10f, 22f), size: new Vector2(0f, 22f),
-            fontSize: 14f, style: FontStyles.Bold,
+            fontSize: tamanhoFonteTimer, style: FontStyles.Bold,
             color: Color.white, align: TextAlignmentOptions.Left);
 
         textoProgresso = CriarTMP(painelEvento, "ProgressoEvento",
             anchorMin: new Vector2(0.6f, 0f), anchorMax: new Vector2(1f, 0f),
             pivot: new Vector2(1f, 0f),
             anchoredPos: new Vector2(-10f, 22f), size: new Vector2(0f, 22f),
-            fontSize: 14f, style: FontStyles.Bold,
+            fontSize: tamanhoFonteTimer, style: FontStyles.Bold,
             color: Color.white, align: TextAlignmentOptions.Right);
 
         // Barra de progresso de tempo
@@ -438,9 +520,9 @@ public class GerenciadorEventos : MonoBehaviour
         barraFill.offsetMin = Vector2.zero;
         barraFill.offsetMax = Vector2.zero;
         barraFillImg = barraFillGO.AddComponent<Image>();
-        barraFillImg.color = new Color(0.2f, 0.8f, 0.3f, 1f);
+        barraFillImg.color = corBarraAtiva;
 
-        painelEvento.SetActive(false);
+        // painel começa fora da tela (POS_ESCONDIDO) e invisível — sem SetActive(false)
     }
 
     TextMeshProUGUI CriarTMP(

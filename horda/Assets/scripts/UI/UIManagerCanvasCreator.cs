@@ -6,6 +6,36 @@ using System.Collections.Generic;
 
 public class UIManagerCanvasCreator : EditorWindow
 {
+    [MenuItem("Tools/UI Manager/Add Dash HUD to Existing Canvas")]
+    public static void AddDashHUDToExistingCanvas()
+    {
+        UIManager uiManager = Object.FindAnyObjectByType<UIManager>();
+        if (uiManager == null)
+        {
+            Debug.LogError("UIManager não encontrado na cena.");
+            return;
+        }
+
+        if (uiManager.dashIcon != null)
+        {
+            Debug.LogWarning("Dash HUD já existe. Nada foi criado.");
+            return;
+        }
+
+        // Procura o SkillChoice_Canvas pelo nome
+        GameObject skillChoiceCanvas = GameObject.Find("SkillChoice_Canvas");
+        GameObject parent = skillChoiceCanvas != null ? skillChoiceCanvas : uiManager.gameObject;
+
+        if (skillChoiceCanvas == null)
+            Debug.LogWarning("SkillChoice_Canvas não encontrado — adicionando ao UIManager.");
+
+        CreateHUDDash(parent, uiManager);
+
+        Selection.activeGameObject = uiManager.dashIcon.gameObject;
+        EditorUtility.SetDirty(uiManager);
+        Debug.Log($"Dash HUD adicionado em '{parent.name}'.");
+    }
+
     [MenuItem("Tools/UI Manager/Create Complete UIManager Canvas")]
     public static void CreateCompleteUIManagerCanvas()
     {
@@ -36,11 +66,63 @@ public class UIManagerCanvasCreator : EditorWindow
         CreateStatusPanel(canvasGO, uiManager);
         CreateSkillSelectionPanel(canvasGO, uiManager);
         CreateStatusCardPanel(canvasGO, uiManager);
-        CreateXPGainText(canvasGO, uiManager); // 🆕 ADICIONADO: Texto de ganho de XP
+        CreateXPGainText(canvasGO, uiManager);
+        CreateHUDDash(canvasGO, uiManager);
 
         // Selecionar o Canvas criado
         Selection.activeGameObject = canvasGO;
 
+    }
+
+    private static void CreateHUDDash(GameObject parent, UIManager uiManager)
+    {
+        // Container ancorado no canto esquerdo
+        GameObject container = new GameObject("HUD_Dash", typeof(RectTransform));
+        container.transform.SetParent(parent.transform, false);
+        RectTransform containerRect = container.GetComponent<RectTransform>();
+        containerRect.anchorMin = new Vector2(1, 0);
+        containerRect.anchorMax = new Vector2(1, 0);
+        containerRect.pivot = new Vector2(1, 0);
+        containerRect.sizeDelta = new Vector2(64, 64);
+        containerRect.anchoredPosition = new Vector2(-20, 20);
+
+        // Ícone do dash
+        GameObject iconGO = new GameObject("DashIcon", typeof(Image));
+        iconGO.transform.SetParent(container.transform, false);
+        RectTransform iconRect = iconGO.GetComponent<RectTransform>();
+        iconRect.anchorMin = Vector2.zero;
+        iconRect.anchorMax = Vector2.one;
+        iconRect.offsetMin = Vector2.zero;
+        iconRect.offsetMax = Vector2.zero;
+        Image iconImage = iconGO.GetComponent<Image>();
+        iconImage.color = new Color(0.3f, 0.3f, 0.3f, 0.6f);
+
+        // Badge de contagem — canto superior direito do ícone
+        GameObject badgeGO = new GameObject("DashCount", typeof(RectTransform), typeof(Image));
+        badgeGO.transform.SetParent(container.transform, false);
+        RectTransform badgeRect = badgeGO.GetComponent<RectTransform>();
+        badgeRect.anchorMin = new Vector2(1, 1);
+        badgeRect.anchorMax = new Vector2(1, 1);
+        badgeRect.pivot = new Vector2(1, 1);
+        badgeRect.sizeDelta = new Vector2(22, 22);
+        badgeRect.anchoredPosition = new Vector2(6, 6);
+        badgeGO.GetComponent<Image>().color = new Color(0.05f, 0.05f, 0.05f, 0.85f);
+
+        GameObject countGO = CreateTMPText(badgeGO, "CountText", Vector2.zero, new Vector2(22, 22));
+        RectTransform countRect = countGO.GetComponent<RectTransform>();
+        countRect.anchorMin = Vector2.zero;
+        countRect.anchorMax = Vector2.one;
+        countRect.offsetMin = Vector2.zero;
+        countRect.offsetMax = Vector2.zero;
+        TextMeshProUGUI countText = countGO.GetComponent<TextMeshProUGUI>();
+        countText.text = "0";
+        countText.fontSize = 13;
+        countText.fontStyle = FontStyles.Bold;
+        countText.color = new Color(0.5f, 0.5f, 0.5f);
+        countText.alignment = TextAlignmentOptions.Center;
+
+        uiManager.dashIcon = iconImage;
+        uiManager.dashChargesText = countText;
     }
 
     // 🆕 MÉTODO PARA CRIAR TEXTO DE GANHO DE XP

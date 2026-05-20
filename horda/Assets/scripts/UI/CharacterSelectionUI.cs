@@ -38,13 +38,22 @@ public class CharacterSelectionUI : MonoBehaviour
     Image   glowPreview;
     GameObject painelPreview;
 
-    // partículas
+    // partículas de fundo
     const int QTD_P = 16;
     RectTransform[] pRT   = new RectTransform[QTD_P];
     Image[]         pImg  = new Image[QTD_P];
     Vector2[]       pOrig = new Vector2[QTD_P];
     float[]         pFase = new float[QTD_P];
     float[]         pVel  = new float[QTD_P];
+
+    // partículas do preview (sobem ao redor do personagem)
+    const int QTD_PP = 14;
+    RectTransform[] ppRT  = new RectTransform[QTD_PP];
+    Image[]         ppImg = new Image[QTD_PP];
+    float[]         ppT   = new float[QTD_PP];
+    float[]         ppDur = new float[QTD_PP];
+    float[]         ppX   = new float[QTD_PP];
+    float[]         ppDx  = new float[QTD_PP];
 
     Color corAtualGlow = new Color(0.55f, 0.15f, 0.85f);
 
@@ -65,6 +74,7 @@ public class CharacterSelectionUI : MonoBehaviour
         ConectarManager();
         StartCoroutine(AnimarParticulas());
         StartCoroutine(AnimarGlow());
+        StartCoroutine(AnimarParticulasPreview());
     }
 
     // ── Canvas ─────────────────────────────────────────────────────────
@@ -251,6 +261,7 @@ public class CharacterSelectionUI : MonoBehaviour
         previewRawImage.color = Color.white;
         Anchors(prevGO, new Vector2(0.05f, 0.08f), new Vector2(0.95f, 0.88f));
         ConfigurarCameraPreview();
+        CriarParticulasPreview(painelPreview);
 
         // nome grande no preview
         txtNomePreview = TMP(painelPreview, "NomePrev",
@@ -645,31 +656,95 @@ public class CharacterSelectionUI : MonoBehaviour
 
     void AdicionarSombraBlob(GameObject personagem)
     {
-        // Cria textura de gradiente circular para a sombra
-        int sz = 64;
-        var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        // Sombra elíptica forte nos pés — gradiente com borda dura no centro e suave nas bordas
+        int sz = 128;
+        var tex    = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         var pixels = new Color[sz * sz];
         var centro = new Vector2(sz * 0.5f, sz * 0.5f);
         float raio = sz * 0.5f;
+
         for (int y = 0; y < sz; y++)
             for (int x = 0; x < sz; x++)
             {
                 float d = Vector2.Distance(new Vector2(x, y), centro) / raio;
+                // Centro opaco, borda suave — curva acelerada para base mais sólida
                 float a = Mathf.Clamp01(1f - d);
-                pixels[y * sz + x] = new Color(0f, 0f, 0f, a * a * 0.55f);
+                a = Mathf.Pow(a, 1.1f) * 0.92f;
+                pixels[y * sz + x] = new Color(0f, 0f, 0.02f, a);
             }
         tex.SetPixels(pixels);
         tex.Apply();
 
         var sombra = new GameObject("BlobShadow");
         sombra.transform.SetParent(personagem.transform, false);
-        sombra.transform.localPosition = new Vector3(0f, -0.75f, 0.1f);
-        sombra.transform.localScale    = new Vector3(1.4f, 0.35f, 1f);
+        sombra.transform.localPosition = new Vector3(0f, -0.73f, 0.1f);
+        sombra.transform.localScale    = new Vector3(2.2f, 0.38f, 1f);
 
         var sr = sombra.AddComponent<SpriteRenderer>();
         sr.sprite       = Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
         sr.sortingOrder = -1;
         sr.color        = Color.white;
+    }
+
+    void CriarParticulasPreview(GameObject painel)
+    {
+        for (int i = 0; i < QTD_PP; i++)
+        {
+            float sz = Random.Range(2f, 5.5f);
+            var go = new GameObject($"PP{i}");
+            go.transform.SetParent(painel.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(sz, sz);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+
+            ppX[i]   = Random.Range(0.08f, 0.92f);
+            float startY = Random.Range(0.05f, 0.4f);
+            rt.anchorMin = rt.anchorMax = new Vector2(ppX[i], startY);
+            rt.anchoredPosition = Vector2.zero;
+
+            var img = go.AddComponent<Image>();
+            img.color = new Color(corAcento.r, corAcento.g, corAcento.b, 0f);
+
+            ppRT[i]  = rt;
+            ppImg[i] = img;
+            ppT[i]   = Random.Range(0f, 1f);
+            ppDur[i] = Random.Range(2.8f, 5.5f);
+            ppDx[i]  = Random.Range(-0.05f, 0.05f);
+        }
+    }
+
+    IEnumerator AnimarParticulasPreview()
+    {
+        while (true)
+        {
+            for (int i = 0; i < QTD_PP; i++)
+            {
+                if (ppRT[i] == null) yield break;
+
+                ppT[i] += Time.deltaTime / ppDur[i];
+                if (ppT[i] >= 1f)
+                {
+                    ppT[i]   = 0f;
+                    ppX[i]   = Random.Range(0.08f, 0.92f);
+                    ppDur[i] = Random.Range(2.8f, 5.5f);
+                    ppDx[i]  = Random.Range(-0.05f, 0.05f);
+                }
+
+                float t = ppT[i];
+                float y = Mathf.Lerp(0.06f, 0.90f, t);
+                float x = ppX[i] + ppDx[i] * t
+                          + Mathf.Sin(t * 5f + ppX[i] * 8f) * 0.018f;
+
+                ppRT[i].anchorMin = ppRT[i].anchorMax = new Vector2(x, y);
+                ppRT[i].anchoredPosition = Vector2.zero;
+
+                // fade in → peak → fade out ao longo do ciclo
+                float alpha = Mathf.Sin(t * Mathf.PI) * 0.20f;
+                ppImg[i].color = new Color(corAtualGlow.r, corAtualGlow.g,
+                                           corAtualGlow.b, alpha);
+            }
+            yield return null;
+        }
     }
 
     void OnDestroy()

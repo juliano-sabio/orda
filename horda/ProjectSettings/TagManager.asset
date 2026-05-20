@@ -48,5 +48,8 @@ TagManager:
   - name: dano_ui
     uniqueID: 1173689823
     locked: 0
+  - name: Enemies
+    uniqueID: 3899992551
+    locked: 0
   m_RenderingLayers:
   - Default

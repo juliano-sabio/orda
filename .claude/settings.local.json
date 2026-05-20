@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm list -g --depth=0 2>&1)",
+      "mcp__obsidian__read_file",
+      "mcp__obsidian__list_allowed_directories",
+      "mcp__obsidian__list_directory",
+      "PowerShell([System.IO.Path]::GetFullPath\\(\"C:\\\\Users\\\\rafin\\\\Documents\\\\Obsidian\"\\))",
+      "PowerShell(\\(Get-Item \"C:\\\\Users\\\\rafin\\\\Documents\"\\).Target; \\(Get-Item \"C:\\\\Users\\\\rafin\\\\Documents\"\\).LinkType)",
+      "mcp__obsidian__write_file",
+      "PowerShell($content = Get-Content 'c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\Scenes\\\\Modo_sobrevivencia.unity' -Raw -Encoding UTF8; $idx = $content.IndexOf\\('m_Name: Main Camera'\\); if \\($idx -gt 0\\) { $content.Substring\\([Math]::Max\\(0, $idx - 1500\\), 2000\\) })",
+      "PowerShell($content = Get-Content 'c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\Scenes\\\\Modo_sobrevivencia.unity' -Raw -Encoding UTF8; $idx = $content.IndexOf\\('m_Name: Main Camera'\\); $section = $content.Substring\\($idx, 1500\\); Write-Output $section)",
+      "PowerShell($content = Get-Content 'c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\Scenes\\\\Modo_sobrevivencia.unity' -Raw -Encoding UTF8; $idx = $content.IndexOf\\('&507583728'\\); $section = $content.Substring\\($idx, 400\\); Write-Output $section)",
+      "PowerShell($content = Get-Content 'c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\Scenes\\\\Modo_sobrevivencia.unity' -Raw -Encoding UTF8; \\($content -split \"`n\" | Select-String \"Light\" | Select-Object -First 20\\))",
+      "Bash(where claude *)",
+      "Bash(ls \"C:\\\\Users\\\\rafin\\\\AppData\\\\Local\\\\Programs\\\\\" 2>/dev/null | grep -i claude)",
+      "Read(//c/Users/rafin/AppData/Local/Programs\" 2>/dev/**)",
+      "Bash(curl -s -m 3 http://127.0.0.1:8080)",
+      "PowerShell(npm install -g @anthropic-ai/claude-code 2>&1)",
+      "Bash(claude mcp *)",
+      "mcp__unity__manage_components",
+      "mcp__unity__execute_code",
+      "mcp__unity__manage_scene",
+      "mcp__unity__read_console",
+      "mcp__unity__find_gameobjects"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"
+    ]
+  }
+}

@@ -18,6 +18,8 @@ public class UIManager : MonoBehaviour
     public GameObject elementAdvantagePanel;
 
     [Header("HUD Elements")]
+    public Image dashIcon;
+    public TextMeshProUGUI dashChargesText;
     public Slider healthBar;
     public Slider xpSlider;
     public Slider ultimateChargeBar;
@@ -811,6 +813,20 @@ public class UIManager : MonoBehaviour
 
         if (ultimateReadyEffect != null)
             ultimateReadyEffect.SetActive(playerStats.IsUltimateReady());
+
+        if (dashChargesText != null)
+        {
+            int charges = playerStats.dashCharges;
+            dashChargesText.text = charges.ToString();
+            dashChargesText.color = charges > 0 ? new Color(0.4f, 0.9f, 1f) : new Color(0.5f, 0.5f, 0.5f);
+        }
+
+        if (dashIcon != null)
+        {
+            dashIcon.color = playerStats.dashCharges > 0
+                ? Color.white
+                : new Color(0.3f, 0.3f, 0.3f, 0.6f);
+        }
 
         if (statusPanelVisible)
         {

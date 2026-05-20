@@ -77,7 +77,7 @@ public class InimigoController : MonoBehaviour
     {
         if (dadosInimigo == null)
         {
-            Debug.LogError($"❌ Inimigo {name} não tem dadosInimigo atribuído!");
+            // Boss e inimigos customizados podem não usar InimigoData; valores já definidos externamente.
             return;
         }
 

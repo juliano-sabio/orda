@@ -38,7 +38,7 @@ public class HealthPickup : MonoBehaviour
         if (playerStats.health >= playerStats.maxHealth) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
-        if (distance <= playerStats.GetXpCollectionRadius())
+        if (distance <= playerStats.GetItemCollectionRadius())
             isAttracted = true;
     }
 
@@ -47,7 +47,7 @@ public class HealthPickup : MonoBehaviour
         if (player == null) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
-        float speed = moveSpeed * Mathf.Lerp(4f, 1f, distance / playerStats.GetXpCollectionRadius());
+        float speed = moveSpeed * Mathf.Lerp(4f, 1f, distance / playerStats.GetItemCollectionRadius());
 
         Vector3 direction = (player.position - transform.position).normalized;
         transform.position += direction * speed * Time.deltaTime;
