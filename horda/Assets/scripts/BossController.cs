@@ -3,413 +3,594 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+[RequireComponent(typeof(InimigoController))]
 public class BossController : MonoBehaviour
 {
-    [Header("Configuração do Boss")]
-    public string nomeBoss = "BOSS";
-    public float vidaMaxima = 500f;
-    public float danoBase = 20f;
-    public float velocidadeBase = 2f;
+    // ──────────────────────────────────────────────
+    // IDENTIDADE
+    // ──────────────────────────────────────────────
+    [Header("Identidade")]
+    public string nomeBoss = "Maga Slime";
 
-    [Header("Animações")]
-    public RuntimeAnimatorController controllerFase1;
-    public RuntimeAnimatorController controllerFase2;
-
-    [Header("Fase 2 — Efeito")]
-    public GameObject efeitoFase2;
-
-    [Header("Fase 2 — Minions")]
-    public GameObject[] prefabsMinions;
-    public int quantidadeMinions = 3;
-    public float raioSpawnMinions = 2f;
-
-    [Header("Fase 2 (% de vida restante)")]
+    // ──────────────────────────────────────────────
+    // FASES
+    // ──────────────────────────────────────────────
+    [Header("Fases")]
+    [Tooltip("Porcentagem de vida para entrar na Fase 2 (0‑1)")]
     public float gatilhoFase2 = 0.5f;
-    public float multiplicadorDanoFase2 = 1.5f;
-    public float multiplicadorVelocidadeFase2 = 1.4f;
-    public Color corFase2 = new Color(1f, 0.3f, 0.1f);
+    [Tooltip("Redução de dano recebido na Fase 2 (0.3 = 30% menos dano)")]
+    public float reducaoDanoFase2 = 0.3f;
 
+    // ──────────────────────────────────────────────
+    // TELEPORTE
+    // ──────────────────────────────────────────────
     [Header("Teleporte")]
-    public float intervaloTeleporteFase1 = 8f;
-    public float intervaloTeleporteFase2 = 4f;
-    public float raioTeleporteMin = 4f;
-    public float raioTeleporteMax = 9f;
-    public GameObject efeitoTeleporte;
+    public float intervalTeleporteFase1 = 4f;
+    public float intervalTeleporteFase2 = 2.5f;
+    public float distMinTeleporte = 4f;
+    public float distMaxTeleporte = 9f;
+    public float duracaoFade = 0.25f;
 
-    [Header("Renderização")]
-    public string sortingLayerName = "Default";
-    public int sortingOrder = 150;
+    // ──────────────────────────────────────────────
+    // ATAQUES
+    // ──────────────────────────────────────────────
+    [Header("Ataques")]
+    public GameObject prefabProjetil;
+    [Tooltip("Projéteis disparados por salva na Fase 1")]
+    public int projeteisFase1 = 5;
+    [Tooltip("Ângulo total do leque de projéteis (graus)")]
+    public float anguloLeque = 70f;
+    public float intervalAtaqueFase1 = 2.5f;
+    public float intervalAtaqueFase2 = 1.4f;
+    public float velocidadeProjetil = 7f;
+    public float danoProjetil = 15f;
 
-    [Header("Anuncio")]
-    public float duracaoAnuncio = 3f;
+    [Header("Olho (ponto de spawn do projétil)")]
+    [Tooltip("Offset do olho em relação ao pivot do boss (world units). Ajuste pelo gizmo na cena.")]
+    public Vector2 offsetOlho = new Vector2(0.03f, 0.13f);
 
-    private Animator anim;
-    private float vidaAtual;
-    private bool fase2Ativa = false;
-    private bool teleportando = false;
-    private InimigoController inimigo;
-    private MonoBehaviour movimentoComp;
+    // ──────────────────────────────────────────────
+    // REFERÊNCIAS INTERNAS
+    // ──────────────────────────────────────────────
+    private InimigoController controller;
+    private SpriteRenderer spriteRenderer;
+    private Animator animator;
+    private Transform player;
 
-    // UI da barra de vida
-    private GameObject painelBoss;
-    private RectTransform barraFill;
-    private TextMeshProUGUI textoNome;
-    private TextMeshProUGUI textoVida;
-    private Image fillImg;
+    private bool fase2Ativada = false;
+    private int projeteis; // valor atual (muda na fase 2)
 
-    private static readonly Color corNormal  = new Color(0.85f, 0.15f, 0.15f);
-    private static readonly Color corFaseTwo = new Color(1f, 0.45f, 0.05f);
+    // ──────────────────────────────────────────────
+    // UI
+    // ──────────────────────────────────────────────
+    private GameObject bossCanvasGO;
+    private Image hpFill;
+    private Image hpFillGhost; // barra "fantasma" que atrasa
+    private TextMeshProUGUI faseText;
+    private TextMeshProUGUI hpText;
 
-    void Awake()
-    {
-        inimigo = GetComponent<InimigoController>();
-        if (inimigo != null)
-        {
-            inimigo.vidaMaxima      = vidaMaxima;
-            inimigo.vidaAtual       = vidaMaxima;
-            inimigo.danoAtual       = danoBase;
-            inimigo.velocidadeBase  = velocidadeBase;
-            inimigo.velocidadeAtual = velocidadeBase;
-        }
-
-        var danoComp = GetComponent<DanoInimigo>();
-        if (danoComp != null) danoComp.dano = danoBase;
-
-        gameObject.layer = 7;
-
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null)
-        {
-            sr.sortingLayerName = sortingLayerName;
-            sr.sortingOrder     = sortingOrder;
-        }
-
-        // Guarda referência ao componente de movimento para pausar durante teleporte
-        movimentoComp = GetComponent<movi_inimigo>() as MonoBehaviour;
-    }
+    // ──────────────────────────────────────────────────────────────
+    // LIFECYCLE
+    // ──────────────────────────────────────────────────────────────
 
     void Start()
     {
-        vidaAtual = vidaMaxima;
-        anim = GetComponent<Animator>();
+        controller    = GetComponent<InimigoController>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator      = GetComponent<Animator>();
+        player        = GameObject.FindGameObjectWithTag("Player")?.transform;
 
-        if (anim != null && controllerFase1 != null)
-            anim.runtimeAnimatorController = controllerFase1;
+        projeteis = projeteisFase1;
 
-        CriarBarraUI();
-        StartCoroutine(AnunciarBoss());
-        StartCoroutine(RotinaTelepote());
+        CriarBossUI();
+        StartCoroutine(SequenciaEntrada());
+        StartCoroutine(LoopTeleporte());
+        StartCoroutine(LoopAtaque());
     }
 
     void Update()
     {
-        if (inimigo == null) return;
+        if (controller == null || controller.estaMorrendo) return;
 
-        vidaAtual = inimigo.vidaAtual;
-        float pct = Mathf.Clamp01(vidaAtual / vidaMaxima);
-
-        if (!fase2Ativa && pct <= gatilhoFase2)
-            AtivarFase2();
-
-        if (inimigo.estaMorrendo)
-            DestruirBarraUI();
-
-        if (painelBoss == null) return;
-
-        if (barraFill != null)
-            barraFill.anchorMax = new Vector2(pct, 1f);
-
-        if (textoVida != null)
-            textoVida.text = $"{Mathf.CeilToInt(vidaAtual)} / {Mathf.CeilToInt(vidaMaxima)}";
+        AtualizarUI();
+        ChecarFase2();
     }
 
-    // ─── Fase 2 ──────────────────────────────────────────────────────────────
-
-    void AtivarFase2()
+    void OnDrawGizmosSelected()
     {
-        fase2Ativa = true;
-        Debug.Log("[Boss] Fase 2 ativada!");
+        // Mostra o ponto de spawn do projétil (olho) em amarelo no editor
+        Gizmos.color = Color.yellow;
+        float sinalX = transform.localScale.x >= 0 ? 1f : -1f;
+        Vector3 pos  = transform.position + new Vector3(offsetOlho.x * sinalX, offsetOlho.y, 0f);
+        Gizmos.DrawWireSphere(pos, 0.08f);
+        Gizmos.DrawLine(transform.position, pos);
+    }
 
-        inimigo.danoAtual       *= multiplicadorDanoFase2;
-        inimigo.velocidadeAtual *= multiplicadorVelocidadeFase2;
+    void OnDestroy()
+    {
+        if (bossCanvasGO != null)
+            Destroy(bossCanvasGO);
+    }
 
-        var danoComp = GetComponent<DanoInimigo>();
-        if (danoComp != null) danoComp.dano = inimigo.danoAtual;
+    // ──────────────────────────────────────────────────────────────
+    // VERIFICAÇÃO DE FASE
+    // ──────────────────────────────────────────────────────────────
 
-        // Troca a animação pelo controller da fase 2
-        if (anim != null && controllerFase2 != null)
-            anim.runtimeAnimatorController = controllerFase2;
-
-        // Tint laranja-avermelhado
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null) sr.color = corFase2;
-
-        if (efeitoFase2 != null)
-            Instantiate(efeitoFase2, transform.position, Quaternion.identity);
-
-        // Spawn de minions ao redor
-        if (prefabsMinions != null && prefabsMinions.Length > 0)
+    void ChecarFase2()
+    {
+        if (fase2Ativada) return;
+        if (controller.GetPorcentagemVida() <= gatilhoFase2)
         {
-            for (int i = 0; i < quantidadeMinions; i++)
-            {
-                GameObject prefab = prefabsMinions[Random.Range(0, prefabsMinions.Length)];
-                if (prefab == null) continue;
-                float angulo = i * (360f / quantidadeMinions) * Mathf.Deg2Rad;
-                Vector2 pos = (Vector2)transform.position
-                    + new Vector2(Mathf.Cos(angulo), Mathf.Sin(angulo)) * raioSpawnMinions;
-                Instantiate(prefab, pos, Quaternion.identity);
-            }
+            fase2Ativada = true;
+            StartCoroutine(TransicaoFase2());
+        }
+    }
+
+    IEnumerator TransicaoFase2()
+    {
+        // Resistência a dano permanente
+        controller.AplicarBuffDefesa(reducaoDanoFase2, 99999f);
+
+        // Dobra os projéteis
+        projeteis = projeteisFase1 * 2;
+
+        // Muda animação (requer estado "Fase2" no AnimatorController)
+        if (animator != null) animator.Play("Fase2");
+
+        // Atualiza indicador de fase
+        if (faseText != null)
+        {
+            faseText.text  = "FASE 2";
+            faseText.color = new Color(1f, 0.4f, 0.1f);
         }
 
-        if (fillImg != null) fillImg.color = corFaseTwo;
+        // Flash de transição
+        yield return StartCoroutine(FlashFase2());
 
-        if (textoNome != null)
-            textoNome.text = $"⚡ {nomeBoss} ⚡";
-
-        StartCoroutine(PiscarBoss());
+        // Aviso de fase
+        StartCoroutine(MostrarTextoTela("MODO FÚRIA ATIVADO!", new Color(1f, 0.3f, 0f), 2f));
     }
 
-    // ─── Teleporte ───────────────────────────────────────────────────────────
-
-    IEnumerator RotinaTelepote()
+    IEnumerator FlashFase2()
     {
-        // Aguarda um momento inicial antes do primeiro teleporte
-        yield return new WaitForSeconds(3f);
-
-        while (inimigo == null || !inimigo.estaMorrendo)
+        Color corOriginal = spriteRenderer != null ? spriteRenderer.color : Color.white;
+        for (int i = 0; i < 8; i++)
         {
-            float intervalo = fase2Ativa ? intervaloTeleporteFase2 : intervaloTeleporteFase1;
-            yield return new WaitForSeconds(intervalo);
+            if (spriteRenderer != null) spriteRenderer.color = Color.white;
+            yield return new WaitForSeconds(0.07f);
+            if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0.3f, 0f);
+            yield return new WaitForSeconds(0.07f);
+        }
+        if (spriteRenderer != null) spriteRenderer.color = corOriginal;
+    }
 
-            if (inimigo != null && !inimigo.estaMorrendo)
-                yield return StartCoroutine(Teleportar());
+    // ──────────────────────────────────────────────────────────────
+    // TELEPORTE
+    // ──────────────────────────────────────────────────────────────
+
+    IEnumerator LoopTeleporte()
+    {
+        // Aguarda o boss aparecer antes de começar a se teleportar
+        yield return new WaitForSeconds(intervalTeleporteFase1);
+
+        while (!controller.estaMorrendo)
+        {
+            yield return StartCoroutine(Teleportar());
+            float proximo = fase2Ativada ? intervalTeleporteFase2 : intervalTeleporteFase1;
+            yield return new WaitForSeconds(proximo);
         }
     }
 
     IEnumerator Teleportar()
     {
-        teleportando = true;
+        if (player == null || spriteRenderer == null) yield break;
 
-        // Pausa o movimento durante o teleporte
-        if (movimentoComp != null) movimentoComp.enabled = false;
-
-        var sr = GetComponent<SpriteRenderer>();
-        var rb = GetComponent<Rigidbody2D>();
-
-        // Efeito de saída
-        if (efeitoTeleporte != null)
-            Instantiate(efeitoTeleporte, transform.position, Quaternion.identity);
-
-        // Pisca e some
+        // Efeito de "carga" antes de sumir (pisca)
         for (int i = 0; i < 3; i++)
         {
-            if (sr != null) sr.enabled = false;
-            yield return new WaitForSeconds(0.07f);
-            if (sr != null) sr.enabled = true;
-            yield return new WaitForSeconds(0.07f);
-        }
-        if (sr != null) sr.enabled = false;
-        yield return new WaitForSeconds(0.15f);
-
-        // Move para nova posição
-        Vector2 novaPosicao = EscolherPosicaoTeleporte();
-        if (rb != null)
-            rb.MovePosition(novaPosicao);
-        else
-            transform.position = novaPosicao;
-
-        yield return new WaitForSeconds(0.05f);
-
-        // Efeito de chegada
-        if (efeitoTeleporte != null)
-            Instantiate(efeitoTeleporte, transform.position, Quaternion.identity);
-
-        if (sr != null) sr.enabled = true;
-
-        // Pisca na chegada
-        for (int i = 0; i < 4; i++)
-        {
-            if (sr != null) sr.enabled = false;
-            yield return new WaitForSeconds(0.06f);
-            if (sr != null) sr.enabled = true;
-            yield return new WaitForSeconds(0.06f);
+            spriteRenderer.color = new Color(0.5f, 0f, 1f);
+            yield return new WaitForSeconds(0.08f);
+            spriteRenderer.color = Color.white;
+            yield return new WaitForSeconds(0.08f);
         }
 
-        // Retoma movimento
-        if (movimentoComp != null) movimentoComp.enabled = true;
-        teleportando = false;
+        // Fade out
+        yield return StartCoroutine(FadeAlpha(1f, 0f, duracaoFade));
+
+        // Move
+        transform.position = ObterPosicaoTeleporte();
+
+        yield return null; // aguarda um frame para física resolver
+
+        // Fade in
+        yield return StartCoroutine(FadeAlpha(0f, 1f, duracaoFade));
     }
 
-    Vector2 EscolherPosicaoTeleporte()
+    Vector2 ObterPosicaoTeleporte()
     {
-        // Usa a posição do player como referência para teleportar ao redor dele
-        var player = FindAnyObjectByType<PlayerStats>();
-        Vector2 centro = player != null
-            ? (Vector2)player.transform.position
-            : (Vector2)transform.position;
+        if (player == null) return transform.position;
 
-        // Tenta até 10 vezes encontrar uma posição longe o suficiente do boss atual
-        for (int tentativa = 0; tentativa < 10; tentativa++)
+        for (int tentativa = 0; tentativa < 20; tentativa++)
         {
-            float angulo   = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-            float distancia = Random.Range(raioTeleporteMin, raioTeleporteMax);
-            Vector2 candidata = centro + new Vector2(Mathf.Cos(angulo), Mathf.Sin(angulo)) * distancia;
+            float angulo   = Random.Range(0f, 360f);
+            float dist     = Random.Range(distMinTeleporte, distMaxTeleporte);
+            float rad      = angulo * Mathf.Deg2Rad;
+            Vector2 alvo   = (Vector2)player.position + new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * dist;
 
-            // Garante distância mínima da posição atual
-            if (Vector2.Distance(candidata, transform.position) >= raioTeleporteMin)
-                return candidata;
+            if (!Physics2D.OverlapCircle(alvo, 0.6f, LayerMask.GetMask("Obstacles")))
+                return alvo;
         }
 
-        // Fallback: posição oposta ao boss em relação ao player
-        Vector2 direcao = ((Vector2)transform.position - centro).normalized;
-        return centro - direcao * raioTeleporteMin;
+        // Fallback: posição acima do player
+        return (Vector2)player.position + Vector2.up * distMinTeleporte;
     }
 
-    // ─── Efeitos Visuais ─────────────────────────────────────────────────────
-
-    IEnumerator PiscarBoss()
+    IEnumerator FadeAlpha(float de, float para, float duracao)
     {
-        var sr = GetComponent<SpriteRenderer>();
-        for (int i = 0; i < 8; i++)
-        {
-            if (sr != null) sr.enabled = false;
-            yield return new WaitForSeconds(0.07f);
-            if (sr != null) sr.enabled = true;
-            yield return new WaitForSeconds(0.07f);
-        }
-    }
-
-    IEnumerator AnunciarBoss()
-    {
-        GameObject canvasGO = new GameObject("BossAnuncio");
-        Canvas canvas = canvasGO.AddComponent<Canvas>();
-        canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 200;
-        canvasGO.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-
-        GameObject txtGO = new GameObject("Txt");
-        txtGO.transform.SetParent(canvasGO.transform, false);
-        var rt = txtGO.AddComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0f, 0.55f);
-        rt.anchorMax = new Vector2(1f, 0.75f);
-        rt.offsetMin = rt.offsetMax = Vector2.zero;
-
-        var tmp = txtGO.AddComponent<TextMeshProUGUI>();
-        tmp.text      = $"⚠ {nomeBoss} ⚠";
-        tmp.fontSize  = 52f;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.color     = new Color(1f, 0.2f, 0.2f);
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.enableWordWrapping = false;
-
+        if (spriteRenderer == null) yield break;
         float t = 0f;
-        while (t < duracaoAnuncio)
+        Color c = spriteRenderer.color;
+        while (t < duracao)
         {
-            t += Time.deltaTime;
-            float alpha = t < 0.4f
-                ? t / 0.4f
-                : (t > duracaoAnuncio - 0.5f ? (duracaoAnuncio - t) / 0.5f : 1f);
-            float escala = 1f + Mathf.Sin(t * 8f) * 0.04f;
-            tmp.color = new Color(1f, 0.2f, 0.2f, alpha);
-            txtGO.transform.localScale = Vector3.one * escala;
+            t   += Time.deltaTime;
+            c.a  = Mathf.Lerp(de, para, t / duracao);
+            spriteRenderer.color = c;
             yield return null;
         }
-
-        Destroy(canvasGO);
+        c.a = para;
+        spriteRenderer.color = c;
     }
 
-    // ─── UI da Barra de Vida ─────────────────────────────────────────────────
+    // ──────────────────────────────────────────────────────────────
+    // ATAQUES
+    // ──────────────────────────────────────────────────────────────
 
-    void CriarBarraUI()
+    IEnumerator LoopAtaque()
     {
-        GameObject canvasGO = new GameObject("BossBarCanvas");
-        DontDestroyOnLoad(canvasGO);
-        Canvas canvas = canvasGO.AddComponent<Canvas>();
-        canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 150;
-        var scaler = canvasGO.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
-        scaler.matchWidthOrHeight  = 0.5f;
-        canvasGO.AddComponent<GraphicRaycaster>();
+        yield return new WaitForSeconds(2.5f); // delay inicial
 
-        painelBoss = new GameObject("PainelBoss");
-        painelBoss.transform.SetParent(canvasGO.transform, false);
-        var rtPainel = painelBoss.AddComponent<RectTransform>();
-        rtPainel.anchorMin        = new Vector2(0.15f, 0f);
-        rtPainel.anchorMax        = new Vector2(0.85f, 0f);
-        rtPainel.pivot            = new Vector2(0.5f, 0f);
-        rtPainel.anchoredPosition = new Vector2(0f, 20f);
-        rtPainel.sizeDelta        = new Vector2(0f, 54f);
-        painelBoss.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.08f, 0.92f);
+        while (!controller.estaMorrendo)
+        {
+            float intervalo = fase2Ativada ? intervalAtaqueFase2 : intervalAtaqueFase1;
+            yield return new WaitForSeconds(intervalo);
 
-        textoNome = CriarTMP(painelBoss,
-            new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
-            new Vector2(0f, -4f), new Vector2(0f, 22f),
-            nomeBoss, 15f, FontStyles.Bold, Color.white);
-
-        GameObject barraBG = new GameObject("BarraBG");
-        barraBG.transform.SetParent(painelBoss.transform, false);
-        var rtBG = barraBG.AddComponent<RectTransform>();
-        rtBG.anchorMin        = new Vector2(0f, 0f);
-        rtBG.anchorMax        = new Vector2(1f, 0f);
-        rtBG.pivot            = new Vector2(0.5f, 0f);
-        rtBG.anchoredPosition = new Vector2(0f, 6f);
-        rtBG.sizeDelta        = new Vector2(-16f, 14f);
-        barraBG.AddComponent<Image>().color = new Color(0.15f, 0.05f, 0.05f);
-
-        GameObject fillGO = new GameObject("Fill");
-        fillGO.transform.SetParent(barraBG.transform, false);
-        barraFill            = fillGO.AddComponent<RectTransform>();
-        barraFill.anchorMin  = new Vector2(0f, 0f);
-        barraFill.anchorMax  = new Vector2(1f, 1f);
-        barraFill.offsetMin  = barraFill.offsetMax = Vector2.zero;
-        fillImg              = fillGO.AddComponent<Image>();
-        fillImg.color        = corNormal;
-
-        textoVida = CriarTMP(painelBoss,
-            new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
-            new Vector2(0f, 22f), new Vector2(0f, 18f),
-            "", 11f, FontStyles.Normal, new Color(0.8f, 0.8f, 0.8f));
+            if (!controller.estaMorrendo && player != null)
+                Disparar();
+        }
     }
 
-    void DestruirBarraUI()
+    Vector3 PosicaoOlho()
     {
-        if (painelBoss != null)
-            StartCoroutine(FadeEDestruir());
+        float sinalX = spriteRenderer != null ? Mathf.Sign(transform.localScale.x) : 1f;
+        return transform.position + new Vector3(offsetOlho.x * sinalX, offsetOlho.y, 0f);
     }
 
-    IEnumerator FadeEDestruir()
+    void Disparar()
     {
-        var cg = painelBoss.GetComponent<CanvasGroup>()
-               ?? painelBoss.AddComponent<CanvasGroup>();
+        if (prefabProjetil == null || player == null) return;
+
+        Vector3 spawnPos  = PosicaoOlho();
+        Vector2 dirBase   = ((Vector2)player.position - (Vector2)spawnPos).normalized;
+        float anguloBase  = Mathf.Atan2(dirBase.y, dirBase.x) * Mathf.Rad2Deg;
+
+        for (int i = 0; i < projeteis; i++)
+        {
+            float t      = projeteis > 1 ? (float)i / (projeteis - 1) : 0.5f;
+            float offset = Mathf.Lerp(-anguloLeque / 2f, anguloLeque / 2f, t);
+            float ang    = (anguloBase + offset) * Mathf.Deg2Rad;
+            Vector2 dir  = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+
+            GameObject proj = Instantiate(prefabProjetil, spawnPos, Quaternion.identity);
+
+            // Tenta ProjetilInimigoDano primeiro, depois projetil_inimigo como fallback
+            ProjetilInimigoDano pid = proj.GetComponent<ProjetilInimigoDano>();
+            if (pid != null)
+            {
+                pid.dano       = danoProjetil;
+                pid.velocidade = velocidadeProjetil;
+                pid.SetDirecao(dir);
+            }
+            else
+            {
+                projetil_inimigo pi = proj.GetComponent<projetil_inimigo>();
+                if (pi != null)
+                {
+                    pi.velocidade = velocidadeProjetil;
+                    pi.SetDirecao(dir);
+                }
+                else
+                {
+                    Rigidbody2D rb = proj.GetComponent<Rigidbody2D>();
+                    if (rb != null) rb.linearVelocity = dir * velocidadeProjetil;
+                }
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // ENTRADA
+    // ──────────────────────────────────────────────────────────────
+
+    IEnumerator SequenciaEntrada()
+    {
+        // Boss começa invisível
+        if (spriteRenderer != null)
+        {
+            Color c = spriteRenderer.color; c.a = 0f;
+            spriteRenderer.color = c;
+        }
+
+        // Exibe aviso antes de aparecer
+        yield return StartCoroutine(MostrarAvisoBoss());
+
+        // Aparece
+        if (spriteRenderer != null)
+            yield return StartCoroutine(FadeAlpha(0f, 1f, 0.6f));
+    }
+
+    IEnumerator MostrarAvisoBoss()
+    {
+        GameObject warnGO = new GameObject("BossWarning");
+        Canvas cv = warnGO.AddComponent<Canvas>();
+        cv.renderMode    = RenderMode.ScreenSpaceOverlay;
+        cv.sortingOrder  = 200;
+        warnGO.AddComponent<CanvasScaler>();
+
+        // Fundo escuro
+        GameObject bgGO = CriarUIGO("BG", warnGO.transform);
+        ExpandirRect(bgGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        Image bgImg = bgGO.AddComponent<Image>();
+        bgImg.color = new Color(0f, 0f, 0f, 0f);
+
+        // Texto principal
+        GameObject txtGO = CriarUIGO("WarnText", warnGO.transform);
+        RectTransform tr = txtGO.GetComponent<RectTransform>();
+        tr.anchorMin = new Vector2(0.05f, 0.35f);
+        tr.anchorMax = new Vector2(0.95f, 0.65f);
+        tr.offsetMin = tr.offsetMax = Vector2.zero;
+        TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
+        txt.text      = "⚠  BOSS APARECEU  ⚠\n<size=60%>" + nomeBoss.ToUpper() + "</size>";
+        txt.fontSize  = 52;
+        txt.fontStyle = FontStyles.Bold;
+        txt.alignment = TextAlignmentOptions.Center;
+        txt.color     = new Color(1f, 0.15f, 0.15f, 0f);
+
+        // Fade in
+        yield return StartCoroutine(FadeCanvasElements(bgImg, txt, 0f, 1f, 0.4f, maxAlphaBG: 0.65f));
+
+        // Pulsa 3 vezes
+        for (int i = 0; i < 3; i++)
+        {
+            txt.color = new Color(1f, 0.9f, 0.1f);
+            yield return new WaitForSeconds(0.15f);
+            txt.color = new Color(1f, 0.15f, 0.15f);
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        // Fade out
+        yield return StartCoroutine(FadeCanvasElements(bgImg, txt, 1f, 0f, 0.4f, maxAlphaBG: 0.65f));
+
+        Destroy(warnGO);
+    }
+
+    IEnumerator FadeCanvasElements(Image bg, TextMeshProUGUI txt, float de, float para, float dur, float maxAlphaBG = 0.65f)
+    {
         float t = 0f;
+        while (t < dur)
+        {
+            t  += Time.deltaTime;
+            float a = Mathf.Lerp(de, para, t / dur);
+            bg.color  = new Color(0f, 0f, 0f, a * maxAlphaBG);
+            txt.color = new Color(txt.color.r, txt.color.g, txt.color.b, a);
+            yield return null;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // BOSS HEALTH BAR UI
+    // ──────────────────────────────────────────────────────────────
+
+    void CriarBossUI()
+    {
+        bossCanvasGO = new GameObject("BossCanvas");
+        Canvas cv = bossCanvasGO.AddComponent<Canvas>();
+        cv.renderMode   = RenderMode.ScreenSpaceOverlay;
+        cv.sortingOrder = 50;
+
+        CanvasScaler cs = bossCanvasGO.AddComponent<CanvasScaler>();
+        cs.uiScaleMode            = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        cs.referenceResolution    = new Vector2(1920, 1080);
+        cs.matchWidthOrHeight     = 0.5f;
+        bossCanvasGO.AddComponent<GraphicRaycaster>();
+
+        // Painel de fundo — parte inferior da tela
+        GameObject painel = CriarUIGO("BossPanel", bossCanvasGO.transform);
+        RectTransform pr = painel.GetComponent<RectTransform>();
+        pr.anchorMin = new Vector2(0.08f, 0.02f);
+        pr.anchorMax = new Vector2(0.92f, 0.115f);
+        pr.offsetMin = pr.offsetMax = Vector2.zero;
+        Image painelImg = painel.AddComponent<Image>();
+        painelImg.color = new Color(0.04f, 0.04f, 0.06f, 0.9f);
+
+        // Linha decorativa no topo do painel
+        GameObject linha = CriarUIGO("Linha", painel.transform);
+        RectTransform lr = linha.GetComponent<RectTransform>();
+        lr.anchorMin = new Vector2(0f, 0.92f);
+        lr.anchorMax = new Vector2(1f, 1f);
+        lr.offsetMin = lr.offsetMax = Vector2.zero;
+        Image linhaImg = linha.AddComponent<Image>();
+        linhaImg.color = new Color(0.8f, 0.2f, 0.2f, 1f);
+
+        // Nome do boss
+        GameObject nomeGO = CriarUIGO("NomeBoss", painel.transform);
+        RectTransform nr = nomeGO.GetComponent<RectTransform>();
+        nr.anchorMin = new Vector2(0.01f, 0.55f);
+        nr.anchorMax = new Vector2(0.75f, 0.92f);
+        nr.offsetMin = nr.offsetMax = Vector2.zero;
+        TextMeshProUGUI nomeTxt = nomeGO.AddComponent<TextMeshProUGUI>();
+        nomeTxt.text      = nomeBoss.ToUpper();
+        nomeTxt.fontSize  = 20;
+        nomeTxt.fontStyle = FontStyles.Bold;
+        nomeTxt.color     = new Color(1f, 0.85f, 0.2f);
+        nomeTxt.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Indicador de fase
+        GameObject faseGO = CriarUIGO("FaseBoss", painel.transform);
+        RectTransform fr = faseGO.GetComponent<RectTransform>();
+        fr.anchorMin = new Vector2(0.75f, 0.55f);
+        fr.anchorMax = new Vector2(0.99f, 0.92f);
+        fr.offsetMin = fr.offsetMax = Vector2.zero;
+        faseText           = faseGO.AddComponent<TextMeshProUGUI>();
+        faseText.text      = "FASE 1";
+        faseText.fontSize  = 14;
+        faseText.color     = new Color(0.75f, 0.75f, 0.75f);
+        faseText.alignment = TextAlignmentOptions.MidlineRight;
+
+        // Fundo da barra HP
+        GameObject barBG = CriarUIGO("HPBarBG", painel.transform);
+        RectTransform bbr = barBG.GetComponent<RectTransform>();
+        bbr.anchorMin = new Vector2(0.01f, 0.08f);
+        bbr.anchorMax = new Vector2(0.99f, 0.52f);
+        bbr.offsetMin = bbr.offsetMax = Vector2.zero;
+        barBG.AddComponent<Image>().color = new Color(0.12f, 0.04f, 0.04f);
+
+        // Barra "fantasma" (atrasa para dar efeito de queima)
+        GameObject ghostGO = CriarUIGO("HPGhost", barBG.transform);
+        ExpandirRect(ghostGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        hpFillGhost      = ghostGO.AddComponent<Image>();
+        hpFillGhost.type = Image.Type.Filled;
+        hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
+        hpFillGhost.fillAmount = 1f;
+        hpFillGhost.color      = new Color(0.9f, 0.6f, 0.1f, 0.7f);
+
+        // Barra HP principal
+        GameObject fillGO = CriarUIGO("HPFill", barBG.transform);
+        ExpandirRect(fillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        hpFill            = fillGO.AddComponent<Image>();
+        hpFill.type       = Image.Type.Filled;
+        hpFill.fillMethod = Image.FillMethod.Horizontal;
+        hpFill.fillAmount = 1f;
+        hpFill.color      = new Color(0.85f, 0.1f, 0.1f);
+
+        // Texto HP (ex: 450 / 500)
+        GameObject hpTextGO = CriarUIGO("HPText", barBG.transform);
+        ExpandirRect(hpTextGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        hpText            = hpTextGO.AddComponent<TextMeshProUGUI>();
+        hpText.fontSize   = 11;
+        hpText.color      = Color.white;
+        hpText.fontStyle  = FontStyles.Bold;
+        hpText.alignment  = TextAlignmentOptions.Center;
+
+        // Marcador de 50% (linha vertical no meio)
+        GameObject marca = CriarUIGO("Marca50", barBG.transform);
+        RectTransform mr = marca.GetComponent<RectTransform>();
+        mr.anchorMin = new Vector2(0.5f, 0f);
+        mr.anchorMax = new Vector2(0.5f, 1f);
+        mr.sizeDelta = new Vector2(2f, 0f);
+        mr.offsetMin = new Vector2(-1f, 0f);
+        mr.offsetMax = new Vector2(1f, 0f);
+        marca.AddComponent<Image>().color = new Color(1f, 1f, 0f, 0.6f);
+
+        // Anima entrada do painel
+        StartCoroutine(EntradaUI(painel));
+    }
+
+    IEnumerator EntradaUI(GameObject painel)
+    {
+        CanvasGroup cg = painel.AddComponent<CanvasGroup>();
+        cg.alpha = 0f;
+        float t = 0f;
+        while (t < 1f) { t += Time.deltaTime * 1.5f; cg.alpha = Mathf.Lerp(0f, 1f, t); yield return null; }
+        cg.alpha = 1f;
+    }
+
+    void AtualizarUI()
+    {
+        if (hpFill == null || controller == null) return;
+
+        float pct = controller.GetPorcentagemVida();
+
+        // Barra principal atualiza instantaneamente
+        hpFill.fillAmount = pct;
+
+        // Cor: vermelho escuro → laranja → vermelho vivo conforme fase
+        hpFill.color = fase2Ativada
+            ? new Color(1f, 0.3f + pct * 0.2f, 0f)
+            : Color.Lerp(new Color(0.85f, 0.1f, 0.1f), new Color(0.9f, 0.7f, 0f), pct);
+
+        // Barra fantasma atrasa para dar efeito de "queima" da vida
+        hpFillGhost.fillAmount = Mathf.MoveTowards(hpFillGhost.fillAmount, pct, Time.deltaTime * 0.6f);
+
+        // Texto numérico de HP
+        if (hpText != null)
+            hpText.text = $"{Mathf.RoundToInt(controller.vidaAtual)} / {Mathf.RoundToInt(controller.vidaMaxima)}";
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // TEXTO FLUTUANTE NA TELA
+    // ──────────────────────────────────────────────────────────────
+
+    IEnumerator MostrarTextoTela(string mensagem, Color cor, float duracao)
+    {
+        GameObject go = new GameObject("BossMsg");
+        Canvas cv = go.AddComponent<Canvas>();
+        cv.renderMode   = RenderMode.ScreenSpaceOverlay;
+        cv.sortingOrder = 150;
+        go.AddComponent<CanvasScaler>();
+
+        GameObject txtGO = CriarUIGO("Msg", go.transform);
+        RectTransform tr = txtGO.GetComponent<RectTransform>();
+        tr.anchorMin = new Vector2(0.1f, 0.55f);
+        tr.anchorMax = new Vector2(0.9f, 0.75f);
+        tr.offsetMin = tr.offsetMax = Vector2.zero;
+        TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
+        txt.text      = mensagem;
+        txt.fontSize  = 38;
+        txt.fontStyle = FontStyles.Bold;
+        txt.alignment = TextAlignmentOptions.Center;
+        txt.color     = new Color(cor.r, cor.g, cor.b, 0f);
+
+        // Fade in
+        float t = 0f;
+        while (t < 0.3f) { t += Time.deltaTime; txt.color = new Color(cor.r, cor.g, cor.b, t / 0.3f); yield return null; }
+        txt.color = new Color(cor.r, cor.g, cor.b, 1f);
+
+        yield return new WaitForSeconds(duracao);
+
+        // Fade out + sobe
+        t = 0f;
+        RectTransform msgRect = txtGO.GetComponent<RectTransform>();
+        Vector2 posBase = msgRect.anchoredPosition;
         while (t < 0.5f)
         {
             t += Time.deltaTime;
-            cg.alpha = Mathf.Lerp(1f, 0f, t / 0.5f);
+            float a = 1f - (t / 0.5f);
+            txt.color = new Color(cor.r, cor.g, cor.b, a);
+            msgRect.anchoredPosition = posBase + Vector2.up * (t * 120f);
             yield return null;
         }
-        Destroy(painelBoss.transform.parent.gameObject);
-        painelBoss = null;
+
+        Destroy(go);
     }
 
-    TextMeshProUGUI CriarTMP(GameObject parent,
-        Vector2 ancMin, Vector2 ancMax, Vector2 pivot,
-        Vector2 pos, Vector2 size,
-        string texto, float fontSize, FontStyles style, Color cor)
+    // ──────────────────────────────────────────────────────────────
+    // HELPERS DE UI
+    // ──────────────────────────────────────────────────────────────
+
+    static GameObject CriarUIGO(string nome, Transform pai)
     {
-        var go = new GameObject("TMP");
-        go.transform.SetParent(parent.transform, false);
-        var rt = go.AddComponent<RectTransform>();
-        rt.anchorMin = ancMin; rt.anchorMax = ancMax;
-        rt.pivot = pivot; rt.anchoredPosition = pos; rt.sizeDelta = size;
-        var tmp = go.AddComponent<TextMeshProUGUI>();
-        tmp.text      = texto;
-        tmp.fontSize  = fontSize;
-        tmp.fontStyle = style;
-        tmp.color     = cor;
-        tmp.alignment = TextAlignmentOptions.Center;
-        return tmp;
+        GameObject go = new GameObject(nome);
+        go.transform.SetParent(pai, false);
+        go.AddComponent<RectTransform>();
+        return go;
+    }
+
+    static void ExpandirRect(RectTransform rt, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        rt.anchorMin = anchorMin;
+        rt.anchorMax = anchorMax;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
     }
 }

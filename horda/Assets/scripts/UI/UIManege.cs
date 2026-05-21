@@ -187,20 +187,6 @@ public class UIManager : MonoBehaviour
         if (elementAdvantagePanel != null) elementAdvantagePanel.SetActive(false);
         if (xpGainText != null) xpGainText.gameObject.SetActive(false);
 
-        // 2. Preenche os textos fixos do Painel de Status
-        if (maxHealthStatusText != null)
-            maxHealthStatusText.text = $"Vida Max: {playerStats.GetMaxHealth():F0}";
-
-        if (critChanceText != null)
-            // Multiplicamos por 100 para exibir como porcentagem (ex: 0.1 -> 10%)
-            critChanceText.text = $"Critico: {playerStats.GetCritChance() * 100f:F1}%";
-
-        if (healthRegenText != null)
-            healthRegenText.text = $"Regen: {playerStats.GetHealthRegen():F1}/s";
-
-        if (attackSpeedText != null)
-            attackSpeedText.text = $"Vel.Atq: {playerStats.GetAttackActivationInterval():F1}s";
-
     } // Final da função
 
     void Update()
@@ -906,11 +892,18 @@ public class UIManager : MonoBehaviour
     {
         if (playerStats == null || !statusPanelVisible) return;
 
+        // ── Vida ──────────────────────────────────────────────────────
+        if (maxHealthStatusText != null)
+        {
+            float sp = playerStats.GetShieldPoints();
+            float mp = playerStats.GetMaxShieldPoints();
+            string shieldStr = mp > 0f ? $" (+{sp:F0}/{mp:F0} escudo)" : "";
+            maxHealthStatusText.text = $"Vida: {playerStats.GetCurrentHealth():F0} / {playerStats.GetMaxHealth():F0}{shieldStr}";
+        }
+
+        // ── Combate ───────────────────────────────────────────────────
         if (damageText != null)
             damageText.text = $"ATQ: {playerStats.GetAttack():F1}";
-
-        if (speedText != null)
-            speedText.text = $"Vel: {playerStats.GetSpeed():F1}";
 
         if (defenseText != null)
         {
@@ -920,58 +913,114 @@ public class UIManager : MonoBehaviour
             defenseText.text = $"DEF: {playerStats.GetDefense():F1}{shieldStr}";
         }
 
+        if (critChanceText != null)
+            critChanceText.text = $"Critico: {playerStats.GetCritChance() * 100f:F1}%";
+
+        // ── Velocidade & Regeneração ──────────────────────────────────
+        if (speedText != null)
+            speedText.text = $"Vel: {playerStats.GetSpeed():F1}";
+
         if (attackSpeedText != null)
             attackSpeedText.text = $"Vel.Atq: {playerStats.GetAttackActivationInterval():F1}s";
 
+        if (healthRegenText != null)
+            healthRegenText.text = $"Regen: {playerStats.GetHealthRegen():F1}/s";
+
+        // ── Level & XP ────────────────────────────────────────────────
+        if (statusPointsText != null)
+            statusPointsText.text = $"Level {playerStats.GetLevel()}  |  XP: {playerStats.GetCurrentXP():F0} / {playerStats.GetXPToNextLevel():F0}";
+
+        // ── Bônus Ativos ──────────────────────────────────────────────
+        if (activeBonusesText != null)
+        {
+            var sb = new System.Text.StringBuilder();
+
+            // Dash
+            int dashes = playerStats.dashCharges;
+            int maxDashes = playerStats.maxDashCharges;
+            if (maxDashes > 0)
+                sb.AppendLine($"Dash: {dashes}/{maxDashes}");
+
+            // Elemento
+            var elem = playerStats.GetCurrentElement();
+            float bonus = playerStats.GetElementalBonus();
+            if (elem.ToString() != "None")
+                sb.AppendLine($"Elem: {elem}  +{(bonus - 1f) * 100f:F0}%");
+
+            // Regen ativa
+            if (playerStats.IsRegeneratingHealth())
+                sb.AppendLine("Regenerando vida...");
+
+            activeBonusesText.text = sb.Length > 0 ? sb.ToString().TrimEnd() : "Nenhum bonus ativo";
+        }
+
+        // ── Elemento (resumo) ─────────────────────────────────────────
         if (elementInfoText != null)
             elementInfoText.text = $"Elem: {playerStats.GetCurrentElement()}\nBonus: {playerStats.GetElementalBonus():F1}x";
 
+        // ── Inventário ────────────────────────────────────────────────
         if (inventoryText != null)
         {
             var inventory = playerStats.GetInventory();
             string inventoryStr = inventory.Count > 0 ? string.Join(", ", inventory) : "Nenhum";
-            inventoryText.text = $"🎒 Itens: {inventoryStr}";
+            inventoryText.text = $"Itens: {inventoryStr}";
         }
 
+        // ── Skills de Ataque ──────────────────────────────────────────
         if (attackSkillsText != null)
         {
             var attackSkills = playerStats.GetAttackSkills();
-            string attackStr = "Skills ATQ:\n";
-            foreach (var skill in attackSkills)
+            if (attackSkills.Count == 0)
             {
-                string status = skill.isActive ? "✅" : "❌";
-                attackStr += $"{status} {skill.skillName} (Dano: {skill.baseDamage:F1})\n";
-            }
-            attackSkillsText.text = attackStr;
-        }
-
-        if (defenseSkillsText != null)
-        {
-            var defenseSkills = playerStats.GetDefenseSkills();
-            string defenseStr = "Skills DEF:\n";
-            foreach (var skill in defenseSkills)
-            {
-                string status = skill.isActive ? "✅" : "❌";
-                defenseStr += $"{status} {skill.skillName} (Defesa: {skill.baseDefense:F1})\n";
-            }
-            defenseSkillsText.text = defenseStr;
-        }
-
-        if (ultimateSkillsText != null)
-        {
-            var ultimate = playerStats.GetUltimateSkill();
-            string ultimateStr = "Ultimate:\n";
-            if (ultimate.isActive)
-            {
-                ultimateStr += $"✅ {ultimate.skillName}\n";
-                ultimateStr += $"Dano: {ultimate.baseDamage:F1}\n";
-                ultimateStr += playerStats.IsUltimateReady() ? "PRONTA PARA USAR!" : "⏳ CARREGANDO...";
+                attackSkillsText.text = "Skills ATQ: Nenhuma";
             }
             else
             {
-                ultimateStr += "🔒 Disponível no Level 5";
+                var sb = new System.Text.StringBuilder("Skills ATQ:\n");
+                foreach (var skill in attackSkills)
+                {
+                    string status = skill.isActive ? "[ON]" : "[OFF]";
+                    sb.AppendLine($"{status} {skill.skillName}  Dano: {skill.baseDamage:F1}");
+                }
+                attackSkillsText.text = sb.ToString().TrimEnd();
             }
-            ultimateSkillsText.text = ultimateStr;
+        }
+
+        // ── Skills de Defesa ──────────────────────────────────────────
+        if (defenseSkillsText != null)
+        {
+            var defenseSkills = playerStats.GetDefenseSkills();
+            if (defenseSkills.Count == 0)
+            {
+                defenseSkillsText.text = "Skills DEF: Nenhuma";
+            }
+            else
+            {
+                var sb = new System.Text.StringBuilder("Skills DEF:\n");
+                foreach (var skill in defenseSkills)
+                {
+                    string status = skill.isActive ? "[ON]" : "[OFF]";
+                    sb.AppendLine($"{status} {skill.skillName}  DEF: {skill.baseDefense:F1}");
+                }
+                defenseSkillsText.text = sb.ToString().TrimEnd();
+            }
+        }
+
+        // ── Ultimate ──────────────────────────────────────────────────
+        if (ultimateSkillsText != null)
+        {
+            var ultimate = playerStats.GetUltimateSkill();
+            if (ultimate.isActive)
+            {
+                string readyStr = playerStats.IsUltimateReady()
+                    ? "PRONTA!"
+                    : $"Carregando... {playerStats.GetUltimateChargeTime():F1}s";
+                ultimateSkillsText.text = $"Ultimate: {ultimate.skillName}\nDano: {ultimate.baseDamage:F1}  {readyStr}";
+            }
+            else
+            {
+                ultimateSkillsText.text = "Ultimate: disponivel no Level 5";
+            }
         }
     }
 
