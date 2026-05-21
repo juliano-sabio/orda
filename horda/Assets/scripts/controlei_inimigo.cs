@@ -118,6 +118,15 @@ public class InimigoController : MonoBehaviour
             dano -= reducao;
         }
 
+        Escudo escudo = GetComponent<Escudo>();
+        if (escudo != null && escudo.Ativo)
+        {
+            float danoAoEscudo = Mathf.Min(dano, escudo.vidaAtual);
+            dano = escudo.AbsorverDano(dano);
+            CriarTextoFlutuante(danoAoEscudo, new Color(0.7f, 0.4f, 1f), "", 28);
+            if (dano <= 0) return;
+        }
+
         vidaAtual -= dano;
 
 
@@ -464,7 +473,12 @@ public class InimigoController : MonoBehaviour
             DroparOrbesXP();
             DroparPowerup();
             OnInimigoDerrotado?.Invoke();
-            Destroy(gameObject);
+
+            BossController boss = GetComponent<BossController>();
+            if (boss != null)
+                boss.IniciarEfeitoMorte();
+            else
+                Destroy(gameObject);
         }
         else
         {

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -49,6 +50,16 @@ public class BossController : MonoBehaviour
     [Tooltip("Offset do olho em relação ao pivot do boss (world units). Ajuste pelo gizmo na cena.")]
     public Vector2 offsetOlho = new Vector2(0.03f, 0.13f);
 
+    [Header("Projétil Especial (Pós-Teleporte)")]
+    [Tooltip("Prefab do projétil especial. Se nulo, usa o prefabProjetil normal.")]
+    public GameObject prefabProjetilEspecial;
+    [Tooltip("Dano do projétil especial")]
+    public float danoProjetilEspecial = 45f;
+
+    [Header("Escudo (Fase 2)")]
+    [Tooltip("Pontos de vida do escudo ativado na Fase 2")]
+    public float vidaEscudo = 200f;
+
     // ──────────────────────────────────────────────
     // REFERÊNCIAS INTERNAS
     // ──────────────────────────────────────────────
@@ -59,6 +70,18 @@ public class BossController : MonoBehaviour
 
     private bool fase2Ativada = false;
     private int projeteis; // valor atual (muda na fase 2)
+    private Transform sombraTransform;
+    private GameObject bossMsgGO;
+    private Vector3 escalaOriginal;
+    private Dictionary<movi_inimigo_manter_distancia, float> intervaisOriginais = new Dictionary<movi_inimigo_manter_distancia, float>();
+
+    // ──────────────────────────────────────────────
+    // SPRITES PIXEL ART
+    // ──────────────────────────────────────────────
+    [Header("Sprites Pixel Art (arrastar no Inspector)")]
+    public Sprite sprHpFrame;  // boss_hp_frame.png
+    public Sprite sprHpFill;   // boss_hp_fill.png
+    public Sprite sprHpBg;     // boss_hp_bg.png
 
     // ──────────────────────────────────────────────
     // UI
@@ -81,7 +104,9 @@ public class BossController : MonoBehaviour
         player        = GameObject.FindGameObjectWithTag("Player")?.transform;
 
         projeteis = projeteisFase1;
+        escalaOriginal = transform.localScale;
 
+        CriarSombra();
         CriarBossUI();
         StartCoroutine(SequenciaEntrada());
         StartCoroutine(LoopTeleporte());
@@ -94,6 +119,7 @@ public class BossController : MonoBehaviour
 
         AtualizarUI();
         ChecarFase2();
+        AtualizarSombra();
     }
 
     void OnDrawGizmosSelected()
@@ -110,6 +136,66 @@ public class BossController : MonoBehaviour
     {
         if (bossCanvasGO != null)
             Destroy(bossCanvasGO);
+        if (bossMsgGO != null)
+            Destroy(bossMsgGO);
+        RestaurarSlimeMagas();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // SOMBRA
+    // ──────────────────────────────────────────────────────────────
+
+    void CriarSombra()
+    {
+        // Textura de elipse (32x14 px) — alpha de 0 a 1, fadeout nas bordas
+        int tw = 32, th = 14;
+        Texture2D tex = new Texture2D(tw, th, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+
+        float cx = tw * 0.5f, cy = th * 0.5f;
+        float rx = tw * 0.5f, ry = th * 0.5f;
+
+        for (int y = 0; y < th; y++)
+        {
+            for (int x = 0; x < tw; x++)
+            {
+                float dx = (x + 0.5f - cx) / rx;
+                float dy = (y + 0.5f - cy) / ry;
+                float alpha = Mathf.Clamp01(1f - (dx * dx + dy * dy));
+                tex.SetPixel(x, y, new Color(0f, 0f, 0f, alpha));
+            }
+        }
+        tex.Apply();
+
+        Sprite spr = Sprite.Create(tex, new Rect(0, 0, tw, th), new Vector2(0.5f, 0.5f), 16f);
+
+        GameObject sombraGO = new GameObject("Sombra");
+        // Fora da hierarquia do boss para não interferir no collider
+        sombraGO.transform.position   = transform.position + Vector3.down * 0.45f;
+        sombraGO.transform.localScale = new Vector3(0.55f, 0.4f, 1f);
+
+        SpriteRenderer sr = sombraGO.AddComponent<SpriteRenderer>();
+        sr.sprite = spr;
+        sr.color  = new Color(1f, 1f, 1f, 0.5f);
+
+        // Copia o sorting layer do boss para garantir que apareça na mesma camada
+        if (spriteRenderer != null)
+        {
+            sr.sortingLayerID   = spriteRenderer.sortingLayerID;
+            sr.sortingLayerName = spriteRenderer.sortingLayerName;
+            sr.sortingOrder     = spriteRenderer.sortingOrder - 1;
+        }
+
+        sombraTransform = sombraGO.transform;
+    }
+
+    void AtualizarSombra()
+    {
+        if (sombraTransform == null || spriteRenderer == null) return;
+        // Segue o boss
+        sombraTransform.position = transform.position + Vector3.down * 0.45f;
+        SpriteRenderer sr = sombraTransform.GetComponent<SpriteRenderer>();
+        if (sr != null) sr.color = new Color(1f, 1f, 1f, spriteRenderer.color.a * 0.5f);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -130,6 +216,10 @@ public class BossController : MonoBehaviour
     {
         // Resistência a dano permanente
         controller.AplicarBuffDefesa(reducaoDanoFase2, 99999f);
+
+        // Ativa escudo
+        Escudo escudo = gameObject.AddComponent<Escudo>();
+        escudo.Ativar(vidaEscudo);
 
         // Dobra os projéteis
         projeteis = projeteisFase1 * 2;
@@ -185,7 +275,8 @@ public class BossController : MonoBehaviour
     {
         if (player == null || spriteRenderer == null) yield break;
 
-        // Efeito de "carga" antes de sumir (pisca)
+        // Efeito de carregamento visual enquanto pisca
+        StartCoroutine(EfeitoCarregamento());
         for (int i = 0; i < 3; i++)
         {
             spriteRenderer.color = new Color(0.5f, 0f, 1f);
@@ -194,35 +285,120 @@ public class BossController : MonoBehaviour
             yield return new WaitForSeconds(0.08f);
         }
 
-        // Fade out
         yield return StartCoroutine(FadeAlpha(1f, 0f, duracaoFade));
-
-        // Move
         transform.position = ObterPosicaoTeleporte();
-
-        yield return null; // aguarda um frame para física resolver
-
-        // Fade in
+        yield return null;
         yield return StartCoroutine(FadeAlpha(0f, 1f, duracaoFade));
+
+        // Dispara o projétil especial logo após aparecer
+        DispararEspecial();
+    }
+
+    IEnumerator EfeitoCarregamento()
+    {
+        // Textura de anel roxo para o efeito de carga
+        int sz = 32;
+        Texture2D tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float c = sz * 0.5f;
+        for (int y = 0; y < sz; y++)
+        for (int x = 0; x < sz; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c, c));
+            float nt = d / c;
+            float a  = Mathf.Clamp01(1f - Mathf.Abs(nt - 0.75f) / 0.25f);
+            tex.SetPixel(x, y, new Color(0.6f, 0f, 1f, a));
+        }
+        tex.Apply();
+        Sprite spr = Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz * 0.5f);
+
+        int sortL = spriteRenderer != null ? spriteRenderer.sortingLayerID : 0;
+        int sortO = spriteRenderer != null ? spriteRenderer.sortingOrder    : 0;
+
+        // 3 anéis em paralelo, um por piscada
+        for (int i = 0; i < 3; i++)
+        {
+            StartCoroutine(LancarAnelCarga(spr, sortL, sortO));
+            yield return new WaitForSeconds(0.16f);
+        }
+    }
+
+    IEnumerator LancarAnelCarga(Sprite spr, int sortL, int sortO)
+    {
+        GameObject ring = new GameObject("AnelCarga");
+        ring.transform.position = transform.position;
+        SpriteRenderer sr = ring.AddComponent<SpriteRenderer>();
+        sr.sprite = spr;
+        sr.sortingLayerID = sortL;
+        sr.sortingOrder   = sortO + 1;
+
+        float t = 0f, dur = 0.4f;
+        while (t < dur)
+        {
+            if (ring == null) yield break;
+            t += Time.deltaTime;
+            float p = t / dur;
+            ring.transform.localScale = Vector3.one * Mathf.Lerp(0.1f, 2.5f, p);
+            sr.color = new Color(1f, 1f, 1f, Mathf.Lerp(0.8f, 0f, p));
+            yield return null;
+        }
+        Destroy(ring);
+    }
+
+    void DispararEspecial()
+    {
+        GameObject prefab = prefabProjetilEspecial != null ? prefabProjetilEspecial : prefabProjetil;
+        if (prefab == null || player == null) return;
+
+        int qtd = fase2Ativada ? 3 : 1;
+        Vector3 spawnPos = PosicaoOlho();
+        Vector2 dirBase  = ((Vector2)player.position - (Vector2)spawnPos).normalized;
+        float anguloBase = Mathf.Atan2(dirBase.y, dirBase.x) * Mathf.Rad2Deg;
+        float spread     = 25f;
+
+        for (int i = 0; i < qtd; i++)
+        {
+            float offset = qtd > 1 ? Mathf.Lerp(-spread, spread, (float)i / (qtd - 1)) : 0f;
+            float ang    = (anguloBase + offset) * Mathf.Deg2Rad;
+            Vector2 dir  = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+
+            GameObject proj = Instantiate(prefab, spawnPos, Quaternion.identity);
+
+            ProjetilEspecialBoss peb = proj.GetComponent<ProjetilEspecialBoss>();
+            if (peb != null)
+            {
+                peb.dano = danoProjetilEspecial;
+                peb.SetDirecao(dir);
+                continue;
+            }
+
+            // Fallback: usa ProjetilInimigoDano se não tiver o script especial
+            ProjetilInimigoDano pid = proj.GetComponent<ProjetilInimigoDano>();
+            if (pid != null) { pid.dano = danoProjetilEspecial; pid.SetDirecao(dir); }
+        }
     }
 
     Vector2 ObterPosicaoTeleporte()
     {
         if (player == null) return transform.position;
 
-        for (int tentativa = 0; tentativa < 20; tentativa++)
-        {
-            float angulo   = Random.Range(0f, 360f);
-            float dist     = Random.Range(distMinTeleporte, distMaxTeleporte);
-            float rad      = angulo * Mathf.Deg2Rad;
-            Vector2 alvo   = (Vector2)player.position + new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * dist;
+        // Raio do boss em world units (escala * raio do collider)
+        float raioBoss = Mathf.Abs(transform.localScale.x) * 0.22f + 0.15f;
+        int mask = LayerMask.GetMask("obstacles");
 
-            if (!Physics2D.OverlapCircle(alvo, 0.6f, LayerMask.GetMask("Obstacles")))
+        for (int tentativa = 0; tentativa < 30; tentativa++)
+        {
+            float angulo = Random.Range(0f, 360f);
+            float dist   = Random.Range(distMinTeleporte, distMaxTeleporte);
+            float rad    = angulo * Mathf.Deg2Rad;
+            Vector2 alvo = (Vector2)player.position + new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * dist;
+
+            if (!Physics2D.OverlapCircle(alvo, raioBoss, mask))
                 return alvo;
         }
 
-        // Fallback: posição acima do player
-        return (Vector2)player.position + Vector2.up * distMinTeleporte;
+        // Fallback: mantém posição atual (não teleporta para dentro de parede)
+        return transform.position;
     }
 
     IEnumerator FadeAlpha(float de, float para, float duracao)
@@ -320,12 +496,165 @@ public class BossController : MonoBehaviour
             spriteRenderer.color = c;
         }
 
-        // Exibe aviso antes de aparecer
         yield return StartCoroutine(MostrarAvisoBoss());
 
-        // Aparece
-        if (spriteRenderer != null)
-            yield return StartCoroutine(FadeAlpha(0f, 1f, 0.6f));
+        // Treme a câmera e dispara explosão sombria juntos
+        CameraShaker.Tremer(0.04f, 2.5f);
+        StartCoroutine(ExplosaoSombria(2.5f));
+
+        // Aparece com fade simples
+        yield return StartCoroutine(FadeAlpha(0f, 1f, 0.6f));
+
+        // Buffa todas as slime_maga presentes na cena
+        BuffarSlimeMagas();
+    }
+
+    void BuffarSlimeMagas()
+    {
+        var slimes = FindObjectsByType<movi_inimigo_manter_distancia>(FindObjectsSortMode.None);
+        foreach (var slime in slimes)
+        {
+            intervaisOriginais[slime] = slime.intervaloAtaque;
+            slime.intervaloAtaque = Mathf.Max(0.5f, slime.intervaloAtaque * 0.45f);
+            StartCoroutine(AnimacaoExcitacaoSlime(slime));
+        }
+    }
+
+    void RestaurarSlimeMagas()
+    {
+        foreach (var par in intervaisOriginais)
+        {
+            if (par.Key != null)
+                par.Key.intervaloAtaque = par.Value;
+        }
+        intervaisOriginais.Clear();
+    }
+
+    IEnumerator AnimacaoExcitacaoSlime(movi_inimigo_manter_distancia slime)
+    {
+        if (slime == null) yield break;
+        SpriteRenderer sr = slime.GetComponent<SpriteRenderer>();
+        if (sr == null) yield break;
+
+        Color corBase  = sr.color;
+        Vector3 escBase = slime.transform.localScale;
+        float dur = 2f, t = 0f;
+
+        while (t < dur && slime != null)
+        {
+            t += Time.deltaTime;
+            float pct  = t / dur;
+            float ping = Mathf.PingPong(t * 10f, 1f);
+
+            // Pulso roxo — cor que combina com o boss
+            sr.color = Color.Lerp(corBase, new Color(0.85f, 0.4f, 1f, 1f), ping * (1f - pct) * 0.75f);
+
+            // Vibração squish/stretch na escala
+            float v = Mathf.Sin(t * 45f) * 0.09f * (1f - pct);
+            slime.transform.localScale = escBase + new Vector3(v, -v * 0.6f, 0f);
+
+            yield return null;
+        }
+
+        if (sr    != null) sr.color = corBase;
+        if (slime != null) slime.transform.localScale = escBase;
+    }
+
+    IEnumerator ExplosaoSombria(float duracao)
+    {
+        int sortLayer = spriteRenderer != null ? spriteRenderer.sortingLayerID : 0;
+        int sortOrder = spriteRenderer != null ? spriteRenderer.sortingOrder   : 0;
+        Vector3 origem = transform.position;
+
+        // ── Textura de anel ──────────────────────────────────────────
+        int sz = 64;
+        Texture2D texAnel = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        texAnel.filterMode = FilterMode.Bilinear;
+        float cr = sz * 0.5f;
+        for (int y = 0; y < sz; y++)
+        for (int x = 0; x < sz; x++)
+        {
+            float d  = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(cr, cr));
+            float nt = d / cr;
+            float a  = Mathf.Clamp01(1f - Mathf.Abs(nt - 0.72f) / 0.28f);
+            texAnel.SetPixel(x, y, new Color(0.18f, 0.04f, 0.28f, a));
+        }
+        texAnel.Apply();
+        Sprite sprAnel = Sprite.Create(texAnel, new Rect(0,0,sz,sz), new Vector2(0.5f,0.5f), sz * 0.5f);
+
+        // ── Anel de shockwave ─────────────────────────────────────────
+        GameObject anelGO = new GameObject("ShockwaveSombrio");
+        anelGO.transform.position = origem + Vector3.down * 0.3f;
+        SpriteRenderer srAnel = anelGO.AddComponent<SpriteRenderer>();
+        srAnel.sprite = sprAnel;
+        srAnel.sortingLayerID = sortLayer;
+        srAnel.sortingOrder   = sortOrder - 1;
+
+        // ── Textura de partícula 4×4 ──────────────────────────────────
+        Texture2D texP = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+        texP.filterMode = FilterMode.Bilinear;
+        for (int y = 0; y < 4; y++)
+        for (int x = 0; x < 4; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x+0.5f,y+0.5f), new Vector2(2f,2f));
+            texP.SetPixel(x, y, new Color(0f,0f,0f, Mathf.Clamp01(1f - d/2f)));
+        }
+        texP.Apply();
+        Sprite sprP = Sprite.Create(texP, new Rect(0,0,4,4), new Vector2(0.5f,0.5f), 16f);
+
+        // ── Partículas sombrias ───────────────────────────────────────
+        int qtd = 18;
+        var pGOs  = new GameObject[qtd];
+        var pVels = new Vector2[qtd];
+
+        for (int i = 0; i < qtd; i++)
+        {
+            float ang = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            float spd = Random.Range(0.4f, 1.6f);
+            pVels[i] = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * spd;
+
+            GameObject p = new GameObject("PartSombria");
+            p.transform.position   = origem + new Vector3(Random.Range(-0.3f, 0.3f), Random.Range(-0.2f, 0.2f), 0f);
+            float scl = Random.Range(0.08f, 0.22f);
+            p.transform.localScale = new Vector3(scl, scl, 1f);
+
+            SpriteRenderer srP = p.AddComponent<SpriteRenderer>();
+            srP.sprite = sprP;
+            // Cores: roxo escuro, preto, violeta apagado
+            srP.color  = Color.Lerp(new Color(0.25f, 0.02f, 0.38f), new Color(0.05f, 0.0f, 0.08f), Random.value);
+            srP.sortingLayerID = sortLayer;
+            srP.sortingOrder   = sortOrder + 1;
+            pGOs[i] = p;
+        }
+
+        // ── Animação ──────────────────────────────────────────────────
+        float t = 0f;
+        while (t < duracao)
+        {
+            t += Time.deltaTime;
+            float p01 = t / duracao;
+
+            // Anel expande devagar e some
+            float sclAnel = Mathf.Lerp(0.05f, 3.2f, Mathf.Pow(p01, 0.5f));
+            anelGO.transform.localScale = new Vector3(sclAnel, sclAnel * 0.28f, 1f);
+            srAnel.color = new Color(1f, 1f, 1f, Mathf.Lerp(0.85f, 0f, p01));
+
+            // Partículas derivam para cima levemente e somem
+            for (int i = 0; i < qtd; i++)
+            {
+                if (pGOs[i] == null) continue;
+                pGOs[i].transform.position += new Vector3(pVels[i].x, pVels[i].y + 0.3f, 0f) * Time.deltaTime;
+                pVels[i] *= 0.97f; // desacelera gradualmente
+                SpriteRenderer srP = pGOs[i].GetComponent<SpriteRenderer>();
+                if (srP != null) { Color c = srP.color; c.a = Mathf.Lerp(0.9f, 0f, p01); srP.color = c; }
+            }
+
+            yield return null;
+        }
+
+        Destroy(anelGO);
+        for (int i = 0; i < qtd; i++)
+            if (pGOs[i] != null) Destroy(pGOs[i]);
     }
 
     IEnumerator MostrarAvisoBoss()
@@ -405,11 +734,11 @@ public class BossController : MonoBehaviour
         cs.matchWidthOrHeight     = 0.5f;
         bossCanvasGO.AddComponent<GraphicRaycaster>();
 
-        // Painel de fundo — parte inferior da tela
+        // Painel de fundo — parte superior da tela (centralizado)
         GameObject painel = CriarUIGO("BossPanel", bossCanvasGO.transform);
         RectTransform pr = painel.GetComponent<RectTransform>();
-        pr.anchorMin = new Vector2(0.08f, 0.02f);
-        pr.anchorMax = new Vector2(0.92f, 0.115f);
+        pr.anchorMin = new Vector2(0.2f, 0.825f);
+        pr.anchorMax = new Vector2(0.8f, 0.935f);
         pr.offsetMin = pr.offsetMax = Vector2.zero;
         Image painelImg = painel.AddComponent<Image>();
         painelImg.color = new Color(0.04f, 0.04f, 0.06f, 0.9f);
@@ -426,21 +755,21 @@ public class BossController : MonoBehaviour
         // Nome do boss
         GameObject nomeGO = CriarUIGO("NomeBoss", painel.transform);
         RectTransform nr = nomeGO.GetComponent<RectTransform>();
-        nr.anchorMin = new Vector2(0.01f, 0.55f);
-        nr.anchorMax = new Vector2(0.75f, 0.92f);
+        nr.anchorMin = new Vector2(0.01f, 0.6f);
+        nr.anchorMax = new Vector2(0.99f, 0.92f);
         nr.offsetMin = nr.offsetMax = Vector2.zero;
         TextMeshProUGUI nomeTxt = nomeGO.AddComponent<TextMeshProUGUI>();
         nomeTxt.text      = nomeBoss.ToUpper();
         nomeTxt.fontSize  = 20;
         nomeTxt.fontStyle = FontStyles.Bold;
         nomeTxt.color     = new Color(1f, 0.85f, 0.2f);
-        nomeTxt.alignment = TextAlignmentOptions.MidlineLeft;
+        nomeTxt.alignment = TextAlignmentOptions.Center;
 
         // Indicador de fase
         GameObject faseGO = CriarUIGO("FaseBoss", painel.transform);
         RectTransform fr = faseGO.GetComponent<RectTransform>();
-        fr.anchorMin = new Vector2(0.75f, 0.55f);
-        fr.anchorMax = new Vector2(0.99f, 0.92f);
+        fr.anchorMin = new Vector2(0.75f, 0.92f);
+        fr.anchorMax = new Vector2(0.99f, 1f);
         fr.offsetMin = fr.offsetMax = Vector2.zero;
         faseText           = faseGO.AddComponent<TextMeshProUGUI>();
         faseText.text      = "FASE 1";
@@ -454,46 +783,51 @@ public class BossController : MonoBehaviour
         bbr.anchorMin = new Vector2(0.01f, 0.08f);
         bbr.anchorMax = new Vector2(0.99f, 0.52f);
         bbr.offsetMin = bbr.offsetMax = Vector2.zero;
-        barBG.AddComponent<Image>().color = new Color(0.12f, 0.04f, 0.04f);
+        Image bgImg = barBG.AddComponent<Image>();
+        if (sprHpBg != null) { bgImg.sprite = sprHpBg; bgImg.type = Image.Type.Tiled; bgImg.color = Color.white; }
+        else bgImg.color = new Color(0.1f, 0.1f, 0.12f);
 
-        // Barra "fantasma" (atrasa para dar efeito de queima)
+        // Barra fantasma (amarela, desce devagar)
         GameObject ghostGO = CriarUIGO("HPGhost", barBG.transform);
         ExpandirRect(ghostGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
-        hpFillGhost      = ghostGO.AddComponent<Image>();
-        hpFillGhost.type = Image.Type.Filled;
+        hpFillGhost            = ghostGO.AddComponent<Image>();
+        if (sprHpFill != null) hpFillGhost.sprite = sprHpFill;
+        hpFillGhost.type       = Image.Type.Filled;
         hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
         hpFillGhost.fillAmount = 1f;
-        hpFillGhost.color      = new Color(0.9f, 0.6f, 0.1f, 0.7f);
+        hpFillGhost.color      = new Color(1f, 0.88f, 0.25f, 0.9f);
 
-        // Barra HP principal
+        // Barra HP principal (pixel art, animada)
         GameObject fillGO = CriarUIGO("HPFill", barBG.transform);
         ExpandirRect(fillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
         hpFill            = fillGO.AddComponent<Image>();
+        if (sprHpFill != null) hpFill.sprite = sprHpFill;
         hpFill.type       = Image.Type.Filled;
         hpFill.fillMethod = Image.FillMethod.Horizontal;
         hpFill.fillAmount = 1f;
-        hpFill.color      = new Color(0.85f, 0.1f, 0.1f);
+        hpFill.color      = sprHpFill != null ? Color.white : new Color(0.1f, 0.85f, 0.2f);
 
         // Texto HP (ex: 450 / 500)
         GameObject hpTextGO = CriarUIGO("HPText", barBG.transform);
         ExpandirRect(hpTextGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
-        hpText            = hpTextGO.AddComponent<TextMeshProUGUI>();
-        hpText.fontSize   = 11;
-        hpText.color      = Color.white;
-        hpText.fontStyle  = FontStyles.Bold;
-        hpText.alignment  = TextAlignmentOptions.Center;
+        hpText           = hpTextGO.AddComponent<TextMeshProUGUI>();
+        hpText.fontSize  = 11;
+        hpText.color     = Color.white;
+        hpText.fontStyle = FontStyles.Bold;
+        hpText.alignment = TextAlignmentOptions.Center;
 
-        // Marcador de 50% (linha vertical no meio)
-        GameObject marca = CriarUIGO("Marca50", barBG.transform);
-        RectTransform mr = marca.GetComponent<RectTransform>();
-        mr.anchorMin = new Vector2(0.5f, 0f);
-        mr.anchorMax = new Vector2(0.5f, 1f);
-        mr.sizeDelta = new Vector2(2f, 0f);
-        mr.offsetMin = new Vector2(-1f, 0f);
-        mr.offsetMax = new Vector2(1f, 0f);
-        marca.AddComponent<Image>().color = new Color(1f, 1f, 0f, 0.6f);
+        // Moldura pixel art por cima (centro transparente, borda opaca)
+        if (sprHpFrame != null)
+        {
+            GameObject frameGO = CriarUIGO("HPFrame", barBG.transform);
+            ExpandirRect(frameGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+            Image frameImg = frameGO.AddComponent<Image>();
+            frameImg.sprite       = sprHpFrame;
+            frameImg.type         = Image.Type.Sliced;
+            frameImg.raycastTarget = false;
+            frameImg.color        = Color.white;
+        }
 
-        // Anima entrada do painel
         StartCoroutine(EntradaUI(painel));
     }
 
@@ -512,16 +846,16 @@ public class BossController : MonoBehaviour
 
         float pct = controller.GetPorcentagemVida();
 
-        // Barra principal atualiza instantaneamente
-        hpFill.fillAmount = pct;
+        // Barra principal consome visivelmente de forma suave
+        hpFill.fillAmount = Mathf.Lerp(hpFill.fillAmount, pct, Time.deltaTime * 2.5f);
 
-        // Cor: vermelho escuro → laranja → vermelho vivo conforme fase
+        // Fase 1: branco (pixel art verde mostra natural); Fase 2: tint vermelho sobre pixel art
         hpFill.color = fase2Ativada
-            ? new Color(1f, 0.3f + pct * 0.2f, 0f)
-            : Color.Lerp(new Color(0.85f, 0.1f, 0.1f), new Color(0.9f, 0.7f, 0f), pct);
+            ? new Color(1f, 0.18f, 0.12f)
+            : (sprHpFill != null ? Color.white : new Color(0.1f, 0.85f, 0.2f));
 
         // Barra fantasma atrasa para dar efeito de "queima" da vida
-        hpFillGhost.fillAmount = Mathf.MoveTowards(hpFillGhost.fillAmount, pct, Time.deltaTime * 0.6f);
+        hpFillGhost.fillAmount = Mathf.MoveTowards(hpFillGhost.fillAmount, pct, Time.deltaTime * 0.35f);
 
         // Texto numérico de HP
         if (hpText != null)
@@ -534,7 +868,9 @@ public class BossController : MonoBehaviour
 
     IEnumerator MostrarTextoTela(string mensagem, Color cor, float duracao)
     {
+        if (bossMsgGO != null) Destroy(bossMsgGO);
         GameObject go = new GameObject("BossMsg");
+        bossMsgGO = go;
         Canvas cv = go.AddComponent<Canvas>();
         cv.renderMode   = RenderMode.ScreenSpaceOverlay;
         cv.sortingOrder = 150;
@@ -573,6 +909,124 @@ public class BossController : MonoBehaviour
         }
 
         Destroy(go);
+        bossMsgGO = null;
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // EFEITO DE MORTE
+    // ──────────────────────────────────────────────────────────────
+
+    public void IniciarEfeitoMorte() => StartCoroutine(EfeitoMorte());
+
+    IEnumerator EfeitoMorte()
+    {
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
+        CameraShaker.Tremer(0.12f, 3.5f);
+
+        // Flash branco / roxo rápido
+        for (int i = 0; i < 14; i++)
+        {
+            if (spriteRenderer != null)
+                spriteRenderer.color = i % 2 == 0 ? Color.white : new Color(0.8f, 0.3f, 1f);
+            yield return new WaitForSeconds(0.04f);
+        }
+
+        int sortL = spriteRenderer != null ? spriteRenderer.sortingLayerID : 0;
+        int sortO = spriteRenderer != null ? spriteRenderer.sortingOrder   : 0;
+
+        CriarAneisMorte(6, sortL, sortO);
+        CriarParticulasMorte(30, sortL, sortO);
+
+        // Boss cresce e desaparece
+        Vector3 escBase = transform.localScale;
+        float t = 0f, dur = 1.1f;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            float p = t / dur;
+            transform.localScale = escBase * Mathf.Lerp(1f, 3f, Mathf.Pow(p, 0.5f));
+            if (spriteRenderer != null)
+                spriteRenderer.color = new Color(1f, 0.8f, 1f, Mathf.Lerp(1f, 0f, p * p));
+            yield return null;
+        }
+
+        BossMorteUI.Exibir("BOSS DERROTADO!", new Color(1f, 0.9f, 0.2f));
+        Destroy(gameObject);
+    }
+
+    void CriarAneisMorte(int qtd, int sortL, int sortO)
+    {
+        int sz = 32;
+        Texture2D tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float c = sz * 0.5f;
+        for (int y = 0; y < sz; y++)
+        for (int x = 0; x < sz; x++)
+        {
+            float d  = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c, c));
+            float nt = d / c;
+            float a  = Mathf.Clamp01(1f - Mathf.Abs(nt - 0.75f) / 0.25f);
+            tex.SetPixel(x, y, new Color(0.7f, 0.3f, 1f, a));
+        }
+        tex.Apply();
+        Sprite spr = Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz * 0.5f);
+
+        for (int i = 0; i < qtd; i++)
+        {
+            GameObject ring = new GameObject("AnelMorteBoss");
+            ring.transform.position = transform.position;
+            SpriteRenderer sr = ring.AddComponent<SpriteRenderer>();
+            sr.sprite         = spr;
+            sr.sortingLayerID = sortL;
+            sr.sortingOrder   = sortO - 1;
+
+            AnelExpansaoAuto anim = ring.AddComponent<AnelExpansaoAuto>();
+            anim.delay        = i * 0.13f;
+            anim.duracaoTotal = Random.Range(0.6f, 1.0f);
+            anim.escalaFinal  = Random.Range(5f, 13f);
+        }
+    }
+
+    void CriarParticulasMorte(int qtd, int sortL, int sortO)
+    {
+        int sz = 6;
+        Texture2D tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        float c2 = sz * 0.5f;
+        for (int y = 0; y < sz; y++)
+        for (int x = 0; x < sz; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c2, c2));
+            tex.SetPixel(x, y, new Color(1f, 1f, 1f, Mathf.Clamp01(1f - d / c2)));
+        }
+        tex.Apply();
+        Sprite spr = Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
+
+        Color[] cores = {
+            new Color(0.8f, 0.4f, 1f), new Color(0.5f, 0.1f, 0.9f),
+            new Color(1f, 0.85f, 0.2f), Color.white, new Color(0.3f, 0f, 0.7f)
+        };
+
+        for (int i = 0; i < qtd; i++)
+        {
+            float ang = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            float spd = Random.Range(1.5f, 5.5f);
+
+            GameObject p = new GameObject("PartMorteBoss");
+            p.transform.position   = transform.position + new Vector3(Random.Range(-0.6f, 0.6f), Random.Range(-0.4f, 0.4f), 0f);
+            p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.4f);
+
+            SpriteRenderer sr = p.AddComponent<SpriteRenderer>();
+            sr.sprite         = spr;
+            sr.color          = cores[Random.Range(0, cores.Length)];
+            sr.sortingLayerID = sortL;
+            sr.sortingOrder   = sortO + 1;
+
+            ParticlaMorteBoss anim = p.AddComponent<ParticlaMorteBoss>();
+            anim.vel  = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * spd;
+            anim.vida = Random.Range(0.5f, 1.4f);
+        }
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -592,5 +1046,116 @@ public class BossController : MonoBehaviour
         rt.anchorMin = anchorMin;
         rt.anchorMax = anchorMax;
         rt.offsetMin = rt.offsetMax = Vector2.zero;
+    }
+}
+
+// ── Anel que se expande sozinho (independente do boss) ────────────
+public class AnelExpansaoAuto : MonoBehaviour
+{
+    public float delay;
+    public float duracaoTotal;
+    public float escalaFinal;
+
+    SpriteRenderer sr;
+    float t;
+    bool ativo;
+
+    void Awake() => sr = GetComponent<SpriteRenderer>();
+
+    void Update()
+    {
+        if (!ativo)
+        {
+            delay -= Time.deltaTime;
+            if (delay <= 0f) ativo = true;
+            return;
+        }
+
+        t += Time.deltaTime;
+        float p = Mathf.Clamp01(t / duracaoTotal);
+        transform.localScale = Vector3.one * Mathf.Lerp(0.5f, escalaFinal, Mathf.Pow(p, 0.6f));
+        if (sr) sr.color = new Color(1f, 1f, 1f, Mathf.Lerp(0.9f, 0f, p));
+
+        if (t >= duracaoTotal) Destroy(gameObject);
+    }
+}
+
+// ── Partícula com física simples (independente do boss) ───────────
+public class ParticlaMorteBoss : MonoBehaviour
+{
+    public Vector2 vel;
+    public float vida;
+
+    SpriteRenderer sr;
+    float t;
+
+    void Awake() => sr = GetComponent<SpriteRenderer>();
+
+    void Update()
+    {
+        t += Time.deltaTime;
+        vel.y -= 4f * Time.deltaTime;
+        vel   *= Mathf.Pow(0.92f, Time.deltaTime * 60f);
+        transform.position += (Vector3)(vel * Time.deltaTime);
+
+        if (sr) { Color c = sr.color; c.a = 1f - (t / vida); sr.color = c; }
+        if (t >= vida) Destroy(gameObject);
+    }
+}
+
+// ── Mensagem "BOSS DERROTADO" exibida após a destruição ───────────
+public class BossMorteUI : MonoBehaviour
+{
+    public static void Exibir(string msg, Color cor)
+    {
+        GameObject runner = new GameObject("BossMorteRunner");
+        runner.AddComponent<BossMorteUI>().StartCoroutine(Mostrar(runner, msg, cor));
+    }
+
+    static IEnumerator Mostrar(GameObject runner, string msg, Color cor)
+    {
+        GameObject cvGO = new GameObject("BossMorteCanvas");
+        Canvas cv = cvGO.AddComponent<Canvas>();
+        cv.renderMode  = RenderMode.ScreenSpaceOverlay;
+        cv.sortingOrder = 200;
+        cvGO.AddComponent<CanvasScaler>();
+
+        GameObject txtGO = new GameObject("MorteTxt");
+        txtGO.transform.SetParent(cvGO.transform, false);
+        RectTransform rt = txtGO.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.1f, 0.35f);
+        rt.anchorMax = new Vector2(0.9f, 0.65f);
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+        TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
+        txt.text      = msg;
+        txt.fontSize  = 64;
+        txt.fontStyle = FontStyles.Bold;
+        txt.alignment = TextAlignmentOptions.Center;
+        txt.color     = new Color(cor.r, cor.g, cor.b, 0f);
+
+        float t = 0f;
+        while (t < 0.35f)
+        {
+            t += Time.deltaTime;
+            txt.color = new Color(cor.r, cor.g, cor.b, t / 0.35f);
+            yield return null;
+        }
+        txt.color = new Color(cor.r, cor.g, cor.b, 1f);
+
+        yield return new WaitForSeconds(2.5f);
+
+        t = 0f;
+        RectTransform msgRt = txt.GetComponent<RectTransform>();
+        Vector2 posBase = msgRt.anchoredPosition;
+        while (t < 0.6f)
+        {
+            t += Time.deltaTime;
+            txt.color = new Color(cor.r, cor.g, cor.b, 1f - t / 0.6f);
+            msgRt.anchoredPosition = posBase + Vector2.up * (t * 100f);
+            yield return null;
+        }
+
+        Destroy(cvGO);
+        Destroy(runner);
     }
 }

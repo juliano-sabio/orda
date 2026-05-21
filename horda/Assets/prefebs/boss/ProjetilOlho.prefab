@@ -172,4 +172,8 @@ MonoBehaviour:
   velocidade: 7
   tempoMaximoVida: 5
   dano: 15
-  ajusteAngular: 0
+  ajusteAngular: -330
+  usarLuz: 1
+  corLuz: {r: 0.19911, g: 0.15574937, b: 0.26415092, a: 1}
+  intensidadeLuz: 1
+  raioExternoLuz: 2.5

@@ -30,6 +30,10 @@ public class SkillChoiceUI : MonoBehaviour
     [Header("Todas as Skills Disponíveis")]
     public List<SkillData> allAvailableSkills = new List<SkillData>();
 
+    [Header("Tempo de Escolha")]
+    [Tooltip("Segundos que o player tem para escolher antes de fechar automaticamente")]
+    public float tempoEscolha = 20f;
+
     // Quando true, a próxima chamada mostra apenas skills de ataque (resetado automaticamente)
     [HideInInspector] public bool somenteSkillsDeAtaque = false;
 
@@ -37,6 +41,7 @@ public class SkillChoiceUI : MonoBehaviour
     private System.Action<SkillData> onSkillChosen;
     private List<GameObject> currentButtons = new List<GameObject>();
     private float previousTimeScale;
+    private Coroutine contadorCoroutine;
 
     void Awake()
     {
@@ -213,6 +218,8 @@ public class SkillChoiceUI : MonoBehaviour
         onSkillChosen = callback;
 
         PauseGame();
+        if (contadorCoroutine != null) StopCoroutine(contadorCoroutine);
+        contadorCoroutine = StartCoroutine(ContadorEscolha());
         ClearSkillButtons();
 
         if (choicePanel != null)
@@ -490,6 +497,12 @@ public class SkillChoiceUI : MonoBehaviour
 
     public void ClosePanel()
     {
+        if (contadorCoroutine != null)
+        {
+            StopCoroutine(contadorCoroutine);
+            contadorCoroutine = null;
+        }
+
         if (choicePanel != null)
         {
             choicePanel.SetActive(false);
@@ -499,6 +512,41 @@ public class SkillChoiceUI : MonoBehaviour
         ResumeGame();
         currentChoices = null;
         onSkillChosen = null;
+    }
+
+    private IEnumerator ContadorEscolha()
+    {
+        Transform pai = choicePanel != null ? choicePanel.transform : transform;
+        GameObject timerGO = new GameObject("TimerEscolha");
+        timerGO.transform.SetParent(pai, false);
+
+        TextMeshProUGUI txt = timerGO.AddComponent<TextMeshProUGUI>();
+        txt.fontSize  = 28;
+        txt.fontStyle = FontStyles.Bold;
+        txt.alignment = TextAlignmentOptions.Center;
+
+        RectTransform rt = timerGO.GetComponent<RectTransform>();
+        rt.anchorMin        = new Vector2(0.5f, 0f);
+        rt.anchorMax        = new Vector2(0.5f, 0f);
+        rt.pivot            = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0f, 30f);
+        rt.sizeDelta        = new Vector2(160f, 50f);
+
+        float restante = tempoEscolha;
+        while (restante > 0f)
+        {
+            restante -= Time.unscaledDeltaTime;
+            int seg   = Mathf.CeilToInt(Mathf.Max(0f, restante));
+            txt.text  = seg.ToString();
+            txt.color = restante < 5f ? Color.red : Color.white;
+            yield return null;
+        }
+
+        contadorCoroutine = null;
+        if (currentChoices != null && currentChoices.Count > 0)
+            OnSkillSelected(currentChoices[Random.Range(0, currentChoices.Count)]);
+        else
+            ClosePanel();
     }
 
     private void PauseGame()

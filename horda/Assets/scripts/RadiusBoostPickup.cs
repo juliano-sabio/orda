@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class RadiusBoostPickup : MonoBehaviour
 {
@@ -9,6 +10,12 @@ public class RadiusBoostPickup : MonoBehaviour
 
     [Header("Movimento de Atração")]
     public float moveSpeed = 5f;
+    [Tooltip("Distância para o ima começar a voar em direção ao player")]
+    public float raioAtracao = 6f;
+
+    [Header("Flutuação")]
+    public float floatAmplitude = 0.15f;
+    public float floatSpeed     = 2f;
 
     [Header("Efeitos")]
     public ParticleSystem collectParticles;
@@ -17,28 +24,63 @@ public class RadiusBoostPickup : MonoBehaviour
     private Transform player;
     private PlayerStats playerStats;
     private bool isAttracted = false;
+    private Vector3 startPosition;
+    private Light2D luz;
+    private GameObject luzGO;
+
+    void Awake()
+    {
+        luzGO = new GameObject("Luz");
+        luzGO.transform.SetParent(transform);
+        luzGO.transform.localPosition = Vector3.zero;
+
+        luz = luzGO.AddComponent<Light2D>();
+        luz.lightType             = Light2D.LightType.Point;
+        luz.intensity             = 1.4f;
+        luz.pointLightOuterRadius = 0.8f;
+        luz.pointLightInnerRadius = 0.4f;
+    }
 
     void Start()
     {
+        luz.color = new Color(0.6f, 0.2f, 1f);
+
+        // Centraliza a luz no centro visual da sprite
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null && sr.sprite != null)
+            luzGO.transform.localPosition = sr.sprite.bounds.center;
+
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
         if (player != null)
             playerStats = player.GetComponent<PlayerStats>();
+
+        startPosition = transform.position;
     }
 
     void Update()
     {
+        float sin = Mathf.Sin(Time.time * floatSpeed);
+        if (luz != null)
+            luz.intensity = Mathf.Lerp(1.0f, 1.8f, (sin + 1f) * 0.5f);
+
         if (!isAttracted)
+        {
+            // Flutuação — a luz segue automaticamente por ser filha
+            transform.position = startPosition + new Vector3(0f, sin * floatAmplitude, 0f);
             CheckDistance();
+        }
         else
+        {
             MoveToPlayer();
+        }
     }
 
     void CheckDistance()
     {
-        if (playerStats == null || player == null) return;
+        if (player == null) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
-        if (distance <= playerStats.GetXpCollectionRadius())
+        if (distance <= raioAtracao)
             isAttracted = true;
     }
 
@@ -46,11 +88,10 @@ public class RadiusBoostPickup : MonoBehaviour
     {
         if (player == null) return;
 
-        float distance = Vector3.Distance(transform.position, player.position);
-        float speed = moveSpeed * Mathf.Lerp(4f, 1f, distance / playerStats.GetXpCollectionRadius());
-
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * speed * Time.deltaTime;
+        float distance  = Vector3.Distance(transform.position, player.position);
+        float speed     = moveSpeed * Mathf.Lerp(4f, 1f, distance / raioAtracao);
+        Vector3 dir     = (player.position - transform.position).normalized;
+        transform.position += dir * speed * Time.deltaTime;
 
         if (distance < 0.5f)
             Collect();

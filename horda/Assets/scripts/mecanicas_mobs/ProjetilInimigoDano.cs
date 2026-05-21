@@ -1,28 +1,49 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class ProjetilInimigoDano : MonoBehaviour
 {
-    [Header("Configura��es de Movimento")]
+    [Header("Configurações de Movimento")]
     public float velocidade = 10f;
     public float tempoMaximoVida = 5f;
 
-    [Header("Configura��es de Dano")]
+    [Header("Configurações de Dano")]
     public float dano = 10f;
 
     [Header("Ajuste de Visual")]
     [Range(-360, 360)]
     public float ajusteAngular = 0f;
 
+    [Header("Luz")]
+    public bool usarLuz = true;
+    public Color corLuz = new Color(0.4f, 0f, 1f);
+    public float intensidadeLuz = 1.8f;
+    public float raioExternoLuz = 2.5f;
+
     private Rigidbody2D rb;
     private bool jaAcertou = false;
+    private Light2D luz2D;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        if (usarLuz)
+        {
+            luz2D = gameObject.AddComponent<Light2D>();
+            luz2D.lightType = Light2D.LightType.Point;
+            luz2D.intensity = intensidadeLuz;
+            luz2D.pointLightOuterRadius = raioExternoLuz;
+            luz2D.pointLightInnerRadius = raioExternoLuz * 0.3f;
+        }
     }
 
     void Start()
     {
+        // Cor aplicada no Start para não ser sobrescrita pelo Awake interno do Light2D
+        if (luz2D != null)
+            luz2D.color = corLuz;
+
         Destroy(gameObject, tempoMaximoVida);
     }
 

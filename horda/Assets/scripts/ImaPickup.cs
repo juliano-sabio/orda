@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class ImaPickup : MonoBehaviour
 {
@@ -20,9 +21,22 @@ public class ImaPickup : MonoBehaviour
     private bool isAttracted = false;
     private bool collected = false;
     private Vector3 startPosition;
+    private Light2D luz;
+
+    void Awake()
+    {
+        if (!TryGetComponent<Light2D>(out luz))
+            luz = gameObject.AddComponent<Light2D>();
+        luz.lightType             = Light2D.LightType.Point;
+        luz.intensity             = 2f;
+        luz.pointLightOuterRadius = 3f;
+        luz.pointLightInnerRadius = 0.6f;
+    }
 
     void Start()
     {
+        luz.color = new Color(0.3f, 0.7f, 1f);
+
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
         if (player != null)
             playerStats = player.GetComponent<PlayerStats>();
@@ -33,8 +47,11 @@ public class ImaPickup : MonoBehaviour
     {
         if (!isAttracted)
         {
-            float offsetY = Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
+            float sin = Mathf.Sin(Time.time * floatSpeed);
+            float offsetY = sin * floatAmplitude;
             transform.position = startPosition + new Vector3(0f, offsetY, 0f);
+            if (luz != null)
+                luz.intensity = Mathf.Lerp(0.9f, 1.8f, (sin + 1f) * 0.5f);
             CheckDistance();
         }
         else
