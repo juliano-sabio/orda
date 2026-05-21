@@ -29,7 +29,11 @@
       "PowerShell(node \"C:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\gen_sprites.js\")",
       "Bash(grep -v \"^\\\\-\\\\-$\")",
       "Bash(xargs grep -l \"m_Transitions:\")",
-      "Bash(xargs grep -L \"m_Transitions: \\\\[\\\\]\")"
+      "Bash(xargs grep -L \"m_Transitions: \\\\[\\\\]\")",
+      "Bash(python3 -c ' *)",
+      "Bash(Get-Content \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\boss\\\\bossprincesa\\\\bossprincesa.controller\")",
+      "Bash(Select-String \"m_Motion|m_DstState|guid\")",
+      "Bash(Select-Object -First 30)"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

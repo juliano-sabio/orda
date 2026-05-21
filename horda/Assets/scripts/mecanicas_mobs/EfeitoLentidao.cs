@@ -19,15 +19,9 @@ public class EfeitoLentidao : MonoBehaviour
 
     void Start()
     {
-        // Tenta encontrar componentes
         movimentoPlayer = GetComponent<PlayerStats>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-
-        if (spriteRenderer != null)
-        {
-            corOriginal = spriteRenderer.color;
-        }
     }
 
     void Update()
@@ -73,6 +67,7 @@ public class EfeitoLentidao : MonoBehaviour
         // Muda cor para indicar efeito
         if (spriteRenderer != null)
         {
+            corOriginal = spriteRenderer.color;
             spriteRenderer.color = corEfeito;
         }
 
