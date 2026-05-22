@@ -33,7 +33,12 @@
       "Bash(python3 -c ' *)",
       "Bash(Get-Content \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\boss\\\\bossprincesa\\\\bossprincesa.controller\")",
       "Bash(Select-String \"m_Motion|m_DstState|guid\")",
-      "Bash(Select-Object -First 30)"
+      "Bash(Select-Object -First 30)",
+      "Bash(Get-ChildItem -Recurse \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\" -Filter \"*.cs\")",
+      "Bash(Select-String -Pattern \"class DanoInimigo\")",
+      "Bash(Select-Object -ExpandProperty Path)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\PocaSlime.cs\" -Force)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\ClonePrincesa.cs\" -Force)"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

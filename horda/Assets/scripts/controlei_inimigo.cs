@@ -475,8 +475,11 @@ public class InimigoController : MonoBehaviour
             OnInimigoDerrotado?.Invoke();
 
             BossController boss = GetComponent<BossController>();
+            BossPrincesa princesa = GetComponent<BossPrincesa>();
             if (boss != null)
                 boss.IniciarEfeitoMorte();
+            else if (princesa != null)
+                princesa.IniciarEfeitoMorte();
             else
                 Destroy(gameObject);
         }

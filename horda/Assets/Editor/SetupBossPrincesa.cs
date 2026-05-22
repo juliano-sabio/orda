@@ -1,8 +1,10 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Animations;
+using UnityEngine.Rendering.Universal;
 using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 
 public static class SetupBossPrincesa
 {
@@ -200,8 +202,113 @@ public static class SetupBossPrincesa
         if (sr != null)
         {
             sr.sprite = sprite;
-            sr.color  = Color.white; // cor real vem do sprite
+            sr.color  = Color.white;
         }
         Debug.Log("ProjetilPrincesa.prefab atualizado com o sprite.");
+    }
+
+    // ─────────────────────────────────────────────────
+    // PROJÉTEIS ESPECIAIS
+    // ─────────────────────────────────────────────────
+
+    [MenuItem("Tools/Setup Projeteis Especiais Princesa")]
+    static void SetupProjeteis()
+    {
+        var configs = new List<(string nomeAse, string nomeClip, string nomePrefab, Color cor)>
+        {
+            ("Projetilprincesa",          "anim_projetil_princesa",  "ProjetilPrincesa",          Color.white),
+            ("projetilespecialraiz",      "anim_especial_raiz",      "ProjetilEspecialRaiz",      new Color(0.3f, 1f,    0.3f)),
+            ("projetilespecialqueima",    "anim_especial_queima",    "ProjetilEspecialQueima",    new Color(1f,   0.4f,  0.1f)),
+            ("projetilespecialempurrar",  "anim_especial_empurrao",  "ProjetilEspecialEmpurrao",  new Color(0.2f, 0.85f, 1f)),
+        };
+
+        foreach (var (nomeAse, nomeClip, nomePrefab, cor) in configs)
+        {
+            var clip  = CriarClip(nomeAse, nomeClip, loopTime: true);
+            if (clip == null) continue;
+
+            var ctrl  = CriarControllerSimples(nomeClip, clip);
+            CriarPrefabProjetilEspecial(nomePrefab, ctrl, cor);
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("Prefabs dos projeteis especiais criados!");
+    }
+
+    static AnimatorController CriarControllerSimples(string nome, AnimationClip clip)
+    {
+        string ctrlPath = $"{PASTA}/{nome}.controller";
+
+        if (AssetDatabase.LoadAssetAtPath<AnimatorController>(ctrlPath) != null)
+            AssetDatabase.DeleteAsset(ctrlPath);
+
+        var ctrl = AnimatorController.CreateAnimatorControllerAtPath(ctrlPath);
+        var sm   = ctrl.layers[0].stateMachine;
+        var st   = sm.AddState("idle");
+        st.motion = clip;
+        sm.defaultState = st;
+
+        EditorUtility.SetDirty(ctrl);
+        return ctrl;
+    }
+
+    static void CriarPrefabProjetilEspecial(string nome, AnimatorController ctrl, Color cor)
+    {
+        string prefabPath = $"{PASTA}/{nome}.prefab";
+
+        var go = new GameObject(nome);
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = 5;
+        sr.color = cor;
+
+        var rb = go.AddComponent<Rigidbody2D>();
+        rb.gravityScale  = 0f;
+        rb.linearDamping = 0f;
+        rb.constraints   = RigidbodyConstraints2D.FreezeRotation;
+
+        var col = go.AddComponent<CircleCollider2D>();
+        col.isTrigger = true;
+        col.radius    = 0.25f;
+
+        var anim = go.AddComponent<Animator>();
+        anim.runtimeAnimatorController = ctrl;
+
+        // Script de homing só no projétil principal (sem "Especial" no nome)
+        bool ehEspecial = nome.Contains("Especial");
+        if (!ehEspecial)
+            go.AddComponent<ProjetilHomingPrincesa>();
+
+        // Luz 2D nos projéteis especiais
+        if (ehEspecial)
+        {
+            var luzGO = new GameObject("Luz");
+            luzGO.transform.SetParent(go.transform, false);
+
+            var luz = luzGO.AddComponent<Light2D>();
+            luz.lightType        = Light2D.LightType.Point;
+            luz.color            = cor;
+            luz.intensity        = 1.8f;
+            luz.pointLightInnerRadius = 0f;
+            luz.pointLightOuterRadius = 1.5f;
+            luz.shadowsEnabled   = false;
+        }
+
+        // Sprite inicial = primeiro frame do clip
+        if (ctrl.animationClips.Length > 0)
+        {
+            var curves = AnimationUtility.GetObjectReferenceCurveBindings(ctrl.animationClips[0]);
+            if (curves.Length > 0)
+            {
+                var keys = AnimationUtility.GetObjectReferenceCurve(ctrl.animationClips[0], curves[0]);
+                if (keys.Length > 0)
+                    sr.sprite = keys[0].value as Sprite;
+            }
+        }
+
+        PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
+        Object.DestroyImmediate(go);
+        Debug.Log($"{nome}.prefab criado/atualizado.");
     }
 }

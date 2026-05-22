@@ -40,6 +40,10 @@ public class BossPrincesa : MonoBehaviour
     [Tooltip("Quantidade de projéteis por canalização: 4 → 8 → 16 (e se repete em 16)")]
     public int[] sequenciaProjeteis = { 4, 8, 16 };
 
+    [Header("Projéteis Especiais")]
+    [Tooltip("Prefab do projétil de Queima — causa queima por 3s. Usa prefabProjetil se vazio.")]
+    public GameObject prefabEspecialQueima;
+
     // ──────────────────────────────────────────────
     // FASE 2
     // ──────────────────────────────────────────────
@@ -58,18 +62,25 @@ public class BossPrincesa : MonoBehaviour
     private Transform           player;
     private PlayerStats         playerStats;
     private Rigidbody2D         rb;
+    private BoxCollider2D        hitbox;
 
-    private bool fase2Ativada    = false;
-    private int  ataqueCicloIdx  = 0;
-    private int  indiceEspecial  = 0;
-    private float velocidadeOrbita = 120f;
+    private bool      fase2Ativada    = false;
+    private int       ataqueCicloIdx  = 0;
+    private float     velocidadeOrbita = 120f;
+    private Coroutine loopCoroutine;
+
+    // dash
+    private bool estaDashando = false;
+
+    private readonly List<InimigoController> inimigosBufados = new List<InimigoController>();
 
     // orbita durante canalização
     private readonly List<GameObject> projeteisCanalizando = new List<GameObject>();
 
     // UI
-    private GameObject bossCanvasGO;
-    private Image       hpFill;
+    private GameObject      bossCanvasGO;
+    private Image           hpFill;
+    private Image           hpFillGhost;
     private TextMeshProUGUI faseText;
 
     // ──────────────────────────────────────────────
@@ -82,6 +93,7 @@ public class BossPrincesa : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator       = GetComponent<Animator>();
         rb             = GetComponent<Rigidbody2D>();
+        hitbox         = GetComponent<BoxCollider2D>();
 
         var pGO = GameObject.FindGameObjectWithTag("Player");
         if (pGO != null)
@@ -104,7 +116,8 @@ public class BossPrincesa : MonoBehaviour
         {
             rb.gravityScale   = 0f;
             rb.linearDamping  = 3f;
-            rb.constraints    = RigidbodyConstraints2D.FreezeRotation;
+            rb.mass           = 10000f; // impede o player de empurrar
+            rb.constraints    = RigidbodyConstraints2D.FreezeAll;
         }
 
         CriarBossUI();
@@ -117,6 +130,25 @@ public class BossPrincesa : MonoBehaviour
 
         AtualizarUI();
         VerificarFase2();
+        SincronizarHitbox();
+    }
+
+    void SincronizarHitbox()
+    {
+        if (hitbox == null || spriteRenderer == null) return;
+
+        // Usa o bounds do renderer (espaço mundo) — já considera pivot, flipX e escala
+        Bounds   wb  = spriteRenderer.bounds;
+        Vector3  scl = transform.lossyScale;
+
+        // Converte centro mundial para espaço local do collider
+        hitbox.offset = transform.InverseTransformPoint(wb.center);
+
+        // Converte tamanho mundial para espaço local e reduz 15% para não vazar
+        hitbox.size = new Vector2(
+            wb.size.x / Mathf.Abs(scl.x),
+            wb.size.y / Mathf.Abs(scl.y)
+        ) * 0.85f;
     }
 
     // ──────────────────────────────────────────────
@@ -144,16 +176,26 @@ public class BossPrincesa : MonoBehaviour
         velocidadeOrbita    = 260f;
 
         // Buff de velocidade em todos os inimigos vivos
+        inimigosBufados.Clear();
         foreach (var inimigo in FindObjectsByType<InimigoController>(FindObjectsSortMode.None))
         {
             if (inimigo == controller) continue;
-            inimigo.velocidadeAtual *= buffVelocidadeInimigos;
+            var movi = inimigo.GetComponent<movi_inimigo>();
+            if (movi != null)
+            {
+                movi.velocidade *= buffVelocidadeInimigos;
+                inimigosBufados.Add(inimigo);
+            }
         }
 
         StartCoroutine(FlashFase2());
 
         if (faseText != null)
             faseText.text = "FASE 2";
+
+        // Interrompe o loop normal, faz a explosão de entrada e reinicia
+        if (loopCoroutine != null) StopCoroutine(loopCoroutine);
+        loopCoroutine = StartCoroutine(EntradaFase2());
     }
 
     IEnumerator FlashFase2()
@@ -190,7 +232,7 @@ public class BossPrincesa : MonoBehaviour
         }
         yield return StartCoroutine(FadeAlpha(0f, 1f, 0.7f));
 
-        StartCoroutine(LoopComportamento());
+        loopCoroutine = StartCoroutine(LoopComportamento());
     }
 
     IEnumerator MostrarAvisoBoss()
@@ -373,12 +415,23 @@ public class BossPrincesa : MonoBehaviour
 
     IEnumerator LoopComportamento()
     {
+        int ciclo = 0;
         while (!controller.estaMorrendo)
         {
             yield return StartCoroutine(FaseVoo());
             yield return StartCoroutine(FaseParada());
             yield return StartCoroutine(FasePreparo());
             yield return StartCoroutine(FaseCanalização());
+
+            if (fase2Ativada)
+            {
+                if (ciclo % 3 == 2)
+                    yield return StartCoroutine(ExplosaoBulletHell());
+                else if (ciclo % 2 == 1)
+                    yield return StartCoroutine(FaseDash());
+            }
+
+            ciclo++;
         }
     }
 
@@ -394,6 +447,7 @@ public class BossPrincesa : MonoBehaviour
         Vector2 destino = ObterDestino();
 
         if (animator != null) animator.SetBool("voando", true);
+        if (rb != null) rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
         while (elapsed < duracaoVoo && !controller.estaMorrendo)
         {
@@ -423,15 +477,13 @@ public class BossPrincesa : MonoBehaviour
     IEnumerator FaseParada()
     {
         if (animator != null) animator.SetBool("voando", false);
-
-        float elapsed = 0f;
-        while (elapsed < tempoParada && !controller.estaMorrendo)
+        if (rb != null)
         {
-            elapsed += Time.deltaTime;
-            if (rb != null)
-                rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, Vector2.zero, Time.deltaTime * 8f);
-            yield return null;
+            rb.linearVelocity = Vector2.zero;
+            rb.constraints    = RigidbodyConstraints2D.FreezeAll;
         }
+
+        yield return new WaitForSeconds(tempoParada);
     }
 
     IEnumerator FasePreparo()
@@ -549,53 +601,48 @@ public class BossPrincesa : MonoBehaviour
 
     void LancarProjetilEspecial()
     {
-        if (prefabProjetil == null || player == null) return;
+        if (player == null) return;
 
-        var tipo = (ProjetilEspecialPrincesa.Tipo)(indiceEspecial % 3);
-        indiceEspecial++;
+        GameObject prefab = prefabEspecialQueima != null ? prefabEspecialQueima : prefabProjetil;
+        if (prefab == null) return;
 
-        GameObject go = Instantiate(prefabProjetil, transform.position, Quaternion.identity);
+        // Leque de 5 projéteis: centro + dois pares de ±15° e ±30°
+        float[] offsets = { -30f, -15f, 0f, 15f, 30f };
+        Vector2 dirBase = ((Vector2)player.position - (Vector2)transform.position).normalized;
 
-        // Desativa scripts padrão
-        foreach (var mb in go.GetComponents<MonoBehaviour>())
-            mb.enabled = false;
-
-        // Garante que o collider seja trigger
-        var col = go.GetComponent<Collider2D>();
-        if (col != null) col.isTrigger = true;
-
-        var especial = go.AddComponent<ProjetilEspecialPrincesa>();
-        especial.tipo = tipo;
-        especial.dano = danoProjetil;
-
-        var sr = go.GetComponent<SpriteRenderer>();
-        if (sr != null)
+        foreach (float offset in offsets)
         {
-            sr.color = CorParaTipo(tipo);
-            sr.enabled = true;
-        }
+            Vector2 dir = Quaternion.Euler(0f, 0f, offset) * dirBase;
 
-        go.transform.localScale *= 1.6f;
+            GameObject go = Instantiate(prefab, transform.position, Quaternion.identity);
 
-        Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
-        var rb2 = go.GetComponent<Rigidbody2D>();
-        if (rb2 != null)
-        {
-            rb2.simulated      = true;
-            rb2.linearVelocity = dir * velocidadeProjetil;
-        }
+            foreach (var mb in go.GetComponents<MonoBehaviour>())
+                mb.enabled = false;
 
-        Destroy(go, duracaoProjetil);
-    }
+            var col = go.GetComponent<Collider2D>();
+            if (col != null) col.isTrigger = true;
 
-    Color CorParaTipo(ProjetilEspecialPrincesa.Tipo tipo)
-    {
-        switch (tipo)
-        {
-            case ProjetilEspecialPrincesa.Tipo.Raiz:     return new Color(0.3f, 1f, 0.3f);
-            case ProjetilEspecialPrincesa.Tipo.Queima:   return new Color(1f, 0.4f, 0.1f);
-            case ProjetilEspecialPrincesa.Tipo.Empurrao: return new Color(0.2f, 0.85f, 1f);
-            default:                                      return Color.white;
+            var especial = go.AddComponent<ProjetilEspecialPrincesa>();
+            especial.tipo = ProjetilEspecialPrincesa.Tipo.Queima;
+            especial.dano = danoProjetil;
+
+            var sr = go.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.color   = new Color(1f, 0.4f, 0.1f);
+                sr.enabled = true;
+            }
+
+            go.transform.localScale *= 1.6f;
+
+            var rb2 = go.GetComponent<Rigidbody2D>();
+            if (rb2 != null)
+            {
+                rb2.simulated      = true;
+                rb2.linearVelocity = dir * velocidadeProjetil;
+            }
+
+            Destroy(go, duracaoProjetil);
         }
     }
 
@@ -810,7 +857,23 @@ public class BossPrincesa : MonoBehaviour
         bgRT.offsetMin = bgRT.offsetMax = Vector2.zero;
         bg.AddComponent<Image>().color = new Color(0.06f, 0.02f, 0.12f, 0.9f);
 
-        // Barra de HP
+        // Barra fantasma (amarela, desce devagar)
+        var ghostGO = new GameObject("HP_Ghost");
+        ghostGO.transform.SetParent(painelGO.transform, false);
+        var ghostRT = ghostGO.AddComponent<RectTransform>();
+        ghostRT.anchorMin = new Vector2(0f, 0f);
+        ghostRT.anchorMax = new Vector2(1f, 1f);
+        ghostRT.offsetMin = new Vector2(4f, 4f);
+        ghostRT.offsetMax = new Vector2(-4f, -4f);
+
+        hpFillGhost = ghostGO.AddComponent<Image>();
+        hpFillGhost.color      = new Color(1f, 0.88f, 0.25f, 0.9f);
+        hpFillGhost.type       = Image.Type.Filled;
+        hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
+        hpFillGhost.fillOrigin = 0;
+        hpFillGhost.fillAmount = 1f;
+
+        // Barra de HP principal (rosa, cai rápido)
         var barraGO = new GameObject("HP_Fill");
         barraGO.transform.SetParent(painelGO.transform, false);
         var barraRT = barraGO.AddComponent<RectTransform>();
@@ -858,13 +921,362 @@ public class BossPrincesa : MonoBehaviour
     void AtualizarUI()
     {
         if (hpFill == null || controller == null) return;
+
         float pct = controller.vidaAtual / controller.vidaMaxima;
-        hpFill.fillAmount = Mathf.Lerp(hpFill.fillAmount, pct, Time.deltaTime * 5f);
+
+        // Barra principal cai rapidamente
+        hpFill.fillAmount = Mathf.Lerp(hpFill.fillAmount, pct, Time.deltaTime * 8f);
+
+        // Barra fantasma segue devagar, dando o efeito de "queima"
+        if (hpFillGhost != null)
+            hpFillGhost.fillAmount = Mathf.MoveTowards(hpFillGhost.fillAmount, pct, Time.deltaTime * 0.35f);
+
+        // Na Fase 2 a barra fica vermelha
+        hpFill.color = fase2Ativada
+            ? new Color(1f, 0.18f, 0.12f)
+            : new Color(0.9f, 0.3f, 0.85f);
+    }
+
+    // ──────────────────────────────────────────────
+    // FASE 2 — BULLET HELL / CLONE / POÇA
+    // ──────────────────────────────────────────────
+
+    IEnumerator ExplosaoBulletHell()
+    {
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.constraints    = RigidbodyConstraints2D.FreezeAll;
+        }
+
+        // Flash vermelho intenso
+        for (int i = 0; i < 8; i++)
+        {
+            if (spriteRenderer != null)
+                spriteRenderer.color = i % 2 == 0 ? new Color(1f, 0.08f, 0.08f) : Color.white;
+            yield return new WaitForSeconds(0.075f);
+        }
+        if (spriteRenderer != null) spriteRenderer.color = Color.white;
+
+        // Onda 1 — 16 projéteis retos
+        LancarOnda(16, 0f);
+
+        yield return new WaitForSeconds(0.45f);
+
+        // Onda 2 — 16 projéteis defasados 11.25°
+        LancarOnda(16, 360f / 32f);
+
+        yield return new WaitForSeconds(0.4f);
+    }
+
+    IEnumerator EntradaFase2()
+    {
+        yield return StartCoroutine(ExplosaoBulletHell());
+        loopCoroutine = StartCoroutine(LoopComportamento());
+    }
+
+    void LancarOnda(int quantidade, float offsetAngulo)
+    {
+        if (prefabProjetil == null) return;
+
+        float passo = 360f / quantidade;
+        for (int i = 0; i < quantidade; i++)
+        {
+            float ang = (passo * i + offsetAngulo) * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+
+            var go = Instantiate(prefabProjetil, transform.position, Quaternion.identity);
+
+            foreach (var mb in go.GetComponents<MonoBehaviour>())
+                mb.enabled = false;
+
+            var homing = go.GetComponent<ProjetilHomingPrincesa>();
+            if (homing != null)
+            {
+                homing.enabled     = true;
+                homing.dano        = danoProjetil;
+                homing.duracaoVida = duracaoProjetil;
+                homing.Iniciar(null); // sem homing, mas ativo para causar dano
+            }
+
+            var rb2 = go.GetComponent<Rigidbody2D>();
+            if (rb2 != null)
+            {
+                rb2.simulated      = true;
+                rb2.linearVelocity = dir * velocidadeProjetil;
+            }
+
+            Destroy(go, duracaoProjetil);
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    // DASH DE SLIME
+    // ──────────────────────────────────────────────
+
+    IEnumerator FaseDash()
+    {
+        if (player == null) yield break;
+
+        // Para antes do dash
+        if (rb != null) { rb.linearVelocity = Vector2.zero; rb.constraints = RigidbodyConstraints2D.FreezeAll; }
+
+        Vector2 alvo = (Vector2)player.position;
+        Vector2 dir  = (alvo - (Vector2)transform.position).normalized;
+
+        if (spriteRenderer != null) spriteRenderer.flipX = dir.x < 0f;
+
+        // Wind-up: pisca magenta
+        for (int i = 0; i < 4; i++)
+        {
+            if (spriteRenderer != null)
+                spriteRenderer.color = i % 2 == 0 ? new Color(1f, 0.2f, 0.85f) : Color.white;
+            yield return new WaitForSeconds(0.08f);
+        }
+        if (spriteRenderer != null) spriteRenderer.color = Color.white;
+
+        // Dash
+        estaDashando = true;
+        if (rb != null) rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        float dashSpeed = velocidadeVoo * 4.5f;
+        float dashDur   = 0.4f;
+        float elapsed   = 0f;
+
+        StartCoroutine(RastroTrail(dashDur));
+
+        while (elapsed < dashDur && !controller.estaMorrendo)
+        {
+            elapsed += Time.deltaTime;
+            if (rb != null)
+                rb.linearVelocity = dir * Mathf.Lerp(dashSpeed, dashSpeed * 0.2f, elapsed / dashDur);
+            yield return null;
+        }
+
+        estaDashando = false;
+        if (rb != null) { rb.linearVelocity = Vector2.zero; rb.constraints = RigidbodyConstraints2D.FreezeAll; }
+
+        yield return new WaitForSeconds(0.35f);
+    }
+
+    IEnumerator RastroTrail(float duracao)
+    {
+        float elapsed = 0f;
+        while (elapsed < duracao && estaDashando)
+        {
+            elapsed += Time.deltaTime;
+            CriarParticulaRastro();
+            yield return new WaitForSeconds(0.045f);
+        }
+    }
+
+    void CriarParticulaRastro()
+    {
+        var go  = new GameObject("RastroDash");
+        go.transform.position   = transform.position;
+        go.transform.localScale = transform.localScale * 0.75f;
+
+        var sr2 = go.AddComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            sr2.sprite         = spriteRenderer.sprite;
+            sr2.flipX          = spriteRenderer.flipX;
+            sr2.sortingLayerID = spriteRenderer.sortingLayerID;
+            sr2.sortingOrder   = spriteRenderer.sortingOrder - 1;
+        }
+        sr2.color = new Color(0.65f, 0.1f, 1f, 0.55f);
+
+        StartCoroutine(FadeParticula(go, sr2, 0.22f));
+    }
+
+    IEnumerator FadeParticula(GameObject go, SpriteRenderer sr2, float dur)
+    {
+        float t = 0f;
+        Color c = sr2 != null ? sr2.color : Color.clear;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            if (sr2 != null) { Color nc = c; nc.a = Mathf.Lerp(c.a, 0f, t / dur); sr2.color = nc; }
+            yield return null;
+        }
+        if (go != null) Destroy(go);
+    }
+
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (!estaDashando || !col.gameObject.CompareTag("Player")) return;
+
+        var rb2  = col.gameObject.GetComponent<Rigidbody2D>();
+        var movi = col.gameObject.GetComponent<moviment_player2>();
+        if (rb2 == null) return;
+
+        Vector2 empurrao = ((Vector2)col.transform.position - (Vector2)transform.position).normalized;
+        if (movi != null) movi.enabled = false;
+        rb2.linearVelocity = empurrao * 16f;
+        StartCoroutine(RestaurarMovimentoPlayer(col.gameObject, movi));
+    }
+
+    IEnumerator RestaurarMovimentoPlayer(GameObject playerGO, moviment_player2 movi)
+    {
+        yield return new WaitForSeconds(0.3f);
+        if (movi != null) movi.enabled = true;
     }
 
     // ──────────────────────────────────────────────
     // MORTE
     // ──────────────────────────────────────────────
+
+    public void IniciarEfeitoMorte()
+    {
+        RemoverBuffInimigos();
+        StartCoroutine(EfeitoMortePrincesa());
+    }
+
+    void RemoverBuffInimigos()
+    {
+        foreach (var inimigo in inimigosBufados)
+        {
+            if (inimigo == null) continue;
+            var movi = inimigo.GetComponent<movi_inimigo>();
+            if (movi != null)
+                movi.velocidade /= buffVelocidadeInimigos;
+        }
+        inimigosBufados.Clear();
+    }
+
+    IEnumerator EfeitoMortePrincesa()
+    {
+        if (loopCoroutine != null) { StopCoroutine(loopCoroutine); loopCoroutine = null; }
+        estaDashando = false;
+
+        if (rb != null) { rb.linearVelocity = Vector2.zero; rb.constraints = RigidbodyConstraints2D.FreezeAll; }
+
+        var col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
+        if (bossCanvasGO != null) { Destroy(bossCanvasGO); bossCanvasGO = null; }
+
+        CameraShaker.Tremer(0.12f, 3.5f);
+
+        int sortL = spriteRenderer != null ? spriteRenderer.sortingLayerID : 0;
+        int sortO = spriteRenderer != null ? spriteRenderer.sortingOrder   : 0;
+
+        // Flash rosa/branco rápido
+        for (int i = 0; i < 12; i++)
+        {
+            if (spriteRenderer != null)
+                spriteRenderer.color = i % 2 == 0 ? Color.white : new Color(1f, 0.35f, 0.9f);
+            yield return new WaitForSeconds(0.045f);
+        }
+
+        CriarAneisMortePrincesa(5, sortL, sortO);
+        CriarParticulasMortePrincesa(40, sortL, sortO);
+
+        // Cresce e dissolve
+        Vector3 escBase = transform.localScale;
+        float t = 0f, dur = 1.2f;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            float p = t / dur;
+            transform.localScale = escBase * Mathf.Lerp(1f, 3.5f, Mathf.Pow(p, 0.5f));
+            if (spriteRenderer != null)
+                spriteRenderer.color = new Color(1f, 0.6f, 1f, Mathf.Lerp(1f, 0f, p * p));
+            yield return null;
+        }
+
+        BossMorteUI.Exibir("BOSS DERROTADO!", new Color(1f, 0.45f, 1f));
+        Destroy(gameObject);
+    }
+
+    void CriarAneisMortePrincesa(int qtd, int sortL, int sortO)
+    {
+        const int SZ = 32;
+        float cx  = SZ * 0.5f;
+        var   tex = new Texture2D(SZ, SZ, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        for (int y = 0; y < SZ; y++)
+        for (int x = 0; x < SZ; x++)
+        {
+            float d  = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(cx, cx));
+            float nt = d / cx;
+            float a  = Mathf.Clamp01(1f - Mathf.Abs(nt - 0.75f) / 0.25f);
+            tex.SetPixel(x, y, new Color(1f, 0.4f, 0.9f, a));
+        }
+        tex.Apply();
+        Sprite spr = Sprite.Create(tex, new Rect(0, 0, SZ, SZ), new Vector2(0.5f, 0.5f), SZ * 0.5f);
+
+        for (int i = 0; i < qtd; i++)
+        {
+            var ring = new GameObject("AnelMortePrincesa");
+            ring.transform.position = transform.position;
+            var sr = ring.AddComponent<SpriteRenderer>();
+            sr.sprite         = spr;
+            sr.sortingLayerID = sortL;
+            sr.sortingOrder   = sortO - 1;
+
+            var anim          = ring.AddComponent<AnelExpansaoAuto>();
+            anim.delay        = i * 0.14f;
+            anim.duracaoTotal = Random.Range(0.7f, 1.2f);
+            anim.escalaFinal  = Random.Range(6f, 15f);
+        }
+    }
+
+    void CriarParticulasMortePrincesa(int qtd, int sortL, int sortO)
+    {
+        const int SZ = 6;
+        float cx  = SZ * 0.5f;
+        var   tex = new Texture2D(SZ, SZ, TextureFormat.RGBA32, false);
+        for (int y = 0; y < SZ; y++)
+        for (int x = 0; x < SZ; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(cx, cx));
+            tex.SetPixel(x, y, new Color(1f, 0.5f, 1f, Mathf.Clamp01(1f - d / cx)));
+        }
+        tex.Apply();
+        Sprite spr = Sprite.Create(tex, new Rect(0, 0, SZ, SZ), new Vector2(0.5f, 0.5f), 16f);
+
+        Color[] cores = {
+            new Color(1f, 0.5f, 1f), new Color(1f, 0.85f, 1f),
+            new Color(0.75f, 0.15f, 1f), Color.white, new Color(1f, 0.3f, 0.65f)
+        };
+
+        for (int i = 0; i < qtd; i++)
+        {
+            float ang = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            float spd = Random.Range(0.8f, 3.5f);
+            Vector2 vel = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * spd;
+
+            var go = new GameObject("PartMortePrincesa");
+            go.transform.position   = transform.position + new Vector3(Random.Range(-0.3f, 0.3f), Random.Range(-0.2f, 0.2f));
+            float scl = Random.Range(0.08f, 0.3f);
+            go.transform.localScale = new Vector3(scl, scl, 1f);
+
+            var sr2            = go.AddComponent<SpriteRenderer>();
+            sr2.sprite         = spr;
+            sr2.color          = cores[Random.Range(0, cores.Length)];
+            sr2.sortingLayerID = sortL;
+            sr2.sortingOrder   = sortO + 1;
+
+            EfeitoRunner.Criar().StartCoroutine(AnimarParticulaMorte(go, sr2, vel));
+        }
+    }
+
+    static IEnumerator AnimarParticulaMorte(GameObject go, SpriteRenderer sr2, Vector2 vel)
+    {
+        float t = 0f, dur = Random.Range(0.6f, 1.3f);
+        Color c = sr2 != null ? sr2.color : Color.white;
+        while (t < dur && go != null)
+        {
+            t += Time.deltaTime;
+            float p = t / dur;
+            go.transform.position += new Vector3(vel.x, vel.y + 0.4f, 0f) * Time.deltaTime;
+            vel *= 0.93f;
+            if (sr2 != null) { Color nc = c; nc.a = 1f - p * p; sr2.color = nc; }
+            yield return null;
+        }
+        if (go != null) Object.Destroy(go);
+    }
 
     void OnDestroy()
     {
@@ -873,5 +1285,8 @@ public class BossPrincesa : MonoBehaviour
         // Destrói projéteis em órbita se ainda existirem
         foreach (var go in projeteisCanalizando)
             if (go != null) Destroy(go);
+
+        // Fallback: garante que o buff seja removido mesmo se IniciarEfeitoMorte não foi chamado
+        RemoverBuffInimigos();
     }
 }

@@ -95,7 +95,7 @@ SpriteRenderer:
   m_Size: {x: 0.48, y: 0.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!50 &7890123456789012303
 Rigidbody2D:
@@ -132,7 +132,7 @@ BoxCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7890123456789012300}
   m_Enabled: 1
-  serializedVersion: 8
+  serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -159,6 +159,15 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0.39}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.4791667, y: -1.45}
+    oldSize: {x: 0.48, y: 0.2}
+    newSize: {x: 0.48, y: 0.2}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
   m_Size: {x: 0.44, y: 0.16}
   m_EdgeRadius: 0
 --- !u!95 &7890123456789012305
@@ -237,13 +246,16 @@ MonoBehaviour:
   tempoVooMax: 4.5
   tempoParada: 1.5
   raioPadraoVoo: 7
-  prefabProjetil: {fileID: 6534021908765432100, guid: e87fb47c30c242868116bfc034b81547, type: 3}
+  prefabProjetil: {fileID: 1472557176115817539, guid: e87fb47c30c242868116bfc034b81547, type: 3}
   velocidadeProjetil: 6
   danoProjetil: 20
   duracaoProjetil: 8
   "duracaoCanaliza\xE7\xE3o": 2.5
   raioOrbita: 1.4
   sequenciaProjeteis: 040000000800000010000000
+  prefabEspecialRaiz: {fileID: 7705073689589674518, guid: 9dca86014020cdd4495c258222580bff, type: 3}
+  prefabEspecialQueima: {fileID: 3346323553756457358, guid: 1ab45434d8d180c43bc595d583272d4b, type: 3}
+  prefabEspecialEmpurrao: {fileID: 6407818086960510534, guid: 2a5dc73fbebeed648a9d546411bedac9, type: 3}
   gatilhoFase2: 0.5
   buffVelocidadeInimigos: 1.5
   forcaOndaEmpurrao: 12
