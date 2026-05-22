@@ -406,8 +406,13 @@ public class InimigoController : MonoBehaviour
         GameObject textObj = new GameObject("TextoFlutuante");
         textObj.transform.SetParent(canvas.transform, false);
 
+        if (Camera.main == null) { Destroy(textObj); return; }
         Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
+        if (screenPos.z <= 0f) { Destroy(textObj); return; }
+        screenPos.z  = 0f;
         screenPos.y += 80;
+        screenPos.x  = Mathf.Clamp(screenPos.x, 0f, Screen.width);
+        screenPos.y  = Mathf.Clamp(screenPos.y, 0f, Screen.height);
         textObj.transform.position = screenPos;
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();

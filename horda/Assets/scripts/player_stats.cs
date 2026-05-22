@@ -99,6 +99,7 @@ public class PlayerStats : MonoBehaviour
     private const float ShieldBreakImmuneDuration = 0.3f;
 
     private UIManager uiManager;
+    private DomoRetardanteUltimate domoUltimate;
     private SkillManager skillManager;
     private StatusCardSystem cardSystem;
 
@@ -456,7 +457,8 @@ public class PlayerStats : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        uiManager = UIManager.Instance;
+        uiManager    = UIManager.Instance;
+        domoUltimate = GetComponent<DomoRetardanteUltimate>();
         skillManager = SkillManager.Instance;
         cardSystem = StatusCardSystem.Instance;
 
@@ -572,20 +574,24 @@ public class PlayerStats : MonoBehaviour
         HandleHealthRegeneration();
         UpdateSkillCooldowns();
         HandlePassiveSkills();
-        UpdateUltimateSystem();
-
-        if (Input.GetKeyDown(KeyCode.R) && ultimateReady && ultimateSkill.isActive)
+        // Quando o domo está presente, ele gerencia o cooldown e o input R
+        if (domoUltimate == null)
         {
-            if (usarUltimateMarcacao)
+            UpdateUltimateSystem();
+
+            if (Input.GetKeyDown(KeyCode.R) && ultimateReady && ultimateSkill.isActive)
             {
-                if (!temPosicaoMarcada)
-                    MarcarPosicao();
+                if (usarUltimateMarcacao)
+                {
+                    if (!temPosicaoMarcada)
+                        MarcarPosicao();
+                    else
+                        TeleportarParaMarcacao();
+                }
                 else
-                    TeleportarParaMarcacao();
-            }
-            else
-            {
-                ActivateUltimate();
+                {
+                    ActivateUltimate();
+                }
             }
         }
 

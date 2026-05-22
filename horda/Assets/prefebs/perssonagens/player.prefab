@@ -16,6 +16,13 @@ GameObject:
   - component: {fileID: 2649917071297917511}
   - component: {fileID: 1475492725510301387}
   - component: {fileID: 7767371224054685517}
+  - component: {fileID: -532111110792013023}
+  - component: {fileID: 4447966580918797876}
+  - component: {fileID: -2956149126085584735}
+  - component: {fileID: -8740842057439862192}
+  - component: {fileID: 6910555082347261622}
+  - component: {fileID: -1236134592443331585}
+  - component: {fileID: -7169058150843933794}
   m_Layer: 6
   m_Name: player
   m_TagString: Player
@@ -149,8 +156,12 @@ MonoBehaviour:
   currentXP: 0
   xpToNextLevel: 100
   xpMultiplier: 1.5
+  dashCharges: 0
+  maxDashCharges: 3
   xpCollectionRadius: 3
+  orbMoveSpeedMultiplier: 1
   autoCollectXP: 1
+  itemCollectionRadius: 2
   showCollectionRadius: 1
   collectionRadiusColor: {r: 0, g: 1, b: 0, a: 0.1}
   attackSkills: []
@@ -166,12 +177,16 @@ MonoBehaviour:
   ultimateCooldown: 30
   ultimateChargeTime: 0
   ultimateReady: 0
+  usarUltimateMarcacao: 1
   attackActivationInterval: 2
   defenseActivationInterval: 3
+  critChance: 0.1
   elementSystem:
     currentElement: 0
     elementalBonus: 1.2
   acquiredSkills: []
+  shieldPoints: 0
+  maxShieldPoints: 0
 --- !u!114 &3327487489180328020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -184,6 +199,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b81a49add66d9b5478e83a20f733e90d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::moviment_player2
+  dashSpeed: 20
+  dashDuration: 0.15
 --- !u!114 &2649917071297917511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,6 +272,172 @@ CapsuleCollider2D:
   m_Offset: {x: -0.007343324, y: -0.0006862574}
   m_Size: {x: 0.14134619, y: 0.18801068}
   m_Direction: 0
+--- !u!114 &-532111110792013023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605273054779499284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.Light2D
+  m_ComponentVersion: 2
+  m_LightType: 3
+  m_BlendStyleIndex: 0
+  m_FalloffIntensity: 0.5
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 1
+  m_LightVolumeIntensity: 1
+  m_LightVolumeEnabled: 0
+  m_ApplyToSortingLayers: 
+  m_LightCookieSprite: {fileID: 0}
+  m_DeprecatedPointLightCookieSprite: {fileID: 0}
+  m_LightOrder: 0
+  m_AlphaBlendOnOverlap: 0
+  m_OverlapOperation: 0
+  m_NormalMapDistance: 3
+  m_NormalMapQuality: 2
+  m_UseNormalMap: 0
+  m_ShadowsEnabled: 1
+  m_ShadowIntensity: 0.75
+  m_ShadowSoftness: 0.3
+  m_ShadowSoftnessFalloffIntensity: 0.5
+  m_ShadowVolumeIntensityEnabled: 0
+  m_ShadowVolumeIntensity: 0.75
+  m_LocalBounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  m_PointLightInnerAngle: 360
+  m_PointLightOuterAngle: 360
+  m_PointLightInnerRadius: 0
+  m_PointLightOuterRadius: 1
+  m_ShapeLightParametricSides: 5
+  m_ShapeLightParametricAngleOffset: 0
+  m_ShapeLightParametricRadius: 1
+  m_ShapeLightFalloffSize: 0.5
+  m_ShapeLightFalloffOffset: {x: 0, y: 0}
+  m_ShapePath:
+  - {x: -0.5, y: -0.5, z: 0}
+  - {x: 0.5, y: -0.5, z: 0}
+  - {x: 0.5, y: 0.5, z: 0}
+  - {x: -0.5, y: 0.5, z: 0}
+--- !u!114 &4447966580918797876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605273054779499284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f049797c11a07d04dbd9169511e86411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCollectLight
+  intensidadeAtiva: 3
+  raioAtivo: 5
+  corLuz: {r: 1, g: 0.9, b: 0.4, a: 1}
+  fadeDuration: 0.3
+--- !u!114 &-2956149126085584735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605273054779499284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf4f5ffaf438a9044b1c406ca7022f82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DashEffect
+  intervalo: 0.03
+  duracaoFade: 0.2
+  corInicial: {r: 0.4, g: 0.7, b: 1, a: 0.8}
+  quantidadeParticulas: 14
+  velocidadeParticula: 2.5
+  tempoVidaParticula: 0.4
+  corParticula: {r: 0.4, g: 0.8, b: 1, a: 1}
+--- !u!114 &-8740842057439862192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605273054779499284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 202738ee5bee8104fb7cb08d137bdd67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDeathEffect
+  quantidadeFragmentos: 8
+  forcaFragmento: 4
+  duracaoFragmento: 0.8
+  duracaoFlash: 0.1
+  quantidadeFlashes: 3
+  corFlash: {r: 1, g: 0, b: 0, a: 1}
+  duracaoEncolher: 0.5
+  spriteMarcador: {fileID: 0}
+  corMarcador: {r: 0.6, g: 0, b: 0, a: 0.8}
+  tamanhoMarcador: 1.2
+  marcadorFade: 0
+  duracaoFadeMarcador: 5
+--- !u!114 &6910555082347261622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605273054779499284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbcc9562f7033554f8d8dec997099614, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnEffect
+  duracaoRaio: 0.18
+  larguraRaio: 0.18
+  corRaio: {r: 0.6, g: 0.9, b: 1, a: 1}
+  duracaoLuz: 0.35
+  raioLuz: 1.4
+  corLuz: {r: 0.6, g: 0.9, b: 1, a: 0.9}
+  duracaoFade: 0.12
+--- !u!114 &-1236134592443331585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605273054779499284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bd3b2e5a61a2f048bd2a55ab6059ff3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUpEffect
+  corAnel: {r: 1, g: 0.85, b: 0.2, a: 1}
+  raioFinal: 3
+  duracaoAnel: 0.6
+  corFlash: {r: 1, g: 0.9, b: 0.3, a: 1}
+  qtdFlashes: 3
+  duracaoFlash: 0.07
+  alturaTexto: 1.8
+  duracaoTexto: 1.2
+--- !u!114 &-7169058150843933794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2605273054779499284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a71ed6d27def5784193d5d4983fdb7ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DomoRetardanteUltimate
+  raio: 5
+  duracao: 5
+  cooldown: 20
+  velocidadeLenta: 1
 --- !u!1 &6694090767569061375
 GameObject:
   m_ObjectHideFlags: 0
