@@ -33,6 +33,9 @@ public class CharacterSelectionUI : MonoBehaviour
     GameObject       previewPersonagem;
     static readonly Vector3 PREVIEW_POS = new Vector3(9999f, 0f, 0f);
 
+    // ── Container de botões de seleção de ultimate ────────────────────
+    GameObject painelSeleçaoUltimate;
+
     // ── Refs de animação ───────────────────────────────────────────────
     Image   glowFundo;
     Image   glowPreview;
@@ -458,16 +461,46 @@ public class CharacterSelectionUI : MonoBehaviour
         painelAbaInfo[1].AddComponent<RectTransform>();
         Anchors(painelAbaInfo[1], Vector2.zero, new Vector2(1f, 0.62f));
 
-        var lblU = TMP(painelAbaInfo[1], "LblU",
-            new Vector2(0f, 0.88f), new Vector2(1f, 0.98f),
-            "⚡ ULTIMATE", 10f, FontStyles.Bold, new Color(1f, 0.85f, 0.2f));
-        lblU.alignment = TextAlignmentOptions.Center;
+        // ScrollRect para lista de ultimates
+        var scrollRoot = new GameObject("ScrollUltimates");
+        scrollRoot.transform.SetParent(painelAbaInfo[1].transform, false);
+        scrollRoot.AddComponent<RectTransform>();
+        Anchors(scrollRoot, new Vector2(0f, 0.01f), new Vector2(1f, 0.98f));
 
-        txtUltimateInfo = TMP(painelAbaInfo[1], "UltInfo",
-            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.86f),
-            "—", 10.5f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.95f));
-        txtUltimateInfo.enableWordWrapping = true;
-        txtUltimateInfo.alignment = TextAlignmentOptions.Top;
+        var viewport = new GameObject("Viewport");
+        viewport.transform.SetParent(scrollRoot.transform, false);
+        viewport.AddComponent<Image>().color = Color.clear;
+        viewport.AddComponent<RectMask2D>();
+        Anchors(viewport, Vector2.zero, Vector2.one);
+
+        var content = new GameObject("Content");
+        content.transform.SetParent(viewport.transform, false);
+        var contentRT      = content.AddComponent<RectTransform>();
+        contentRT.anchorMin = new Vector2(0f, 1f);
+        contentRT.anchorMax = new Vector2(1f, 1f);
+        contentRT.pivot     = new Vector2(0.5f, 1f);
+        contentRT.anchoredPosition = Vector2.zero;
+        contentRT.sizeDelta        = Vector2.zero;
+
+        var vlg = content.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing                = 5f;
+        vlg.padding                = new RectOffset(4, 4, 4, 4);
+        vlg.childForceExpandWidth  = true;
+        vlg.childForceExpandHeight = false;
+        vlg.childAlignment         = TextAnchor.UpperCenter;
+
+        var csf = content.AddComponent<ContentSizeFitter>();
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var sr = scrollRoot.AddComponent<ScrollRect>();
+        sr.content          = contentRT;
+        sr.viewport         = viewport.GetComponent<RectTransform>();
+        sr.horizontal       = false;
+        sr.vertical         = true;
+        sr.scrollSensitivity = 25f;
+        sr.movementType     = ScrollRect.MovementType.Clamped;
+
+        painelSeleçaoUltimate = content;
 
         // ── Painel PASSIVAS ──────────────────────────────────────────
         painelAbaInfo[2] = new GameObject("ConteudoPassivas");
@@ -601,6 +634,7 @@ public class CharacterSelectionUI : MonoBehaviour
         manager.characterIcons           = iconesArray;
         manager.ultimateInfoText         = txtUltimateInfo;
         manager.passivasInfoText         = txtPassivasInfo;
+        manager.painelUltimates          = painelSeleçaoUltimate;
         manager.characterPreviewName     = txtNomePreview;
         manager.selectionUI              = this;
 

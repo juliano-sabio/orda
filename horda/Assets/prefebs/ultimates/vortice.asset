@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
+  m_Name: vortice
+  m_EditorClassIdentifier: Assembly-CSharp::UltimateData
+  ultimateName: "V\xF3rtice"
+  description: "Cria um tornado que puxa todos os inimigos em espiral para o centro por 5s."
+  ultimateIcon: {fileID: 21300000, guid: e6f7a8b9c0d10c2d3e4f5a6b7c000006, type: 3}
+  cooldown: 22
+  baseDamage: 0
+  areaOfEffect: 7
+  duration: 5
+  element: 6
+  specialEffect: "Tr\xEAs an\xE9is verdes girando com 8 part\xEDculas orbitando."
+  ultimateType: 0
+  specialValue: 0
+  behaviorScriptName: VorticeUltimate
+  visualEffectPrefab: {fileID: 0}
+  requiredLevel: 1
+  isUnlocked: 1

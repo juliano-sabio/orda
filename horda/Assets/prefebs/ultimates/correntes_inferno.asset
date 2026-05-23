@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
+  m_Name: correntes_inferno
+  m_EditorClassIdentifier: Assembly-CSharp::UltimateData
+  ultimateName: "Correntes do Inferno"
+  description: "Correntes de fogo saem do jogador em 8 dire\xE7\xF5es, prendendo e queimando inimigos."
+  ultimateIcon: {fileID: 21300000, guid: f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2, type: 3}
+  cooldown: 24
+  baseDamage: 15
+  areaOfEffect: 10
+  duration: 6
+  element: 1
+  specialEffect: "8 correntes de fogo em todas as dire\xE7\xF5es; inimigos presos queimam continuamente."
+  ultimateType: 0
+  specialValue: 0
+  behaviorScriptName: CorrentesInfernoUltimate
+  visualEffectPrefab: {fileID: 0}
+  requiredLevel: 1
+  isUnlocked: 1

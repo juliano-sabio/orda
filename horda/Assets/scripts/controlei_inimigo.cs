@@ -108,7 +108,7 @@ public class InimigoController : MonoBehaviour
 
     }
 
-    public void ReceberDano(float dano, bool isCrit = false)
+    public void ReceberDano(float dano, bool isCrit = false, bool mostrarNumero = true)
     {
         if (estaMorrendo) return;
 
@@ -123,14 +123,13 @@ public class InimigoController : MonoBehaviour
         {
             float danoAoEscudo = Mathf.Min(dano, escudo.vidaAtual);
             dano = escudo.AbsorverDano(dano);
-            CriarTextoFlutuante(danoAoEscudo, new Color(0.7f, 0.4f, 1f), "", 28);
+            if (mostrarNumero) CriarTextoFlutuante(danoAoEscudo, new Color(0.7f, 0.4f, 1f), "", 28);
             if (dano <= 0) return;
         }
 
         vidaAtual -= dano;
 
-
-        MostrarDanoFlutuante(dano, isCrit);
+        if (mostrarNumero) MostrarDanoFlutuante(dano, isCrit);
         StartCoroutine(EfeitoVisualDano());
 
         if (vidaAtual <= 0)
@@ -465,10 +464,13 @@ public class InimigoController : MonoBehaviour
         }
     }
 
+    public static event System.Action<InimigoController> OnPreMorte;
+
     public void Morrer()
     {
         if (estaMorrendo && vidaAtual <= 0)
         {
+            OnPreMorte?.Invoke(this);
 
             if (suporteComponent != null)
             {

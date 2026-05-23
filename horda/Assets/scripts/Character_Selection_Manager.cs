@@ -9,8 +9,9 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     public CharacterData[] characters;
     public StageData[] stages;
 
-    // Painel de seleção de ultimate (criado em runtime)
-    private GameObject painelUltimates;
+    // Painel de seleção de ultimate (pode ser fornecido externamente ou criado em runtime)
+    [HideInInspector] public GameObject painelUltimates;
+    private bool painelEmbutido = false;
     private int ultimateSelecionadaIndex = 0;
     private List<GameObject> botoesUltimate = new List<GameObject>();
 
@@ -83,6 +84,8 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         PlayerPrefs.SetInt($"SelectedUltimate_{charIndex}", index);
         PlayerPrefs.Save();
         AtualizarDestaqueBotoes();
+        if (characters != null && charIndex < characters.Length)
+            AtualizarUltimateInfo(characters[charIndex]);
     }
 
     // ✅ CORREÇÃO: Método que o GameSceneManager usa para passar os dados para o Player
@@ -160,8 +163,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     {
         if (ultimateInfoText == null) return;
 
-        UltimateData u = data.ultimateSkill;
-        if (u == null && data.HasUltimatesDisponiveis()) u = data.ultimatesDisponiveis[0];
+        UltimateData u = data.GetUltimate(ultimateSelecionadaIndex);
 
         if (u != null)
         {
@@ -237,6 +239,13 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     void CriarPainelUltimates()
     {
+        // Se já foi fornecido externamente (embutido na aba ULTIMATE), só marca e sai
+        if (painelUltimates != null)
+        {
+            painelEmbutido = true;
+            return;
+        }
+
         Canvas canvas = FindObjectOfType<Canvas>();
         if (canvas == null) return;
 
@@ -253,7 +262,6 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         Image bg = painelUltimates.AddComponent<Image>();
         bg.color = new Color(0.05f, 0.05f, 0.15f, 0.92f);
 
-        // Título
         GameObject titulo = new GameObject("Titulo");
         titulo.transform.SetParent(painelUltimates.transform, false);
         RectTransform rTitulo = titulo.AddComponent<RectTransform>();
@@ -275,23 +283,18 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     {
         if (painelUltimates == null) return;
 
-        // Remove botões antigos
         foreach (var b in botoesUltimate) if (b) Destroy(b);
         botoesUltimate.Clear();
 
         if (!data.HasUltimatesDisponiveis())
         {
-            painelUltimates.SetActive(false);
+            if (!painelEmbutido) painelUltimates.SetActive(false);
             return;
         }
 
-        painelUltimates.SetActive(true);
+        if (!painelEmbutido) painelUltimates.SetActive(true);
 
         int total = data.ultimatesDisponiveis.Length;
-        float larguraBotao = 200f;
-        float espacamento = 20f;
-        float totalWidth = total * larguraBotao + (total - 1) * espacamento;
-        float startX = -totalWidth / 2f + larguraBotao / 2f;
 
         for (int i = 0; i < total; i++)
         {
@@ -299,12 +302,115 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             if (ud == null) continue;
 
             int capturedIndex = i;
-            GameObject botao = CriarBotaoUltimate(ud, startX + i * (larguraBotao + espacamento));
+            GameObject botao = painelEmbutido
+                ? CriarBotaoUltimateEmbutido(ud, i, total)
+                : CriarBotaoUltimate(ud, CalcularPosXBotao(i, total));
             botao.GetComponent<Button>().onClick.AddListener(() => SelectUltimate(capturedIndex));
             botoesUltimate.Add(botao);
         }
 
         AtualizarDestaqueBotoes();
+    }
+
+    float CalcularPosXBotao(int index, int total)
+    {
+        float largura = 200f, espaco = 20f;
+        float totalW  = total * largura + (total - 1) * espaco;
+        return -totalW / 2f + largura / 2f + index * (largura + espaco);
+    }
+
+    // Versão empilhada com scroll para uso dentro da aba ULTIMATE
+    GameObject CriarBotaoUltimateEmbutido(UltimateData ud, int index, int total)
+    {
+        GameObject go = new GameObject($"BotaoUlt_{ud.ultimateName}");
+        go.transform.SetParent(painelUltimates.transform, false);
+        go.AddComponent<RectTransform>();
+        var le = go.AddComponent<LayoutElement>();
+        le.preferredHeight = 68f;
+        le.flexibleWidth   = 1f;
+
+        Image img = go.AddComponent<Image>();
+        img.color  = new Color(0.1f, 0.1f, 0.25f, 1f);
+        Button btn = go.AddComponent<Button>();
+        ColorBlock cb = btn.colors;
+        cb.highlightedColor = new Color(0.2f, 0.3f, 0.6f, 1f);
+        cb.pressedColor     = new Color(0.1f, 0.2f, 0.4f, 1f);
+        btn.colors          = cb;
+        btn.targetGraphic   = img;
+
+        bool temIcone = ud.ultimateIcon != null;
+
+        if (temIcone)
+        {
+            // Ícone (coluna esquerda, metade de cima)
+            var goIcon = new GameObject("Icone");
+            goIcon.transform.SetParent(go.transform, false);
+            var rIcon = goIcon.AddComponent<RectTransform>();
+            rIcon.anchorMin = new Vector2(0.04f, 0.48f);
+            rIcon.anchorMax = new Vector2(0.38f, 0.96f);
+            rIcon.offsetMin = rIcon.offsetMax = Vector2.zero;
+            var imgIcon = goIcon.AddComponent<Image>();
+            imgIcon.sprite              = ud.ultimateIcon;
+            imgIcon.preserveAspect      = true;
+            imgIcon.color               = Color.white;
+            imgIcon.raycastTarget       = false;
+        }
+
+        // Nome (direita se tem ícone, topo completo se não tem)
+        float nomeXMin = temIcone ? 0.40f : 0.03f;
+        var goNome = new GameObject("Nome");
+        goNome.transform.SetParent(go.transform, false);
+        var rNome  = goNome.AddComponent<RectTransform>();
+        rNome.anchorMin = new Vector2(nomeXMin, 0.72f); rNome.anchorMax = new Vector2(0.97f, 0.98f);
+        rNome.offsetMin = rNome.offsetMax = Vector2.zero;
+        var txtNome = goNome.AddComponent<TextMeshProUGUI>();
+        txtNome.text      = ud.ultimateName;
+        txtNome.fontSize  = temIcone ? 10f : 11f;
+        txtNome.fontStyle = FontStyles.Bold;
+        txtNome.color     = ud.GetElementColor();
+        txtNome.alignment = TextAlignmentOptions.MidlineLeft;
+        txtNome.enableWordWrapping = true;
+
+        // CD (direita se tem ícone)
+        float cdXMin = temIcone ? 0.40f : 0.03f;
+        var goCD = new GameObject("CD");
+        goCD.transform.SetParent(go.transform, false);
+        var rCD  = goCD.AddComponent<RectTransform>();
+        rCD.anchorMin = new Vector2(cdXMin, 0.50f); rCD.anchorMax = new Vector2(0.97f, 0.72f);
+        rCD.offsetMin = rCD.offsetMax = Vector2.zero;
+        var txtCD = goCD.AddComponent<TextMeshProUGUI>();
+        txtCD.text      = $"CD: {ud.cooldown}s  |  {ud.duration}s";
+        txtCD.fontSize  = 8.5f;
+        txtCD.color     = new Color(0.8f, 0.8f, 0.8f);
+        txtCD.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Descrição (largura total, parte de baixo)
+        var goDesc = new GameObject("Desc");
+        goDesc.transform.SetParent(go.transform, false);
+        var rDesc  = goDesc.AddComponent<RectTransform>();
+        rDesc.anchorMin = new Vector2(0.03f, 0.02f); rDesc.anchorMax = new Vector2(0.97f, 0.48f);
+        rDesc.offsetMin = rDesc.offsetMax = Vector2.zero;
+        var txtDesc = goDesc.AddComponent<TextMeshProUGUI>();
+        txtDesc.text             = ud.description;
+        txtDesc.fontSize         = 8f;
+        txtDesc.color            = new Color(0.72f, 0.72f, 0.72f);
+        txtDesc.alignment        = TextAlignmentOptions.Top;
+        txtDesc.enableWordWrapping = true;
+        txtDesc.overflowMode     = TextOverflowModes.Truncate;
+
+        // Barra de seleção (base do botão)
+        var goSel = new GameObject("SelBar");
+        goSel.transform.SetParent(go.transform, false);
+        var rSel = goSel.AddComponent<RectTransform>();
+        rSel.anchorMin = Vector2.zero;
+        rSel.anchorMax = new Vector2(1f, 0f);
+        rSel.offsetMin = Vector2.zero;
+        rSel.offsetMax = new Vector2(0f, 4f);
+        var imgSel = goSel.AddComponent<Image>();
+        imgSel.color         = new Color(0.2f, 0.7f, 1f, 0f);
+        imgSel.raycastTarget = false;
+
+        return go;
     }
 
     GameObject CriarBotaoUltimate(UltimateData ud, float posX)
@@ -379,11 +485,23 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         for (int i = 0; i < botoesUltimate.Count; i++)
         {
             if (botoesUltimate[i] == null) continue;
+            bool sel = i == ultimateSelecionadaIndex;
+
             Image img = botoesUltimate[i].GetComponent<Image>();
-            if (img == null) continue;
-            img.color = i == ultimateSelecionadaIndex
-                ? new Color(0.15f, 0.35f, 0.7f, 1f)
-                : new Color(0.1f, 0.1f, 0.25f, 1f);
+            if (img != null)
+                img.color = sel
+                    ? new Color(0.15f, 0.35f, 0.7f, 1f)
+                    : new Color(0.1f, 0.1f, 0.25f, 1f);
+
+            var selBar = botoesUltimate[i].transform.Find("SelBar");
+            if (selBar != null)
+            {
+                var imgBar = selBar.GetComponent<Image>();
+                if (imgBar != null)
+                    imgBar.color = sel
+                        ? new Color(0.2f, 0.7f, 1f, 1f)
+                        : new Color(0f, 0f, 0f, 0f);
+            }
         }
     }
 }

@@ -38,7 +38,18 @@
       "Bash(Select-String -Pattern \"class DanoInimigo\")",
       "Bash(Select-Object -ExpandProperty Path)",
       "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\PocaSlime.cs\" -Force)",
-      "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\ClonePrincesa.cs\" -Force)"
+      "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\ClonePrincesa.cs\" -Force)",
+      "Bash(xargs grep -l \"CharacterData\\\\|characterName\\\\|ultimatesDisponiveis\")",
+      "Bash(where python *)",
+      "Bash(where python3 *)",
+      "PowerShell(python -c \"print\\('ok'\\)\" 2>&1)",
+      "Bash(python -c \"import sys; print\\(sys.version\\)\")",
+      "PowerShell(node --version 2>&1)",
+      "Bash(node gen_icons.js)",
+      "Bash(New-Item -ItemType File -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\ultimates\\\\vortice_icon.png.meta\" -Force)",
+      "Bash(Out-Null)",
+      "Bash(Write-Host \"created\")",
+      "Bash(node -e ' *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

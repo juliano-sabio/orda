@@ -100,6 +100,7 @@ public class PlayerStats : MonoBehaviour
 
     private UIManager uiManager;
     private DomoRetardanteUltimate domoUltimate;
+    private bool ultimateBehaviorAtivo; // qualquer behavior de ultimate gerencia o próprio input
     private SkillManager skillManager;
     private StatusCardSystem cardSystem;
 
@@ -149,7 +150,11 @@ public class PlayerStats : MonoBehaviour
             ultimateSkill.areaOfEffect = ultimateData.areaOfEffect;
             ultimateSkill.duration = ultimateData.duration;
             ultimateSkill.element = ultimateData.element;
+            ultimateSkill.icon = ultimateData.ultimateIcon;
             ultimateSkill.isActive = true;
+
+            if (!string.IsNullOrEmpty(ultimateData.behaviorScriptName))
+                AplicarComportamentoUltimate(ultimateData);
         }
 
         UpdateUI();
@@ -414,6 +419,7 @@ public class PlayerStats : MonoBehaviour
         public float areaOfEffect;
         public float duration;
         public Element element = Element.None;
+        public UnityEngine.Sprite icon;
         public List<SkillModifier> modifiers = new List<SkillModifier>();
 
         public float CalculateTotalDamage()
@@ -459,6 +465,7 @@ public class PlayerStats : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         uiManager    = UIManager.Instance;
         domoUltimate = GetComponent<DomoRetardanteUltimate>();
+        ultimateBehaviorAtivo = TemBehaviorUltimate();
         skillManager = SkillManager.Instance;
         cardSystem = StatusCardSystem.Instance;
 
@@ -574,8 +581,8 @@ public class PlayerStats : MonoBehaviour
         HandleHealthRegeneration();
         UpdateSkillCooldowns();
         HandlePassiveSkills();
-        // Quando o domo está presente, ele gerencia o cooldown e o input R
-        if (domoUltimate == null)
+        // Behaviors de ultimate gerenciam o próprio cooldown e input (tecla R)
+        if (!ultimateBehaviorAtivo)
         {
             UpdateUltimateSystem();
 
@@ -960,23 +967,21 @@ public class PlayerStats : MonoBehaviour
         float finalDamage = CalculateElementalDamage(totalDamage, ultimateElement, Element.None);
 
 
-        // APLICA DANO EM ÁREA NA ULTIMATE (isso é permitido pois é uma habilidade especial)
-        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, ultimateSkill.areaOfEffect);
-        foreach (var hitCollider in hitColliders)
+        // Só aplica dano se a ultimate tiver baseDamage > 0
+        if (ultimateSkill.baseDamage > 0)
         {
-            if (hitCollider.gameObject == gameObject) continue;
-            if (hitCollider.CompareTag("Enemy") || hitCollider.CompareTag("enemy"))
+            Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, ultimateSkill.areaOfEffect);
+            foreach (var hitCollider in hitColliders)
             {
+                if (hitCollider.gameObject == gameObject) continue;
                 InimigoController inimigo = hitCollider.GetComponent<InimigoController>();
                 if (inimigo != null)
                 {
-                    // Chance de crítico na ultimate
                     bool isCrit = UnityEngine.Random.value < 0.3f;
                     float ultimateDamage = isCrit ? finalDamage * 1.5f : finalDamage;
                     inimigo.ReceberDano(ultimateDamage, isCrit);
+                    elementSystem.ApplyElementalEffect(ultimateElement, hitCollider.gameObject);
                 }
-
-                elementSystem.ApplyElementalEffect(ultimateElement, hitCollider.gameObject);
             }
         }
 
@@ -1053,6 +1058,153 @@ public class PlayerStats : MonoBehaviour
 
         attack = originalAttack;
         speed = originalSpeed;
+    }
+
+    void AplicarComportamentoUltimate(UltimateData ultimateData)
+    {
+        // DestroyImmediate garante remoção síncrona — Destroy() é deferido e
+        // GetComponent ainda retornaria o componente antigo no mesmo frame.
+        var domoAntigo      = GetComponent<DomoRetardanteUltimate>();    if (domoAntigo      != null) DestroyImmediate(domoAntigo);
+        var geloAntigo      = GetComponent<CampoDeGeloUltimate>();       if (geloAntigo      != null) DestroyImmediate(geloAntigo);
+        var pulsoAntigo     = GetComponent<PulsoMagneticoUltimate>();    if (pulsoAntigo     != null) DestroyImmediate(pulsoAntigo);
+        var tempAntigo      = GetComponent<TempestadeEletricaUltimate>(); if (tempAntigo     != null) DestroyImmediate(tempAntigo);
+        var meteorAntigo    = GetComponent<ChuvaMeteorosUltimate>();     if (meteorAntigo    != null) DestroyImmediate(meteorAntigo);
+        var vorticeAntigo   = GetComponent<VorticeUltimate>();           if (vorticeAntigo   != null) DestroyImmediate(vorticeAntigo);
+        var drenagemAntigo  = GetComponent<DrenagemDeVidaUltimate>();    if (drenagemAntigo  != null) DestroyImmediate(drenagemAntigo);
+        var anciaoAntigo    = GetComponent<DespertarAnciaoUltimate>();   if (anciaoAntigo    != null) DestroyImmediate(anciaoAntigo);
+        var necropoleAntigo  = GetComponent<NecropoleUltimate>();         if (necropoleAntigo  != null) DestroyImmediate(necropoleAntigo);
+        var punicaoAntigo    = GetComponent<PunicaoDivinaUltimate>();     if (punicaoAntigo    != null) DestroyImmediate(punicaoAntigo);
+        var ritualAntigo     = GetComponent<RitualAnciaoUltimate>();      if (ritualAntigo     != null) DestroyImmediate(ritualAntigo);
+        var correntesAntigo  = GetComponent<CorrentesInfernoUltimate>(); if (correntesAntigo  != null) DestroyImmediate(correntesAntigo);
+
+        switch (ultimateData.behaviorScriptName)
+        {
+            case "DomoRetardanteUltimate":
+            {
+                var c      = gameObject.AddComponent<DomoRetardanteUltimate>();
+                c.cooldown = ultimateData.cooldown;
+                c.duracao  = ultimateData.duration;
+                c.raio     = ultimateData.areaOfEffect;
+                break;
+            }
+            case "CampoDeGeloUltimate":
+            {
+                var c      = gameObject.AddComponent<CampoDeGeloUltimate>();
+                c.cooldown = ultimateData.cooldown;
+                c.duracao  = ultimateData.duration;
+                c.raio     = ultimateData.areaOfEffect;
+                break;
+            }
+            case "PulsoMagneticoUltimate":
+            {
+                var c          = gameObject.AddComponent<PulsoMagneticoUltimate>();
+                c.cooldown     = ultimateData.cooldown;
+                c.duracao      = ultimateData.duration;
+                c.raio         = ultimateData.areaOfEffect;
+                c.danoRepulsao = ultimateData.baseDamage;
+                break;
+            }
+            case "TempestadeEletricaUltimate":
+            {
+                var c         = gameObject.AddComponent<TempestadeEletricaUltimate>();
+                c.cooldown    = ultimateData.cooldown;
+                c.duracao     = ultimateData.duration;
+                c.raio        = ultimateData.areaOfEffect;
+                c.danoPorBolt = ultimateData.baseDamage;
+                break;
+            }
+            case "ChuvaMeteorosUltimate":
+            {
+                var c          = gameObject.AddComponent<ChuvaMeteorosUltimate>();
+                c.cooldown     = ultimateData.cooldown;
+                c.duracao      = ultimateData.duration;
+                c.raio         = ultimateData.areaOfEffect;
+                c.danoMeteoro  = ultimateData.baseDamage;
+                break;
+            }
+            case "VorticeUltimate":
+            {
+                var c      = gameObject.AddComponent<VorticeUltimate>();
+                c.cooldown = ultimateData.cooldown;
+                c.duracao  = ultimateData.duration;
+                c.raio     = ultimateData.areaOfEffect;
+                break;
+            }
+            case "DrenagemDeVidaUltimate":
+            {
+                var c               = gameObject.AddComponent<DrenagemDeVidaUltimate>();
+                c.cooldown          = ultimateData.cooldown;
+                c.duracao           = ultimateData.duration;
+                c.raio              = ultimateData.areaOfEffect;
+                c.danoPorSegundo    = ultimateData.baseDamage;
+                break;
+            }
+            case "DespertarAnciaoUltimate":
+            {
+                var c          = gameObject.AddComponent<DespertarAnciaoUltimate>();
+                c.cooldown     = ultimateData.cooldown;
+                c.duracao      = ultimateData.duration;
+                c.raio         = ultimateData.areaOfEffect;
+                c.danoGolpe    = ultimateData.baseDamage;
+                break;
+            }
+            case "NecropoleUltimate":
+            {
+                var c              = gameObject.AddComponent<NecropoleUltimate>();
+                c.cooldown         = ultimateData.cooldown;
+                c.duracao          = ultimateData.duration;
+                c.raio             = ultimateData.areaOfEffect;
+                c.danoFantasma     = ultimateData.baseDamage;
+                break;
+            }
+            case "PunicaoDivinaUltimate":
+            {
+                var c             = gameObject.AddComponent<PunicaoDivinaUltimate>();
+                c.cooldown        = ultimateData.cooldown;
+                c.danoImpacto     = ultimateData.baseDamage;
+                c.danoSecundario  = ultimateData.baseDamage * 0.4f;
+                c.raioExplosao    = ultimateData.areaOfEffect;
+                break;
+            }
+            case "RitualAnciaoUltimate":
+            {
+                var c         = gameObject.AddComponent<RitualAnciaoUltimate>();
+                c.cooldown    = ultimateData.cooldown;
+                c.duracao     = ultimateData.duration;
+                c.raio        = ultimateData.areaOfEffect;
+                c.danoFinal   = ultimateData.baseDamage;
+                break;
+            }
+            case "CorrentesInfernoUltimate":
+            {
+                var c               = gameObject.AddComponent<CorrentesInfernoUltimate>();
+                c.cooldown          = ultimateData.cooldown;
+                c.duracao           = ultimateData.duration;
+                c.raio              = ultimateData.areaOfEffect;
+                c.danoPorSegundo    = ultimateData.baseDamage;
+                break;
+            }
+        }
+
+        // Atualiza a flag usada no Update
+        ultimateBehaviorAtivo = TemBehaviorUltimate();
+        domoUltimate = GetComponent<DomoRetardanteUltimate>();
+    }
+
+    bool TemBehaviorUltimate()
+    {
+        return GetComponent<DomoRetardanteUltimate>()     != null
+            || GetComponent<CampoDeGeloUltimate>()        != null
+            || GetComponent<PulsoMagneticoUltimate>()     != null
+            || GetComponent<TempestadeEletricaUltimate>() != null
+            || GetComponent<ChuvaMeteorosUltimate>()      != null
+            || GetComponent<VorticeUltimate>()            != null
+            || GetComponent<DrenagemDeVidaUltimate>()     != null
+            || GetComponent<DespertarAnciaoUltimate>()   != null
+            || GetComponent<NecropoleUltimate>()          != null
+            || GetComponent<PunicaoDivinaUltimate>()      != null
+            || GetComponent<RitualAnciaoUltimate>()       != null
+            || GetComponent<CorrentesInfernoUltimate>()   != null;
     }
 
     private void UpdateUI()

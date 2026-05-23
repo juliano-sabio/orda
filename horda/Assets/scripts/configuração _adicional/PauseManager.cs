@@ -464,9 +464,14 @@ public class PauseManager : MonoBehaviour
     {
         PlayButtonClickSound();
 
-
         // Despausar antes de sair
-        ResumeGame();
+        isPaused = false;
+        Time.timeScale = 1f;
+        if (pausePanel != null) pausePanel.SetActive(false);
+
+        // Destrói todos os singletons persistentes antes de carregar o menu,
+        // para que a UI do gameplay não vaze para outras cenas.
+        LimparManagersPersistentes();
 
         // 🎯 CARREGAR CENA DO MENU PRINCIPAL
         if (!string.IsNullOrEmpty(mainMenuSceneName))
@@ -484,6 +489,21 @@ public class PauseManager : MonoBehaviour
         {
             Debug.LogError("❌ Nome da cena do menu principal não configurado!");
         }
+    }
+
+    private void LimparManagersPersistentes()
+    {
+        GameObject eventoCanvas = GameObject.Find("EventoCanvas");
+        if (eventoCanvas != null) Destroy(eventoCanvas);
+
+        if (GerenciadorEventos.Instance != null) Destroy(GerenciadorEventos.Instance.gameObject);
+        if (UIManager.Instance          != null) Destroy(UIManager.Instance.gameObject);
+        if (SkillManager.Instance       != null) Destroy(SkillManager.Instance.gameObject);
+        if (StatusCardSystem.Instance   != null) Destroy(StatusCardSystem.Instance.gameObject);
+
+        // Destrói o próprio PauseManager por último
+        Instance = null;
+        Destroy(gameObject);
     }
 
     public void ExitGame()

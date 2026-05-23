@@ -79,8 +79,15 @@ public class DomoRetardanteUltimate : MonoBehaviour
         // Registra projéteis que entraram no raio
         foreach (var col in Physics2D.OverlapCircleAll(centro, raio))
         {
-            if (col.CompareTag("Player") || col.CompareTag("Enemy")) continue;
+            // Ignora o próprio jogador e qualquer coisa de inimigo
+            if (col.gameObject == gameObject) continue;
+            if (col.GetComponent<PlayerStats>()    != null) continue;
             if (col.GetComponent<InimigoController>() != null) continue;
+            if (col.GetComponent<movi_inimigo>()      != null) continue;
+            if (col.GetComponent<BossController>()    != null) continue;
+            if (col.GetComponent<BossPrincesa>()      != null) continue;
+            if (col.GetComponentInParent<InimigoController>() != null) continue;
+            if (col.GetComponentInParent<movi_inimigo>()      != null) continue;
 
             var rb = col.GetComponent<Rigidbody2D>();
             if (rb == null || velocidadeOriginal.ContainsKey(rb)) continue;

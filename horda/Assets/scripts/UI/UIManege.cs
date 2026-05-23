@@ -602,7 +602,9 @@ public class UIManager : MonoBehaviour
         {
             if (ultimateSkill.isActive)
             {
-                ultimateSkillIcon.sprite = GetSkillIcon(ultimateSkill.skillName);
+                ultimateSkillIcon.sprite = ultimateSkill.icon != null
+                    ? ultimateSkill.icon
+                    : GetSkillIcon(ultimateSkill.skillName);
                 ultimateSkillIcon.color = playerStats.IsUltimateReady() ? Color.yellow : Color.white;
                 ultimateSkillIcon.gameObject.SetActive(true);
 
