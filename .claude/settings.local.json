@@ -49,7 +49,17 @@
       "Bash(New-Item -ItemType File -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\ultimates\\\\vortice_icon.png.meta\" -Force)",
       "Bash(Out-Null)",
       "Bash(Write-Host \"created\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(sed -i 's/public float danoPorBolt   = 25f;/public float danoPorBolt   = 20f;/' TempestadeEletricaUltimate.cs)",
+      "Bash(sed -i 's/public float intervaloMeteoro  = 0.28f;/public float intervaloMeteoro  = 0.65f;/' ChuvaMeteorosUltimate.cs)",
+      "Bash(sed -i 's/public float danoMeteoro       = 35f;/public float danoMeteoro       = 25f;/' ChuvaMeteorosUltimate.cs)",
+      "Bash(sed -i 's/public float cooldown        = 22f;/public float cooldown        = 27f;/' BencaoAnciaoUltimate.cs)",
+      "Bash(sed -i 's/public float cooldown        = 24f;/public float cooldown        = 26f;/' DrenagemDeVidaUltimate.cs)",
+      "mcp__obsidian__search_files",
+      "mcp__obsidian__read_text_file",
+      "mcp__obsidian__directory_tree",
+      "Bash(Get-ChildItem -Recurse \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\UI\" -Filter \"*.cs\")",
+      "Bash(Select-Object FullName)"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

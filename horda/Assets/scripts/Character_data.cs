@@ -42,6 +42,9 @@ public class CharacterData : ScriptableObject
     [Header("Habilidades (Scripts Adicionais)")]
     public UltimateData ultimateSkill;
     public UltimateData[] ultimatesDisponiveis;
+
+    [Header("Passivas")]
+    public PassiveData[] passivasDisponiveis;
     public SkillBehavior specialSkillBehavior;
     public UltimateBehavior ultimateBehavior;
 

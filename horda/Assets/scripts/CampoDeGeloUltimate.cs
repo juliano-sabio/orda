@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -239,8 +239,8 @@ public class CampoDeGeloUltimate : MonoBehaviour
 
         // Projéteis da canalização têm ProjetilHomingPrincesa/ProjetilEspecialPrincesa
         // adicionado diretamente no root via AddComponent — GetComponent é suficiente aqui
-        if (root.GetComponent<ProjetilHomingPrincesa>()   != null) return null;
-        if (root.GetComponent<ProjetilEspecialPrincesa>() != null) return null;
+        if (go.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return null;
+        if (go.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return null;
 
         return root;
     }

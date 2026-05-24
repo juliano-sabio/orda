@@ -168,6 +168,9 @@ public class NecropoleUltimate : MonoBehaviour
         foreach (var ic in FindObjectsByType<InimigoController>(FindObjectsSortMode.None))
         {
             if (ic == null || ic.gameObject == null) continue;
+            if (!ic.enabled) continue; // ignora projéteis em órbita da Princesa
+            if (ic.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) continue;
+            if (ic.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) continue;
             float d = Vector3.Distance(pos, ic.transform.position);
             if (d < distMin) { distMin = d; melhor = ic; }
         }

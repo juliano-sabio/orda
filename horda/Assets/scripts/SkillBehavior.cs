@@ -13,4 +13,6 @@ public abstract class SkillBehavior : MonoBehaviour
     public abstract void ApplyEffect();
 
     public virtual void RemoveEffect() { }
+
+    public virtual void ReducirCooldown(float segundos) { }
 }

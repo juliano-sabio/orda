@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +9,7 @@ public class PunicaoDivinaUltimate : MonoBehaviour
     public float danoImpacto     = 80f;
     public float danoSecundario  = 32f;
     public float raioExplosao    = 4f;
-    public float cooldown        = 25f;
+    public float cooldown        = 27f;
     public int   numSecundarios  = 3;
 
     public float CooldownRestante => cooldownRestante;
@@ -149,8 +149,8 @@ public class PunicaoDivinaUltimate : MonoBehaviour
         if (root == null) { var bc = go.GetComponent<BossController>() ?? go.GetComponentInParent<BossController>(); if (bc != null) root = bc.gameObject; }
         if (root == null) { var bp = go.GetComponent<BossPrincesa>() ?? go.GetComponentInParent<BossPrincesa>(); if (bp != null) root = bp.gameObject; }
         if (root == null) return null;
-        if (root.GetComponent<ProjetilHomingPrincesa>()   != null) return null;
-        if (root.GetComponent<ProjetilEspecialPrincesa>() != null) return null;
+        if (go.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return null;
+        if (go.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return null;
         return root;
     }
 

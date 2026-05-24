@@ -15,6 +15,11 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     private int ultimateSelecionadaIndex = 0;
     private List<GameObject> botoesUltimate = new List<GameObject>();
 
+    // Painel de seleção de passiva
+    [HideInInspector] public GameObject painelPassivas;
+    private int passivaSelecionadaIndex = 0;
+    private List<GameObject> botoesPassiva = new List<GameObject>();
+
     [Header("📊 UI - Info")]
     public TextMeshProUGUI coinsText;
     public TextMeshProUGUI characterNameText;
@@ -73,8 +78,19 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         if (index < characterIcons.Length && characterIcons[index]) characterIcons[index].SetSelected(true);
 
         ultimateSelecionadaIndex = PlayerPrefs.GetInt($"SelectedUltimate_{index}", 0);
+        passivaSelecionadaIndex  = PlayerPrefs.GetInt($"SelectedPassiva_{index}", 0);
         UpdateStatusDisplay(characters[index]);
         AtualizarPainelUltimates(characters[index]);
+        AtualizarPainelPassivas(characters[index]);
+    }
+
+    public void SelectPassiva(int index)
+    {
+        int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        passivaSelecionadaIndex = index;
+        PlayerPrefs.SetInt($"SelectedPassiva_{charIndex}", index);
+        PlayerPrefs.Save();
+        AtualizarDestaqueBotoesPassiva();
     }
 
     public void SelectUltimate(int index)
@@ -184,23 +200,153 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         }
     }
 
-    void AtualizarPassivasInfo(CharacterData data)
+    void AtualizarPassivasInfo(CharacterData data) { } // substituído por AtualizarPainelPassivas
+
+    void AtualizarPainelPassivas(CharacterData data)
     {
-        if (passivasInfoText == null) return;
+        if (painelPassivas == null) return;
 
-        var sb = new System.Text.StringBuilder();
+        foreach (var b in botoesPassiva) if (b) Destroy(b);
+        botoesPassiva.Clear();
 
-        string bonuses = data.GetElementBonusDescription();
-        if (!string.IsNullOrEmpty(bonuses) && bonuses != "Sem bônus elemental")
-            sb.AppendLine(bonuses);
+        if (data.passivasDisponiveis == null || data.passivasDisponiveis.Length == 0)
+        {
+            CriarBotaoPassivaVazio();
+            return;
+        }
 
-        sb.AppendLine($"Regen HP: <color=#88ff88>+{data.baseHealthRegen}/s</color>  (delay {data.baseRegenDelay}s)");
+        for (int i = 0; i < data.passivasDisponiveis.Length; i++)
+        {
+            PassiveData pd = data.passivasDisponiveis[i];
+            if (pd == null) continue;
+            int idx = i;
+            var botao = CriarBotaoPassiva(pd);
+            botao.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => SelectPassiva(idx));
+            botoesPassiva.Add(botao);
+        }
 
-        string efeito = GetElementEffectDescription(data.baseElement);
-        if (!string.IsNullOrEmpty(efeito))
-            sb.Append($"\n<i>{efeito}</i>");
+        AtualizarDestaqueBotoesPassiva();
+    }
 
-        passivasInfoText.text = sb.ToString().TrimStart('\n');
+    void CriarBotaoPassivaVazio()
+    {
+        var go = new GameObject("SemPassivas");
+        go.transform.SetParent(painelPassivas.transform, false);
+        go.AddComponent<RectTransform>();
+        var le = go.AddComponent<UnityEngine.UI.LayoutElement>();
+        le.preferredHeight = 40f;
+        le.flexibleWidth   = 1f;
+        var txt = go.AddComponent<TMPro.TextMeshProUGUI>();
+        txt.text      = "Nenhuma passiva disponível.";
+        txt.fontSize  = 10f;
+        txt.color     = new Color(0.5f, 0.5f, 0.5f);
+        txt.alignment = TMPro.TextAlignmentOptions.Center;
+        botoesPassiva.Add(go);
+    }
+
+    GameObject CriarBotaoPassiva(PassiveData pd)
+    {
+        var go = new GameObject($"BotaoPassiva_{pd.passiveName}");
+        go.transform.SetParent(painelPassivas.transform, false);
+        go.AddComponent<RectTransform>();
+        var le = go.AddComponent<UnityEngine.UI.LayoutElement>();
+        le.preferredHeight = 64f;
+        le.flexibleWidth   = 1f;
+
+        var img = go.AddComponent<UnityEngine.UI.Image>();
+        img.color = new Color(0.08f, 0.14f, 0.10f, 1f);
+
+        var btn = go.AddComponent<UnityEngine.UI.Button>();
+        var cb  = btn.colors;
+        cb.highlightedColor = new Color(0.15f, 0.30f, 0.18f, 1f);
+        cb.pressedColor     = new Color(0.08f, 0.20f, 0.10f, 1f);
+        btn.colors      = cb;
+        btn.targetGraphic = img;
+
+        bool temIcone = pd.passiveIcon != null;
+
+        if (temIcone)
+        {
+            var goIcon = new GameObject("Icone");
+            goIcon.transform.SetParent(go.transform, false);
+            var rIcon = goIcon.AddComponent<RectTransform>();
+            rIcon.anchorMin = new Vector2(0.03f, 0.45f);
+            rIcon.anchorMax = new Vector2(0.33f, 0.95f);
+            rIcon.offsetMin = rIcon.offsetMax = Vector2.zero;
+            var imgIcon = goIcon.AddComponent<UnityEngine.UI.Image>();
+            imgIcon.sprite         = pd.passiveIcon;
+            imgIcon.preserveAspect = true;
+            imgIcon.raycastTarget  = false;
+        }
+
+        float nomeX = temIcone ? 0.36f : 0.04f;
+
+        var goNome = new GameObject("Nome");
+        goNome.transform.SetParent(go.transform, false);
+        var rNome = goNome.AddComponent<RectTransform>();
+        rNome.anchorMin = new Vector2(nomeX, 0.68f); rNome.anchorMax = new Vector2(0.97f, 0.97f);
+        rNome.offsetMin = rNome.offsetMax = Vector2.zero;
+        var txtNome = goNome.AddComponent<TMPro.TextMeshProUGUI>();
+        txtNome.text      = pd.passiveName;
+        txtNome.fontSize  = 10f;
+        txtNome.fontStyle = TMPro.FontStyles.Bold;
+        txtNome.color     = new Color(0.5f, 1f, 0.65f);
+        txtNome.alignment = TMPro.TextAlignmentOptions.MidlineLeft;
+        txtNome.enableWordWrapping = true;
+
+        var goBonus = new GameObject("Bonus");
+        goBonus.transform.SetParent(go.transform, false);
+        var rBonus = goBonus.AddComponent<RectTransform>();
+        rBonus.anchorMin = new Vector2(nomeX, 0.44f); rBonus.anchorMax = new Vector2(0.97f, 0.68f);
+        rBonus.offsetMin = rBonus.offsetMax = Vector2.zero;
+        var txtBonus = goBonus.AddComponent<TMPro.TextMeshProUGUI>();
+        txtBonus.text      = pd.GetBonusDescription().Split('\n')[0]; // primeira linha de bônus
+        txtBonus.fontSize  = 8.5f;
+        txtBonus.color     = new Color(0.85f, 0.85f, 0.85f);
+        txtBonus.alignment = TMPro.TextAlignmentOptions.MidlineLeft;
+
+        var goDesc = new GameObject("Desc");
+        goDesc.transform.SetParent(go.transform, false);
+        var rDesc = goDesc.AddComponent<RectTransform>();
+        rDesc.anchorMin = new Vector2(0.03f, 0.03f); rDesc.anchorMax = new Vector2(0.97f, 0.43f);
+        rDesc.offsetMin = rDesc.offsetMax = Vector2.zero;
+        var txtDesc = goDesc.AddComponent<TMPro.TextMeshProUGUI>();
+        txtDesc.text             = pd.description;
+        txtDesc.fontSize         = 8f;
+        txtDesc.color            = new Color(0.70f, 0.70f, 0.70f);
+        txtDesc.alignment        = TMPro.TextAlignmentOptions.TopLeft;
+        txtDesc.enableWordWrapping = true;
+        txtDesc.overflowMode     = TMPro.TextOverflowModes.Truncate;
+
+        var goSel = new GameObject("SelBar");
+        goSel.transform.SetParent(go.transform, false);
+        var rSel = goSel.AddComponent<RectTransform>();
+        rSel.anchorMin = Vector2.zero; rSel.anchorMax = new Vector2(1f, 0f);
+        rSel.offsetMin = Vector2.zero; rSel.offsetMax = new Vector2(0f, 4f);
+        var imgSel = goSel.AddComponent<UnityEngine.UI.Image>();
+        imgSel.color         = new Color(0.3f, 1f, 0.5f, 0f);
+        imgSel.raycastTarget = false;
+
+        return go;
+    }
+
+    void AtualizarDestaqueBotoesPassiva()
+    {
+        for (int i = 0; i < botoesPassiva.Count; i++)
+        {
+            if (botoesPassiva[i] == null) continue;
+            bool sel = i == passivaSelecionadaIndex;
+            var img = botoesPassiva[i].GetComponent<UnityEngine.UI.Image>();
+            if (img != null)
+                img.color = sel ? new Color(0.10f, 0.28f, 0.14f, 1f) : new Color(0.08f, 0.14f, 0.10f, 1f);
+            var selBar = botoesPassiva[i].transform.Find("SelBar");
+            if (selBar != null)
+            {
+                var imgBar = selBar.GetComponent<UnityEngine.UI.Image>();
+                if (imgBar != null)
+                    imgBar.color = sel ? new Color(0.3f, 1f, 0.5f, 1f) : new Color(0f, 0f, 0f, 0f);
+            }
+        }
     }
 
     void AtualizarPreview(CharacterData data)

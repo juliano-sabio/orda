@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -198,15 +198,19 @@ public class VorticeUltimate : MonoBehaviour
 
     static GameObject ResolverInimigo(GameObject go)
     {
+        if (go.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return null;
+        if (go.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return null;
+
         GameObject root = null;
         var ic = go.GetComponent<InimigoController>() ?? go.GetComponentInParent<InimigoController>();
         if (ic != null) root = ic.gameObject;
         if (root == null) { var mi = go.GetComponent<movi_inimigo>() ?? go.GetComponentInParent<movi_inimigo>(); if (mi != null) root = mi.gameObject; }
-        if (root == null) { var bc = go.GetComponent<BossController>() ?? go.GetComponentInParent<BossController>(); if (bc != null) root = bc.gameObject; }
-        if (root == null) { var bp = go.GetComponent<BossPrincesa>() ?? go.GetComponentInParent<BossPrincesa>(); if (bp != null) root = bp.gameObject; }
         if (root == null) return null;
-        if (root.GetComponent<ProjetilHomingPrincesa>()   != null) return null;
-        if (root.GetComponent<ProjetilEspecialPrincesa>() != null) return null;
+
+        // Bosses não são afetados pelo vórtice
+        if (root.GetComponent<BossController>() != null) return null;
+        if (root.GetComponent<BossPrincesa>()   != null) return null;
+
         return root;
     }
 

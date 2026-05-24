@@ -295,13 +295,11 @@ public class CorrentesInfernoUltimate : MonoBehaviour
 
     static GameObject ResolverRaiz(GameObject go)
     {
+        if (go.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return null;
+        if (go.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return null;
+
         var ic = go.GetComponent<InimigoController>() ?? go.GetComponentInParent<InimigoController>();
-        if (ic != null)
-        {
-            if (ic.GetComponent<ProjetilHomingPrincesa>()   != null) return null;
-            if (ic.GetComponent<ProjetilEspecialPrincesa>() != null) return null;
-            return ic.gameObject;
-        }
+        if (ic != null) return ic.gameObject;
         var mi = go.GetComponent<movi_inimigo>() ?? go.GetComponentInParent<movi_inimigo>();
         if (mi != null) return mi.gameObject;
         return null;

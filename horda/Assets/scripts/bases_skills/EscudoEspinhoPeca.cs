@@ -20,6 +20,9 @@ public class EscudoEspinhoPeca : MonoBehaviour
     {
         if (controlador == null || other == null) return;
 
+        if (other.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return;
+        if (other.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return;
+
         InimigoController inimigo = other.GetComponent<InimigoController>();
         if (inimigo == null) inimigo = other.GetComponentInParent<InimigoController>();
 

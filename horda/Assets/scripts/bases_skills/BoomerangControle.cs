@@ -276,6 +276,10 @@ public class BoomerangController : MonoBehaviour
     {
         if (obj == null) return false;
 
+        // Projéteis da canalização da princesa nunca são alvos válidos
+        if (obj.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return false;
+        if (obj.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return false;
+
         // ✅ MÉTODO SEGURO: Verificar por componente primeiro
         if (obj.GetComponent<InimigoController>() != null)
         {

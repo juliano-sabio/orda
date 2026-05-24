@@ -33,8 +33,9 @@ public class CharacterSelectionUI : MonoBehaviour
     GameObject       previewPersonagem;
     static readonly Vector3 PREVIEW_POS = new Vector3(9999f, 0f, 0f);
 
-    // ── Container de botões de seleção de ultimate ────────────────────
+    // ── Container de botões de seleção de ultimate / passiva ─────────
     GameObject painelSeleçaoUltimate;
+    GameObject painelSeleçaoPassiva;
 
     // ── Refs de animação ───────────────────────────────────────────────
     Image   glowFundo;
@@ -508,16 +509,53 @@ public class CharacterSelectionUI : MonoBehaviour
         painelAbaInfo[2].AddComponent<RectTransform>();
         Anchors(painelAbaInfo[2], Vector2.zero, new Vector2(1f, 0.62f));
 
-        var lblP = TMP(painelAbaInfo[2], "LblP",
-            new Vector2(0f, 0.88f), new Vector2(1f, 0.98f),
-            "🛡 PASSIVAS", 10f, FontStyles.Bold, new Color(0.4f, 0.9f, 0.6f));
-        lblP.alignment = TextAlignmentOptions.Center;
+        // ScrollRect para lista de passivas (igual ao de ultimates)
+        var scrollPassiva = new GameObject("ScrollPassivas");
+        scrollPassiva.transform.SetParent(painelAbaInfo[2].transform, false);
+        scrollPassiva.AddComponent<RectTransform>();
+        Anchors(scrollPassiva, new Vector2(0f, 0.01f), new Vector2(1f, 0.98f));
 
+        var vpPassiva = new GameObject("Viewport");
+        vpPassiva.transform.SetParent(scrollPassiva.transform, false);
+        vpPassiva.AddComponent<Image>().color = Color.clear;
+        vpPassiva.AddComponent<RectMask2D>();
+        Anchors(vpPassiva, Vector2.zero, Vector2.one);
+
+        var contentPassiva = new GameObject("Content");
+        contentPassiva.transform.SetParent(vpPassiva.transform, false);
+        var cpRT        = contentPassiva.AddComponent<RectTransform>();
+        cpRT.anchorMin  = new Vector2(0f, 1f);
+        cpRT.anchorMax  = new Vector2(1f, 1f);
+        cpRT.pivot      = new Vector2(0.5f, 1f);
+        cpRT.anchoredPosition = Vector2.zero;
+        cpRT.sizeDelta        = Vector2.zero;
+
+        var vlgP = contentPassiva.AddComponent<VerticalLayoutGroup>();
+        vlgP.spacing               = 5f;
+        vlgP.padding               = new RectOffset(4, 4, 4, 4);
+        vlgP.childForceExpandWidth = true;
+        vlgP.childForceExpandHeight = false;
+        vlgP.childAlignment        = TextAnchor.UpperCenter;
+
+        var csfP = contentPassiva.AddComponent<ContentSizeFitter>();
+        csfP.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var srP = scrollPassiva.AddComponent<ScrollRect>();
+        srP.content          = cpRT;
+        srP.viewport         = vpPassiva.GetComponent<RectTransform>();
+        srP.horizontal       = false;
+        srP.vertical         = true;
+        srP.scrollSensitivity = 25f;
+        srP.movementType     = ScrollRect.MovementType.Clamped;
+
+        painelSeleçaoPassiva = contentPassiva;
+
+        // txtPassivasInfo mantido para compatibilidade (não visível mas ainda referenciado)
         txtPassivasInfo = TMP(painelAbaInfo[2], "PassInfo",
-            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.86f),
-            "—", 10.5f, FontStyles.Normal, new Color(0.75f, 0.90f, 0.75f));
+            new Vector2(0f, 0f), new Vector2(0f, 0f),
+            "", 10.5f, FontStyles.Normal, new Color(0.75f, 0.90f, 0.75f));
         txtPassivasInfo.enableWordWrapping = true;
-        txtPassivasInfo.alignment = TextAlignmentOptions.Top;
+        txtPassivasInfo.gameObject.SetActive(false);
 
         MostrarAbaInfo(0);
     }
@@ -635,6 +673,7 @@ public class CharacterSelectionUI : MonoBehaviour
         manager.ultimateInfoText         = txtUltimateInfo;
         manager.passivasInfoText         = txtPassivasInfo;
         manager.painelUltimates          = painelSeleçaoUltimate;
+        manager.painelPassivas           = painelSeleçaoPassiva;
         manager.characterPreviewName     = txtNomePreview;
         manager.selectionUI              = this;
 

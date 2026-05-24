@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +9,7 @@ public class TempestadeEletricaUltimate : MonoBehaviour
     public float duracao       = 5f;
     public float cooldown      = 20f;
     public float intervaloBolt = 0.45f;
-    public float danoPorBolt   = 25f;
+    public float danoPorBolt   = 20f;
 
     public float CooldownRestante => cooldownRestante;
     public bool  Ativo            => ativo;
@@ -110,8 +110,8 @@ public class TempestadeEletricaUltimate : MonoBehaviour
         if (root == null) { var bc = go.GetComponent<BossController>() ?? go.GetComponentInParent<BossController>(); if (bc != null) root = bc.gameObject; }
         if (root == null) { var bp = go.GetComponent<BossPrincesa>() ?? go.GetComponentInParent<BossPrincesa>(); if (bp != null) root = bp.gameObject; }
         if (root == null) return null;
-        if (root.GetComponent<ProjetilHomingPrincesa>()   != null) return null;
-        if (root.GetComponent<ProjetilEspecialPrincesa>() != null) return null;
+        if (go.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return null;
+        if (go.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return null;
         return root;
     }
 

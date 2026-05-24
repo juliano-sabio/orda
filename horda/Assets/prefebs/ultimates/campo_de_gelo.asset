@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: campo_de_gelo
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: Campo de Gelo
-  description: Congela todos os inimigos dentro do raio por 2 segundos.
+  description: Congela todos os inimigos dentro do raio por 4 segundos.
   ultimateIcon: {fileID: 21300000, guid: 0b30c626fedbeaf44afba239d80252d8, type: 3}
   cooldown: 25
   baseDamage: 0
   areaOfEffect: 6
-  duration: 2
+  duration: 4
   element: 2
   specialEffect: "Inimigos congelados ficam im\xF3veis e com tint azul."
   ultimateType: 0

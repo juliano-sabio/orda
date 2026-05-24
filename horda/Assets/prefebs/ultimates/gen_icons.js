@@ -506,4 +506,222 @@ function save(c, name) {
     save(c,'correntes_inferno_icon.png');
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 10. BÊNÇÃO DO ANCIÃO (Healing Totem)
+// ═══════════════════════════════════════════════════════════════════════════
+{
+    const c = newCanvas(32,32,[5,4,0,255]);
+
+    // Fundo: brilho dourado suave no centro
+    for(let y=0;y<32;y++) for(let x=0;x<32;x++) {
+        const d=Math.sqrt((x-16)**2+(y-16)**2);
+        if(d<15) blend(c,x,y, 255,200,40, Math.floor(35*(1-d/15)));
+    }
+
+    // Haste do totem (coluna central)
+    for(let y=6;y<=25;y++) {
+        set(c,15,y, 180,120,20);
+        set(c,16,y, 220,160,30);
+        set(c,17,y, 180,120,20);
+    }
+
+    // Travessa superior
+    for(let x=10;x<=22;x++) {
+        set(c,x,9,  200,150,30);
+        set(c,x,10, 240,190,50);
+    }
+    // Travessa média
+    for(let x=12;x<=20;x++) {
+        set(c,x,15, 200,150,30);
+        set(c,x,16, 240,190,50);
+    }
+
+    // Orbe dourado no topo (brilhante)
+    circle(c,16,5, 4, [255,220,60,200], true);
+    circle(c,16,5, 3, [255,240,120,230], true);
+    circle(c,16,5, 2, [255,255,200,255], true);
+    set(c,16,5, 255,255,255);
+
+    // Runas laterais (pequenos pontos dourados)
+    for(const [rx,ry] of [[11,12],[21,12],[11,19],[21,19]])
+        blend(c,rx,ry, 255,220,60,200);
+
+    // Base do totem (arco oval)
+    for(let x=11;x<=21;x++) {
+        blend(c,x,26, 200,150,25,180);
+    }
+    blend(c,12,27, 200,150,25,120);
+    blend(c,20,27, 200,150,25,120);
+
+    // Partículas de cura verdes subindo
+    const particulasCura = [[13,21],[19,21],[14,17],[18,17],[12,13],[20,13]];
+    for(let i=0;i<particulasCura.length;i++) {
+        const [px,py] = particulasCura[i];
+        const alpha = Math.floor(180*(1-i*0.12));
+        blend(c,px,py, 80,255,100, alpha);
+    }
+
+    // Anel de cura externo (verde-dourado)
+    circle(c,16,16, 14, [120,220,80,60]);
+    circle(c,16,16, 13, [200,200,40,40]);
+
+    save(c,'bencao_anciao_icon.png');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 11. CASULO DE CRISTAL (Crystal Cocoon)
+// ═══════════════════════════════════════════════════════════════════════════
+{
+    const c = newCanvas(32,32,[0,6,14,255]);
+
+    // Brilho central ciano/azul
+    for(let y=0;y<32;y++) for(let x=0;x<32;x++) {
+        const d=Math.sqrt((x-16)**2+(y-16)**2);
+        if(d<13) blend(c,x,y, 80,200,255, Math.floor(50*(1-d/13)));
+    }
+
+    // Hexágono de cristal (6 arestas)
+    const hex = [
+        [16,5],[26,10],[26,22],[16,27],[6,22],[6,10]
+    ];
+    for(let i=0;i<hex.length;i++) {
+        const [x0,y0] = hex[i];
+        const [x1,y1] = hex[(i+1)%hex.length];
+        line(c,x0,y0,x1,y1, [130,220,255,220], 1);
+    }
+
+    // Linhas internas cruzando (profundidade do cristal)
+    line(c,16,5,16,27,  [100,200,255,100], 1);
+    line(c,6,10,26,22,  [100,200,255,90],  1);
+    line(c,26,10,6,22,  [100,200,255,90],  1);
+
+    // Anel externo maior (brilho)
+    const hexExt = [
+        [16,2],[29,8],[29,24],[16,30],[3,24],[3,8]
+    ];
+    for(let i=0;i<hexExt.length;i++) {
+        const [x0,y0] = hexExt[i];
+        const [x1,y1] = hexExt[(i+1)%hexExt.length];
+        line(c,x0,y0,x1,y1, [60,160,220,80], 1);
+    }
+
+    // Núcleo brilhante central
+    circle(c,16,16, 4, [200,240,255,200], true);
+    circle(c,16,16, 2, [240,255,255,240], true);
+    set(c,16,16, 255,255,255);
+
+    // Estilhaços/reflexos nos vértices
+    for(const [vx,vy] of hex) {
+        blend(c,vx,vy, 200,240,255,230);
+        blend(c,vx,vy, 255,255,255,120);
+    }
+
+    // Brilhinhos espalhados
+    for(const [bx,by] of [[10,8],[22,8],[9,20],[23,20],[16,3],[16,29]])
+        blend(c,bx,by, 180,230,255,160);
+
+    save(c,'casulo_cristal_icon.png');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 12. ESCUDO SÔNICO (Sonic Shield)
+// ═══════════════════════════════════════════════════════════════════════════
+{
+    const c = newCanvas(32,32,[0,4,12,255]);
+
+    // Brilho central ciano
+    for(let y=0;y<32;y++) for(let x=0;x<32;x++) {
+        const d=Math.sqrt((x-16)**2+(y-16)**2);
+        if(d<14) blend(c,x,y, 100,220,255, Math.floor(40*(1-d/14)));
+    }
+
+    // Anéis sônicos concêntricos (3 anéis expandindo)
+    circle(c,16,16, 5,  [180,240,255,220]);
+    circle(c,16,16, 9,  [140,210,255,160]);
+    circle(c,16,16, 13, [100,180,255,100]);
+
+    // Distorção sônica nos anéis (pequenos arcos em 8 direções)
+    const dirs8 = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
+    for(const [dx,dy] of dirs8) {
+        const x = Math.round(16 + dx*9), y = Math.round(16 + dy*9);
+        blend(c,x,y, 220,250,255,200);
+        blend(c,x+dx,y+dy, 200,240,255,120);
+    }
+
+    // Raios radiais curtos (efeito de impacto)
+    for(let i=0;i<8;i++) {
+        const ang = (i/8)*Math.PI*2;
+        for(let r=10;r<=13;r++) {
+            const px=Math.round(16+Math.cos(ang)*r), py=Math.round(16+Math.sin(ang)*r);
+            blend(c,px,py, 200,240,255,180);
+        }
+    }
+
+    // Núcleo central brilhante (escudo/player)
+    circle(c,16,16, 3, [180,230,255,200], true);
+    circle(c,16,16, 2, [220,250,255,230], true);
+    set(c,16,16, 255,255,255);
+
+    // Brilhinhos nas extremidades dos raios
+    for(let i=0;i<8;i++) {
+        const ang = (i/8)*Math.PI*2;
+        const px=Math.round(16+Math.cos(ang)*13), py=Math.round(16+Math.sin(ang)*13);
+        blend(c,px,py, 255,255,255,200);
+    }
+
+    // Partículas externas (energia sônica)
+    for(const [px,py] of [[4,16],[28,16],[16,4],[16,28],[6,6],[26,6],[6,26],[26,26]])
+        blend(c,px,py, 150,210,255,130);
+
+    save(c,'escudo_sonico_icon.png');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 13. COLHEITA (Passive — XP harvest)
+// ═══════════════════════════════════════════════════════════════════════════
+{
+    const c = newCanvas(32,32,[5,8,3,255]);
+
+    // Brilho dourado suave de fundo
+    for(let y=0;y<32;y++) for(let x=0;x<32;x++) {
+        const d=Math.sqrt((x-16)**2+(y-16)**2);
+        if(d<14) blend(c,x,y, 200,160,0, Math.floor(35*(1-d/14)));
+    }
+
+    // Espiga de trigo (caule vertical)
+    line(c,16,26, 16,10, [160,120,20,220], 1);
+
+    // Grãos em pares ao longo do caule (alternados esquerda/direita)
+    const graos = [[14,10],[18,12],[14,14],[18,16],[14,18],[18,20]];
+    for(const [gx,gy] of graos) {
+        blend(c,gx,gy,    220,180,40,230);
+        blend(c,gx+1,gy,  240,200,60,200);
+        blend(c,gx,gy-1,  200,160,20,160);
+    }
+
+    // Ponta da espiga (top)
+    set(c,16,8,  240,200,50);
+    set(c,16,9,  220,180,40);
+
+    // Folhas curtas saindo do caule
+    line(c,16,22, 13,25, [80,160,30,180], 1);
+    line(c,16,22, 19,25, [80,160,30,180], 1);
+
+    // Orbe de XP flutuando ao lado (símbolo de ganho de XP)
+    circle(c,24,10, 4, [255,220,0,200], true);
+    circle(c,24,10, 4, [255,255,100,120]);
+    // "+" dentro do orbe
+    set(c,24,9,  255,255,255);
+    set(c,24,10, 255,255,255);
+    set(c,24,11, 255,255,255);
+    set(c,23,10, 255,255,255);
+    set(c,25,10, 255,255,255);
+
+    // Faíscas de XP ao redor
+    for(const [sx,sy] of [[8,8],[9,14],[8,22],[24,20],[27,15]])
+        blend(c,sx,sy, 255,220,0,160);
+
+    save(c,'colheita_icon.png');
+}
+
 console.log('All icons generated!');

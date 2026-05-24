@@ -180,6 +180,8 @@ public class PassiveProjectileSkill2D : SkillBehavior
         foreach (GameObject enemy in enemies)
         {
             if (enemy == null || !enemy.activeInHierarchy) continue;
+            if (enemy.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) continue;
+            if (enemy.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) continue;
 
             float distance = Vector2.Distance(playerPosition, (Vector2)enemy.transform.position);
             if (distance < closestDistance && distance <= searchRange)
@@ -252,6 +254,7 @@ public class PassiveProjectileSkill2D : SkillBehavior
             foreach (MonoBehaviour component in enemyComponents)
             {
                 if (component == null) continue;
+                if (!component.enabled) continue; // ignora scripts desabilitados (ex: projéteis em órbita da Princesa)
 
                 string typeName = component.GetType().Name.ToLower();
                 if (typeName.Contains("enemy") || typeName.Contains("inimigo"))
@@ -329,6 +332,11 @@ public class PassiveProjectileSkill2D : SkillBehavior
     public override void RemoveEffect()
     {
         activationTimer = 0f;
+    }
+
+    public override void ReducirCooldown(float segundos)
+    {
+        activationTimer += segundos;
     }
 
     public void UpdateFromSkillData(SkillData newSkillData)

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
+  m_Name: bencao_anciao
+  m_EditorClassIdentifier: Assembly-CSharp::UltimateData
+  ultimateName: "Ben\xE7\xE3o do Anc\xE3o"
+  description: "Invoca um totem sagrado que pulsa 6 vezes, curando 8% do HP e reduzindo cooldowns das habilidades a cada pulso."
+  ultimateIcon: {fileID: 21300000, guid: b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4, type: 3}
+  cooldown: 27
+  baseDamage: 8
+  areaOfEffect: 0
+  duration: 6
+  element: 0
+  specialEffect: "Totem cura 8% HP e reduz 0.5s dos cooldowns de habilidades por pulso."
+  ultimateType: 0
+  specialValue: 0
+  behaviorScriptName: BencaoAnciaoUltimate
+  visualEffectPrefab: {fileID: 0}
+  requiredLevel: 1
+  isUnlocked: 1

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +7,7 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
     [Header("Configurações")]
     public float raio            = 10f;
     public float duracao         = 7f;
-    public float cooldown        = 24f;
+    public float cooldown        = 26f;
     public float danoPorSegundo  = 18f;
     public float percentualCura  = 0.10f;
 
@@ -183,8 +183,8 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
         if (root == null) { var bc = go.GetComponent<BossController>() ?? go.GetComponentInParent<BossController>(); if (bc != null) root = bc.gameObject; }
         if (root == null) { var bp = go.GetComponent<BossPrincesa>() ?? go.GetComponentInParent<BossPrincesa>(); if (bp != null) root = bp.gameObject; }
         if (root == null) return null;
-        if (root.GetComponent<ProjetilHomingPrincesa>()   != null) return null;
-        if (root.GetComponent<ProjetilEspecialPrincesa>() != null) return null;
+        if (go.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return null;
+        if (go.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return null;
         return root;
     }
 

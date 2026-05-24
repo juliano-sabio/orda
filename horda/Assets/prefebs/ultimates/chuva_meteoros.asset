@@ -16,7 +16,7 @@ MonoBehaviour:
   description: "Meteoros caem sobre inimigos a cada 0.65s por 6s, causando dano em \xE1rea no impacto."
   ultimateIcon: {fileID: 21300000, guid: b3c4d5e6f7a8091a0b1c2d3e4f5a0003, type: 3}
   cooldown: 25
-  baseDamage: 35
+  baseDamage: 25
   areaOfEffect: 8
   duration: 6
   element: 1

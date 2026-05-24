@@ -152,6 +152,9 @@ public class BoomerangSkillBehavior : SkillBehavior
         foreach (InimigoController enemy in allEnemies)
         {
             if (enemy == null || enemy.gameObject == playerTransform.gameObject) continue;
+            if (!enemy.enabled) continue; // ignora scripts desabilitados (ex: projéteis em órbita da Princesa)
+            if (enemy.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) continue;
+            if (enemy.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) continue;
 
             float distance = Vector2.Distance(playerTransform.position, enemy.transform.position);
             if (distance < throwRange && distance < nearestDistance)
@@ -307,6 +310,11 @@ public class BoomerangSkillBehavior : SkillBehavior
     public void SetActive(bool active)
     {
         isActive = active;
+    }
+
+    public override void ReducirCooldown(float segundos)
+    {
+        nextActivationTime -= segundos;
     }
 
     // ✅ MÉTODO TestBoomerang SEGURO

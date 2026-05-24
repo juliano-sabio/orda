@@ -54,6 +54,10 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI statusPointsText;
     public TextMeshProUGUI activeBonusesText;
 
+    [Header("🛡 Passiva Equipada")]
+    public Image         passivaIcon;
+    public TextMeshProUGUI passivaLabel;
+
     [Header("🎯 BARRA DE HABILIDADES - Slots de Ícones")]
     public Image attackSkill1Icon;
     public Image attackSkill2Icon;
@@ -141,6 +145,75 @@ public class UIManager : MonoBehaviour
 
         ConnectToEquippedSkill();
 
+        if (passivaIcon == null)
+            CriarSlotPassivaRuntime();
+    }
+
+    void CriarSlotPassivaRuntime()
+    {
+        if (attackSkill1Icon == null) return;
+
+        Transform parent = attackSkill1Icon.transform.parent;
+        if (parent == null) return;
+
+        GameObject slot = new GameObject("SlotPassiva");
+        slot.transform.SetParent(parent, false);
+
+        RectTransform slotRect = slot.AddComponent<RectTransform>();
+        slotRect.sizeDelta = new Vector2(52, 52);
+
+        Vector2 basePos = attackSkill1Icon.rectTransform.anchoredPosition;
+        slotRect.anchoredPosition = basePos + new Vector2(-130, 0);
+
+        Image bg = slot.AddComponent<Image>();
+        bg.color = new Color(0.05f, 0.18f, 0.05f, 0.92f);
+
+        GameObject border = new GameObject("Borda");
+        border.transform.SetParent(slot.transform, false);
+        RectTransform borderRect = border.AddComponent<RectTransform>();
+        borderRect.anchorMin = Vector2.zero;
+        borderRect.anchorMax = Vector2.one;
+        borderRect.sizeDelta = new Vector2(2, 2);
+        borderRect.anchoredPosition = Vector2.zero;
+        Image borderImg = border.AddComponent<Image>();
+        borderImg.color = new Color(0.1f, 0.65f, 0.1f, 0.55f);
+
+        GameObject iconGO = new GameObject("IconePassiva");
+        iconGO.transform.SetParent(slot.transform, false);
+        RectTransform iconRect = iconGO.AddComponent<RectTransform>();
+        iconRect.sizeDelta = new Vector2(38, 38);
+        iconRect.anchoredPosition = new Vector2(0, 5);
+        passivaIcon = iconGO.AddComponent<Image>();
+        passivaIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+
+        GameObject labelGO = new GameObject("LabelPassiva");
+        labelGO.transform.SetParent(slot.transform, false);
+        RectTransform labelRect = labelGO.AddComponent<RectTransform>();
+        labelRect.sizeDelta = new Vector2(52, 12);
+        labelRect.anchoredPosition = new Vector2(0, -20);
+        passivaLabel = labelGO.AddComponent<TextMeshProUGUI>();
+        passivaLabel.fontSize = 6.5f;
+        passivaLabel.alignment = TextAlignmentOptions.Center;
+        passivaLabel.color = new Color(0.5f, 1f, 0.5f, 1f);
+        passivaLabel.text = "Passiva";
+
+        if (dashIcon != null)
+            StartCoroutine(AlinhararComDash(slotRect));
+    }
+
+    private IEnumerator AlinhararComDash(RectTransform slotRect)
+    {
+        yield return new WaitForEndOfFrame();
+        if (dashIcon == null || slotRect == null) yield break;
+
+        RectTransform parentRect = slotRect.parent as RectTransform;
+        if (parentRect == null) yield break;
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            parentRect, dashIcon.transform.position, null, out Vector2 local);
+
+        Vector2 pos = slotRect.anchoredPosition;
+        slotRect.anchoredPosition = new Vector2(pos.x, local.y);
     }
 
     // 🆕 MÉTODO PARA ENCONTRAR/CRIAR PAUSE MANAGER
@@ -530,6 +603,23 @@ public class UIManager : MonoBehaviour
 
             image.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0f);
         }
+    }
+
+    public void SetPassivaIcon(Sprite icon, string nome)
+    {
+        if (passivaIcon == null) return;
+        if (icon != null)
+        {
+            passivaIcon.sprite  = icon;
+            passivaIcon.color   = Color.white;
+            passivaIcon.gameObject.SetActive(true);
+        }
+        else
+        {
+            passivaIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+            passivaIcon.gameObject.SetActive(true);
+        }
+        if (passivaLabel != null) passivaLabel.text = nome ?? "";
     }
 
     // 🎯 MÉTODOS EXISTENTES DO UIMANAGER (mantidos)

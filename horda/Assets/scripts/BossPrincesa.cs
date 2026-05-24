@@ -35,6 +35,7 @@ public class BossPrincesa : MonoBehaviour
     [Tooltip("Duração da canalização — deve bater com a animação de ataque")]
     public float duracaoCanalização = 2.5f;
     public float raioOrbita         = 1.4f;
+    public float escalaProjetilOrbita = 2f;
 
     [Header("Sequência de Projéteis")]
     [Tooltip("Quantidade de projéteis por canalização: 4 → 8 → 16 (e se repete em 16)")]
@@ -506,21 +507,49 @@ public class BossPrincesa : MonoBehaviour
         if (fase2Ativada)
             EmitirOndaEnergia();
 
+        // Scale-in + órbita simultâneos (0.3s surgimento)
+        float surgirT = 0f;
+        float anguloBase = 0f;
+        int total = projeteisCanalizando.Count;
+        while (surgirT < 0.3f)
+        {
+            surgirT    += Time.deltaTime;
+            anguloBase += Time.deltaTime * velocidadeOrbita;
+            float s     = Mathf.Clamp01(surgirT / 0.3f);
+
+            for (int i = 0; i < total; i++)
+            {
+                var go = projeteisCanalizando[i];
+                if (go == null) continue;
+                float ang = anguloBase + (360f / total) * i;
+                float rad = ang * Mathf.Deg2Rad;
+                go.transform.position   = transform.position + new Vector3(Mathf.Cos(rad), Mathf.Sin(rad)) * raioOrbita;
+                go.transform.rotation   = Quaternion.Euler(0f, 0f, ang + 90f);
+                go.transform.localScale = Vector3.one * (escalaProjetilOrbita * s);
+            }
+            yield return null;
+        }
+
+        foreach (var go in projeteisCanalizando)
+            if (go != null) go.transform.localScale = Vector3.one * escalaProjetilOrbita;
+
         // Gira a órbita durante a canalização
         float elapsed = 0f;
-        float anguloBase = 0f;
         while (elapsed < duracaoCanalização && !controller.estaMorrendo)
         {
             elapsed    += Time.deltaTime;
             anguloBase += Time.deltaTime * velocidadeOrbita;
 
-            for (int i = 0; i < projeteisCanalizando.Count; i++)
+            for (int i = 0; i < total; i++)
             {
-                if (projeteisCanalizando[i] == null) continue;
-                float ang = anguloBase + (360f / projeteisCanalizando.Count) * i;
+                var go = projeteisCanalizando[i];
+                if (go == null) continue;
+
+                float ang = anguloBase + (360f / total) * i;
                 float rad = ang * Mathf.Deg2Rad;
-                projeteisCanalizando[i].transform.position =
-                    transform.position + new Vector3(Mathf.Cos(rad), Mathf.Sin(rad)) * raioOrbita;
+
+                go.transform.position = transform.position + new Vector3(Mathf.Cos(rad), Mathf.Sin(rad)) * raioOrbita;
+                go.transform.rotation = Quaternion.Euler(0f, 0f, ang + 90f);
             }
 
             yield return null;
@@ -549,19 +578,28 @@ public class BossPrincesa : MonoBehaviour
             Vector3 pos = transform.position + new Vector3(Mathf.Cos(rad), Mathf.Sin(rad)) * raioOrbita;
 
             GameObject go = Instantiate(prefabProjetil, pos, Quaternion.identity);
+            go.transform.localScale = Vector3.zero; // começa invisível para o scale-in
 
             var rb2 = go.GetComponent<Rigidbody2D>();
             if (rb2 != null)
             {
                 rb2.linearVelocity = Vector2.zero;
-                rb2.simulated      = false; // remove da física; transform.position funciona livremente
+                rb2.simulated      = false;
             }
 
-            foreach (var mb in go.GetComponents<MonoBehaviour>())
-                mb.enabled = false; // desliga todos os scripts do projétil durante a órbita
+            // Remove da detecção de inimigos durante a órbita
+            foreach (var col in go.GetComponentsInChildren<Collider2D>())
+                col.enabled = false;
+            go.tag = "Untagged";
 
+            // Desliga TODOS os scripts — inclui qualquer script de movimento/homing
+            foreach (var mb in go.GetComponentsInChildren<MonoBehaviour>())
+                mb.enabled = false;
+
+            // Pré-configura o homing para quando for lançado (mantém DESABILITADO agora)
             var homing = go.GetComponent<ProjetilHomingPrincesa>();
             if (homing == null) homing = go.AddComponent<ProjetilHomingPrincesa>();
+            homing.enabled          = false; // garantir que não roda durante a órbita
             homing.velocidade       = velocidadeProjetil;
             homing.velocidadeMaxima = velocidadeProjetil + 4f;
             homing.dano             = danoProjetil;
@@ -585,6 +623,10 @@ public class BossPrincesa : MonoBehaviour
                 rb2.simulated      = true;
                 rb2.linearVelocity = dir * velocidadeProjetil;
             }
+
+            // Reativa colliders agora que o projétil está sendo lançado
+            foreach (var col in go.GetComponentsInChildren<Collider2D>())
+                col.enabled = true;
 
             var homing = go.GetComponent<ProjetilHomingPrincesa>();
             if (homing != null)

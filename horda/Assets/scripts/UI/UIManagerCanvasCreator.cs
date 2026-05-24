@@ -189,6 +189,44 @@ public class UIManagerCanvasCreator : EditorWindow
         // Attack Skills
         GameObject attackSkills = CreatePanel(hud, "AttackSkills", new Vector2(240, 150));
 
+        // Passive Slot (à esquerda de AttackSkill1)
+        GameObject passivaSlot = new GameObject("PassivaSlot", typeof(Image));
+        passivaSlot.transform.SetParent(attackSkills.transform, false);
+        var psRect = passivaSlot.GetComponent<RectTransform>();
+        psRect.sizeDelta        = new Vector2(52, 52);
+        psRect.anchoredPosition = new Vector2(-130, 0);
+        var psBg = passivaSlot.GetComponent<Image>();
+        psBg.color = new Color(0.08f, 0.18f, 0.10f, 0.85f);
+
+        // Borda verde fina ao redor do slot
+        var psBorder = new GameObject("Border", typeof(Image));
+        psBorder.transform.SetParent(passivaSlot.transform, false);
+        var pbRect = psBorder.GetComponent<RectTransform>();
+        pbRect.anchorMin = Vector2.zero; pbRect.anchorMax = Vector2.one;
+        pbRect.offsetMin = new Vector2(-2f, -2f); pbRect.offsetMax = new Vector2(2f, 2f);
+        psBorder.GetComponent<Image>().color = new Color(0.25f, 0.75f, 0.35f, 0.55f);
+        psBorder.transform.SetAsFirstSibling();
+
+        // Ícone da passiva
+        var psIconGO = new GameObject("Icon", typeof(Image));
+        psIconGO.transform.SetParent(passivaSlot.transform, false);
+        var piRect = psIconGO.GetComponent<RectTransform>();
+        piRect.sizeDelta = new Vector2(38, 38);
+        piRect.anchoredPosition = new Vector2(0, 5);
+        uiManager.passivaIcon = psIconGO.GetComponent<Image>();
+        uiManager.passivaIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+
+        // Label com nome da passiva
+        var psLabelGO = CreateTMPText(passivaSlot, "PassivaLabel", new Vector2(0, -20), new Vector2(56, 14));
+        var psLabel   = psLabelGO.GetComponent<TextMeshProUGUI>();
+        psLabel.text      = "";
+        psLabel.fontSize  = 6.5f;
+        psLabel.color     = new Color(0.5f, 1f, 0.6f);
+        psLabel.alignment = TextAlignmentOptions.Center;
+        psLabel.enableWordWrapping = false;
+        psLabel.overflowMode = TextOverflowModes.Truncate;
+        uiManager.passivaLabel = psLabel;
+
         // Attack Skill 1
         GameObject skill1 = CreateSkillSlot(attackSkills, "AttackSkill1", new Vector2(-60, 0), uiManager);
         uiManager.attackSkill1Icon = skill1.transform.Find("Icon").GetComponent<Image>();

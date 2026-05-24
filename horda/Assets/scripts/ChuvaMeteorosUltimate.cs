@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class ChuvaMeteorosUltimate : MonoBehaviour
@@ -7,8 +7,8 @@ public class ChuvaMeteorosUltimate : MonoBehaviour
     public float raio              = 14f;
     public float duracao           = 8f;
     public float cooldown          = 25f;
-    public float intervaloMeteoro  = 0.28f;
-    public float danoMeteoro       = 35f;
+    public float intervaloMeteoro  = 0.65f;
+    public float danoMeteoro       = 25f;
     public float raioImpacto       = 2.4f;
 
     public float CooldownRestante => cooldownRestante;
@@ -92,8 +92,8 @@ public class ChuvaMeteorosUltimate : MonoBehaviour
         if (root == null) { var bc = go.GetComponent<BossController>() ?? go.GetComponentInParent<BossController>(); if (bc != null) root = bc.gameObject; }
         if (root == null) { var bp = go.GetComponent<BossPrincesa>() ?? go.GetComponentInParent<BossPrincesa>(); if (bp != null) root = bp.gameObject; }
         if (root == null) return null;
-        if (root.GetComponent<ProjetilHomingPrincesa>()   != null) return null;
-        if (root.GetComponent<ProjetilEspecialPrincesa>() != null) return null;
+        if (go.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return null;
+        if (go.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return null;
         return root;
     }
 

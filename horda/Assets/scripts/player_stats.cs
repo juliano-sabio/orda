@@ -157,6 +157,15 @@ public class PlayerStats : MonoBehaviour
                 AplicarComportamentoUltimate(ultimateData);
         }
 
+        // Aplica passiva selecionada
+        if (characterData.passivasDisponiveis != null && characterData.passivasDisponiveis.Length > 0)
+        {
+            int passivaIndex = PlayerPrefs.GetInt($"SelectedPassiva_{charIndex}", 0);
+            passivaIndex = Mathf.Clamp(passivaIndex, 0, characterData.passivasDisponiveis.Length - 1);
+            PassiveData passiva = characterData.passivasDisponiveis[passivaIndex];
+            if (passiva != null) AplicarPassiva(passiva);
+        }
+
         UpdateUI();
     }
     public enum Element
@@ -477,6 +486,17 @@ public class PlayerStats : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         yield return StartCoroutine(DelayedCharacterInitialization());
         UpdateUI();
+        AtualizarIconePassivaUI();
+    }
+
+    void AtualizarIconePassivaUI()
+    {
+        if (uiManager == null || characterData == null) return;
+        if (characterData.passivasDisponiveis == null || characterData.passivasDisponiveis.Length == 0) return;
+        int charIdx    = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        int passIdx    = Mathf.Clamp(PlayerPrefs.GetInt($"SelectedPassiva_{charIdx}", 0), 0, characterData.passivasDisponiveis.Length - 1);
+        PassiveData p  = characterData.passivasDisponiveis[passIdx];
+        if (p != null) uiManager.SetPassivaIcon(p.passiveIcon, p.passiveName);
     }
 
     public void InitializeFromCharacterSelection()
@@ -898,8 +918,12 @@ public class PlayerStats : MonoBehaviour
         return 100f * Mathf.Pow(xpMultiplier, level - 1);
     }
 
+    [HideInInspector] public bool invulneravel = false;
+
     public void TakeDamage(float damage)
     {
+        if (invulneravel) return;
+
         ShieldAuraBehavior aura = GetComponentInChildren<ShieldAuraBehavior>();
         if (aura != null && aura.TryBlockDamage())
         {
@@ -1060,6 +1084,23 @@ public class PlayerStats : MonoBehaviour
         speed = originalSpeed;
     }
 
+    void AplicarPassiva(PassiveData p)
+    {
+        if (p.xpBonusPercent   > 0) xpMultiplier       *= (1f + p.xpBonusPercent);
+        if (p.attackBonus      > 0) attack              += p.attackBonus;
+        if (p.defenseBonus     > 0) defense             += p.defenseBonus;
+        if (p.speedBonus       > 0) speed               += p.speedBonus;
+        if (p.healthBonus      > 0) { maxHealth += p.healthBonus; health = maxHealth; }
+        if (p.regenBonus       > 0) healthRegenRate     += p.regenBonus;
+        if (p.cooldownReduction > 0)
+        {
+            attackActivationInterval  *= (1f - p.cooldownReduction);
+            defenseActivationInterval *= (1f - p.cooldownReduction);
+        }
+
+        if (uiManager != null) uiManager.SetPassivaIcon(p.passiveIcon, p.passiveName);
+    }
+
     void AplicarComportamentoUltimate(UltimateData ultimateData)
     {
         // DestroyImmediate garante remoção síncrona — Destroy() é deferido e
@@ -1076,6 +1117,9 @@ public class PlayerStats : MonoBehaviour
         var punicaoAntigo    = GetComponent<PunicaoDivinaUltimate>();     if (punicaoAntigo    != null) DestroyImmediate(punicaoAntigo);
         var ritualAntigo     = GetComponent<RitualAnciaoUltimate>();      if (ritualAntigo     != null) DestroyImmediate(ritualAntigo);
         var correntesAntigo  = GetComponent<CorrentesInfernoUltimate>(); if (correntesAntigo  != null) DestroyImmediate(correntesAntigo);
+        var bencaoAntigo     = GetComponent<BencaoAnciaoUltimate>();     if (bencaoAntigo     != null) DestroyImmediate(bencaoAntigo);
+        var casuloAntigo     = GetComponent<CasuloCristalUltimate>();    if (casuloAntigo     != null) DestroyImmediate(casuloAntigo);
+        var escudoAntigo     = GetComponent<EscudoSonicoUltimate>();     if (escudoAntigo     != null) DestroyImmediate(escudoAntigo);
 
         switch (ultimateData.behaviorScriptName)
         {
@@ -1175,6 +1219,23 @@ public class PlayerStats : MonoBehaviour
                 c.danoFinal   = ultimateData.baseDamage;
                 break;
             }
+            case "CasuloCristalUltimate":
+            {
+                var c             = gameObject.AddComponent<CasuloCristalUltimate>();
+                c.cooldown        = ultimateData.cooldown;
+                c.duracaoCasulo   = ultimateData.duration;
+                c.danoEstilhacos  = ultimateData.baseDamage;
+                c.raioExplosao    = ultimateData.areaOfEffect;
+                break;
+            }
+            case "BencaoAnciaoUltimate":
+            {
+                var c              = gameObject.AddComponent<BencaoAnciaoUltimate>();
+                c.cooldown         = ultimateData.cooldown;
+                c.duracao          = ultimateData.duration;
+                c.curaPorPulso     = ultimateData.baseDamage > 0 ? ultimateData.baseDamage / 100f : 0.08f;
+                break;
+            }
             case "CorrentesInfernoUltimate":
             {
                 var c               = gameObject.AddComponent<CorrentesInfernoUltimate>();
@@ -1182,6 +1243,15 @@ public class PlayerStats : MonoBehaviour
                 c.duracao           = ultimateData.duration;
                 c.raio              = ultimateData.areaOfEffect;
                 c.danoPorSegundo    = ultimateData.baseDamage;
+                break;
+            }
+            case "EscudoSonicoUltimate":
+            {
+                var c              = gameObject.AddComponent<EscudoSonicoUltimate>();
+                c.cooldown         = ultimateData.cooldown;
+                c.duracao          = ultimateData.duration;
+                c.danoBasePorPulso = ultimateData.baseDamage;
+                c.raio             = ultimateData.areaOfEffect;
                 break;
             }
         }
@@ -1204,7 +1274,10 @@ public class PlayerStats : MonoBehaviour
             || GetComponent<NecropoleUltimate>()          != null
             || GetComponent<PunicaoDivinaUltimate>()      != null
             || GetComponent<RitualAnciaoUltimate>()       != null
-            || GetComponent<CorrentesInfernoUltimate>()   != null;
+            || GetComponent<CorrentesInfernoUltimate>()   != null
+            || GetComponent<BencaoAnciaoUltimate>()       != null
+            || GetComponent<CasuloCristalUltimate>()      != null
+            || GetComponent<EscudoSonicoUltimate>()       != null;
     }
 
     private void UpdateUI()
@@ -1461,6 +1534,7 @@ public class PlayerStats : MonoBehaviour
         if (Camera.main != null)
             Camera.main.backgroundColor = new Color(0.04f, 0.03f, 0.07f);
         yield return new WaitForEndOfFrame();
+        if (!Application.isPlaying) yield break;
         Texture2D screenshot = ScreenCapture.CaptureScreenshotAsTexture();
         Time.timeScale = 0f;
         GameOverUI.Mostrar(screenshot);

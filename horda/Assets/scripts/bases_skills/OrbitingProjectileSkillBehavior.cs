@@ -217,6 +217,12 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         }
     }
 
+    private static bool EhProjetilPrincesa(GameObject go)
+    {
+        return go.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null
+            || go.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null;
+    }
+
     private Transform FindNearestEnemy(GameObject[] enemies)
     {
         Transform nearest = null;
@@ -224,6 +230,7 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
 
         foreach (GameObject enemy in enemies)
         {
+            if (EhProjetilPrincesa(enemy)) continue;
             float distance = Vector2.Distance(playerTransform.position, enemy.transform.position);
             if (distance < nearestDistance && distance <= targetAcquisitionRange)
             {
@@ -241,6 +248,7 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
 
         foreach (GameObject enemy in enemies)
         {
+            if (EhProjetilPrincesa(enemy)) continue;
             float distance = Vector2.Distance(playerTransform.position, enemy.transform.position);
             if (distance <= targetAcquisitionRange)
             {
@@ -258,14 +266,14 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
 
     private Transform FindEnemyInPlayerDirection(GameObject[] enemies)
     {
-        // Encontra inimigo na direção que o player está virado
-        Vector2 playerDirection = playerTransform.right; // Assumindo que player olha para a direita
+        Vector2 playerDirection = playerTransform.right;
 
         Transform bestTarget = null;
         float bestDot = -1f;
 
         foreach (GameObject enemy in enemies)
         {
+            if (EhProjetilPrincesa(enemy)) continue;
             float distance = Vector2.Distance(playerTransform.position, enemy.transform.position);
             if (distance <= targetAcquisitionRange)
             {
@@ -280,7 +288,7 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
             }
         }
 
-        return bestDot > 0.5f ? bestTarget : null; // Só retorna se estiver razoavelmente na frente
+        return bestDot > 0.5f ? bestTarget : null;
     }
 
     // 🎯 CALCULAR POSIÇÃO NA ÓRBITA
