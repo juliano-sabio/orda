@@ -1120,6 +1120,7 @@ public class PlayerStats : MonoBehaviour
         var bencaoAntigo     = GetComponent<BencaoAnciaoUltimate>();     if (bencaoAntigo     != null) DestroyImmediate(bencaoAntigo);
         var casuloAntigo     = GetComponent<CasuloCristalUltimate>();    if (casuloAntigo     != null) DestroyImmediate(casuloAntigo);
         var escudoAntigo     = GetComponent<EscudoSonicoUltimate>();     if (escudoAntigo     != null) DestroyImmediate(escudoAntigo);
+        var raioAntigo       = GetComponent<RaioCerteiroUltimate>();    if (raioAntigo       != null) DestroyImmediate(raioAntigo);
 
         switch (ultimateData.behaviorScriptName)
         {
@@ -1254,6 +1255,15 @@ public class PlayerStats : MonoBehaviour
                 c.raio             = ultimateData.areaOfEffect;
                 break;
             }
+            case "RaioCerteiroUltimate":
+            {
+                var c              = gameObject.AddComponent<RaioCerteiroUltimate>();
+                c.cooldown         = ultimateData.cooldown;
+                c.danoPorRaio      = ultimateData.baseDamage;
+                c.raioMaxBounce    = ultimateData.areaOfEffect;
+                c.maxRicochetes    = (int)ultimateData.specialValue;
+                break;
+            }
         }
 
         // Atualiza a flag usada no Update
@@ -1277,7 +1287,8 @@ public class PlayerStats : MonoBehaviour
             || GetComponent<CorrentesInfernoUltimate>()   != null
             || GetComponent<BencaoAnciaoUltimate>()       != null
             || GetComponent<CasuloCristalUltimate>()      != null
-            || GetComponent<EscudoSonicoUltimate>()       != null;
+            || GetComponent<EscudoSonicoUltimate>()       != null
+            || GetComponent<RaioCerteiroUltimate>()       != null;
     }
 
     private void UpdateUI()

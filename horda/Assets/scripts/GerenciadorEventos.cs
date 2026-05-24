@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Tilemaps;
 using TMPro;
 
 public enum TipoEvento
@@ -12,6 +13,7 @@ public enum TipoEvento
     Sobreviver,
     ColetarXP,
     UsarUltimate,
+    ColetarEspirito,
 }
 
 [Serializable]
@@ -23,6 +25,8 @@ public class EventoAleatorio
     public float duracao = 30f;
     public int quantidade = 5;
     public string recompensaDescricao = "+15% de vida recuperada!";
+    [Tooltip("Quantos espíritos nascem no mapa (0 = usa quantidade)")]
+    public int quantidadeSpawn = 0;
 }
 
 public class GerenciadorEventos : MonoBehaviour
@@ -49,12 +53,21 @@ public class GerenciadorEventos : MonoBehaviour
     public Color   corDesc           = new Color(0.85f, 0.85f, 0.85f);
     public float   tamanhoFonteTimer = 14f;
 
+    [Header("Espíritos do Evento")]
+    public GameObject espiritoEventoPrefab;
+    public float      distMinEspiritos    = 18f;
+    public LayerMask  camadasObstaculo;
+    public float      raioChecagemSpawn   = 0.5f;
+
     [Header("Visual — Barra de Progresso")]
     public Color   corBarraAtiva     = new Color(0.2f, 0.8f, 0.3f);
     public Color   corBarraSucesso   = new Color(0.2f, 0.9f, 0.3f);
     public Color   corBarraFalha     = new Color(0.9f, 0.2f, 0.2f);
 
     // Estado do evento
+    private readonly List<GameObject> espiritosMapa = new List<GameObject>();
+    private Tilemap[] tilemapsObstaculo;
+
     private bool eventoAtivo;
     private EventoAleatorio eventoAtual;
     private float proximoEventoTempo;   // tempo absoluto do relógio para o próximo evento
@@ -81,17 +94,10 @@ public class GerenciadorEventos : MonoBehaviour
     private Vector2 POS_VISIVEL  => posicaoVisivel;
     private static readonly Vector2 POS_ESCONDIDO = new Vector2(360f, -10f);
 
-    void Reset()
-    {
-        PopularEventosPadrao();
-    }
-
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        if (eventos == null || eventos.Count == 0)
-            PopularEventosPadrao();
     }
 
     void Start()
@@ -161,11 +167,18 @@ public class GerenciadorEventos : MonoBehaviour
 
         MostrarPainel(true);
         uiManager?.ShowSkillAcquired("⚡ EVENTO!", eventoAtual.nome);
+
+        if (eventoAtual.tipo == TipoEvento.ColetarEspirito)
+        {
+            int spawn = eventoAtual.quantidadeSpawn > 0 ? eventoAtual.quantidadeSpawn : eventoAtual.quantidade;
+            SpawnEspiritos(spawn);
+        }
     }
 
     void EncerrarEvento(bool sucesso)
     {
         eventoAtivo = false;
+        LimparEspiritos();
 
         if (sucesso && playerStats != null)
             playerStats.Heal(playerStats.maxHealth * 0.15f);
@@ -311,114 +324,121 @@ public class GerenciadorEventos : MonoBehaviour
             EncerrarEvento(true);
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Eventos padrão
 
-    [ContextMenu("Resetar Eventos Padrão")]
-    void PopularEventosPadrao()
+    // ──────────────────────────────────────────────────────────
+    // Espíritos
+
+    Bounds CalcularBoundsMapa()
     {
-        eventos = new List<EventoAleatorio>
+        var tilemaps = FindObjectsOfType<Tilemap>();
+        if (tilemaps == null || tilemaps.Length == 0)
+            return new Bounds(Vector3.zero, new Vector3(60f, 40f, 0f));
+
+        bool primeiro = true;
+        Bounds bounds = new Bounds();
+        foreach (var tm in tilemaps)
         {
-            new EventoAleatorio
+            if (!tm.gameObject.activeInHierarchy) continue;
+            tm.CompressBounds();
+            Bounds b = new Bounds();
+            b.SetMinMax(
+                tm.transform.TransformPoint(tm.localBounds.min),
+                tm.transform.TransformPoint(tm.localBounds.max)
+            );
+            if (primeiro) { bounds = b; primeiro = false; }
+            else bounds.Encapsulate(b);
+        }
+        return bounds;
+    }
+
+    bool PosicaoTemObstaculo(Vector2 pos)
+    {
+        // Cacheia na primeira chamada: layer 3 OU qualquer tilemap com TilemapCollider2D
+        if (tilemapsObstaculo == null || tilemapsObstaculo.Length == 0)
+        {
+            var todos = FindObjectsOfType<Tilemap>();
+            var lista = new List<Tilemap>();
+            foreach (var tm in todos)
+                if (tm.gameObject.layer == 3 || tm.GetComponent<TilemapCollider2D>() != null)
+                    lista.Add(tm);
+            tilemapsObstaculo = lista.ToArray();
+        }
+
+        // Margem de 2 células ao redor para cobrir bordas visuais
+        foreach (var tm in tilemapsObstaculo)
+        {
+            Vector3Int celula = tm.WorldToCell(pos);
+            for (int dx = -2; dx <= 2; dx++)
+                for (int dy = -2; dy <= 2; dy++)
+                    if (tm.GetTile(celula + new Vector3Int(dx, dy, 0)) != null)
+                        return true;
+        }
+
+        // Checagem física como fallback
+        return Physics2D.OverlapBox(pos, Vector2.one * 1.5f, 0f, camadasObstaculo) != null;
+    }
+
+    void SpawnEspiritos(int quantidade)
+    {
+        if (espiritoEventoPrefab == null) return;
+
+        Bounds  mapa        = CalcularBoundsMapa();
+        var     posicoes    = new List<Vector2>();
+        const   int tentativasMax = 50;
+
+        // Fase 1: tenta respeitar distMinEspiritos
+        // Fase 2: se não couberem todos, relaxa a distância mínima
+        float distAtual = distMinEspiritos;
+
+        for (int i = 0; i < quantidade; i++)
+        {
+            bool encontrou = false;
+
+            for (int t = 0; t < tentativasMax; t++)
             {
-                nome = "Caçada",
-                descricao = "Derrote 8 inimigos antes do tempo acabar!",
-                tipo = TipoEvento.MatarInimigos,
-                duracao = 20f,
-                quantidade = 8,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
+                Vector2 candidato = new Vector2(
+                    UnityEngine.Random.Range(mapa.min.x, mapa.max.x),
+                    UnityEngine.Random.Range(mapa.min.y, mapa.max.y)
+                );
+
+                if (PosicaoTemObstaculo(candidato)) continue;
+
+                bool longe = true;
+                foreach (var p in posicoes)
+                    if (Vector2.Distance(candidato, p) < distAtual)
+                    { longe = false; break; }
+
+                if (!longe) continue;
+
+                posicoes.Add(candidato);
+                var e = Instantiate(espiritoEventoPrefab, new Vector3(candidato.x, candidato.y, 0f), Quaternion.identity);
+                espiritosMapa.Add(e);
+                encontrou = true;
+                break;
+            }
+
+            // Se não achou, relaxa a distância e tenta de novo neste índice
+            if (!encontrou && distAtual > 3f)
             {
-                nome = "Intocável",
-                descricao = "Não leve nenhum dano por 20 segundos!",
-                tipo = TipoEvento.NaoLevarDano,
-                duracao = 20f,
-                quantidade = 0,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Sobrevivente",
-                descricao = "Sobreviva pelos próximos 20 segundos!",
-                tipo = TipoEvento.Sobreviver,
-                duracao = 20f,
-                quantidade = 0,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Exterminador",
-                descricao = "Derrote 10 inimigos antes do tempo acabar!",
-                tipo = TipoEvento.MatarInimigos,
-                duracao = 20f,
-                quantidade = 10,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Esquiva Perfeita",
-                descricao = "Fique 20 segundos sem levar dano!",
-                tipo = TipoEvento.NaoLevarDano,
-                duracao = 20f,
-                quantidade = 0,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Coletor de Almas",
-                descricao = "Colete 100 de XP em 20 segundos!",
-                tipo = TipoEvento.ColetarXP,
-                duracao = 20f,
-                quantidade = 100,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Energia Máxima",
-                descricao = "Colete 200 de XP em 20 segundos!",
-                tipo = TipoEvento.ColetarXP,
-                duracao = 20f,
-                quantidade = 200,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Poder Supremo",
-                descricao = "Use sua Ultimate 1 vez em 20 segundos!",
-                tipo = TipoEvento.UsarUltimate,
-                duracao = 20f,
-                quantidade = 1,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Força Total",
-                descricao = "Use sua Ultimate 2 vezes em 20 segundos!",
-                tipo = TipoEvento.UsarUltimate,
-                duracao = 20f,
-                quantidade = 2,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Pilha de Corpos",
-                descricao = "Derrote 5 inimigos antes do tempo acabar!",
-                tipo = TipoEvento.MatarInimigos,
-                duracao = 20f,
-                quantidade = 5,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-            new EventoAleatorio
-            {
-                nome = "Chacina",
-                descricao = "Derrote 12 inimigos antes do tempo acabar!",
-                tipo = TipoEvento.MatarInimigos,
-                duracao = 20f,
-                quantidade = 12,
-                recompensaDescricao = "+15% de vida recuperada!"
-            },
-        };
+                distAtual = Mathf.Max(distAtual - 2f, 3f);
+                i--; // repete este índice com distância menor
+            }
+        }
+    }
+
+    void LimparEspiritos()
+    {
+        foreach (var esp in espiritosMapa)
+            if (esp != null) Destroy(esp);
+        espiritosMapa.Clear();
+    }
+
+    public void RegistrarEspiritoColetado()
+    {
+        if (!eventoAtivo || eventoAtual.tipo != TipoEvento.ColetarEspirito) return;
+        progresso++;
+        if (progresso >= eventoAtual.quantidade)
+            EncerrarEvento(true);
     }
 
     // ──────────────────────────────────────────────────────────

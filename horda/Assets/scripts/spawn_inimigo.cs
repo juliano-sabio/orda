@@ -46,6 +46,20 @@ public class EnemySpawnerCompleto : MonoBehaviour
     [SerializeField] private float distanciaMaxima = 15f;
     [SerializeField] private int limiteInimigosGlobal = 30;
 
+    [Header("ESCALADA DE DIFICULDADE")]
+    [Tooltip("Ativa o aumento progressivo de dificuldade com o tempo")]
+    public bool escalarDificuldade = true;
+    [Tooltip("Intervalo de spawn no início do jogo (segundos)")]
+    public float intervaloInicial   = 2.5f;
+    [Tooltip("Intervalo mínimo de spawn (mais difícil possível)")]
+    public float intervaloMinimo    = 0.35f;
+    [Tooltip("Limite de inimigos simultâneos no início")]
+    public int   limiteInicialInimigos = 15;
+    [Tooltip("Limite de inimigos simultâneos no pico de dificuldade")]
+    public int   limiteFinalInimigos   = 60;
+    [Tooltip("Tempo (segundos) para atingir dificuldade máxima")]
+    public float tempoParaEscalar   = 360f;
+
     // Variáveis de controle interno
     private float tempoTotalJogo = 0f;
     private float cronometroSpawn = 0f;
@@ -75,11 +89,28 @@ public class EnemySpawnerCompleto : MonoBehaviour
         else LógicaSpawnSimples();
     }
 
+    float GetIntervaloAtual()
+    {
+        if (!escalarDificuldade) return usarWaves && waves.Count > 0 ? waves[waveAtualIndex].intervaloSpaw : 2f;
+        float t = Mathf.Clamp01(tempoTotalJogo / tempoParaEscalar);
+        float curva = t * t * (3f - 2f * t); // smoothstep
+        float base_ = usarWaves && waves.Count > 0 ? waves[waveAtualIndex].intervaloSpaw : intervaloInicial;
+        return Mathf.Lerp(Mathf.Min(base_, intervaloInicial), intervaloMinimo, curva);
+    }
+
+    int GetLimiteAtual()
+    {
+        if (!escalarDificuldade) return limiteInimigosGlobal;
+        float t = Mathf.Clamp01(tempoTotalJogo / tempoParaEscalar);
+        float curva = t * t * (3f - 2f * t);
+        return Mathf.RoundToInt(Mathf.Lerp(limiteInicialInimigos, limiteFinalInimigos, curva));
+    }
+
     void GerenciarSistemaWaves()
     {
         if (waveAtiva)
         {
-            if (cronometroSpawn >= waves[waveAtualIndex].intervaloSpaw)
+            if (cronometroSpawn >= GetIntervaloAtual())
             {
                 TentarSpawnar();
                 cronometroSpawn = 0;
@@ -89,7 +120,7 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
     void LógicaSpawnSimples()
     {
-        if (cronometroSpawn >= 2f) // Intervalo padrão se não houver wave
+        if (cronometroSpawn >= GetIntervaloAtual())
         {
             TentarSpawnar();
             cronometroSpawn = 0;
@@ -98,7 +129,7 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
     void TentarSpawnar()
     {
-        if (inimigosAtivos.Count >= limiteInimigosGlobal || inimigosDisponiveis.Count == 0) return;
+        if (inimigosAtivos.Count >= GetLimiteAtual() || inimigosDisponiveis.Count == 0) return;
 
         // Tenta encontrar uma posição válida
         Vector2? posicaoValida = ObterPosicaoLivre();

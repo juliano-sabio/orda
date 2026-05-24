@@ -724,4 +724,109 @@ function save(c, name) {
     save(c,'colheita_icon.png');
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 14. CORAÇÃO ROBUSTO (Robust Heart - passive: +30 HP)
+// ═══════════════════════════════════════════════════════════════════════════
+{
+    const c = newCanvas(32,32,[13,0,8,255]);
+
+    // Warm golden ambient glow
+    for(let y=0;y<32;y++) for(let x=0;x<32;x++) {
+        const d=Math.sqrt((x-16)**2+(y-15)**2);
+        if(d<14) blend(c,x,y, 180,70,0, Math.floor(28*(1-d/14)));
+    }
+
+    // Heart shape via math formula: (x²+y²-1)³ - x²y³ ≤ 0
+    for(let y=4;y<27;y++) for(let x=5;x<27;x++) {
+        const nx=(x-16)/9.5, ny=(14-y)/9.5;
+        const v=(nx*nx+ny*ny-1)**3 - nx*nx*ny**3;
+        if(v<=0) {
+            const isHL = x<=15 && y<=13;
+            if(isHL) set(c,x,y, 255,60,90);
+            else     set(c,x,y, 204,0,34);
+        }
+    }
+
+    // Shield reinforcement outline (lower half of heart, grey-blue)
+    for(let y=16;y<27;y++) for(let x=5;x<27;x++) {
+        const nx=(x-16)/9.5, ny=(14-y)/9.5;
+        const v=(nx*nx+ny*ny-1)**3 - nx*nx*ny**3;
+        const vOuter=(nx*nx+ny*ny-1.12)**3 - nx*nx*(ny*1.12)**3;
+        if(v>0 && vOuter<=0) blend(c,x,y, 102,102,160, 200);
+    }
+
+    // Golden aura dots scattered around
+    for(const [ax,ay] of [[7,7],[25,7],[6,16],[26,16],[8,24],[24,24],[16,3],[13,26],[19,26]]) {
+        blend(c,ax,ay, 255,180,0,200);
+        blend(c,ax+1,ay, 180,120,0,130);
+    }
+
+    // Inner highlight pulse (top-left of heart, brighter)
+    for(let y=8;y<13;y++) for(let x=10;x<15;x++) {
+        const nx=(x-16)/9.5, ny=(14-y)/9.5;
+        const v=(nx*nx+ny*ny-1)**3 - nx*nx*ny**3;
+        if(v<=0) blend(c,x,y, 255,120,140,100);
+    }
+
+    save(c,'coracao_robusto_icon.png');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 15. CAÇADOR (Hunter - passive: +5 ATQ +10% XP)
+// ═══════════════════════════════════════════════════════════════════════════
+{
+    const c = newCanvas(32,32,[4,7,3,255]);
+
+    // Forest green ambient
+    for(let y=0;y<32;y++) for(let x=0;x<32;x++) {
+        const d=Math.sqrt((x-16)**2+(y-16)**2);
+        if(d<14) blend(c,x,y, 40,100,10, Math.floor(22*(1-d/14)));
+    }
+
+    // Bow body (arc on the left, curves toward center)
+    for(let i=0;i<=24;i++) {
+        const t=i/24;
+        const by=Math.round(5+t*22);
+        const bx=Math.round(9 - Math.sin(t*Math.PI)*6);
+        set(c,bx,by, 160,100,25);
+        blend(c,bx-1,by, 120,70,15, 180);
+        blend(c,bx+1,by, 180,130,50, 120);
+    }
+
+    // Bowstring (vertical line on bow left)
+    for(let y=5;y<=27;y++) blend(c,9,y, 220,200,120,200);
+
+    // Arrow shaft (diagonal, bottom-left to top-right)
+    line(c,8,24, 26,8, [200,160,50,230], 1);
+
+    // Arrowhead (top-right, pointing up-right)
+    set(c,27,7,  240,210,80);
+    set(c,26,6,  255,230,100);
+    set(c,28,8,  220,190,60);
+    blend(c,25,7, 200,170,40, 200);
+    blend(c,27,9, 200,170,40, 180);
+
+    // Fletching (bottom-left of arrow)
+    set(c,7,25,  200,80,40);
+    set(c,8,26,  200,80,40);
+    set(c,6,24,  180,60,30);
+    set(c,9,27,  180,60,30);
+
+    // XP orb (golden star, top-right corner)
+    circle(c,25,9, 3, [220,200,30,190], true);
+    set(c,25,9,  255,255,180);
+    // '+' inside orb
+    for(const [ox,oy] of [[25,8],[25,10],[24,9],[26,9]])
+        set(c,ox,oy, 255,255,255);
+
+    // XP sparkles floating
+    for(const [sx,sy] of [[6,6],[28,6],[5,28],[27,28],[16,3],[16,29]])
+        blend(c,sx,sy, 200,180,30,160);
+
+    // Outer ring (faint green)
+    circle(c,16,16, 14, [60,160,20,70]);
+
+    save(c,'cacador_icon.png');
+}
+
 console.log('All icons generated!');
