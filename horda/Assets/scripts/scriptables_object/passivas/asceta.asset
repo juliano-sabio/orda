@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0, type: 3}
+  m_Name: asceta
+  m_EditorClassIdentifier: Assembly-CSharp::PassiveData
+  passiveName: "Asceta"
+  description: "Equil\xEDbrio entre ataque, defesa e recupera\xE7\xE3o. Ganhe +6 ATQ, +6 DEF, +1/s de regenera\xE7\xE3o e 10% mais XP."
+  passiveIcon: {fileID: 21300000, guid: f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6, type: 3}
+  xpBonusPercent: 0.1
+  attackBonus: 6
+  defenseBonus: 6
+  speedBonus: 0
+  healthBonus: 0
+  regenBonus: 1
+  cooldownReduction: 0
+  isUnlocked: 1
+  requiredLevel: 1

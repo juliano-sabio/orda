@@ -889,7 +889,7 @@ public class PlayerStats : MonoBehaviour
         GetComponent<LevelUpEffect>()?.Executar(level);
 
         maxHealth += 10f;
-        health = maxHealth;
+        health = Mathf.Min(health, maxHealth);
         attack += 2f;
         defense += 1f;
         speed += 0.5f;
@@ -954,7 +954,15 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
 
         if (health <= 0f)
+        {
+            var folego = GetComponent<UltimoFolegoPassiva>();
+            if (folego != null && folego.TentarSobreviver())
+            {
+                UpdateUI();
+                return;
+            }
             Die();
+        }
     }
 
     public void Heal(float healAmount)
@@ -1098,7 +1106,41 @@ public class PlayerStats : MonoBehaviour
             defenseActivationInterval *= (1f - p.cooldownReduction);
         }
 
+        if (!string.IsNullOrEmpty(p.behaviorScriptName))
+            AplicarComportamentoPassiva(p.behaviorScriptName);
+
         if (uiManager != null) uiManager.SetPassivaIcon(p.passiveIcon, p.passiveName);
+    }
+
+    void AplicarComportamentoPassiva(string behaviorName)
+    {
+        switch (behaviorName)
+        {
+            case "UltimoFolegoPassiva":
+                if (GetComponent<UltimoFolegoPassiva>() == null)
+                    gameObject.AddComponent<UltimoFolegoPassiva>();
+                break;
+            case "SombraVelozPassiva":
+                if (GetComponent<SombraVelozPassiva>() == null)
+                    gameObject.AddComponent<SombraVelozPassiva>();
+                break;
+            case "PulsoVitalPassiva":
+                if (GetComponent<PulsoVitalPassiva>() == null)
+                    gameObject.AddComponent<PulsoVitalPassiva>();
+                break;
+            case "ImposicaoPassiva":
+                if (GetComponent<ImposicaoPassiva>() == null)
+                    gameObject.AddComponent<ImposicaoPassiva>();
+                break;
+            case "FocoPassiva":
+                if (GetComponent<FocoPassiva>() == null)
+                    gameObject.AddComponent<FocoPassiva>();
+                break;
+            case "RessurgenciaPassiva":
+                if (GetComponent<RessurgenciaPassiva>() == null)
+                    gameObject.AddComponent<RessurgenciaPassiva>();
+                break;
+        }
     }
 
     void AplicarComportamentoUltimate(UltimateData ultimateData)

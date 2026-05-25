@@ -17,7 +17,7 @@ MonoBehaviour:
   ultimateIcon: {fileID: -3305714898862992543, guid: 4345f8e660293af418cd2da5dd63d0fb, type: 3}
   cooldown: 28
   baseDamage: 50
-  areaOfEffect: 6
+  areaOfEffect: 12
   duration: 1
   element: 3
   specialEffect: "Ricochete em cadeia com visual de raio branco-ciano."

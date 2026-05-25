@@ -18,6 +18,9 @@ public class PassiveData : ScriptableObject
     [Range(0f, 5f)]   public float regenBonus        = 0f;
     [Range(0f, 0.5f)] public float cooldownReduction = 0f;
 
+    [Header("Comportamento Especial")]
+    public string behaviorScriptName;
+
     [Header("Metadados")]
     public bool isUnlocked    = true;
     public int  requiredLevel = 1;

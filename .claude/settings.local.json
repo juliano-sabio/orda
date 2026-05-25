@@ -87,7 +87,22 @@
       "Bash(node -e \"const {createCanvas}=require\\('canvas'\\);const c=createCanvas\\(1,1\\);console.log\\('ok'\\)\")",
       "Bash(node -e \"console.log\\('ok'\\)\")",
       "Bash(node -e *)",
-      "Bash(Get-Content \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\ultimates\\\\raio_certeiro.asset.meta\" -ErrorAction SilentlyContinue)"
+      "Bash(Get-Content \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\ultimates\\\\raio_certeiro.asset.meta\" -ErrorAction SilentlyContinue)",
+      "Bash(node \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\scriptables_object\\\\passivas\\\\gen_asceta.js\")",
+      "Bash(node \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\scriptables_object\\\\passivas\\\\gen_ultimo_folego.js\")",
+      "Bash(node \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\scriptables_object\\\\passivas\\\\gen_sombra_veloz.js\")",
+      "Bash(node gen_pulso_vital.js)",
+      "Bash(node gen_imposicao.js)",
+      "Bash(node gen_foco.js)",
+      "Bash(node gen_ressurgencia.js)",
+      "Bash(xargs grep -l \"InimigoController\\\\|SlimeColorida\")",
+      "Bash(python3 -c \"import uuid; print\\(uuid.uuid4\\(\\).hex\\)\")",
+      "Bash(powershell -command \"[System.Guid]::NewGuid\\(\\).ToString\\('N'\\)\")",
+      "Bash(powershell -command \"[System.Guid]::NewGuid\\(\\).ToString\\('N'\\); [System.Guid]::NewGuid\\(\\).ToString\\('N'\\)\")",
+      "Bash(powershell -command \"1..10 | ForEach-Object { [System.Math]::Abs\\([System.BitConverter]::ToInt64\\([System.Guid]::NewGuid\\(\\).ToByteArray\\(\\), 0\\)\\) }\")",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Library\\\\Artifacts\" | Select-Object -First 5 | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Library\\\\Artifacts\\\\05\" | ForEach-Object { $_.Name })"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

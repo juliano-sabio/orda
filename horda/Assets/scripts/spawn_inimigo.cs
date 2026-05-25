@@ -142,31 +142,30 @@ public class EnemySpawnerCompleto : MonoBehaviour
         }
     }
 
-    // A FUNÇÃO QUE RESOLVE SEU PROBLEMA
+    bool ForaDaCamera(Vector2 pos)
+    {
+        if (Camera.main == null) return true;
+        Vector3 vp = Camera.main.WorldToViewportPoint(pos);
+        const float margem = 0.05f;
+        return vp.x < -margem || vp.x > 1f + margem || vp.y < -margem || vp.y > 1f + margem;
+    }
+
     Vector2? ObterPosicaoLivre()
     {
         for (int i = 0; i < tentativasMaximas; i++)
         {
-            // 1. Sorteia uma posição ao redor do player
-            float angulo = Random.Range(0f, 360f);
+            float angulo    = Random.Range(0f, 360f);
             Vector2 direcao = new Vector2(Mathf.Cos(angulo * Mathf.Deg2Rad), Mathf.Sin(angulo * Mathf.Deg2Rad));
             float distancia = Random.Range(distanciaMinima, distanciaMaxima);
-            Vector2 pontoSorteado = (Vector2)player.position + (direcao * distancia);
+            Vector2 ponto   = (Vector2)player.position + direcao * distancia;
 
-            // 2. Checa se nesse ponto existe algum colisor das camadas bloqueadas
-            // O OverlapCircle retorna qualquer colisor que tocar esse círculo
-            Collider2D colisorEncontrado = Physics2D.OverlapCircle(pontoSorteado, raioDeChecagem, camadasBloqueadas);
+            if (!ForaDaCamera(ponto)) continue;
 
-            if (colisorEncontrado == null)
-            {
-                // Se for null, o caminho está livre!
-                return pontoSorteado;
-            }
-
-            // Se chegou aqui, ele bateu em algo e o loop vai tentar de novo (até o limite de tentativasMaximas)
+            if (Physics2D.OverlapCircle(ponto, raioDeChecagem, camadasBloqueadas) == null)
+                return ponto;
         }
 
-        return null; // Falhou em achar um lugar limpo
+        return null;
     }
 
     TipoInimigo EscolherInimigoPorPeso()

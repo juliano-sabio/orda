@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 5527219092308542028}
   - component: {fileID: 81561910164020121}
   - component: {fileID: 7158926547638021958}
+  - component: {fileID: 1234509876543210987}
   m_Layer: 7
   m_Name: slime_curativa
   m_TagString: Enemy
@@ -258,6 +259,24 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0.01289343, y: 0.018253854}
   m_Radius: 0.07722204
+--- !u!114 &1234509876543210987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7137502516410988737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::SlimeCurativaOnda
+  raioOnda: 12
+  curaOnda: 40
+  duracaoOnda: 0.6
+  camadaInimigos:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!50 &7158926547638021958
 Rigidbody2D:
   serializedVersion: 5

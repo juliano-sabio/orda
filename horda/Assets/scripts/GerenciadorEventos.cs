@@ -14,6 +14,7 @@ public enum TipoEvento
     ColetarXP,
     UsarUltimate,
     ColetarEspirito,
+    EliminarSlimeColorida,
 }
 
 [Serializable]
@@ -55,6 +56,10 @@ public class GerenciadorEventos : MonoBehaviour
 
     [Header("Espíritos do Evento")]
     public GameObject espiritoEventoPrefab;
+    public Tilemap    terrenoBase;
+
+    [Header("Slime Colorida")]
+    public GameObject slimeColoridaPrefab;
     public float      distMinEspiritos    = 18f;
     public LayerMask  camadasObstaculo;
     public float      raioChecagemSpawn   = 0.5f;
@@ -66,6 +71,8 @@ public class GerenciadorEventos : MonoBehaviour
 
     // Estado do evento
     private readonly List<GameObject> espiritosMapa = new List<GameObject>();
+    private GameObject    slimeColoridaAtiva;
+    private IndicadorSlime indicadorSlime;
     private Tilemap[] tilemapsObstaculo;
 
     private bool eventoAtivo;
@@ -137,6 +144,16 @@ public class GerenciadorEventos : MonoBehaviour
         timerContagem -= Time.deltaTime;
         AtualizarUI();
 
+        if (eventoAtual.tipo == TipoEvento.EliminarSlimeColorida
+            && slimeColoridaAtiva != null
+            && indicadorSlime == null
+            && (eventoAtual.duracao - timerContagem) >= 180f)
+        {
+            var go = new GameObject("IndicadorSlime");
+            indicadorSlime = go.AddComponent<IndicadorSlime>();
+            indicadorSlime.alvo = slimeColoridaAtiva.transform;
+        }
+
         if (timerContagem <= 0f)
             EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver);
     }
@@ -173,12 +190,27 @@ public class GerenciadorEventos : MonoBehaviour
             int spawn = eventoAtual.quantidadeSpawn > 0 ? eventoAtual.quantidadeSpawn : eventoAtual.quantidade;
             SpawnEspiritos(spawn);
         }
+        else if (eventoAtual.tipo == TipoEvento.EliminarSlimeColorida)
+        {
+            SpawnSlimeColorida();
+        }
     }
 
     void EncerrarEvento(bool sucesso)
     {
         eventoAtivo = false;
         LimparEspiritos();
+
+        if (slimeColoridaAtiva != null)
+        {
+            Destroy(slimeColoridaAtiva);
+            slimeColoridaAtiva = null;
+        }
+        if (indicadorSlime != null)
+        {
+            Destroy(indicadorSlime.gameObject);
+            indicadorSlime = null;
+        }
 
         if (sucesso && playerStats != null)
             playerStats.Heal(playerStats.maxHealth * 0.15f);
@@ -354,13 +386,17 @@ public class GerenciadorEventos : MonoBehaviour
     bool PosicaoTemObstaculo(Vector2 pos)
     {
         // Cacheia na primeira chamada: layer 3 OU qualquer tilemap com TilemapCollider2D
+        // Exclui o terrenoBase para não tratar o chão como obstáculo
         if (tilemapsObstaculo == null || tilemapsObstaculo.Length == 0)
         {
             var todos = FindObjectsOfType<Tilemap>();
             var lista = new List<Tilemap>();
             foreach (var tm in todos)
+            {
+                if (terrenoBase != null && tm == terrenoBase) continue;
                 if (tm.gameObject.layer == 3 || tm.GetComponent<TilemapCollider2D>() != null)
                     lista.Add(tm);
+            }
             tilemapsObstaculo = lista.ToArray();
         }
 
@@ -378,17 +414,44 @@ public class GerenciadorEventos : MonoBehaviour
         return Physics2D.OverlapBox(pos, Vector2.one * 1.5f, 0f, camadasObstaculo) != null;
     }
 
+    // Verifica se pos está completamente dentro do terreno_base (checa centro + 4 pontos cardeais)
+    bool PosicaoNoTerreno(Vector2 pos)
+    {
+        if (terrenoBase == null) return true;
+        const float r = 0.8f;
+        Vector2[] pts = { pos, pos + Vector2.right * r, pos - Vector2.right * r,
+                               pos + Vector2.up   * r, pos - Vector2.up   * r };
+        foreach (var p in pts)
+            if (terrenoBase.GetTile(terrenoBase.WorldToCell(p)) == null) return false;
+        return true;
+    }
+
+    // Método público para EspiritoEvento verificar durante o drift
+    public bool PosicaoValida(Vector2 pos)
+        => PosicaoNoTerreno(pos) && !PosicaoTemObstaculo(pos);
+
     void SpawnEspiritos(int quantidade)
     {
         if (espiritoEventoPrefab == null) return;
 
-        Bounds  mapa        = CalcularBoundsMapa();
-        var     posicoes    = new List<Vector2>();
-        const   int tentativasMax = 50;
+        Bounds mapa;
+        if (terrenoBase != null)
+        {
+            terrenoBase.CompressBounds();
+            mapa = new Bounds();
+            mapa.SetMinMax(
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max)
+            );
+        }
+        else
+        {
+            mapa = CalcularBoundsMapa();
+        }
 
-        // Fase 1: tenta respeitar distMinEspiritos
-        // Fase 2: se não couberem todos, relaxa a distância mínima
-        float distAtual = distMinEspiritos;
+        var   posicoes      = new List<Vector2>();
+        const int tentativasMax = 60;
+        float distAtual     = distMinEspiritos;
 
         for (int i = 0; i < quantidade; i++)
         {
@@ -401,7 +464,7 @@ public class GerenciadorEventos : MonoBehaviour
                     UnityEngine.Random.Range(mapa.min.y, mapa.max.y)
                 );
 
-                if (PosicaoTemObstaculo(candidato)) continue;
+                if (!PosicaoValida(candidato)) continue;
 
                 bool longe = true;
                 foreach (var p in posicoes)
@@ -417,13 +480,60 @@ public class GerenciadorEventos : MonoBehaviour
                 break;
             }
 
-            // Se não achou, relaxa a distância e tenta de novo neste índice
             if (!encontrou && distAtual > 3f)
             {
                 distAtual = Mathf.Max(distAtual - 2f, 3f);
-                i--; // repete este índice com distância menor
+                i--;
             }
         }
+    }
+
+    void SpawnSlimeColorida()
+    {
+        if (slimeColoridaPrefab == null) return;
+
+        Bounds mapa;
+        if (terrenoBase != null)
+        {
+            terrenoBase.CompressBounds();
+            mapa = new Bounds();
+            mapa.SetMinMax(
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max)
+            );
+        }
+        else
+        {
+            mapa = CalcularBoundsMapa();
+        }
+
+        Vector2 posPlayer = playerStats != null
+            ? (Vector2)playerStats.transform.position
+            : Vector2.zero;
+
+        for (int t = 0; t < 80; t++)
+        {
+            Vector2 candidato = new Vector2(
+                UnityEngine.Random.Range(mapa.min.x, mapa.max.x),
+                UnityEngine.Random.Range(mapa.min.y, mapa.max.y)
+            );
+            if (!PosicaoValida(candidato)) continue;
+            if (Vector2.Distance(candidato, posPlayer) < 8f) continue;
+
+            slimeColoridaAtiva = Instantiate(
+                slimeColoridaPrefab,
+                new Vector3(candidato.x, candidato.y, 0f),
+                Quaternion.identity
+            );
+            return;
+        }
+    }
+
+    public void RegistrarSlimeColoridaEliminada()
+    {
+        if (!eventoAtivo || eventoAtual.tipo != TipoEvento.EliminarSlimeColorida) return;
+        slimeColoridaAtiva = null;
+        EncerrarEvento(true);
     }
 
     void LimparEspiritos()

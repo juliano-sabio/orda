@@ -59,16 +59,18 @@ public class InimigoController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Color corOriginal;
     private Rigidbody2D rb;
+    private DanoInimigo danoInimigoComponent;
+    private float proximoContato = 0f;
+    private const float INTERVALO_CONTATO = 1f;
 
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
+        danoInimigoComponent = GetComponent<DanoInimigo>();
 
         if (spriteRenderer != null)
-        {
             corOriginal = spriteRenderer.color;
-        }
 
         InicializarComData();
     }
@@ -547,6 +549,39 @@ public class InimigoController : MonoBehaviour
                     Instantiate(drop.prefab, transform.position, Quaternion.identity);
             }
         }
+    }
+
+    // ── Dano por contato (usado quando DanoInimigo não está presente) ──────────
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (danoInimigoComponent != null || estaMorrendo) return;
+        if (other.CompareTag("Player")) AplicarDanoContato(other.GetComponent<PlayerStats>());
+    }
+
+    void OnTriggerStay2D(Collider2D other)
+    {
+        if (danoInimigoComponent != null || estaMorrendo || Time.time < proximoContato) return;
+        if (other.CompareTag("Player")) AplicarDanoContato(other.GetComponent<PlayerStats>());
+    }
+
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (danoInimigoComponent != null || estaMorrendo) return;
+        if (col.gameObject.CompareTag("Player")) AplicarDanoContato(col.gameObject.GetComponent<PlayerStats>());
+    }
+
+    void OnCollisionStay2D(Collision2D col)
+    {
+        if (danoInimigoComponent != null || estaMorrendo || Time.time < proximoContato) return;
+        if (col.gameObject.CompareTag("Player")) AplicarDanoContato(col.gameObject.GetComponent<PlayerStats>());
+    }
+
+    void AplicarDanoContato(PlayerStats stats)
+    {
+        if (stats == null) return;
+        stats.TakeDamage(danoAtual);
+        proximoContato = Time.time + INTERVALO_CONTATO;
     }
 
     public float GetPorcentagemVida()

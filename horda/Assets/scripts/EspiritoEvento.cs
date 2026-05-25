@@ -65,7 +65,14 @@ public class EspiritoEvento : MonoBehaviour
         if (timerDrift >= intervaloDrift)
             MudarDrift();
 
-        posBase += driftDir * velocidadeDrift * Time.deltaTime;
+        Vector2 proxBase = posBase + driftDir * velocidadeDrift * Time.deltaTime;
+
+        var ge = GerenciadorEventos.Instance;
+        if (ge != null && !ge.PosicaoValida(proxBase))
+            MudarDrift(); // bate em obstáculo ou sai do terreno → nova direção aleatória
+        else
+            posBase = proxBase;
+
         float bob = Mathf.Sin(tempoVida * frequenciaBob * Mathf.PI * 2f) * amplitudeBob;
         transform.position = new Vector3(posBase.x, posBase.y + bob, transform.position.z);
     }
@@ -137,14 +144,14 @@ public class EspiritoEvento : MonoBehaviour
     void CriarBrilho()
     {
         var go = new GameObject("brilho");
-        go.transform.SetParent(transform);
-        go.transform.localPosition = Vector3.zero;
+        go.transform.SetParent(transform, false);
+        go.transform.localPosition = new Vector3(0f, 0.37f, 0f);
 
         luzBrilho = go.AddComponent<Light2D>();
-        luzBrilho.lightType          = Light2D.LightType.Point;
-        luzBrilho.color              = new Color(0.65f, 0.9f, 1f);
-        luzBrilho.intensity          = 1.1f;
-        luzBrilho.pointLightOuterRadius = 2.2f;
+        luzBrilho.lightType             = Light2D.LightType.Point;
+        luzBrilho.color                 = new Color(0.65f, 0.1f, 1f);
+        luzBrilho.intensity             = 1.2f;
+        luzBrilho.pointLightOuterRadius = 2.4f;
         luzBrilho.pointLightInnerRadius = 0.2f;
     }
 
@@ -152,7 +159,7 @@ public class EspiritoEvento : MonoBehaviour
     {
         if (luzBrilho == null) return;
         float pulse = 1f + Mathf.Sin(tempoVida * 2.5f) * 0.18f;
-        luzBrilho.intensity = 1.1f * pulse;
+        luzBrilho.intensity = 1.2f * pulse;
     }
 
     void Coletar()
