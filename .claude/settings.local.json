@@ -102,7 +102,13 @@
       "Bash(powershell -command \"1..10 | ForEach-Object { [System.Math]::Abs\\([System.BitConverter]::ToInt64\\([System.Guid]::NewGuid\\(\\).ToByteArray\\(\\), 0\\)\\) }\")",
       "PowerShell(Get-ChildItem \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })",
       "PowerShell(Get-ChildItem \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Library\\\\Artifacts\" | Select-Object -First 5 | ForEach-Object { $_.Name })",
-      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Library\\\\Artifacts\\\\05\" | ForEach-Object { $_.Name })"
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Library\\\\Artifacts\\\\05\" | ForEach-Object { $_.Name })",
+      "mcp__unity__script_apply_edits",
+      "mcp__unity__create_script",
+      "Bash(dir \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\eventos\\\\slimeeventocarga\")",
+      "Bash(findstr /i slime)",
+      "Bash(grep ^guid: c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/prefebs/inimigos/__TRACKED_VAR__.prefab.meta)",
+      "Bash(grep -m1 '^--- !u!1 &' c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/prefebs/inimigos/__TRACKED_VAR__.prefab)"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

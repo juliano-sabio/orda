@@ -480,6 +480,10 @@ public class GameOverUI : MonoBehaviour
         GameObject eventoCanvas = GameObject.Find("EventoCanvas");
         if (eventoCanvas != null) Destroy(eventoCanvas);
 
+        // Borda sangrenta do evento Ceifador
+        GameObject bordaSangue = GameObject.Find("BordaSangue");
+        if (bordaSangue != null) Destroy(bordaSangue);
+
         if (GerenciadorEventos.Instance != null) Destroy(GerenciadorEventos.Instance.gameObject);
         if (UIManager.Instance != null)          Destroy(UIManager.Instance.gameObject);
         if (PauseManager.Instance != null)       Destroy(PauseManager.Instance.gameObject);

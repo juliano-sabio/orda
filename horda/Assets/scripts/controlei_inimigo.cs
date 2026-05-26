@@ -32,6 +32,8 @@ public class InimigoController : MonoBehaviour
     [Header("Dano Flutuante")]
     public float alturaDanoFlutuante = 2f;
     public bool mostrarDanoAposMorte = true;
+    public bool mostrarDanoFlutuante = true;
+    public bool imuneAoDano = false;
 
     [Header("Sistema de Cura")]
     public bool podeReceberCura = true;
@@ -112,7 +114,7 @@ public class InimigoController : MonoBehaviour
 
     public void ReceberDano(float dano, bool isCrit = false, bool mostrarNumero = true)
     {
-        if (estaMorrendo) return;
+        if (estaMorrendo || imuneAoDano) return;
 
         if (temBuffDefesa && bonusDefesa > 0)
         {
@@ -125,13 +127,13 @@ public class InimigoController : MonoBehaviour
         {
             float danoAoEscudo = Mathf.Min(dano, escudo.vidaAtual);
             dano = escudo.AbsorverDano(dano);
-            if (mostrarNumero) CriarTextoFlutuante(danoAoEscudo, new Color(0.7f, 0.4f, 1f), "", 28);
+            if (mostrarNumero && mostrarDanoFlutuante) CriarTextoFlutuante(danoAoEscudo, new Color(0.7f, 0.4f, 1f), "", 28);
             if (dano <= 0) return;
         }
 
         vidaAtual -= dano;
 
-        if (mostrarNumero) MostrarDanoFlutuante(dano, isCrit);
+        if (mostrarNumero && mostrarDanoFlutuante) MostrarDanoFlutuante(dano, isCrit);
         StartCoroutine(EfeitoVisualDano());
 
         if (vidaAtual <= 0)
