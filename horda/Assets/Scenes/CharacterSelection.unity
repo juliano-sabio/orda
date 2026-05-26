@@ -205,9 +205,9 @@ RectTransform:
   - {fileID: 1347887352}
   m_Father: {fileID: 815194298}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 1028.0432, y: 75}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &58437371
@@ -1216,9 +1216,9 @@ RectTransform:
   - {fileID: 2143803226}
   m_Father: {fileID: 815194298}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 788.0433, y: 75}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &491423479
@@ -1428,11 +1428,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSelectionManagerIntegrated
   characters: []
   stages: []
+  painelUltimates: {fileID: 0}
+  painelPassivas: {fileID: 0}
   coinsText: {fileID: 0}
   characterNameText: {fileID: 456452868}
   characterElementText: {fileID: 2086828229}
   characterDescriptionText: {fileID: 1723467628}
   elementBonusText: {fileID: 2035678834}
+  ultimateInfoText: {fileID: 0}
+  passivasInfoText: {fileID: 0}
+  characterPreviewName: {fileID: 0}
+  selectionUI: {fileID: 0}
   statusSliders: []
   upgradeButtons: []
   upgradeLevelTexts: []
@@ -2130,9 +2136,9 @@ RectTransform:
   - {fileID: 1517542777}
   m_Father: {fileID: 815194298}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 1268.0432, y: 75}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &777435573
@@ -2611,9 +2617,9 @@ RectTransform:
   - {fileID: 1624781168}
   m_Father: {fileID: 815194298}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 1148.0432, y: 75}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &954253541
@@ -2995,9 +3001,9 @@ RectTransform:
   - {fileID: 1375002150}
   m_Father: {fileID: 815194298}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 668.0433, y: 75}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1016474511
@@ -3536,9 +3542,9 @@ RectTransform:
   - {fileID: 722834181}
   m_Father: {fileID: 815194298}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 908.0433, y: 75}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1263710632
@@ -5257,6 +5263,11 @@ MonoBehaviour:
   characters:
   - {fileID: 11400000, guid: 3f72eee4c22cb074fa6d797a22524ea5, type: 2}
   numSlots: 6
+  spriteFundo: {fileID: 21300000, guid: 28e8bfafe339dde44b1b0993a3f80072, type: 3}
+  spritePainel: {fileID: 21300000, guid: 8f543b1945a01784099d8dbabfe6be04, type: 3}
+  spriteMolduraPreview: {fileID: 21300000, guid: e815b97a9782cf6479cbff5f685ad75e, type: 3}
+  spriteBarraTopo: {fileID: 21300000, guid: a9828c33fe034a148b745b16c93bac38, type: 3}
+  spriteBotao: {fileID: 21300000, guid: 9497a68472eb93f44b1f3aa5e853d789, type: 3}
 --- !u!4 &1895491438
 Transform:
   m_ObjectHideFlags: 0
