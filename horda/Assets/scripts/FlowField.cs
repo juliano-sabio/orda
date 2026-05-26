@@ -29,6 +29,7 @@ public class FlowField : MonoBehaviour
     private Vector2 gridCentroAtual;
     private float tempoUltimaReconstrucao = -999f;
     private Transform playerTransform;
+    public static Transform AlvoOverride;
 
     private static readonly Vector2Int[] dirs8 = {
         new Vector2Int( 1, 0), new Vector2Int(-1, 0),
@@ -85,13 +86,14 @@ public class FlowField : MonoBehaviour
     {
         if (playerTransform == null)
             playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (playerTransform == null) return;
 
-        // Quando o player sair da área do grid, recentra o grid nele
-        if (!Valido(MundoParaCelula(playerTransform.position))
+        Transform alvo = AlvoOverride != null ? AlvoOverride : playerTransform;
+        if (alvo == null) return;
+
+        if (!Valido(MundoParaCelula(alvo.position))
             && Time.time - tempoUltimaReconstrucao >= intervaloReconstrucao)
         {
-            ConstruirGridEmTorno(playerTransform.position);
+            ConstruirGridEmTorno(alvo.position);
             tempoUltimaReconstrucao = Time.time;
         }
 
@@ -100,7 +102,9 @@ public class FlowField : MonoBehaviour
 
     void Recalcular()
     {
-        Vector2Int dest = MundoParaCelula(playerTransform.position);
+        Transform alvo = AlvoOverride != null ? AlvoOverride : playerTransform;
+        if (alvo == null) return;
+        Vector2Int dest = MundoParaCelula(alvo.position);
         if (!Valido(dest)) return;
 
         // BFS a partir do player — propaga custo para toda a grade

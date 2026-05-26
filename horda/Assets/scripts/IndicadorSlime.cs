@@ -5,6 +5,7 @@ using TMPro;
 public class IndicadorSlime : MonoBehaviour
 {
     public Transform alvo;
+    public Color     corSeta = new Color(1f, 0.25f, 0.9f);
 
     private Canvas      canvas;
     private RectTransform seta;
@@ -49,7 +50,7 @@ public class IndicadorSlime : MonoBehaviour
         var arrowTxt = arrowGO.AddComponent<TextMeshProUGUI>();
         arrowTxt.text      = "▲";
         arrowTxt.fontSize  = 48;
-        arrowTxt.color     = new Color(1f, 0.25f, 0.9f);
+        arrowTxt.color     = corSeta;
         arrowTxt.alignment = TextAlignmentOptions.Center;
         arrowTxt.enableWordWrapping = false;
 

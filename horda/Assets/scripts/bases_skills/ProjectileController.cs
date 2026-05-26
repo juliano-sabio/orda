@@ -275,6 +275,9 @@ public class ProjectileController2D : MonoBehaviour
         if (obj.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) return false;
         if (obj.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) return false;
 
+        // Slime do evento percurso é aliada — nunca é alvo do player
+        if (obj.GetComponent<SlimePercursoEvento>() != null) return false;
+
         if (obj.tag == "Enemy" || obj.tag == "enemy")
             return true;
 

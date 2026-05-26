@@ -15,6 +15,8 @@ public enum TipoEvento
     UsarUltimate,
     ColetarEspirito,
     EliminarSlimeColorida,
+    Ceifador,
+    SlimePercurso,
 }
 
 [Serializable]
@@ -60,6 +62,15 @@ public class GerenciadorEventos : MonoBehaviour
 
     [Header("Slime Colorida")]
     public GameObject slimeColoridaPrefab;
+
+    [Header("Ceifador")]
+    public GameObject ceifadorPrefab;
+
+    [Header("Slime Percurso")]
+    public GameObject slimePercursoPrefab;
+    public GameObject[] prefabsInimigosPercurso;
+    public int          qtdInimigosPercurso = 15;
+    public float        insetCanto          = 6f;
     public float      distMinEspiritos    = 18f;
     public LayerMask  camadasObstaculo;
     public float      raioChecagemSpawn   = 0.5f;
@@ -73,6 +84,12 @@ public class GerenciadorEventos : MonoBehaviour
     private readonly List<GameObject> espiritosMapa = new List<GameObject>();
     private GameObject    slimeColoridaAtiva;
     private IndicadorSlime indicadorSlime;
+    private readonly List<GameObject> ceifadoresMapa = new List<GameObject>();
+    private BordaSangueEvento bordaSangue;
+
+    private SlimePercursoEvento slimePercurso;
+    private readonly List<GameObject> inimigosPercurso = new List<GameObject>();
+    private Coroutine corSpawnPercurso;
     private Tilemap[] tilemapsObstaculo;
 
     private bool eventoAtivo;
@@ -154,8 +171,21 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.alvo = slimeColoridaAtiva.transform;
         }
 
+        if (eventoAtual.tipo == TipoEvento.SlimePercurso
+            && slimePercurso != null
+            && indicadorSlime == null
+            && (eventoAtual.duracao - timerContagem) >= 15f)
+        {
+            var go = new GameObject("IndicadorSlimePercurso");
+            indicadorSlime = go.AddComponent<IndicadorSlime>();
+            indicadorSlime.alvo     = slimePercurso.transform;
+            indicadorSlime.corSeta  = new Color(0.2f, 1f, 0.45f);
+        }
+
         if (timerContagem <= 0f)
-            EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver);
+            EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver
+                        || eventoAtual.tipo == TipoEvento.Ceifador
+                        || (eventoAtual.tipo == TipoEvento.SlimePercurso && slimePercurso != null && slimePercurso.Chegou));
     }
 
     // Tempo decorrido desde o início — usa TimerManager se disponível
@@ -169,32 +199,43 @@ public class GerenciadorEventos : MonoBehaviour
     // ──────────────────────────────────────────────────────────
     // Lógica do evento
 
-    void TentarIniciarEvento()
+void TentarIniciarEvento()
+{
+    if (eventos == null || eventos.Count == 0) return;
+
+    if (painelEvento == null)
+        CriarPainelUI();
+
+    eventoAtual = eventos[UnityEngine.Random.Range(0, eventos.Count)];
+    eventoAtivo = true;
+    timerContagem = eventoAtual.duracao;
+    progresso = 0;
+    xpAcumulada = 0f;
+
+    Debug.Log($"[GerenciadorEventos] Iniciando evento: {eventoAtual.nome} (tipo={eventoAtual.tipo})");
+
+    MostrarPainel(true);
+    uiManager?.ShowSkillAcquired("⚡ EVENTO!", eventoAtual.nome);
+
+    if (eventoAtual.tipo == TipoEvento.ColetarEspirito)
     {
-        if (eventos == null || eventos.Count == 0) return;
-
-        if (painelEvento == null)
-            CriarPainelUI();
-
-        eventoAtual = eventos[UnityEngine.Random.Range(0, eventos.Count)];
-        eventoAtivo = true;
-        timerContagem = eventoAtual.duracao;
-        progresso = 0;
-        xpAcumulada = 0f;
-
-        MostrarPainel(true);
-        uiManager?.ShowSkillAcquired("⚡ EVENTO!", eventoAtual.nome);
-
-        if (eventoAtual.tipo == TipoEvento.ColetarEspirito)
-        {
-            int spawn = eventoAtual.quantidadeSpawn > 0 ? eventoAtual.quantidadeSpawn : eventoAtual.quantidade;
-            SpawnEspiritos(spawn);
-        }
-        else if (eventoAtual.tipo == TipoEvento.EliminarSlimeColorida)
-        {
-            SpawnSlimeColorida();
-        }
+        int spawn = eventoAtual.quantidadeSpawn > 0 ? eventoAtual.quantidadeSpawn : eventoAtual.quantidade;
+        SpawnEspiritos(spawn);
     }
+    else if (eventoAtual.tipo == TipoEvento.EliminarSlimeColorida)
+    {
+        SpawnSlimeColorida();
+    }
+    else if (eventoAtual.tipo == TipoEvento.Ceifador)
+    {
+        int qtd = eventoAtual.quantidade > 0 ? eventoAtual.quantidade : 6;
+        SpawnCeifadores(qtd);
+    }
+    else if (eventoAtual.tipo == TipoEvento.SlimePercurso)
+    {
+        SpawnSlimePercurso();
+    }
+}
 
     void EncerrarEvento(bool sucesso)
     {
@@ -211,6 +252,9 @@ public class GerenciadorEventos : MonoBehaviour
             Destroy(indicadorSlime.gameObject);
             indicadorSlime = null;
         }
+
+        LimparCeifadores();
+        LimparSlimePercurso();
 
         if (sucesso && playerStats != null)
             playerStats.Heal(playerStats.maxHealth * 0.15f);
@@ -528,6 +572,228 @@ public class GerenciadorEventos : MonoBehaviour
             return;
         }
     }
+
+void SpawnCeifadores(int quantidade)
+{
+    if (ceifadorPrefab == null) { Debug.LogError("[Ceifador] ceifadorPrefab é null!"); return; }
+
+    Bounds mapa;
+    if (terrenoBase != null)
+    {
+        terrenoBase.CompressBounds();
+        mapa = new Bounds();
+        mapa.SetMinMax(
+            terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+            terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max)
+        );
+    }
+    else
+    {
+        mapa = CalcularBoundsMapa();
+    }
+
+    Debug.Log($"[Ceifador] Tentando spawnar {quantidade} ceifadores. Bounds: {mapa.min} a {mapa.max}");
+
+    Vector2 posPlayer = playerStats != null
+        ? (Vector2)playerStats.transform.position
+        : Vector2.zero;
+
+    var posicoes = new List<Vector2>();
+    int spawned = 0;
+
+    for (int i = 0; i < quantidade; i++)
+    {
+        bool encontrou = false;
+        for (int t = 0; t < 80; t++)
+        {
+            Vector2 candidato = new Vector2(
+                UnityEngine.Random.Range(mapa.min.x, mapa.max.x),
+                UnityEngine.Random.Range(mapa.min.y, mapa.max.y)
+            );
+            if (!PosicaoValida(candidato)) continue;
+            // raio físico do ceifador: escala 5 × collider 0.4 = 2.0 — verifica obstáculos na área real
+            int maskObst = camadasObstaculo != 0 ? (int)camadasObstaculo : (1 << 3);
+            if (Physics2D.OverlapCircle(candidato, 2.2f, maskObst)) continue;
+            if (Vector2.Distance(candidato, posPlayer) < 8f) continue;
+
+            bool longe = true;
+            foreach (var p in posicoes)
+                if (Vector2.Distance(candidato, p) < 5f) { longe = false; break; }
+            if (!longe) continue;
+
+            posicoes.Add(candidato);
+            var go = Instantiate(ceifadorPrefab,
+                new Vector3(candidato.x, candidato.y, 0f),
+                Quaternion.identity);
+            ceifadoresMapa.Add(go);
+            spawned++;
+            encontrou = true;
+            break;
+        }
+        if (!encontrou) break;
+    }
+    Debug.Log($"[Ceifador] Spawnou {spawned}/{quantidade} ceifadores.");
+
+    // Borda sangrenta
+    if (bordaSangue == null)
+    {
+        var go = new GameObject("BordaSangue");
+        bordaSangue = go.AddComponent<BordaSangueEvento>();
+        bordaSangue.Mostrar();
+    }
+}
+
+void LimparCeifadores()
+{
+    foreach (var c in ceifadoresMapa)
+        if (c != null) Destroy(c);
+    ceifadoresMapa.Clear();
+
+    if (bordaSangue != null)
+    {
+        bordaSangue.Esconder();
+        bordaSangue = null;
+    }
+}
+
+// Busca posição válida partindo do canto em direção ao centro do mapa
+Vector2 CantoDentroDoMapa(Vector2 canto, Bounds mapa, float raioMax = 60f)
+{
+    int maskObst  = camadasObstaculo != 0 ? (int)camadasObstaculo : (1 << 3);
+    Vector2 dir   = ((Vector2)mapa.center - canto).normalized;
+
+    for (float d = 0f; d <= raioMax; d += 0.5f)
+    {
+        Vector2 p = canto + dir * d;
+        if (!mapa.Contains(new Vector3(p.x, p.y, 0f)))    continue;
+        if (Physics2D.OverlapCircle(p, 2.2f, maskObst))   continue;
+        if (!PosicaoValida(p))                             continue;
+        return p;
+    }
+
+    // Fallback: amostragem aleatória dentro do mapa
+    for (int i = 0; i < 300; i++)
+    {
+        Vector2 p = new Vector2(
+            UnityEngine.Random.Range(mapa.min.x + 2f, mapa.max.x - 2f),
+            UnityEngine.Random.Range(mapa.min.y + 2f, mapa.max.y - 2f)
+        );
+        if (Physics2D.OverlapCircle(p, 2.2f, maskObst)) continue;
+        if (!PosicaoValida(p))                           continue;
+        return p;
+    }
+    return (Vector2)mapa.center;
+}
+
+void SpawnSlimePercurso()
+{
+    if (slimePercursoPrefab == null) { Debug.LogError("[SlimePercurso] slimePercursoPrefab é null!"); return; }
+
+    Bounds mapa;
+    if (terrenoBase != null)
+    {
+        terrenoBase.CompressBounds();
+        mapa = new Bounds();
+        mapa.SetMinMax(
+            terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+            terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max)
+        );
+    }
+    else
+    {
+        mapa = CalcularBoundsMapa();
+    }
+
+    float ins = insetCanto > 0 ? insetCanto : 6f;
+
+    // Escolhe 2 cantos diagonais aleatoriamente
+    Vector2[] cantos = new Vector2[]
+    {
+        new Vector2(mapa.min.x + ins, mapa.min.y + ins),
+        new Vector2(mapa.max.x - ins, mapa.min.y + ins),
+        new Vector2(mapa.min.x + ins, mapa.max.y - ins),
+        new Vector2(mapa.max.x - ins, mapa.max.y - ins),
+    };
+    int idxA = UnityEngine.Random.Range(0, 2);           // 0 ou 1
+    int idxB = idxA == 0 ? 3 : 2;                        // diagonal oposta
+
+    Vector2 origem  = CantoDentroDoMapa(cantos[idxA], mapa);
+    Vector2 destino = CantoDentroDoMapa(cantos[idxB], mapa);
+
+    // Se os dois cantos colapsaram no mesmo ponto, tenta o par alternativo
+    if (Vector2.Distance(origem, destino) < 10f)
+    {
+        int idxA2 = idxA == 0 ? 1 : 0;
+        int idxB2 = idxA2 == 0 ? 3 : 2;
+        Vector2 alt1 = CantoDentroDoMapa(cantos[idxA2], mapa);
+        Vector2 alt2 = CantoDentroDoMapa(cantos[idxB2], mapa);
+        if (Vector2.Distance(alt1, alt2) > Vector2.Distance(origem, destino))
+        { origem = alt1; destino = alt2; }
+        Debug.LogWarning($"[SlimePercurso] Cantos muito próximos, usando alternativa: {origem} → {destino}");
+    }
+
+    var go = Instantiate(slimePercursoPrefab, new Vector3(origem.x, origem.y, 0f), Quaternion.identity);
+    slimePercurso = go.GetComponent<SlimePercursoEvento>();
+    if (slimePercurso == null) { Debug.LogError("[SlimePercurso] prefab sem SlimePercursoEvento!"); Destroy(go); return; }
+
+    slimePercurso.OnChegou += () => { if (this != null && eventoAtivo) EncerrarEvento(true);  };
+    slimePercurso.OnMorreu += () => { if (this != null && eventoAtivo) EncerrarEvento(false); };
+
+    slimePercurso.IniciarPercurso(destino);
+
+    // Redireciona FlowField para a slime
+    FlowField.AlvoOverride = slimePercurso.transform;
+
+    // Spawn de inimigos em ondas
+    if (prefabsInimigosPercurso != null && prefabsInimigosPercurso.Length > 0)
+        corSpawnPercurso = StartCoroutine(SpawnInimigosPercurso());
+
+    Debug.Log($"[SlimePercurso] Slime spawnada em {origem} → destino {destino}");
+}
+
+IEnumerator SpawnInimigosPercurso()
+{
+    int spawned = 0;
+    while (eventoAtivo && slimePercurso != null && !slimePercurso.Chegou && spawned < qtdInimigosPercurso)
+    {
+        yield return new WaitForSeconds(4f);
+        if (!eventoAtivo || slimePercurso == null) yield break;
+
+        Vector2 posPlayer = playerStats != null ? (Vector2)playerStats.transform.position : Vector2.zero;
+        for (int t = 0; t < 30; t++)
+        {
+            float ang = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+            float dist = UnityEngine.Random.Range(10f, 20f);
+            Vector2 pos = posPlayer + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * dist;
+            if (!PosicaoValida(pos)) continue;
+            int maskObst = camadasObstaculo != 0 ? (int)camadasObstaculo : (1 << 3);
+            if (Physics2D.OverlapCircle(pos, 1f, maskObst)) continue;
+
+            var prefab = prefabsInimigosPercurso[UnityEngine.Random.Range(0, prefabsInimigosPercurso.Length)];
+            var go = Instantiate(prefab, new Vector3(pos.x, pos.y, 0f), Quaternion.identity);
+            inimigosPercurso.Add(go);
+            spawned++;
+            break;
+        }
+    }
+}
+
+void LimparSlimePercurso()
+{
+    FlowField.AlvoOverride = null;
+
+    if (corSpawnPercurso != null && this != null) { StopCoroutine(corSpawnPercurso); corSpawnPercurso = null; }
+
+    if (slimePercurso != null)
+    {
+        Destroy(slimePercurso.gameObject);
+        slimePercurso = null;
+    }
+
+    foreach (var e in inimigosPercurso)
+        if (e != null) Destroy(e);
+    inimigosPercurso.Clear();
+}
 
     public void RegistrarSlimeColoridaEliminada()
     {

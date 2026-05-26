@@ -31,9 +31,10 @@ public class movi_inimigo : MonoBehaviour
 
         // FlowField dá a direção ótima desviando de obstáculos;
         // fallback para linha reta se o FlowField não estiver na cena
+        Transform alvo = FlowField.AlvoOverride != null ? FlowField.AlvoOverride : player;
         Vector2 dir = FlowField.Instance != null
             ? FlowField.Instance.ObterDirecao(transform.position)
-            : ((Vector2)player.position - (Vector2)transform.position).normalized;
+            : (alvo != null ? ((Vector2)alvo.position - (Vector2)transform.position).normalized : Vector2.zero);
 
         direcaoMovimento = Vector2.Lerp(direcaoMovimento, dir, Time.deltaTime * suavizacao);
     }
