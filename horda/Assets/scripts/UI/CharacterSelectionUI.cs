@@ -59,12 +59,19 @@ public class CharacterSelectionUI : MonoBehaviour
     float[]         ppX   = new float[QTD_PP];
     float[]         ppDx  = new float[QTD_PP];
 
-    Color corAtualGlow = new Color(0.55f, 0.15f, 0.85f);
+    Color corAtualGlow = new Color(0.78f, 0.66f, 0.25f);
 
-    // ── Paleta base ────────────────────────────────────────────────────
-    static readonly Color corFundo  = new Color(0.04f, 0.03f, 0.10f);
-    static readonly Color corPainel = new Color(0.08f, 0.06f, 0.16f);
-    static readonly Color corAcento = new Color(0.55f, 0.15f, 0.85f);
+    [Header("Sprites Dark Fantasy")]
+    public Sprite spriteFundo;
+    public Sprite spritePainel;
+    public Sprite spriteMolduraPreview;
+    public Sprite spriteBarraTopo;
+    public Sprite spriteBotao;
+
+    // ── Paleta dark fantasy ────────────────────────────────────────────
+    static readonly Color corFundo  = new Color(0.05f, 0.02f, 0.02f);  // #0D0505
+    static readonly Color corPainel = new Color(0.18f, 0.08f, 0.08f);  // #2D1515
+    static readonly Color corAcento = new Color(0.78f, 0.66f, 0.25f);  // #C8A840 dourado
 
     // ──────────────────────────────────────────────────────────────────
     void Start()
@@ -113,7 +120,14 @@ public class CharacterSelectionUI : MonoBehaviour
     // ── Fundo com glow dinâmico ────────────────────────────────────────
     void CriarFundo(GameObject root)
     {
-        Img(root, "Fundo", Vector2.zero, Vector2.one, corFundo);
+        var fundoGO = Img(root, "Fundo", Vector2.zero, Vector2.one, corFundo);
+        if (spriteFundo != null)
+        {
+            var img = fundoGO.GetComponent<Image>();
+            img.sprite = spriteFundo;
+            img.type   = Image.Type.Simple;
+            img.color  = Color.white;
+        }
 
         // glow central (muda de cor com o elemento)
         var g = Img(root, "GlowFundo", new Vector2(0.15f,0.15f), new Vector2(0.85f,0.85f),
@@ -172,6 +186,13 @@ public class CharacterSelectionUI : MonoBehaviour
         var painel = Img(root, "PainelIcones",
             new Vector2(0f, 0.78f), new Vector2(1f, 0.93f),
             corPainel);
+        if (spriteBarraTopo != null)
+        {
+            var img = painel.GetComponent<Image>();
+            img.sprite = spriteBarraTopo;
+            img.type   = Image.Type.Sliced;
+            img.color  = Color.white;
+        }
         var rt = painel.GetComponent<RectTransform>();
         rt.offsetMin = new Vector2(8f, 0f); rt.offsetMax = new Vector2(-8f, 0f);
 
@@ -197,7 +218,7 @@ public class CharacterSelectionUI : MonoBehaviour
         le.preferredHeight = 110f;
 
         var bgImg = go.AddComponent<Image>();
-        bgImg.color = new Color(0.12f, 0.10f, 0.22f);
+        bgImg.color = new Color(0.15f, 0.08f, 0.08f);
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = bgImg;
 
@@ -267,6 +288,17 @@ public class CharacterSelectionUI : MonoBehaviour
         ConfigurarCameraPreview();
         CriarParticulasPreview(painelPreview);
 
+        if (spriteMolduraPreview != null)
+        {
+            var molduraGO  = Img(painelPreview, "MolduraPreview", Vector2.zero, Vector2.one, Color.white);
+            var molduraImg = molduraGO.GetComponent<Image>();
+            molduraImg.sprite     = spriteMolduraPreview;
+            molduraImg.type       = Image.Type.Sliced;
+            molduraImg.fillCenter = false;
+            molduraImg.color      = Color.white;
+            molduraGO.transform.SetAsLastSibling();
+        }
+
         // nome grande no preview
         txtNomePreview = TMP(painelPreview, "NomePrev",
             new Vector2(0f,0.88f), new Vector2(1f,1f),
@@ -277,12 +309,19 @@ public class CharacterSelectionUI : MonoBehaviour
         var info = Img(root, "PainelInfo",
             new Vector2(0.01f,0.10f), new Vector2(0.31f,0.78f),
             corPainel);
+        if (spritePainel != null)
+        {
+            var img = info.GetComponent<Image>();
+            img.sprite = spritePainel;
+            img.type   = Image.Type.Sliced;
+            img.color  = Color.white;
+        }
         BarraTopo(info, corAcento);
 
         var lblInfo = TMP(info, "LblInfo",
             new Vector2(0f,0.93f), new Vector2(1f,1f),
             "PERSONAGEM", 12f, FontStyles.Bold,
-            new Color(0.7f,0.6f,1f));
+            new Color(0.88f,0.78f,0.55f));
         lblInfo.alignment = TextAlignmentOptions.Center;
 
         txtNome = TMP(info, "Nome",
@@ -308,11 +347,18 @@ public class CharacterSelectionUI : MonoBehaviour
         var status = Img(root, "PainelStatus",
             new Vector2(0.69f,0.10f), new Vector2(0.99f,0.78f),
             corPainel);
+        if (spritePainel != null)
+        {
+            var img = status.GetComponent<Image>();
+            img.sprite = spritePainel;
+            img.type   = Image.Type.Sliced;
+            img.color  = Color.white;
+        }
         BarraTopo(status, corAcento);
 
         var lblSt = TMP(status, "LblSt",
             new Vector2(0f,0.92f), new Vector2(1f,1f),
-            "STATUS", 12f, FontStyles.Bold, new Color(0.7f,0.6f,1f));
+            "STATUS", 12f, FontStyles.Bold, new Color(0.88f,0.78f,0.55f));
         lblSt.alignment = TextAlignmentOptions.Center;
 
         string[] labels = { "VIDA", "ATK", "DEF", "VEL" };
@@ -347,7 +393,7 @@ public class CharacterSelectionUI : MonoBehaviour
             // nível
             upgradeLevelTexts[i] = TMP(linha, "Nv",
                 new Vector2(0.74f,0f), new Vector2(0.87f,1f),
-                "Nv.0", 10f, FontStyles.Normal, new Color(0.7f,0.7f,1f));
+                "Nv.0", 10f, FontStyles.Normal, new Color(0.65f,0.55f,0.35f));
             upgradeLevelTexts[i].alignment = TextAlignmentOptions.Center;
 
             // botão +
@@ -394,7 +440,7 @@ public class CharacterSelectionUI : MonoBehaviour
         // botão MISSÕES
         CriarBotao(rodape, "BtnMissoes",
             new Vector2(0.40f,0.08f), new Vector2(0.60f,0.92f),
-            "MISSÕES", new Color(0.20f,0.10f,0.40f), () => { });
+            "MISSÕES", new Color(0.35f,0.20f,0.08f), () => { });
 
         CriarBotao(rodape, "BtnJogar",
             new Vector2(0.72f,0.04f), new Vector2(1f,0.96f),
@@ -411,8 +457,8 @@ public class CharacterSelectionUI : MonoBehaviour
     void CriarAbasInfo(GameObject info)
     {
         string[] nomes  = { "INFO", "ULTIMATE", "PASSIVAS" };
-        Color corAtiva  = new Color(0.22f, 0.10f, 0.48f);
-        Color corInativa = new Color(0.06f, 0.04f, 0.14f);
+        Color corAtiva  = new Color(0.35f, 0.20f, 0.08f);
+        Color corInativa = new Color(0.10f, 0.05f, 0.05f);
 
         for (int i = 0; i < 3; i++)
         {
@@ -446,7 +492,7 @@ public class CharacterSelectionUI : MonoBehaviour
 
         txtDesc = TMP(painelAbaInfo[0], "Desc",
             new Vector2(0.04f, 0.26f), new Vector2(0.96f, 0.96f),
-            "—", 11f, FontStyles.Normal, new Color(0.78f, 0.75f, 0.88f));
+            "—", 11f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.70f));
         txtDesc.enableWordWrapping = true;
         txtDesc.alignment = TextAlignmentOptions.Top;
 
@@ -562,8 +608,8 @@ public class CharacterSelectionUI : MonoBehaviour
 
     void MostrarAbaInfo(int idx)
     {
-        Color corAtiva   = new Color(0.22f, 0.10f, 0.48f);
-        Color corInativa = new Color(0.06f, 0.04f, 0.14f);
+        Color corAtiva   = new Color(0.35f, 0.20f, 0.08f);
+        Color corInativa = new Color(0.10f, 0.05f, 0.05f);
         for (int i = 0; i < 3; i++)
         {
             if (painelAbaInfo[i] != null) painelAbaInfo[i].SetActive(i == idx);
@@ -830,7 +876,7 @@ public class CharacterSelectionUI : MonoBehaviour
     // ── Helpers ────────────────────────────────────────────────────────
     Slider CriarSlider(GameObject go, Color corFill)
     {
-        go.AddComponent<Image>().color = new Color(0.12f, 0.10f, 0.20f);
+        go.AddComponent<Image>().color = new Color(0.15f, 0.08f, 0.08f);
 
         var fillArea = new GameObject("FA"); fillArea.transform.SetParent(go.transform, false);
         fillArea.AddComponent<Image>().color = new Color(0f,0f,0f,0f); // cria RectTransform
@@ -859,7 +905,17 @@ public class CharacterSelectionUI : MonoBehaviour
         var go  = new GameObject(nome);
         go.transform.SetParent(parent.transform, false);
         Anchors(go, ancMin, ancMax);
-        var img = go.AddComponent<Image>(); img.color = cor;
+        var img = go.AddComponent<Image>();
+        if (spriteBotao != null)
+        {
+            img.sprite = spriteBotao;
+            img.type   = Image.Type.Sliced;
+            img.color  = Color.white;
+        }
+        else
+        {
+            img.color = cor;
+        }
         var btn = go.AddComponent<Button>(); btn.targetGraphic = img;
         btn.onClick.AddListener(acao);
         TMP(go, "T", Vector2.zero, Vector2.one,
