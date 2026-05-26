@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"j:/unity/projetos/horda/orda\" log --oneline -20)",
+      "WebFetch(domain:127.0.0.1)",
+      "mcp__unity-mcp__find_gameobjects",
+      "Skill(pixel-art-professional)",
+      "Skill(pixel-art-professional:*)",
+      "mcp__aseprite__fill_area",
+      "mcp__aseprite__draw_line",
+      "mcp__aseprite__draw_rectangle",
+      "mcp__aseprite__save_as",
+      "mcp__unity-mcp__manage_camera",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "mcp__pixellab__get_balance",
+      "mcp__pixellab__create_map_object",
+      "mcp__pixellab__get_map_object",
+      "PowerShell($end = \\(Get-Date\\).AddSeconds\\(12\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\verify_ui_20260526_152023.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; if \\(-not \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\verify_ui_20260526_152023.png\"\\)\\) { Write-Output \"not found\" })",
+      "PowerShell($end = \\(Get-Date\\).AddSeconds\\(12\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\verify_ui_152100.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; if \\(-not \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\verify_ui_152100.png\"\\)\\) { Write-Output \"not found\" })",
+      "PowerShell($end = \\(Get-Date\\).AddSeconds\\(12\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\verify_ui.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; if \\(-not \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\verify_ui.png\"\\)\\) { Write-Output \"not found\" })",
+      "PowerShell($end = \\(Get-Date\\).AddSeconds\\(15\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_verify2.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; if \\(-not \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_verify2.png\"\\)\\) { Write-Output \"not found\" })",
+      "PowerShell($end = \\(Get-Date\\).AddSeconds\\(20\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_zoom2.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; Write-Output \"done waiting\")",
+      "PowerShell($end = \\(Get-Date\\).AddSeconds\\(25\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_z2.png\"\\) { Write-Output \"found at $\\(\\(Get-Date\\).ToString\\('HH:mm:ss'\\)\\)\"; break }; Start-Sleep -Milliseconds 800 }; Write-Output \"done\")"
+    ]
+  }
+}

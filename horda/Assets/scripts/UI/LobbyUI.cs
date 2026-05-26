@@ -13,15 +13,15 @@ public class LobbyUI : MonoBehaviour
     const string cenaMenu = "menu_inicial";
     const string cenaJogo = "escolher terreno";
 
-    // ── Paleta ────────────────────────────────────────────────────────
-    static readonly Color corFundo     = new Color(0.04f, 0.03f, 0.10f);
-    static readonly Color corAcento    = new Color(0.55f, 0.15f, 0.85f);
-    static readonly Color corClaro     = new Color(0.75f, 0.35f, 1.00f);
-    static readonly Color corPainel    = new Color(0.08f, 0.06f, 0.16f);
-    static readonly Color corSlotVazio = new Color(0.10f, 0.08f, 0.18f);
-    static readonly Color corSlotOcup  = new Color(0.14f, 0.10f, 0.24f);
-    static readonly Color corVerde     = new Color(0.15f, 0.55f, 0.20f);
-    static readonly Color corCinza     = new Color(0.25f, 0.20f, 0.35f);
+    // ── Paleta dark fantasy ───────────────────────────────────────────
+    static readonly Color corFundo     = new Color(0.05f, 0.02f, 0.02f);  // #0D0505 pedra funda
+    static readonly Color corAcento    = new Color(0.78f, 0.66f, 0.25f);  // #C8A840 dourado
+    static readonly Color corClaro     = new Color(0.94f, 0.88f, 0.75f);  // #F0E0C0 creme
+    static readonly Color corPainel    = new Color(0.18f, 0.08f, 0.08f);  // #2D1515 pedra painel
+    static readonly Color corSlotVazio = new Color(0.15f, 0.07f, 0.07f);  // #261212 slot vazio
+    static readonly Color corSlotOcup  = new Color(0.23f, 0.13f, 0.13f);  // #3B2121 slot ocupado
+    static readonly Color corVerde     = new Color(0.15f, 0.55f, 0.20f);  // verde pronto
+    static readonly Color corCinza     = new Color(0.30f, 0.20f, 0.20f);  // pedra cinza
 
     // ── Estado dos jogadores (simulado) ───────────────────────────────
     const int MAX_JOGADORES = 4;
@@ -146,7 +146,7 @@ public class LobbyUI : MonoBehaviour
         var txtCod = Texto("TxtCodigo",
             new Vector2(0.05f, 0f), new Vector2(0.78f, 1f),
             codigoSala, 22f, FontStyles.Bold,
-            new Color(0.80f, 0.70f, 1.00f));
+            new Color(0.94f, 0.88f, 0.75f));
         txtCod.transform.SetParent(painelCodigo.transform, false);
         txtCod.alignment = TextAlignmentOptions.Left;
 
@@ -194,7 +194,7 @@ public class LobbyUI : MonoBehaviour
         BarraTopo(painel, corAcento);
         var lblJ = Texto("LblJ",
             new Vector2(0f, 0.90f), new Vector2(1f, 1f),
-            "JOGADORES", 15f, FontStyles.Bold, new Color(0.80f, 0.70f, 1.00f));
+            "JOGADORES", 15f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f));
         lblJ.transform.SetParent(painel.transform, false);
         lblJ.GetComponent<RectTransform>().anchorMin = new Vector2(0f, 0.92f);
         lblJ.GetComponent<RectTransform>().anchorMax = Vector2.one;
@@ -203,7 +203,7 @@ public class LobbyUI : MonoBehaviour
         // contador
         txtContador = Texto("Contador",
             new Vector2(0f, 0f), Vector2.one,
-            "1 / 4", 13f, FontStyles.Normal, new Color(0.60f, 0.55f, 0.75f));
+            "1 / 4", 13f, FontStyles.Normal, new Color(0.65f, 0.55f, 0.35f));
         txtContador.transform.SetParent(painel.transform, false);
         var rCont = txtContador.GetComponent<RectTransform>();
         rCont.anchorMin = new Vector2(0.70f, 0.92f); rCont.anchorMax = Vector2.one;
@@ -239,11 +239,11 @@ public class LobbyUI : MonoBehaviour
             var rav = av.AddComponent<RectTransform>();
             rav.anchorMin = new Vector2(0.02f, 0.15f); rav.anchorMax = new Vector2(0.18f, 0.85f);
             rav.offsetMin = rav.offsetMax = Vector2.zero;
-            av.AddComponent<Image>().color = new Color(0.20f, 0.16f, 0.30f);
+            av.AddComponent<Image>().color = new Color(0.20f, 0.10f, 0.10f);
 
             // ícone no avatar
             var ic = Texto($"Ic{i}", Vector2.zero, Vector2.one,
-                "?", 18f, FontStyles.Bold, new Color(0.50f, 0.45f, 0.65f));
+                "?", 18f, FontStyles.Bold, new Color(0.55f, 0.45f, 0.25f));
             ic.transform.SetParent(av.transform, false);
             ic.GetComponent<RectTransform>().anchorMin = Vector2.zero;
             ic.GetComponent<RectTransform>().anchorMax = Vector2.one;
@@ -254,7 +254,7 @@ public class LobbyUI : MonoBehaviour
                 new Vector2(0.20f, 0.50f), new Vector2(0.75f, 0.95f),
                 i == 0 ? "Você" : "Aguardando...",
                 14f, FontStyles.Bold,
-                i == 0 ? Color.white : new Color(0.45f, 0.40f, 0.55f));
+                i == 0 ? corClaro : new Color(0.40f, 0.28f, 0.28f));
             nome.transform.SetParent(slot.transform, false);
             nome.GetComponent<RectTransform>().anchorMin = new Vector2(0.20f, 0.50f);
             nome.GetComponent<RectTransform>().anchorMax = new Vector2(0.75f, 0.95f);
@@ -305,10 +305,10 @@ public class LobbyUI : MonoBehaviour
         rp.anchorMin = new Vector2(0.55f, 0.12f); rp.anchorMax = new Vector2(0.96f, 0.84f);
         rp.offsetMin = rp.offsetMax = Vector2.zero;
         painel.AddComponent<Image>().color = corPainel;
-        BarraTopo(painel, new Color(0.20f, 0.10f, 0.40f));
+        BarraTopo(painel, new Color(0.15f, 0.08f, 0.05f));
 
-        Color corAbaAtiva  = new Color(0.22f, 0.10f, 0.48f);
-        Color corAbaInativa = new Color(0.06f, 0.04f, 0.14f);
+        Color corAbaAtiva  = new Color(0.35f, 0.20f, 0.08f);
+        Color corAbaInativa = new Color(0.10f, 0.05f, 0.05f);
         Image[] tabImgs = new Image[2];
         string[] tabNomes = { "SALA", "PERSONAGEM" };
 
@@ -361,7 +361,7 @@ public class LobbyUI : MonoBehaviour
     void CriarConteudoSala(GameObject pai)
     {
         TextoPN(pai, "LblConf", new Vector2(0f, 0.92f), Vector2.one,
-            "CONFIGURAÇÕES DA SALA", 13f, FontStyles.Bold, new Color(0.80f, 0.70f, 1.00f))
+            "CONFIGURAÇÕES DA SALA", 13f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
             .alignment = TextAlignmentOptions.Center;
 
         CriarOpcaoConf(pai, "Mapa", 0.72f, 0.87f,
@@ -372,7 +372,7 @@ public class LobbyUI : MonoBehaviour
             new[]{ "2", "3", "4" });
 
         TextoPN(pai, "LblVis", new Vector2(0.05f, 0.22f), new Vector2(0.50f, 0.31f),
-            "Visibilidade", 12f, FontStyles.Bold, new Color(0.75f, 0.65f, 0.90f))
+            "Visibilidade", 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
             .alignment = TextAlignmentOptions.Left;
 
         CriarBotaoToggle(pai, "Pública", new Vector2(0.05f, 0.12f), new Vector2(0.47f, 0.21f), true);
@@ -388,7 +388,7 @@ public class LobbyUI : MonoBehaviour
     void CriarConteudoPersonagem(GameObject pai)
     {
         TextoPN(pai, "LblP", new Vector2(0f, 0.92f), Vector2.one,
-            "ESCOLHA SEU PERSONAGEM", 12f, FontStyles.Bold, new Color(0.80f, 0.70f, 1.00f))
+            "ESCOLHA SEU PERSONAGEM", 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
             .alignment = TextAlignmentOptions.Center;
 
         CriarGridPersonagens(pai);
@@ -431,8 +431,8 @@ public class LobbyUI : MonoBehaviour
             r.offsetMin = r.offsetMax = Vector2.zero;
             var img = go.AddComponent<Image>();
             img.color = i == charIdx
-                ? new Color(0.22f, 0.10f, 0.48f)
-                : new Color(0.10f, 0.08f, 0.20f);
+                ? new Color(0.35f, 0.20f, 0.08f)
+                : new Color(0.15f, 0.08f, 0.08f);
             charIconBGs[i] = img;
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img;
@@ -450,8 +450,8 @@ public class LobbyUI : MonoBehaviour
     void CriarSubAbasLobby(GameObject pai)
     {
         string[] nomes = { "INFO", "ULTIMATE", "PASSIVAS" };
-        Color corAtiva   = new Color(0.22f, 0.10f, 0.48f);
-        Color corInativa = new Color(0.06f, 0.04f, 0.14f);
+        Color corAtiva   = new Color(0.35f, 0.20f, 0.08f);
+        Color corInativa = new Color(0.10f, 0.05f, 0.05f);
 
         for (int i = 0; i < 3; i++)
         {
@@ -482,7 +482,7 @@ public class LobbyUI : MonoBehaviour
         SetAnchors(subPaineis[0], new Vector2(0f, 0.01f), new Vector2(1f, 0.58f));
         txtInfoLobby = TextoPN(subPaineis[0], "Txt",
             new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
-            "—", 10f, FontStyles.Normal, new Color(0.78f, 0.75f, 0.88f));
+            "—", 10f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.70f));
         txtInfoLobby.enableWordWrapping = true;
         txtInfoLobby.alignment = TextAlignmentOptions.TopLeft;
 
@@ -493,7 +493,7 @@ public class LobbyUI : MonoBehaviour
         SetAnchors(subPaineis[1], new Vector2(0f, 0.01f), new Vector2(1f, 0.58f));
         txtUltimateLobby = TextoPN(subPaineis[1], "Txt",
             new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
-            "—", 10f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.95f));
+            "—", 10f, FontStyles.Normal, new Color(0.94f, 0.88f, 0.75f));
         txtUltimateLobby.enableWordWrapping = true;
         txtUltimateLobby.alignment = TextAlignmentOptions.TopLeft;
 
@@ -504,7 +504,7 @@ public class LobbyUI : MonoBehaviour
         SetAnchors(subPaineis[2], new Vector2(0f, 0.01f), new Vector2(1f, 0.58f));
         txtPassivasLobby = TextoPN(subPaineis[2], "Txt",
             new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
-            "—", 10f, FontStyles.Normal, new Color(0.75f, 0.90f, 0.75f));
+            "—", 10f, FontStyles.Normal, new Color(0.72f, 0.88f, 0.68f));
         txtPassivasLobby.enableWordWrapping = true;
         txtPassivasLobby.alignment = TextAlignmentOptions.TopLeft;
 
@@ -523,8 +523,8 @@ public class LobbyUI : MonoBehaviour
             for (int i = 0; i < charIconBGs.Length; i++)
                 if (charIconBGs[i] != null)
                     charIconBGs[i].color = i == idx
-                        ? new Color(0.22f, 0.10f, 0.48f)
-                        : new Color(0.10f, 0.08f, 0.20f);
+                        ? new Color(0.35f, 0.20f, 0.08f)
+                        : new Color(0.15f, 0.08f, 0.08f);
 
         var data = characters[idx];
         if (data == null) return;
@@ -562,8 +562,8 @@ public class LobbyUI : MonoBehaviour
 
     void MostrarSubAbaLobby(int idx)
     {
-        Color corAtiva   = new Color(0.22f, 0.10f, 0.48f);
-        Color corInativa = new Color(0.06f, 0.04f, 0.14f);
+        Color corAtiva   = new Color(0.35f, 0.20f, 0.08f);
+        Color corInativa = new Color(0.10f, 0.05f, 0.05f);
         for (int i = 0; i < 3; i++)
         {
             if (subPaineis[i] != null) subPaineis[i].SetActive(i == idx);
@@ -714,9 +714,9 @@ public class LobbyUI : MonoBehaviour
             else
             {
                 slotNome[i].text  = "Vaga livre";
-                slotNome[i].color = new Color(0.40f, 0.35f, 0.50f);
+                slotNome[i].color = new Color(0.40f, 0.28f, 0.28f);
                 slotStatus[i].text  = "Aguardando jogador...";
-                slotStatus[i].color = new Color(0.30f, 0.27f, 0.40f);
+                slotStatus[i].color = new Color(0.30f, 0.20f, 0.20f);
             }
         }
 
@@ -768,7 +768,7 @@ public class LobbyUI : MonoBehaviour
         float yMin, float yMax, string[] opcoes)
     {
         var lbl = Texto($"Lbl_{label}", Vector2.zero, Vector2.one,
-            label, 13f, FontStyles.Bold, new Color(0.75f, 0.65f, 0.90f));
+            label, 13f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f));
         lbl.transform.SetParent(pai.transform, false);
         AjustarAnchors(lbl, new Vector2(0.05f, yMax - 0.05f), new Vector2(0.95f, yMax + 0.04f));
         lbl.alignment = TextAlignmentOptions.Left;
@@ -786,7 +786,7 @@ public class LobbyUI : MonoBehaviour
             r.anchorMin = new Vector2(xMin, yMin); r.anchorMax = new Vector2(xMax, yMax - 0.06f);
             r.offsetMin = r.offsetMax = Vector2.zero;
             var img = go.AddComponent<Image>();
-            img.color = i == 0 ? corAcento : new Color(0.14f, 0.10f, 0.28f);
+            img.color = i == 0 ? corAcento : new Color(0.18f, 0.10f, 0.10f);
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img; btn.transition = Selectable.Transition.None;
             btn.onClick.AddListener(() =>
@@ -798,7 +798,7 @@ public class LobbyUI : MonoBehaviour
                     if (ch.name.StartsWith($"Opt_{label}_"))
                     {
                         var ci = ch.GetComponent<Image>();
-                        if (ci != null) ci.color = new Color(0.14f, 0.10f, 0.28f);
+                        if (ci != null) ci.color = new Color(0.18f, 0.10f, 0.10f);
                     }
                 }
                 img.color = corAcento;
@@ -821,14 +821,14 @@ public class LobbyUI : MonoBehaviour
         r.anchorMin = mn; r.anchorMax = mx;
         r.offsetMin = r.offsetMax = Vector2.zero;
         var img = go.AddComponent<Image>();
-        img.color = ativo ? corAcento : new Color(0.14f, 0.10f, 0.28f);
+        img.color = ativo ? corAcento : new Color(0.18f, 0.10f, 0.10f);
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img; btn.transition = Selectable.Transition.None;
         btn.onClick.AddListener(() =>
         {
             img.color = corAcento;
             var irmao = go.transform.parent.Find(label == "Pública" ? "BtnT_Privada" : "BtnT_Pública");
-            if (irmao != null) irmao.GetComponent<Image>().color = new Color(0.14f, 0.10f, 0.28f);
+            if (irmao != null) irmao.GetComponent<Image>().color = new Color(0.18f, 0.10f, 0.10f);
         });
         var t = Texto("T", Vector2.zero, Vector2.one,
             label, 12f, FontStyles.Bold, Color.white);

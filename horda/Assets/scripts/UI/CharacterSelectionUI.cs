@@ -59,7 +59,7 @@ public class CharacterSelectionUI : MonoBehaviour
     float[]         ppX   = new float[QTD_PP];
     float[]         ppDx  = new float[QTD_PP];
 
-    Color corAtualGlow = new Color(0.78f, 0.66f, 0.25f);
+    Color corAtualGlow = new Color(0.55f, 0.08f, 0.08f);
 
     [Header("Sprites Dark Fantasy")]
     public Sprite spriteFundo;
@@ -67,11 +67,12 @@ public class CharacterSelectionUI : MonoBehaviour
     public Sprite spriteMolduraPreview;
     public Sprite spriteBarraTopo;
     public Sprite spriteBotao;
+    public Sprite[] spriteStatIcons; // [0]=vida [1]=atk [2]=def [3]=vel
 
     // ── Paleta dark fantasy ────────────────────────────────────────────
-    static readonly Color corFundo  = new Color(0.05f, 0.02f, 0.02f);  // #0D0505
-    static readonly Color corPainel = new Color(0.18f, 0.08f, 0.08f);  // #2D1515
-    static readonly Color corAcento = new Color(0.78f, 0.66f, 0.25f);  // #C8A840 dourado
+    static readonly Color corFundo  = new Color(0.03f, 0.01f, 0.01f);  // #080303
+    static readonly Color corPainel = new Color(0.07f, 0.03f, 0.03f);  // #120808
+    static readonly Color corAcento = new Color(0.55f, 0.08f, 0.08f);  // #8C1414 carmesim
 
     // ──────────────────────────────────────────────────────────────────
     void Start()
@@ -174,7 +175,7 @@ public class CharacterSelectionUI : MonoBehaviour
 
         var t = TMP(root, "Titulo",
             new Vector2(0f,0.93f), new Vector2(1f, 1f),
-            "SELEÇÃO DE PERSONAGEM", 26f, FontStyles.Bold, Color.white);
+            "SELECAO DE PERSONAGEM", 26f, FontStyles.Bold, Color.white);
         t.alignment = TextAlignmentOptions.Center;
 
         StartCoroutine(PulsarTitulo(t));
@@ -218,7 +219,16 @@ public class CharacterSelectionUI : MonoBehaviour
         le.preferredHeight = 110f;
 
         var bgImg = go.AddComponent<Image>();
-        bgImg.color = new Color(0.15f, 0.08f, 0.08f);
+        if (spritePainel != null)
+        {
+            bgImg.sprite = spritePainel;
+            bgImg.type   = Image.Type.Sliced;
+            bgImg.color  = new Color(0.6f, 0.55f, 0.55f);
+        }
+        else
+        {
+            bgImg.color = new Color(0.05f, 0.02f, 0.02f);
+        }
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = bgImg;
 
@@ -257,7 +267,7 @@ public class CharacterSelectionUI : MonoBehaviour
         var rs = sel.AddComponent<RectTransform>();
         rs.anchorMin = Vector2.zero; rs.anchorMax = Vector2.one;
         rs.offsetMin = new Vector2(-3f,-3f); rs.offsetMax = new Vector2(3f,3f);
-        sel.AddComponent<Image>().color = new Color(0.3f,1f,0.5f,0.40f);
+        sel.AddComponent<Image>().color = new Color(corAcento.r, corAcento.g, corAcento.b, 0.75f);
         sel.SetActive(false);
         iconUI.selectedIndicator = sel;
 
@@ -290,7 +300,9 @@ public class CharacterSelectionUI : MonoBehaviour
 
         if (spriteMolduraPreview != null)
         {
-            var molduraGO  = Img(painelPreview, "MolduraPreview", Vector2.zero, Vector2.one, Color.white);
+            // Moldura posicionada exatamente sobre o campo preto do personagem
+            var molduraGO  = Img(painelPreview, "MolduraPreview",
+                new Vector2(0.02f, 0.05f), new Vector2(0.98f, 0.92f), Color.white);
             var molduraImg = molduraGO.GetComponent<Image>();
             molduraImg.sprite     = spriteMolduraPreview;
             molduraImg.type       = Image.Type.Sliced;
@@ -321,7 +333,7 @@ public class CharacterSelectionUI : MonoBehaviour
         var lblInfo = TMP(info, "LblInfo",
             new Vector2(0f,0.93f), new Vector2(1f,1f),
             "PERSONAGEM", 12f, FontStyles.Bold,
-            new Color(0.88f,0.78f,0.55f));
+            new Color(0.88f,0.80f,0.72f));
         lblInfo.alignment = TextAlignmentOptions.Center;
 
         txtNome = TMP(info, "Nome",
@@ -358,7 +370,7 @@ public class CharacterSelectionUI : MonoBehaviour
 
         var lblSt = TMP(status, "LblSt",
             new Vector2(0f,0.92f), new Vector2(1f,1f),
-            "STATUS", 12f, FontStyles.Bold, new Color(0.88f,0.78f,0.55f));
+            "STATUS", 12f, FontStyles.Bold, new Color(0.88f,0.80f,0.72f));
         lblSt.alignment = TextAlignmentOptions.Center;
 
         string[] labels = { "VIDA", "ATK", "DEF", "VEL" };
@@ -371,44 +383,69 @@ public class CharacterSelectionUI : MonoBehaviour
 
         for (int i = 0; i < 4; i++)
         {
-            float yMax = 0.88f - i * 0.22f;
+            float yMax = 0.90f - i * 0.22f;
             float yMin = yMax  - 0.18f;
 
             var linha = new GameObject($"Linha_{i}");
             linha.transform.SetParent(status.transform, false);
-            Anchors(linha, new Vector2(0.04f, yMin), new Vector2(0.96f, yMax));
+            // Padded para não ultrapassar a moldura do painel (8% de cada lado)
+            Anchors(linha, new Vector2(0.08f, yMin), new Vector2(0.82f, yMax));
+
+            var linhaFundo = linha.AddComponent<Image>();
+            linhaFundo.color = new Color(0f, 0f, 0f, 0f);
+
+            var indGO = new GameObject("Ind");
+            indGO.transform.SetParent(linha.transform, false);
+            Anchors(indGO, new Vector2(0.03f, 0.06f), new Vector2(0.30f, 0.94f));
+            var indImg = indGO.AddComponent<Image>();
+            if (spriteStatIcons != null && i < spriteStatIcons.Length && spriteStatIcons[i] != null)
+            {
+                indImg.sprite = spriteStatIcons[i];
+                indImg.color  = Color.white;
+                indImg.preserveAspect = true;
+            }
+            else { indImg.color = cores[i]; }
 
             // label
             var lbl = TMP(linha, "Lbl",
-                new Vector2(0f,0.5f), new Vector2(0.28f,1f),
-                labels[i], 11f, FontStyles.Bold, cores[i]);
+                new Vector2(0.33f, 0.48f), new Vector2(0.90f, 1.0f),
+                labels[i], 8f, FontStyles.Bold, cores[i]);
             lbl.alignment = TextAlignmentOptions.MidlineLeft;
 
             // slider
             var slGO = new GameObject("Slider");
             slGO.transform.SetParent(linha.transform, false);
-            Anchors(slGO, new Vector2(0.28f,0.25f), new Vector2(0.74f,0.75f));
+            Anchors(slGO, new Vector2(0.33f, 0.05f), new Vector2(0.72f, 0.48f));
             sliders[i] = CriarSlider(slGO, cores[i]);
 
             // nível
-            upgradeLevelTexts[i] = TMP(linha, "Nv",
-                new Vector2(0.74f,0f), new Vector2(0.87f,1f),
-                "Nv.0", 10f, FontStyles.Normal, new Color(0.65f,0.55f,0.35f));
+            upgradeLevelTexts[i] = TMP(status, "Nv",
+                new Vector2(0.81f, yMin + 0.02f), new Vector2(0.93f, yMax - 0.02f),
+                "Nv.0", 8f, FontStyles.Normal, new Color(0.65f,0.55f,0.35f));
             upgradeLevelTexts[i].alignment = TextAlignmentOptions.Center;
 
-            // botão +
             int cap = i;
             var btnGO = new GameObject("BtnUp");
-            btnGO.transform.SetParent(linha.transform, false);
-            Anchors(btnGO, new Vector2(0.88f,0.10f), new Vector2(1f,0.90f));
+            btnGO.transform.SetParent(status.transform, false);
+            Anchors(btnGO, new Vector2(0.80f, yMin + 0.01f), new Vector2(0.97f, yMax - 0.01f));
             var bImg = btnGO.AddComponent<Image>();
-            bImg.color = new Color(0.15f,0.45f,0.15f);
+            if (spriteBotao != null)
+            {
+                bImg.sprite = spriteBotao;
+                bImg.type   = Image.Type.Sliced;
+                bImg.color  = new Color(0.20f, 0.50f, 0.20f);
+            }
+            else
+            {
+                bImg.color = new Color(0.15f, 0.45f, 0.15f);
+            }
             var b = btnGO.AddComponent<Button>();
+            b.transition = Selectable.Transition.None;
             b.targetGraphic = bImg;
             b.onClick.AddListener(() => manager?.BuyUpgrade(cap));
             TMP(btnGO, "T",
                 Vector2.zero, Vector2.one,
-                "+", 18f, FontStyles.Bold, Color.white)
+                "+", 14f, FontStyles.Bold, Color.white)
                 .alignment = TextAlignmentOptions.Center;
             upgradeButtons[i] = b;
         }
@@ -429,7 +466,7 @@ public class CharacterSelectionUI : MonoBehaviour
 
         CriarBotao(rodape, "BtnVoltar",
             new Vector2(0f,0.08f), new Vector2(0.18f,0.92f),
-            "← VOLTAR", new Color(0.45f,0.08f,0.08f), () =>
+            "< VOLTAR", new Color(0.45f,0.08f,0.08f), () =>
             {
                 if (GameSceneManager.Instance != null)
                     GameSceneManager.Instance.GoToMainMenu();
@@ -440,11 +477,11 @@ public class CharacterSelectionUI : MonoBehaviour
         // botão MISSÕES
         CriarBotao(rodape, "BtnMissoes",
             new Vector2(0.40f,0.08f), new Vector2(0.60f,0.92f),
-            "MISSÕES", new Color(0.35f,0.20f,0.08f), () => { });
+            "MISSOES", new Color(0.42f,0.32f,0.18f), () => { });
 
         CriarBotao(rodape, "BtnJogar",
             new Vector2(0.72f,0.04f), new Vector2(1f,0.96f),
-            "JOGAR  ▶", new Color(0.10f,0.50f,0.15f), () =>
+            "JOGAR >", new Color(0.10f,0.50f,0.15f), () =>
             {
                 if (GameSceneManager.Instance != null)
                     GameSceneManager.Instance.StartGameplay();
@@ -457,24 +494,31 @@ public class CharacterSelectionUI : MonoBehaviour
     void CriarAbasInfo(GameObject info)
     {
         string[] nomes  = { "INFO", "ULTIMATE", "PASSIVAS" };
-        Color corAtiva  = new Color(0.35f, 0.20f, 0.08f);
-        Color corInativa = new Color(0.10f, 0.05f, 0.05f);
+        Color corAtiva   = new Color(0.55f, 0.10f, 0.10f);
+        Color corInativa = new Color(0.18f, 0.07f, 0.07f);
+        float tabPadX = 0.07f;
+        float tabW    = (1f - 2f * tabPadX) / 3f;
 
         for (int i = 0; i < 3; i++)
         {
-            float xMin = i * (1f / 3f);
-            float xMax = (i + 1) * (1f / 3f);
+            float xMin = tabPadX + i * tabW;
+            float xMax = tabPadX + (i + 1) * tabW;
             int idx = i;
 
             var tabGO  = new GameObject($"Tab_{nomes[i]}");
             tabGO.transform.SetParent(info.transform, false);
             var tabImg = tabGO.AddComponent<Image>();
+            if (spriteBotao != null)
+            {
+                tabImg.sprite = spriteBotao;
+                tabImg.type   = Image.Type.Sliced;
+            }
             tabImg.color = i == 0 ? corAtiva : corInativa;
             var tabRT  = tabGO.GetComponent<RectTransform>();
-            tabRT.anchorMin = new Vector2(xMin, 0.62f);
-            tabRT.anchorMax = new Vector2(xMax, 0.70f);
-            tabRT.offsetMin = new Vector2(i > 0 ? 1f : 0f, 0f);
-            tabRT.offsetMax = new Vector2(i < 2 ? -1f : 0f, 0f);
+            tabRT.anchorMin = new Vector2(xMin, 0.63f);
+            tabRT.anchorMax = new Vector2(xMax, 0.71f);
+            tabRT.offsetMin = new Vector2(i > 0 ? 2f : 0f, 0f);
+            tabRT.offsetMax = new Vector2(i < 2 ? -2f : 0f, 0f);
             var btn = tabGO.AddComponent<Button>();
             btn.targetGraphic = tabImg;
             btn.transition = Selectable.Transition.None;
@@ -608,8 +652,8 @@ public class CharacterSelectionUI : MonoBehaviour
 
     void MostrarAbaInfo(int idx)
     {
-        Color corAtiva   = new Color(0.35f, 0.20f, 0.08f);
-        Color corInativa = new Color(0.10f, 0.05f, 0.05f);
+        Color corAtiva   = new Color(0.55f, 0.10f, 0.10f);
+        Color corInativa = new Color(0.18f, 0.07f, 0.07f);
         for (int i = 0; i < 3; i++)
         {
             if (painelAbaInfo[i] != null) painelAbaInfo[i].SetActive(i == idx);
@@ -910,13 +954,18 @@ public class CharacterSelectionUI : MonoBehaviour
         {
             img.sprite = spriteBotao;
             img.type   = Image.Type.Sliced;
-            img.color  = Color.white;
+            // multiplicar cor pela textura de pedra (cor escura = pedra escura, verde = pedra verde)
+            img.color  = new Color(
+                Mathf.Clamp01(cor.r + 0.45f),
+                Mathf.Clamp01(cor.g + 0.45f),
+                Mathf.Clamp01(cor.b + 0.45f));
         }
         else
         {
             img.color = cor;
         }
         var btn = go.AddComponent<Button>(); btn.targetGraphic = img;
+        btn.transition = Selectable.Transition.None;
         btn.onClick.AddListener(acao);
         TMP(go, "T", Vector2.zero, Vector2.one,
             texto, fontSize, FontStyles.Bold, Color.white)

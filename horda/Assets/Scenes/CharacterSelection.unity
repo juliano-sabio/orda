@@ -5268,6 +5268,11 @@ MonoBehaviour:
   spriteMolduraPreview: {fileID: 21300000, guid: e815b97a9782cf6479cbff5f685ad75e, type: 3}
   spriteBarraTopo: {fileID: 21300000, guid: a9828c33fe034a148b745b16c93bac38, type: 3}
   spriteBotao: {fileID: 21300000, guid: 9497a68472eb93f44b1f3aa5e853d789, type: 3}
+  spriteStatIcons:
+  - {fileID: 21300000, guid: 18ab888dc20c71c48ab480c9193b9a8e, type: 3}
+  - {fileID: 21300000, guid: 57a54ac067b8cd8488773e5179acb251, type: 3}
+  - {fileID: 21300000, guid: 2576ed62bacd75e4891c7bf04d89e75c, type: 3}
+  - {fileID: 21300000, guid: 3bac07c50e5380f4c8b30cd7a818fc24, type: 3}
 --- !u!4 &1895491438
 Transform:
   m_ObjectHideFlags: 0

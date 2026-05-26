@@ -1,5 +1,9 @@
 {
   "mcpServers": {
+    "unity-mcp": {
+      "type": "http",
+      "url": "http://127.0.0.1:8080/mcp"
+    },
     "obsidian": {
       "type": "stdio",
       "command": "C:\\Users\\rafin\\AppData\\Roaming\\npm\\mcp-server-filesystem.cmd",
