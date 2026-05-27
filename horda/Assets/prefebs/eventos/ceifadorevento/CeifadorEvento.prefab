@@ -207,6 +207,7 @@ MonoBehaviour:
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 0
   mostrarDanoFlutuante: 0
+  imuneAoDano: 0
   podeReceberCura: 0
   multiplicadorCuraRecebida: 1
   mostrarCuraFlutuante: 0

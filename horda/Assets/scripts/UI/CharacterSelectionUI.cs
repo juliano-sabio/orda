@@ -75,12 +75,15 @@ public class CharacterSelectionUI : MonoBehaviour
     static readonly Color corAcento = new Color(0.55f, 0.08f, 0.08f);  // #8C1414 carmesim
 
     // ──────────────────────────────────────────────────────────────────
+    void Awake()
+    {
+        // Destrói canvas residual ANTES do primeiro frame ser renderizado
+        var antigo = GameObject.Find("CanvasPrincipal");
+        if (antigo != null) DestroyImmediate(antigo);
+    }
+
     void Start()
     {
-        // Remove qualquer canvas pré-criado pelo editor tool
-        var antigo = GameObject.Find("CanvasPrincipal");
-        if (antigo != null) Destroy(antigo);
-
         CriarCanvas();
         CriarUI();
         ConectarManager();
@@ -331,24 +334,24 @@ public class CharacterSelectionUI : MonoBehaviour
         BarraTopo(info, corAcento);
 
         var lblInfo = TMP(info, "LblInfo",
-            new Vector2(0f,0.93f), new Vector2(1f,1f),
-            "PERSONAGEM", 12f, FontStyles.Bold,
+            new Vector2(0f,0.94f), new Vector2(1f,1f),
+            "PERSONAGEM", 11f, FontStyles.Bold,
             new Color(0.88f,0.80f,0.72f));
         lblInfo.alignment = TextAlignmentOptions.Center;
 
         txtNome = TMP(info, "Nome",
-            new Vector2(0f,0.81f), new Vector2(1f,0.93f),
-            "—", 20f, FontStyles.Bold, Color.white);
+            new Vector2(0f,0.84f), new Vector2(1f,0.94f),
+            "—", 18f, FontStyles.Bold, Color.white);
         txtNome.alignment = TextAlignmentOptions.Center;
 
         txtElemento = TMP(info, "Elemento",
-            new Vector2(0f,0.71f), new Vector2(1f,0.81f),
-            "—", 14f, FontStyles.Normal, Color.yellow);
+            new Vector2(0f,0.78f), new Vector2(1f,0.84f),
+            "—", 12f, FontStyles.Normal, Color.yellow);
         txtElemento.alignment = TextAlignmentOptions.Center;
 
         // linha divisória
         var ln = Img(info, "Ln",
-            new Vector2(0.05f,0.705f), new Vector2(0.95f,0.705f),
+            new Vector2(0.05f,0.775f), new Vector2(0.95f,0.775f),
             new Color(1f,1f,1f,0.08f));
         ln.GetComponent<RectTransform>().offsetMax = new Vector2(0f,1f);
 
@@ -415,19 +418,19 @@ public class CharacterSelectionUI : MonoBehaviour
             // slider
             var slGO = new GameObject("Slider");
             slGO.transform.SetParent(linha.transform, false);
-            Anchors(slGO, new Vector2(0.33f, 0.05f), new Vector2(0.72f, 0.48f));
+            Anchors(slGO, new Vector2(0.33f, 0.05f), new Vector2(0.65f, 0.48f));
             sliders[i] = CriarSlider(slGO, cores[i]);
 
-            // nível
+            // nível (oculto atrás do botão)
             upgradeLevelTexts[i] = TMP(status, "Nv",
-                new Vector2(0.81f, yMin + 0.02f), new Vector2(0.93f, yMax - 0.02f),
-                "Nv.0", 8f, FontStyles.Normal, new Color(0.65f,0.55f,0.35f));
+                new Vector2(0.74f, yMin + 0.05f), new Vector2(0.84f, yMax - 0.05f),
+                "Nv.0", 7f, FontStyles.Normal, new Color(0.65f,0.55f,0.35f));
             upgradeLevelTexts[i].alignment = TextAlignmentOptions.Center;
 
             int cap = i;
             var btnGO = new GameObject("BtnUp");
             btnGO.transform.SetParent(status.transform, false);
-            Anchors(btnGO, new Vector2(0.80f, yMin + 0.01f), new Vector2(0.97f, yMax - 0.01f));
+            Anchors(btnGO, new Vector2(0.74f, yMin + 0.05f), new Vector2(0.84f, yMax - 0.05f));
             var bImg = btnGO.AddComponent<Image>();
             if (spriteBotao != null)
             {
@@ -476,8 +479,9 @@ public class CharacterSelectionUI : MonoBehaviour
 
         // botão MISSÕES
         CriarBotao(rodape, "BtnMissoes",
-            new Vector2(0.40f,0.08f), new Vector2(0.60f,0.92f),
-            "MISSOES", new Color(0.42f,0.32f,0.18f), () => { });
+            new Vector2(0.38f,0.05f), new Vector2(0.62f,0.95f),
+            "MISSOES", new Color(0.10f,0.50f,0.15f),
+            () => FindObjectOfType<MissoesUI>()?.TogglePainel(), 24f);
 
         CriarBotao(rodape, "BtnJogar",
             new Vector2(0.72f,0.04f), new Vector2(1f,0.96f),
@@ -515,8 +519,8 @@ public class CharacterSelectionUI : MonoBehaviour
             }
             tabImg.color = i == 0 ? corAtiva : corInativa;
             var tabRT  = tabGO.GetComponent<RectTransform>();
-            tabRT.anchorMin = new Vector2(xMin, 0.63f);
-            tabRT.anchorMax = new Vector2(xMax, 0.71f);
+            tabRT.anchorMin = new Vector2(xMin, 0.70f);
+            tabRT.anchorMax = new Vector2(xMax, 0.77f);
             tabRT.offsetMin = new Vector2(i > 0 ? 2f : 0f, 0f);
             tabRT.offsetMax = new Vector2(i < 2 ? -2f : 0f, 0f);
             var btn = tabGO.AddComponent<Button>();
@@ -532,7 +536,7 @@ public class CharacterSelectionUI : MonoBehaviour
         painelAbaInfo[0] = new GameObject("ConteudoInfo");
         painelAbaInfo[0].transform.SetParent(info.transform, false);
         painelAbaInfo[0].AddComponent<RectTransform>();
-        Anchors(painelAbaInfo[0], Vector2.zero, new Vector2(1f, 0.62f));
+        Anchors(painelAbaInfo[0], Vector2.zero, new Vector2(1f, 0.69f));
 
         txtDesc = TMP(painelAbaInfo[0], "Desc",
             new Vector2(0.04f, 0.26f), new Vector2(0.96f, 0.96f),
@@ -550,13 +554,14 @@ public class CharacterSelectionUI : MonoBehaviour
         painelAbaInfo[1] = new GameObject("ConteudoUltimate");
         painelAbaInfo[1].transform.SetParent(info.transform, false);
         painelAbaInfo[1].AddComponent<RectTransform>();
-        Anchors(painelAbaInfo[1], Vector2.zero, new Vector2(1f, 0.62f));
+        Anchors(painelAbaInfo[1], Vector2.zero, new Vector2(1f, 0.69f));
 
         // ScrollRect para lista de ultimates
         var scrollRoot = new GameObject("ScrollUltimates");
         scrollRoot.transform.SetParent(painelAbaInfo[1].transform, false);
         scrollRoot.AddComponent<RectTransform>();
-        Anchors(scrollRoot, new Vector2(0f, 0.01f), new Vector2(1f, 0.98f));
+        Anchors(scrollRoot, Vector2.zero, Vector2.one,
+            new Vector2(69.61f, 86.59f), new Vector2(-76.40f, 0f));
 
         var viewport = new GameObject("Viewport");
         viewport.transform.SetParent(scrollRoot.transform, false);
@@ -597,13 +602,14 @@ public class CharacterSelectionUI : MonoBehaviour
         painelAbaInfo[2] = new GameObject("ConteudoPassivas");
         painelAbaInfo[2].transform.SetParent(info.transform, false);
         painelAbaInfo[2].AddComponent<RectTransform>();
-        Anchors(painelAbaInfo[2], Vector2.zero, new Vector2(1f, 0.62f));
+        Anchors(painelAbaInfo[2], Vector2.zero, new Vector2(1f, 0.69f));
 
         // ScrollRect para lista de passivas (igual ao de ultimates)
         var scrollPassiva = new GameObject("ScrollPassivas");
         scrollPassiva.transform.SetParent(painelAbaInfo[2].transform, false);
         scrollPassiva.AddComponent<RectTransform>();
-        Anchors(scrollPassiva, new Vector2(0f, 0.01f), new Vector2(1f, 0.98f));
+        Anchors(scrollPassiva, Vector2.zero, Vector2.one,
+            new Vector2(69.61f, 86.59f), new Vector2(-76.40f, 0f));
 
         var vpPassiva = new GameObject("Viewport");
         vpPassiva.transform.SetParent(scrollPassiva.transform, false);
