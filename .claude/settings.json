@@ -21,7 +21,9 @@
       "PowerShell($end = \\(Get-Date\\).AddSeconds\\(12\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\verify_ui.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; if \\(-not \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\verify_ui.png\"\\)\\) { Write-Output \"not found\" })",
       "PowerShell($end = \\(Get-Date\\).AddSeconds\\(15\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_verify2.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; if \\(-not \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_verify2.png\"\\)\\) { Write-Output \"not found\" })",
       "PowerShell($end = \\(Get-Date\\).AddSeconds\\(20\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_zoom2.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; Write-Output \"done waiting\")",
-      "PowerShell($end = \\(Get-Date\\).AddSeconds\\(25\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_z2.png\"\\) { Write-Output \"found at $\\(\\(Get-Date\\).ToString\\('HH:mm:ss'\\)\\)\"; break }; Start-Sleep -Milliseconds 800 }; Write-Output \"done\")"
+      "PowerShell($end = \\(Get-Date\\).AddSeconds\\(25\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_z2.png\"\\) { Write-Output \"found at $\\(\\(Get-Date\\).ToString\\('HH:mm:ss'\\)\\)\"; break }; Start-Sleep -Milliseconds 800 }; Write-Output \"done\")",
+      "mcp__pixellab__create_1_direction_object",
+      "mcp__pixellab__get_object"
     ]
   }
 }
