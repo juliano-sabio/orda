@@ -35,6 +35,11 @@ public class InimigoSuporte : MonoBehaviour
     public float duracaoBuff = 5f;
     public float aumentoDefesa = 0.1f;
 
+    [Header("Onda de Repulsão ao Curar")]
+    public float forcaRepulsao  = 14f;
+    public float raioRepulsao   = 7f;
+    public float duracaoOndaRep = 0.55f;
+
     private float proximaCura = 0f;
     private AudioSource audioSource;
     private List<GameObject> efeitosAtivos = new List<GameObject>();
@@ -143,15 +148,74 @@ public class InimigoSuporte : MonoBehaviour
         int alvosACurar = Mathf.Min(alvosParaCurar.Count, maximoAlvosPorVez);
 
         for (int i = 0; i < alvosACurar; i++)
-        {
             CurarInimigo(alvosParaCurar[i]);
-            CriarEfeitoVisual(alvosParaCurar[i].transform.position);
-        }
+
+        // Onda de cura centrada na própria slime
+        var ondaGO = new GameObject("OndaCura");
+        ondaGO.transform.position = transform.position;
+        ondaGO.AddComponent<OndaCuraVisual>().Iniciar(raioCura, 0.6f);
+
+        EmitirOndaRepulsao();
 
         if (somCura != null && audioSource != null)
         {
             audioSource.PlayOneShot(somCura);
         }
+    }
+
+    void EmitirOndaRepulsao()
+    {
+        var cols = Physics2D.OverlapCircleAll(transform.position, raioRepulsao, alvosCuraLayer);
+        foreach (var c in cols)
+        {
+            var rb = c.GetComponent<Rigidbody2D>() ?? c.GetComponentInParent<Rigidbody2D>();
+            if (rb == null || rb.gameObject == gameObject) continue;
+
+            Vector2 dir  = (Vector2)rb.transform.position - (Vector2)transform.position;
+            float   dist = dir.magnitude;
+            if (dist > 0.1f)
+                rb.AddForce(dir.normalized * forcaRepulsao, ForceMode2D.Impulse);
+        }
+
+        var go = new GameObject("OndaRepulsao");
+        go.transform.position = transform.position;
+        StartCoroutine(AnimarOndaRepulsao(go));
+    }
+
+    IEnumerator AnimarOndaRepulsao(GameObject go)
+    {
+        const int SEGS = 48;
+        var lr = go.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true;
+        lr.loop          = true;
+        lr.positionCount = SEGS;
+        lr.material      = new Material(Shader.Find("Sprites/Default"));
+        lr.sortingOrder  = 10;
+
+        Vector2 centro = go.transform.position;
+
+        for (float t = 0f; t < duracaoOndaRep; t += Time.deltaTime)
+        {
+            if (go == null) yield break;
+            float p    = t / duracaoOndaRep;
+            float r    = Mathf.Lerp(0f, raioRepulsao, p);
+            float a    = Mathf.Lerp(0.85f, 0f, p);
+            float larg = Mathf.Lerp(0.32f, 0.05f, p);
+            Color cor  = new Color(0.25f, 1f, 0.45f, a);
+
+            lr.startColor = lr.endColor = cor;
+            lr.startWidth = lr.endWidth = larg;
+
+            for (int i = 0; i < SEGS; i++)
+            {
+                float ang = i / (float)SEGS * Mathf.PI * 2f;
+                lr.SetPosition(i, centro + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * r);
+            }
+
+            yield return null;
+        }
+
+        if (go != null) Destroy(go);
     }
 
     void CurarInimigo(InimigoController inimigo)

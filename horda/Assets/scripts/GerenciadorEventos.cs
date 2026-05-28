@@ -17,6 +17,7 @@ public enum TipoEvento
     EliminarSlimeColorida,
     Ceifador,
     SlimePercurso,
+    ZonaEliminacao,
 }
 
 [Serializable]
@@ -75,6 +76,13 @@ public class GerenciadorEventos : MonoBehaviour
     public LayerMask  camadasObstaculo;
     public float      raioChecagemSpawn   = 0.5f;
 
+    [Header("Zona de Eliminação")]
+    public GameObject[] prefabsInimigosZona;
+    public float        raioZona = 8f;
+
+    [Header("Drops Globais de Inimigos")]
+    public List<DropEntry> dropsGlobais = new List<DropEntry>();
+
     [Header("Visual — Barra de Progresso")]
     public Color   corBarraAtiva     = new Color(0.2f, 0.8f, 0.3f);
     public Color   corBarraSucesso   = new Color(0.2f, 0.9f, 0.3f);
@@ -87,6 +95,7 @@ public class GerenciadorEventos : MonoBehaviour
     private readonly List<GameObject> ceifadoresMapa = new List<GameObject>();
     private BordaSangueEvento bordaSangue;
 
+    private ZonaEliminacaoEvento zonaEliminacao;
     private SlimePercursoEvento slimePercurso;
     private readonly List<GameObject> inimigosPercurso = new List<GameObject>();
     private Coroutine corSpawnPercurso;
@@ -182,6 +191,17 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.corSeta  = new Color(0.2f, 1f, 0.45f);
         }
 
+        if (eventoAtual.tipo == TipoEvento.ZonaEliminacao
+            && zonaEliminacao != null
+            && indicadorSlime == null
+            && (eventoAtual.duracao - timerContagem) >= 120f)
+        {
+            var go = new GameObject("IndicadorZona");
+            indicadorSlime = go.AddComponent<IndicadorSlime>();
+            indicadorSlime.alvo    = zonaEliminacao.transform;
+            indicadorSlime.corSeta = new Color(0.25f, 0.85f, 1f);
+        }
+
         if (timerContagem <= 0f)
             EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver
                         || eventoAtual.tipo == TipoEvento.Ceifador
@@ -235,6 +255,10 @@ void TentarIniciarEvento()
     {
         SpawnSlimePercurso();
     }
+    else if (eventoAtual.tipo == TipoEvento.ZonaEliminacao)
+    {
+        SpawnZonaEliminacao();
+    }
 }
 
     void EncerrarEvento(bool sucesso)
@@ -255,9 +279,13 @@ void TentarIniciarEvento()
 
         LimparCeifadores();
         LimparSlimePercurso();
+        LimparZonaEliminacao();
 
         if (sucesso && playerStats != null)
-            playerStats.Heal(playerStats.maxHealth * 0.15f);
+        {
+            float pctCura = eventoAtual.tipo == TipoEvento.SlimePercurso ? 0.40f : 0.15f;
+            playerStats.Heal(playerStats.maxHealth * pctCura);
+        }
 
         StartCoroutine(MostrarResultado(sucesso));
         AgendarProximoEvento();
@@ -775,6 +803,69 @@ IEnumerator SpawnInimigosPercurso()
             spawned++;
             break;
         }
+    }
+}
+
+void SpawnZonaEliminacao()
+{
+    Bounds mapa;
+    if (terrenoBase != null)
+    {
+        terrenoBase.CompressBounds();
+        mapa = new Bounds();
+        mapa.SetMinMax(
+            terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+            terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max));
+    }
+    else mapa = CalcularBoundsMapa();
+
+    Vector2 posPlayer = playerStats != null ? (Vector2)playerStats.transform.position : Vector2.zero;
+    int maskObst = camadasObstaculo != 0 ? (int)camadasObstaculo : (1 << 3);
+
+    Vector2 centro = Vector2.zero;
+    bool encontrou = false;
+    for (int t = 0; t < 120; t++)
+    {
+        Vector2 c = new Vector2(
+            UnityEngine.Random.Range(mapa.min.x + raioZona, mapa.max.x - raioZona),
+            UnityEngine.Random.Range(mapa.min.y + raioZona, mapa.max.y - raioZona));
+
+        if (!PosicaoValida(c)) continue;
+        if (Vector2.Distance(c, posPlayer) < raioZona + 4f) continue;
+        if (Physics2D.OverlapCircle(c, raioZona * 0.5f, maskObst)) continue;
+
+        centro = c;
+        encontrou = true;
+        break;
+    }
+
+    if (!encontrou) centro = (Vector2)mapa.center;
+
+    var go = new GameObject("ZonaEliminacao");
+    go.transform.position = new Vector3(centro.x, centro.y, 0f);
+    zonaEliminacao = go.AddComponent<ZonaEliminacaoEvento>();
+    zonaEliminacao.raio           = raioZona;
+    zonaEliminacao.quantidade     = eventoAtual.quantidade;
+    zonaEliminacao.prefabsInimigos = prefabsInimigosZona;
+
+    zonaEliminacao.OnProgresso += (atual, total) =>
+    {
+        progresso = atual;
+    };
+    zonaEliminacao.OnConcluido += () =>
+    {
+        if (eventoAtivo) EncerrarEvento(true);
+    };
+
+    Debug.Log($"[ZonaEliminacao] Zona criada em {centro}, raio={raioZona}, kills={eventoAtual.quantidade}");
+}
+
+void LimparZonaEliminacao()
+{
+    if (zonaEliminacao != null)
+    {
+        Destroy(zonaEliminacao.gameObject);
+        zonaEliminacao = null;
     }
 }
 

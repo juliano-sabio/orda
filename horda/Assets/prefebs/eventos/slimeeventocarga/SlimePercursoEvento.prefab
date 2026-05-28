@@ -195,9 +195,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InimigoController
   dadosInimigo: {fileID: 0}
-  vidaAtual: 2000
+  vidaAtual: 6000
   danoAtual: 0
-  vidaMaxima: 2000
+  vidaMaxima: 6000
   xpOrbPrefab: {fileID: 0}
   minOrbs: 0
   maxOrbs: 0
@@ -252,3 +252,6 @@ MonoBehaviour:
   controllerSlime: {fileID: 1533084664610640819, guid: 1a4bd1691ddd18e49b94ed9856687a22, type: 3}
   danoOnda: 5
   intervaloOnda: 7
+  curaOnda: 15
+  intervaloCura: 7
+  efeitoCuraPrefab: {fileID: 1001000000000001, guid: d4b5c392a5f6e70823456789bcdef012, type: 3}

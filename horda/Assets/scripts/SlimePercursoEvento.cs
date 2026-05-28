@@ -16,6 +16,12 @@ public class SlimePercursoEvento : MonoBehaviour
     public float danoOnda      = 5f;
     public float intervaloOnda = 7f;
 
+    [Header("Onda de Cura")]
+    public float curaOnda        = 15f;
+    public float intervaloCura   = 7f;
+    public float raioOndaCura    = 8f;
+    public float forcaRepulsao   = 12f;
+
     // A* grid
     const float PASSO    = 1.5f;
     const float RAIO_OBS = 2.2f;
@@ -64,6 +70,7 @@ public class SlimePercursoEvento : MonoBehaviour
         AdicionarBrilho();
         CriarBarraVida();
         StartCoroutine(OndaDano());
+        StartCoroutine(OndaCura());
     }
 
     public void IniciarPercurso(Vector2 destino)
@@ -471,5 +478,77 @@ public class SlimePercursoEvento : MonoBehaviour
             if (ps != null) ps.TakeDamage(danoOnda);
             yield return new WaitForSeconds(intervaloOnda);
         }
+    }
+
+    IEnumerator OndaCura()
+    {
+        yield return new WaitForSeconds(intervaloCura);
+        while (!Chegou && !morreu)
+        {
+            EmitirOndaCura();
+            yield return new WaitForSeconds(intervaloCura);
+        }
+    }
+
+    void EmitirOndaCura()
+    {
+        Vector2 centro = transform.position;
+
+        // Cura o player se estiver no raio
+        var ps = FindFirstObjectByType<PlayerStats>();
+        if (ps != null && Vector2.Distance(centro, ps.transform.position) <= raioOndaCura)
+            ps.Heal(curaOnda);
+
+        // Cura a própria slime
+        if (inimigoCtrl != null)
+        {
+            inimigoCtrl.vidaAtual = Mathf.Min(inimigoCtrl.vidaMaxima, inimigoCtrl.vidaAtual + curaOnda * 2f);
+            AtualizarBarraVida();
+        }
+
+        // Repele inimigos no raio
+        var hits = Physics2D.OverlapCircleAll(centro, raioOndaCura, LayerMask.GetMask("Enemy"));
+        foreach (var col in hits)
+        {
+            if (col.gameObject == gameObject) continue;
+            var rbInimigo = col.GetComponent<Rigidbody2D>();
+            if (rbInimigo == null) continue;
+            Vector2 dir = ((Vector2)col.transform.position - centro);
+            if (dir.sqrMagnitude < 0.01f) dir = Random.insideUnitCircle.normalized;
+            else dir.Normalize();
+            rbInimigo.AddForce(dir * forcaRepulsao, ForceMode2D.Impulse);
+        }
+
+        // Onda visual expansiva verde
+        StartCoroutine(AnimarOndaCura(centro));
+    }
+
+    IEnumerator AnimarOndaCura(Vector2 centro)
+    {
+        var go = new GameObject("OndaCuraPercurso");
+        go.transform.position = centro;
+        var lr = go.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true;
+        lr.loop          = true;
+        lr.positionCount = 48;
+        lr.material      = new Material(Shader.Find("Sprites/Default"));
+        lr.sortingOrder  = 12;
+
+        float dur = 0.7f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            if (go == null) yield break;
+            float p = t / dur;
+            float r = Mathf.Lerp(0.3f, raioOndaCura, p);
+            lr.startColor = lr.endColor = new Color(0.2f, 1f, 0.5f, Mathf.Lerp(0.9f, 0f, p));
+            lr.startWidth = lr.endWidth = Mathf.Lerp(0.5f, 0.05f, p);
+            for (int i = 0; i < 48; i++)
+            {
+                float ang = i / 48f * Mathf.PI * 2f;
+                lr.SetPosition(i, centro + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * r);
+            }
+            yield return null;
+        }
+        if (go != null) Destroy(go);
     }
 }

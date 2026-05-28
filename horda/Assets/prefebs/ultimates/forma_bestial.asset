@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
+  m_Name: forma_bestial
+  m_EditorClassIdentifier: Assembly-CSharp::UltimateData
+  ultimateName: Forma Bestial
+  description: 'Por 6s transforma em forma animal: velocidade dobrada, golpes corpo
+    a corpo constantes e rugidos que empurram inimigos. Ao sair, libera uma onda
+    de impacto massiva.'
+  ultimateIcon: {fileID: 4176462413722408931, guid: 235098597b590844687770286798fa2a, type: 3}
+  cooldown: 32
+  baseDamage: 22
+  areaOfEffect: 5.5
+  duration: 6
+  element: 0
+  specialEffect: Aura laranja girando, rugido a cada 2s com onda de empurrao, burst
+    final com 12 raios radiais.
+  ultimateType: 0
+  specialValue: 0
+  behaviorScriptName: FormaBestialUltimate
+  visualEffectPrefab: {fileID: 0}
+  requiredLevel: 1
+  isUnlocked: 1

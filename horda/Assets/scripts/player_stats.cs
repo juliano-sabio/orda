@@ -61,6 +61,7 @@ public class PlayerStats : MonoBehaviour
     public float ultimateCooldown = 30f;
     public float ultimateChargeTime = 0f;
     public bool ultimateReady = false;
+    public bool ultimateBloqueada = false;
 
     [Header("🔵 Ultimate de Marcação de Posição")]
     public bool usarUltimateMarcacao = true;
@@ -103,6 +104,10 @@ public class PlayerStats : MonoBehaviour
     private bool ultimateBehaviorAtivo; // qualquer behavior de ultimate gerencia o próprio input
     private SkillManager skillManager;
     private StatusCardSystem cardSystem;
+
+    float       speedOriginalAntesSlow;
+    bool        estaSlowado;
+    Coroutine   corotinaRestaurarSlow;
 
     void Awake()
     {
@@ -974,6 +979,7 @@ public class PlayerStats : MonoBehaviour
     private void UpdateUltimateSystem()
     {
         if (!ultimateSkill.isActive) return;
+        if (ultimateBloqueada) return;
 
         if (!ultimateReady)
         {
@@ -991,7 +997,7 @@ public class PlayerStats : MonoBehaviour
 
     public void ActivateUltimate()
     {
-        if (!ultimateReady || !ultimateSkill.isActive) return;
+        if (!ultimateReady || !ultimateSkill.isActive || ultimateBloqueada) return;
 
         OnUltimateAtivada?.Invoke();
         float totalDamage = ultimateSkill.CalculateTotalDamage();
@@ -1163,6 +1169,7 @@ public class PlayerStats : MonoBehaviour
         var casuloAntigo     = GetComponent<CasuloCristalUltimate>();    if (casuloAntigo     != null) DestroyImmediate(casuloAntigo);
         var escudoAntigo     = GetComponent<EscudoSonicoUltimate>();     if (escudoAntigo     != null) DestroyImmediate(escudoAntigo);
         var raioAntigo       = GetComponent<RaioCerteiroUltimate>();    if (raioAntigo       != null) DestroyImmediate(raioAntigo);
+        var bestialAntigo    = GetComponent<FormaBestialUltimate>();   if (bestialAntigo    != null) DestroyImmediate(bestialAntigo);
 
         switch (ultimateData.behaviorScriptName)
         {
@@ -1306,6 +1313,15 @@ public class PlayerStats : MonoBehaviour
                 c.maxRicochetes    = (int)ultimateData.specialValue;
                 break;
             }
+            case "FormaBestialUltimate":
+            {
+                var c              = gameObject.AddComponent<FormaBestialUltimate>();
+                c.cooldown         = ultimateData.cooldown;
+                c.duracao          = ultimateData.duration;
+                c.danoMelee        = ultimateData.baseDamage;
+                c.raioRugido       = ultimateData.areaOfEffect;
+                break;
+            }
         }
 
         // Atualiza a flag usada no Update
@@ -1330,7 +1346,8 @@ public class PlayerStats : MonoBehaviour
             || GetComponent<BencaoAnciaoUltimate>()       != null
             || GetComponent<CasuloCristalUltimate>()      != null
             || GetComponent<EscudoSonicoUltimate>()       != null
-            || GetComponent<RaioCerteiroUltimate>()       != null;
+            || GetComponent<RaioCerteiroUltimate>()       != null
+            || GetComponent<FormaBestialUltimate>()       != null;
     }
 
     private void UpdateUI()
@@ -1702,13 +1719,24 @@ public class PlayerStats : MonoBehaviour
     }
     public void AplicarSlow(float reducao, float duracao)
     {
-        // Reduz a velocidade temporariamente
-        float reducaoAplicada = speed * reducao;
-        speed -= reducaoAplicada;
+        if (!estaSlowado)
+        {
+            speedOriginalAntesSlow = speed;
+            estaSlowado = true;
+        }
 
+        speed = speedOriginalAntesSlow * (1f - Mathf.Clamp01(reducao));
 
-        // Restaura após a duração
-        StartCoroutine(RestaurarVelocidade(reducaoAplicada, duracao));
+        if (corotinaRestaurarSlow != null) StopCoroutine(corotinaRestaurarSlow);
+        corotinaRestaurarSlow = StartCoroutine(RestaurarVelocidade(duracao));
+    }
+
+    public void CancelarSlow()
+    {
+        if (!estaSlowado) return;
+        if (corotinaRestaurarSlow != null) { StopCoroutine(corotinaRestaurarSlow); corotinaRestaurarSlow = null; }
+        speed       = speedOriginalAntesSlow;
+        estaSlowado = false;
     }
     public void AddShieldAuraBehavior(SkillData skill)
     {
@@ -1737,10 +1765,12 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    private IEnumerator RestaurarVelocidade(float reducao, float duracao)
+    private IEnumerator RestaurarVelocidade(float duracao)
     {
         yield return new WaitForSeconds(duracao);
-        speed += reducao;
+        speed = speedOriginalAntesSlow;
+        estaSlowado = false;
+        corotinaRestaurarSlow = null;
     }
     // --- NOVOS MÉTODOS PARA O UIMANAGER ---
 

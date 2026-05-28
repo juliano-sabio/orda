@@ -108,7 +108,17 @@
       "Bash(dir \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\eventos\\\\slimeeventocarga\")",
       "Bash(findstr /i slime)",
       "Bash(grep ^guid: c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/prefebs/inimigos/__TRACKED_VAR__.prefab.meta)",
-      "Bash(grep -m1 '^--- !u!1 &' c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/prefebs/inimigos/__TRACKED_VAR__.prefab)"
+      "Bash(grep -m1 '^--- !u!1 &' c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/prefebs/inimigos/__TRACKED_VAR__.prefab)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '\\(pocao|poção|cura|espirito|spirit|heal|potion\\)' } | Select-Object FullName)",
+      "Bash(dir \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\poção de cura\" /b)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\poção de cura\" -Recurse | ForEach-Object { $_.FullName })",
+      "Bash(del \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\inimigos\\\\slime_ellemental\\\\SlimeElemental.prefab\")",
+      "PowerShell(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\inimigos\\\\slime_ellemental\\\\SlimeElemental.prefab\" -Confirm:$false)",
+      "Bash(xargs grep -l \"CharacterData\\\\|ultimatesDisponiveis\")",
+      "Bash(xargs grep -l \"Assembly-CSharp::CharacterData\")",
+      "PowerShell(py --version)",
+      "PowerShell(python --version)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\" -Recurse -File -Include \"*spawn*\", \"*Spawn*\", \"*spawner*\", \"*Spawner*\", \"*onda*\", \"*Onda*\", \"*wave*\", \"*Wave*\", \"*gerenciador*\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

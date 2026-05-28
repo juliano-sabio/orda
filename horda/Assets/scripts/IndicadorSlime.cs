@@ -90,10 +90,10 @@ public class IndicadorSlime : MonoBehaviour
 
         if (nasTela)
         {
-            // Posiciona acima da slime na tela
+            // Posiciona acima da slime na tela, clampado dentro do canvas
             canvasPos = new Vector2(
-                (vp.x - 0.5f) * canvasRT.rect.width,
-                (vp.y - 0.5f) * canvasRT.rect.height + 55f
+                Mathf.Clamp((vp.x - 0.5f) * canvasRT.rect.width,  -hw + MARGIN, hw - MARGIN),
+                Mathf.Clamp((vp.y - 0.5f) * canvasRT.rect.height + 55f, -hh + MARGIN, hh - MARGIN)
             );
             seta.localRotation = Quaternion.identity;
         }

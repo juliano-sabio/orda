@@ -325,6 +325,8 @@ public class InimigoController : MonoBehaviour
         RemoverBuffDefesa();
     }
 
+    public void RemoverBuff() => RemoverBuffDefesa();
+
     private void RemoverBuffDefesa()
     {
         temBuffDefesa = false;
@@ -545,6 +547,17 @@ public class InimigoController : MonoBehaviour
         if (dadosInimigo != null && dadosInimigo.dropsPossiveis != null)
         {
             foreach (var drop in dadosInimigo.dropsPossiveis)
+            {
+                if (drop.prefab == null) continue;
+                if (UnityEngine.Random.value <= drop.chance)
+                    Instantiate(drop.prefab, transform.position, Quaternion.identity);
+            }
+        }
+
+        var ge = GerenciadorEventos.Instance;
+        if (ge != null && ge.dropsGlobais != null)
+        {
+            foreach (var drop in ge.dropsGlobais)
             {
                 if (drop.prefab == null) continue;
                 if (UnityEngine.Random.value <= drop.chance)

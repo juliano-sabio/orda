@@ -64,7 +64,15 @@ public class PocaoCura : MonoBehaviour
             : quantidadeCura;
 
         stats.Heal(cura);
+        SpawnEfeitoColeta(other.transform.position);
         Destroy(gameObject);
+    }
+
+    void SpawnEfeitoColeta(Vector3 pos)
+    {
+        var go = new GameObject("EfeitoColetaCura");
+        go.transform.position = pos;
+        go.AddComponent<EfeitoColetaCuraFX>();
     }
 
     void OnDrawGizmosSelected()

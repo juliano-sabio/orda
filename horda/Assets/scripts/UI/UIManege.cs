@@ -695,7 +695,9 @@ public class UIManager : MonoBehaviour
                 ultimateSkillIcon.sprite = ultimateSkill.icon != null
                     ? ultimateSkill.icon
                     : GetSkillIcon(ultimateSkill.skillName);
-                ultimateSkillIcon.color = playerStats.IsUltimateReady() ? Color.yellow : Color.white;
+                ultimateSkillIcon.color = playerStats.ultimateBloqueada ? Color.red
+                                        : playerStats.IsUltimateReady() ? Color.yellow
+                                        : Color.white;
                 ultimateSkillIcon.gameObject.SetActive(true);
 
                 if (ultimateSkillElementIcon != null)
@@ -869,28 +871,37 @@ public class UIManager : MonoBehaviour
         {
             float sp = playerStats.GetShieldPoints();
             string shieldStr = sp > 0.5f ? $" +{sp:F0}" : "";
-            healthText.text = $"{playerStats.GetCurrentHealth():F0}/{playerStats.GetMaxHealth():F0}{shieldStr}";
+            string novoHp = $"{playerStats.GetCurrentHealth():F0}/{playerStats.GetMaxHealth():F0}{shieldStr}";
+            if (healthText.text != novoHp) healthText.text = novoHp;
         }
 
         if (levelText != null)
-            levelText.text = $"Level: {playerStats.GetLevel()}";
+        {
+            string novoLvl = $"Level: {playerStats.GetLevel()}";
+            if (levelText.text != novoLvl) levelText.text = novoLvl;
+        }
 
         if (xpText != null)
-            xpText.text = $"XP: {playerStats.GetCurrentXP():F0}/{playerStats.GetXPToNextLevel():F0}";
+        {
+            string novoXp = $"XP: {playerStats.GetCurrentXP():F0}/{playerStats.GetXPToNextLevel():F0}";
+            if (xpText.text != novoXp) xpText.text = novoXp;
+        }
 
         if (ultimateChargeText != null)
         {
             float chargePercent = (playerStats.GetUltimateChargeTime() / playerStats.GetUltimateCooldown()) * 100f;
-            ultimateChargeText.text = playerStats.IsUltimateReady() ?
-                "ULTIMATE PRONTA!" :
-                $"ULTIMATE: {chargePercent:F0}%";
+            string novoTextoUlti = playerStats.ultimateBloqueada ? "ULTIMATE BLOQUEADA!" :
+                playerStats.IsUltimateReady() ? "ULTIMATE PRONTA!" :
+                $"ULTIMATE: {Mathf.FloorToInt(chargePercent)}%";
+            if (ultimateChargeText.text != novoTextoUlti)
+                ultimateChargeText.text = novoTextoUlti;
         }
 
         if (currentElementText != null)
             currentElementText.text = $"Elem: {playerStats.GetCurrentElement()}";
 
         if (ultimateReadyEffect != null)
-            ultimateReadyEffect.SetActive(playerStats.IsUltimateReady());
+            ultimateReadyEffect.SetActive(playerStats.IsUltimateReady() && !playerStats.ultimateBloqueada);
 
         if (dashChargesText != null)
         {

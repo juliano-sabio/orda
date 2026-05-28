@@ -21,6 +21,25 @@ public class Escudo : MonoBehaviour
         StartCoroutine(PulsarEscudo());
     }
 
+    public void Desativar()
+    {
+        if (!Ativo) return;
+        StartCoroutine(QuebrarEscudo());
+    }
+
+    public void ForcarRemover()
+    {
+        StopAllCoroutines();
+        vidaAtual = 0;
+        if (visualGO != null) { Destroy(visualGO); visualGO = null; }
+        Destroy(this);
+    }
+
+    void OnDestroy()
+    {
+        if (visualGO != null) Destroy(visualGO);
+    }
+
     // Retorna o dano que passou pelo escudo (overflow)
     public float AbsorverDano(float dano)
     {
@@ -49,16 +68,23 @@ public class Escudo : MonoBehaviour
         {
             float d  = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c, c));
             float nt = d / c;
-            float a  = Mathf.Clamp01(1f - Mathf.Abs(nt - 0.75f) / 0.25f);
-            a *= Mathf.Clamp01((nt - 0.2f) / 0.3f); // transparente no centro
-            tex.SetPixel(x, y, new Color(0.7f, 0.4f, 1f, a));
+            float a  = Mathf.Clamp01(1f - Mathf.Abs(nt - 0.82f) / 0.18f);
+            a *= Mathf.Clamp01((nt - 0.5f) / 0.2f);
+            tex.SetPixel(x, y, new Color(0.75f, 0.5f, 1f, a * 0.55f));
         }
         tex.Apply();
         Sprite spr = Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), (float)sz);
 
         visualGO = new GameObject("EscudoVisual");
         visualGO.transform.SetParent(transform);
-        visualGO.transform.localPosition = Vector3.zero;
+
+        SpriteRenderer bossSR = GetComponent<SpriteRenderer>();
+
+        // Centraliza no meio do sprite (compensa pivot na base)
+        if (bossSR != null)
+            visualGO.transform.position = bossSR.bounds.center;
+        else
+            visualGO.transform.localPosition = Vector3.zero;
 
         // Compensa escala do boss para o escudo ter ~7 world units de diâmetro
         float avgParent = (Mathf.Abs(transform.localScale.x) + Mathf.Abs(transform.localScale.y)) * 0.5f;
@@ -68,7 +94,6 @@ public class Escudo : MonoBehaviour
         srVisual = visualGO.AddComponent<SpriteRenderer>();
         srVisual.sprite = spr;
 
-        SpriteRenderer bossSR = GetComponent<SpriteRenderer>();
         if (bossSR != null)
         {
             srVisual.sortingLayerID = bossSR.sortingLayerID;
@@ -81,10 +106,10 @@ public class Escudo : MonoBehaviour
         while (Ativo && srVisual != null)
         {
             float t     = Time.time;
-            float alpha = Mathf.Lerp(0.15f, 0.45f, (Mathf.Sin(t * 2.5f) + 1f) * 0.5f);
-            float scl   = Mathf.Lerp(0.96f, 1.04f, (Mathf.Sin(t * 1.8f) + 1f) * 0.5f);
+            float alpha = Mathf.Lerp(0.08f, 0.22f, (Mathf.Sin(t * 1.8f) + 1f) * 0.5f);
+            float scl   = Mathf.Lerp(0.98f, 1.02f, (Mathf.Sin(t * 1.3f) + 1f) * 0.5f);
 
-            srVisual.color = new Color(0.7f, 0.4f, 1f, alpha);
+            srVisual.color = new Color(0.75f, 0.5f, 1f, alpha);
             if (visualGO != null)
                 visualGO.transform.localScale = Vector3.one * (baseLocalScale * scl);
 
