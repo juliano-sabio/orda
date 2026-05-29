@@ -1738,6 +1738,14 @@ public class PlayerStats : MonoBehaviour
         speed       = speedOriginalAntesSlow;
         estaSlowado = false;
     }
+
+    // Cancela o timer do slow sem tocar na velocidade — usado quando outro sistema já restaura speed
+    public void CancelarTimerSlow()
+    {
+        if (corotinaRestaurarSlow != null) { StopCoroutine(corotinaRestaurarSlow); corotinaRestaurarSlow = null; }
+        estaSlowado            = false;
+        speedOriginalAntesSlow = speed;
+    }
     public void AddShieldAuraBehavior(SkillData skill)
     {
         if (GetComponentInChildren<ShieldAuraBehavior>() != null) return;

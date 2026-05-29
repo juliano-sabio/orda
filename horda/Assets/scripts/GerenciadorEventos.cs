@@ -18,6 +18,7 @@ public enum TipoEvento
     Ceifador,
     SlimePercurso,
     ZonaEliminacao,
+    Colapso,
 }
 
 [Serializable]
@@ -38,8 +39,12 @@ public class GerenciadorEventos : MonoBehaviour
     public static GerenciadorEventos Instance { get; private set; }
 
     [Header("Sincronização com TimerManager")]
-    public float delayInicial     = 30f;   // segundos de jogo antes do primeiro evento
-    public float intervaloEventos = 60f;   // intervalo fixo entre eventos (segundos)
+    public float delayInicial     = 30f;
+    public float intervaloEventos = 60f;
+
+    [Header("Debug")]
+    [Tooltip("-1 = aleatório | 0..N = força índice da lista eventos")]
+    public int debugForcarEvento = -1;
 
     [Header("Eventos Disponíveis")]
     public List<EventoAleatorio> eventos = new List<EventoAleatorio>();
@@ -97,6 +102,7 @@ public class GerenciadorEventos : MonoBehaviour
 
     private ZonaEliminacaoEvento zonaEliminacao;
     private SlimePercursoEvento slimePercurso;
+    private EventoColapso       colapsoAtivo;
     private readonly List<GameObject> inimigosPercurso = new List<GameObject>();
     private Coroutine corSpawnPercurso;
     private Tilemap[] tilemapsObstaculo;
@@ -205,7 +211,8 @@ public class GerenciadorEventos : MonoBehaviour
         if (timerContagem <= 0f)
             EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver
                         || eventoAtual.tipo == TipoEvento.Ceifador
-                        || (eventoAtual.tipo == TipoEvento.SlimePercurso && slimePercurso != null && slimePercurso.Chegou));
+                        || (eventoAtual.tipo == TipoEvento.SlimePercurso && slimePercurso != null && slimePercurso.Chegou)
+                        || (eventoAtual.tipo == TipoEvento.Colapso && progresso >= eventoAtual.quantidade));
     }
 
     // Tempo decorrido desde o início — usa TimerManager se disponível
@@ -226,7 +233,10 @@ void TentarIniciarEvento()
     if (painelEvento == null)
         CriarPainelUI();
 
-    eventoAtual = eventos[UnityEngine.Random.Range(0, eventos.Count)];
+    int idx = (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
+        ? debugForcarEvento
+        : UnityEngine.Random.Range(0, eventos.Count);
+    eventoAtual = eventos[idx];
     eventoAtivo = true;
     timerContagem = eventoAtual.duracao;
     progresso = 0;
@@ -259,6 +269,10 @@ void TentarIniciarEvento()
     {
         SpawnZonaEliminacao();
     }
+    else if (eventoAtual.tipo == TipoEvento.Colapso)
+    {
+        IniciarColapso();
+    }
 }
 
     void EncerrarEvento(bool sucesso)
@@ -280,6 +294,7 @@ void TentarIniciarEvento()
         LimparCeifadores();
         LimparSlimePercurso();
         LimparZonaEliminacao();
+        LimparColapso();
 
         if (sucesso && playerStats != null)
         {
@@ -399,10 +414,13 @@ void TentarIniciarEvento()
 
     void OnInimigoDerrotado()
     {
-        if (!eventoAtivo || eventoAtual.tipo != TipoEvento.MatarInimigos) return;
-        progresso++;
-        if (progresso >= eventoAtual.quantidade)
-            EncerrarEvento(true);
+        if (!eventoAtivo) return;
+        if (eventoAtual.tipo == TipoEvento.MatarInimigos || eventoAtual.tipo == TipoEvento.Colapso)
+        {
+            progresso++;
+            if (progresso >= eventoAtual.quantidade)
+                EncerrarEvento(true);
+        }
     }
 
     void OnDanoRecebido()
@@ -805,6 +823,29 @@ IEnumerator SpawnInimigosPercurso()
         }
     }
 }
+
+    // ──────────────────────────────────────────────────────────
+    // Colapso
+
+    void IniciarColapso()
+    {
+        Bounds mapa    = CalcularBoundsMapa();
+        Vector2 centro = mapa.center;
+
+        var go = new GameObject("EventoColapso");
+        colapsoAtivo = go.AddComponent<EventoColapso>();
+        colapsoAtivo.Iniciar(playerStats, centro, eventoAtual.duracao, mapa);
+    }
+
+    void LimparColapso()
+    {
+        if (colapsoAtivo != null)
+        {
+            Destroy(colapsoAtivo.gameObject);
+            colapsoAtivo = null;
+        }
+    }
+
 
 void SpawnZonaEliminacao()
 {

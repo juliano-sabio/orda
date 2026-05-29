@@ -47,6 +47,12 @@ public class SlimeElemental : MonoBehaviour
     float proxDanoContato;
     bool  atacando;
 
+    // rastreamento dos GOs criados em EfeitoCarga/Vortice para cleanup na morte
+    GameObject      cargaAnelExt;
+    GameObject      cargaAnelInt;
+    GameObject[]    cargaOrbs;
+    GameObject      vorticeRoot;
+
     // movimento manter-distância
     Vector2 direcaoMovimento;
     Vector2 ultimaDirFuga = Vector2.down;
@@ -75,7 +81,20 @@ public class SlimeElemental : MonoBehaviour
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
+        LimparEfeitoCarga();
         SpawnCacosGelo(transform.position);
+    }
+
+    void LimparEfeitoCarga()
+    {
+        if (cargaAnelExt != null) { Destroy(cargaAnelExt); cargaAnelExt = null; }
+        if (cargaAnelInt != null) { Destroy(cargaAnelInt); cargaAnelInt = null; }
+        if (cargaOrbs    != null)
+        {
+            foreach (var o in cargaOrbs) if (o != null) Destroy(o);
+            cargaOrbs = null;
+        }
+        if (vorticeRoot  != null) { Destroy(vorticeRoot);  vorticeRoot  = null; }
     }
 
     void SpawnCacosGelo(Vector3 pos)
@@ -408,7 +427,8 @@ public class SlimeElemental : MonoBehaviour
 
     IEnumerator Vortice(Vector2 centro)
     {
-        var root = new GameObject("Vortice");
+        vorticeRoot = new GameObject("Vortice");
+        var root = vorticeRoot;
         root.transform.position = centro;
 
         var lr1 = CriarAnel(root, raioVento,        new Color(0.5f, 1f, 0.6f, 0.8f),  0.10f);
@@ -482,6 +502,7 @@ public class SlimeElemental : MonoBehaviour
             }
             yield return null;
         }
+        vorticeRoot = null;
         Destroy(root);
     }
 
@@ -492,14 +513,15 @@ public class SlimeElemental : MonoBehaviour
         {
             t += Time.deltaTime;
             if (Random.value < 0.06f)
-                StartCoroutine(LinhaRajada(centro, raio));
+                SpawnRajada(centro, raio);
             yield return null;
         }
     }
 
-    IEnumerator LinhaRajada(Vector2 centro, float raio)
+    // Criação inline — a animação roda no próprio GO via RajadaFX
+    void SpawnRajada(Vector2 centro, float raio)
     {
-        float ang = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+        float ang    = Random.Range(0f, 360f) * Mathf.Deg2Rad;
         Vector2 dir  = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
         Vector2 orig = centro + dir * Random.Range(0.3f, raio * 0.5f);
         Vector2 fim  = centro + dir * raio;
@@ -512,15 +534,7 @@ public class SlimeElemental : MonoBehaviour
         lr.sortingOrder  = 13;
         lr.SetPosition(0, orig);
         lr.SetPosition(1, fim);
-
-        for (float i = 0f; i < 0.25f; i += Time.deltaTime)
-        {
-            float p = i / 0.25f;
-            lr.startWidth = lr.endWidth = Mathf.Lerp(0.15f, 0f, p);
-            lr.startColor = lr.endColor = new Color(0.6f, 1f, 0.65f, 1f - p);
-            yield return null;
-        }
-        Destroy(go);
+        go.AddComponent<RajadaFX>();
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -745,27 +759,27 @@ public class SlimeElemental : MonoBehaviour
     IEnumerator EfeitoCarga(Color cor, float duracao)
     {
         // Anel pulsante ao redor da slime — raio 2.0 para ficar fora do corpo (escala 6)
-        var anelGO = new GameObject("AnelCarga");
-        anelGO.transform.position = transform.position;
-        var lrCarga = CriarAnel(anelGO, 2.0f, new Color(cor.r, cor.g, cor.b, 0f), 0.18f);
+        cargaAnelExt = new GameObject("AnelCarga");
+        cargaAnelExt.transform.position = transform.position;
+        var lrCarga = CriarAnel(cargaAnelExt, 2.0f, new Color(cor.r, cor.g, cor.b, 0f), 0.18f);
 
         // segundo anel interno mais sutil
-        var anelIn = new GameObject("AnelCargaInt");
-        anelIn.transform.position = transform.position;
-        var lrIn = CriarAnel(anelIn, 1.4f, new Color(cor.r, cor.g, cor.b, 0f), 0.10f);
+        cargaAnelInt = new GameObject("AnelCargaInt");
+        cargaAnelInt.transform.position = transform.position;
+        var lrIn = CriarAnel(cargaAnelInt, 1.4f, new Color(cor.r, cor.g, cor.b, 0f), 0.10f);
 
         // 6 orbs que orbitam e spiralam em direção ao corpo
         const int NUM_ORBS = 6;
-        var orbGOs = new GameObject[NUM_ORBS];
+        cargaOrbs = new GameObject[NUM_ORBS];
         var orbSRs = new SpriteRenderer[NUM_ORBS];
         for (int i = 0; i < NUM_ORBS; i++)
         {
-            orbGOs[i] = new GameObject("OrbCarga");
-            orbSRs[i] = orbGOs[i].AddComponent<SpriteRenderer>();
+            cargaOrbs[i] = new GameObject("OrbCarga");
+            orbSRs[i] = cargaOrbs[i].AddComponent<SpriteRenderer>();
             orbSRs[i].sprite       = GerarSprite(16, cor);
             orbSRs[i].sortingOrder = 16;
             float sz = Random.Range(0.5f, 0.9f);
-            orbGOs[i].transform.localScale = Vector3.one * sz;
+            cargaOrbs[i].transform.localScale = Vector3.one * sz;
         }
 
         Vector3 escOrig = transform.localScale;
@@ -776,11 +790,11 @@ public class SlimeElemental : MonoBehaviour
             float p = t / duracao; // 0 → 1
 
             // anéis seguem a slime, pulsam
-            anelGO.transform.position = transform.position;
-            anelIn.transform.position = transform.position;
+            if (cargaAnelExt != null) cargaAnelExt.transform.position = transform.position;
+            if (cargaAnelInt != null) cargaAnelInt.transform.position = transform.position;
             float escAnel = 1f + Mathf.Sin(p * Mathf.PI * 6f) * 0.08f * (1f - p);
-            anelGO.transform.localScale = Vector3.one * escAnel;
-            anelIn.transform.localScale = Vector3.one * (escAnel * 0.95f);
+            if (cargaAnelExt != null) cargaAnelExt.transform.localScale = Vector3.one * escAnel;
+            if (cargaAnelInt != null) cargaAnelInt.transform.localScale = Vector3.one * (escAnel * 0.95f);
             AlphaLR(lrCarga, Mathf.Sin(p * Mathf.PI) * 0.95f);
             AlphaLR(lrIn,    Mathf.Sin(p * Mathf.PI) * 0.55f);
 
@@ -788,9 +802,9 @@ public class SlimeElemental : MonoBehaviour
             float raioOrb = Mathf.Lerp(maxRaio, 1.2f, p * p);
             for (int i = 0; i < NUM_ORBS; i++)
             {
-                if (orbGOs[i] == null) continue;
+                if (cargaOrbs[i] == null) continue;
                 float ang = (360f / NUM_ORBS * i + t * 200f) * Mathf.Deg2Rad;
-                orbGOs[i].transform.position = (Vector2)transform.position
+                cargaOrbs[i].transform.position = (Vector2)transform.position
                     + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * raioOrb;
                 var c = orbSRs[i].color;
                 c.a = Mathf.Sin(p * Mathf.PI) * 0.95f;
@@ -809,9 +823,7 @@ public class SlimeElemental : MonoBehaviour
         // burst de liberação
         StartCoroutine(BurstCarga(transform.position, cor));
 
-        Destroy(anelGO);
-        Destroy(anelIn);
-        foreach (var o in orbGOs) if (o != null) Destroy(o);
+        LimparEfeitoCarga();
     }
 
     IEnumerator BurstCarga(Vector3 pos, Color cor)
@@ -963,6 +975,25 @@ public class CacoGeloFX : MonoBehaviour
                 c.a      = Mathf.Clamp01(1f - elapsed / DURACAO);
                 sr.color = c;
             }
+            yield return null;
+        }
+        Destroy(gameObject);
+    }
+}
+
+public class RajadaFX : MonoBehaviour
+{
+    void Start() => StartCoroutine(Animar());
+
+    System.Collections.IEnumerator Animar()
+    {
+        var lr = GetComponent<LineRenderer>();
+        for (float t = 0f; t < 0.25f; t += Time.deltaTime)
+        {
+            if (lr == null) { Destroy(gameObject); yield break; }
+            float p = t / 0.25f;
+            lr.startWidth = lr.endWidth = Mathf.Lerp(0.15f, 0f, p);
+            lr.startColor = lr.endColor = new Color(0.6f, 1f, 0.65f, 1f - p);
             yield return null;
         }
         Destroy(gameObject);

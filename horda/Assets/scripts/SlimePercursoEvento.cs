@@ -519,27 +519,34 @@ public class SlimePercursoEvento : MonoBehaviour
             rbInimigo.AddForce(dir * forcaRepulsao, ForceMode2D.Impulse);
         }
 
-        // Onda visual expansiva verde
-        StartCoroutine(AnimarOndaCura(centro));
-    }
-
-    IEnumerator AnimarOndaCura(Vector2 centro)
-    {
-        var go = new GameObject("OndaCuraPercurso");
-        go.transform.position = centro;
-        var lr = go.AddComponent<LineRenderer>();
+        // Onda visual — roda no próprio GO para sobreviver à destruição da slime
+        var ondaGO = new GameObject("OndaCuraPercurso");
+        ondaGO.transform.position = centro;
+        var lr = ondaGO.AddComponent<LineRenderer>();
         lr.useWorldSpace = true;
         lr.loop          = true;
         lr.positionCount = 48;
         lr.material      = new Material(Shader.Find("Sprites/Default"));
         lr.sortingOrder  = 12;
+        ondaGO.AddComponent<OndaCuraFX>().Iniciar(raioOndaCura);
+    }
+}
 
-        float dur = 0.7f;
+public class OndaCuraFX : MonoBehaviour
+{
+    public void Iniciar(float raio) => StartCoroutine(Animar(raio));
+
+    System.Collections.IEnumerator Animar(float raio)
+    {
+        var lr     = GetComponent<LineRenderer>();
+        var centro = (Vector2)transform.position;
+        float dur  = 0.7f;
+
         for (float t = 0f; t < dur; t += Time.deltaTime)
         {
-            if (go == null) yield break;
+            if (lr == null) { Destroy(gameObject); yield break; }
             float p = t / dur;
-            float r = Mathf.Lerp(0.3f, raioOndaCura, p);
+            float r = Mathf.Lerp(0.3f, raio, p);
             lr.startColor = lr.endColor = new Color(0.2f, 1f, 0.5f, Mathf.Lerp(0.9f, 0f, p));
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.5f, 0.05f, p);
             for (int i = 0; i < 48; i++)
@@ -549,6 +556,6 @@ public class SlimePercursoEvento : MonoBehaviour
             }
             yield return null;
         }
-        if (go != null) Destroy(go);
+        Destroy(gameObject);
     }
 }

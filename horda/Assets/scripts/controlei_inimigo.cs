@@ -416,8 +416,8 @@ public class InimigoController : MonoBehaviour
         if (screenPos.z <= 0f) { Destroy(textObj); return; }
         screenPos.z  = 0f;
         screenPos.y += 80;
-        screenPos.x  = Mathf.Clamp(screenPos.x, 0f, Screen.width);
-        screenPos.y  = Mathf.Clamp(screenPos.y, 0f, Screen.height);
+        screenPos.x  = Mathf.Clamp(screenPos.x, 10f, Screen.width  - 10f);
+        screenPos.y  = Mathf.Clamp(screenPos.y, 10f, Screen.height - 10f);
         textObj.transform.position = screenPos;
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();

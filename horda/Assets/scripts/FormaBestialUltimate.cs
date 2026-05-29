@@ -63,7 +63,11 @@ public class FormaBestialUltimate : MonoBehaviour
     void OnDestroy()
     {
         if (!ativo) return;
-        if (playerStats != null) playerStats.speed = velocidadeOriginal;
+        if (playerStats != null)
+        {
+            playerStats.speed = velocidadeOriginal;
+            playerStats.CancelarTimerSlow();
+        }
         if (sr != null) sr.color = corOriginal;
         var sm = SkillManager.Instance;
         if (sm != null) sm.enabled = true;
@@ -121,6 +125,7 @@ public class FormaBestialUltimate : MonoBehaviour
 
         if (sr != null) sr.color = corOriginal;
         playerStats.speed = velocidadeOriginal;
+        playerStats.CancelarTimerSlow();
         if (sm != null) sm.enabled = true;
         if (auraAtiva != null) { Destroy(auraAtiva); auraAtiva = null; }
         ativo = false;
