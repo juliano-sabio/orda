@@ -6,6 +6,7 @@ public class IndicadorSlime : MonoBehaviour
 {
     public Transform alvo;
     public Color     corSeta = new Color(1f, 0.25f, 0.9f);
+    public string    label   = "Slime!";
 
     private Canvas      canvas;
     private RectTransform seta;
@@ -123,7 +124,7 @@ public class IndicadorSlime : MonoBehaviour
             new Vector2(alvo.position.x, alvo.position.y)
         );
         if (texto != null)
-            texto.text = $"Slime! {dist:F0}m";
+            texto.text = $"{label} {dist:F0}m";
     }
 
     void OnDestroy()

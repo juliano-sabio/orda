@@ -19,6 +19,9 @@ public enum TipoEvento
     SlimePercurso,
     ZonaEliminacao,
     Colapso,
+    TempestadeEletrica,
+    Portal,
+    Danca,
 }
 
 [Serializable]
@@ -85,6 +88,22 @@ public class GerenciadorEventos : MonoBehaviour
     public GameObject[] prefabsInimigosZona;
     public float        raioZona = 8f;
 
+    [Header("Dança")]
+    public int   dancaQuantidade = 8;
+    public float dancaTempoZona  = 40f;
+    public float dancaRaioZona   = 2.5f;
+
+    [Header("Portal")]
+    public float        portalRaioFechar     = 2.5f;
+    public float        portalTempoFechar    = 3.5f;
+    public float        portalIntervaloSpawn = 5f;
+    public GameObject[] prefabsInimigosPortal;
+
+    [Header("Tempestade Elétrica")]
+    public float tempestadeDanoJogador = 20f;
+    public float tempestadeDanoInimigo = 50f;
+    public float tempestadeRaioImpacto = 3f;
+
     [Header("Drops Globais de Inimigos")]
     public List<DropEntry> dropsGlobais = new List<DropEntry>();
 
@@ -100,14 +119,18 @@ public class GerenciadorEventos : MonoBehaviour
     private readonly List<GameObject> ceifadoresMapa = new List<GameObject>();
     private BordaSangueEvento bordaSangue;
 
-    private ZonaEliminacaoEvento zonaEliminacao;
-    private SlimePercursoEvento slimePercurso;
-    private EventoColapso       colapsoAtivo;
+    private ZonaEliminacaoEvento    zonaEliminacao;
+    private SlimePercursoEvento     slimePercurso;
+    private EventoColapso           colapsoAtivo;
+    private TempestadeEletricaEvento tempestadeAtiva;
+    private PortalEvento             portalAtivo;
+    private DancaEvento              dancaAtiva;
     private readonly List<GameObject> inimigosPercurso = new List<GameObject>();
     private Coroutine corSpawnPercurso;
     private Tilemap[] tilemapsObstaculo;
 
     private bool eventoAtivo;
+    private bool primeiroEventoDisparado;
     private EventoAleatorio eventoAtual;
     private float proximoEventoTempo;   // tempo absoluto do relógio para o próximo evento
     private float timerContagem;
@@ -133,6 +156,22 @@ public class GerenciadorEventos : MonoBehaviour
     private Vector2 POS_VISIVEL  => posicaoVisivel;
     private static readonly Vector2 POS_ESCONDIDO = new Vector2(360f, -10f);
 
+    [UnityEngine.ContextMenu("Adicionar Tempestade Elétrica")]
+    void AdicionarTempestadeNoInspector()
+    {
+        if (eventos == null) eventos = new System.Collections.Generic.List<EventoAleatorio>();
+        if (eventos.Exists(e => e.tipo == TipoEvento.TempestadeEletrica)) return;
+        eventos.Insert(0, new EventoAleatorio
+        {
+            nome                = "⚡ Tempestade Elétrica",
+            descricao           = "Raios caem pelo mapa! Fique de olho nos círculos de aviso e sobreviva!",
+            tipo                = TipoEvento.TempestadeEletrica,
+            duracao             = 240f,
+            quantidade          = 0,
+            recompensaDescricao = "+15% de vida recuperada!"
+        });
+    }
+
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -147,6 +186,8 @@ public class GerenciadorEventos : MonoBehaviour
 
         CriarPainelUI();
         proximoEventoTempo = delayInicial; // não usa TempoDecorrido() aqui — TimerManager ainda não inicializou
+
+        PopularEventosPadrao();
 
         InimigoController.OnInimigoDerrotado += OnInimigoDerrotado;
         PlayerStats.OnDanoRecebido += OnDanoRecebido;
@@ -211,6 +252,8 @@ public class GerenciadorEventos : MonoBehaviour
         if (timerContagem <= 0f)
             EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver
                         || eventoAtual.tipo == TipoEvento.Ceifador
+                        || eventoAtual.tipo == TipoEvento.TempestadeEletrica
+                        || eventoAtual.tipo == TipoEvento.Danca
                         || (eventoAtual.tipo == TipoEvento.SlimePercurso && slimePercurso != null && slimePercurso.Chegou)
                         || (eventoAtual.tipo == TipoEvento.Colapso && progresso >= eventoAtual.quantidade));
     }
@@ -233,9 +276,17 @@ void TentarIniciarEvento()
     if (painelEvento == null)
         CriarPainelUI();
 
-    int idx = (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
-        ? debugForcarEvento
-        : UnityEngine.Random.Range(0, eventos.Count);
+    int idx;
+    if (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
+        idx = debugForcarEvento;
+    else if (!primeiroEventoDisparado)
+    {
+        idx = eventos.FindIndex(e => e.tipo == TipoEvento.Danca);
+        if (idx < 0) idx = 0;
+    }
+    else
+        idx = UnityEngine.Random.Range(0, eventos.Count);
+    primeiroEventoDisparado = true;
     eventoAtual = eventos[idx];
     eventoAtivo = true;
     timerContagem = eventoAtual.duracao;
@@ -273,6 +324,18 @@ void TentarIniciarEvento()
     {
         IniciarColapso();
     }
+    else if (eventoAtual.tipo == TipoEvento.TempestadeEletrica)
+    {
+        IniciarTempestadeEletrica();
+    }
+    else if (eventoAtual.tipo == TipoEvento.Portal)
+    {
+        IniciarPortal();
+    }
+    else if (eventoAtual.tipo == TipoEvento.Danca)
+    {
+        IniciarDanca();
+    }
 }
 
     void EncerrarEvento(bool sucesso)
@@ -295,6 +358,10 @@ void TentarIniciarEvento()
         LimparSlimePercurso();
         LimparZonaEliminacao();
         LimparColapso();
+        LimparTempestadeEletrica();
+        LimparPortal();
+        if (dancaAtiva != null) dancaAtiva.Encerrar();
+        LimparDanca();
 
         if (sucesso && playerStats != null)
         {
@@ -947,6 +1014,177 @@ void LimparSlimePercurso()
         progresso++;
         if (progresso >= eventoAtual.quantidade)
             EncerrarEvento(true);
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Inicialização dos eventos padrão
+
+    void PopularEventosPadrao()
+    {
+        AdicionarSeAusente(new EventoAleatorio
+        {
+            nome = "⚡ Tempestade Elétrica",
+            descricao = "Raios caem pelo mapa! Fique de olho nos círculos de aviso e sobreviva!",
+            tipo = TipoEvento.TempestadeEletrica,
+            duracao = 240f,
+            quantidade = 0,
+            recompensaDescricao = "+15% de vida recuperada!"
+        }, primeiro: true);
+
+        AdicionarSeAusente(new EventoAleatorio
+        {
+            nome = "Eliminar Slime Colorida",
+            descricao = "Encontre e elimine a slime colorida!",
+            tipo = TipoEvento.EliminarSlimeColorida,
+            duracao = 60f,
+            quantidade = 1,
+            recompensaDescricao = "+15% de vida recuperada!"
+        });
+
+        AdicionarSeAusente(new EventoAleatorio
+        {
+            nome = "Ceifador",
+            descricao = "Sobreviva ao ataque dos ceifadores!",
+            tipo = TipoEvento.Ceifador,
+            duracao = 30f,
+            quantidade = 6,
+            recompensaDescricao = "+15% de vida recuperada!"
+        });
+
+        AdicionarSeAusente(new EventoAleatorio
+        {
+            nome = "Slime Percurso",
+            descricao = "Impeça a slime de atravessar o mapa!",
+            tipo = TipoEvento.SlimePercurso,
+            duracao = 60f,
+            quantidade = 0,
+            recompensaDescricao = "+40% de vida recuperada!"
+        });
+
+        AdicionarSeAusente(new EventoAleatorio
+        {
+            nome = "Zona de Eliminação",
+            descricao = "Elimine inimigos dentro da zona marcada!",
+            tipo = TipoEvento.ZonaEliminacao,
+            duracao = 45f,
+            quantidade = 10,
+            recompensaDescricao = "+15% de vida recuperada!"
+        });
+
+        AdicionarSeAusente(new EventoAleatorio
+        {
+            nome = "Colapso",
+            descricao = "A zona está fechando! Sobreviva e elimine inimigos!",
+            tipo = TipoEvento.Colapso,
+            duracao = 40f,
+            quantidade = 15,
+            recompensaDescricao = "+15% de vida recuperada!"
+        });
+    }
+
+    void AdicionarSeAusente(EventoAleatorio evento, bool primeiro = false)
+    {
+        if (eventos.Exists(e => e.tipo == evento.tipo)) return;
+        if (primeiro) eventos.Insert(0, evento);
+        else eventos.Add(evento);
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Dança
+
+    void IniciarDanca()
+    {
+        var go = new GameObject("DancaEvento");
+        dancaAtiva = go.AddComponent<DancaEvento>();
+        dancaAtiva.quantidade = dancaQuantidade;
+        dancaAtiva.tempoZona  = dancaTempoZona;
+        dancaAtiva.raioZona   = dancaRaioZona;
+
+        dancaAtiva.OnProgresso += (atual, total) => { progresso = atual; };
+
+        dancaAtiva.Iniciar(playerStats, terrenoBase);
+    }
+
+    void LimparDanca()
+    {
+        if (dancaAtiva != null)
+        {
+            Destroy(dancaAtiva.gameObject);
+            dancaAtiva = null;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Portal
+
+    void IniciarPortal()
+    {
+        Bounds mapa;
+        if (terrenoBase != null)
+        {
+            terrenoBase.CompressBounds();
+            mapa = new Bounds();
+            mapa.SetMinMax(
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max));
+        }
+        else mapa = CalcularBoundsMapa();
+
+        float ins = insetCanto > 0 ? insetCanto : 6f;
+        Vector2[] cantos = new Vector2[]
+        {
+            new Vector2(mapa.min.x + ins, mapa.min.y + ins),
+            new Vector2(mapa.max.x - ins, mapa.min.y + ins),
+            new Vector2(mapa.min.x + ins, mapa.max.y - ins),
+            new Vector2(mapa.max.x - ins, mapa.max.y - ins),
+        };
+        int idxA = UnityEngine.Random.Range(0, 2);
+        int idxB = idxA == 0 ? 3 : 2;
+
+        Vector2 posA = CantoDentroDoMapa(cantos[idxA], mapa);
+        Vector2 posB = CantoDentroDoMapa(cantos[idxB], mapa);
+
+        var go = new GameObject("PortalEvento");
+        portalAtivo = go.AddComponent<PortalEvento>();
+        portalAtivo.raioFechar     = portalRaioFechar;
+        portalAtivo.tempoFechar    = portalTempoFechar;
+
+        portalAtivo.OnConcluido  += () => { if (eventoAtivo) EncerrarEvento(true);  };
+        portalAtivo.OnProgresso  += (atual, total) => { progresso = atual; };
+
+        portalAtivo.Iniciar(playerStats, posA, posB, prefabsInimigosPortal, portalIntervaloSpawn);
+    }
+
+    void LimparPortal()
+    {
+        if (portalAtivo != null)
+        {
+            Destroy(portalAtivo.gameObject);
+            portalAtivo = null;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Tempestade Elétrica
+
+    void IniciarTempestadeEletrica()
+    {
+        var go = new GameObject("TempestadeEletricaEvento");
+        tempestadeAtiva = go.AddComponent<TempestadeEletricaEvento>();
+        tempestadeAtiva.danoJogador = tempestadeDanoJogador;
+        tempestadeAtiva.danoInimigo = tempestadeDanoInimigo;
+        tempestadeAtiva.raioImpacto = tempestadeRaioImpacto;
+        tempestadeAtiva.terrenoBase = terrenoBase;
+        tempestadeAtiva.Iniciar(playerStats, eventoAtual.duracao);
+    }
+
+    void LimparTempestadeEletrica()
+    {
+        if (tempestadeAtiva != null)
+        {
+            Destroy(tempestadeAtiva.gameObject);
+            tempestadeAtiva = null;
+        }
     }
 
     // ──────────────────────────────────────────────────────────
