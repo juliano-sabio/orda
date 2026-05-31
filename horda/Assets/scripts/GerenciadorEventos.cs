@@ -21,7 +21,6 @@ public enum TipoEvento
     Colapso,
     TempestadeEletrica,
     Portal,
-    Danca,
 }
 
 [Serializable]
@@ -88,11 +87,6 @@ public class GerenciadorEventos : MonoBehaviour
     public GameObject[] prefabsInimigosZona;
     public float        raioZona = 8f;
 
-    [Header("Dança")]
-    public int   dancaQuantidade = 8;
-    public float dancaTempoZona  = 40f;
-    public float dancaRaioZona   = 2.5f;
-
     [Header("Portal")]
     public float        portalRaioFechar     = 2.5f;
     public float        portalTempoFechar    = 3.5f;
@@ -124,13 +118,11 @@ public class GerenciadorEventos : MonoBehaviour
     private EventoColapso           colapsoAtivo;
     private TempestadeEletricaEvento tempestadeAtiva;
     private PortalEvento             portalAtivo;
-    private DancaEvento              dancaAtiva;
     private readonly List<GameObject> inimigosPercurso = new List<GameObject>();
     private Coroutine corSpawnPercurso;
     private Tilemap[] tilemapsObstaculo;
 
     private bool eventoAtivo;
-    private bool primeiroEventoDisparado;
     private EventoAleatorio eventoAtual;
     private float proximoEventoTempo;   // tempo absoluto do relógio para o próximo evento
     private float timerContagem;
@@ -253,7 +245,7 @@ public class GerenciadorEventos : MonoBehaviour
             EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver
                         || eventoAtual.tipo == TipoEvento.Ceifador
                         || eventoAtual.tipo == TipoEvento.TempestadeEletrica
-                        || eventoAtual.tipo == TipoEvento.Danca
+
                         || (eventoAtual.tipo == TipoEvento.SlimePercurso && slimePercurso != null && slimePercurso.Chegou)
                         || (eventoAtual.tipo == TipoEvento.Colapso && progresso >= eventoAtual.quantidade));
     }
@@ -276,17 +268,9 @@ void TentarIniciarEvento()
     if (painelEvento == null)
         CriarPainelUI();
 
-    int idx;
-    if (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
-        idx = debugForcarEvento;
-    else if (!primeiroEventoDisparado)
-    {
-        idx = eventos.FindIndex(e => e.tipo == TipoEvento.Danca);
-        if (idx < 0) idx = 0;
-    }
-    else
-        idx = UnityEngine.Random.Range(0, eventos.Count);
-    primeiroEventoDisparado = true;
+    int idx = (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
+        ? debugForcarEvento
+        : UnityEngine.Random.Range(0, eventos.Count);
     eventoAtual = eventos[idx];
     eventoAtivo = true;
     timerContagem = eventoAtual.duracao;
@@ -332,10 +316,6 @@ void TentarIniciarEvento()
     {
         IniciarPortal();
     }
-    else if (eventoAtual.tipo == TipoEvento.Danca)
-    {
-        IniciarDanca();
-    }
 }
 
     void EncerrarEvento(bool sucesso)
@@ -360,8 +340,6 @@ void TentarIniciarEvento()
         LimparColapso();
         LimparTempestadeEletrica();
         LimparPortal();
-        if (dancaAtiva != null) dancaAtiva.Encerrar();
-        LimparDanca();
 
         if (sucesso && playerStats != null)
         {
@@ -1087,31 +1065,6 @@ void LimparSlimePercurso()
         if (eventos.Exists(e => e.tipo == evento.tipo)) return;
         if (primeiro) eventos.Insert(0, evento);
         else eventos.Add(evento);
-    }
-
-    // ──────────────────────────────────────────────────────────
-    // Dança
-
-    void IniciarDanca()
-    {
-        var go = new GameObject("DancaEvento");
-        dancaAtiva = go.AddComponent<DancaEvento>();
-        dancaAtiva.quantidade = dancaQuantidade;
-        dancaAtiva.tempoZona  = dancaTempoZona;
-        dancaAtiva.raioZona   = dancaRaioZona;
-
-        dancaAtiva.OnProgresso += (atual, total) => { progresso = atual; };
-
-        dancaAtiva.Iniciar(playerStats, terrenoBase);
-    }
-
-    void LimparDanca()
-    {
-        if (dancaAtiva != null)
-        {
-            Destroy(dancaAtiva.gameObject);
-            dancaAtiva = null;
-        }
     }
 
     // ──────────────────────────────────────────────────────────

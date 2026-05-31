@@ -71,7 +71,7 @@ public class moviment_player2 : MonoBehaviour
     private IEnumerator DashCoroutine()
     {
         isDashing = true;
-        dashEffect?.IniciarEfeito();
+        dashEffect?.IniciarEfeito(dashDirection);
 
         yield return new WaitForSeconds(dashDuration);
 

@@ -534,8 +534,20 @@ public enum SpecificSkillType
     EarthStomp,
     Ultimate,
     Boomerang, // 🆕 NOVO TIPO DE SKILL
-    EscudoRotativo, // 🆕 Escudos orbitais que refletem projéteis inimigos
-    EscudoEspinhoso, // Escudo de espinho que causa dano ao tocar inimigos e desativa por um tempo
+    EscudoRotativo,
+    EscudoEspinhoso,
+    CampoEspinhos,
+    ChuvaEstrelas,
+    GarrasAbismo,
+    FuriaLaminas,
+    SombrasCruz,
+    CorteFantasma,
+    LancaLuz,
+    ChicoteEnergia,
+    MisseisTeleguiados,
+    PulsoRitmico,
+    EspadaFantasma,
+    CorrenteSombria,
 }
 
 // 🆕 NOVO ENUM PARA TARGETING ORBITAL

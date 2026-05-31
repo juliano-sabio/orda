@@ -14,14 +14,91 @@ public class DashEffect : MonoBehaviour
     public float tempoVidaParticula = 0.4f;
     public Color corParticula = new Color(0.4f, 0.8f, 1f, 1f);
 
+    [Header("Sprite Dash")]
+    public Color corDash = new Color(0.5f, 0.85f, 1f, 0.9f);
+    public float duracaoDashSprite = 0.35f;
+
     private SpriteRenderer spriteRenderer;
     private Coroutine spawnarCoroutine;
     private Sprite spriteParticula;
+    private Sprite spriteDash;
 
     void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer  = GetComponent<SpriteRenderer>();
         spriteParticula = CriarSpriteCirculo();
+        spriteDash      = CriarSpriteDash();
+    }
+
+    private Sprite CriarSpriteDash()
+    {
+        int w = 128, h = 40;
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        tex.wrapMode   = TextureWrapMode.Clamp;
+
+        for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            // nx: 0=ponta traseira, 1=frente brilhante
+            float nx = x / (float)(w - 1);
+            // ny: 0=centro, 1=borda
+            float ny = Mathf.Abs((y - h * 0.5f) / (h * 0.5f));
+
+            // A largura do rastro cresce da ponta até a frente
+            float halfW = Mathf.Lerp(0.05f, 1f, Mathf.Pow(nx, 0.6f));
+            float inShape = ny < halfW ? 1f : 0f;
+
+            float distRel = ny / Mathf.Max(halfW, 0.001f);
+            float alpha = inShape
+                * Mathf.Pow(1f - distRel * distRel, 1.5f)  // suaviza borda
+                * Mathf.Pow(nx, 0.4f);                      // brilha mais na frente
+
+            tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+        }
+
+        tex.Apply();
+        // Pivot na frente (x=1) para o sprite apontar na direção do dash
+        return Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(1f, 0.5f), 32f);
+    }
+
+    private void SpawnarSpriteDash(Vector2 direcao)
+    {
+        if (spriteDash == null) return;
+
+        var go = new GameObject("DashSprite");
+        go.transform.position = transform.position;
+
+        float angulo = Mathf.Atan2(direcao.y, direcao.x) * Mathf.Rad2Deg;
+        go.transform.rotation = Quaternion.Euler(0f, 0f, angulo);
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = spriteDash;
+        sr.color  = corDash;
+        if (spriteRenderer != null)
+        {
+            sr.sortingLayerName = spriteRenderer.sortingLayerName;
+            sr.sortingOrder     = spriteRenderer.sortingOrder - 1;
+        }
+
+        StartCoroutine(FadeDashSprite(sr));
+    }
+
+    private IEnumerator FadeDashSprite(SpriteRenderer sr)
+    {
+        if (sr == null) yield break;
+        Color inicio = sr.color;
+        for (float t = 0f; t < duracaoDashSprite; t += Time.deltaTime)
+        {
+            if (sr == null) yield break;
+            float p = t / duracaoDashSprite;
+            // Escala estica no início e encolhe no fim
+            float escala = Mathf.Lerp(1f, 1.4f, p);
+            sr.transform.localScale = new Vector3(escala, 1f - p * 0.3f, 1f);
+            sr.color = new Color(inicio.r, inicio.g, inicio.b, Mathf.Lerp(inicio.a, 0f, p * p));
+            yield return null;
+        }
+        if (sr != null) Destroy(sr.gameObject);
     }
 
     private Sprite CriarSpriteCirculo()
@@ -94,12 +171,15 @@ public class DashEffect : MonoBehaviour
         if (go != null) Destroy(go);
     }
 
-    public void IniciarEfeito()
+    public void IniciarEfeito() => IniciarEfeito(Vector2.right);
+
+    public void IniciarEfeito(Vector2 direcao)
     {
         if (spawnarCoroutine != null)
             StopCoroutine(spawnarCoroutine);
         spawnarCoroutine = StartCoroutine(SpawnarAfterimages());
         EmitirParticulas();
+        SpawnarSpriteDash(direcao);
     }
 
     public void PararEfeito()

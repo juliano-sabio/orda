@@ -23,21 +23,12 @@ public static class GerenciadorEventosAutoSetup
 
             alterou |= Adicionar(ge, new EventoAleatorio
             {
-                nome = "Dança",
-                descricao = "Zonas aparecem no mapa! Chegue até a zona antes do tempo acabar. 3 erros e o evento falha!",
-                tipo = TipoEvento.Danca,
-                duracao = 300f, quantidade = 8,
-                recompensaDescricao = "+15% de vida recuperada!"
-            }, primeiro: true);
-
-            alterou |= Adicionar(ge, new EventoAleatorio
-            {
                 nome = "Portal",
                 descricao = "Dois portais abriram no mapa! Chegue perto de cada um para fechá-los antes que inimigos invadam!",
                 tipo = TipoEvento.Portal,
                 duracao = 300f, quantidade = 2,
                 recompensaDescricao = "+15% de vida recuperada!"
-            });
+            }, primeiro: true);
 
             alterou |= Adicionar(ge, new EventoAleatorio
             {

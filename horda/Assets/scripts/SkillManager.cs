@@ -510,6 +510,48 @@ public class SkillManager : MonoBehaviour
                     Debug.LogError("❌ [SkillManager] Não consegui encontrar nenhum PlayerStats na cena!");
                 break;
 
+            case SpecificSkillType.CampoEspinhos:
+                AddCampoEspinhosBehaviorToPlayer(skill);
+                break;
+
+            case SpecificSkillType.ChuvaEstrelas:
+                AddChuvaEstrelasBehaviorToPlayer(skill);
+                break;
+
+            case SpecificSkillType.GarrasAbismo:
+                AddGarrasAbismoBehaviorToPlayer(skill);
+                break;
+
+            case SpecificSkillType.FuriaLaminas:
+                AddFuriaLaminasBehaviorToPlayer(skill);
+                break;
+
+            case SpecificSkillType.SombrasCruz:
+                AddSombrasCruzBehaviorToPlayer(skill);
+                break;
+
+            case SpecificSkillType.CorteFantasma:
+                AddCorteFantasmaBehaviorToPlayer(skill);
+                break;
+            case SpecificSkillType.LancaLuz:
+                AddBehavior<LancaLuzSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.ChicoteEnergia:
+                AddBehavior<ChicoteEnergiaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.MisseisTeleguiados:
+                AddBehavior<MisseisTeleguiadosSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.PulsoRitmico:
+                AddBehavior<PulsoRitmicoSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.EspadaFantasma:
+                AddBehavior<EspadaFantasmaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.CorrenteSombria:
+                AddBehavior<CorrenteSombriaSkillBehavior>(skill);
+                break;
+
             case SpecificSkillType.HealthRegen:
                 playerStats.healthRegenRate += skill.healthRegenBonus;
                 break;
@@ -520,6 +562,93 @@ public class SkillManager : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    void AddBehavior<T>(SkillData skill) where T : SkillBehavior
+    {
+        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) return;
+        var old = playerStats.GetComponent<T>();
+        if (old != null) Destroy(old);
+        var b = playerStats.gameObject.AddComponent<T>();
+        b.Initialize(playerStats);
+
+        // Chama ConfigurarDeSkillData via reflection se existir
+        var m = typeof(T).GetMethod("ConfigurarDeSkillData");
+        m?.Invoke(b, new object[] { skill });
+    }
+
+    void AddCorteFantasmaBehaviorToPlayer(SkillData skill)
+    {
+        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) return;
+        var old = playerStats.GetComponent<CorteFantasmaSkillBehavior>();
+        if (old != null) Destroy(old);
+        var behavior = playerStats.gameObject.AddComponent<CorteFantasmaSkillBehavior>();
+        behavior.Initialize(playerStats);
+        behavior.ConfigurarDeSkillData(skill);
+    }
+
+    void AddSombrasCruzBehaviorToPlayer(SkillData skill)
+    {
+        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) return;
+        var old = playerStats.GetComponent<SombrasCruzSkillBehavior>();
+        if (old != null) Destroy(old);
+        var behavior = playerStats.gameObject.AddComponent<SombrasCruzSkillBehavior>();
+        behavior.Initialize(playerStats);
+        behavior.ConfigurarDeSkillData(skill);
+    }
+
+    void AddFuriaLaminasBehaviorToPlayer(SkillData skill)
+    {
+        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) return;
+        var old = playerStats.GetComponent<FuriaLaminasSkillBehavior>();
+        if (old != null) Destroy(old);
+        var behavior = playerStats.gameObject.AddComponent<FuriaLaminasSkillBehavior>();
+        behavior.Initialize(playerStats);
+        behavior.ConfigurarDeSkillData(skill);
+    }
+
+    void AddGarrasAbismoBehaviorToPlayer(SkillData skill)
+    {
+        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) return;
+        var old = playerStats.GetComponent<GarrasAbismoSkillBehavior>();
+        if (old != null) Destroy(old);
+        var behavior = playerStats.gameObject.AddComponent<GarrasAbismoSkillBehavior>();
+        behavior.Initialize(playerStats);
+        behavior.ConfigurarDeSkillData(skill);
+    }
+
+    void AddChuvaEstrelasBehaviorToPlayer(SkillData skill)
+    {
+        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) return;
+
+        var old = playerStats.GetComponent<ChuvaEstrelasSkillBehavior>();
+        if (old != null) Destroy(old);
+
+        var behavior = playerStats.gameObject.AddComponent<ChuvaEstrelasSkillBehavior>();
+        behavior.Initialize(playerStats);
+        behavior.ConfigurarDeSkillData(skill);
+    }
+
+    void AddCampoEspinhosBehaviorToPlayer(SkillData skill)
+    {
+        if (playerStats == null)
+        {
+            playerStats = FindFirstObjectByType<PlayerStats>();
+            if (playerStats == null) return;
+        }
+
+        var old = playerStats.GetComponent<CampoEspinhosSkillBehavior>();
+        if (old != null) Destroy(old);
+
+        var behavior = playerStats.gameObject.AddComponent<CampoEspinhosSkillBehavior>();
+        behavior.Initialize(playerStats);
+        behavior.ConfigurarDeSkillData(skill);
     }
     // ✅ MÉTODO NOVO: Adiciona bumerangue ao Player
     void AddBoomerangBehaviorToPlayer(SkillData skill)

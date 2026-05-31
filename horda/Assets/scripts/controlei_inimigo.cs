@@ -81,7 +81,9 @@ public class InimigoController : MonoBehaviour
     {
         if (dadosInimigo == null)
         {
-            // Boss e inimigos customizados podem não usar InimigoData; valores já definidos externamente.
+            // Boss customizado: vida já definida externamente via Awake
+            if (vidaMaxima <= 0f) vidaMaxima = 100f;
+            if (vidaAtual  <= 0f) vidaAtual  = vidaMaxima;
             return;
         }
 
@@ -487,14 +489,16 @@ public class InimigoController : MonoBehaviour
             DroparPowerup();
             OnInimigoDerrotado?.Invoke();
 
-            BossController boss = GetComponent<BossController>();
-            BossPrincesa princesa = GetComponent<BossPrincesa>();
-            if (boss != null)
-                boss.IniciarEfeitoMorte();
-            else if (princesa != null)
-                princesa.IniciarEfeitoMorte();
-            else
-                Destroy(gameObject);
+            BossController        boss    = GetComponent<BossController>();
+            BossPrincesa          princesa = GetComponent<BossPrincesa>();
+            BossGuarda            guarda  = GetComponent<BossGuarda>();
+            BossSlimeGuardaElite  elite   = GetComponent<BossSlimeGuardaElite>();
+
+            if      (boss    != null) boss.IniciarEfeitoMorte();
+            else if (princesa != null) princesa.IniciarEfeitoMorte();
+            else if (guarda  != null) guarda.IniciarEfeitoMorte();
+            else if (elite   != null) elite.IniciarEfeitoMorte();
+            else                      Destroy(gameObject);
         }
         else
         {

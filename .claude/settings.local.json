@@ -118,7 +118,10 @@
       "Bash(xargs grep -l \"Assembly-CSharp::CharacterData\")",
       "PowerShell(py --version)",
       "PowerShell(python --version)",
-      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\" -Recurse -File -Include \"*spawn*\", \"*Spawn*\", \"*spawner*\", \"*Spawner*\", \"*onda*\", \"*Onda*\", \"*wave*\", \"*Wave*\", \"*gerenciador*\")"
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\" -Recurse -File -Include \"*spawn*\", \"*Spawn*\", \"*spawner*\", \"*Spawner*\", \"*onda*\", \"*Onda*\", \"*wave*\", \"*Wave*\", \"*gerenciador*\")",
+      "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\DancaEvento.cs\" -Force)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\DancaEvento.cs.meta\" -Force -ErrorAction SilentlyContinue)",
+      "Bash(xargs grep -l \"class InimigoController\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"
