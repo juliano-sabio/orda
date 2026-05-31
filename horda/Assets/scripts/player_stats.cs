@@ -902,12 +902,18 @@ public class PlayerStats : MonoBehaviour
         healthRegenRate += 0.2f;
 
 
-        // Nivels de skill e de carta de status sao mutuamente exclusivos
-        bool isSkillLevel = skillManager != null && skillManager.IsSkillLevel(level);
+        // Garante referência atualizada ao SkillManager
+        if (skillManager == null) skillManager = SkillManager.Instance;
+        if (skillManager == null) skillManager = FindFirstObjectByType<SkillManager>();
 
-        if (isSkillLevel)
+        // Milestones fixos de skill (1, 3, 6, 10)
+        bool isMilestone  = level == 1 || level == 3 || level == 6 || level == 10;
+        bool maxSkills    = skillManager != null && skillManager.activeSkills.Count >= 4;
+        bool isSkillLevel = isMilestone && !maxSkills;
+
+        if (isSkillLevel && skillManager != null)
         {
-            skillManager.OnPlayerLevelUp(level);
+            StartCoroutine(AbrirEscolhaSkill());
         }
         else if (cardSystem != null)
         {
@@ -916,6 +922,29 @@ public class PlayerStats : MonoBehaviour
 
         if (uiManager != null)
             uiManager.ShowSkillAcquired($"Level {level}", "Novas habilidades disponiveis!");
+    }
+
+    private IEnumerator AbrirEscolhaSkill()
+    {
+        // Fecha a notificação de level-up imediatamente
+        if (UIManager.Instance != null && UIManager.Instance.skillAcquiredPanel != null)
+            UIManager.Instance.skillAcquiredPanel.SetActive(false);
+
+        yield return new WaitForSecondsRealtime(0.4f);
+
+        if (skillManager == null) yield break;
+
+        var choiceUI = FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
+        if (choiceUI == null) yield break;
+
+        // Aplica filtro de slot
+        int proximoSlot = skillManager.activeSkills.Count + 1;
+        bool ehAtaque   = (proximoSlot % 2 == 1);
+        choiceUI.somenteSkillsDeAtaque = ehAtaque;
+        choiceUI.somenteSkillsDeDefesa = !ehAtaque;
+
+        // Chama diretamente sem passar pelo OfferSkillChoice
+        choiceUI.ShowRandomSkillChoice(skill => { if (skillManager != null) skillManager.AddSkill(skill); });
     }
 
     private float CalculateXPForNextLevel()
@@ -966,6 +995,14 @@ public class PlayerStats : MonoBehaviour
                 UpdateUI();
                 return;
             }
+
+            var segundaChance = GetComponent<SegundaChanceSkillBehavior>();
+            if (segundaChance != null && segundaChance.TentarReviver())
+            {
+                UpdateUI();
+                return;
+            }
+
             Die();
         }
     }

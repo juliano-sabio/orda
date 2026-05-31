@@ -36,6 +36,8 @@ public class SkillChoiceUI : MonoBehaviour
 
     // Quando true, a próxima chamada mostra apenas skills de ataque (resetado automaticamente)
     [HideInInspector] public bool somenteSkillsDeAtaque = false;
+    // Quando true, a próxima chamada mostra apenas skills de defesa/passiva (resetado automaticamente)
+    [HideInInspector] public bool somenteSkillsDeDefesa = false;
 
     private List<SkillData> currentChoices;
     private System.Action<SkillData> onSkillChosen;
@@ -70,22 +72,21 @@ public class SkillChoiceUI : MonoBehaviour
     private void LoadSkillsFromSkillManager()
     {
         SkillManager skillManager = SkillManager.Instance;
+        if (skillManager == null)
+            skillManager = FindFirstObjectByType<SkillManager>();
+
         if (skillManager != null)
         {
             List<SkillData> managerSkills = skillManager.GetAvailableSkills();
-            if (managerSkills.Count > 0)
+            if (managerSkills != null && managerSkills.Count > 0)
             {
                 allAvailableSkills.Clear();
                 allAvailableSkills.AddRange(managerSkills);
             }
-            else
-            {
-                Debug.LogWarning("⚠️ SkillManager não tem skills disponíveis");
-            }
         }
         else
         {
-            Debug.LogError("❌ SkillManager não encontrado!");
+            Debug.LogError("❌ SkillManager não encontrado em nenhuma busca!");
         }
     }
 
@@ -130,11 +131,18 @@ public class SkillChoiceUI : MonoBehaviour
         // 🎯 ATUALIZAR SKILLS DO SKILLMANAGER SEMPRE ANTES DE MOSTRAR
         LoadSkillsFromSkillManager();
 
-        // Filtra apenas skills de ataque na primeira escolha
+        // Filtro de tipo de skill por slot
         if (somenteSkillsDeAtaque)
         {
-            allAvailableSkills = allAvailableSkills.FindAll(s => s.EhSkillDeAtaque());
+            var filtradas = allAvailableSkills.FindAll(s => s.EhSkillDeAtaque());
+            if (filtradas.Count > 0) allAvailableSkills = filtradas;
             somenteSkillsDeAtaque = false;
+        }
+        else if (somenteSkillsDeDefesa)
+        {
+            var filtradas = allAvailableSkills.FindAll(s => !s.EhSkillDeAtaque());
+            if (filtradas.Count > 0) allAvailableSkills = filtradas;
+            somenteSkillsDeDefesa = false;
         }
 
         if (allAvailableSkills == null || allAvailableSkills.Count == 0)
@@ -143,8 +151,8 @@ public class SkillChoiceUI : MonoBehaviour
             return;
         }
 
-        // 🎯 SELECIONAR 3 SKILLS ALEATÓRIAS
-        List<SkillData> randomSkills = SelectRandomSkills(numberOfSkillsToShow);
+        // 🎯 SELECIONAR 3 SKILLS ALEATÓRIAS (máximo 3 independente do Inspector)
+        List<SkillData> randomSkills = SelectRandomSkills(Mathf.Min(numberOfSkillsToShow, 3));
 
         foreach (var skill in randomSkills)
         {
@@ -243,14 +251,14 @@ public class SkillChoiceUI : MonoBehaviour
 
     private IEnumerator CreateSkillButtonsWithSpecificPrefabs(List<SkillData> skills)
     {
-        yield return new WaitForEndOfFrame();
+        yield return null; // aguarda 1 frame (não WaitForEndOfFrame para evitar conflito com TMPro)
 
         for (int i = 0; i < skills.Count; i++)
         {
             CreateSkillButtonWithSpecificPrefab(skills[i], i);
         }
 
-
+        yield return null;
         yield return StartCoroutine(ForceLayoutRefresh());
     }
 
@@ -303,9 +311,16 @@ public class SkillChoiceUI : MonoBehaviour
             return;
         }
 
-        SetupCardTextsOnly(cardObj, skill);
+        // Tenta usar o SkillCardRuntimeManager primeiro (mais robusto)
+        var runtimeManager = cardObj.GetComponent<SkillCardRuntimeManager>();
+        if (runtimeManager != null)
+            runtimeManager.InitializeRuntime(skill);
+        else
+            SetupCardTextsOnly(cardObj, skill);
 
+        // Conecta o botão de seleção
         Button button = cardObj.GetComponent<Button>();
+        if (button == null) button = cardObj.GetComponentInChildren<Button>();
         if (button != null)
         {
             button.onClick.RemoveAllListeners();

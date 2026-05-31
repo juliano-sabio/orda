@@ -542,6 +542,8 @@ public enum SpecificSkillType
     FuriaLaminas,
     SombrasCruz,
     CorteFantasma,
+    SegundaChance,
+    FugaSombras,
     LancaLuz,
     ChicoteEnergia,
     MisseisTeleguiados,

@@ -115,10 +115,18 @@ public class SkillManager : MonoBehaviour
     private IEnumerator DelayedInitialChoice()
     {
         yield return new WaitForSeconds(1.5f);
-        // Primeira escolha: só permite skills de ataque para o player não ficar sem dano
-        if (skillChoiceUI != null)
-            skillChoiceUI.somenteSkillsDeAtaque = true;
+        AplicarFiltroSlot();
         OfferSkillChoice();
+    }
+
+    // Slot 1=ataque, 2=defesa, 3=ataque, 4=defesa
+    void AplicarFiltroSlot()
+    {
+        if (skillChoiceUI == null) return;
+        int proximoSlot = activeSkills.Count + 1; // slot que será preenchido
+        bool ehAtaque = (proximoSlot % 2 == 1);   // ímpares = ataque, pares = defesa
+        skillChoiceUI.somenteSkillsDeAtaque = ehAtaque;
+        skillChoiceUI.somenteSkillsDeDefesa = !ehAtaque;
     }
 
     private SkillChoiceUI FindSkillChoiceUIInUIManager()
@@ -167,6 +175,7 @@ public class SkillManager : MonoBehaviour
 
     public bool IsSkillLevel(int level)
     {
+        if (activeSkills.Count >= 4) return false; // já tem o máximo de skills
         return System.Array.Exists(levelUpMilestones, m => m == level);
     }
 
@@ -182,9 +191,7 @@ public class SkillManager : MonoBehaviour
             }
         }
 
-        bool isMilestone = System.Array.Exists(levelUpMilestones, milestone => milestone == newLevel);
-
-        if (isMilestone)
+        if (IsSkillLevel(newLevel))
             StartCoroutine(OfferSkillChoiceWithDelay());
 
         ApplyLevelBonusToSkills(newLevel);
@@ -192,23 +199,22 @@ public class SkillManager : MonoBehaviour
 
     private IEnumerator OfferSkillChoiceWithDelay()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return null; // apenas 1 frame de delay
         OfferSkillChoice();
     }
 
     void OfferSkillChoice()
     {
+        // Re-busca referências se nulas
         if (playerStats == null)
-        {
-            Debug.LogError("❌ PlayerStats null no OfferSkillChoice!");
-            return;
-        }
+            playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) { Debug.LogError("❌ PlayerStats não encontrado!"); return; }
 
         if (skillChoiceUI == null)
-        {
-            Debug.LogError("❌ SkillChoiceUI null no OfferSkillChoice!");
-            return;
-        }
+            skillChoiceUI = FindSkillChoiceUIInUIManager();
+        if (skillChoiceUI == null)
+            skillChoiceUI = FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
+        if (skillChoiceUI == null) { Debug.LogError("❌ SkillChoiceUI não encontrado!"); return; }
 
         if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
             skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
@@ -338,6 +344,7 @@ public class SkillManager : MonoBehaviour
     public void AddSkill(SkillData skill)
     {
         if (skill == null) return;
+        if (activeSkills.Count >= 4) return; // máximo de 4 skills
 
         // VERIFICAÇÃO MAIS RIGOROSA PARA DUPLICAÇÃO
         bool alreadyHasExactSkill = activeSkills.Exists(s =>
@@ -532,6 +539,14 @@ public class SkillManager : MonoBehaviour
 
             case SpecificSkillType.CorteFantasma:
                 AddCorteFantasmaBehaviorToPlayer(skill);
+                break;
+
+            case SpecificSkillType.SegundaChance:
+                AddBehavior<SegundaChanceSkillBehavior>(skill);
+                break;
+
+            case SpecificSkillType.FugaSombras:
+                AddBehavior<FugaSombrasSkillBehavior>(skill);
                 break;
             case SpecificSkillType.LancaLuz:
                 AddBehavior<LancaLuzSkillBehavior>(skill);

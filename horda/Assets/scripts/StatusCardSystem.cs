@@ -62,6 +62,14 @@ public class StatusCardSystem : MonoBehaviour
 
     public void OfferCardChoice()
     {
+        // Não mostra status cards em níveis de skill
+        var sm = SkillManager.Instance;
+        if (sm != null)
+        {
+            int level = playerStats != null ? playerStats.level : 0;
+            if (sm.IsSkillLevel(level)) return;
+        }
+
         if (choiceUI == null) choiceUI = FindAnyObjectByType<StatusCardChoiceUI>(FindObjectsInactive.Include);
         if (choiceUI == null)
         {

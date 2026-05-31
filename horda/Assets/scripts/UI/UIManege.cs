@@ -145,6 +145,10 @@ public class UIManager : MonoBehaviour
 
         ConnectToEquippedSkill();
 
+        // Subscreve ao evento de skill adquirida para atualizar os slots
+        if (skillManager != null)
+            skillManager.OnSkillAcquired += OnSkillAdquiridaHUD;
+
         if (passivaIcon == null)
             CriarSlotPassivaRuntime();
     }
@@ -646,8 +650,10 @@ public class UIManager : MonoBehaviour
         var skills = skillManager?.GetActiveSkills();
         if (skills == null) return;
 
+        // Slot 1 (índice 0) = ataque → attackSkill1Icon
+        // Slot 3 (índice 2) = ataque → attackSkill2Icon
         SetSkillSlot(attackSkill1Icon, attackSkill1ElementIcon, skills.Count > 0 ? skills[0] : null);
-        SetSkillSlot(attackSkill2Icon, attackSkill2ElementIcon, skills.Count > 1 ? skills[1] : null);
+        SetSkillSlot(attackSkill2Icon, attackSkill2ElementIcon, skills.Count > 2 ? skills[2] : null);
     }
 
     private void UpdateDefenseSkillIcons()
@@ -655,8 +661,17 @@ public class UIManager : MonoBehaviour
         var skills = skillManager?.GetActiveSkills();
         if (skills == null) return;
 
-        SetSkillSlot(defenseSkill1Icon, defenseSkill1ElementIcon, skills.Count > 2 ? skills[2] : null);
+        // Slot 2 (índice 1) = defesa → defenseSkill1Icon
+        // Slot 4 (índice 3) = defesa → defenseSkill2Icon
+        SetSkillSlot(defenseSkill1Icon, defenseSkill1ElementIcon, skills.Count > 1 ? skills[1] : null);
         SetSkillSlot(defenseSkill2Icon, defenseSkill2ElementIcon, skills.Count > 3 ? skills[3] : null);
+    }
+
+    private void OnSkillAdquiridaHUD(SkillData skill)
+    {
+        // Atualiza apenas os slots de ataque e defesa, não toca no ultimate
+        UpdateAttackSkillIcons();
+        UpdateDefenseSkillIcons();
     }
 
     private void SetSkillSlot(Image icon, Image elementIcon, SkillData skill)
@@ -686,7 +701,8 @@ public class UIManager : MonoBehaviour
 
     private void UpdateUltimateSkillIcon()
     {
-        var ultimateSkill = playerStats.GetUltimateSkill();
+        var ultimateSkill = playerStats?.GetUltimateSkill();
+        if (ultimateSkill == null) return;
 
         if (ultimateSkillIcon != null)
         {

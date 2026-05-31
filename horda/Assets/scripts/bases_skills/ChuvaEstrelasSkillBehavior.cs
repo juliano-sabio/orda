@@ -101,7 +101,6 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
                   ?? col.GetComponentInParent<InimigoController>();
             if (ic != null) ic.ReceberDano(DanoAtual, false);
         }
-        CameraShaker.Tremer(0.08f, 0.12f);
     }
 
     List<GameObject> EncontrarAlvosMaisProximos(int qtd)
