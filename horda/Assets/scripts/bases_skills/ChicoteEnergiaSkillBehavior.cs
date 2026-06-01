@@ -16,6 +16,7 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano  = data.attackBonus > 0f        ? data.attackBonus        : 30f;
         intervalo = data.activationInterval > 0f ? data.activationInterval : 2f;
         raio      = data.specialValue > 0f       ? data.specialValue       : 4f;
@@ -70,7 +71,10 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior
 
             float largura = Mathf.Lerp(0.25f, 0.06f, prog);
             lr.startWidth = largura; lr.endWidth = largura * 0.3f;
-            Color cor = new Color(0.2f, 0.8f, 1f, Mathf.Lerp(1f, 0.3f, prog));
+            Color baseRGB = (skillData != null && skillData.appliedElement != ElementType.None)
+                ? ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? new Color(0.2f, 0.8f, 1f)
+                : new Color(0.2f, 0.8f, 1f);
+            Color cor = new Color(baseRGB.r, baseRGB.g, baseRGB.b, Mathf.Lerp(1f, 0.3f, prog));
             lr.startColor = cor; lr.endColor = new Color(cor.r, cor.g, cor.b, 0f);
 
             // Dano em área
@@ -83,6 +87,7 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior
                 if (atingidos.Contains(id)) continue;
                 atingidos.Add(id);
                 ic.ReceberDano(DanoAtual, false);
+                SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
                 StartCoroutine(FlashInimigo(ic));
             }
 

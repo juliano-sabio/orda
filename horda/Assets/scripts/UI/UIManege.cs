@@ -686,8 +686,19 @@ public class UIManager : MonoBehaviour
 
             if (elementIcon != null)
             {
-                elementIcon.color = GetElementColor(skill.element);
-                elementIcon.gameObject.SetActive(true);
+                if (skill.appliedElement != ElementType.None)
+                {
+                    Color cor = ElementRegistry.Instance?.GetCor(skill.appliedElement) ?? Color.white;
+                    elementIcon.color = cor;
+                    var def = ElementRegistry.Instance?.Get(skill.appliedElement);
+                    if (def?.icone != null) elementIcon.sprite = def.icone;
+                    elementIcon.gameObject.SetActive(true);
+                }
+                else
+                {
+                    elementIcon.color = GetElementColor(skill.element);
+                    elementIcon.gameObject.SetActive(skill.element != PlayerStats.Element.None);
+                }
             }
         }
         else
@@ -697,6 +708,13 @@ public class UIManager : MonoBehaviour
             if (elementIcon != null)
                 elementIcon.gameObject.SetActive(false);
         }
+    }
+
+    public void AtualizarElementoAplicado()
+    {
+        UpdateAttackSkillIcons();
+        UpdateDefenseSkillIcons();
+        UpdateUltimateSkillIcon();
     }
 
     private void UpdateUltimateSkillIcon()

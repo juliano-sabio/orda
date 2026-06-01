@@ -18,11 +18,18 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f          ? data.attackBonus        : 12f;
         intervalo   = data.activationInterval > 0f   ? data.activationInterval : 5f;
         duracaoAtiva = data.duration > 0f            ? data.duration           : 3f;
         qtdAlvos    = data.projectileCount > 0       ? data.projectileCount    : 3;
         timer       = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     void Update()
@@ -82,7 +89,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior
                 linhas[i].SetPosition(2, ate);
 
                 float pulso = Mathf.Sin(t * 8f + i) * 0.5f + 0.5f;
-                Color cor = new Color(0.5f, 0.15f, 0.9f, 0.6f + pulso * 0.4f);
+                Color baseC = CorElemento(); Color cor = new Color(baseC.r, baseC.g, baseC.b, 0.6f + pulso * 0.4f);
                 linhas[i].startColor = linhas[i].endColor = cor;
                 linhas[i].startWidth = linhas[i].endWidth = 0.05f + pulso * 0.08f;
             }
@@ -94,7 +101,10 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior
                 proxDano = 0.5f;
                 foreach (var ic in alvos)
                     if (ic != null && !ic.estaMorrendo)
+                    {
                         ic.ReceberDano(DanoAtual, false);
+                        SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
+                    }
             }
 
             yield return null;

@@ -17,11 +17,18 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f          ? data.attackBonus        : 25f;
         intervalo   = data.activationInterval > 0f   ? data.activationInterval : 3f;
         qtdMisseis  = data.projectileCount > 0       ? data.projectileCount    : 3;
         velocidade  = data.projectileSpeed > 0f      ? data.projectileSpeed    : 10f;
         timer       = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     void Update()
@@ -37,13 +44,14 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior
     {
         var alvos = EncontrarAlvos(qtdMisseis);
         Vector2 origem = playerStats.transform.position;
+        Color corMissil = CorElemento();
 
         for (int i = 0; i < qtdMisseis; i++)
         {
             var alvo = i < alvos.Count ? alvos[i] : null;
             var go = new GameObject("Missil");
             go.transform.position = origem + Random.insideUnitCircle * 0.3f;
-            go.AddComponent<MissilProjetil>().Iniciar(alvo, velocidade, DanoAtual);
+            go.AddComponent<MissilProjetil>().Iniciar(alvo, velocidade, DanoAtual, corMissil);
             yield return new WaitForSeconds(0.18f);
         }
     }
@@ -67,14 +75,16 @@ public class MissilProjetil : MonoBehaviour
     float   vel, dano;
     bool    atingiu;
     SpriteRenderer sr;
+    Color corBase = new Color(1f, 0.5f, 0.1f);
 
-    public void Iniciar(InimigoController a, float v, float d)
+    public void Iniciar(InimigoController a, float v, float d, Color cor = default)
     {
         alvo = a; vel = v; dano = d;
+        if (cor != default && cor != Color.white) corBase = cor;
         dir  = alvo != null ? ((Vector2)alvo.transform.position - (Vector2)transform.position).normalized : Random.insideUnitCircle.normalized;
 
         sr = gameObject.AddComponent<SpriteRenderer>();
-        sr.sprite = GerarDisco(8); sr.color = new Color(1f, 0.5f, 0.1f); sr.sortingOrder = 14;
+        sr.sprite = GerarDisco(8); sr.color = corBase; sr.sortingOrder = 14;
         transform.localScale = Vector3.one * 0.3f;
 
         var col = gameObject.AddComponent<CircleCollider2D>();
@@ -100,6 +110,7 @@ public class MissilProjetil : MonoBehaviour
         if (ic == null) return;
         atingiu = true;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(null, ic.gameObject, dano, this);
         SpawnImpacto();
         Destroy(gameObject);
     }
@@ -109,7 +120,7 @@ public class MissilProjetil : MonoBehaviour
         while (!atingiu && gameObject != null)
         {
             var t = new GameObject("T"); t.transform.position = transform.position;
-            var tsr = t.AddComponent<SpriteRenderer>(); tsr.sprite = GerarDisco(6); tsr.color = new Color(1f, 0.4f, 0.1f, 0.5f); tsr.sortingOrder = 13;
+            var tsr = t.AddComponent<SpriteRenderer>(); tsr.sprite = GerarDisco(6); tsr.color = new Color(corBase.r, corBase.g * 0.85f, corBase.b, 0.5f); tsr.sortingOrder = 13;
             t.transform.localScale = Vector3.one * 0.2f;
             t.AddComponent<AutoDestroyFade>().Iniciar(0.1f);
             yield return new WaitForSeconds(0.04f);
@@ -121,7 +132,7 @@ public class MissilProjetil : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             var p = new GameObject("P"); p.transform.position = transform.position;
-            var psr = p.AddComponent<SpriteRenderer>(); psr.sprite = GerarDisco(6); psr.color = new Color(1f, 0.5f, 0.1f); psr.sortingOrder = 15;
+            var psr = p.AddComponent<SpriteRenderer>(); psr.sprite = GerarDisco(6); psr.color = corBase; psr.sortingOrder = 15;
             p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.2f);
             p.AddComponent<AutoDestroyFadeMove>().Iniciar(Random.insideUnitCircle.normalized * Random.Range(1.5f, 4f), 0.25f);
         }

@@ -1,0 +1,125 @@
+<h2>Fluxo de UI — Aplicar Elemento na Skill</h2>
+<p class="subtitle">Duas etapas após pegar o drop do boss. Clique na opção que prefere para cada tela.</p>
+
+<style>
+.flow { display: flex; align-items: flex-start; gap: 24px; margin-top: 20px; flex-wrap: wrap; }
+.flow-step { flex: 1; min-width: 280px; }
+.step-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 8px; }
+.screen { background: #0e0c18; border: 1px solid #333; border-radius: 10px; overflow: hidden; }
+.screen-header { background: #1a1630; padding: 10px 14px; border-bottom: 1px solid #2a2540; display: flex; align-items: center; gap: 8px; }
+.screen-body { padding: 14px; }
+.arrow { font-size: 28px; color: #555; align-self: center; padding-top: 40px; }
+
+/* Skill card in step 1 */
+.skill-row { display: flex; align-items: center; gap: 10px; background: #16132a; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s; }
+.skill-row:hover { border-color: #ff6622; }
+.skill-row.locked { opacity: 0.4; }
+.skill-icon { width: 36px; height: 36px; background: #2a2545; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.skill-info h4 { margin: 0; font-size: 13px; color: #eee; }
+.skill-info p { margin: 0; font-size: 11px; color: #888; }
+.has-element { font-size: 10px; color: #ff4444; margin-left: auto; }
+
+/* Characteristic cards in step 2 */
+.char-card { background: #16132a; border-radius: 8px; border: 2px solid #2a2545; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; }
+.char-card:hover { border-color: #ff6622; }
+.char-card h4 { margin: 0 0 4px; font-size: 13px; }
+.char-card p { margin: 0; font-size: 11px; color: #aaa; }
+
+/* element badge */
+.el-badge { display: inline-flex; align-items: center; gap: 5px; background: #2a1a0a; border: 1px solid #ff4400; border-radius: 12px; padding: 3px 10px; font-size: 12px; color: #ff8844; }
+</style>
+
+<div class="flow">
+
+  <!-- ETAPA 1 -->
+  <div class="flow-step">
+    <div class="step-label">📦 ETAPA 1 — Escolher qual skill recebe o elemento</div>
+    <div class="screen">
+      <div class="screen-header">
+        <span style="font-size:18px">🔥</span>
+        <div>
+          <div style="font-size:13px;color:#ff8844;font-weight:bold">Elemento FOGO coletado!</div>
+          <div style="font-size:11px;color:#888">Escolha uma skill para receber o elemento</div>
+        </div>
+      </div>
+      <div class="screen-body">
+        <div class="skill-row">
+          <div class="skill-icon">⚔️</div>
+          <div class="skill-info"><h4>Golpe Veloz</h4><p>Ultimate • Sem elemento</p></div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon">🛡️</div>
+          <div class="skill-info"><h4>Barreira</h4><p>Passiva • Sem elemento</p></div>
+        </div>
+        <div class="skill-row locked">
+          <div class="skill-icon">💥</div>
+          <div class="skill-info"><h4>Explosão Sônica</h4><p>Ultimate</p></div>
+          <span class="has-element">❄️ já tem elemento</span>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#555;text-align:center">Skills com elemento bloqueadas</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- ETAPA 2 -->
+  <div class="flow-step">
+    <div class="step-label">⚡ ETAPA 2 — Escolher a característica do elemento</div>
+    <div class="screen">
+      <div class="screen-header">
+        <span style="font-size:18px">⚔️</span>
+        <div>
+          <div style="font-size:13px;color:#eee;font-weight:bold">Golpe Veloz</div>
+          <div style="font-size:11px;color:#888">Qual poder do <span style="color:#ff8844">Fogo</span> quer adicionar?</div>
+        </div>
+      </div>
+      <div class="screen-body">
+        <div class="char-card">
+          <h4 style="color:#ff8844">🔥 A — Queimadura</h4>
+          <p>Inimigos atingidos sofrem 3 ticks de dano de fogo ao longo de 3 segundos.</p>
+        </div>
+        <div class="char-card">
+          <h4 style="color:#ff8844">💥 B — Explosão</h4>
+          <p>Ao atingir um inimigo, causa dano em área nos inimigos próximos.</p>
+        </div>
+        <div style="margin-top:12px;text-align:center">
+          <div style="font-size:10px;color:#555;margin-bottom:8px">Esta escolha é permanente</div>
+          <button style="background:#2a1a0a;border:1px solid #ff4400;border-radius:6px;color:#ff8844;padding:6px 20px;cursor:pointer;font-size:12px">⚠️ Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="arrow">→</div>
+
+  <div class="flow-step">
+    <div class="step-label">✅ RESULTADO — Skill com elemento aplicado</div>
+    <div class="screen">
+      <div class="screen-header" style="background:#0a1a0a">
+        <span style="font-size:18px">⚔️</span>
+        <div>
+          <div style="font-size:13px;color:#eee;font-weight:bold">Golpe Veloz</div>
+          <div class="el-badge">🔥 Fogo — Queimadura</div>
+        </div>
+      </div>
+      <div class="screen-body">
+        <div style="background:#1a1000;border-radius:6px;padding:10px;border:1px solid #ff4400;margin-bottom:10px">
+          <div style="font-size:11px;color:#ff8844;margin-bottom:4px">🔥 Efeito Ativo</div>
+          <div style="font-size:12px;color:#ddd">Inimigos atingidos queimam por 3s</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:#888;margin-bottom:6px">HUD da Skill</div>
+          <div style="display:inline-flex;flex-direction:column;align-items:center;gap:3px">
+            <div style="width:44px;height:44px;background:#2a2545;border-radius:6px;border:2px solid #ff4400;display:flex;align-items:center;justify-content:center;font-size:22px">⚔️</div>
+            <div style="width:18px;height:18px;background:#ff4400;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px">🔥</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p style="margin-top:20px;color:#888;font-size:12px;text-align:center">Este fluxo parece certo? Responda "ok" ou me diga o que mudar.</p>

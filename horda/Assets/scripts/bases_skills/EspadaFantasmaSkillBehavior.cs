@@ -15,10 +15,17 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f          ? data.attackBonus        : 20f;
         intervalo   = data.activationInterval > 0f   ? data.activationInterval : 2.5f;
         alcanceCorte = data.specialValue > 0f        ? data.specialValue       : 3f;
         timer       = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     void Update()
@@ -61,7 +68,7 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior
         go.transform.position = origem + dir * (alcanceCorte * 0.5f);
         go.transform.rotation = Quaternion.Euler(0f, 0f, ang - 90f);
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = GerarEspada(); sr.color = new Color(0.85f, 0.85f, 1f, 0.9f); sr.sortingOrder = 14;
+        sr.sprite = GerarEspada(); { Color ce = CorElemento(); sr.color = new Color(ce.r, ce.g, ce.b, 0.9f); } sr.sortingOrder = 14;
         go.transform.localScale = new Vector3(0.5f, alcanceCorte * 0.4f, 1f);
 
         // Colisão e dano
@@ -72,13 +79,14 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior
             var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
             if (ic == null || ic.estaMorrendo) continue;
             ic.ReceberDano(DanoAtual, false);
+            SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
         }
 
         // Fade
         for (float t = 0f; t < 0.2f; t += Time.deltaTime)
         {
             if (sr == null) yield break;
-            sr.color = new Color(0.85f, 0.85f, 1f, Mathf.Lerp(0.9f, 0f, t / 0.2f));
+            { Color ce = CorElemento(); sr.color = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(0.9f, 0f, t / 0.2f)); }
             go.transform.localScale = new Vector3(Mathf.Lerp(0.5f, 0.1f, t / 0.2f), alcanceCorte * 0.4f, 1f);
             yield return null;
         }

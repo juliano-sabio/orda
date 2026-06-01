@@ -20,6 +20,7 @@ public class BoomerangController : MonoBehaviour
     [SerializeField] private int maxTargets = 3;
     [SerializeField] private PlayerStats.Element element = PlayerStats.Element.None;
     [SerializeField] private bool healOnReturn = false;
+    [HideInInspector] public SkillData skillData;
     [SerializeField] private float healPercent = 0.1f;
 
     [Header("🌀 Referências")]
@@ -341,6 +342,7 @@ public class BoomerangController : MonoBehaviour
         if (inimigo != null)
         {
             inimigo.ReceberDano(damage);
+            SkillElementEffect.Aplicar(skillData, enemy, damage, this);
             ApplyElementalEffect(enemy);
         }
         else

@@ -1,0 +1,175 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da00c503a7c0fa342b9fd9b27d0f18fc, type: 3}
+  m_Name: ElementRegistry
+  m_EditorClassIdentifier: Assembly-CSharp::ElementRegistry
+  elementos:
+  - tipo: 1
+    nomeDisplay: Fogo
+    cor: {r: 1, g: 0.26666668, b: 0, a: 1}
+    icone: {fileID: 434769800930914892, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: F
+    caracteristicas:
+    - nome: Queimadura
+      descricao: 3 ticks de dano em 3s
+      tipo: 0
+      valor1: 0
+      valor2: 3
+    - nome: Explosao
+      descricao: Dano em area ao atingir
+      tipo: 1
+      valor1: 2.5
+      valor2: 0.6
+  - tipo: 2
+    nomeDisplay: Ar
+    cor: {r: 0.26666668, g: 0.8, b: 1, a: 1}
+    icone: {fileID: 2746350846085233415, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: A
+    caracteristicas:
+    - nome: Recuo
+      descricao: Knockback forte
+      tipo: 2
+      valor1: 12
+      valor2: 0
+    - nome: Rajada
+      descricao: -30% cooldown desta skill
+      tipo: 3
+      valor1: 0.7
+      valor2: 0
+  - tipo: 3
+    nomeDisplay: Terra
+    cor: {r: 0.6666667, g: 0.53333336, b: 0.26666668, a: 1}
+    icone: {fileID: -7657859869032552223, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: T
+    caracteristicas:
+    - nome: Atordoamento
+      descricao: Stun 1.5s (40% chance)
+      tipo: 4
+      valor1: 1.5
+      valor2: 0.4
+    - nome: Escudo Pedra
+      descricao: Escudo temporario ao ativar
+      tipo: 5
+      valor1: 0
+      valor2: 0
+  - tipo: 4
+    nomeDisplay: Agua
+    cor: {r: 0.26666668, g: 0.53333336, b: 1, a: 1}
+    icone: {fileID: 6763475411575406883, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: W
+    caracteristicas:
+    - nome: Lentidao
+      descricao: -50% velocidade por 3s
+      tipo: 6
+      valor1: 3
+      valor2: 0.5
+    - nome: Cura
+      descricao: Recupera 15% do dano causado
+      tipo: 7
+      valor1: 0.15
+      valor2: 0
+  - tipo: 5
+    nomeDisplay: Raio
+    cor: {r: 1, g: 0.8666667, b: 0, a: 1}
+    icone: {fileID: 5145344626429399097, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: R
+    caracteristicas:
+    - nome: Cadeia
+      descricao: Salta para 2 inimigos (60% dano)
+      tipo: 8
+      valor1: 4
+      valor2: 0.6
+    - nome: Paralisia
+      descricao: 35% chance imobilizar 1s
+      tipo: 9
+      valor1: 1
+      valor2: 0.35
+  - tipo: 6
+    nomeDisplay: Gelo
+    cor: {r: 0.6666667, g: 0.8666667, b: 1, a: 1}
+    icone: {fileID: 3069280928828078628, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: G
+    caracteristicas:
+    - nome: Congelamento
+      descricao: Congela por 2s
+      tipo: 10
+      valor1: 2
+      valor2: 0
+    - nome: Fragilidade
+      descricao: +25% dano de todas as fontes 3s
+      tipo: 11
+      valor1: 3
+      valor2: 0.25
+  - tipo: 7
+    nomeDisplay: Planta
+    cor: {r: 0.26666668, g: 0.6666667, b: 0.26666668, a: 1}
+    icone: {fileID: -3206849947276370887, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: P
+    caracteristicas:
+    - nome: Veneno
+      descricao: 5 ticks de veneno em 5s
+      tipo: 12
+      valor1: 0
+      valor2: 5
+    - nome: Enraizamento
+      descricao: Imovel por 2.5s
+      tipo: 13
+      valor1: 2.5
+      valor2: 0
+  - tipo: 8
+    nomeDisplay: Trevas
+    cor: {r: 0.4, g: 0.13333334, b: 0.6666667, a: 1}
+    icone: {fileID: -7095153296786560660, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: X
+    caracteristicas:
+    - nome: Maldicao
+      descricao: -30% defesa por 4s
+      tipo: 14
+      valor1: 4
+      valor2: 0.3
+    - nome: Roubo Vida
+      descricao: 20% do dano vira cura
+      tipo: 15
+      valor1: 0.2
+      valor2: 0
+  - tipo: 9
+    nomeDisplay: Luz
+    cor: {r: 1, g: 0.93333334, b: 0.53333336, a: 1}
+    icone: {fileID: 7421955392321357448, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: L
+    caracteristicas:
+    - nome: Sagrado
+      descricao: +50% dano vs Elite e Boss
+      tipo: 16
+      valor1: 1.5
+      valor2: 0
+    - nome: Cegamento
+      descricao: -40% dano e vel ataque 3s
+      tipo: 17
+      valor1: 3
+      valor2: 0.4
+  - tipo: 10
+    nomeDisplay: Corrompido
+    cor: {r: 0.6666667, g: 0.13333334, b: 0.53333336, a: 1}
+    icone: {fileID: -8509227329556114038, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    emoji: C
+    caracteristicas:
+    - nome: Caos
+      descricao: Dano aleatorio 50-250%
+      tipo: 18
+      valor1: 0
+      valor2: 0
+    - nome: Infeccao
+      descricao: Propaga 60% dano a 3 inimigos
+      tipo: 19
+      valor1: 3.5
+      valor2: 0.6

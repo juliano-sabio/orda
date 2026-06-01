@@ -29,6 +29,10 @@ public class SkillData : ScriptableObject
     public float elementalEffectChance = 0.2f;
     public float elementalEffectDuration = 3f;
 
+    [Header("💎 Elemento Infundido (runtime)")]
+    public ElementType appliedElement = ElementType.None;
+    public int appliedCharacteristicIndex = -1; // -1 = sem característica
+
     [Header("🎯 Modificadores de Skills")]
     public List<SkillModifierData> skillModifiers = new List<SkillModifierData>();
 

@@ -19,11 +19,18 @@ public class CorteFantasmaSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f          ? data.attackBonus        : 35f;
         intervalo   = data.activationInterval > 0f   ? data.activationInterval : 2.5f;
         qtdCortes   = data.projectileCount > 0       ? data.projectileCount    : 2;
         velocidade  = data.projectileSpeed > 0f      ? data.projectileSpeed    : 18f;
         timer       = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     void Update()
@@ -40,21 +47,22 @@ public class CorteFantasmaSkillBehavior : SkillBehavior
         var alvos = EncontrarAlvos(qtdCortes);
         Vector2 origem = playerStats.transform.position;
 
+        Color corCorte = CorElemento();
         for (int i = 0; i < alvos.Count; i++)
         {
             var alvo = alvos[i];
             // Delay leve entre cortes
-            StartCoroutine(DisparararCorteComDelay(origem, alvo, i * 0.1f));
+            StartCoroutine(DisparararCorteComDelay(origem, alvo, i * 0.1f, corCorte));
         }
     }
 
-    IEnumerator DisparararCorteComDelay(Vector2 origem, InimigoController alvo, float delay)
+    IEnumerator DisparararCorteComDelay(Vector2 origem, InimigoController alvo, float delay, Color cor = default)
     {
         if (delay > 0f) yield return new WaitForSeconds(delay);
 
         var go = new GameObject("CorteFantasma");
         go.transform.position = origem;
-        go.AddComponent<CorteFantasmaProjetil>().Iniciar(alvo, velocidade, DanoAtual);
+        go.AddComponent<CorteFantasmaProjetil>().Iniciar(alvo, velocidade, DanoAtual, cor);
     }
 
     List<InimigoController> EncontrarAlvos(int qtd)
@@ -82,14 +90,16 @@ public class CorteFantasmaProjetil : MonoBehaviour
     float             dano;
     bool              atingiu;
     float             rot;
+    Color             corBase = new Color(0.7f, 0.9f, 1f);
 
     SpriteRenderer    sr;
 
-    public void Iniciar(InimigoController alvoIC, float velocidade, float dmg)
+    public void Iniciar(InimigoController alvoIC, float velocidade, float dmg, Color cor = default)
     {
         alvo = alvoIC;
         vel  = velocidade;
         dano = dmg;
+        if (cor != default && cor != Color.white) corBase = cor;
 
         if (alvo != null)
             dir = ((Vector2)alvo.transform.position - (Vector2)transform.position).normalized;
@@ -102,7 +112,7 @@ public class CorteFantasmaProjetil : MonoBehaviour
 
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarCorteFantasma();
-        sr.color        = new Color(0.7f, 0.9f, 1f, 0.9f);
+        sr.color        = new Color(corBase.r, corBase.g, corBase.b, 0.9f);
         sr.sortingOrder = 14;
         transform.localScale = Vector3.one * 0.7f;
 
@@ -142,7 +152,7 @@ public class CorteFantasmaProjetil : MonoBehaviour
         if (sr != null)
         {
             float pulso = Mathf.Sin(rot) * 0.15f + 0.85f;
-            sr.color = new Color(0.7f, 0.9f, 1f, pulso);
+            sr.color = new Color(corBase.r, corBase.g, corBase.b, pulso);
         }
     }
 
@@ -155,6 +165,7 @@ public class CorteFantasmaProjetil : MonoBehaviour
 
         atingiu = true;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(null, ic.gameObject, dano, this);
         StartCoroutine(EfeitoImpacto(transform.position, transform.rotation));
     }
 
@@ -171,7 +182,7 @@ public class CorteFantasmaProjetil : MonoBehaviour
             t.transform.localScale = transform.localScale * 0.85f;
             var tsr = t.AddComponent<SpriteRenderer>();
             tsr.sprite       = GerarCorteFantasma();
-            tsr.color        = new Color(0.5f, 0.8f, 1f, 0.4f);
+            tsr.color        = new Color(corBase.r * 0.75f, corBase.g * 0.9f, corBase.b, 0.4f);
             tsr.sortingOrder = 13;
             t.AddComponent<AutoDestroyFade>().Iniciar(0.15f);
         }
@@ -201,7 +212,7 @@ public class CorteFantasmaProjetil : MonoBehaviour
             p.transform.position = pos;
             var psr = p.AddComponent<SpriteRenderer>();
             psr.sprite = GerarDisco(6);
-            psr.color  = new Color(0.7f, 0.9f, 1f);
+            psr.color  = corBase;
             psr.sortingOrder = 14;
             p.transform.localScale = Vector3.one * Random.Range(0.08f, 0.18f);
             p.AddComponent<AutoDestroyFadeMove>().Iniciar(

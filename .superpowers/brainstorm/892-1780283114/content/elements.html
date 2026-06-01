@@ -1,0 +1,141 @@
+<h2>10 Elementos — Características por Elemento</h2>
+<p class="subtitle">Cada skill pode receber 1 elemento. O player escolhe entre 2 opções de característica. Me diga se quer mudar algum.</p>
+
+<style>
+.el-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.el-card { background: #12111a; border-radius: 8px; border-left: 4px solid; padding: 12px 14px; }
+.el-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.el-icon { font-size: 22px; }
+.el-name { font-weight: bold; font-size: 15px; }
+.el-opts { display: flex; flex-direction: column; gap: 5px; }
+.el-opt { background: #1e1b2e; border-radius: 5px; padding: 6px 10px; font-size: 12px; }
+.el-opt strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1px; }
+.el-opt span { color: #bbb; }
+.el-vfx { font-size: 10px; margin-top: 6px; opacity: 0.6; font-style: italic; }
+</style>
+
+<div class="el-grid">
+
+  <div class="el-card" style="border-color:#ff4400">
+    <div class="el-header">
+      <span class="el-icon">🔥</span>
+      <span class="el-name" style="color:#ff6622">FOGO</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#ff8844">A — Queimadura</strong><span>DoT: 3 ticks de dano de fogo ao longo de 3s</span></div>
+      <div class="el-opt"><strong style="color:#ff8844">B — Explosão</strong><span>Ao atingir, causa dano em área (AoE splash)</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: partículas de chama, borda laranja pulsante no ícone</div>
+  </div>
+
+  <div class="el-card" style="border-color:#44ccff">
+    <div class="el-header">
+      <span class="el-icon">💨</span>
+      <span class="el-name" style="color:#66ddff">AR</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#88eeff">A — Recuo</strong><span>Knockback forte nos inimigos atingidos</span></div>
+      <div class="el-opt"><strong style="color:#88eeff">B — Rajada</strong><span>Reduz o cooldown desta skill em 30%</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: espiral de vento ao redor do ícone, tint ciano</div>
+  </div>
+
+  <div class="el-card" style="border-color:#886622">
+    <div class="el-header">
+      <span class="el-icon">🪨</span>
+      <span class="el-name" style="color:#aa8844">TERRA</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#ccaa66">A — Atordoamento</strong><span>Chance de stun: inimigo fica imóvel por 1.5s</span></div>
+      <div class="el-opt"><strong style="color:#ccaa66">B — Escudo de Pedra</strong><span>Ao ativar a skill, ganha escudo temporário</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: fragmentos de rocha, textura pedra no ícone</div>
+  </div>
+
+  <div class="el-card" style="border-color:#2266ff">
+    <div class="el-header">
+      <span class="el-icon">💧</span>
+      <span class="el-name" style="color:#4488ff">ÁGUA</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#66aaff">A — Lentidão</strong><span>Inimigos atingidos ficam 50% mais lentos por 3s</span></div>
+      <div class="el-opt"><strong style="color:#66aaff">B — Cura</strong><span>Regenera HP equivalente a 15% do dano causado</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: gotas d'água, ondas azuis no ícone</div>
+  </div>
+
+  <div class="el-card" style="border-color:#ffdd00">
+    <div class="el-header">
+      <span class="el-icon">⚡</span>
+      <span class="el-name" style="color:#ffee44">RAIO</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#ffff66">A — Cadeia</strong><span>O golpe salta para até 2 inimigos próximos (60% do dano)</span></div>
+      <div class="el-opt"><strong style="color:#ffff66">B — Paralisia</strong><span>Chance de 35% de imobilizar o inimigo por 1s</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: faíscas elétricas, arco amarelo no ícone</div>
+  </div>
+
+  <div class="el-card" style="border-color:#88ccff">
+    <div class="el-header">
+      <span class="el-icon">❄️</span>
+      <span class="el-name" style="color:#aaddff">GELO</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#cceeff">A — Congelamento</strong><span>Congela o inimigo por 2s (imóvel + vulnerável)</span></div>
+      <div class="el-opt"><strong style="color:#cceeff">B — Fragilidade</strong><span>Inimigo atingido recebe +25% de dano de todas as fontes</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: cristais de gelo, tint azul frio no ícone</div>
+  </div>
+
+  <div class="el-card" style="border-color:#44aa44">
+    <div class="el-header">
+      <span class="el-icon">🌿</span>
+      <span class="el-name" style="color:#66cc66">PLANTA</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#88dd88">A — Veneno</strong><span>DoT de veneno: 5 ticks em 5s (dano gradual)</span></div>
+      <div class="el-opt"><strong style="color:#88dd88">B — Enraizamento</strong><span>Prende o inimigo no lugar por 2.5s (não move)</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: brotos/folhas ao redor, tint verde no ícone</div>
+  </div>
+
+  <div class="el-card" style="border-color:#6622aa">
+    <div class="el-header">
+      <span class="el-icon">🌑</span>
+      <span class="el-name" style="color:#9944cc">TREVAS</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#bb66ee">A — Maldição</strong><span>Reduz defesa do inimigo em 30% por 4s</span></div>
+      <div class="el-opt"><strong style="color:#bb66ee">B — Roubo de Vida</strong><span>20% do dano causado pela skill vira cura para o player</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: fumaça escura, sombras roxas, tint escuro</div>
+  </div>
+
+  <div class="el-card" style="border-color:#ffee88">
+    <div class="el-header">
+      <span class="el-icon">☀️</span>
+      <span class="el-name" style="color:#ffee88">LUZ</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#ffffaa">A — Sagrado</strong><span>Dano +50% contra inimigos Elite e Bosses</span></div>
+      <div class="el-opt"><strong style="color:#ffffaa">B — Cegamento</strong><span>Reduz dano e vel. ataque do inimigo em 40% por 3s</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: halo dourado/branco, brilho pulsante no ícone</div>
+  </div>
+
+  <div class="el-card" style="border-color:#aa2288">
+    <div class="el-header">
+      <span class="el-icon">💜</span>
+      <span class="el-name" style="color:#cc44aa">CORROMPIDO</span>
+    </div>
+    <div class="el-opts">
+      <div class="el-opt"><strong style="color:#ee66cc">A — Caos</strong><span>Dano aleatório entre 50% e 250% do normal</span></div>
+      <div class="el-opt"><strong style="color:#ee66cc">B — Infecção</strong><span>Propaga 60% do dano para até 3 inimigos próximos</span></div>
+    </div>
+    <div class="el-vfx">✨ Visual: glitch visual, cores distorcidas, tint roxo-preto</div>
+  </div>
+
+</div>
+
+<p style="margin-top:20px;color:#888;font-size:12px">Algum elemento quer mudar? Responda no terminal com suas alterações ou "ok" para aprovar.</p>

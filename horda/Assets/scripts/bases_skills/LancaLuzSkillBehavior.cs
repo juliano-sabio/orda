@@ -16,11 +16,18 @@ public class LancaLuzSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano   = data.attackBonus > 0f          ? data.attackBonus        : 60f;
         intervalo  = data.activationInterval > 0f   ? data.activationInterval : 4f;
         velocidade = data.projectileSpeed > 0f      ? data.projectileSpeed    : 20f;
         alcance    = data.specialValue > 0f         ? data.specialValue       : 12f;
         timer      = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     void Update()
@@ -42,7 +49,7 @@ public class LancaLuzSkillBehavior : SkillBehavior
 
         var go = new GameObject("LancaLuz");
         go.transform.position = origem;
-        go.AddComponent<LancaLuzProjetil>().Iniciar(dir, velocidade, DanoAtual, alcance);
+        go.AddComponent<LancaLuzProjetil>().Iniciar(dir, velocidade, DanoAtual, alcance, CorElemento());
     }
 
     InimigoController EncontrarMaisProximo()
@@ -67,14 +74,16 @@ public class LancaLuzProjetil : MonoBehaviour
     float   vel, dano, alcance;
     bool    atingiu;
     SpriteRenderer sr;
+    Color corBase = new Color(1f, 0.95f, 0.5f);
 
-    public void Iniciar(Vector2 d, float v, float dmg, float alc)
+    public void Iniciar(Vector2 d, float v, float dmg, float alc, Color cor = default)
     {
         dir = d; vel = v; dano = dmg; alcance = alc; origem = transform.position;
+        if (cor != default && cor != Color.white) corBase = cor;
         float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, ang - 90f);
         sr = gameObject.AddComponent<SpriteRenderer>();
-        sr.sprite = GerarLanca(); sr.color = new Color(1f, 0.95f, 0.5f); sr.sortingOrder = 14;
+        sr.sprite = GerarLanca(); sr.color = corBase; sr.sortingOrder = 14;
         transform.localScale = new Vector3(0.5f, 1.2f, 1f);
         var col = gameObject.AddComponent<CapsuleCollider2D>();
         col.isTrigger = true; col.size = new Vector2(0.25f, 1.2f);
@@ -95,6 +104,7 @@ public class LancaLuzProjetil : MonoBehaviour
         var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(null, ic.gameObject, dano, this);
         atingiu = true;
         SpawnImpacto();
         StartCoroutine(FadeOut());
@@ -105,7 +115,7 @@ public class LancaLuzProjetil : MonoBehaviour
         for (float t = 0f; t < 0.15f; t += Time.deltaTime)
         {
             if (sr == null) yield break;
-            sr.color = new Color(1f, 0.95f, 0.5f, 1f - t / 0.15f);
+            sr.color = new Color(corBase.r, corBase.g, corBase.b, 1f - t / 0.15f);
             yield return null;
         }
         Destroy(gameObject);
@@ -116,7 +126,7 @@ public class LancaLuzProjetil : MonoBehaviour
         while (!atingiu && gameObject != null)
         {
             var t = new GameObject("T"); t.transform.position = transform.position; t.transform.rotation = transform.rotation; t.transform.localScale = transform.localScale;
-            var tsr = t.AddComponent<SpriteRenderer>(); tsr.sprite = GerarLanca(); tsr.color = new Color(1f, 0.9f, 0.3f, 0.35f); tsr.sortingOrder = 13;
+            var tsr = t.AddComponent<SpriteRenderer>(); tsr.sprite = GerarLanca(); tsr.color = new Color(corBase.r, corBase.g * 0.95f, corBase.b * 0.6f, 0.35f); tsr.sortingOrder = 13;
             t.AddComponent<AutoDestroyFade>().Iniciar(0.12f);
             yield return new WaitForSeconds(0.05f);
         }
@@ -127,7 +137,7 @@ public class LancaLuzProjetil : MonoBehaviour
         for (int i = 0; i < 8; i++)
         {
             var p = new GameObject("P"); p.transform.position = transform.position;
-            var psr = p.AddComponent<SpriteRenderer>(); psr.sprite = GerarDisco(6); psr.color = new Color(1f, 0.9f, 0.3f); psr.sortingOrder = 15;
+            var psr = p.AddComponent<SpriteRenderer>(); psr.sprite = GerarDisco(6); psr.color = corBase; psr.sortingOrder = 15;
             p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.22f);
             p.AddComponent<AutoDestroyFadeMove>().Iniciar(Random.insideUnitCircle.normalized * Random.Range(2f, 6f), 0.35f);
         }

@@ -1,0 +1,61 @@
+<h2>Sistema de Elementos — Abordagem de Arquitetura</h2>
+<p class="subtitle">Como estruturar os dados dos elementos no projeto Unity</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1a1a2e;padding:16px;font-family:monospace;font-size:12px;color:#7ecfff;">
+      <div style="color:#ffd700;margin-bottom:6px">🗂 ScriptableObjects Individuais</div>
+      <div style="color:#aaa">Assets/Elements/</div>
+      <div style="color:#7ecfff">  FireElement.asset</div>
+      <div style="color:#7ecfff">  IceElement.asset</div>
+      <div style="color:#7ecfff">  LightElement.asset</div>
+      <div style="color:#aaa">  ... (10 arquivos)</div>
+    </div>
+    <div class="card-body">
+      <h3>A — SO por Elemento</h3>
+      <p>Cada elemento é um ScriptableObject com nome, cor, ícone e array de 2 características. Fácil de balancear no Inspector, padrão já usado em SkillData.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>Tune valores sem recompilar</li><li>Padrão do projeto</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>10 arquivos .asset para gerenciar</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1a1a2e;padding:16px;font-family:monospace;font-size:12px;color:#7ecfff;">
+      <div style="color:#ffd700;margin-bottom:6px">📋 ElementRegistry — SO único</div>
+      <div style="color:#7ecfff">ElementRegistry.asset</div>
+      <div style="color:#aaa">  └─ ElementDef[] elements</div>
+      <div style="color:#aaa">       [0] Fogo, [1] Ar ...</div>
+      <div style="color:#aaa">       cada um com 2 opções</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Registry Centralizado ⭐ Recomendado</h3>
+      <p>Um único ScriptableObject com array de todos os 10 elementos. Cada elemento tem: tipo, cor, ícone, 2 características. Simples de manter, 1 arquivo só.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>1 arquivo, tudo centralizado</li><li>Referência fácil no código</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Inspector fica longo</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1a1a2e;padding:16px;font-family:monospace;font-size:12px;color:#7ecfff;">
+      <div style="color:#ffd700;margin-bottom:6px">⚡ Código Puro (enum + switch)</div>
+      <div style="color:#7ecfff">ElementSystem.cs</div>
+      <div style="color:#aaa">  GetCharacteristics(ElementType)</div>
+      <div style="color:#aaa">  ApplyEffect(skill, element)</div>
+      <div style="color:#aaa">  — sem assets extras</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Hardcoded em C#</h3>
+      <p>Tudo em código: enum com 10 elementos, switch statement com cada efeito. Mais rápido de implementar, mas difícil de balancear valores depois.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>Implementação mais rápida</li><li>Zero arquivos extras</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Recompila pra ajustar valores</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

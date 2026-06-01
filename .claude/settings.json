@@ -23,7 +23,21 @@
       "PowerShell($end = \\(Get-Date\\).AddSeconds\\(20\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_zoom2.png\"\\) { Write-Output \"found\"; break }; Start-Sleep -Milliseconds 500 }; Write-Output \"done waiting\")",
       "PowerShell($end = \\(Get-Date\\).AddSeconds\\(25\\); while \\(\\(Get-Date\\) -lt $end\\) { if \\(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\Screenshots\\\\shot_z2.png\"\\) { Write-Output \"found at $\\(\\(Get-Date\\).ToString\\('HH:mm:ss'\\)\\)\"; break }; Start-Sleep -Milliseconds 800 }; Write-Output \"done\")",
       "mcp__pixellab__create_1_direction_object",
-      "mcp__pixellab__get_object"
+      "mcp__pixellab__get_object",
+      "Bash(Get-ChildItem -Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\\" -Recurse -Filter \"*.cs\" | Select-Object -First 50 FullName)",
+      "Bash(bash \"C:/Users/julia/.claude/plugins/cache/superpowers-dev/superpowers/5.1.0/scripts/start-server.sh\" --project-dir \"j:/unity/projetos/horda/orda\")",
+      "Bash(bash \"C:/Users/julia/.claude/plugins/cache/superpowers-dev/superpowers/5.1.0/skills/brainstorming/scripts/start-server.sh\" --project-dir \"j:/unity/projetos/horda/orda\")",
+      "Bash(curl -s http://127.0.0.1:8080/mcp)",
+      "Bash(dir \"j:/unity/projetos/horda/orda/horda/Assets/scripts\")",
+      "Bash(curl -s --max-time 3 http://127.0.0.1:8080/mcp)",
+      "Bash(dir \"j:/unity/projetos/horda/orda/horda/Assets/scripts/Elements\")",
+      "Bash(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\Elements\\\\SkillElementEffect.cs\" -PathType Leaf)",
+      "Bash(python -c \"import urllib.request, json; urllib.request.urlopen\\('http://127.0.0.1:8080/mcp', timeout=5\\); print\\('reachable'\\)\")",
+      "mcp__aseprite__export_spritesheet",
+      "Bash(mkdir -p \"j:/unity/projetos/horda/orda/horda/Assets/assets/UI/elements\" && cp \"C:/Users/julia/Downloads/craftpix-net-359734-magic-objects-and-icons-pixel-art-pack/PNG_n_TILED/Runes.png\" \"j:/unity/projetos/horda/orda/horda/Assets/assets/UI/elements/runes.png\" && echo \"Copiado\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\julia\\Downloads\\craftpix-net-359734-magic-objects-and-icons-pixel-art-pack\\PNG_n_TILED"
     ]
   }
 }

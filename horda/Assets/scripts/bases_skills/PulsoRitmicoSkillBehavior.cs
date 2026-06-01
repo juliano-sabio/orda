@@ -15,10 +15,17 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano  = data.attackBonus > 0f        ? data.attackBonus        : 15f;
         intervalo = data.activationInterval > 0f ? data.activationInterval : 1.2f;
         raio      = data.specialValue > 0f       ? data.specialValue       : 3.5f;
         timer     = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     void Update()
@@ -41,6 +48,7 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior
             var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
             if (ic == null || ic.estaMorrendo) continue;
             ic.ReceberDano(DanoAtual, false);
+            SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
         }
 
         StartCoroutine(VisualPulso(centro));
@@ -61,7 +69,7 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior
             float p = t / dur;
             float r = Mathf.Lerp(0.2f, raio * 1.1f, p);
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.22f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(0.3f, 0.9f, 0.5f, Mathf.Lerp(1f, 0f, p));
+            { Color ce = CorElemento(); lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, p)); }
             for (int i = 0; i < SEGS; i++)
             {
                 float ang = 360f / SEGS * i * Mathf.Deg2Rad;

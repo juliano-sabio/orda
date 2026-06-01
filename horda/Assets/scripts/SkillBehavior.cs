@@ -4,6 +4,7 @@ public abstract class SkillBehavior : MonoBehaviour
 {
     [Header("Referencias")]
     public PlayerStats playerStats;
+    public SkillData skillData;
 
     public virtual void Initialize(PlayerStats stats)
     {

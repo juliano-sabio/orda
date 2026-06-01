@@ -19,11 +19,18 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f        ? data.attackBonus        : 30f;
         intervalo   = data.activationInterval > 0f ? data.activationInterval : 2.5f;
         qtdLaminas  = data.projectileCount > 0     ? data.projectileCount    : 5;
         velocidade  = data.projectileSpeed > 0f    ? data.projectileSpeed    : 14f;
         timer       = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     void Update()
@@ -41,6 +48,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
     {
         var alvos = EncontrarAlvos(qtdLaminas);
         Vector2 origem = playerStats.transform.position;
+        Color corLamina = CorElemento();
 
         for (int i = 0; i < alvos.Count; i++)
         {
@@ -50,7 +58,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
 
             var go = new GameObject("Lamina");
             go.transform.position = origem;
-            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual);
+            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual, corLamina);
         }
 
         // Se há menos alvos que lâminas, completa com direções aleatórias
@@ -59,7 +67,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
             Vector2 dir = AnguloAleatorio(i, qtdLaminas);
             var go = new GameObject("Lamina");
             go.transform.position = origem;
-            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual);
+            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual, corLamina);
         }
 
         StartCoroutine(FlashPlayer());
@@ -106,19 +114,21 @@ public class LaminaProjetil : MonoBehaviour
     bool    atingiu;
     Vector2 origem;
     const float ALCANCE_MAX = 7f;
+    Color corBase = new Color(0.85f, 0.92f, 1f);
 
     SpriteRenderer sr;
 
-    public void Iniciar(Vector2 direcao, float velocidade, float dmg)
+    public void Iniciar(Vector2 direcao, float velocidade, float dmg, Color cor = default)
     {
         dir    = direcao;
         vel    = velocidade;
         dano   = dmg;
         origem = transform.position;
+        if (cor != default && cor != Color.white) corBase = cor;
 
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarLamina();
-        sr.color        = new Color(0.85f, 0.92f, 1f);
+        sr.color        = corBase;
         sr.sortingOrder = 12;
         transform.localScale = Vector3.one * 0.55f;
 
@@ -157,6 +167,7 @@ public class LaminaProjetil : MonoBehaviour
               ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(null, ic.gameObject, dano, this);
         atingiu = true;
         StartCoroutine(EfeitoImpacto());
     }
@@ -176,7 +187,7 @@ public class LaminaProjetil : MonoBehaviour
             p.transform.position = transform.position;
             var psr = p.AddComponent<SpriteRenderer>();
             psr.sprite = GerarDisco(6);
-            psr.color  = new Color(0.85f, 0.92f, 1f);
+            psr.color  = corBase;
             psr.sortingOrder = 13;
             p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.2f);
             Vector2 v = Random.insideUnitCircle.normalized * Random.Range(2f, 5f);
@@ -206,7 +217,7 @@ public class LaminaProjetil : MonoBehaviour
         p.transform.localScale = transform.localScale * 0.7f;
         var psr = p.AddComponent<SpriteRenderer>();
         psr.sprite       = GerarLamina();
-        psr.color        = new Color(0.6f, 0.75f, 1f, 0.45f);
+        psr.color        = new Color(corBase.r * 0.75f, corBase.g * 0.75f, corBase.b * 0.75f, 0.45f);
         psr.sortingOrder = 11;
         // Usa componente self-managed para não depender do LaminaProjetil
         p.AddComponent<AutoDestroyFade>().Iniciar(0.12f);

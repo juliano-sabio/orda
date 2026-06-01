@@ -24,11 +24,18 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano     = data.attackBonus > 0f          ? data.attackBonus        : 20f;
         intervalo    = data.activationInterval > 0f   ? data.activationInterval : 3f;
         qtdEstrelas  = data.projectileCount > 0       ? data.projectileCount    : 3;
         raioImpacto  = data.specialValue > 0f         ? data.specialValue       : 1.5f;
         timer        = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
@@ -73,9 +80,10 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
             if (avisoGO == null) yield break;
             float prog  = t / tempoAviso;
             float pulso = Mathf.Sin(t * 14f) * 0.5f + 0.5f;
+            Color ce = CorElemento();
             Color cor   = Color.Lerp(
-                new Color(1f, 0.9f, 0.2f, 0.4f + pulso * 0.4f),
-                new Color(1f, 0.4f, 0.1f, 0.6f + pulso * 0.3f),
+                new Color(ce.r, ce.g, ce.b, 0.4f + pulso * 0.4f),
+                new Color(ce.r * 0.8f, ce.g * 0.6f, ce.b * 0.5f, 0.6f + pulso * 0.3f),
                 prog);
             if (avisoLR != null) avisoLR.startColor = avisoLR.endColor = cor;
             yield return null;
@@ -99,7 +107,11 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
         {
             var ic = col.GetComponent<InimigoController>()
                   ?? col.GetComponentInParent<InimigoController>();
-            if (ic != null) ic.ReceberDano(DanoAtual, false);
+            if (ic != null)
+            {
+                ic.ReceberDano(DanoAtual, false);
+                SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
+            }
         }
     }
 
@@ -141,7 +153,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
         lr.material      = new Material(Shader.Find("Sprites/Default"));
         lr.sortingOrder  = 8;
         lr.startWidth    = lr.endWidth = 0.08f;
-        lr.startColor    = lr.endColor = new Color(1f, 0.9f, 0.2f, 0.5f);
+        { Color ce = CorElemento(); lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, 0.5f); }
         for (int i = 0; i < SEGS; i++)
         {
             float ang = 360f / SEGS * i * Mathf.Deg2Rad;
@@ -157,7 +169,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
         lrCruz.material      = new Material(Shader.Find("Sprites/Default"));
         lrCruz.sortingOrder  = 9;
         lrCruz.startWidth    = lrCruz.endWidth = 0.05f;
-        lrCruz.startColor    = lrCruz.endColor = new Color(1f, 0.9f, 0.2f, 0.6f);
+        { Color ce = CorElemento(); lrCruz.startColor = lrCruz.endColor = new Color(ce.r, ce.g, ce.b, 0.6f); }
         lrCruz.SetPosition(0, pos + Vector2.left  * raio * 0.4f);
         lrCruz.SetPosition(1, pos + Vector2.right * raio * 0.4f);
 
@@ -171,7 +183,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
 
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarEstrela(16);
-        sr.color        = new Color(1f, 0.9f, 0.3f);
+        { Color ce = CorElemento(); sr.color = new Color(ce.r, ce.g, ce.b, 1f); }
         sr.sortingOrder = 14;
         go.transform.localScale = Vector3.one * 0.5f;
 
@@ -188,7 +200,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
             // Escala brilha mais ao aproximar
             float esc = Mathf.Lerp(0.4f, 0.9f, p);
             go.transform.localScale = Vector3.one * esc;
-            sr.color = Color.Lerp(new Color(1f, 0.9f, 0.3f), Color.white, p);
+            { Color ce = CorElemento(); sr.color = Color.Lerp(new Color(ce.r, ce.g, ce.b), Color.white, p); }
 
             // Spawn partícula de rastro
             if (Time.frameCount % 2 == 0)
@@ -197,7 +209,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
                 t2.transform.position = go.transform.position;
                 var sr2 = t2.AddComponent<SpriteRenderer>();
                 sr2.sprite = GerarDisco(6);
-                sr2.color  = new Color(1f, 0.8f, 0.2f, 0.7f);
+                { Color ce = CorElemento(); sr2.color = new Color(ce.r, ce.g, ce.b, 0.7f); }
                 sr2.sortingOrder = 13;
                 t2.transform.localScale = Vector3.one * esc * 0.5f;
                 trail.Add(t2);
@@ -226,7 +238,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
             float p = t / dur;
             float r = Mathf.Lerp(0.1f, raioImpacto * 1.4f, p);
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.25f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(1f, 0.85f, 0.2f, Mathf.Lerp(1f, 0f, p));
+            { Color ce = CorElemento(); lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, p)); }
             for (int i = 0; i < SEGS; i++)
             {
                 float ang = 360f / SEGS * i * Mathf.Deg2Rad;
@@ -242,7 +254,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
             var p = new GameObject("Faísca");
             p.transform.position = pos;
             var sr = p.AddComponent<SpriteRenderer>();
-            sr.sprite = GerarDisco(6); sr.color = new Color(1f, 0.9f, 0.2f); sr.sortingOrder = 12;
+            sr.sprite = GerarDisco(6); { Color ce = CorElemento(); sr.color = new Color(ce.r, ce.g, ce.b); } sr.sortingOrder = 12;
             p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.22f);
             Vector2 vel = Random.insideUnitCircle.normalized * Random.Range(2f, 5f);
             StartCoroutine(Faisca(sr, vel));

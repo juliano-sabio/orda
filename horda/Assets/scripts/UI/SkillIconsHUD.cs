@@ -25,6 +25,8 @@ public class SkillIconsHUD : MonoBehaviour
     Transform       container;
     SkillManager    skillManager;
     List<GameObject> slots = new List<GameObject>();
+    public static SkillIconsHUD Instance { get; private set; }
+    Dictionary<string, GameObject> slotPorNome = new Dictionary<string, GameObject>();
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -41,6 +43,7 @@ public class SkillIconsHUD : MonoBehaviour
 
     void Start()
     {
+        Instance = this;
         skillManager = FindFirstObjectByType<SkillManager>();
         if (skillManager == null) return;
 
@@ -54,6 +57,7 @@ public class SkillIconsHUD : MonoBehaviour
 
     void OnDestroy()
     {
+        if (Instance == this) Instance = null;
         if (skillManager != null)
             skillManager.OnSkillAcquired -= OnSkillAdquirida;
         if (canvas != null)
@@ -198,7 +202,48 @@ public class SkillIconsHUD : MonoBehaviour
         nomeTxt.enableWordWrapping = false;
         nomeTxt.overflowMode = TextOverflowModes.Truncate;
 
+        // Registrar slot para lookup posterior
+        slotPorNome[skill.skillName] = slotGO;
+
+        // Badge de elemento (oculto por padrão)
+        var badgeGO = new GameObject("BadgeElemento");
+        badgeGO.transform.SetParent(slotGO.transform, false);
+        var badgeRT = badgeGO.AddComponent<RectTransform>();
+        badgeRT.anchorMin = badgeRT.anchorMax = new Vector2(0.5f, 0f);
+        badgeRT.pivot = new Vector2(0.5f, 1f);
+        badgeRT.anchoredPosition = new Vector2(0f, -4f);
+        badgeRT.sizeDelta = new Vector2(18f, 18f);
+        var badgeImg = badgeGO.AddComponent<Image>();
+        badgeImg.sprite = GerarDisco(32);
+        badgeImg.color = Color.clear;
+        badgeGO.SetActive(false);
+
+        if (skill.appliedElement != ElementType.None)
+            AtualizarBadgeGO(badgeGO, skill);
+
         return slotGO;
+    }
+
+    public void AtualizarBadgeElemento(SkillData skill)
+    {
+        if (skill == null || !slotPorNome.TryGetValue(skill.skillName, out var slotGO)) return;
+
+        // Atualiza badge
+        var badge = slotGO.transform.Find("BadgeElemento")?.gameObject;
+        if (badge != null) AtualizarBadgeGO(badge, skill);
+
+        // Atualiza borda com a cor do elemento
+        var borda = slotGO.transform.Find("Borda")?.GetComponent<Image>();
+        if (borda != null && skill.appliedElement != ElementType.None)
+            borda.color = ElementRegistry.Instance?.GetCor(skill.appliedElement) ?? corBorda;
+    }
+
+    static void AtualizarBadgeGO(GameObject badge, SkillData skill)
+    {
+        if (skill.appliedElement == ElementType.None) { badge.SetActive(false); return; }
+        var cor = ElementRegistry.Instance?.GetCor(skill.appliedElement) ?? Color.white;
+        badge.GetComponent<Image>().color = cor;
+        badge.SetActive(true);
     }
 
     // ── Animação de entrada ───────────────────────────────────────────────────

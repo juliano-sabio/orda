@@ -9,6 +9,7 @@ public class ProjectileController2D : MonoBehaviour
     public float lifeTime = 5f;
     public float damage = 25f;
     public PlayerStats.Element element = PlayerStats.Element.None;
+    public SkillData skillData;
 
     [Header("🎯 Controle Orbital")]
     public bool isOrbiting = false;
@@ -325,7 +326,14 @@ public class ProjectileController2D : MonoBehaviour
     {
         InimigoController inimigo = enemy.GetComponent<InimigoController>();
         if (inimigo != null)
+        {
             inimigo.ReceberDano(damage);
+            SkillElementEffect.Aplicar(skillData, enemy, damage, this);
+
+            // Burst de impacto do elemento
+            if (skillData != null && skillData.appliedElement != ElementType.None)
+                ElementParticles.SpawnarImpacto(enemy.transform.position, skillData.appliedElement);
+        }
         else
             Debug.LogWarning($"[ProjectileController] InimigoController não encontrado em: {enemy.name}");
 
@@ -368,6 +376,10 @@ public class ProjectileController2D : MonoBehaviour
 
     Color GetElementColor()
     {
+        // Novo sistema tem prioridade
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+
         switch (element)
         {
             case PlayerStats.Element.Fire: return Color.red;
@@ -378,6 +390,30 @@ public class ProjectileController2D : MonoBehaviour
             case PlayerStats.Element.Wind: return Color.white;
             default: return Color.white;
         }
+    }
+
+    public void AplicarVisuaisElemento()
+    {
+        if (skillData == null || skillData.appliedElement == ElementType.None) return;
+        Color cor = ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null) sr.color = cor;
+
+        if (trailRenderer != null)
+        {
+            trailRenderer.startColor = cor;
+            trailRenderer.endColor = new Color(cor.r, cor.g, cor.b, 0f);
+        }
+
+        foreach (var ps in GetComponentsInChildren<ParticleSystem>())
+        {
+            var main = ps.main;
+            main.startColor = new ParticleSystem.MinMaxGradient(cor);
+        }
+
+        // Adiciona partículas de trail do elemento
+        ElementParticles.AdicionarTrail(gameObject, skillData.appliedElement);
     }
 
     private void DestroyProjectile()

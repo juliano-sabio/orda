@@ -18,11 +18,18 @@ public class SombrasCruzSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f          ? data.attackBonus        : 25f;
         intervalo   = data.activationInterval > 0f   ? data.activationInterval : 3f;
         velocidade  = data.projectileSpeed > 0f      ? data.projectileSpeed    : 16f;
         alcance     = data.specialValue > 0f         ? data.specialValue       : 8f;
         timer       = intervalo;
+    }
+
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
+        return Color.white;
     }
 
     void Update()
@@ -73,7 +80,7 @@ public class SombrasCruzSkillBehavior : SkillBehavior
             lr.SetPosition(1, ponta);
 
             float larg  = Mathf.Lerp(0.35f, 0.05f, prog);
-            Color cor   = new Color(0.55f, 0.25f, 1f, Mathf.Lerp(1f, 0f, prog));
+            Color ceB = CorElemento(); Color cor = new Color(ceB.r, ceB.g, ceB.b, Mathf.Lerp(1f, 0f, prog));
             lr.startWidth = larg; lr.endWidth = larg * 0.3f;
             lr.startColor = cor;  lr.endColor = new Color(cor.r, cor.g, cor.b, 0f);
 
@@ -93,6 +100,7 @@ public class SombrasCruzSkillBehavior : SkillBehavior
                 if (hashset.Contains(id)) continue;
                 hashset.Add(id);
                 ic.ReceberDano(DanoAtual, false);
+                SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
             }
 
             yield return null;
@@ -106,7 +114,7 @@ public class SombrasCruzSkillBehavior : SkillBehavior
         var sr = playerStats?.GetComponent<SpriteRenderer>();
         if (sr == null) yield break;
         Color orig = sr.color;
-        sr.color = new Color(0.5f, 0.3f, 1f);
+        { Color ceFl = CorElemento(); sr.color = new Color(ceFl.r, ceFl.g, ceFl.b); }
         yield return new WaitForSeconds(0.07f);
         if (sr != null) sr.color = orig;
     }
@@ -182,6 +190,7 @@ public class SombraCruzProjetil : MonoBehaviour
         atingidos.Add(id);
 
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(null, ic.gameObject, dano, this);
         StartCoroutine(FlashImpacto(ic));
     }
 
