@@ -27,6 +27,8 @@ MonoBehaviour:
   elementalBonus: 1
   elementalEffectChance: 0.2
   elementalEffectDuration: 3
+  appliedElement: 0
+  appliedCharacteristicIndex: -1
   skillModifiers: []
   visualEffect: {fileID: 0}
   soundEffect: {fileID: 0}
@@ -104,7 +106,7 @@ MonoBehaviour:
   requiredLevel: 1
   isUnique: 1
   requiredSkills: []
-  specificType: 30
+  specificType: 33
   specialValue: 0
   stackable: 1
   maxStacks: 1

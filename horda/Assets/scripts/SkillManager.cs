@@ -548,6 +548,10 @@ public class SkillManager : MonoBehaviour
             case SpecificSkillType.FugaSombras:
                 AddBehavior<FugaSombrasSkillBehavior>(skill);
                 break;
+
+            case SpecificSkillType.BarreiraEnergia:
+                AddBehavior<BarreiraEnergiaSkillBehavior>(skill);
+                break;
             case SpecificSkillType.LancaLuz:
                 AddBehavior<LancaLuzSkillBehavior>(skill);
                 break;

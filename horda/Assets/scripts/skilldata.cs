@@ -548,6 +548,7 @@ public enum SpecificSkillType
     CorteFantasma,
     SegundaChance,
     FugaSombras,
+    BarreiraEnergia,
     LancaLuz,
     ChicoteEnergia,
     MisseisTeleguiados,

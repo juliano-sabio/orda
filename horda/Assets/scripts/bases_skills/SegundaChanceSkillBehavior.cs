@@ -3,12 +3,16 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class SegundaChanceSkillBehavior : SkillBehavior
+public class SegundaChanceSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     float porcentagemCura  = 0.3f;  // 30% do HP máximo
     float recarga          = 360f;  // 6 minutos
     float timerRecarga     = 0f;
     bool  emRecarga        = false;
+
+    public bool  EmRecarga    => emRecarga;
+    public float TimerRecarga => timerRecarga;
+    public float RecargaTotal => recarga;
 
     public override void Initialize(PlayerStats stats)
     {

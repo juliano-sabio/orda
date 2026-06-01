@@ -1,13 +1,17 @@
 using System.Collections;
 using UnityEngine;
 
-public class FugaSombrasSkillBehavior : SkillBehavior
+public class FugaSombrasSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     float limiarHP   = 0.50f; // ativa quando HP cai abaixo de 50%
     float recarga    = 360f;  // 6 minutos
-    float distancia  = 12f;
+    float distancia  = 30f;
 
     float timerRecarga = 0f;
+
+    public bool  EmRecarga    => timerRecarga > 0f;
+    public float TimerRecarga => timerRecarga;
+    public float RecargaTotal => recarga;
 
     public override void Initialize(PlayerStats stats)
     {
@@ -86,7 +90,7 @@ public class FugaSombrasSkillBehavior : SkillBehavior
         for (int t = 0; t < 30; t++)
         {
             float ang  = Random.Range(0f, Mathf.PI * 2f);
-            float dist = Random.Range(distancia * 0.5f, distancia);
+            float dist = Random.Range(distancia * 0.7f, distancia);
             Vector2 candidato = origem + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * dist;
 
             if (ge != null && !ge.PosicaoValida(candidato)) continue;

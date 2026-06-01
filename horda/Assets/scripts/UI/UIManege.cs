@@ -149,6 +149,7 @@ public class UIManager : MonoBehaviour
         if (skillManager != null)
             skillManager.OnSkillAcquired += OnSkillAdquiridaHUD;
 
+
         if (passivaIcon == null)
             CriarSlotPassivaRuntime();
     }

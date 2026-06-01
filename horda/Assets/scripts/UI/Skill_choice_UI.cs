@@ -132,15 +132,18 @@ public class SkillChoiceUI : MonoBehaviour
         LoadSkillsFromSkillManager();
 
         // Filtro de tipo de skill por slot
+        // Remove entradas nulas antes de filtrar
+        allAvailableSkills.RemoveAll(s => s == null);
+
         if (somenteSkillsDeAtaque)
         {
-            var filtradas = allAvailableSkills.FindAll(s => s.EhSkillDeAtaque());
+            var filtradas = allAvailableSkills.FindAll(s => s != null && s.EhSkillDeAtaque());
             if (filtradas.Count > 0) allAvailableSkills = filtradas;
             somenteSkillsDeAtaque = false;
         }
         else if (somenteSkillsDeDefesa)
         {
-            var filtradas = allAvailableSkills.FindAll(s => !s.EhSkillDeAtaque());
+            var filtradas = allAvailableSkills.FindAll(s => s != null && !s.EhSkillDeAtaque());
             if (filtradas.Count > 0) allAvailableSkills = filtradas;
             somenteSkillsDeDefesa = false;
         }
