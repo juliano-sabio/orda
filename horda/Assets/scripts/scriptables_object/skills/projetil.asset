@@ -16,6 +16,7 @@ MonoBehaviour:
   description: "Proj\xE9til autom\xE1tico que busca inimigos pr\xF3ximos"
   icon: {fileID: -4788251595239408036, guid: 87d51b3707ca6ee44b4db007c664f4af, type: 3}
   cardPrefab: {fileID: 9207106959770819712, guid: 56b047b7fd9a58a4fa1aad0d35373d6a, type: 3}
+  projectilePrefab: {fileID: 0}
   healthBonus: 0
   attackBonus: 20
   defenseBonus: 0
@@ -26,6 +27,8 @@ MonoBehaviour:
   elementalBonus: 1
   elementalEffectChance: 0.2
   elementalEffectDuration: 3
+  appliedElement: 0
+  appliedCharacteristicIndex: -1
   skillModifiers: []
   visualEffect: {fileID: 0}
   soundEffect: {fileID: 0}
@@ -151,3 +154,7 @@ MonoBehaviour:
   boomerangSeekNewTargets: 1
   boomerangSeekRadius: 5
   boomerangMaxHitsPerThrow: 5
+  escudoPrefabVisual: {fileID: 0}
+  escudoVelocidadeRotacao: 120
+  escudoRaioOrbita: 1.8
+  escudoQuantidade: 1
