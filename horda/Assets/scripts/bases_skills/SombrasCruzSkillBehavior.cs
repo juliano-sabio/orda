@@ -1,8 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SombrasCruzSkillBehavior : SkillBehavior
+public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     float baseDano      = 12f;
     float multiplicador = 0.6f;
@@ -11,6 +11,9 @@ public class SombrasCruzSkillBehavior : SkillBehavior
     float alcance       = 8f;
 
     float timer;
+    public bool  EmRecarga    => timer > 0f;
+    public float TimerRecarga => timer;
+    public float RecargaTotal => intervalo;
 
     float DanoAtual => baseDano + (playerStats != null ? playerStats.attack * multiplicador : 0f);
 
@@ -37,7 +40,11 @@ public class SombrasCruzSkillBehavior : SkillBehavior
     void Disparar()
     {
         // Pulsos expandem sempre a partir da posição atual do player
-        Vector2[] direcoes = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
+        Vector2[] direcoes = SkillEvolutionManager.Tem(SkillEvolutionType.CruzDupla)
+            ? new[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right,
+                      new Vector2(1,1).normalized, new Vector2(-1,1).normalized,
+                      new Vector2(1,-1).normalized, new Vector2(-1,-1).normalized }
+            : new[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
         foreach (var dir in direcoes)
             StartCoroutine(PulsoBeam(dir));
 
@@ -46,7 +53,8 @@ public class SombrasCruzSkillBehavior : SkillBehavior
 
     IEnumerator PulsoBeam(Vector2 dir)
     {
-        float dur = alcance / velocidade;
+        float alcanceReal = SkillEvolutionManager.Tem(SkillEvolutionType.SombrasPerfurantes) ? alcance * 2f : alcance;
+        float dur = alcanceReal / velocidade;
 
         var go = new GameObject("SombraCruzBeam");
         var lr = go.AddComponent<LineRenderer>();
@@ -63,7 +71,7 @@ public class SombrasCruzSkillBehavior : SkillBehavior
             if (go == null || playerStats == null) yield break;
 
             float prog    = t / dur;
-            float distAtual = Mathf.Lerp(0f, alcance, prog);
+            float distAtual = Mathf.Lerp(0f, alcanceReal, prog);
 
             // Origem SEMPRE na posição atual do player
             Vector2 origem = playerStats.transform.position;
@@ -208,6 +216,7 @@ public class SombraCruzProjetil : MonoBehaviour
             p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.22f);
             Vector2 v = dir * Random.Range(1f, 3f) + (Vector2)Random.insideUnitCircle * 1.5f;
             p.AddComponent<AutoDestroyFadeMove>().Iniciar(v, 0.3f);
+            Destroy(p, 0.6f); // failsafe
         }
     }
 
@@ -274,3 +283,4 @@ public class AutoDestroyFadeMove : MonoBehaviour
         Destroy(gameObject);
     }
 }
+

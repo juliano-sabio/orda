@@ -53,7 +53,7 @@ public class IndicadorSlime : MonoBehaviour
         arrowTxt.fontSize  = 48;
         arrowTxt.color     = corSeta;
         arrowTxt.alignment = TextAlignmentOptions.Center;
-        arrowTxt.enableWordWrapping = false;
+        arrowTxt.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
 
         // Texto com distância
         var txtGO  = new GameObject("Texto");
@@ -66,7 +66,7 @@ public class IndicadorSlime : MonoBehaviour
         texto.fontStyle  = FontStyles.Bold;
         texto.color      = Color.white;
         texto.alignment  = TextAlignmentOptions.Center;
-        texto.enableWordWrapping = false;
+        texto.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
     }
 
     void Update()

@@ -339,6 +339,9 @@ public class SkillManager : MonoBehaviour
     {
         if (skill == null) return;
 
+        // Garante referência ao player
+        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+
         // VERIFICAÇÃO MAIS RIGOROSA PARA DUPLICAÇÃO
         bool alreadyHasExactSkill = activeSkills.Exists(s =>
             s.skillName == skill.skillName &&
@@ -533,6 +536,30 @@ public class SkillManager : MonoBehaviour
             case SpecificSkillType.CorteFantasma:
                 AddCorteFantasmaBehaviorToPlayer(skill);
                 break;
+
+            case SpecificSkillType.SegundaChance:
+                AddBehavior<SegundaChanceSkillBehavior>(skill);
+                break;
+
+            case SpecificSkillType.FugaSombras:
+                AddBehavior<FugaSombrasSkillBehavior>(skill);
+                break;
+
+            case SpecificSkillType.BarreiraEnergia:
+                AddBehavior<BarreiraEnergiaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.TeiaProtecao:
+                AddBehavior<TeiaProtecaoSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.InstintoSobrevivencia:
+                AddBehavior<InstintoSobrevivenciaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.EspelhoMagico:
+                AddBehavior<EspelhoMagicoSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.EscudoKarma:
+                AddBehavior<EscudoKarmaSkillBehavior>(skill);
+                break;
             case SpecificSkillType.LancaLuz:
                 AddBehavior<LancaLuzSkillBehavior>(skill);
                 break;
@@ -550,6 +577,16 @@ public class SkillManager : MonoBehaviour
                 break;
             case SpecificSkillType.CorrenteSombria:
                 AddBehavior<CorrenteSombriaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.Aureola:
+                AddBehavior<AureolaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.BarreiraReflexiva:
+                AddBehavior<BarreiraReflexivaSkillBehavior>(skill);
+                break;
+
+            case SpecificSkillType.CristaisGelo:
+                AddBehavior<CristaisGeloSkillBehavior>(skill);
                 break;
 
             case SpecificSkillType.HealthRegen:

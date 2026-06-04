@@ -74,6 +74,11 @@ public class CampoDeGeloUltimate : MonoBehaviour
         Vector2 posicaoCampo = transform.position;
         Vector2 direcao      = EncontrarDirecaoInimigo(posicaoCampo);
 
+        // GeloEterno: +4s de duração total
+        float duracaoVisualEfetiva = duracaoVisual;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.GeloEterno))
+            duracaoVisualEfetiva += 4f;
+
         var vfx   = CriarVisual(posicaoCampo);
         float elapsed = 0f;
 
@@ -90,13 +95,25 @@ public class CampoDeGeloUltimate : MonoBehaviour
 
         // Fase pós-viagem: campo parado, mas continua congelando quem entrar
         float posElapsed = 0f;
-        float posExtra   = Mathf.Max(0f, duracaoVisual - duracao);
+        float posExtra   = Mathf.Max(0f, duracaoVisualEfetiva - duracao);
         while (posElapsed < posExtra)
         {
             posElapsed += Time.deltaTime;
             AtualizarCongelados(posicaoCampo, posicaoCampo);
             foreach (var e in congelados)
                 if (e.rb != null) e.rb.linearVelocity = Vector2.zero;
+
+            // GeloAbsoluto: inimigos congelados recebem dano extra (representa 50% de vulnerabilidade)
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.GeloAbsoluto))
+            {
+                foreach (var e in congelados)
+                {
+                    if (e.go == null) continue;
+                    var ic = e.go.GetComponent<InimigoController>();
+                    if (ic != null) ic.ReceberDano(12f * Time.deltaTime, false, false);
+                }
+            }
+
             yield return null;
         }
 

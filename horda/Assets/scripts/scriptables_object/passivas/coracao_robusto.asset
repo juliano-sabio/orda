@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: coracao_robusto
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: "Cora\xE7\xE3o Robusto"
-  description: "Vida m\xE1xima aumentada em 30 pontos. Sua resist\xEAncia supera a dos guerreiros comuns."
-  passiveIcon: {fileID: 21300000, guid: e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6, type: 3}
+  description: "Vida m\xE1xima aumentada em 30 pontos. Sua resist\xEAncia supera
+    a dos guerreiros comuns."
+  passiveIcon: {fileID: -6304973041331225894, guid: 9152b7d707340af44a8dd1bc5630c186, type: 3}
   xpBonusPercent: 0
   attackBonus: 0
   defenseBonus: 0
@@ -22,5 +23,6 @@ MonoBehaviour:
   healthBonus: 30
   regenBonus: 0
   cooldownReduction: 0
+  behaviorScriptName: 
   isUnlocked: 1
   requiredLevel: 1

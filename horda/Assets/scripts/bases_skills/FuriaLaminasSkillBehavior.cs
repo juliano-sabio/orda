@@ -1,8 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FuriaLaminasSkillBehavior : SkillBehavior
+public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     float baseDano      = 8f;
     float multiplicador = 0.4f;
@@ -12,6 +12,9 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
     float raioDeteccao  = 12f;
 
     float timer;
+    public bool  EmRecarga    => timer > 0f;
+    public float TimerRecarga => timer;
+    public float RecargaTotal => intervalo;
 
     float DanoAtual => baseDano + (playerStats != null ? playerStats.attack * multiplicador : 0f);
 
@@ -39,7 +42,8 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
 
     void DispararLaminas()
     {
-        var alvos = EncontrarAlvos(qtdLaminas);
+        int qtdReal = SkillEvolutionManager.Tem(SkillEvolutionType.LaminasDuplas) ? qtdLaminas * 2 : qtdLaminas;
+        var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
         for (int i = 0; i < alvos.Count; i++)
@@ -54,7 +58,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
         }
 
         // Se há menos alvos que lâminas, completa com direções aleatórias
-        for (int i = alvos.Count; i < qtdLaminas; i++)
+        for (int i = alvos.Count; i < qtdReal; i++)
         {
             Vector2 dir = AnguloAleatorio(i, qtdLaminas);
             var go = new GameObject("Lamina");
@@ -157,19 +161,15 @@ public class LaminaProjetil : MonoBehaviour
               ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
         ic.ReceberDano(dano, false);
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas))
+            EvolutionFX.SpawnExplosao(transform.position, 1.5f, dano * 0.5f, new Color(0.85f, 0.92f, 1f), this);
         atingiu = true;
         StartCoroutine(EfeitoImpacto());
     }
 
-    IEnumerator Vida()
-    {
-        yield return new WaitForSeconds(3f);
-        if (gameObject != null) Destroy(gameObject);
-    }
-
     IEnumerator EfeitoImpacto()
     {
-        // Faíscas
+        // Faíscas — usam AutoDestroyFadeMove para não depender deste componente
         for (int i = 0; i < 5; i++)
         {
             var p = new GameObject("FaiscaLamina");
@@ -180,7 +180,8 @@ public class LaminaProjetil : MonoBehaviour
             psr.sortingOrder = 13;
             p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.2f);
             Vector2 v = Random.insideUnitCircle.normalized * Random.Range(2f, 5f);
-            StartCoroutine(FadeParticula(psr, v));
+            p.AddComponent<AutoDestroyFadeMove>().Iniciar(v, 0.3f);
+            Destroy(p, 0.6f); // failsafe
         }
 
         if (sr != null)
@@ -212,22 +213,6 @@ public class LaminaProjetil : MonoBehaviour
         p.AddComponent<AutoDestroyFade>().Iniciar(0.12f);
     }
 
-    IEnumerator FadeParticula(SpriteRenderer psr, Vector2 v)
-    {
-        Color c = psr.color;
-        float vida = Random.Range(0.2f, 0.4f);
-        for (float t = 0f; t < vida; t += Time.deltaTime)
-        {
-            v *= Mathf.Pow(0.85f, Time.deltaTime * 60f);
-            if (psr != null)
-            {
-                psr.transform.position += (Vector3)(v * Time.deltaTime);
-                psr.color = new Color(c.r, c.g, c.b, Mathf.Lerp(1f, 0f, t / vida));
-            }
-            yield return null;
-        }
-        if (psr != null) Destroy(psr.gameObject);
-    }
 
     // ── Sprites procedurais ───────────────────────────────────────────────────
 
@@ -288,3 +273,4 @@ public class AutoDestroyFade : MonoBehaviour
         Destroy(gameObject);
     }
 }
+

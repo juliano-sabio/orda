@@ -167,7 +167,7 @@ public class BossGuarda : MonoBehaviour
                 faseText.color = new Color(0.2f, 1f, 0.4f);
             }
 
-            StartCoroutine(MostrarTextoTela("MODO FÚRIA — REGENERANDO!", new Color(0.2f, 1f, 0.4f), 2f));
+            StartCoroutine(MostrarTextoTela("MODO FURIA — REGENERANDO!", new Color(0.2f, 1f, 0.4f), 2f));
             StartCoroutine(LoopCura());
         }
     }
@@ -357,7 +357,7 @@ public class BossGuarda : MonoBehaviour
         tr.anchorMax = new Vector2(0.95f, 0.65f);
         tr.offsetMin = tr.offsetMax = Vector2.zero;
         TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text      = $"⚠  BOSS APARECEU  ⚠\n<size=60%>{nomeBoss.ToUpper()}</size>";
+        txt.text      = $"!  BOSS APARECEU  !\n<size=60%>{nomeBoss.ToUpper()}</size>";
         txt.fontSize  = 52;
         txt.fontStyle = FontStyles.Bold;
         txt.alignment = TextAlignmentOptions.Center;

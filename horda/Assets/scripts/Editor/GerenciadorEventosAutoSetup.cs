@@ -15,7 +15,7 @@ public static class GerenciadorEventosAutoSetup
 
     static void AdicionarEventos()
     {
-        var managers = Object.FindObjectsOfType<GerenciadorEventos>();
+        var managers = Object.FindObjectsByType<GerenciadorEventos>(FindObjectsSortMode.None);
         foreach (var ge in managers)
         {
             if (ge == null || ge.eventos == null) continue;

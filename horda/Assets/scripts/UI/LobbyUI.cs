@@ -70,7 +70,7 @@ public class LobbyUI : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────
     void Start()
     {
-        if (FindObjectOfType<EventSystem>() == null)
+        if (FindAnyObjectByType<EventSystem>() == null)
         {
             var es = new GameObject("EventSystem");
             es.AddComponent<EventSystem>();
@@ -381,7 +381,7 @@ public class LobbyUI : MonoBehaviour
         var aviso = TextoPN(pai, "Aviso", new Vector2(0.05f, 0.01f), new Vector2(0.95f, 0.11f),
             "⚠  Networking não implementado — aparência apenas",
             10f, FontStyles.Italic, new Color(0.70f, 0.60f, 0.30f));
-        aviso.enableWordWrapping = true;
+        aviso.textWrappingMode = TMPro.TextWrappingModes.Normal;
         aviso.alignment = TextAlignmentOptions.Center;
     }
 
@@ -404,7 +404,7 @@ public class LobbyUI : MonoBehaviour
                 new Vector2(0.05f, 0.64f), new Vector2(0.95f, 0.90f),
                 "Atribua o campo\n'characters' no Inspector.",
                 11f, FontStyles.Italic, new Color(0.6f, 0.5f, 0.8f));
-            t.enableWordWrapping = true;
+            t.textWrappingMode = TMPro.TextWrappingModes.Normal;
             return;
         }
 
@@ -483,7 +483,7 @@ public class LobbyUI : MonoBehaviour
         txtInfoLobby = TextoPN(subPaineis[0], "Txt",
             new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
             "—", 10f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.70f));
-        txtInfoLobby.enableWordWrapping = true;
+        txtInfoLobby.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtInfoLobby.alignment = TextAlignmentOptions.TopLeft;
 
         // ULTIMATE
@@ -494,7 +494,7 @@ public class LobbyUI : MonoBehaviour
         txtUltimateLobby = TextoPN(subPaineis[1], "Txt",
             new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
             "—", 10f, FontStyles.Normal, new Color(0.94f, 0.88f, 0.75f));
-        txtUltimateLobby.enableWordWrapping = true;
+        txtUltimateLobby.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtUltimateLobby.alignment = TextAlignmentOptions.TopLeft;
 
         // PASSIVAS
@@ -505,7 +505,7 @@ public class LobbyUI : MonoBehaviour
         txtPassivasLobby = TextoPN(subPaineis[2], "Txt",
             new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
             "—", 10f, FontStyles.Normal, new Color(0.72f, 0.88f, 0.68f));
-        txtPassivasLobby.enableWordWrapping = true;
+        txtPassivasLobby.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtPassivasLobby.alignment = TextAlignmentOptions.TopLeft;
 
         MostrarSubAbaLobby(0);

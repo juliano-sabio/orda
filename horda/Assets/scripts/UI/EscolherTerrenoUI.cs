@@ -46,7 +46,7 @@ public class EscolherTerrenoUI : MonoBehaviour
 
     void GarantirEventSystem()
     {
-        if (FindObjectOfType<EventSystem>() == null)
+        if (FindAnyObjectByType<EventSystem>() == null)
         {
             GameObject es = new GameObject("EventSystem");
             es.AddComponent<EventSystem>();
@@ -192,7 +192,7 @@ public class EscolherTerrenoUI : MonoBehaviour
             new Vector2(0.05f, 0.25f), new Vector2(0.95f, 0.58f),
             fase.descricao, 13f, FontStyles.Normal,
             fase.desbloqueada ? new Color(0.8f, 0.8f, 0.8f) : new Color(0.4f, 0.4f, 0.4f));
-        desc.enableWordWrapping = true;
+        desc.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
         // Rodapé do card
         if (fase.desbloqueada)

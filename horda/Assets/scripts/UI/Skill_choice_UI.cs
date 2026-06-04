@@ -36,8 +36,9 @@ public class SkillChoiceUI : MonoBehaviour
 
     // Quando true, a próxima chamada mostra apenas skills de ataque (resetado automaticamente)
     [HideInInspector] public bool somenteSkillsDeAtaque = false;
+    [HideInInspector] public bool somenteSkillsDeDefesa = false;
 
-    private List<SkillData> currentChoices;
+    public List<SkillData> currentChoices;
     private System.Action<SkillData> onSkillChosen;
     private List<GameObject> currentButtons = new List<GameObject>();
     private float previousTimeScale;
@@ -130,11 +131,21 @@ public class SkillChoiceUI : MonoBehaviour
         // 🎯 ATUALIZAR SKILLS DO SKILLMANAGER SEMPRE ANTES DE MOSTRAR
         LoadSkillsFromSkillManager();
 
-        // Filtra apenas skills de ataque na primeira escolha
+        // Remove entradas nulas antes de filtrar
+        allAvailableSkills.RemoveAll(s => s == null);
+
+        // Filtra por tipo de slot
         if (somenteSkillsDeAtaque)
         {
-            allAvailableSkills = allAvailableSkills.FindAll(s => s.EhSkillDeAtaque());
+            var filtradas = allAvailableSkills.FindAll(s => s != null && s.EhSkillDeAtaque());
+            if (filtradas.Count > 0) allAvailableSkills = filtradas;
             somenteSkillsDeAtaque = false;
+        }
+        else if (somenteSkillsDeDefesa)
+        {
+            var filtradas = allAvailableSkills.FindAll(s => s != null && !s.EhSkillDeAtaque());
+            if (filtradas.Count > 0) allAvailableSkills = filtradas;
+            somenteSkillsDeDefesa = false;
         }
 
         if (allAvailableSkills == null || allAvailableSkills.Count == 0)
@@ -201,12 +212,9 @@ public class SkillChoiceUI : MonoBehaviour
             return;
         }
 
-        // 🎯 GARANTIR que o GameObject está ATIVO
+        // Garante que o GameObject está ativo
         if (!gameObject.activeInHierarchy)
-        {
-            Debug.LogWarning("⚠️ SkillChoiceUI inativo! Ativando...");
             gameObject.SetActive(true);
-        }
 
         // 🎯 GARANTIR que o Canvas está ATIVO
         if (choicePanel != null && !choicePanel.activeInHierarchy)
@@ -261,24 +269,24 @@ public class SkillChoiceUI : MonoBehaviour
         if (cardPrefabToUse == null)
         {
             cardPrefabToUse = skillChoicePrefab;
-            Debug.LogWarning($"⚠️ Skill {skill.skillName} não tem cardPrefab! Usando fallback genérico");
+            Debug.LogWarning($"⚠️ Skill {TextUtils.SemAcento(skill.skillName)} não tem cardPrefab! Usando fallback genérico");
         }
 
         if (cardPrefabToUse == null)
         {
             cardPrefabToUse = Resources.Load<GameObject>("Cards/SkillCard_Auto");
-            Debug.LogWarning($"⚠️ Usando card automático do Resources para: {skill.skillName}");
+            Debug.LogWarning($"⚠️ Usando card automático do Resources para: {TextUtils.SemAcento(skill.skillName)}");
         }
 
         if (cardPrefabToUse == null)
         {
-            Debug.LogError($"🚨 Criando card de emergência para: {skill.skillName}");
+            Debug.LogError($"🚨 Criando card de emergência para: {TextUtils.SemAcento(skill.skillName)}");
             CreateEmergencySkillButton(skill, index);
             return;
         }
 
         GameObject cardObj = Instantiate(cardPrefabToUse, skillsContainer);
-        cardObj.name = $"{skill.skillName}_Instance";
+        cardObj.name = $"{TextUtils.SemAcento(skill.skillName)}_Instance";
         cardObj.SetActive(true);
         currentButtons.Add(cardObj);
 
@@ -292,14 +300,14 @@ public class SkillChoiceUI : MonoBehaviour
 #if UNITY_EDITOR
         if (!Application.isPlaying)
         {
-            Debug.LogWarning($"🚨 BLOQUEADO: Tentativa de modificar fora do runtime - {skill.skillName}");
+            Debug.LogWarning($"🚨 BLOQUEADO: Tentativa de modificar fora do runtime - {TextUtils.SemAcento(skill.skillName)}");
             return;
         }
 #endif
 
         if (!Application.isPlaying)
         {
-            Debug.LogError($"❌ TENTATIVA PERIGOSA: Modificar em Editor - {skill.skillName}");
+            Debug.LogError($"❌ TENTATIVA PERIGOSA: Modificar em Editor - {TextUtils.SemAcento(skill.skillName)}");
             return;
         }
 
@@ -308,7 +316,9 @@ public class SkillChoiceUI : MonoBehaviour
         Button button = cardObj.GetComponent<Button>();
         if (button != null)
         {
-            button.onClick.RemoveAllListeners();
+            // Substitui o evento inteiro — apaga listeners persistentes E runtime
+            // (RemoveAllListeners só remove runtime; persistent sobrevivem)
+            button.onClick = new Button.ButtonClickedEvent();
             button.onClick.AddListener(() => OnSkillSelected(skill));
             button.interactable = true;
         }
@@ -323,11 +333,11 @@ public class SkillChoiceUI : MonoBehaviour
             if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
             {
                 string elementIcon = GetElementIcon(skill.element);
-                text.text = $"<b>{skill.skillName}</b>\n{elementIcon} {skill.element}";
+                text.text = $"<b>{TextUtils.SemAcento(skill.skillName)}</b>\n{elementIcon} {skill.element}";
             }
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {
-                text.text = skill.description;
+                text.text = TextUtils.SemAcento(skill.description);
             }
             else if (text.name.Contains("Stats") || text.name.Contains("Status") || text.name.Contains("Bonus"))
             {
@@ -350,8 +360,8 @@ public class SkillChoiceUI : MonoBehaviour
     {
         switch (element)
         {
-            case PlayerStats.Element.Fire: return "🔥";
-            case PlayerStats.Element.Ice: return "❄️";
+            case PlayerStats.Element.Fire: return "[Fogo]";
+            case PlayerStats.Element.Ice: return "[Gelo]";
             case PlayerStats.Element.Lightning: return "";
             case PlayerStats.Element.Poison: return "";
             case PlayerStats.Element.Earth: return "";
@@ -384,7 +394,7 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void CreateEmergencySkillButton(SkillData skill, int index)
     {
-        GameObject cardObj = new GameObject($"EmergencyCard_{skill.skillName}",
+        GameObject cardObj = new GameObject($"EmergencyCard_{TextUtils.SemAcento(skill.skillName)}",
             typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
 
         cardObj.transform.SetParent(skillsContainer);
@@ -404,7 +414,7 @@ public class SkillChoiceUI : MonoBehaviour
             button.onClick.AddListener(() => OnSkillSelected(skill));
         }
 
-        Debug.LogWarning($"🚨 Card de emergência criado para: {skill.skillName}");
+        Debug.LogWarning($"🚨 Card de emergência criado para: {TextUtils.SemAcento(skill.skillName)}");
     }
 
     private void SetupSkillCardManually(GameObject cardObj, SkillData skill)
@@ -414,11 +424,11 @@ public class SkillChoiceUI : MonoBehaviour
         {
             if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
             {
-                text.text = $"<b>{skill.skillName}</b>";
+                text.text = $"<b>{TextUtils.SemAcento(skill.skillName)}</b>";
             }
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {
-                text.text = skill.description;
+                text.text = TextUtils.SemAcento(skill.description);
             }
             else if (text.name.Contains("Stats") || text.name.Contains("Status") || text.name.Contains("Bonus"))
             {
@@ -464,7 +474,6 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void OnSkillSelected(SkillData selectedSkill)
     {
-
         if (selectedSkill != null)
         {
             StartCoroutine(SelectionConfirmationEffect(selectedSkill));
@@ -479,10 +488,13 @@ public class SkillChoiceUI : MonoBehaviour
     {
         foreach (var button in currentButtons)
         {
-            if (button != null)
+            if (button == null) continue;
+            // Desativa overlay e todos os botões do card
+            foreach (var btn in button.GetComponentsInChildren<Button>(true))
             {
-                Button btn = button.GetComponent<Button>();
-                if (btn != null) btn.interactable = false;
+                btn.interactable = false;
+                var g = btn.GetComponent<UnityEngine.UI.Graphic>();
+                if (g != null) g.raycastTarget = false;
             }
         }
 
@@ -535,6 +547,12 @@ public class SkillChoiceUI : MonoBehaviour
         float restante = tempoEscolha;
         while (restante > 0f)
         {
+            // Pausa o timer enquanto a UI de evolução estiver aberta
+            if (SkillEvolutionUI.Instance != null && SkillEvolutionUI.Instance.Visivel)
+            {
+                yield return null;
+                continue;
+            }
             restante -= Time.unscaledDeltaTime;
             int seg   = Mathf.CeilToInt(Mathf.Max(0f, restante));
             txt.text  = seg.ToString();

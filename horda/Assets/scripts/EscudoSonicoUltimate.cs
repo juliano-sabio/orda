@@ -74,7 +74,12 @@ public class EscudoSonicoUltimate : MonoBehaviour
                 numeroPulso++;
                 proxPulso = intervaloPulso;
 
-                float danoEscalado = danoBasePorPulso * (1f + (numeroPulso - 1) * 0.25f);
+                // SonicoAmplificado: dano base dobrado
+                float danoBase = danoBasePorPulso;
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.SonicoAmplificado))
+                    danoBase *= 2f;
+
+                float danoEscalado = danoBase * (1f + (numeroPulso - 1) * 0.25f);
                 DispararPulso(numeroPulso, danoEscalado);
             }
 
@@ -108,8 +113,18 @@ public class EscudoSonicoUltimate : MonoBehaviour
                 {
                     Vector2 dir = ((Vector2)ic.transform.position - centro).normalized;
                     if (dir == Vector2.zero) dir = Random.insideUnitCircle.normalized;
-                    rb.AddForce(dir * forcaEmpurrao, ForceMode2D.Impulse);
+
+                    // SonicoPercussao: +50% knockback
+                    float forcaEfetiva = forcaEmpurrao;
+                    if (SkillEvolutionManager.Tem(SkillEvolutionType.SonicoPercussao))
+                        forcaEfetiva *= 1.5f;
+
+                    rb.AddForce(dir * forcaEfetiva, ForceMode2D.Impulse);
                 }
+
+                // SonicoPercussao: atordoa por 0.5s (desativa movimento brevemente)
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.SonicoPercussao))
+                    StartCoroutine(AtordoarInimigo(ic, 0.5f));
             }
         }
 
@@ -122,7 +137,7 @@ public class EscudoSonicoUltimate : MonoBehaviour
 
             // É um projétil se tem Rigidbody2D mas não é o player nem um inimigo
             var rb = col.GetComponent<Rigidbody2D>();
-            if (rb != null && col.GetComponent<PlayerStats>() == null)
+            if (rb != null && rb.bodyType != RigidbodyType2D.Static && col.GetComponent<PlayerStats>() == null)
             {
                 Vector2 dir = ((Vector2)col.transform.position - centro).normalized;
                 if (dir == Vector2.zero) dir = Random.insideUnitCircle.normalized;
@@ -303,6 +318,18 @@ public class EscudoSonicoUltimate : MonoBehaviour
 
         foreach (var (go, _, _) in raios)
             if (go != null) Destroy(go);
+    }
+
+    IEnumerator AtordoarInimigo(InimigoController ic, float duracao)
+    {
+        if (ic == null) yield break;
+        var movi = ic.GetComponent<movi_inimigo>();
+        var moviD = ic.GetComponent<movi_inimigo_manter_distancia>();
+        if (movi   != null) movi.enabled   = false;
+        if (moviD  != null) moviD.enabled  = false;
+        yield return new WaitForSeconds(duracao);
+        if (movi   != null) movi.enabled   = true;
+        if (moviD  != null) moviD.enabled  = true;
     }
 
     IEnumerator FlashPlayer()

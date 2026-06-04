@@ -197,7 +197,7 @@ public class EventoEclipseTorre : MonoBehaviour
         tRT.anchorMin = new Vector2(0f,0.52f); tRT.anchorMax = new Vector2(1f,1f);
         tRT.offsetMin = new Vector2(8f,0f);    tRT.offsetMax = new Vector2(-8f,0f);
         var tTMP = tituloGO.AddComponent<TextMeshProUGUI>();
-        tTMP.text      = "🏰  PROTEJA A TORRE";
+        tTMP.text      = "[]  PROTEJA A TORRE";
         tTMP.fontSize  = 11f;
         tTMP.fontStyle = FontStyles.Bold;
         tTMP.alignment = TextAlignmentOptions.Center;

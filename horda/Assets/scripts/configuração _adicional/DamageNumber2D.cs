@@ -1,58 +1,93 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 
 public class DamageNumber2D : MonoBehaviour
 {
-    private TMP_Text textMeshPro;
-    private float floatSpeed = 2f;
-    private float duration = 1f;
-    private Vector3 startPosition;
-    private float startTime;
-    private Color originalColor;
+    TMP_Text tmp;
+    float duration;
+    float elapsed;
+    Vector3 startPos;
+    Vector3 velocity;
+    Color corBase;
+    bool isCrit;
+    bool isFatal;
 
-    public void Initialize(float damage, Color color, float duration = 1f, float floatSpeed = 2f)
+    public void Initialize(float damage, Color color, float dur = 1f, float floatSpeed = 2f)
     {
-        textMeshPro = GetComponent<TMP_Text>();
-        if (textMeshPro == null)
+        tmp = GetComponent<TMP_Text>();
+        if (tmp == null) { Destroy(gameObject); return; }
+
+        corBase  = color;
+        duration = dur;
+        elapsed  = 0f;
+        startPos = transform.position;
+        isCrit   = color == Color.yellow;
+        isFatal  = color == Color.red;
+
+        // Velocidade inicial: para cima + deriva horizontal aleatória
+        float dx = Random.Range(-0.5f, 0.5f);
+        velocity = new Vector3(dx, floatSpeed * 1.2f, 0f);
+
+        // Texto e estilo
+        int val = Mathf.RoundToInt(damage);
+        if (isFatal)
         {
-            Debug.LogError("❌ DamageNumber2D precisa de um componente TMP_Text!");
-            return;
+            tmp.text      = val.ToString();
+            tmp.fontSize  = 7;
+            tmp.fontStyle = FontStyles.Bold;
+        }
+        else if (isCrit)
+        {
+            tmp.text      = val + "!";
+            tmp.fontSize  = 5.5f;
+            tmp.fontStyle = FontStyles.Bold;
+        }
+        else
+        {
+            tmp.text      = val.ToString();
+            tmp.fontSize  = 4f;
+            tmp.fontStyle = FontStyles.Normal;
         }
 
-        textMeshPro.text = Mathf.RoundToInt(damage).ToString();
-        originalColor = color;
-        textMeshPro.color = color;
-        textMeshPro.alignment = TextAlignmentOptions.Center;
+        tmp.color     = color;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.outlineWidth = 0.25f;
+        tmp.outlineColor = new Color32(0, 0, 0, 200);
 
-        this.duration = duration;
-        this.floatSpeed = floatSpeed;
-        this.startPosition = transform.position;
-        this.startTime = Time.time;
+        // Escala inicial de "pop"
+        transform.localScale = Vector3.one * (isFatal ? 1.6f : isCrit ? 1.3f : 1f);
 
-        // Destrói automaticamente
-        Destroy(gameObject, duration + 0.1f);
+        Destroy(gameObject, dur + 0.15f);
     }
 
     void Update()
     {
-        if (textMeshPro == null) return;
+        if (tmp == null) return;
+        elapsed += Time.deltaTime;
+        float t = Mathf.Clamp01(elapsed / duration);
 
-        float t = (Time.time - startTime) / duration;
+        // Movimento com gravidade suave
+        velocity.y -= Time.deltaTime * 1.5f;
+        transform.position += velocity * Time.deltaTime;
 
-        // Movimento para cima
-        transform.position = startPosition + Vector3.up * floatSpeed * t;
+        // Escala: pop-in rápido → normaliza → encolhe no final
+        float scaleT = Mathf.Clamp01(elapsed / 0.12f);
+        float scaleOut = Mathf.Clamp01(1f - (t - 0.7f) / 0.3f);
+        float popScale = Mathf.Lerp(0f, 1.1f, scaleT) * scaleOut;
+        if (isFatal) popScale *= 1.3f;
+        else if (isCrit) popScale *= 1.15f;
+        transform.localScale = Vector3.one * popScale;
 
-        // Fade out
-        Color color = originalColor;
-        color.a = 1f - t;
-        textMeshPro.color = color;
+        // Fade: fica opaco até 60% depois some
+        float alpha = t < 0.6f ? 1f : Mathf.Lerp(1f, 0f, (t - 0.6f) / 0.4f);
+        Color c = corBase; c.a = alpha;
+        tmp.color = c;
 
-        // Efeito de escala
-        float scale = 1f + Mathf.Sin(t * Mathf.PI) * 0.2f;
-        transform.localScale = Vector3.one * scale;
-
-        // Rotação leve para efeito dinâmico
-        float rotation = Mathf.Sin(t * Mathf.PI * 2) * 5f;
-        transform.rotation = Quaternion.Euler(0, 0, rotation);
+        // Rotação leve só no crit
+        if (isCrit)
+        {
+            float rot = Mathf.Sin(elapsed * 18f) * Mathf.Lerp(8f, 0f, t);
+            transform.rotation = Quaternion.Euler(0, 0, rot);
+        }
     }
 }

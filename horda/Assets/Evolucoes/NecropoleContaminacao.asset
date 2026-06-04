@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
+  m_Name: NecropoleContaminacao
+  m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
+  nomeEvolucao: "Contamina\xE7\xE3o Sombria"
+  descricao: Inimigos mortos na zona envenenam os vizinhos em 3u por 2s.
+  icone: {fileID: 8854504604341680941, guid: e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9, type: 3}
+  corDestaque: {r: 0.35, g: 0, b: 0.6, a: 1}
+  skillAlvo: 48
+  tipoEvolucao: 72
+  raridade: 3

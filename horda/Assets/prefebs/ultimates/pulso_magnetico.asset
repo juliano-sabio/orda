@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Pulso Magn\xE9tico"
   description: "Atrai todos os inimigos no raio por 4.5s, depois os repele com for\xE7a."
-  ultimateIcon: {fileID: 21300000, guid: 558e9b9ecb3d39c49ab9d6f5373de702, type: 3}
+  ultimateIcon: {fileID: 4991954654029058326, guid: 558e9b9ecb3d39c49ab9d6f5373de702, type: 3}
   cooldown: 22
   baseDamage: 40
   areaOfEffect: 8

@@ -35,7 +35,7 @@ public class StatusCardUI : MonoBehaviour
         if (cardData == null) return;
 
         cardNameText.text = cardData.cardName;
-        descriptionText.text = cardData.description;
+        descriptionText.text = TextUtils.SemAcento(cardData.description);
         costText.text = $"Custo: {cardData.cost}";
         rarityText.text = cardData.rarity.ToString();
         levelRequirementText.text = $"Nv. {cardData.requiredLevel}";

@@ -99,13 +99,13 @@ public class CharacterSelectionCanvasCreator : EditorWindow
             new Vector2(0f, 0.35f), new Vector2(1f, 0.85f),
             new Vector2(0f, 0f), new Vector2(-20f, 0f),
             13f, FontStyles.Normal, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center);
-        txtDesc.enableWordWrapping = true;
+        txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
         TextMeshProUGUI txtBonus = CriarTMP(painelInfo, "BonusElemento",
             new Vector2(0f, 0f), new Vector2(1f, 0.3f),
             new Vector2(0f, 0f), new Vector2(-16f, 0f),
             12f, FontStyles.Normal, new Color(0.6f, 1f, 0.6f), TextAlignmentOptions.Center);
-        txtBonus.enableWordWrapping = true;
+        txtBonus.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
         manager.characterNameText = txtNome;
         manager.characterElementText = txtElemento;
@@ -369,7 +369,7 @@ public class CharacterSelectionCanvasCreator : EditorWindow
         tmp.fontStyle = style;
         tmp.color = cor;
         tmp.alignment = align;
-        tmp.enableWordWrapping = false;
+        tmp.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         return tmp;
     }
 }

@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0, type: 3}
   m_Name: imposicao
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
-  passiveName: "Imposição"
-  description: "A cada 18s emite uma aura por 3s que reduz o dano de todos os inimigos próximos em 30%."
-  passiveIcon: {fileID: 21300000, guid: 4d5e6f7a8b9c4d5e6f7a8b9c4d5e6f7a, type: 3}
+  passiveName: "Imposi\xE7\xE3o"
+  description: "A cada 18s emite uma aura por 3s que reduz o dano de todos os inimigos
+    pr\xF3ximos em 30%."
+  passiveIcon: {fileID: 8704918124540161019, guid: 4d5e6f7a8b9c4d5e6f7a8b9c4d5e6f7a, type: 3}
   xpBonusPercent: 0
   attackBonus: 0
   defenseBonus: 0

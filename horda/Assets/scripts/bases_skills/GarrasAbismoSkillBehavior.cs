@@ -1,8 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GarrasAbismoSkillBehavior : SkillBehavior
+public class GarrasAbismoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
 {
     float baseDano      = 12f;
     float multiplicador = 0.7f;
@@ -12,19 +12,27 @@ public class GarrasAbismoSkillBehavior : SkillBehavior
     float raioDeteccao  = 10f;
 
     float timer;
+    public bool  EmRecarga    => timer > 0f;
+    public float TimerRecarga => timer;
+    public float RecargaTotal => intervalo;
 
     float DanoAtual => baseDano + (playerStats != null ? playerStats.attack * multiplicador : 0f);
 
     static readonly Color COR_GARRAS = new Color(0.45f, 0.1f, 0.7f, 0.95f);
     static readonly Color COR_AVISO  = new Color(0.3f, 0f, 0.5f, 0.6f);
 
-    public override void Initialize(PlayerStats stats) => base.Initialize(stats);
+    
+    public void OnEvolucaoAplicada(SkillEvolutionType tipo)
+    {
+        if (tipo == SkillEvolutionType.GarrasAlcance) raioDeteccao *= 1.6f;
+    }
+public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
     public void ConfigurarDeSkillData(SkillData data)
     {
         baseDano      = data.attackBonus > 0f          ? data.attackBonus        : 25f;
         intervalo     = data.activationInterval > 0f   ? data.activationInterval : 4f;
-        qtdAlvos      = Mathf.Min(2, data.projectileCount > 0 ? data.projectileCount : 2);
+        qtdAlvos      = data.projectileCount > 0 ? data.projectileCount : 2;
         duracaoPresa  = data.duration > 0f             ? data.duration           : 1.2f;
         timer         = intervalo;
     }
@@ -77,7 +85,15 @@ public class GarrasAbismoSkillBehavior : SkillBehavior
         pos = ic.transform.position;
 
         // Dano e prende
-        ic.ReceberDano(DanoAtual, false);
+        bool execucao = SkillEvolutionManager.Tem(SkillEvolutionType.Execucao) &&
+                        ic.vidaAtual / Mathf.Max(1f, ic.vidaMaxima) < 0.25f;
+        if (execucao) { ic.ReceberDano(ic.vidaAtual + 1f, false); }
+        else
+        {
+            ic.ReceberDano(DanoAtual, false);
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.GarrasVenenosas))
+                EvolutionFX.AplicarVeneno(ic, DanoAtual * 0.4f, 2.5f);
+        }
         StartCoroutine(PrederInimigo(ic, duracaoPresa));
         StartCoroutine(AnimarGarras(pos));
     }
@@ -88,7 +104,6 @@ public class GarrasAbismoSkillBehavior : SkillBehavior
 
         var rb = ic.GetComponent<Rigidbody2D>();
         var movi = ic.GetComponent<movi_inimigo>();
-        var lento = ic.GetComponent<EfeitoLentidao>();
 
         // Para o inimigo
         float velOriginal = 0f;
@@ -291,3 +306,6 @@ public class GarrasAbismoSkillBehavior : SkillBehavior
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
     }
 }
+
+
+

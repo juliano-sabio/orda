@@ -38,7 +38,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     [Header("🔋 UI - Status")]
     public Slider[] statusSliders;
 
-    [Header("⚔️ Sistema de Upgrades")]
+    [Header("+️ Sistema de Upgrades")]
     public Button[] upgradeButtons;
     public TextMeshProUGUI[] upgradeLevelTexts;
     public int[] upgradeLevels = new int[4];
@@ -154,7 +154,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         if (!data) return;
 
         characterNameText.text = data.characterName;
-        characterDescriptionText.text = data.description;
+        characterDescriptionText.text = TextUtils.SemAcento(data.description);
         characterElementText.text = $"{CharacterData.GetElementIcon(data.baseElement)} {data.baseElement}";
         characterElementText.color = CharacterData.GetElementColor(data.baseElement);
         elementBonusText.text = data.GetElementBonusDescription();
@@ -246,7 +246,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     GameObject CriarBotaoPassiva(PassiveData pd)
     {
-        var go = new GameObject($"BotaoPassiva_{pd.passiveName}");
+        var go = new GameObject($"BotaoPassiva_{TextUtils.SemAcento(pd.passiveName)}");
         go.transform.SetParent(painelPassivas.transform, false);
         go.AddComponent<RectTransform>();
         var le = go.AddComponent<UnityEngine.UI.LayoutElement>();
@@ -300,12 +300,12 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rNome.anchorMin = new Vector2(nomeX, 0.68f); rNome.anchorMax = new Vector2(0.97f, 0.97f);
         rNome.offsetMin = rNome.offsetMax = Vector2.zero;
         var txtNome = goNome.AddComponent<TMPro.TextMeshProUGUI>();
-        txtNome.text      = pd.passiveName;
+        txtNome.text      = TextUtils.SemAcento(pd.passiveName);
         txtNome.fontSize  = 9.5f;
         txtNome.fontStyle = TMPro.FontStyles.Bold;
         txtNome.color     = new Color(0.92f, 0.82f, 0.62f);
         txtNome.alignment = TMPro.TextAlignmentOptions.MidlineLeft;
-        txtNome.enableWordWrapping = true;
+        txtNome.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
         var goBonus = new GameObject("Bonus");
         goBonus.transform.SetParent(go.transform, false);
@@ -317,7 +317,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         txtBonus.fontSize         = 7.5f;
         txtBonus.color            = new Color(0.90f, 0.82f, 0.65f);
         txtBonus.alignment        = TMPro.TextAlignmentOptions.MidlineLeft;
-        txtBonus.enableWordWrapping = false;
+        txtBonus.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         txtBonus.richText         = true;
 
         var goDesc = new GameObject("Desc");
@@ -330,7 +330,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         txtDesc.fontSize         = 7.5f;
         txtDesc.color            = new Color(0.60f, 0.55f, 0.45f);
         txtDesc.alignment        = TMPro.TextAlignmentOptions.TopLeft;
-        txtDesc.enableWordWrapping = true;
+        txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDesc.overflowMode     = TMPro.TextOverflowModes.Truncate;
 
         var goSel = new GameObject("SelBar");
@@ -393,7 +393,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     private void UpdateCurrencyUI()
     {
-        if (coinsText) coinsText.text = $"💰 {PlayerPrefs.GetInt("PlayerCoins", 1000)}";
+        if (coinsText) coinsText.text = $"$ {PlayerPrefs.GetInt("PlayerCoins", 1000)}";
     }
 
     // ─── Painel de Seleção de Ultimate ───────────────────────────────────────
@@ -407,7 +407,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             return;
         }
 
-        Canvas canvas = FindObjectOfType<Canvas>();
+        Canvas canvas = FindAnyObjectByType<Canvas>();
         if (canvas == null) return;
 
         painelUltimates = new GameObject("PainelUltimates");
@@ -483,7 +483,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     // Versão empilhada com scroll para uso dentro da aba ULTIMATE
     GameObject CriarBotaoUltimateEmbutido(UltimateData ud, int index, int total)
     {
-        GameObject go = new GameObject($"BotaoUlt_{ud.ultimateName}");
+        GameObject go = new GameObject($"BotaoUlt_{TextUtils.SemAcento(ud.ultimateName)}");
         go.transform.SetParent(painelUltimates.transform, false);
         go.AddComponent<RectTransform>();
         var le = go.AddComponent<LayoutElement>();
@@ -538,12 +538,12 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rNome.anchorMin = new Vector2(nomeX, 0.70f); rNome.anchorMax = new Vector2(0.97f, 0.97f);
         rNome.offsetMin = rNome.offsetMax = Vector2.zero;
         var txtNome = goNome.AddComponent<TextMeshProUGUI>();
-        txtNome.text      = ud.ultimateName;
+        txtNome.text      = TextUtils.SemAcento(ud.ultimateName);
         txtNome.fontSize  = 9.5f;
         txtNome.fontStyle = FontStyles.Bold;
         txtNome.color     = corAcento;
         txtNome.alignment = TextAlignmentOptions.MidlineLeft;
-        txtNome.enableWordWrapping = true;
+        txtNome.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
         float cdX = temIcone ? 0.26f : 0.07f;
         var goCD = new GameObject("CD");
@@ -563,11 +563,11 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rDesc.anchorMin = new Vector2(0.07f, 0.02f); rDesc.anchorMax = new Vector2(0.97f, 0.46f);
         rDesc.offsetMin = rDesc.offsetMax = Vector2.zero;
         var txtDesc = goDesc.AddComponent<TextMeshProUGUI>();
-        txtDesc.text             = ud.description;
+        txtDesc.text             = TextUtils.SemAcento(ud.description);
         txtDesc.fontSize         = 7.5f;
         txtDesc.color            = new Color(0.60f, 0.55f, 0.45f);
         txtDesc.alignment        = TextAlignmentOptions.TopLeft;
-        txtDesc.enableWordWrapping = true;
+        txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDesc.overflowMode     = TextOverflowModes.Truncate;
 
         var goSel = new GameObject("SelBar");
@@ -584,7 +584,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     GameObject CriarBotaoUltimate(UltimateData ud, float posX)
     {
-        GameObject go = new GameObject($"BotaoUltimate_{ud.ultimateName}");
+        GameObject go = new GameObject($"BotaoUltimate_{TextUtils.SemAcento(ud.ultimateName)}");
         go.transform.SetParent(painelUltimates.transform, false);
 
         RectTransform r = go.AddComponent<RectTransform>();
@@ -612,7 +612,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rNome.anchoredPosition = new Vector2(0f, -6f);
         rNome.sizeDelta = new Vector2(-8f, 22f);
         TextMeshProUGUI txtNome = goNome.AddComponent<TextMeshProUGUI>();
-        txtNome.text = ud.ultimateName;
+        txtNome.text = TextUtils.SemAcento(ud.ultimateName);
         txtNome.fontSize = 13f;
         txtNome.fontStyle = FontStyles.Bold;
         txtNome.color = ud.GetElementColor();
@@ -639,11 +639,11 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rDesc.anchorMin = new Vector2(0f, 0f); rDesc.anchorMax = new Vector2(1f, 1f);
         rDesc.offsetMin = new Vector2(6f, 6f); rDesc.offsetMax = new Vector2(-6f, -52f);
         TextMeshProUGUI txtDesc = goDesc.AddComponent<TextMeshProUGUI>();
-        txtDesc.text = ud.description;
+        txtDesc.text = TextUtils.SemAcento(ud.description);
         txtDesc.fontSize = 9.5f;
         txtDesc.color = new Color(0.75f, 0.75f, 0.75f);
         txtDesc.alignment = TextAlignmentOptions.Center;
-        txtDesc.enableWordWrapping = true;
+        txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDesc.overflowMode = TextOverflowModes.Truncate;
 
         return go;

@@ -481,7 +481,7 @@ public class CharacterSelectionUI : MonoBehaviour
         CriarBotao(rodape, "BtnMissoes",
             new Vector2(0.38f,0.05f), new Vector2(0.62f,0.95f),
             "MISSOES", new Color(0.10f,0.50f,0.15f),
-            () => FindObjectOfType<MissoesUI>()?.TogglePainel(), 24f);
+            () => FindAnyObjectByType<MissoesUI>()?.TogglePainel(), 24f);
 
         CriarBotao(rodape, "BtnJogar",
             new Vector2(0.72f,0.04f), new Vector2(1f,0.96f),
@@ -541,13 +541,13 @@ public class CharacterSelectionUI : MonoBehaviour
         txtDesc = TMP(painelAbaInfo[0], "Desc",
             new Vector2(0.04f, 0.26f), new Vector2(0.96f, 0.96f),
             "—", 11f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.70f));
-        txtDesc.enableWordWrapping = true;
+        txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDesc.alignment = TextAlignmentOptions.Top;
 
         txtBonus = TMP(painelAbaInfo[0], "Bonus",
             new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.24f),
             "—", 10f, FontStyles.Normal, new Color(0.5f, 1f, 0.6f));
-        txtBonus.enableWordWrapping = true;
+        txtBonus.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtBonus.alignment = TextAlignmentOptions.Center;
 
         // ── Painel ULTIMATE ──────────────────────────────────────────
@@ -650,7 +650,7 @@ public class CharacterSelectionUI : MonoBehaviour
         txtPassivasInfo = TMP(painelAbaInfo[2], "PassInfo",
             new Vector2(0f, 0f), new Vector2(0f, 0f),
             "", 10.5f, FontStyles.Normal, new Color(0.75f, 0.90f, 0.75f));
-        txtPassivasInfo.enableWordWrapping = true;
+        txtPassivasInfo.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtPassivasInfo.gameObject.SetActive(false);
 
         MostrarAbaInfo(0);
@@ -810,11 +810,8 @@ public class CharacterSelectionUI : MonoBehaviour
             rb.simulated = false;
         foreach (var col in previewPersonagem.GetComponentsInChildren<Collider2D>())
             col.enabled = false;
-        foreach (var mb  in previewPersonagem.GetComponentsInChildren<MonoBehaviour>())
-        {
-            if (mb is Animator) continue;
+        foreach (var mb in previewPersonagem.GetComponentsInChildren<MonoBehaviour>())
             mb.enabled = false;
-        }
 
         // Aplica cor do personagem
         foreach (var sr in previewPersonagem.GetComponentsInChildren<SpriteRenderer>())
@@ -1006,7 +1003,7 @@ public class CharacterSelectionUI : MonoBehaviour
         var t = go.AddComponent<TextMeshProUGUI>(); // TMP cria RectTransform automaticamente
         t.text = texto; t.fontSize = size;
         t.fontStyle = style; t.color = cor;
-        t.enableWordWrapping = false;
+        t.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         Anchors(go, ancMin, ancMax);
         return t;
     }

@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0, type: 3}
   m_Name: pulso_vital
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
-  passiveName: "Pulso Vital"
-  description: "A cada 20s, drena {0} HP de cada inimigo próximo (raio 4u) e transfere o total curado para você."
-  passiveIcon: {fileID: 21300000, guid: 1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d, type: 3}
+  passiveName: Pulso Vital
+  description: "A cada 20s, drena {0} HP de cada inimigo pr\xF3ximo (raio 4u) e transfere
+    o total curado para voc\xEA."
+  passiveIcon: {fileID: 82063977124821072, guid: 1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d, type: 3}
   xpBonusPercent: 0
   attackBonus: 0
   defenseBonus: 0

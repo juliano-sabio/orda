@@ -13,7 +13,8 @@ public class SkillSelectionSlot : MonoBehaviour
     public void SetSkill(SkillData skillData)
     {
         skillIcon.sprite = skillData.icon;
-        skillName.text = skillData.skillName;
+        string nome = skillData.skillName;
+        skillName.text = TextUtils.SemAcento(nome);
         skillType.text = skillData.skillType.ToString();
 
         // Elemento

@@ -95,7 +95,19 @@ public class UIManagerCanvasCreator : EditorWindow
         iconRect.offsetMin = Vector2.zero;
         iconRect.offsetMax = Vector2.zero;
         Image iconImage = iconGO.GetComponent<Image>();
-        iconImage.color = new Color(0.3f, 0.3f, 0.3f, 0.6f);
+
+        // Tenta carregar o sprite do ícone
+        Sprite dashSprite = CarregarSpriteDash();
+        if (dashSprite != null)
+        {
+            iconImage.sprite          = dashSprite;
+            iconImage.color           = Color.white;
+            iconImage.preserveAspect  = true;
+        }
+        else
+        {
+            iconImage.color = new Color(0.3f, 0.3f, 0.3f, 0.6f);
+        }
 
         // Badge de contagem — canto superior direito do ícone
         GameObject badgeGO = new GameObject("DashCount", typeof(RectTransform), typeof(Image));
@@ -123,6 +135,23 @@ public class UIManagerCanvasCreator : EditorWindow
 
         uiManager.dashIcon = iconImage;
         uiManager.dashChargesText = countText;
+    }
+
+    static Sprite CarregarSpriteDash()
+    {
+        string[] caminhos = {
+            "Assets/prefebs/dash/iconedash.ase",
+            "Assets/Skills/DashIconBota.png",
+            "Assets/Skills/DashIcon.png",
+        };
+        foreach (var path in caminhos)
+        {
+            var s = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (s != null) return s;
+            foreach (var a in AssetDatabase.LoadAllAssetsAtPath(path))
+                if (a is Sprite sp) return sp;
+        }
+        return null;
     }
 
     // 🆕 MÉTODO PARA CRIAR TEXTO DE GANHO DE XP
@@ -223,7 +252,7 @@ public class UIManagerCanvasCreator : EditorWindow
         psLabel.fontSize  = 6.5f;
         psLabel.color     = new Color(0.5f, 1f, 0.6f);
         psLabel.alignment = TextAlignmentOptions.Center;
-        psLabel.enableWordWrapping = false;
+        psLabel.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         psLabel.overflowMode = TextOverflowModes.Truncate;
         uiManager.passivaLabel = psLabel;
 

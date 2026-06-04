@@ -325,7 +325,18 @@ public class ProjectileController2D : MonoBehaviour
     {
         InimigoController inimigo = enemy.GetComponent<InimigoController>();
         if (inimigo != null)
+        {
             inimigo.ReceberDano(damage);
+
+            // Evoluções de impacto
+            var evoMgr = SkillEvolutionManager.Instance;
+            if (evoMgr != null)
+            {
+                if (evoMgr.EvolucaoAtiva(SkillEvolutionType.SpiritBallExplosiva))
+                    EvolutionFX.SpawnExplosao(transform.position, 2f, damage * 0.5f,
+                        new Color(0.5f, 0.8f, 1f), this);
+            }
+        }
         else
             Debug.LogWarning($"[ProjectileController] InimigoController não encontrado em: {enemy.name}");
 

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
+  m_Name: DrenagemMassiva
+  m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
+  nomeEvolucao: Drenagem Massiva
+  descricao: +50% de raio da aura de drenagem.
+  icone: {fileID: 0}
+  corDestaque: {r: 0.75, g: 0.05, b: 0.35, a: 1}
+  skillAlvo: 53
+  tipoEvolucao: 82
+  raridade: 3

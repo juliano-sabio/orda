@@ -62,6 +62,11 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
         ativo            = true;
         cooldownRestante = cooldown;
 
+        // DrenagemMassiva: +50% de raio
+        float raioOriginal = raio;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.DrenagemMassiva))
+            raio *= 1.5f;
+
         var auraGO = CriarAura();
         yield return StartCoroutine(AnimarEntrada(auraGO));
 
@@ -80,6 +85,7 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
         }
 
         LimparDrenados();
+        raio = raioOriginal; // restaura raio base
         ativo = false;
         StartCoroutine(FadeOutDestruir(auraGO, 0.35f));
     }
@@ -133,6 +139,11 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
 
     void AplicarDrenagemECura()
     {
+        // DrenagemTotal: percentual de cura para 25%
+        float percentualEfetivo = percentualCura;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.DrenagemTotal))
+            percentualEfetivo = 0.25f;
+
         float totalDano = 0f;
         foreach (var e in drenados)
         {
@@ -145,7 +156,7 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
         }
 
         if (totalDano > 0f && playerStats != null)
-            playerStats.Heal(totalDano * percentualCura);
+            playerStats.Heal(totalDano * percentualEfetivo);
     }
 
     void AtualizarTintDrenados(float elapsed)

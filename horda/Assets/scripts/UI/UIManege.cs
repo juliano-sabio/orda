@@ -147,6 +147,10 @@ public class UIManager : MonoBehaviour
 
         if (passivaIcon == null)
             CriarSlotPassivaRuntime();
+
+        // Adiciona display de cooldown automaticamente
+        if (GetComponent<SkillCooldownDisplay>() == null)
+            gameObject.AddComponent<SkillCooldownDisplay>();
     }
 
     void CriarSlotPassivaRuntime()
@@ -249,6 +253,14 @@ public class UIManager : MonoBehaviour
     // --- INICIALIZAÇÃO DA UI (CHAMADA NO START) ---
     void InitializeUI()
     {
+        // Ícone do dash — carrega em runtime se não foi atribuído no editor
+        if (dashIcon != null && dashIcon.sprite == null)
+        {
+            Sprite s = Resources.Load<Sprite>("DashIconBota");
+            if (s == null) s = Resources.Load<Sprite>("DashIcon");
+            if (s != null) { dashIcon.sprite = s; dashIcon.color = Color.white; dashIcon.preserveAspect = true; }
+        }
+
         // Atualiza as barras de vida e XP logo no início
         UpdatePlayerStatus();
 
@@ -277,6 +289,33 @@ public class UIManager : MonoBehaviour
     }
 
     // 🆕 MÉTODO PARA VERIFICAR SE O JOGO ESTÁ PAUSADO
+    // Remove acentos para compatibilidade com fontes sem glifos portugueses
+    static string RemoverAcentos(string texto)
+    {
+        if (string.IsNullOrEmpty(texto)) return texto;
+        var sb = new System.Text.StringBuilder(texto.Length);
+        foreach (char c in texto)
+        {
+            switch (c)
+            {
+                case 'Á': case 'À': case 'Â': case 'Ã': sb.Append('A'); break;
+                case 'É': case 'Ê':                     sb.Append('E'); break;
+                case 'Í':                               sb.Append('I'); break;
+                case 'Ó': case 'Ô': case 'Õ':           sb.Append('O'); break;
+                case 'Ú':                               sb.Append('U'); break;
+                case 'Ç':                               sb.Append('C'); break;
+                case 'á': case 'à': case 'â': case 'ã': sb.Append('a'); break;
+                case 'é': case 'ê':                     sb.Append('e'); break;
+                case 'í':                               sb.Append('i'); break;
+                case 'ó': case 'ô': case 'õ':           sb.Append('o'); break;
+                case 'ú':                               sb.Append('u'); break;
+                case 'ç':                               sb.Append('c'); break;
+                default:                                sb.Append(c);  break;
+            }
+        }
+        return sb.ToString();
+    }
+
     private bool IsGamePaused()
     {
         return pauseManager != null && pauseManager.IsGamePaused();
@@ -370,7 +409,7 @@ public class UIManager : MonoBehaviour
 
         if (skillManagerSkillName != null)
         {
-            skillManagerSkillName.text = equippedSkill.skillName;
+            skillManagerSkillName.text = TextUtils.SemAcento(equippedSkill.skillName);
             skillManagerSkillName.color = GetElementColor(equippedSkill.element);
         }
 
@@ -619,7 +658,7 @@ public class UIManager : MonoBehaviour
             passivaIcon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
             passivaIcon.gameObject.SetActive(true);
         }
-        if (passivaLabel != null) passivaLabel.text = nome ?? "";
+        if (passivaLabel != null) passivaLabel.text = RemoverAcentos(nome ?? "");
     }
 
     // 🎯 MÉTODOS EXISTENTES DO UIMANAGER (mantidos)
@@ -641,21 +680,34 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // Atualiza só os 4 slots de skill sem tocar na ultimate
+    public void AtualizarSlotsSkill()
+    {
+        UpdateAttackSkillIcons();
+        UpdateDefenseSkillIcons();
+    }
+
     private void UpdateAttackSkillIcons()
     {
+        if (skillManager == null) skillManager = FindAnyObjectByType<SkillManager>();
         var skills = skillManager?.GetActiveSkills();
         if (skills == null) return;
 
+        // Slot 1 (índice 0) = ataque → attackSkill1Icon
+        // Slot 3 (índice 2) = ataque → attackSkill2Icon
         SetSkillSlot(attackSkill1Icon, attackSkill1ElementIcon, skills.Count > 0 ? skills[0] : null);
-        SetSkillSlot(attackSkill2Icon, attackSkill2ElementIcon, skills.Count > 1 ? skills[1] : null);
+        SetSkillSlot(attackSkill2Icon, attackSkill2ElementIcon, skills.Count > 2 ? skills[2] : null);
     }
 
     private void UpdateDefenseSkillIcons()
     {
+        if (skillManager == null) skillManager = FindAnyObjectByType<SkillManager>();
         var skills = skillManager?.GetActiveSkills();
         if (skills == null) return;
 
-        SetSkillSlot(defenseSkill1Icon, defenseSkill1ElementIcon, skills.Count > 2 ? skills[2] : null);
+        // Slot 2 (índice 1) = defesa → defenseSkill1Icon
+        // Slot 4 (índice 3) = defesa → defenseSkill2Icon
+        SetSkillSlot(defenseSkill1Icon, defenseSkill1ElementIcon, skills.Count > 1 ? skills[1] : null);
         SetSkillSlot(defenseSkill2Icon, defenseSkill2ElementIcon, skills.Count > 3 ? skills[3] : null);
     }
 
@@ -744,7 +796,7 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        return CreateFallbackIcon(skillName);
+        return CreateFallbackIcon(TextUtils.SemAcento(skillName));
     }
 
     private Sprite CreateFallbackIcon(string skillName)
@@ -754,7 +806,7 @@ public class UIManager : MonoBehaviour
 
         Texture2D texture = new Texture2D(64, 64);
         Color[] pixels = new Color[64 * 64];
-        Color baseColor = ColorForString(skillName);
+        Color baseColor = ColorForString(TextUtils.SemAcento(skillName));
 
         for (int i = 0; i < pixels.Length; i++)
         {
@@ -966,12 +1018,24 @@ public class UIManager : MonoBehaviour
         {
             if (playerStats.HasUltimate())
             {
-                ultimateCooldownText.text = playerStats.IsUltimateReady() ? "PRONTA!" : "CARREGINGO";
-                ultimateCooldownText.color = playerStats.IsUltimateReady() ? Color.yellow : Color.gray;
+                if (playerStats.IsUltimateReady())
+                {
+                    ultimateCooldownText.text      = "";   // pronta = sem texto
+                    ultimateCooldownText.color     = Color.yellow;
+                }
+                else
+                {
+                    float restante = playerStats.ultimateCooldown - playerStats.ultimateChargeTime;
+                    ultimateCooldownText.text  = Mathf.CeilToInt(restante).ToString();
+                    ultimateCooldownText.color = restante <= 5f
+                        ? new Color(1f, 0.4f, 0.1f)   // laranja quando quase pronta
+                        : new Color(0.8f, 0.8f, 0.8f); // cinza claro
+                    ultimateCooldownText.fontStyle = FontStyles.Bold;
+                }
             }
             else
             {
-                ultimateCooldownText.text = "BLOQUEADA";
+                ultimateCooldownText.text  = "";
                 ultimateCooldownText.color = Color.gray;
             }
         }
@@ -1083,7 +1147,7 @@ public class UIManager : MonoBehaviour
                 foreach (var skill in attackSkills)
                 {
                     string status = skill.isActive ? "[ON]" : "[OFF]";
-                    sb.AppendLine($"{status} {skill.skillName}  Dano: {skill.baseDamage:F1}");
+                    sb.AppendLine($"{status} {TextUtils.SemAcento(skill.skillName)}  Dano: {skill.baseDamage:F1}");
                 }
                 attackSkillsText.text = sb.ToString().TrimEnd();
             }
@@ -1103,7 +1167,7 @@ public class UIManager : MonoBehaviour
                 foreach (var skill in defenseSkills)
                 {
                     string status = skill.isActive ? "[ON]" : "[OFF]";
-                    sb.AppendLine($"{status} {skill.skillName}  DEF: {skill.baseDefense:F1}");
+                    sb.AppendLine($"{status} {TextUtils.SemAcento(skill.skillName)}  DEF: {skill.baseDefense:F1}");
                 }
                 defenseSkillsText.text = sb.ToString().TrimEnd();
             }
@@ -1118,7 +1182,7 @@ public class UIManager : MonoBehaviour
                 string readyStr = playerStats.IsUltimateReady()
                     ? "PRONTA!"
                     : $"Carregando... {playerStats.GetUltimateChargeTime():F1}s";
-                ultimateSkillsText.text = $"Ultimate: {ultimate.skillName}\nDano: {ultimate.baseDamage:F1}  {readyStr}";
+                ultimateSkillsText.text = $"Ultimate: {TextUtils.SemAcento(ultimate.skillName)}\nDano: {ultimate.baseDamage:F1}  {readyStr}";
             }
             else
             {
@@ -1163,13 +1227,9 @@ public class UIManager : MonoBehaviour
 
     private void CreateSkillSelectionPlaceholders()
     {
-        GameObject button1 = CreateSkillButton("Trocar Skill (Q/E)", Color.blue);
-        button1.GetComponent<Button>().onClick.AddListener(() => {
-            NextSkill();
-        });
+        CreateSkillButton("Trocar Skill (Q/E)", Color.blue, () => NextSkill());
 
-        GameObject button2 = CreateSkillButton("Adicionar Skill (F7)", Color.green);
-        button2.GetComponent<Button>().onClick.AddListener(() => {
+        CreateSkillButton("Adicionar Skill (F7)", Color.green, () => {
             if (skillManager != null)
             {
                 var method = skillManager.GetType().GetMethod("AddRandomSkill");
@@ -1177,8 +1237,7 @@ public class UIManager : MonoBehaviour
             }
         });
 
-        GameObject button3 = CreateSkillButton("Skills de Teste (F9)", Color.yellow);
-        button3.GetComponent<Button>().onClick.AddListener(() => {
+        CreateSkillButton("Skills de Teste (F9)", Color.yellow, () => {
             if (skillManager != null)
             {
                 var method = skillManager.GetType().GetMethod("AddTestSkills");
@@ -1187,24 +1246,39 @@ public class UIManager : MonoBehaviour
         });
     }
 
-    private GameObject CreateSkillButton(string text, Color color)
+    private GameObject CreateSkillButton(string text, Color color, System.Action callback)
     {
         GameObject buttonGO = Instantiate(skillButtonPrefab, skillButtonContainer);
         buttonGO.SetActive(true);
 
-        Button button = buttonGO.GetComponent<Button>();
-        TextMeshProUGUI buttonText = buttonGO.GetComponentInChildren<TextMeshProUGUI>();
-
-        if (buttonText != null)
+        // Bloqueia todos os botões do prefab — impede listeners persistentes
+        foreach (var b in buttonGO.GetComponentsInChildren<Button>(true))
         {
-            buttonText.text = text;
+            b.onClick.RemoveAllListeners();
+            b.interactable = false;
+            var g = b.GetComponent<UnityEngine.UI.Graphic>();
+            if (g != null) g.raycastTarget = false;
         }
+
+        TextMeshProUGUI buttonText = buttonGO.GetComponentInChildren<TextMeshProUGUI>();
+        if (buttonText != null)
+            buttonText.text = text;
 
         Image buttonImage = buttonGO.GetComponent<Image>();
         if (buttonImage != null)
-        {
             buttonImage.color = color;
-        }
+
+        // Overlay invisível cobrindo o botão inteiro — único receptor de cliques
+        var overlay = new GameObject("ClickOverlay");
+        overlay.transform.SetParent(buttonGO.transform, false);
+        var rt = overlay.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+        var img = overlay.AddComponent<Image>();
+        img.color = Color.clear;
+        img.raycastTarget = true;
+        var overlayBtn = overlay.AddComponent<Button>();
+        if (callback != null) overlayBtn.onClick.AddListener(() => callback());
 
         return buttonGO;
     }
@@ -1307,8 +1381,8 @@ public class UIManager : MonoBehaviour
     {
         if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
         {
-            skillNameText.text = skillName;
-            skillDescriptionText.text = description;
+            skillNameText.text = TextUtils.SemAcento(skillName);
+            skillDescriptionText.text = TextUtils.SemAcento(description);
             skillAcquiredPanel.SetActive(true);
 
             StartCoroutine(HideSkillAcquiredPanel());

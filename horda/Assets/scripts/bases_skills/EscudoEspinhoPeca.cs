@@ -30,8 +30,19 @@ public class EscudoEspinhoPeca : MonoBehaviour
 
         inimigo.ReceberDano(controlador.GetDano());
 
+        // EspinhosVenenosos2 — aplica veneno ao acertar
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosVenenosos2))
+            EvolutionFX.AplicarVeneno(inimigo, 2f, 5f);
+
         hitsRestantes--;
         if (hitsRestantes <= 0)
+        {
+            // EspinhosExplosivos — explosão ao esgotar hits
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosExplosivos))
+                EvolutionFX.SpawnExplosao(transform.position, 2.5f,
+                    controlador.GetDano() * 1.5f, new Color(0.3f, 1f, 0.4f),
+                    controlador);
             controlador.OnEnemyHit();
+        }
     }
 }

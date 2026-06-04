@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
   m_Name: chuva_meteoros
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
-  ultimateName: "Chuva de Meteoros"
-  description: "Meteoros caem sobre inimigos a cada 0.65s por 6s, causando dano em \xE1rea no impacto."
-  ultimateIcon: {fileID: 21300000, guid: b3c4d5e6f7a8091a0b1c2d3e4f5a0003, type: 3}
+  ultimateName: Chuva de Meteoros
+  description: "Meteoros caem sobre inimigos a cada 0.65s por 6s, causando dano em
+    \xE1rea no impacto."
+  ultimateIcon: {fileID: -3900171204097184066, guid: b3c4d5e6f7a8091a0b1c2d3e4f5a0003, type: 3}
   cooldown: 25
   baseDamage: 25
   areaOfEffect: 8

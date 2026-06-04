@@ -116,6 +116,17 @@ public class DomoRetardanteUltimate : MonoBehaviour
             // Saiu do raio → restaura e marca para remoção
             if (Vector2.Distance(rb.position, centro) > raio + 0.3f)
             {
+                // DomoInversor: projéteis saindo são redirecionados para inimigos próximos
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.DomoInversor))
+                {
+                    var inimigo = EncontrarInimigoMaisProximo(rb.position);
+                    if (inimigo != null)
+                    {
+                        Vector2 dirInimigo = ((Vector2)inimigo.transform.position - rb.position).normalized;
+                        float speed = rb.linearVelocity.magnitude;
+                        rb.linearVelocity = dirInimigo * speed;
+                    }
+                }
                 RestaurarProjetil(rb);
                 sair.Add(rb);
                 continue;
@@ -131,6 +142,20 @@ public class DomoRetardanteUltimate : MonoBehaviour
             velocidadeOriginal.Remove(rb);
             homingMaxOriginal.Remove(rb);
         }
+    }
+
+    GameObject EncontrarInimigoMaisProximo(Vector2 pos)
+    {
+        float menorDist = float.MaxValue;
+        GameObject melhor = null;
+        foreach (var c in Physics2D.OverlapCircleAll(pos, 15f))
+        {
+            var ic = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
+            if (ic == null) continue;
+            float d = Vector2.Distance(pos, ic.transform.position);
+            if (d < menorDist) { menorDist = d; melhor = ic.gameObject; }
+        }
+        return melhor;
     }
 
     void RestaurarProjetil(Rigidbody2D rb)
@@ -156,6 +181,15 @@ public class DomoRetardanteUltimate : MonoBehaviour
         ativo            = true;
         cooldownRestante = cooldown;
 
+        // DomoFortificado: +3s de duração e velocidade mínima 0.3
+        float duracaoEfetiva      = duracao;
+        float velocidadeLentaBase = velocidadeLenta; // guarda valor original
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.DomoFortificado))
+        {
+            duracaoEfetiva += 3f;
+            velocidadeLenta = Mathf.Min(velocidadeLenta, 0.3f); // aplica ao campo usado pelo FixedUpdate
+        }
+
         GameObject domoGO = CriarVisual();
         var lr = domoGO.GetComponentInChildren<LineRenderer>();
         var sr = domoGO.GetComponentInChildren<SpriteRenderer>();
@@ -163,7 +197,7 @@ public class DomoRetardanteUltimate : MonoBehaviour
         yield return StartCoroutine(AnimarEntrada(domoGO, lr));
 
         float elapsed = 0f;
-        while (elapsed < duracao)
+        while (elapsed < duracaoEfetiva)
         {
             elapsed += Time.deltaTime;
             domoGO.transform.position = transform.position;
@@ -197,6 +231,7 @@ public class DomoRetardanteUltimate : MonoBehaviour
         velocidadeOriginal.Clear();
         homingMaxOriginal.Clear();
 
+        velocidadeLenta = velocidadeLentaBase; // restaura valor original do campo
         ativo = false;
         StartCoroutine(FadeOutDomo(domoGO));
     }

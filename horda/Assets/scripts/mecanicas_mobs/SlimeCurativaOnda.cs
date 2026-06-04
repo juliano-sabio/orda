@@ -46,6 +46,7 @@ public class OndaCuraVisual : MonoBehaviour
 {
     public void Iniciar(float raioFinal, float duracao)
     {
+        Destroy(gameObject, duracao + 0.5f); // failsafe
         StartCoroutine(Animar(raioFinal, duracao));
     }
 

@@ -104,7 +104,7 @@ MonoBehaviour:
   requiredLevel: 1
   isUnique: 1
   requiredSkills: []
-  specificType: 32
+  specificType: 34
   specialValue: 3
   stackable: 1
   maxStacks: 1

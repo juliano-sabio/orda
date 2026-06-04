@@ -49,7 +49,7 @@ public class TutorialUI : MonoBehaviour
     {
         if (!mostrarSempre && PlayerPrefs.GetInt(CHAVE, 0) == 1) return;
 
-        if (FindObjectOfType<EventSystem>() == null)
+        if (FindAnyObjectByType<EventSystem>() == null)
         {
             var es = new GameObject("EventSystem");
             es.AddComponent<EventSystem>();
@@ -120,7 +120,7 @@ public class TutorialUI : MonoBehaviour
         txtDescricao = CriarTexto(painelTutorial, "Desc",
             new Vector2(0.08f, 0.22f), new Vector2(0.92f, 0.44f),
             "", 18f, FontStyles.Normal, new Color(0.85f, 0.85f, 0.85f));
-        txtDescricao.enableWordWrapping = true;
+        txtDescricao.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
         // Indicadores de passo (bolinhas)
         CriarIndicadores(painelTutorial);

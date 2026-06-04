@@ -138,7 +138,7 @@ public class PlayerSpawnEffect : MonoBehaviour
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
-            rb.isKinematic    = bloquear;
+            rb.bodyType = bloquear ? RigidbodyType2D.Kinematic : RigidbodyType2D.Dynamic;
         }
     }
 }

@@ -58,11 +58,21 @@ public class BencaoAnciaoUltimate : MonoBehaviour
 
         yield return StartCoroutine(AnimarEntrada(totem));
 
-        int pulsos = Mathf.RoundToInt(duracao / intervaloPulso);
+        // BencaoIntensa: cura por pulso para 15% do HP
+        float curaPorPulsoEfetiva = curaPorPulso;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.BencaoIntensa))
+            curaPorPulsoEfetiva = 0.15f;
+
+        // BencaoRapida: intervalo reduzido para 0.6s
+        float intervaloPulsoEfetivo = intervaloPulso;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.BencaoRapida))
+            intervaloPulsoEfetivo = 0.6f;
+
+        int pulsos = Mathf.RoundToInt(duracao / intervaloPulsoEfetivo);
         for (int i = 0; i < pulsos; i++)
         {
-            yield return new WaitForSeconds(intervaloPulso);
-            AplicarPulso(posTotem, totem, i);
+            yield return new WaitForSeconds(intervaloPulsoEfetivo);
+            AplicarPulsoComCura(posTotem, totem, i, curaPorPulsoEfetiva);
         }
 
         yield return StartCoroutine(AnimarSaida(totem));
@@ -73,10 +83,15 @@ public class BencaoAnciaoUltimate : MonoBehaviour
 
     void AplicarPulso(Vector3 pos, GameObject totem, int indice)
     {
+        AplicarPulsoComCura(pos, totem, indice, curaPorPulso);
+    }
+
+    void AplicarPulsoComCura(Vector3 pos, GameObject totem, int indice, float curaPct)
+    {
         // Cura
         if (playerStats != null)
         {
-            float cura = playerStats.maxHealth * curaPorPulso;
+            float cura = playerStats.maxHealth * curaPct;
             playerStats.health = Mathf.Min(playerStats.health + cura, playerStats.maxHealth);
         }
 

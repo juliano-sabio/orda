@@ -56,7 +56,17 @@ public class StatusCardSystem : MonoBehaviour
 
     private IEnumerator DelayedOffer()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        // Aguarda outras UIs de seleção fecharem antes de abrir
+        float timeout = 10f;
+        while (timeout > 0f &&
+               (SkillEvolutionUI.Instance != null && SkillEvolutionUI.Instance.Visivel))
+        {
+            yield return new WaitForSecondsRealtime(0.1f);
+            timeout -= 0.1f;
+        }
+
         OfferCardChoice();
     }
 
@@ -69,6 +79,7 @@ public class StatusCardSystem : MonoBehaviour
             return;
         }
 
+        Debug.Log("[StatusCardSystem] Abrindo cartas de status...");
         choiceUI.Show(GenerateChoices(3), ApplyCard);
     }
 

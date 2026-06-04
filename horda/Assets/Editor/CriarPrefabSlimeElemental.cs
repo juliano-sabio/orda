@@ -4,8 +4,8 @@ using UnityEngine;
 [InitializeOnLoad]
 public static class CriarPrefabSlimeElemental
 {
-    const string ASE_PATH    = "Assets/prefebs/inimigos/slime_ellemental/slimeelemental.ase";
-    const string PREFAB_PATH = "Assets/prefebs/inimigos/slime_ellemental/SlimeElemental.prefab";
+    const string ASE_PATH    = "Assets/prefebs/inimigos/elite/slimeelemental.ase";
+    const string PREFAB_PATH = "Assets/prefebs/inimigos/elite/SlimeElemental.prefab";
 
     static CriarPrefabSlimeElemental()
     {

@@ -522,7 +522,8 @@ public class PlayerStats : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠️ CharacterSelectionManager não encontrado! Usando configurações padrão.");
+            // Aplica bônus de upgrade diretamente dos PlayerPrefs sem precisar do manager
+            AplicarUpgradesDePlayerPrefs();
             InitializeDefaultSkills();
         }
 
@@ -581,6 +582,22 @@ public class PlayerStats : MonoBehaviour
         };
 
         RecalcMaxShield();
+    }
+
+    void AplicarUpgradesDePlayerPrefs()
+    {
+        // Lê os níveis de upgrade salvos e aplica os bônus de stats
+        float upHP  = PlayerPrefs.GetInt("Upgrade_0", 0) * 0.05f;
+        float upATK = PlayerPrefs.GetInt("Upgrade_1", 0) * 0.05f;
+        float upDEF = PlayerPrefs.GetInt("Upgrade_2", 0) * 0.05f;
+        float upSPD = PlayerPrefs.GetInt("Upgrade_3", 0) * 0.05f;
+
+        if (upHP  > 0f) maxHealth  = Mathf.RoundToInt(maxHealth  * (1f + upHP));
+        if (upATK > 0f) attack     = Mathf.RoundToInt(attack     * (1f + upATK));
+        if (upDEF > 0f) defense    = Mathf.RoundToInt(defense    * (1f + upDEF));
+        if (upSPD > 0f) speed      = speed * (1f + upSPD);
+
+        health = maxHealth;
     }
 
     public void InitializeDefaultSkills()
@@ -902,12 +919,19 @@ public class PlayerStats : MonoBehaviour
         healthRegenRate += 0.2f;
 
 
-        // Nivels de skill e de carta de status sao mutuamente exclusivos
-        bool isSkillLevel = skillManager != null && skillManager.IsSkillLevel(level);
+        // Re-busca referências se nulas
+        if (skillManager == null) skillManager = SkillManager.Instance;
+        if (skillManager == null) skillManager = FindFirstObjectByType<SkillManager>();
+
+        // Milestones fixos — não depende do skillManager estar disponível
+        bool isMilestone  = level == 1 || level == 3 || level == 6 || level == 10;
+        bool hasMaxSkills = skillManager != null && skillManager.activeSkills.Count >= 4;
+        bool isSkillLevel = isMilestone && !hasMaxSkills;
 
         if (isSkillLevel)
         {
-            skillManager.OnPlayerLevelUp(level);
+            // Sempre tenta abrir skill choice em milestone — status card NUNCA abre nesses níveis
+            StartCoroutine(AbrirEscolhaSkill());
         }
         else if (cardSystem != null)
         {
@@ -916,6 +940,40 @@ public class PlayerStats : MonoBehaviour
 
         if (uiManager != null)
             uiManager.ShowSkillAcquired($"Level {level}", "Novas habilidades disponiveis!");
+    }
+
+    private IEnumerator AbrirEscolhaSkill()
+    {
+        // Fecha notificação de level-up
+        if (UIManager.Instance != null && UIManager.Instance.skillAcquiredPanel != null)
+            UIManager.Instance.skillAcquiredPanel.SetActive(false);
+
+        yield return new WaitForSecondsRealtime(0.4f);
+
+        // Aguarda a UI de evolução fechar antes de mostrar a seleção de skill
+        while (SkillEvolutionUI.Instance != null && SkillEvolutionUI.Instance.Visivel)
+            yield return new WaitForSecondsRealtime(0.1f);
+
+        // Re-busca referências
+        if (skillManager == null) skillManager = SkillManager.Instance;
+        if (skillManager == null) skillManager = FindFirstObjectByType<SkillManager>();
+
+        var choiceUI = FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
+        if (choiceUI == null) yield break;
+
+        // Aplica filtro de slot (ímpar=ataque, par=defesa)
+        int proximoSlot = skillManager != null ? skillManager.activeSkills.Count + 1 : 1;
+        bool ehAtaque   = (proximoSlot % 2 == 1);
+        choiceUI.somenteSkillsDeAtaque = ehAtaque;
+        choiceUI.somenteSkillsDeDefesa = !ehAtaque;
+
+        choiceUI.ShowRandomSkillChoice(skill =>
+        {
+            if (skillManager != null) skillManager.AddSkill(skill);
+
+            // Atualiza apenas os slots de skill — sem tocar na ultimate
+            if (UIManager.Instance != null) UIManager.Instance.AtualizarSlotsSkill();
+        });
     }
 
     private float CalculateXPForNextLevel()
@@ -950,6 +1008,30 @@ public class PlayerStats : MonoBehaviour
                 shieldImmuneTimer = ShieldBreakImmuneDuration;
         }
 
+        // Espelho Mágico reflete o dano antes de aplicar
+        var espelho = GetComponent<EspelhoMagicoSkillBehavior>();
+        if (espelho != null && espelho.TentarRefletir(remaining))
+        {
+            UpdateUI();
+            return;
+        }
+
+        // Escudo de Karma absorve o hit completamente
+        var karma = GetComponent<EscudoKarmaSkillBehavior>();
+        if (karma != null && karma.AbsorverHit(damage))
+        {
+            UpdateUI();
+            return;
+        }
+
+        // Barreira Reflexiva — reflete dano ao atacante mais próximo e pode anular
+        var barrReflex = GetComponent<BarreiraReflexivaSkillBehavior>();
+        if (barrReflex != null) remaining = barrReflex.AplicarReflexao(remaining);
+
+        // Aureola — reduz o dano recebido enquanto ativa
+        var aureola = GetComponent<AureolaSkillBehavior>();
+        if (aureola != null) remaining = aureola.AplicarReducao(remaining);
+
         health -= remaining;
         if (remaining > 0f)
             OnDanoRecebido?.Invoke();
@@ -966,6 +1048,14 @@ public class PlayerStats : MonoBehaviour
                 UpdateUI();
                 return;
             }
+
+            var segundaChance = GetComponent<SegundaChanceSkillBehavior>();
+            if (segundaChance != null && segundaChance.TentarReviver())
+            {
+                UpdateUI();
+                return;
+            }
+
             Die();
         }
     }

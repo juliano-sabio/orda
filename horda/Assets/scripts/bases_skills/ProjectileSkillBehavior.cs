@@ -144,22 +144,36 @@ public class PassiveProjectileSkill2D : SkillBehavior
     {
         if (projectilePrefab == null) return;
 
-        // 1. CHECAGEM DIRETA NO PREFAB: Se o prefab tem o script de órbita, 
-        // ele NÃO deve buscar alvo para lançar.
         bool isOrbitalPrefab = projectilePrefab.GetComponent<SwordOrbitalController>() != null;
-        bool isOrbitalData = skillData != null && skillData.isOrbitalProjectile;
+        bool isOrbitalData   = skillData != null && skillData.isOrbitalProjectile;
+        string nomeSkill     = skillData != null ? skillData.skillName.ToLower() : "";
+        var evoMgr           = SkillEvolutionManager.Instance;
 
         if (isOrbitalPrefab || isOrbitalData)
         {
-            LaunchProjectile2D(null); // Lança sem alvo para não dar impulso
+            // Espiral Dupla: 2 orbs
+            int qtdOrbital = (evoMgr != null && evoMgr.EvolucaoAtiva(SkillEvolutionType.EspiralDupla)
+                              && nomeSkill.Contains("spiral")) ? 2 : 1;
+            for (int i = 0; i < qtdOrbital; i++)
+                LaunchProjectile2D(null);
         }
         else
         {
             Transform target = FindClosestEnemy2D();
-            if (target != null)
-            {
+            if (target == null) return;
+
+            // Spirit Ball Dupla: 2 projéteis
+            bool ballDupla = evoMgr != null && evoMgr.EvolucaoAtiva(SkillEvolutionType.SpiritBallDupla)
+                             && nomeSkill.Contains("ball");
+            // Homing Múltiplo: 3 projéteis (Spirit Homing usa Boomerang type)
+            bool homingMulti = evoMgr != null &&
+                               (evoMgr.EvolucaoAtiva(SkillEvolutionType.HomingMultiplo) ||
+                                evoMgr.EhEvolucao(SpecificSkillType.Boomerang, SkillEvolutionType.HomingMultiplo))
+                               && nomeSkill.Contains("homing");
+
+            int qtd = homingMulti ? 3 : ballDupla ? 2 : 1;
+            for (int i = 0; i < qtd; i++)
                 LaunchProjectile2D(target);
-            }
         }
     }
 
@@ -284,8 +298,6 @@ public class PassiveProjectileSkill2D : SkillBehavior
 
         if (pc != null)
         {
-            // Se o alvo for nulo, a velocidade será zero no Initialize do Controller,
-            // impedindo que a espada saia voando.
             pc.Initialize(
                 target,
                 CalculateDamage(),
@@ -293,6 +305,20 @@ public class PassiveProjectileSkill2D : SkillBehavior
                 skillData?.projectileLifeTime ?? 4f,
                 skillData?.element ?? PlayerStats.Element.None
             );
+
+            // Evoluções pós-lançamento
+            var evoMgr   = SkillEvolutionManager.Instance;
+            string nome  = skillData != null ? skillData.skillName.ToLower() : "";
+            if (evoMgr != null)
+            {
+                // Espiral Furacão: zigzag ao sair da órbita
+                if (evoMgr.EvolucaoAtiva(SkillEvolutionType.EspiralFuracao) && nome.Contains("spiral"))
+                    projectile.AddComponent<ZigzagMoveFX>().Iniciar(pc);
+
+                // Homing Eterno: relança 2x após hit
+                if (evoMgr.EvolucaoAtiva(SkillEvolutionType.HomingEterno) && nome.Contains("homing"))
+                    projectile.AddComponent<HomingEternoFX>().Iniciar(this, pc);
+            }
         }
         else
         {

@@ -35,7 +35,7 @@ public class MenuInicialUI : MonoBehaviour
     // ────────────────────────────────────────────────────────────────────
     void Start()
     {
-        if (FindObjectOfType<EventSystem>() == null)
+        if (FindAnyObjectByType<EventSystem>() == null)
         {
             var es = new GameObject("EventSystem");
             es.AddComponent<EventSystem>();

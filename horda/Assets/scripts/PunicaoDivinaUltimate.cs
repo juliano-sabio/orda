@@ -68,8 +68,13 @@ public class PunicaoDivinaUltimate : MonoBehaviour
         // Raio principal
         yield return StartCoroutine(AnimarRaioPrincipal(posAlvo));
 
+        // PunicaoDivina2: +60% dano principal
+        float danoImpactoEfetivo = danoImpacto;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.PunicaoDivina2))
+            danoImpactoEfetivo *= 1.6f;
+
         // Dano principal
-        AplicarDano(posAlvo, danoImpacto, true);
+        AplicarDano(posAlvo, danoImpactoEfetivo, true);
 
         // Explosão de luz + onda de choque
         StartCoroutine(AnimarExplosao(posAlvo));
@@ -78,16 +83,27 @@ public class PunicaoDivinaUltimate : MonoBehaviour
         // Pequena pausa dramática
         yield return new WaitForSeconds(0.1f);
 
+        // PunicaoJulgamento: +2 raios secundários
+        int numSecEfetivo = numSecundarios;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.PunicaoJulgamento))
+            numSecEfetivo += 2;
+
+        // PunicaoJulgamento: dano secundário +50%
+        float danoSecEfetivo = danoSecundario;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.PunicaoJulgamento))
+            danoSecEfetivo *= 1.5f;
+
         // Raios secundários nos inimigos próximos
-        var secundarios = EncontrarSecundarios(posAlvo, alvoGO);
+        var secundarios = EncontrarSecundarios(posAlvo, alvoGO, numSecEfetivo);
         foreach (var sec in secundarios)
         {
+            if (sec == null || sec.gameObject == null) continue;
             Vector2 posSec = sec.transform.position;
             var marcSec = CriarMarcadorPequeno(posSec);
             yield return new WaitForSeconds(0.18f);
             Destroy(marcSec);
             StartCoroutine(AnimarRaioSecundario(posSec));
-            AplicarDano(posSec, danoSecundario, false);
+            AplicarDano(posSec, danoSecEfetivo, false);
             StartCoroutine(AnimarExplosaoSecundaria(posSec));
         }
 
@@ -112,13 +128,14 @@ public class PunicaoDivinaUltimate : MonoBehaviour
         return melhor;
     }
 
-    List<GameObject> EncontrarSecundarios(Vector2 centro, GameObject excluir)
+    List<GameObject> EncontrarSecundarios(Vector2 centro, GameObject excluir, int maxSec = -1)
     {
+        if (maxSec < 0) maxSec = numSecundarios;
         var lista = new List<GameObject>();
         var vistos = new HashSet<GameObject> { excluir };
         foreach (var c in Physics2D.OverlapCircleAll(centro, raioDeteccao))
         {
-            if (lista.Count >= numSecundarios) break;
+            if (lista.Count >= maxSec) break;
             var root = ResolverInimigo(c.gameObject);
             if (root == null || vistos.Contains(root)) continue;
             vistos.Add(root);
@@ -129,7 +146,12 @@ public class PunicaoDivinaUltimate : MonoBehaviour
 
     void AplicarDano(Vector2 centro, float dano, bool podeCrit)
     {
-        foreach (var c in Physics2D.OverlapCircleAll(centro, raioExplosao))
+        // PunicaoDivina2: +50% raio de explosão
+        float raioEfetivo = raioExplosao;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.PunicaoDivina2))
+            raioEfetivo *= 1.5f;
+
+        foreach (var c in Physics2D.OverlapCircleAll(centro, raioEfetivo))
         {
             var ic = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
             if (ic != null)

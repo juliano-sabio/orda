@@ -87,13 +87,22 @@ public class CasuloCristalUltimate : MonoBehaviour
 
     void AplicarDanoEstilhacos()
     {
-        foreach (var col in Physics2D.OverlapCircleAll(transform.position, raioExplosao))
+        // CasuloLetal: +75% dano e +50% raio
+        float danoEfetivo = danoEstilhacos;
+        float raioEfetivo = raioExplosao;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.CasuloLetal))
+        {
+            danoEfetivo *= 1.75f;
+            raioEfetivo *= 1.5f;
+        }
+
+        foreach (var col in Physics2D.OverlapCircleAll(transform.position, raioEfetivo))
         {
             if (col.gameObject == gameObject) continue;
             if (col.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) continue;
             if (col.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) continue;
             var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
-            if (ic != null) ic.ReceberDano(danoEstilhacos);
+            if (ic != null) ic.ReceberDano(danoEfetivo);
         }
     }
 
@@ -247,7 +256,11 @@ public class CasuloCristalUltimate : MonoBehaviour
 
     void LancarEstilhacos()
     {
+        // CasuloReforjado: +8 estilhaços extras
         int qtd = 16;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.CasuloReforjado))
+            qtd += 8;
+
         for (int i = 0; i < qtd; i++)
         {
             float ang = (360f / qtd) * i + Random.Range(-10f, 10f);

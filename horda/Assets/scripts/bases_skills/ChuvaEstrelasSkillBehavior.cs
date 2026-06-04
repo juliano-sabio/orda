@@ -1,8 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChuvaEstrelasSkillBehavior : SkillBehavior
+public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     float baseDano       = 10f;
     float multiplicador  = 0.8f;
@@ -12,6 +12,9 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
     float alturaQueda    = 8f;
 
     float timer;
+    public bool  EmRecarga    => timer > 0f;
+    public float TimerRecarga => timer;
+    public float RecargaTotal => intervalo;
 
     float DanoAtual => baseDano + (playerStats != null ? playerStats.attack * multiplicador : 0f);
 
@@ -47,18 +50,6 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
     public override void ApplyEffect() => StartCoroutine(DispararChuva());
 
     // ── Lógica principal ──────────────────────────────────────────────────────
-
-    IEnumerator DispararChuva()
-    {
-        var alvos = EncontrarAlvosMaisProximos(qtdEstrelas);
-
-        foreach (var alvo in alvos)
-        {
-            Vector2 pos = alvo != null ? (Vector2)alvo.transform.position : (Vector2)transform.position;
-            StartCoroutine(QuedaEstrela(pos));
-            yield return new WaitForSeconds(0.15f);
-        }
-    }
 
     IEnumerator QuedaEstrela(Vector2 alvo)
     {
@@ -101,7 +92,21 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
                   ?? col.GetComponentInParent<InimigoController>();
             if (ic != null) ic.ReceberDano(DanoAtual, false);
         }
-        CameraShaker.Tremer(0.08f, 0.12f);
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.ImpactoSismico))
+            EvolutionFX.SpawnShockwave(pos, raioImpacto * 2.5f, DanoAtual * 0.5f, this);
+    }
+
+    IEnumerator DispararChuva()
+    {
+        int extra = SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaIntensa) ? 2 : 0;
+        var alvos = EncontrarAlvosMaisProximos(qtdEstrelas + extra);
+        foreach (var alvo in alvos)
+        {
+            Vector2 pos = alvo != null ? (Vector2)alvo.transform.position
+                        : (playerStats != null ? (Vector2)playerStats.transform.position : Vector2.zero);
+            StartCoroutine(QuedaEstrela(pos));
+            yield return new WaitForSeconds(0.15f);
+        }
     }
 
     List<GameObject> EncontrarAlvosMaisProximos(int qtd)
@@ -176,9 +181,6 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
         sr.sortingOrder = 14;
         go.transform.localScale = Vector3.one * 0.5f;
 
-        // Rastro
-        var trail = new List<GameObject>();
-
         float dur = 0.25f;
         for (float t = 0f; t < dur; t += Time.deltaTime)
         {
@@ -201,8 +203,8 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
                 sr2.color  = new Color(1f, 0.8f, 0.2f, 0.7f);
                 sr2.sortingOrder = 13;
                 t2.transform.localScale = Vector3.one * esc * 0.5f;
-                trail.Add(t2);
                 StartCoroutine(FadeParticula(sr2, 0.15f));
+                Destroy(t2, 0.4f); // failsafe
             }
 
             yield return null;
@@ -315,3 +317,4 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
     }
 }
+

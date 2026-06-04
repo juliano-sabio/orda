@@ -1,16 +1,20 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
-public class EspadaFantasmaSkillBehavior : SkillBehavior
+public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
 {
     float baseDano      = 10f;
     float multiplicador = 0.5f;
     float intervalo     = 5f;
     float alcanceCorte  = 3f;
     float timer;
+    public bool  EmRecarga    => timer > 0f;
+    public float TimerRecarga => timer;
+    public float RecargaTotal => intervalo;
 
     float DanoAtual => baseDano + (playerStats != null ? playerStats.attack * multiplicador : 0f);
 
+        public void OnEvolucaoAplicada(SkillEvolutionType tipo) { if (tipo == SkillEvolutionType.EspadaAlcance) alcanceCorte *= 1.5f; }
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
     public void ConfigurarDeSkillData(SkillData data)
@@ -38,8 +42,10 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior
             ? ((Vector2)alvo.transform.position - origem).normalized
             : Vector2.right;
 
-        // 3 cortes rápidos em leque
-        float[] angulos = { -25f, 0f, 25f };
+        // Espada Dupla: também corta por trás
+        float[] angulos = SkillEvolutionManager.Tem(SkillEvolutionType.EspadaDuplaFantasma)
+            ? new float[] { -25f, 0f, 25f, 155f, 180f, 205f }
+            : new float[] { -25f, 0f, 25f };
         foreach (float angOffset in angulos)
         {
             float rad = angOffset * Mathf.Deg2Rad;
@@ -72,6 +78,8 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior
             var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
             if (ic == null || ic.estaMorrendo) continue;
             ic.ReceberDano(DanoAtual, false);
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFlamejante))
+                EvolutionFX.AplicarChamas(ic, this, DanoAtual * 0.3f, 3f);
         }
 
         // Fade
@@ -113,3 +121,5 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior
         tex.Apply(); return Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), w);
     }
 }
+
+

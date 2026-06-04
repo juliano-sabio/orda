@@ -153,11 +153,27 @@ public class CorrentesInfernoUltimate : MonoBehaviour
 
     void AplicarDano()
     {
+        // InfernoIntensidade: dano por segundo dobrado
+        float danoEfetivo = danoPorSegundo;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.InfernoIntensidade))
+            danoEfetivo *= 2f;
+
         var mortos = new List<EstadoAcorrentado>();
         foreach (var e in acorrentados)
         {
             if (e.ic == null || e.go == null) { mortos.Add(e); continue; }
-            e.ic.ReceberDano(danoPorSegundo * Time.deltaTime, false, false);
+            e.ic.ReceberDano(danoEfetivo * Time.deltaTime, false, false);
+
+            // InfernoPropagado: propaga fogo para vizinhos em 5u
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.InfernoPropagado))
+            {
+                foreach (var c in Physics2D.OverlapCircleAll(e.go.transform.position, 5f))
+                {
+                    var icViz = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
+                    if (icViz != null && icViz != e.ic)
+                        icViz.ReceberDano(danoEfetivo * 0.35f * Time.deltaTime, false, false);
+                }
+            }
         }
         foreach (var m in mortos)
         {

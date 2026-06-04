@@ -217,6 +217,7 @@ public class SlimePercursoEvento : MonoBehaviour
                 }
             }
         }
+        Debug.LogWarning($"[SlimePercurso] A* atingiu MAX_ITER={MAX_ITER}. Usando rota direta ({inicio}→{fim}) — pode atravessar paredes.");
         return new List<Vector2> { inicio, fim };
     }
 
@@ -414,7 +415,7 @@ public class SlimePercursoEvento : MonoBehaviour
         textoVida.fontStyle      = FontStyles.Bold;
         textoVida.color          = new Color(0.2f, 1f, 0.45f);
         textoVida.alignment      = TextAlignmentOptions.Center;
-        textoVida.enableWordWrapping = false;
+        textoVida.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
 
         // Track (fundo da barra)
         var trackGO = new GameObject("Track");

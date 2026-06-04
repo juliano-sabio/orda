@@ -121,7 +121,16 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\" -Recurse -File -Include \"*spawn*\", \"*Spawn*\", \"*spawner*\", \"*Spawner*\", \"*onda*\", \"*Onda*\", \"*wave*\", \"*Wave*\", \"*gerenciador*\")",
       "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\DancaEvento.cs\" -Force)",
       "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\DancaEvento.cs.meta\" -Force -ErrorAction SilentlyContinue)",
-      "Bash(xargs grep -l \"class InimigoController\")"
+      "Bash(xargs grep -l \"class InimigoController\")",
+      "mcp__obsidian__read_multiple_files",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\bases_skills\" -Filter \"*.cs\")",
+      "Bash(Select-Object Name)",
+      "Bash(xargs grep -l \"enum SpecificSkillType\")",
+      "Bash(grep \"\\\\.cs$\")",
+      "Bash(xargs grep -l \"UniversalRenderPipeline\")",
+      "Bash(xargs grep -l \"DashIcon\\\\|HUD_Dash\")",
+      "Bash(xargs grep -l \"Morrer\\\\|estaMorrendo\")",
+      "Bash(xargs grep -l \"void Morrer\\\\|public void Morrer\\\\|OnPreMorte\\\\|OnDeath\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

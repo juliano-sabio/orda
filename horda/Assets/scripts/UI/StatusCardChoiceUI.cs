@@ -65,6 +65,10 @@ public class StatusCardChoiceUI : MonoBehaviour
         if (choicePanel != null)
             choicePanel.SetActive(true);
 
+        // Garante que o painel fica na frente de tudo
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas != null) canvas.sortingOrder = 500;
+
         if (titleText != null)
             titleText.text = titleMessage;
 
@@ -139,13 +143,13 @@ public class StatusCardChoiceUI : MonoBehaviour
         {
             string n = text.name.ToLower();
             if (n.Contains("name") || n.Contains("nome") || n.Contains("title"))
-                text.text = card.cardName;
+                text.text = TextUtils.SemAcento(card.cardName);
             else if (n.Contains("desc") || n.Contains("detail"))
-                text.text = card.description;
+                text.text = TextUtils.SemAcento(TextUtils.SemAcento(card.description));
             else if (n.Contains("rarity") || n.Contains("rarid"))
                 text.text = rarityLabel;
             else if (n.Contains("stat") || n.Contains("bonus") || n.Contains("status"))
-                text.text = card.description;
+                text.text = TextUtils.SemAcento(TextUtils.SemAcento(card.description));
             // Botão de raridade (ex.: "comun", "rare", "curse")
             else if (n.Contains("button") || n.Contains("comun") || n.Contains("rare")
                      || n.Contains("curse") || n.Contains("mistico"))
@@ -157,7 +161,7 @@ public class StatusCardChoiceUI : MonoBehaviour
         {
             string n = text.name.ToLower();
             if (n.Contains("name") || n.Contains("nome") || n.Contains("title"))
-                text.text = card.cardName;
+                text.text = TextUtils.SemAcento(card.cardName);
             else if (n.Contains("rarity") || n.Contains("comun") || n.Contains("rare") || n.Contains("curse"))
                 text.text = rarityLabel;
         }
@@ -182,25 +186,27 @@ public class StatusCardChoiceUI : MonoBehaviour
 
     private void WireButton(GameObject obj, StatusCardInfo card)
     {
-        // Tenta o Button no root primeiro, depois qualquer filho
-        Button btn = obj.GetComponent<Button>();
-        if (btn == null) btn = obj.GetComponentInChildren<Button>();
+        // Bloqueia TODOS os Graphics — impede listeners persistentes
+        foreach (var g in obj.GetComponentsInChildren<Graphic>(true))
+            g.raycastTarget = false;
 
-        if (btn != null)
+        foreach (var b in obj.GetComponentsInChildren<Button>(true))
         {
-            btn.onClick.RemoveAllListeners();
-            btn.onClick.AddListener(() => OnCardSelected(card));
+            b.onClick = new Button.ButtonClickedEvent(); // limpa persistentes E runtime
+            b.interactable = false;
         }
-        else
-        {
-            // Sem Button — adiciona um transparente sobre o card inteiro
-            Button newBtn = obj.AddComponent<Button>();
-            Image btnImage = obj.GetComponent<Image>();
-            if (btnImage == null) btnImage = obj.AddComponent<Image>();
-            btnImage.color = new Color(0, 0, 0, 0);
-            newBtn.targetGraphic = btnImage;
-            newBtn.onClick.AddListener(() => OnCardSelected(card));
-        }
+
+        // Overlay invisível cobrindo o card inteiro — único receptor de cliques
+        var overlay = new GameObject("ClickOverlay");
+        overlay.transform.SetParent(obj.transform, false);
+        var rt = overlay.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+        var img = overlay.AddComponent<Image>();
+        img.color = Color.clear;
+        img.raycastTarget = true;
+        var overlayBtn = overlay.AddComponent<Button>();
+        overlayBtn.onClick.AddListener(() => OnCardSelected(card));
     }
 
     private void OnCardSelected(StatusCardInfo card)
@@ -301,7 +307,7 @@ public class StatusCardChoiceUI : MonoBehaviour
         GameObject textGO = new GameObject("Name", typeof(RectTransform));
         textGO.transform.SetParent(obj.transform);
         TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
-        tmp.text = $"{card.cardName}\n{card.description}\n[{GetRarityLabel(card.rarity)}]";
+        tmp.text = $"{TextUtils.SemAcento(card.cardName)}\n{TextUtils.SemAcento(card.description)}\n[{GetRarityLabel(card.rarity)}]";
         tmp.fontSize = 14;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = Color.white;

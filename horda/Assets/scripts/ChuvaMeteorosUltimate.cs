@@ -99,10 +99,25 @@ public class ChuvaMeteorosUltimate : MonoBehaviour
 
     void AplicarDano(Vector2 centro)
     {
-        foreach (var c in Physics2D.OverlapCircleAll(centro, raioImpacto))
+        // MeteorosMaior: +30% dano e +50% raio
+        float raioEfetivo = raioImpacto;
+        float danoEfetivo = danoMeteoro;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.MeteorosMaior))
+        {
+            raioEfetivo *= 1.5f;
+            danoEfetivo *= 1.3f;
+        }
+
+        foreach (var c in Physics2D.OverlapCircleAll(centro, raioEfetivo))
         {
             var ic = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
-            if (ic != null) ic.ReceberDano(danoMeteoro, false);
+            if (ic != null)
+            {
+                ic.ReceberDano(danoEfetivo, false);
+                // MeteorosDuploImpacto: aplica dano duas vezes
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.MeteorosDuploImpacto))
+                    ic.ReceberDano(danoEfetivo, false);
+            }
         }
     }
 

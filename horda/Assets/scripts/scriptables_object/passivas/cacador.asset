@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: "Ca\xE7ador"
   description: "+5 de ataque e 10% mais XP. O predador aprende com cada presa ca\xE7ada."
-  passiveIcon: {fileID: 21300000, guid: f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7, type: 3}
-  xpBonusPercent: 0.10
+  passiveIcon: {fileID: -6182427718114342318, guid: e58a199bd899b474caed8add0cec3872, type: 3}
+  xpBonusPercent: 0.1
   attackBonus: 5
   defenseBonus: 0
   speedBonus: 0
   healthBonus: 0
   regenBonus: 0
   cooldownReduction: 0
+  behaviorScriptName: 
   isUnlocked: 1
   requiredLevel: 1
