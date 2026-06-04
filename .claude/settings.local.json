@@ -121,10 +121,18 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\" -Recurse -File -Include \"*spawn*\", \"*Spawn*\", \"*spawner*\", \"*Spawner*\", \"*onda*\", \"*Onda*\", \"*wave*\", \"*Wave*\", \"*gerenciador*\")",
       "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\DancaEvento.cs\" -Force)",
       "Bash(Remove-Item \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\DancaEvento.cs.meta\" -Force -ErrorAction SilentlyContinue)",
-      "Bash(xargs grep -l \"class InimigoController\")"
+      "Bash(xargs grep -l \"class InimigoController\")",
+      "mcp__pixellab__select_object_frames",
+      "Bash(sed -i 's/card_frame_0/card_frame_2/g' \"j:/unity/projetos/horda/orda/horda/Assets/scripts/UI/Skill_choice_UI.cs\")",
+      "Bash(sed -i 's/card_frame_0/card_frame_2/g' \"j:/unity/projetos/horda/orda/horda/Assets/scripts/UI/StatusCardChoiceUI.cs\")",
+      "mcp__aseprite__import_image",
+      "mcp__aseprite__scale_sprite",
+      "Bash(git checkout *)",
+      "PowerShell([Environment]::GetFolderPath\\(\"Desktop\"\\))"
     ],
     "additionalDirectories": [
-      "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"
+      "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda",
+      "C:\\Users\\julia\\Downloads"
     ]
   }
 }

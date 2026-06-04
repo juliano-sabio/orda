@@ -34,7 +34,8 @@
       "Bash(Test-Path \"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\scripts\\\\Elements\\\\SkillElementEffect.cs\" -PathType Leaf)",
       "Bash(python -c \"import urllib.request, json; urllib.request.urlopen\\('http://127.0.0.1:8080/mcp', timeout=5\\); print\\('reachable'\\)\")",
       "mcp__aseprite__export_spritesheet",
-      "Bash(mkdir -p \"j:/unity/projetos/horda/orda/horda/Assets/assets/UI/elements\" && cp \"C:/Users/julia/Downloads/craftpix-net-359734-magic-objects-and-icons-pixel-art-pack/PNG_n_TILED/Runes.png\" \"j:/unity/projetos/horda/orda/horda/Assets/assets/UI/elements/runes.png\" && echo \"Copiado\")"
+      "Bash(mkdir -p \"j:/unity/projetos/horda/orda/horda/Assets/assets/UI/elements\" && cp \"C:/Users/julia/Downloads/craftpix-net-359734-magic-objects-and-icons-pixel-art-pack/PNG_n_TILED/Runes.png\" \"j:/unity/projetos/horda/orda/horda/Assets/assets/UI/elements/runes.png\" && echo \"Copiado\")",
+      "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\(\"j:\\\\unity\\\\projetos\\\\horda\\\\orda\\\\horda\\\\Assets\\\\assets\\\\UI\\\\charselection\\\\panel_stone.png\"\\); [System.Convert]::ToBase64String\\($bytes\\))"
     ],
     "additionalDirectories": [
       "C:\\Users\\julia\\Downloads\\craftpix-net-359734-magic-objects-and-icons-pixel-art-pack\\PNG_n_TILED"

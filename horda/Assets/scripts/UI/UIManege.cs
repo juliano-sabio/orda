@@ -678,11 +678,16 @@ public class UIManager : MonoBehaviour
     {
         if (icon == null) return;
 
+        // Atualiza label de nome da skill no slot se existir
+        var nameLabel = icon.transform.parent.Find("SkillNameText")
+                        ?.GetComponent<TMPro.TextMeshProUGUI>();
+
         if (skill != null)
         {
             icon.sprite = skill.icon != null ? skill.icon : defaultSkillIcon;
             icon.color = Color.white;
             icon.gameObject.SetActive(true);
+            if (nameLabel != null) nameLabel.text = skill.skillName;
 
             if (elementIcon != null)
             {
@@ -705,8 +710,8 @@ public class UIManager : MonoBehaviour
         {
             icon.sprite = defaultSkillIcon;
             icon.color = new Color(0.3f, 0.3f, 0.3f, 0.5f);
-            if (elementIcon != null)
-                elementIcon.gameObject.SetActive(false);
+            if (elementIcon != null) elementIcon.gameObject.SetActive(false);
+            if (nameLabel != null) nameLabel.text = "";
         }
     }
 
