@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 6763475411575406883, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+  m_Sprite: {fileID: -8509227329556114038, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -145,7 +145,6 @@ MonoBehaviour:
   elementType: 4
   bobAmplitude: 0.12
   bobFrequency: 2.2
-  rotationSpeed: 45
 --- !u!50 &513499694061965131
 Rigidbody2D:
   serializedVersion: 5

@@ -25,10 +25,11 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior
         timer       = intervalo;
     }
 
+    static readonly Color COR_ORIG = new Color(1f, 0.5f, 0.1f);
     Color CorElemento() {
         if (skillData != null && skillData.appliedElement != ElementType.None)
-            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
-        return Color.white;
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
     }
 
     void Update()

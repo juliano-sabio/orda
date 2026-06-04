@@ -47,6 +47,22 @@ public class SkillManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
+        }
+
+        // Limpa elementos aplicados nos ScriptableObjects ao iniciar
+        // (evita que elementos de sessões de teste persistam)
+        LimparElementosAplicados();
+    }
+
+    void LimparElementosAplicados()
+    {
+        foreach (var skill in availableSkills)
+        {
+            if (skill == null) continue;
+            skill.appliedElement = ElementType.None;
+            skill.appliedCharacteristicIndex = -1;
+            skill.elementColor = Color.white;
         }
     }
 

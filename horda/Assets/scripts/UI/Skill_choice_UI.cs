@@ -379,6 +379,29 @@ public class SkillChoiceUI : MonoBehaviour
         }
     }
 
+    private void AplicarEstileDarkFantasyCard(GameObject cardObj)
+    {
+        // Estilo dark fantasy nos textos
+        foreach (var txt in cardObj.GetComponentsInChildren<TMPro.TextMeshProUGUI>())
+        {
+            if (txt.name.Contains("Name") || txt.name.Contains("Title"))
+                txt.color = new Color(0.95f, 0.82f, 0.40f);
+            else if (txt.name.Contains("Rarity") || txt.name.Contains("Raridade"))
+                txt.color = new Color(0.80f, 0.55f, 0.25f);
+            else
+                txt.color = new Color(0.90f, 0.82f, 0.65f);
+        }
+        // Borda dourada fina no card
+        var border = new GameObject("DarkBorder");
+        border.transform.SetParent(cardObj.transform, false);
+        var bImg = border.AddComponent<Image>();
+        bImg.color = new Color(0.78f, 0.66f, 0.25f, 0.5f);
+        var bRT = border.GetComponent<RectTransform>();
+        bRT.anchorMin = Vector2.zero; bRT.anchorMax = Vector2.one;
+        bRT.offsetMin = new Vector2(-2f, -2f); bRT.offsetMax = new Vector2(2f, 2f);
+        border.transform.SetAsFirstSibling();
+    }
+
     private void SetupCardTransform(GameObject cardObj)
     {
         RectTransform rect = cardObj.GetComponent<RectTransform>();
@@ -410,9 +433,20 @@ public class SkillChoiceUI : MonoBehaviour
         currentButtons.Add(cardObj);
 
         Image image = cardObj.GetComponent<Image>();
-        image.color = new Color(0.3f, 0.2f, 0.2f, 1f);
+        var cardSprite = Resources.Load<Sprite>("UI/carta_frame");
+        if (cardSprite == null)
+            cardSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/assets/UI/skill_card/cartaskill.png");
+        if (cardSprite != null) {
+            image.sprite = cardSprite;
+            image.color  = Color.white;
+            image.type   = Image.Type.Sliced;
+        } else {
+            image.color = new Color(0.07f, 0.05f, 0.10f, 0.97f);
+        }
 
         SetupCardTransform(cardObj);
+        AplicarEstileDarkFantasyCard(cardObj);
         SetupSkillCardManually(cardObj, skill);
 
         Button button = cardObj.GetComponent<Button>();

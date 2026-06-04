@@ -26,10 +26,11 @@ public class SombrasCruzSkillBehavior : SkillBehavior
         timer       = intervalo;
     }
 
+    static readonly Color COR_ORIG = new Color(0.55f, 0.25f, 1f);
     Color CorElemento() {
         if (skillData != null && skillData.appliedElement != ElementType.None)
-            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
-        return Color.white;
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
     }
 
     void Update()
@@ -132,22 +133,26 @@ public class SombraCruzProjetil : MonoBehaviour
     HashSet<int>   atingidos = new HashSet<int>();
 
     SpriteRenderer sr;
+    SkillData      skillDataProj;
+    Color          corBase = new Color(0.55f, 0.25f, 1f);
 
-    public void Iniciar(Vector2 direcao, float velocidade, float dmg, float alc)
+    public void Iniciar(Vector2 direcao, float velocidade, float dmg, float alc,
+                        SkillData sd = null, Color cor = default)
     {
-        dir    = direcao;
-        vel    = velocidade;
-        dano   = dmg;
+        dir     = direcao;
+        vel     = velocidade;
+        dano    = dmg;
         alcance = alc;
-        origem = transform.position;
+        origem  = transform.position;
+        skillDataProj = sd;
+        if (cor != default && cor != Color.white) corBase = cor;
 
-        // Rotaciona para a direção
         float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, ang - 90f);
 
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarCorte();
-        sr.color        = new Color(0.55f, 0.25f, 1f);
+        sr.color        = corBase;
         sr.sortingOrder = 13;
 
         var col = gameObject.AddComponent<BoxCollider2D>();
@@ -166,7 +171,7 @@ public class SombraCruzProjetil : MonoBehaviour
         {
             float dist  = Vector2.Distance(transform.position, origem);
             float prog  = Mathf.Clamp01(dist / alcance);
-            sr.color    = new Color(0.55f, 0.25f, 1f, Mathf.Lerp(1f, 0f, prog));
+            sr.color    = new Color(corBase.r, corBase.g, corBase.b, Mathf.Lerp(1f, 0f, prog));
             float escX  = Mathf.Lerp(1f, 0.3f, prog);
             transform.localScale = new Vector3(escX, 1f, 1f);
         }
@@ -190,7 +195,7 @@ public class SombraCruzProjetil : MonoBehaviour
         atingidos.Add(id);
 
         ic.ReceberDano(dano, false);
-        SkillElementEffect.Aplicar(null, ic.gameObject, dano, this);
+        SkillElementEffect.Aplicar(skillDataProj, ic.gameObject, dano, this);
         StartCoroutine(FlashImpacto(ic));
     }
 
@@ -212,7 +217,7 @@ public class SombraCruzProjetil : MonoBehaviour
             p.transform.position = transform.position;
             var psr = p.AddComponent<SpriteRenderer>();
             psr.sprite = GerarDisco(6);
-            psr.color  = new Color(0.55f, 0.25f, 1f);
+            psr.color  = corBase;
             psr.sortingOrder = 12;
             p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.22f);
             Vector2 v = dir * Random.Range(1f, 3f) + (Vector2)Random.insideUnitCircle * 1.5f;

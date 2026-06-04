@@ -287,6 +287,34 @@ public class StatusCardChoiceUI : MonoBehaviour
 
     // ── Carta emergencial (nenhum prefab atribuído) ──────────────────────────
 
+    private void AplicarEstileDarkFantasyStatusCard(GameObject obj, StatusCardInfo card)
+    {
+        // Textos dark fantasy
+        foreach (var txt in obj.GetComponentsInChildren<TextMeshProUGUI>(true))
+        {
+            string n = txt.name.ToLower();
+            if (n.Contains("name") || n.Contains("title"))
+                txt.color = new Color(0.95f, 0.82f, 0.40f);
+            else if (n.Contains("rarity") || n.Contains("rarid"))
+                txt.color = GetRarityColor(card.rarity);
+            else
+                txt.color = new Color(0.90f, 0.82f, 0.65f);
+        }
+        // Borda colorida por raridade
+        var bord = obj.transform.Find("DFRarityBorder")?.GetComponent<Image>();
+        if (bord == null) {
+            var bordGO = new GameObject("DFRarityBorder", typeof(Image));
+            bordGO.transform.SetParent(obj.transform, false);
+            bord = bordGO.GetComponent<Image>();
+            var bRT = bordGO.GetComponent<RectTransform>();
+            bRT.anchorMin = Vector2.zero; bRT.anchorMax = Vector2.one;
+            bRT.offsetMin = new Vector2(-2f,-2f); bRT.offsetMax = new Vector2(2f,2f);
+            bordGO.transform.SetAsFirstSibling();
+        }
+        Color rc = GetRarityColor(card.rarity);
+        bord.color = new Color(rc.r, rc.g, rc.b, 0.65f);
+    }
+
     private void SpawnEmergencyCard(StatusCardInfo card)
     {
         GameObject obj = new GameObject($"EmergencyCard_{card.statType}", typeof(RectTransform));
@@ -295,22 +323,40 @@ public class StatusCardChoiceUI : MonoBehaviour
         RectTransform rt = obj.GetComponent<RectTransform>();
         rt.sizeDelta = cardSize;
 
+        // Dark fantasy: card_frame como fundo
         Image bg = obj.AddComponent<Image>();
-        bg.color = GetRarityColor(card.rarity);
+        var cardSprite = Resources.Load<Sprite>("UI/carta_frame");
+        #if UNITY_EDITOR
+        if (cardSprite == null)
+            cardSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/assets/UI/skill_card/cartaskill.png");
+        #endif
+        if (cardSprite != null) { bg.sprite = cardSprite; bg.color = Color.white; bg.type = Image.Type.Sliced; }
+        else bg.color = new Color(0.07f, 0.05f, 0.10f, 0.97f);
 
+        // Borda colorida por raridade
+        var bord = new GameObject("RarityBorder", typeof(Image));
+        bord.transform.SetParent(obj.transform, false);
+        var bordImg = bord.GetComponent<Image>();
+        bordImg.color = new Color(GetRarityColor(card.rarity).r, GetRarityColor(card.rarity).g,
+                                   GetRarityColor(card.rarity).b, 0.7f);
+        var bordRT = bord.GetComponent<RectTransform>();
+        bordRT.anchorMin = Vector2.zero; bordRT.anchorMax = Vector2.one;
+        bordRT.offsetMin = new Vector2(-2f,-2f); bordRT.offsetMax = new Vector2(2f,2f);
+        bord.transform.SetAsFirstSibling();
+
+        // Texto
         GameObject textGO = new GameObject("Name", typeof(RectTransform));
         textGO.transform.SetParent(obj.transform);
         TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
-        tmp.text = $"{card.cardName}\n{card.description}\n[{GetRarityLabel(card.rarity)}]";
+        tmp.text = $"<b>{card.cardName}</b>\n{card.description}\n<size=10>[{GetRarityLabel(card.rarity)}]</size>";
         tmp.fontSize = 14;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        tmp.color = new Color(0.90f, 0.82f, 0.65f);
 
         RectTransform tr = textGO.GetComponent<RectTransform>();
-        tr.anchorMin = Vector2.zero;
-        tr.anchorMax = Vector2.one;
-        tr.sizeDelta = Vector2.zero;
-        tr.anchoredPosition = Vector2.zero;
+        tr.anchorMin = new Vector2(0.05f, 0.1f);
+        tr.anchorMax = new Vector2(0.95f, 0.9f);
+        tr.offsetMin = tr.offsetMax = Vector2.zero;
 
         spawnedCards.Add(obj);
         WireButton(obj, card);

@@ -267,7 +267,6 @@ public class ElementApplicationUI : MonoBehaviour
     {
         var go = new GameObject("ElementApplicationUI_Canvas");
         go.transform.SetParent(transform, false);
-        DontDestroyOnLoad(go);
         canvas = go.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 200;

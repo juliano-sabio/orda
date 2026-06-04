@@ -49,7 +49,7 @@ public static class SkillElementEffect
                 break;
 
             case CharacteristicType.Recuo:
-                AplicarKnockback(alvo, car.valor1 > 0 ? car.valor1 : 12f);
+                caller.StartCoroutine(AplicarKnockbackCoroutine(alvo, car.valor1 > 0 ? car.valor1 : 12f));
                 break;
 
             case CharacteristicType.Rajada:
@@ -163,14 +163,27 @@ public static class SkillElementEffect
     static IEnumerator AplicarCC(InimigoController ic, float duracao, string tipo)
     {
         if (ic == null) yield break;
+
+        // Desabilita script de movimento para garantir imobilização
+        var movi = ic.GetComponent<movi_inimigo>();
+        if (movi != null) movi.enabled = false;
+
         var rb = ic.GetComponent<Rigidbody2D>();
-        Vector2 velOriginal = Vector2.zero;
-        if (rb != null) { velOriginal = rb.linearVelocity; rb.linearVelocity = Vector2.zero; rb.bodyType = RigidbodyType2D.Static; }
+        if (rb != null) { rb.linearVelocity = Vector2.zero; rb.bodyType = RigidbodyType2D.Static; }
+
         var sr = ic.GetComponent<SpriteRenderer>();
         Color corOriginal = Color.white;
-        if (sr != null) { corOriginal = sr.color; sr.color = tipo == "gelo" ? new Color(0.6f, 0.85f, 1f) : new Color(0.8f, 0.8f, 0.8f); }
+        if (sr != null)
+        {
+            corOriginal = sr.color;
+            sr.color = tipo == "gelo" ? new Color(0.6f, 0.85f, 1f) : new Color(0.8f, 0.8f, 0.8f);
+        }
+
         yield return new WaitForSeconds(duracao);
-        if (rb != null) { rb.bodyType = RigidbodyType2D.Dynamic; rb.linearVelocity = velOriginal; }
+
+        if (ic == null) yield break;
+        if (rb != null) { rb.bodyType = RigidbodyType2D.Dynamic; rb.linearVelocity = Vector2.zero; }
+        if (movi != null) movi.enabled = true;
         if (sr != null) sr.color = corOriginal;
     }
 
@@ -214,22 +227,63 @@ public static class SkillElementEffect
         if (marker != null) Object.Destroy(marker);
     }
 
-    static void AplicarKnockback(GameObject alvo, float forca)
+    static IEnumerator AplicarKnockbackCoroutine(GameObject alvo, float forca)
     {
+        if (alvo == null) yield break;
         var rb = alvo.GetComponent<Rigidbody2D>();
-        if (rb == null) return;
+        if (rb == null) yield break;
         var player = FindPlayer();
-        if (player == null) return;
-        rb.AddForce((alvo.transform.position - player.position).normalized * forca, ForceMode2D.Impulse);
+        if (player == null) yield break;
+
+        Vector2 dir = ((Vector2)alvo.transform.position - (Vector2)player.position).normalized;
+
+        // Desabilita script de movimento para não cancelar o knockback
+        var movi = alvo.GetComponent<movi_inimigo>();
+        if (movi != null) movi.enabled = false;
+
+        // Aplica velocidade de knockback diretamente
+        rb.linearVelocity = dir * forca;
+
+        float duracao = 0.25f;
+        yield return new WaitForSeconds(duracao);
+
+        // Restaura movimento
+        if (alvo != null && movi != null) movi.enabled = true;
+        if (rb != null) rb.linearVelocity = Vector2.zero;
     }
 
     static void AplicarAoE(Vector3 centro, float raio, float dano, GameObject alvoOriginal)
     {
+        // Visual da explosão
+        ElementParticles.SpawnarImpacto(centro, ElementType.Fogo);
+
+        // Anel de expansão visual
+        var ring = new GameObject("ExplosaoRing");
+        ring.transform.position = centro;
+        var lr = ring.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true;
+        lr.material = new Material(Shader.Find("Sprites/Default"));
+        lr.startColor = new Color(1f, 0.4f, 0.05f, 0.8f);
+        lr.endColor   = new Color(1f, 0.2f, 0f, 0f);
+        lr.startWidth = 0.15f; lr.endWidth = 0.05f;
+        lr.positionCount = 33; lr.loop = true;
+        for (int i = 0; i < 33; i++)
+        {
+            float a = i / 32f * Mathf.PI * 2f;
+            lr.SetPosition(i, centro + new Vector3(Mathf.Cos(a), Mathf.Sin(a)) * raio);
+        }
+        UnityEngine.Object.Destroy(ring, 0.3f);
+
+        // Dano nos inimigos próximos
+        int count = 0;
         foreach (var hit in Physics2D.OverlapCircleAll(centro, raio))
         {
             if (hit.gameObject == alvoOriginal) continue;
-            hit.GetComponent<InimigoController>()?.ReceberDano(dano, false);
+            var ic = hit.GetComponent<InimigoController>()
+                  ?? hit.GetComponentInParent<InimigoController>();
+            if (ic != null) { ic.ReceberDano(dano, false); count++; }
         }
+        Debug.Log($"[Explosao] {count} inimigos atingidos | raio={raio:F1} dano={dano:F1}");
     }
 
     static void AplicarCadeia(GameObject alvoOriginal, float raio, float dano, int maxAlvos)
@@ -256,7 +310,9 @@ public static class SkillElementEffect
     static Transform _playerCache;
     static Transform FindPlayer()
     {
-        if (_playerCache != null) return _playerCache;
+        // Valida cache (objeto pode ter sido destruído entre sessões de Play Mode)
+        if (_playerCache != null && _playerCache.gameObject != null) return _playerCache;
+        _playerCache = null;
         var go = GameObject.FindWithTag("Player");
         if (go != null) _playerCache = go.transform;
         return _playerCache;

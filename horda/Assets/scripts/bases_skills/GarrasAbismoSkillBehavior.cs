@@ -20,8 +20,8 @@ public class GarrasAbismoSkillBehavior : SkillBehavior
 
     Color CorElemento() {
         if (skillData != null && skillData.appliedElement != ElementType.None)
-            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
-        return Color.white;
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_GARRAS;
+        return COR_GARRAS;
     }
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);

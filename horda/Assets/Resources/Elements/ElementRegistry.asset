@@ -64,7 +64,7 @@ MonoBehaviour:
   - tipo: 4
     nomeDisplay: Agua
     cor: {r: 0.26666668, g: 0.53333336, b: 1, a: 1}
-    icone: {fileID: 6763475411575406883, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    icone: {fileID: -8509227329556114038, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
     emoji: W
     caracteristicas:
     - nome: Lentidao
@@ -96,7 +96,7 @@ MonoBehaviour:
   - tipo: 6
     nomeDisplay: Gelo
     cor: {r: 0.6666667, g: 0.8666667, b: 1, a: 1}
-    icone: {fileID: 3069280928828078628, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    icone: {fileID: 6763475411575406883, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
     emoji: G
     caracteristicas:
     - nome: Congelamento
@@ -128,7 +128,7 @@ MonoBehaviour:
   - tipo: 8
     nomeDisplay: Trevas
     cor: {r: 0.4, g: 0.13333334, b: 0.6666667, a: 1}
-    icone: {fileID: -7095153296786560660, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    icone: {fileID: 3069280928828078628, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
     emoji: X
     caracteristicas:
     - nome: Maldicao
@@ -160,7 +160,7 @@ MonoBehaviour:
   - tipo: 10
     nomeDisplay: Corrompido
     cor: {r: 0.6666667, g: 0.13333334, b: 0.53333336, a: 1}
-    icone: {fileID: -8509227329556114038, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
+    icone: {fileID: -7095153296786560660, guid: bf7b424bcc4e7f643a148a78412af628, type: 3}
     emoji: C
     caracteristicas:
     - nome: Caos

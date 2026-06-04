@@ -27,10 +27,11 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
         timer       = intervalo;
     }
 
+    static readonly Color COR_ORIG = new Color(0.85f, 0.92f, 1f);
     Color CorElemento() {
         if (skillData != null && skillData.appliedElement != ElementType.None)
-            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
-        return Color.white;
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
     }
 
     void Update()
