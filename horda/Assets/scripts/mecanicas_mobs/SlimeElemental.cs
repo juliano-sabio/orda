@@ -277,6 +277,7 @@ public class SlimeElemental : MonoBehaviour
     {
         var root = new GameObject("ZonaGelo");
         root.transform.position = centro;
+        Destroy(root, duracaoGelo + 2f); // failsafe
 
         // Controller on root handles damage & slow independently of this slime's lifetime
         var ctrl = root.AddComponent<ZonaGeloController>();
@@ -557,6 +558,7 @@ public class SlimeElemental : MonoBehaviour
         // Marcador de alvo — dois anéis pulsantes
         var marcGO  = new GameObject("MarcadorFogo");
         marcGO.transform.position = destino;
+        Destroy(marcGO, 3f); // failsafe
         var lrM1 = CriarAnel(marcGO, raioExplosao,        new Color(1f, 0.3f, 0f, 0.9f), 0.10f);
         var lrM2 = CriarAnel(marcGO, raioExplosao * 0.5f, new Color(1f, 0.6f, 0.1f, 0.7f), 0.06f);
 
@@ -566,6 +568,7 @@ public class SlimeElemental : MonoBehaviour
         // Corpo do meteoro
         Vector2 origem = destino + new Vector2(Random.Range(-1.2f, 1.2f), 10f);
         var goM  = new GameObject("Meteoro");
+        Destroy(goM, 2f); // failsafe
         var srM  = goM.AddComponent<SpriteRenderer>();
         srM.sprite       = GerarSprite(22, new Color(1f, 0.35f, 0.02f));
         srM.sortingOrder = 20;
@@ -613,6 +616,7 @@ public class SlimeElemental : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             var go = new GameObject("Cruz");
+            Destroy(go, 1.5f); // failsafe
             var lr = go.AddComponent<LineRenderer>();
             lr.useWorldSpace = true;
             lr.positionCount = 2;
@@ -802,7 +806,7 @@ public class SlimeElemental : MonoBehaviour
             float raioOrb = Mathf.Lerp(maxRaio, 1.2f, p * p);
             for (int i = 0; i < NUM_ORBS; i++)
             {
-                if (cargaOrbs[i] == null) continue;
+                if (cargaOrbs[i] == null || orbSRs[i] == null) continue;
                 float ang = (360f / NUM_ORBS * i + t * 200f) * Mathf.Deg2Rad;
                 cargaOrbs[i].transform.position = (Vector2)transform.position
                     + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * raioOrb;

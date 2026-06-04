@@ -540,6 +540,8 @@ public enum SpecificSkillType
     Boomerang, // 🆕 NOVO TIPO DE SKILL
     EscudoRotativo,
     EscudoEspinhoso,
+    Aureola,
+    BarreiraReflexiva,
     CampoEspinhos,
     ChuvaEstrelas,
     GarrasAbismo,
@@ -555,6 +557,35 @@ public enum SpecificSkillType
     PulsoRitmico,
     EspadaFantasma,
     CorrenteSombria,
+    SegundaChance,
+    FugaSombras,
+    BarreiraEnergia,
+    TeiaProtecao,
+    InstintoSobrevivencia,
+    EspelhoMagico,
+    EscudoKarma,
+
+    // Ultimates
+    UltRaioCerteiro,
+    UltTempestadeEletrica,
+    UltChuvaMeteorosUlt,
+    UltCampoDeGelo,
+    UltVortice,
+    UltNecropole,
+    UltRitualAnciao,
+    UltBencaoAnciao,
+    UltCasuloCristal,
+    UltCorrentesInferno,
+    UltDrenagemDeVida,
+    UltEscudoSonico,
+    UltFormaBestial,
+    UltPulsoMagnetico,
+    UltPunicaoDivina,
+    UltDomoRetardante,
+    UltDespertarAnciao,
+
+    // Novas skills de ataque
+    CristaisGelo,
 }
 
 // 🆕 NOVO ENUM PARA TARGETING ORBITAL

@@ -37,13 +37,13 @@ public class SkillCardInstance : MonoBehaviour
         if (nameText != null)
         {
             string elementIcon = currentSkillData.GetElementIcon();
-            nameText.text = $"<b>{currentSkillData.skillName}</b>\n{elementIcon} {currentSkillData.element}";
+            nameText.text = $"<b>{TextUtils.SemAcento(currentSkillData.skillName)}</b>\n{elementIcon} {currentSkillData.element}";
         }
 
         // Descrição
         if (descriptionText != null)
         {
-            descriptionText.text = currentSkillData.description;
+            descriptionText.text = TextUtils.SemAcento(currentSkillData.description);
         }
 
         // Stats

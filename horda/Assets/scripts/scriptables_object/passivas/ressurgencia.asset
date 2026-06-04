@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0, type: 3}
   m_Name: ressurgencia
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
-  passiveName: "Ressurgência"
-  description: "A cada 35s, ao matar um inimigo, recupera 25 HP e ganha +15% de velocidade por 4s."
-  passiveIcon: {fileID: 21300000, guid: 0d1e2f3a4b5c0d1e2f3a4b5c0d1e2f3a, type: 3}
+  passiveName: "Ressurg\xEAncia"
+  description: A cada 35s, ao matar um inimigo, recupera 25 HP e ganha +15% de velocidade
+    por 4s.
+  passiveIcon: {fileID: -7128161271713816573, guid: 0d1e2f3a4b5c0d1e2f3a4b5c0d1e2f3a, type: 3}
   xpBonusPercent: 0
   attackBonus: 0
   defenseBonus: 0

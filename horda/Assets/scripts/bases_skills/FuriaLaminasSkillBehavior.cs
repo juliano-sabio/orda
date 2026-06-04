@@ -1,8 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FuriaLaminasSkillBehavior : SkillBehavior
+public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     float baseDano      = 8f;
     float multiplicador = 0.4f;
@@ -12,6 +12,9 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
     float raioDeteccao  = 12f;
 
     float timer;
+    public bool  EmRecarga    => timer > 0f;
+    public float TimerRecarga => timer;
+    public float RecargaTotal => intervalo;
 
     float DanoAtual => baseDano + (playerStats != null ? playerStats.attack * multiplicador : 0f);
 
@@ -19,19 +22,11 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
-        this.skillData = data;
         baseDano    = data.attackBonus > 0f        ? data.attackBonus        : 30f;
         intervalo   = data.activationInterval > 0f ? data.activationInterval : 2.5f;
         qtdLaminas  = data.projectileCount > 0     ? data.projectileCount    : 5;
         velocidade  = data.projectileSpeed > 0f    ? data.projectileSpeed    : 14f;
         timer       = intervalo;
-    }
-
-    static readonly Color COR_ORIG = new Color(0.85f, 0.92f, 1f);
-    Color CorElemento() {
-        if (skillData != null && skillData.appliedElement != ElementType.None)
-            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
-        return COR_ORIG;
     }
 
     void Update()
@@ -47,9 +42,9 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
 
     void DispararLaminas()
     {
-        var alvos = EncontrarAlvos(qtdLaminas);
+        int qtdReal = SkillEvolutionManager.Tem(SkillEvolutionType.LaminasDuplas) ? qtdLaminas * 2 : qtdLaminas;
+        var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
-        Color corLamina = CorElemento();
 
         for (int i = 0; i < alvos.Count; i++)
         {
@@ -59,16 +54,16 @@ public class FuriaLaminasSkillBehavior : SkillBehavior
 
             var go = new GameObject("Lamina");
             go.transform.position = origem;
-            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual, corLamina);
+            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual);
         }
 
         // Se há menos alvos que lâminas, completa com direções aleatórias
-        for (int i = alvos.Count; i < qtdLaminas; i++)
+        for (int i = alvos.Count; i < qtdReal; i++)
         {
             Vector2 dir = AnguloAleatorio(i, qtdLaminas);
             var go = new GameObject("Lamina");
             go.transform.position = origem;
-            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual, corLamina);
+            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual);
         }
 
         StartCoroutine(FlashPlayer());
@@ -115,21 +110,19 @@ public class LaminaProjetil : MonoBehaviour
     bool    atingiu;
     Vector2 origem;
     const float ALCANCE_MAX = 7f;
-    Color corBase = new Color(0.85f, 0.92f, 1f);
 
     SpriteRenderer sr;
 
-    public void Iniciar(Vector2 direcao, float velocidade, float dmg, Color cor = default)
+    public void Iniciar(Vector2 direcao, float velocidade, float dmg)
     {
         dir    = direcao;
         vel    = velocidade;
         dano   = dmg;
         origem = transform.position;
-        if (cor != default && cor != Color.white) corBase = cor;
 
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarLamina();
-        sr.color        = corBase;
+        sr.color        = new Color(0.85f, 0.92f, 1f);
         sr.sortingOrder = 12;
         transform.localScale = Vector3.one * 0.55f;
 
@@ -168,31 +161,27 @@ public class LaminaProjetil : MonoBehaviour
               ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
         ic.ReceberDano(dano, false);
-        SkillElementEffect.Aplicar(null, ic.gameObject, dano, this);
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas))
+            EvolutionFX.SpawnExplosao(transform.position, 1.5f, dano * 0.5f, new Color(0.85f, 0.92f, 1f), this);
         atingiu = true;
         StartCoroutine(EfeitoImpacto());
     }
 
-    IEnumerator Vida()
-    {
-        yield return new WaitForSeconds(3f);
-        if (gameObject != null) Destroy(gameObject);
-    }
-
     IEnumerator EfeitoImpacto()
     {
-        // Faíscas
+        // Faíscas — usam AutoDestroyFadeMove para não depender deste componente
         for (int i = 0; i < 5; i++)
         {
             var p = new GameObject("FaiscaLamina");
             p.transform.position = transform.position;
             var psr = p.AddComponent<SpriteRenderer>();
             psr.sprite = GerarDisco(6);
-            psr.color  = corBase;
+            psr.color  = new Color(0.85f, 0.92f, 1f);
             psr.sortingOrder = 13;
             p.transform.localScale = Vector3.one * Random.Range(0.1f, 0.2f);
             Vector2 v = Random.insideUnitCircle.normalized * Random.Range(2f, 5f);
-            StartCoroutine(FadeParticula(psr, v));
+            p.AddComponent<AutoDestroyFadeMove>().Iniciar(v, 0.3f);
+            Destroy(p, 0.6f); // failsafe
         }
 
         if (sr != null)
@@ -218,28 +207,12 @@ public class LaminaProjetil : MonoBehaviour
         p.transform.localScale = transform.localScale * 0.7f;
         var psr = p.AddComponent<SpriteRenderer>();
         psr.sprite       = GerarLamina();
-        psr.color        = new Color(corBase.r * 0.75f, corBase.g * 0.75f, corBase.b * 0.75f, 0.45f);
+        psr.color        = new Color(0.6f, 0.75f, 1f, 0.45f);
         psr.sortingOrder = 11;
         // Usa componente self-managed para não depender do LaminaProjetil
         p.AddComponent<AutoDestroyFade>().Iniciar(0.12f);
     }
 
-    IEnumerator FadeParticula(SpriteRenderer psr, Vector2 v)
-    {
-        Color c = psr.color;
-        float vida = Random.Range(0.2f, 0.4f);
-        for (float t = 0f; t < vida; t += Time.deltaTime)
-        {
-            v *= Mathf.Pow(0.85f, Time.deltaTime * 60f);
-            if (psr != null)
-            {
-                psr.transform.position += (Vector3)(v * Time.deltaTime);
-                psr.color = new Color(c.r, c.g, c.b, Mathf.Lerp(1f, 0f, t / vida));
-            }
-            yield return null;
-        }
-        if (psr != null) Destroy(psr.gameObject);
-    }
 
     // ── Sprites procedurais ───────────────────────────────────────────────────
 
@@ -300,3 +273,4 @@ public class AutoDestroyFade : MonoBehaviour
         Destroy(gameObject);
     }
 }
+

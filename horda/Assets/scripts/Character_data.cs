@@ -86,8 +86,8 @@ public class CharacterData : ScriptableObject
     {
         switch (element)
         {
-            case PlayerStats.Element.Fire: return "🔥";
-            case PlayerStats.Element.Ice: return "❄️";
+            case PlayerStats.Element.Fire: return "[Fogo]";
+            case PlayerStats.Element.Ice: return "[Gelo]";
             case PlayerStats.Element.Lightning: return "";
             case PlayerStats.Element.Poison: return "";
             case PlayerStats.Element.Earth: return "";

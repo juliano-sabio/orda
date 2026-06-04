@@ -77,6 +77,11 @@ public class VorticeUltimate : MonoBehaviour
         ativo            = true;
         cooldownRestante = cooldown;
 
+        // VorticeExpansivo: +40% de raio
+        float raioOriginal = raio;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.VorticeExpansivo))
+            raio *= 1.4f;
+
         Vector2 posicaoCampo = transform.position;
         vortexPos            = posicaoCampo;
         Vector2 direcao      = EncontrarDirecaoInimigo(posicaoCampo);
@@ -100,10 +105,15 @@ public class VorticeUltimate : MonoBehaviour
         // Fase de atração: fica no lugar e puxa inimigos para o centro
         yield return StartCoroutine(AnimarEntrada(vfx));
 
+        // VorticeExpansivo: +2s de duração
+        float duracaoEfetiva = duracao;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.VorticeExpansivo))
+            duracaoEfetiva += 2f;
+
         float elapsed = 0f;
         float rotacao = 0f;
 
-        while (elapsed < duracao)
+        while (elapsed < duracaoEfetiva)
         {
             elapsed += Time.deltaTime;
             rotacao += Time.deltaTime * 280f;
@@ -111,10 +121,22 @@ public class VorticeUltimate : MonoBehaviour
             AnimarVortice(vfx, rotacao, elapsed);
             AtrairInimigos(posicaoCampo);
 
+            // VorticeDestruidor: 15 dano/s nos inimigos dentro do vórtice
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.VorticeDestruidor))
+            {
+                foreach (var e in atraidos)
+                {
+                    if (e.go == null) continue;
+                    var ic = e.go.GetComponent<InimigoController>();
+                    if (ic != null) ic.ReceberDano(15f * Time.deltaTime, false, false);
+                }
+            }
+
             yield return null;
         }
 
         LiberarTodos();
+        raio = raioOriginal; // restaura raio base
         ativo = false;
         StartCoroutine(FadeOutDestruir(vfx, 0.35f));
     }

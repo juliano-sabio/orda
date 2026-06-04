@@ -17,7 +17,7 @@ MonoBehaviour:
 
     Ao tocar um
     inimigo, causa dano e se retrai por alguns segundos.'
-  icon: {fileID: 9146722917893442466, guid: 924e1b5b388f9504ab93fdb9595a9ac7, type: 3}
+  icon: {fileID: -2920428525519399840, guid: e843bd07aca1fe94791af15876cff22c, type: 3}
   cardPrefab: {fileID: 8728022091165569818, guid: 2528f4c01622f864bac10eccfd3210ee, type: 3}
   projectilePrefab: {fileID: 0}
   healthBonus: 0

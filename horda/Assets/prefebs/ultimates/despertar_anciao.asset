@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: despertar_anciao
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Despertar do Anc\xE3o"
-  description: "Invoca uma entidade anciã que paira sobre o campo e esmaga inimigos com tentáculos por 8s."
-  ultimateIcon: {fileID: 21300000, guid: c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7, type: 3}
+  description: "Invoca uma entidade anci\xE3 que paira sobre o campo e esmaga inimigos
+    com tent\xE1culos por 8s."
+  ultimateIcon: {fileID: 484392071834553536, guid: c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7, type: 3}
   cooldown: 28
   baseDamage: 28
   areaOfEffect: 14
   duration: 8
   element: 4
-  specialEffect: "Entidade roxa com 3 olhos desce tentáculos em inimigos aleatórios."
+  specialEffect: "Entidade roxa com 3 olhos desce tent\xE1culos em inimigos aleat\xF3rios."
   ultimateType: 0
   specialValue: 0
   behaviorScriptName: DespertarAnciaoUltimate

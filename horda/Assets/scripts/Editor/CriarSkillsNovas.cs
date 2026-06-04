@@ -293,12 +293,190 @@ public static class CriarSkillsNovas
         AssetDatabase.SaveAssets();
     }
 
+    [MenuItem("Tools/Skills/Criar Skills Defesa Avancadas")]
+    public static void CriarDefesasAvancadas()
+    {
+        CriarSkillDefesa("TeiaProtecao",       "Teia de Proteção",
+            "Cria uma barreira que empurra inimigos para fora. Ativa ao receber dano.",
+            SpecificSkillType.TeiaProtecao, SkillRarity.Rare,
+            0f, 180f, 3.5f, new Color(0.3f, 1f, 0.5f));
+
+        CriarSkillDefesa("InstintoSobrevivencia", "Instinto de Sobrevivência",
+            "Ao ficar abaixo de 30% HP, ativa automaticamente aumentando defesa e regeneração por 8s.",
+            SpecificSkillType.InstintoSobrevivencia, SkillRarity.Epic,
+            0f, 180f, 30f, new Color(1f, 0.55f, 0.1f));
+
+        CriarSkillDefesa("EspelhoMagico",     "Espelho Mágico",
+            "Reflete o dano recebido de volta ao inimigo por 4s. Ativa ao receber dano.",
+            SpecificSkillType.EspelhoMagico, SkillRarity.Epic,
+            0f, 180f, 4f, new Color(0.6f, 0.9f, 1f));
+
+        CriarSkillDefesa("EscudoKarma",       "Escudo de Karma",
+            "Absorve os próximos 3 hits completamente. Cada hit destrói uma orb dourada.",
+            SpecificSkillType.EscudoKarma, SkillRarity.Legendary,
+            0f, 180f, 3f, new Color(1f, 0.85f, 0.2f));
+
+        Debug.Log("✅ 4 skills de defesa avançadas criadas!");
+    }
+
+    [MenuItem("Tools/Skills/Criar Skills de Defesa")]
+    public static void CriarDefesas()
+    {
+        CriarSkillDefesa("SegundaChance",   "Segunda Chance",
+            "Ao morrer, revive automaticamente com 30% do HP. Recarga de 6 minutos.",
+            SpecificSkillType.SegundaChance, SkillRarity.Epic,
+            0f, 360f, 30f, new Color(1f, 0.85f, 0.1f));
+
+        CriarSkillDefesa("FugaSombras",     "Fuga das Sombras",
+            "Ao receber dano com HP abaixo de 50%, teleporta para posição segura. Recarga de 6 minutos.",
+            SpecificSkillType.FugaSombras, SkillRarity.Rare,
+            20f, 360f, 30f, new Color(0.5f, 0.1f, 0.9f));
+
+        CriarSkillDefesa("BarreiraEnergia", "Barreira de Energia",
+            "Cria um escudo com HP próprio que absorve dano. Se quebrar, regenera após 12s.",
+            SpecificSkillType.BarreiraEnergia, SkillRarity.Rare,
+            150f, 12f, 0f, new Color(0.2f, 0.6f, 1f));
+
+        Debug.Log("✅ 3 skills de defesa criadas!");
+    }
+
+    static void CriarSkillDefesa(string id, string nome, string desc,
+        SpecificSkillType tipo, SkillRarity raridade,
+        float valor, float cooldown, float especial, Color cor)
+    {
+        string path = $"{PASTA}/{id}.asset";
+        if (!AssetDatabase.IsValidFolder(PASTA))
+        { AssetDatabase.CreateFolder("Assets", "Skills"); AssetDatabase.Refresh(); }
+
+        var existente = AssetDatabase.LoadAssetAtPath<SkillData>(path);
+        if (existente != null)
+        {
+            if (existente.icon == null) { existente.icon = GerarIconeDefesa(id, cor); EditorUtility.SetDirty(existente); AssetDatabase.SaveAssets(); }
+            AdicionarAoSkillManager(existente);
+            return;
+        }
+
+        var skill = ScriptableObject.CreateInstance<SkillData>();
+        skill.icon         = GerarIconeDefesa(id, cor);
+        skill.skillName    = nome;
+        skill.description  = desc;
+        skill.specificType = tipo;
+        skill.rarity       = raridade;
+        skill.isPassive    = true;
+        skill.isUnique     = true;
+        skill.requiredLevel = 1;
+        skill.elementColor = cor;
+        skill.element      = PlayerStats.Element.None;
+        skill.healthBonus  = valor;
+        skill.specialValue = especial;
+        skill.cooldown     = cooldown;
+
+        AssetDatabase.CreateAsset(skill, path);
+        AdicionarAoSkillManager(skill);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log($"✅ '{nome}' criada.");
+    }
+
+    static Sprite GerarIconeDefesa(string id, Color cor)
+    {
+        const int SZ = 64;
+        string iconPath = $"{PASTA}/{id}Icon.png";
+
+        var existente = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+        if (existente != null) return existente;
+
+        var tex    = new Texture2D(SZ, SZ, TextureFormat.RGBA32, false);
+        var pixels = new Color[SZ * SZ];
+        float cx = SZ * 0.5f;
+
+        // Fundo circular escuro
+        for (int y = 0; y < SZ; y++)
+        for (int x = 0; x < SZ; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x, y), new Vector2(cx, cx));
+            float a = Mathf.Clamp01(1f - d / (cx * 1.05f));
+            pixels[y * SZ + x] = new Color(cor.r * 0.1f, cor.g * 0.1f, cor.b * 0.15f, a);
+        }
+
+        // Forma única por tipo
+        if (id == "SegundaChance")    DesenharCoracao(pixels, SZ, cx, cor);
+        else if (id == "FugaSombras") DesenharSeta(pixels, SZ, cx, cor);
+        else                          DesenharEscudo(pixels, SZ, cx, cor);
+
+        tex.SetPixels(pixels);
+        tex.Apply();
+
+        byte[] png = tex.EncodeToPNG();
+        Object.DestroyImmediate(tex);
+        System.IO.File.WriteAllBytes(System.IO.Path.Combine(Application.dataPath, "../" + iconPath), png);
+        AssetDatabase.Refresh();
+
+        var imp = AssetImporter.GetAtPath(iconPath) as TextureImporter;
+        if (imp != null) { imp.textureType = TextureImporterType.Sprite; imp.spritePixelsPerUnit = SZ; imp.filterMode = FilterMode.Point; imp.SaveAndReimport(); }
+        return AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+    }
+
+    static void DesenharCoracao(Color[] p, int sz, float cx, Color cor)
+    {
+        for (int y = 0; y < sz; y++)
+        for (int x = 0; x < sz; x++)
+        {
+            float nx = (x - cx) / cx;
+            float ny = (y - cx * 0.9f) / cx;
+            float h = Mathf.Pow(nx*nx + ny*ny - 0.5f, 3f) - nx*nx*ny*ny*ny;
+            if (h <= 0f)
+            {
+                float dist = Mathf.Sqrt(nx*nx + ny*ny);
+                float b = Mathf.Clamp01(1f - dist * 1.2f);
+                p[y*sz+x] = Color.Lerp(p[y*sz+x], Color.Lerp(cor, Color.white, b * 0.4f), 0.9f);
+            }
+        }
+    }
+
+    static void DesenharSeta(Color[] p, int sz, float cx, Color cor)
+    {
+        // Seta apontando para direita (teleporte)
+        int cy = (int)cx;
+        for (int i = -18; i <= 18; i++) { int px = (int)cx + i, py = cy; if (px>=0&&px<sz&&py>=0&&py<sz) p[py*sz+px] = Color.Lerp(p[py*sz+px], cor, 0.9f); }
+        for (int i = 1; i <= 10; i++) for (int j = -i; j <= i; j++) { int px = (int)cx+18-i, py = cy+j; if (px>=0&&px<sz&&py>=0&&py<sz) p[py*sz+px] = Color.Lerp(p[py*sz+px], cor, 0.85f); }
+        // Silhueta simples do player na esquerda
+        for (int y = cy-8; y <= cy+8; y++) for (int x = (int)cx-18; x <= (int)cx-10; x++)
+        { if (x<0||x>=sz||y<0||y>=sz) continue; float nx=(x-(cx-14))/4f; float ny=(y-cy)/8f; if (nx*nx+ny*ny<=1f) p[y*sz+x]=Color.Lerp(p[y*sz+x], new Color(cor.r,cor.g,cor.b,0.5f), 0.6f); }
+    }
+
+    static void DesenharEscudo(Color[] p, int sz, float cx, Color cor)
+    {
+        // Escudo hexagonal
+        int cy = (int)cx;
+        for (int y = cy-20; y <= cy+20; y++)
+        for (int x = (int)cx-16; x <= (int)cx+16; x++)
+        {
+            if (x<0||x>=sz||y<0||y>=sz) continue;
+            float nx = Mathf.Abs(x-cx)/16f; float ny = (y-cy)/20f;
+            float larg = ny < -0.5f ? (1f+ny*2f) : ny > 0.7f ? ((1f-ny)/0.3f) : 1f;
+            float d = nx/Mathf.Max(larg,0.01f);
+            if (d <= 1f)
+            {
+                float brilho = Mathf.Clamp01(1f-d) * Mathf.Lerp(1f, 0.4f, (y-cy+20f)/40f);
+                p[y*sz+x] = Color.Lerp(p[y*sz+x], Color.Lerp(cor, Color.white, brilho*0.3f), Mathf.Clamp01(brilho*1.5f));
+            }
+        }
+        // Cruz no escudo
+        for (int i = -6; i <= 6; i++)
+        {
+            int px = (int)cx+i, py = cy; if (px>=0&&px<sz&&py>=0&&py<sz) p[py*sz+px] = Color.white;
+            px = (int)cx; py = cy+i; if (px>=0&&px<sz&&py>=0&&py<sz) p[py*sz+px] = Color.white;
+        }
+    }
+
     [MenuItem("Tools/Skills/Criar TODAS as Skills Novas")]
     public static void CriarTodas()
     {
         CriarLanca(); CriarChicote(); CriarMisseis();
         CriarPulso(); CriarEspada(); CriarCorrente();
-        Debug.Log("✅ Todas as 6 skills criadas!");
+        CriarDefesas();
+        Debug.Log("✅ Todas as skills criadas!");
     }
 }
 #endif

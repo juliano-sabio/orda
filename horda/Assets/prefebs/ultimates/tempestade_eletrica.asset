@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: tempestade_eletrica
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Tempestade El\xE9trica"
-  description: "Inv\xF3ca raios que atingem inimigos aleat\xF3rios na \xE1rea a cada 0.45s por 5s."
-  ultimateIcon: {fileID: 21300000, guid: f1e2d3c4b5a697886950413200000001, type: 3}
+  description: "Inv\xF3ca raios que atingem inimigos aleat\xF3rios na \xE1rea a cada
+    0.45s por 5s."
+  ultimateIcon: {fileID: -7258724206939660299, guid: f1e2d3c4b5a697886950413200000001, type: 3}
   cooldown: 20
   baseDamage: 20
   areaOfEffect: 10
   duration: 5
   element: 3
-  specialEffect: "Raios em zigue-zague com flash branco no impacto."
+  specialEffect: Raios em zigue-zague com flash branco no impacto.
   ultimateType: 0
   specialValue: 0
   behaviorScriptName: TempestadeEletricaUltimate

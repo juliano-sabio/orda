@@ -238,7 +238,7 @@ public class BossController : MonoBehaviour
         yield return StartCoroutine(FlashFase2());
 
         // Aviso de fase
-        StartCoroutine(MostrarTextoTela("MODO FÚRIA ATIVADO!", new Color(1f, 0.3f, 0f), 2f));
+        StartCoroutine(MostrarTextoTela("MODO FURIA ATIVADO!", new Color(1f, 0.3f, 0f), 2f));
     }
 
     IEnumerator FlashFase2()
@@ -678,7 +678,7 @@ public class BossController : MonoBehaviour
         tr.anchorMax = new Vector2(0.95f, 0.65f);
         tr.offsetMin = tr.offsetMax = Vector2.zero;
         TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text      = "⚠  BOSS APARECEU  ⚠\n<size=60%>" + nomeBoss.ToUpper() + "</size>";
+        txt.text      = "!  BOSS APARECEU  !\n<size=60%>" + nomeBoss.ToUpper() + "</size>";
         txt.fontSize  = 52;
         txt.fontStyle = FontStyles.Bold;
         txt.alignment = TextAlignmentOptions.Center;

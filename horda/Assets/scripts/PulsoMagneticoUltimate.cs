@@ -80,7 +80,11 @@ public class PulsoMagneticoUltimate : MonoBehaviour
         ativo            = true;
         cooldownRestante = cooldown;
 
+        // MagneticoCentro: +1.5s de fase de atração
         float duracaoAtracao = duracao - 0.5f;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.MagneticoCentro))
+            duracaoAtracao += 1.5f;
+
         var auraGO = CriarAura();
 
         // Fase atração
@@ -173,13 +177,24 @@ public class PulsoMagneticoUltimate : MonoBehaviour
             Vector2 dir = ((Vector2)e.go.transform.position - (Vector2)transform.position).normalized;
             if (dir == Vector2.zero) dir = Random.insideUnitCircle.normalized;
             e.rb.linearVelocity = Vector2.zero;
-            e.rb.AddForce(dir * forcaRepulsao, ForceMode2D.Impulse);
+
+            // MagneticoSupercarregado: +80% força de repulsão
+            float forcaEfetiva = forcaRepulsao;
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.MagneticoSupercarregado))
+                forcaEfetiva *= 1.8f;
+
+            e.rb.AddForce(dir * forcaEfetiva, ForceMode2D.Impulse);
 
             var inimigo = e.go.GetComponent<InimigoController>();
             if (inimigo != null && danoRepulsao > 0f)
             {
+                // MagneticoSupercarregado: +50% dano de repulsão
+                float danoEfetivo = danoRepulsao;
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.MagneticoSupercarregado))
+                    danoEfetivo *= 1.5f;
+
                 bool crit = Random.value < 0.25f;
-                inimigo.ReceberDano(crit ? danoRepulsao * 1.5f : danoRepulsao, crit);
+                inimigo.ReceberDano(crit ? danoEfetivo * 1.5f : danoEfetivo, crit);
             }
         }
     }

@@ -82,6 +82,26 @@ public class NecropoleUltimate : MonoBehaviour
 
         Vector2 pos = ic.transform.position;
         StartCoroutine(SpawnarFantasma(pos));
+
+        // NecropoleContaminacao: inimigos mortos envenenam vizinhos em 3u por 2s (dano por tempo)
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.NecropoleContaminacao))
+            StartCoroutine(ContaminarVizinhos(pos));
+    }
+
+    IEnumerator ContaminarVizinhos(Vector2 pos)
+    {
+        float duracao = 2f;
+        float elapsed = 0f;
+        while (elapsed < duracao)
+        {
+            elapsed += Time.deltaTime;
+            foreach (var c in Physics2D.OverlapCircleAll(pos, 3f))
+            {
+                var icViz = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
+                if (icViz != null) icViz.ReceberDano(8f * Time.deltaTime, false, false);
+            }
+            yield return null;
+        }
     }
 
     // ─── FANTASMA ALIADO ────────────────────────────────────────────────────
@@ -110,7 +130,16 @@ public class NecropoleUltimate : MonoBehaviour
             yield return null;
         }
 
-        float vida         = duracaoFantasma;
+        // NecropoleExercito: fantasmas duram +3s e têm +50% de velocidade
+        float duracaoEfetivaFantasma = duracaoFantasma;
+        float velocidadeEfetivaFantasma = velocidadeFantasma;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.NecropoleExercito))
+        {
+            duracaoEfetivaFantasma += 3f;
+            velocidadeEfetivaFantasma *= 1.5f;
+        }
+
+        float vida         = duracaoEfetivaFantasma;
         float timerAtaque  = 0f;
         float tempoBob     = 0f;
 
@@ -129,7 +158,7 @@ public class NecropoleUltimate : MonoBehaviour
             if (alvo != null)
             {
                 Vector2 dir = ((Vector2)alvo.transform.position - (Vector2)go.transform.position).normalized;
-                go.transform.position = (Vector2)go.transform.position + dir * velocidadeFantasma * Time.deltaTime;
+                go.transform.position = (Vector2)go.transform.position + dir * velocidadeEfetivaFantasma * Time.deltaTime;
 
                 // Ataque ao chegar perto
                 if (timerAtaque <= 0f && Vector2.Distance(go.transform.position, alvo.transform.position) < 1.2f)

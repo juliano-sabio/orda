@@ -93,6 +93,11 @@ public class FormaBestialUltimate : MonoBehaviour
         // Rugido imediato ao ativar
         Rugido();
 
+        // BestialFrenesi: intervalo melee reduzido para 0.2s
+        float intervaloMeleeEfetivo = intervaloMelee;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.BestialFrenesi))
+            intervaloMeleeEfetivo = 0.2f;
+
         float elapsed    = 0f;
         float proxMelee  = 0f;
         float proxRugido = intervaloRugido;
@@ -107,7 +112,7 @@ public class FormaBestialUltimate : MonoBehaviour
 
             if (proxMelee <= 0f)
             {
-                proxMelee = intervaloMelee;
+                proxMelee = intervaloMeleeEfetivo;
                 AtaqueMelee();
             }
 
@@ -148,6 +153,11 @@ public class FormaBestialUltimate : MonoBehaviour
 
     void Rugido()
     {
+        // BestialRugidoMortal: +80% dano rugido
+        float danoRugidoEfetivo = danoRugido;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.BestialRugidoMortal))
+            danoRugidoEfetivo *= 1.8f;
+
         Vector2 centro = transform.position;
         foreach (var col in Physics2D.OverlapCircleAll(centro, raioRugido))
         {
@@ -156,7 +166,7 @@ public class FormaBestialUltimate : MonoBehaviour
                   ?? col.GetComponentInParent<InimigoController>();
             if (ic == null) continue;
 
-            ic.ReceberDano(danoRugido);
+            ic.ReceberDano(danoRugidoEfetivo);
             var rb = col.GetComponent<Rigidbody2D>() ?? ic.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -171,6 +181,9 @@ public class FormaBestialUltimate : MonoBehaviour
 
     void BurstFinal()
     {
+        // BestialRugidoMortal: burst final também com +80% dano
+        float multRugido = SkillEvolutionManager.Tem(SkillEvolutionType.BestialRugidoMortal) ? 1.8f : 1f;
+
         float raioFinal = raioRugido * 1.6f;
         Vector2 centro  = transform.position;
 
@@ -181,7 +194,7 @@ public class FormaBestialUltimate : MonoBehaviour
                   ?? col.GetComponentInParent<InimigoController>();
             if (ic == null) continue;
 
-            ic.ReceberDano(danoMelee * 3f);
+            ic.ReceberDano(danoMelee * 3f * multRugido);
             var rb = col.GetComponent<Rigidbody2D>() ?? ic.GetComponent<Rigidbody2D>();
             if (rb != null)
             {

@@ -40,7 +40,7 @@ public class MissoesUI : MonoBehaviour
         // Pega dados do CharacterSelectionUI se não foram atribuídos no Inspector
         if (personagens == null || personagens.Length == 0)
         {
-            var charUI = FindObjectOfType<CharacterSelectionUI>();
+            var charUI = FindAnyObjectByType<CharacterSelectionUI>();
             if (charUI != null) personagens = charUI.characters;
         }
 
@@ -366,7 +366,7 @@ public class MissoesUI : MonoBehaviour
             descricao, 9f, FontStyles.Normal,
             new Color(0.60f, 0.55f, 0.45f));
         txtDesc.alignment          = TextAlignmentOptions.MidlineLeft;
-        txtDesc.enableWordWrapping = true;
+        txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
     }
 
     void CriarCardInfo(string titulo, string texto)
@@ -391,7 +391,7 @@ public class MissoesUI : MonoBehaviour
         var t = CriarTexto(card, "Txt",
             new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.96f),
             $"<b>{titulo}</b>\n\n{texto}", 11f, FontStyles.Normal, corTexto);
-        t.enableWordWrapping = true;
+        t.textWrappingMode = TMPro.TextWrappingModes.Normal;
         t.alignment          = TextAlignmentOptions.TopLeft;
     }
 

@@ -55,12 +55,28 @@ public class TempestadeEletricaUltimate : MonoBehaviour
 
         Vector2 posicaoCampo = transform.position;
 
+        // TempestadeIntensa: +50% raio
+        float raioEfetivo = raio;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.TempestadeIntensa))
+            raioEfetivo *= 1.5f;
+
+        // TempestadeContinua: +3s de duração
+        float duracaoEfetiva = duracao;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.TempestadeContinua))
+            duracaoEfetiva += 3f;
+
+        // Temporariamente aumenta o raio para criação do visual
+        float raioOriginal = raio;
+        raio = raioEfetivo;
+
         GameObject ringGO = CriarAnelEletrico(posicaoCampo);
         yield return StartCoroutine(AnimarEntrada(ringGO));
 
+        raio = raioOriginal;
+
         float elapsed = 0f;
         float proximo = 0f;
-        while (elapsed < duracao)
+        while (elapsed < duracaoEfetiva)
         {
             elapsed += Time.deltaTime;
             proximo -= Time.deltaTime;
@@ -69,7 +85,10 @@ public class TempestadeEletricaUltimate : MonoBehaviour
             if (proximo <= 0f)
             {
                 proximo = intervaloBolt;
-                DispararRaio(posicaoCampo);
+                DispararRaio(posicaoCampo, raioEfetivo);
+                // TempestadeIntensa: dispara 2 raios simultâneos
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.TempestadeIntensa))
+                    DispararRaio(posicaoCampo, raioEfetivo);
             }
             yield return null;
         }
@@ -80,9 +99,10 @@ public class TempestadeEletricaUltimate : MonoBehaviour
 
     // ─── LÓGICA ─────────────────────────────────────────────────────────────
 
-    void DispararRaio(Vector2 posicaoCampo)
+    void DispararRaio(Vector2 posicaoCampo, float raioEfetivo = -1f)
     {
-        var cols = Physics2D.OverlapCircleAll(posicaoCampo, raio);
+        if (raioEfetivo < 0f) raioEfetivo = raio;
+        var cols = Physics2D.OverlapCircleAll(posicaoCampo, raioEfetivo);
         var candidatos = new List<GameObject>();
 
         foreach (var c in cols)

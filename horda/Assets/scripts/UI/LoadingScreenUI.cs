@@ -149,7 +149,7 @@ public class LoadingScreenUI : MonoBehaviour
             new Vector2(0.15f, 0.08f), new Vector2(0.85f, 0.16f),
             dicas[Random.Range(0, dicas.Length)],
             15f, FontStyles.Italic, new Color(0.72f, 0.62f, 0.88f));
-        txtDica.enableWordWrapping = true;
+        txtDica.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDica.alignment = TextAlignmentOptions.Center;
     }
 

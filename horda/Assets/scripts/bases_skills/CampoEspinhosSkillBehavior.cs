@@ -1,13 +1,16 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
-public class CampoEspinhosSkillBehavior : SkillBehavior
+public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     float baseDano        = 5f;
     float multiplicador   = 0.5f; // 50% do ataque do player + baseDano
     float raio            = 3f;
     float intervalo       = 3f;
     float timer;
+    public bool  EmRecarga    => timer > 0f;
+    public float TimerRecarga => timer;
+    public float RecargaTotal => intervalo;
 
     float DanoAtual => baseDano + (playerStats != null ? playerStats.attack * multiplicador : 0f);
 
@@ -20,12 +23,6 @@ public class CampoEspinhosSkillBehavior : SkillBehavior
     float          angRot;
     Color          corAura = new Color(0.2f, 1f, 0.3f);
 
-    Color CorElemento() {
-        if (skillData != null && skillData.appliedElement != ElementType.None)
-            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? Color.white;
-        return Color.white;
-    }
-
     // ── Inicialização ─────────────────────────────────────────────────────────
 
     public override void Initialize(PlayerStats stats)
@@ -35,12 +32,12 @@ public class CampoEspinhosSkillBehavior : SkillBehavior
 
     public void ConfigurarDeSkillData(SkillData data)
     {
-        this.skillData = data;
         baseDano      = data.attackBonus > 0f ? data.attackBonus : 10f;
         raio      = data.specialValue > 0f   ? data.specialValue       : 3f;
         intervalo = data.activationInterval > 0f ? data.activationInterval : 1.5f;
-        Color ce = CorElemento();
-        corAura   = ce != Color.white ? ce : new Color(0.2f, 1f, 0.3f);
+        corAura   = data.elementColor != Color.white && data.elementColor != Color.clear
+                    ? data.elementColor
+                    : new Color(0.2f, 1f, 0.3f);
 
         timer = intervalo;
         CriarVisual();
@@ -97,16 +94,18 @@ public class CampoEspinhosSkillBehavior : SkillBehavior
     void DanificarInimigos()
     {
         if (playerStats == null) return;
-        var cols = Physics2D.OverlapCircleAll(playerStats.transform.position, raio);
+        float raioReal = SkillEvolutionManager.Tem(SkillEvolutionType.CampoAmpliado) ? raio * 1.5f : raio;
+        float danoReal = SkillEvolutionManager.Tem(SkillEvolutionType.CampoAmpliado) ? DanoAtual * 1.3f : DanoAtual;
+
+        var cols = Physics2D.OverlapCircleAll(playerStats.transform.position, raioReal);
         foreach (var col in cols)
         {
             var ic = col.GetComponent<InimigoController>()
                   ?? col.GetComponentInParent<InimigoController>();
-            if (ic != null)
-            {
-                ic.ReceberDano(DanoAtual, false);
-                SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
-            }
+            if (ic == null) continue;
+            ic.ReceberDano(danoReal, false);
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosVenenosos))
+                EvolutionFX.AplicarVeneno(ic, danoReal * 0.3f, 2f);
         }
     }
 
@@ -219,3 +218,4 @@ public class CampoEspinhosSkillBehavior : SkillBehavior
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
     }
 }
+

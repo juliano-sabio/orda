@@ -12,15 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
   m_Name: drenagem_vida
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
-  ultimateName: "Drenagem de Vida"
-  description: "Drena vida de todos os inimigos no raio continuamente, convertendo 50% do dano em cura para o jogador."
-  ultimateIcon: {fileID: 21300000, guid: a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5, type: 3}
+  ultimateName: Drenagem de Vida
+  description: Drena vida de todos os inimigos no raio continuamente, convertendo
+    50% do dano em cura para o jogador.
+  ultimateIcon: {fileID: -2459815457080990079, guid: a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5, type: 3}
   cooldown: 26
   baseDamage: 18
   areaOfEffect: 10
   duration: 7
   element: 4
-  specialEffect: "Feixes de energia vermelhos saindo dos inimigos em dire\xE7\xE3o ao jogador."
+  specialEffect: "Feixes de energia vermelhos saindo dos inimigos em dire\xE7\xE3o
+    ao jogador."
   ultimateType: 0
   specialValue: 0
   behaviorScriptName: DrenagemDeVidaUltimate

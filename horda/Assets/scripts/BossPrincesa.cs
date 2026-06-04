@@ -261,7 +261,7 @@ public class BossPrincesa : MonoBehaviour
         tr.anchorMax = new Vector2(0.95f, 0.65f);
         tr.offsetMin = tr.offsetMax = Vector2.zero;
         TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text      = "⚠  BOSS APARECEU  ⚠\n<size=60%>" + nomeBoss.ToUpper() + "</size>";
+        txt.text      = "!  BOSS APARECEU  !\n<size=60%>" + nomeBoss.ToUpper() + "</size>";
         txt.fontSize  = 52;
         txt.fontStyle = FontStyles.Bold;
         txt.alignment = TextAlignmentOptions.Center;

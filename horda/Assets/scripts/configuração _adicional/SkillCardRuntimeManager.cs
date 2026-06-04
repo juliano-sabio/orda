@@ -69,11 +69,11 @@ public class SkillCardRuntimeManager : MonoBehaviour
         if (nameText != null)
         {
             string elementIcon = SkillData.GetElementIcon();
-            nameText.text = $"<b>{SkillData.skillName}</b>\n{elementIcon} {SkillData.element}";
+            nameText.text = $"<b>{TextUtils.SemAcento(SkillData.skillName)}</b>\n{elementIcon} {SkillData.element}";
         }
 
         if (descriptionText != null)
-            descriptionText.text = SkillData.description;
+            descriptionText.text = TextUtils.SemAcento(SkillData.description);
 
         if (statsText != null)
             statsText.text = GetFormattedStats();

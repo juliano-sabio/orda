@@ -367,34 +367,27 @@ public class InimigoController : MonoBehaviour
 
     private void MostrarDanoFlutuante(float dano, bool isCrit)
     {
+        // Normal = branco | Crit = vermelho
+        Color cor = isCrit ? Color.red : Color.white;
         if (DamageNumberManager.Instance != null)
-        {
             DamageNumberManager.Instance.ShowDamage(this.transform, dano, isCrit);
-        }
         else
-        {
-            CriarTextoFlutuante(dano, isCrit ? Color.yellow : Color.white, "", 28);
-        }
+            CriarTextoFlutuante(dano, cor, "", isCrit ? 32 : 24);
     }
 
     private void MostrarDanoFatal(float danoFinal, bool isCrit)
     {
+        if (!mostrarDanoAposMorte) return;
 
-        if (mostrarDanoAposMorte)
+        // Usa a mesma lógica — vermelho se crit, branco se normal
+        Color cor = isCrit ? Color.red : Color.white;
+        if (DamageNumberManager.Instance != null)
         {
-            GameObject dummyTarget = new GameObject("DummyTarget");
-            dummyTarget.transform.position = this.transform.position;
-
-            if (DamageNumberManager.Instance != null)
-            {
-                DamageNumberManager.Instance.ShowDamageFatal(dummyTarget.transform, danoFinal, isCrit);
-            }
-            else
-            {
-                CriarTextoFlutuante(danoFinal, Color.red, "💀 ", 48);
-            }
-
-            Destroy(dummyTarget, 2f);
+            DamageNumberManager.Instance.ShowDamage(this.transform, danoFinal, isCrit);
+        }
+        else
+        {
+            CriarTextoFlutuante(danoFinal, cor, "", isCrit ? 40 : 28);
         }
     }
 

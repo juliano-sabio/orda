@@ -12,15 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
   m_Name: casulo_cristal
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
-  ultimateName: "Casulo de Cristal"
-  description: "Encapsula em um cristal por 2.5s ficando invulner\xE1vel. Ao quebrar, estoura em estilha\xE7os e restaura HP cheio."
-  ultimateIcon: {fileID: 21300000, guid: c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5, type: 3}
+  ultimateName: Casulo de Cristal
+  description: "Encapsula em um cristal por 2.5s ficando invulner\xE1vel. Ao quebrar,
+    estoura em estilha\xE7os e restaura HP cheio."
+  ultimateIcon: {fileID: -2722032896369593618, guid: c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5, type: 3}
   cooldown: 32
   baseDamage: 60
   areaOfEffect: 5
   duration: 2.5
   element: 0
-  specialEffect: "Invulnerabilidade + HP cheio ao sair. Estilha\xE7os causam 60 de dano em raio 5."
+  specialEffect: "Invulnerabilidade + HP cheio ao sair. Estilha\xE7os causam 60 de
+    dano em raio 5."
   ultimateType: 0
   specialValue: 0
   behaviorScriptName: CasuloCristalUltimate

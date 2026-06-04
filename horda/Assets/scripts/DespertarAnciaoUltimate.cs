@@ -60,6 +60,11 @@ public class DespertarAnciaoUltimate : MonoBehaviour
         var entidadeGO = CriarEntidade(posEntidade);
         yield return StartCoroutine(AnimarEntrada(entidadeGO, posEntidade));
 
+        // DespertarFurioso: intervalo reduzido para 0.35s
+        float intervaloEfetivo = intervaloGolpe;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.DespertarFurioso))
+            intervaloEfetivo = 0.35f;
+
         float elapsed = 0f;
         float proximo = 0f;
         while (elapsed < duracao)
@@ -71,7 +76,7 @@ public class DespertarAnciaoUltimate : MonoBehaviour
 
             if (proximo <= 0f)
             {
-                proximo = intervaloGolpe;
+                proximo = intervaloEfetivo;
                 var alvo = EscolherAlvo(centroCampo);
                 if (alvo.HasValue)
                     StartCoroutine(AnimarTentaculo(posEntidade, alvo.Value));
@@ -101,10 +106,19 @@ public class DespertarAnciaoUltimate : MonoBehaviour
 
     void AplicarDano(Vector2 centro)
     {
-        foreach (var c in Physics2D.OverlapCircleAll(centro, raioImpacto))
+        // DespertarGigante: +60% raio de impacto e +50% dano
+        float raioEfetivo = raioImpacto;
+        float danoEfetivo = danoGolpe;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.DespertarGigante))
+        {
+            raioEfetivo *= 1.6f;
+            danoEfetivo *= 1.5f;
+        }
+
+        foreach (var c in Physics2D.OverlapCircleAll(centro, raioEfetivo))
         {
             var ic = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
-            if (ic != null) ic.ReceberDano(danoGolpe, Random.value < 0.2f);
+            if (ic != null) ic.ReceberDano(danoEfetivo, Random.value < 0.2f);
         }
     }
 

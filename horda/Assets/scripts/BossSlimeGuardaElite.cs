@@ -225,7 +225,7 @@ public class BossSlimeGuardaElite : MonoBehaviour
         switch (fase)
         {
             case 2: msg = "MODO AGRESSIVO!"; cor = new Color(1f, 0.7f, 0.1f); break;
-            case 3: msg = "MODO FÚRIA!";     cor = new Color(1f, 0.3f, 0.1f); break;
+            case 3: msg = "MODO FURIA!";     cor = new Color(1f, 0.3f, 0.1f); break;
             default: msg = "MODO DESESPERO!"; cor = new Color(0.8f, 0.1f, 1f); break;
         }
 
@@ -234,7 +234,7 @@ public class BossSlimeGuardaElite : MonoBehaviour
 
         StartCoroutine(MostrarTextoTela(msg, cor, 2f));
         CameraShaker.Tremer(0.08f, 0.5f);
-        if (faseText != null) { faseText.text = fase == 2 ? "AGRESSIVO" : fase == 3 ? "FÚRIA" : "DESESPERO"; faseText.color = cor; }
+        if (faseText != null) { faseText.text = fase == 2 ? "AGRESSIVO" : fase == 3 ? "FURIA" : "DESESPERO"; faseText.color = cor; }
     }
 
     // ── AÇÕES ────────────────────────────────────────────────────────────────────
@@ -677,7 +677,7 @@ public class BossSlimeGuardaElite : MonoBehaviour
         tr.anchorMin = new Vector2(0.05f, 0.35f); tr.anchorMax = new Vector2(0.95f, 0.65f);
         tr.offsetMin = tr.offsetMax = Vector2.zero;
         var txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text = $"⚔  BOSS APARECEU  ⚔\n<size=60%>{nomeBoss.ToUpper()}</size>";
+        txt.text = $"+  BOSS APARECEU  +\n<size=60%>{nomeBoss.ToUpper()}</size>";
         txt.fontSize = 52; txt.fontStyle = FontStyles.Bold;
         txt.alignment = TextAlignmentOptions.Center;
         txt.color = new Color(0.9f, 0.55f, 0.1f, 0f);

@@ -123,6 +123,7 @@ public class GerenciadorEventos : MonoBehaviour
     private Tilemap[] tilemapsObstaculo;
 
     private bool eventoAtivo;
+    private bool primeiroEventoDisparado;
     private EventoAleatorio eventoAtual;
     private float proximoEventoTempo;   // tempo absoluto do relógio para o próximo evento
     private float timerContagem;
@@ -172,9 +173,9 @@ public class GerenciadorEventos : MonoBehaviour
 
     void Start()
     {
-        playerStats   = FindObjectOfType<PlayerStats>();
-        uiManager     = FindObjectOfType<UIManager>();
-        timerManager  = FindObjectOfType<TimerManager>();
+        playerStats   = FindAnyObjectByType<PlayerStats>();
+        uiManager     = FindAnyObjectByType<UIManager>();
+        timerManager  = FindAnyObjectByType<TimerManager>();
 
         CriarPainelUI();
         proximoEventoTempo = delayInicial; // não usa TempoDecorrido() aqui — TimerManager ainda não inicializou
@@ -268,9 +269,17 @@ void TentarIniciarEvento()
     if (painelEvento == null)
         CriarPainelUI();
 
-    int idx = (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
-        ? debugForcarEvento
-        : UnityEngine.Random.Range(0, eventos.Count);
+    int idx;
+    if (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
+        idx = debugForcarEvento;
+    else if (!primeiroEventoDisparado)
+    {
+        idx = eventos.FindIndex(e => e.tipo == TipoEvento.Colapso);
+        if (idx < 0) idx = 0;
+    }
+    else
+        idx = UnityEngine.Random.Range(0, eventos.Count);
+    primeiroEventoDisparado = true;
     eventoAtual = eventos[idx];
     eventoAtivo = true;
     timerContagem = eventoAtual.duracao;
@@ -280,7 +289,7 @@ void TentarIniciarEvento()
     Debug.Log($"[GerenciadorEventos] Iniciando evento: {eventoAtual.nome} (tipo={eventoAtual.tipo})");
 
     MostrarPainel(true);
-    uiManager?.ShowSkillAcquired("⚡ EVENTO!", eventoAtual.nome);
+    uiManager?.ShowSkillAcquired("EVENTO!", eventoAtual.nome);
 
     if (eventoAtual.tipo == TipoEvento.ColetarEspirito)
     {
@@ -320,6 +329,7 @@ void TentarIniciarEvento()
 
     void EncerrarEvento(bool sucesso)
     {
+        if (!eventoAtivo) return; // guard contra double-call
         eventoAtivo = false;
         LimparEspiritos();
 
@@ -348,13 +358,14 @@ void TentarIniciarEvento()
         }
 
         StartCoroutine(MostrarResultado(sucesso));
+        if (sucesso) StartCoroutine(OfertarEvolucaoAposEvento());
         AgendarProximoEvento();
     }
 
     IEnumerator MostrarResultado(bool sucesso)
     {
         // Painel já está visível — só atualiza o conteúdo
-        if (textoNome   != null) { textoNome.text = sucesso ? "✔ SUCESSO!" : "✘ FALHOU!"; textoNome.color = sucesso ? new Color(0.2f, 1f, 0.3f) : new Color(1f, 0.3f, 0.3f); }
+        if (textoNome   != null) { textoNome.text = sucesso ? "OK SUCESSO!" : "X FALHOU!"; textoNome.color = sucesso ? new Color(0.2f, 1f, 0.3f) : new Color(1f, 0.3f, 0.3f); }
         if (textoDesc   != null) textoDesc.text = sucesso ? eventoAtual.recompensaDescricao : "Evento não completado.";
         if (textoTimer  != null) { textoTimer.text = ""; textoTimer.color = Color.white; }
         if (textoProgresso != null) textoProgresso.text = "";
@@ -380,7 +391,7 @@ void TentarIniciarEvento()
         if (mostrar)
         {
             if (textoNome  != null) { textoNome.text = eventoAtual.nome; textoNome.color = Color.yellow; }
-            if (textoDesc  != null) textoDesc.text = eventoAtual.descricao;
+            if (textoDesc  != null) textoDesc.text = TextUtils.SemAcento(eventoAtual.descricao);
             if (barraFillImg != null) barraFillImg.color = corBarraAtiva; //new Color(0.2f, 0.8f, 0.3f);
             StopCoroutine("AnimarSaida");
             StartCoroutine("AnimarEntrada");
@@ -497,7 +508,7 @@ void TentarIniciarEvento()
 
     Bounds CalcularBoundsMapa()
     {
-        var tilemaps = FindObjectsOfType<Tilemap>();
+        var tilemaps = FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
         if (tilemaps == null || tilemaps.Length == 0)
             return new Bounds(Vector3.zero, new Vector3(60f, 40f, 0f));
 
@@ -524,7 +535,7 @@ void TentarIniciarEvento()
         // Exclui o terrenoBase para não tratar o chão como obstáculo
         if (tilemapsObstaculo == null || tilemapsObstaculo.Length == 0)
         {
-            var todos = FindObjectsOfType<Tilemap>();
+            var todos = FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
             var lista = new List<Tilemap>();
             foreach (var tm in todos)
             {
@@ -848,7 +859,7 @@ IEnumerator SpawnInimigosPercurso()
     while (eventoAtivo && slimePercurso != null && !slimePercurso.Chegou && spawned < qtdInimigosPercurso)
     {
         yield return new WaitForSeconds(4f);
-        if (!eventoAtivo || slimePercurso == null) yield break;
+        if (!eventoAtivo || slimePercurso == null || slimePercurso.Chegou) yield break;
 
         Vector2 posPlayer = playerStats != null ? (Vector2)playerStats.transform.position : Vector2.zero;
         for (int t = 0; t < 30; t++)
@@ -1141,6 +1152,121 @@ void LimparSlimePercurso()
     }
 
     // ──────────────────────────────────────────────────────────
+    // Evolução de skill como recompensa de evento
+
+    [Header("Evolução de Skills")]
+    public List<SkillEvolutionData> todasEvolucoes = new List<SkillEvolutionData>();
+
+    IEnumerator OfertarEvolucaoAposEvento()
+    {
+        // Aguarda o resultado do evento ser exibido
+        yield return new WaitForSeconds(3.5f);
+
+        var sm = SkillManager.Instance;
+        if (sm == null) { Debug.LogWarning("[Evolução] SkillManager não encontrado."); yield break; }
+        if (sm.activeSkills.Count == 0) { Debug.LogWarning("[Evolução] Player não tem skills ativas."); yield break; }
+
+        if (todasEvolucoes == null || todasEvolucoes.Count == 0)
+        {
+            Debug.LogWarning("[Evolução] todasEvolucoes está vazia! Execute Tools → Evolucoes → Criar Todas as Evolucoes com a cena aberta.");
+            yield break;
+        }
+
+        Debug.Log($"[Evolução] Skills ativas: {sm.activeSkills.Count} | Evoluções cadastradas: {todasEvolucoes.Count}");
+
+        // Filtra evoluções disponíveis para as skills ativas do player
+        // Verifica se a evolução ESPECÍFICA já foi aplicada (não apenas se a skill tem qualquer evolução)
+        var disponiveis = new List<SkillEvolutionData>();
+        foreach (var evo in todasEvolucoes)
+        {
+            if (evo == null) continue;
+            bool temSkill    = sm.activeSkills.Exists(s => s != null && s.specificType == evo.skillAlvo);
+            bool jaTemEstaEvo = SkillEvolutionManager.Instance != null &&
+                                SkillEvolutionManager.Instance.EvolucaoAtiva(evo.tipoEvolucao);
+            if (temSkill && !jaTemEstaEvo) disponiveis.Add(evo);
+        }
+
+        // Verifica ultimates ativas do player
+        var playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats != null)
+        {
+            // Mapeia component de ultimate para o SpecificSkillType correspondente
+            var ultimateMap = new System.Collections.Generic.Dictionary<System.Type, SpecificSkillType>
+            {
+                { typeof(RaioCerteiroUltimate),      SpecificSkillType.UltRaioCerteiro      },
+                { typeof(TempestadeEletricaUltimate),SpecificSkillType.UltTempestadeEletrica },
+                { typeof(ChuvaMeteorosUltimate),     SpecificSkillType.UltChuvaMeteorosUlt   },
+                { typeof(CampoDeGeloUltimate),       SpecificSkillType.UltCampoDeGelo        },
+                { typeof(VorticeUltimate),           SpecificSkillType.UltVortice            },
+                { typeof(NecropoleUltimate),         SpecificSkillType.UltNecropole          },
+                { typeof(RitualAnciaoUltimate),      SpecificSkillType.UltRitualAnciao       },
+                { typeof(BencaoAnciaoUltimate),      SpecificSkillType.UltBencaoAnciao       },
+                { typeof(CasuloCristalUltimate),     SpecificSkillType.UltCasuloCristal      },
+                { typeof(CorrentesInfernoUltimate),  SpecificSkillType.UltCorrentesInferno   },
+                { typeof(DrenagemDeVidaUltimate),    SpecificSkillType.UltDrenagemDeVida     },
+                { typeof(EscudoSonicoUltimate),      SpecificSkillType.UltEscudoSonico       },
+                { typeof(FormaBestialUltimate),      SpecificSkillType.UltFormaBestial       },
+                { typeof(PulsoMagneticoUltimate),    SpecificSkillType.UltPulsoMagnetico     },
+                { typeof(PunicaoDivinaUltimate),     SpecificSkillType.UltPunicaoDivina      },
+                { typeof(DomoRetardanteUltimate),    SpecificSkillType.UltDomoRetardante     },
+                { typeof(DespertarAnciaoUltimate),   SpecificSkillType.UltDespertarAnciao    },
+            };
+
+            foreach (var kv in ultimateMap)
+            {
+                if (playerStats.GetComponent(kv.Key) == null) continue;
+                SpecificSkillType ultimateType = kv.Value;
+
+                foreach (var evo in todasEvolucoes)
+                {
+                    if (evo == null) continue;
+                    if (evo.skillAlvo != ultimateType) continue;
+                    bool jaTemEstaEvo = SkillEvolutionManager.Instance != null &&
+                                       SkillEvolutionManager.Instance.EvolucaoAtiva(evo.tipoEvolucao);
+                    if (!jaTemEstaEvo && !disponiveis.Contains(evo))
+                        disponiveis.Add(evo);
+                }
+            }
+        }
+
+        Debug.Log($"[Evolução] Disponíveis para o player: {disponiveis.Count}");
+        if (disponiveis.Count == 0) { Debug.LogWarning("[Evolução] Nenhuma evolução disponível para as skills atuais."); yield break; }
+
+        // Sorteia 2 opções aleatórias
+        var opcoes = new List<SkillEvolutionData>();
+        var copia  = new List<SkillEvolutionData>(disponiveis);
+        int qtd    = Mathf.Min(2, copia.Count);
+        for (int i = 0; i < qtd; i++)
+        {
+            int idx = UnityEngine.Random.Range(0, copia.Count);
+            opcoes.Add(copia[idx]);
+            copia.RemoveAt(idx);
+        }
+
+        // Garante que o manager de evolução existe
+        if (SkillEvolutionManager.Instance == null)
+        {
+            var go = new GameObject("SkillEvolutionManager");
+            go.AddComponent<SkillEvolutionManager>();
+        }
+
+        // Cria UI se não existir
+        if (SkillEvolutionUI.Instance == null)
+        {
+            var go = new GameObject("SkillEvolutionUI");
+            go.AddComponent<SkillEvolutionUI>();
+        }
+
+        // Exibe as opções
+        SkillEvolutionUI.Instance.MostrarOpcoes(opcoes, evo =>
+        {
+            SkillEvolutionManager.Instance?.AplicarEvolucao(evo);
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowSkillAcquired(evo.nomeEvolucao, evo.descricao);
+        });
+    }
+
+    // ──────────────────────────────────────────────────────────
     // Criação do painel de UI em runtime
 
     void CriarPainelUI()
@@ -1265,7 +1391,7 @@ void LimparSlimePercurso()
         tmp.fontStyle = style;
         tmp.color = color;
         tmp.alignment = align;
-        tmp.enableWordWrapping = true;
+        tmp.textWrappingMode = TMPro.TextWrappingModes.Normal;
         tmp.overflowMode = TextOverflowModes.Truncate;
         return tmp;
     }

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
+  m_Name: VorticeDestruidor
+  m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
+  nomeEvolucao: "V\xF3rtice Destruidor"
+  descricao: "Inimigos dentro do v\xF3rtice recebem 15 de dano por segundo."
+  icone: {fileID: 5142958066713371779, guid: e6f7a8b9c0d10c2d3e4f5a6b7c000006, type: 3}
+  corDestaque: {r: 0.3, g: 1, b: 0.6, a: 1}
+  skillAlvo: 47
+  tipoEvolucao: 69
+  raridade: 2

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: aureola
   description: bloqueia qualquer dano mas entra em tempo de recarga
-  icon: {fileID: 4901165210638357611, guid: bb220d63c9bbda64d9aa93a93aea5176, type: 3}
+  icon: {fileID: 3831778685843724948, guid: 2136ad60b4889bb458be8ff4048fe69a, type: 3}
   cardPrefab: {fileID: 8728022091165569818, guid: 14708d00ab9b5d0439922a541fd3710a, type: 3}
   projectilePrefab: {fileID: 7230362266523295520, guid: f5ff4d6d4ec156e42951637c4f488c79, type: 3}
   healthBonus: 0
@@ -152,3 +152,7 @@ MonoBehaviour:
   boomerangSeekNewTargets: 0
   boomerangSeekRadius: 5
   boomerangMaxHitsPerThrow: 5
+  escudoPrefabVisual: {fileID: 0}
+  escudoVelocidadeRotacao: 120
+  escudoRaioOrbita: 1.8
+  escudoQuantidade: 1
