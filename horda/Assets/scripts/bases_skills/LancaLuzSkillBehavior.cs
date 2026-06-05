@@ -19,8 +19,16 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
     public void OnEvolucaoAplicada(SkillEvolutionType tipo) { if (tipo == SkillEvolutionType.LancasMultiplas) qtdLancas = 3; }
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(1f, 0.95f, 0.3f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano   = data.attackBonus > 0f        ? data.attackBonus   : 30f;
         intervalo  = data.activationInterval > 0f ? data.activationInterval : 8f;
         velocidade = data.projectileSpeed > 0f    ? data.projectileSpeed    : 20f;
@@ -74,7 +82,9 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
                 dir.x * Mathf.Sin(rad) + dir.y * Mathf.Cos(rad));
             var go = new GameObject("LancaLuz");
             go.transform.position = origem;
-            go.AddComponent<LancaLuzProjetil>().Iniciar(dirFinal, velocidade, DanoAtual, alcance);
+            var lp = go.AddComponent<LancaLuzProjetil>();
+            lp.skillDataRef = skillData;
+            lp.Iniciar(dirFinal, velocidade, DanoAtual, alcance);
         }
     }
 
@@ -118,6 +128,7 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
 
 public class LancaLuzProjetil : MonoBehaviour
 {
+    public SkillData skillDataRef;
     Vector2 dir, origem;
     float   vel, dano, alcance;
     bool    atingiu;
@@ -171,6 +182,7 @@ public class LancaLuzProjetil : MonoBehaviour
         var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
         if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva))
             EvolutionFX.SpawnExplosao(transform.position, 2.5f, dano * 0.6f, new Color(1f, 0.9f, 0.3f), this);
         bool perfura = SkillEvolutionManager.Tem(SkillEvolutionType.LancaPerfurante);

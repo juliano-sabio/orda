@@ -18,8 +18,16 @@ public class EscudoKarmaSkillBehavior : SkillBehavior, ISkillComRecarga
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(1f, 0.85f, 0.2f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         if (data.cooldown > 0f)        recarga  = data.cooldown;
         if (data.projectileCount > 0)  maxHits  = data.projectileCount;
     }
@@ -77,7 +85,7 @@ public class EscudoKarmaSkillBehavior : SkillBehavior, ISkillComRecarga
                 float d = Vector2.Distance(ic.transform.position, pos);
                 if (d < menorDist) { menorDist = d; alvo = ic; }
             }
-            if (alvo != null) alvo.ReceberDano(danoAbsorvido * 2f, false);
+            if (alvo != null) { alvo.ReceberDano(danoAbsorvido * 2f, false); SkillElementEffect.Aplicar(skillData, alvo.gameObject, danoAbsorvido * 2f, this); }
         }
 
         if (hitsRestantes <= 0)

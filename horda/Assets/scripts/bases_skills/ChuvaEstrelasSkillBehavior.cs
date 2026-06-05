@@ -25,8 +25,16 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
         base.Initialize(stats);
     }
 
+    static readonly Color COR_ORIG = new Color(1f, 0.9f, 0.2f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano     = data.attackBonus > 0f          ? data.attackBonus        : 20f;
         intervalo    = data.activationInterval > 0f   ? data.activationInterval : 3f;
         qtdEstrelas  = data.projectileCount > 0       ? data.projectileCount    : 3;
@@ -90,7 +98,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
         {
             var ic = col.GetComponent<InimigoController>()
                   ?? col.GetComponentInParent<InimigoController>();
-            if (ic != null) ic.ReceberDano(DanoAtual, false);
+            if (ic != null) { ic.ReceberDano(DanoAtual, false); SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this); }
         }
         if (SkillEvolutionManager.Tem(SkillEvolutionType.ImpactoSismico))
             EvolutionFX.SpawnShockwave(pos, raioImpacto * 2.5f, DanoAtual * 0.5f, this);

@@ -20,8 +20,16 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(0.9f, 0.9f, 1f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f        ? data.attackBonus        : 30f;
         intervalo   = data.activationInterval > 0f ? data.activationInterval : 2.5f;
         qtdLaminas  = data.projectileCount > 0     ? data.projectileCount    : 5;
@@ -54,7 +62,9 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
 
             var go = new GameObject("Lamina");
             go.transform.position = origem;
-            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual);
+            var lp = go.AddComponent<LaminaProjetil>();
+            lp.skillDataRef = skillData;
+            lp.Iniciar(dir, velocidade, DanoAtual);
         }
 
         // Se há menos alvos que lâminas, completa com direções aleatórias
@@ -63,7 +73,9 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
             Vector2 dir = AnguloAleatorio(i, qtdLaminas);
             var go = new GameObject("Lamina");
             go.transform.position = origem;
-            go.AddComponent<LaminaProjetil>().Iniciar(dir, velocidade, DanoAtual);
+            var lp = go.AddComponent<LaminaProjetil>();
+            lp.skillDataRef = skillData;
+            lp.Iniciar(dir, velocidade, DanoAtual);
         }
 
         StartCoroutine(FlashPlayer());
@@ -103,6 +115,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
 
 public class LaminaProjetil : MonoBehaviour
 {
+    public SkillData skillDataRef;
     Vector2 dir;
     float   vel;
     float   dano;
@@ -161,6 +174,7 @@ public class LaminaProjetil : MonoBehaviour
               ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
         if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas))
             EvolutionFX.SpawnExplosao(transform.position, 1.5f, dano * 0.5f, new Color(0.85f, 0.92f, 1f), this);
         atingiu = true;

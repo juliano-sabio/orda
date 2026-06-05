@@ -17,8 +17,16 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
         public void OnEvolucaoAplicada(SkillEvolutionType tipo) { if (tipo == SkillEvolutionType.PulsoAlcance) raio *= 1.75f; }
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(0.3f, 0.9f, 0.5f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano  = data.attackBonus > 0f        ? data.attackBonus        : 15f;
         intervalo = data.activationInterval > 0f ? data.activationInterval : 1.2f;
         raio      = data.specialValue > 0f       ? data.specialValue       : 3.5f;
@@ -46,6 +54,7 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
             var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
             if (ic == null || ic.estaMorrendo) continue;
             ic.ReceberDano(danoReal, false);
+            SkillElementEffect.Aplicar(skillData, ic.gameObject, danoReal, this);
             atingidos.Add(ic);
         }
         // Pulso em Cadeia: propaga 50% para vizinhos

@@ -18,8 +18,16 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
         public void OnEvolucaoAplicada(SkillEvolutionType tipo) { if (tipo == SkillEvolutionType.ChicoteAlcance) raio *= 1.5f; }
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(0.1f, 0.85f, 1f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano  = data.attackBonus > 0f        ? data.attackBonus        : 30f;
         intervalo = data.activationInterval > 0f ? data.activationInterval : 2f;
         raio      = data.specialValue > 0f       ? data.specialValue       : 4f;
@@ -127,6 +135,7 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
                 if (atingidos.Contains(id)) continue;
                 atingidos.Add(id);
                 ic.ReceberDano(DanoAtual, false);
+                SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
                 if (SkillEvolutionManager.Tem(SkillEvolutionType.ChicoteEletrico)) EvolutionFX.AplicarLentidao(ic, 1f, 0.4f);
                 StartCoroutine(FlashInimigo(ic));
                 SpawnImpactoInimigo(ic.transform.position);

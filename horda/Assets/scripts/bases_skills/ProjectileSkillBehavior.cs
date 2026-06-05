@@ -8,7 +8,6 @@ public class PassiveProjectileSkill2D : SkillBehavior
     public float activationInterval = 2.0f;
     public float searchRange = 10f;
 
-    private SkillData skillData;
     private float activationTimer = 0f;
 
     public override void Initialize(PlayerStats stats)

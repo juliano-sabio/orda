@@ -20,8 +20,16 @@ public class CorteFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(0.65f, 0.92f, 1f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f          ? data.attackBonus        : 35f;
         intervalo   = data.activationInterval > 0f   ? data.activationInterval : 2.5f;
         qtdCortes   = data.projectileCount > 0       ? data.projectileCount    : 2;
@@ -103,7 +111,9 @@ public class CorteFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga
 
         var go = new GameObject("CorteFantasma");
         go.transform.position = origem;
-        go.AddComponent<CorteFantasmaProjetil>().Iniciar(alvo, velocidade, DanoAtual, this);
+        var proj = go.AddComponent<CorteFantasmaProjetil>();
+        proj.skillDataRef = skillData;
+        proj.Iniciar(alvo, velocidade, DanoAtual, this);
     }
 
     List<InimigoController> EncontrarAlvos(int qtd)
@@ -125,6 +135,7 @@ public class CorteFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga
 
 public class CorteFantasmaProjetil : MonoBehaviour
 {
+    public SkillData           skillDataRef;
     InimigoController          alvo;
     CorteFantasmaSkillBehavior skillBehavior;
     Vector2                    dir;
@@ -219,6 +230,7 @@ public class CorteFantasmaProjetil : MonoBehaviour
 
         atingiu = true;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
 
         // CorteLetal: 2 hits no mesmo inimigo = atordoamento
         if (SkillEvolutionManager.Tem(SkillEvolutionType.CorteLetal) && skillBehavior != null)

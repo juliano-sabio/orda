@@ -17,8 +17,16 @@ public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(0.3f, 1f, 0.5f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         if (data.cooldown > 0f)           recarga   = data.cooldown;
         if (data.specialValue > 0f)       raio      = data.specialValue;
         if (data.activationInterval > 0f) duracao   = data.activationInterval;

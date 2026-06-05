@@ -39,7 +39,7 @@ public class SkillChoiceUI : MonoBehaviour
     // Quando true, a próxima chamada mostra apenas skills de defesa/passiva (resetado automaticamente)
     [HideInInspector] public bool somenteSkillsDeDefesa = false;
 
-    private List<SkillData> currentChoices;
+    public List<SkillData> currentChoices;
     private System.Action<SkillData> onSkillChosen;
     private List<GameObject> currentButtons = new List<GameObject>();
     private float previousTimeScale;
@@ -340,8 +340,7 @@ public class SkillChoiceUI : MonoBehaviour
         {
             if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
             {
-                string elementIcon = GetElementIcon(skill.element);
-                text.text = $"<b>{skill.skillName}</b>\n{elementIcon} {skill.element}";
+                text.text = $"<b>{skill.skillName}</b>";
             }
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {
@@ -353,12 +352,24 @@ public class SkillChoiceUI : MonoBehaviour
             }
         }
 
-        Image[] images = cardObj.GetComponentsInChildren<Image>();
-        foreach (Image img in images)
+        if (skill.icon != null)
         {
-            if ((img.name.Contains("Icon") || img.name.Contains("Image")) && skill.icon != null)
+            // Prioridade: IconInner (dentro do slot_frame), senão qualquer Image com "Icon"/"Image"
+            var innerT = cardObj.transform.Find("IconArea/IconImageSlot/IconInner");
+            Image iconImg = innerT != null ? innerT.GetComponent<Image>() : null;
+            if (iconImg == null)
             {
-                img.sprite = skill.icon;
+                // Busca apenas "IconInner" — evita sobrescrever slot_frame em IconImageSlot
+                foreach (var img in cardObj.GetComponentsInChildren<Image>())
+                {
+                    if (img.name == "IconInner") { iconImg = img; break; }
+                }
+            }
+            if (iconImg != null)
+            {
+                iconImg.sprite = skill.icon;
+                iconImg.type = Image.Type.Simple;
+                iconImg.preserveAspect = true;
             }
         }
     }
@@ -425,38 +436,107 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void CreateEmergencySkillButton(SkillData skill, int index)
     {
+        // ── Root card ──────────────────────────────────────────────────────────
         GameObject cardObj = new GameObject($"EmergencyCard_{skill.skillName}",
             typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
-
         cardObj.transform.SetParent(skillsContainer);
         cardObj.SetActive(true);
         currentButtons.Add(cardObj);
 
-        Image image = cardObj.GetComponent<Image>();
-        var cardSprite = Resources.Load<Sprite>("UI/carta_frame");
-        if (cardSprite == null)
-            cardSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/assets/UI/skill_card/cartaskill.png");
-        if (cardSprite != null) {
-            image.sprite = cardSprite;
-            image.color  = Color.white;
-            image.type   = Image.Type.Sliced;
-        } else {
-            image.color = new Color(0.07f, 0.05f, 0.10f, 0.97f);
-        }
+        // Background: carta_frame simples esticado para preencher o componente
+        Image bgImg = cardObj.GetComponent<Image>();
+        Sprite cartaFrame = CarregarSprite("Assets/assets/UI/skill_card/cartaskill.png", "carta_frame");
+        if (cartaFrame != null) { bgImg.sprite = cartaFrame; bgImg.color = Color.white; }
+        else                    { bgImg.color = new Color(0.07f, 0.05f, 0.10f, 0.97f); }
+        bgImg.type = Image.Type.Simple;
+        bgImg.preserveAspect = false;
+        bgImg.raycastTarget = true;
 
         SetupCardTransform(cardObj);
-        AplicarEstileDarkFantasyCard(cardObj);
-        SetupSkillCardManually(cardObj, skill);
+
+        // ── IconArea: faixa do topo que serve como container para o slot ────────
+        var iconArea = new GameObject("IconArea", typeof(RectTransform));
+        iconArea.transform.SetParent(cardObj.transform, false);
+        var iaRT = iconArea.GetComponent<RectTransform>();
+        iaRT.anchorMin = new Vector2(0f, 0.68f); iaRT.anchorMax = new Vector2(1f, 0.97f);
+        iaRT.anchoredPosition = Vector2.zero; iaRT.sizeDelta = Vector2.zero;
+
+        // IconImageSlot: stretch preenchendo a IconArea com margem pequena
+        var slotGO = new GameObject("IconImageSlot", typeof(RectTransform), typeof(Image));
+        slotGO.transform.SetParent(iconArea.transform, false);
+        var slotRT = slotGO.GetComponent<RectTransform>();
+        slotRT.anchorMin = new Vector2(0.05f, 0.05f); slotRT.anchorMax = new Vector2(0.95f, 0.95f);
+        slotRT.pivot = new Vector2(0.5f, 0.5f);
+        slotRT.anchoredPosition = Vector2.zero; slotRT.sizeDelta = Vector2.zero;
+        var slotImg = slotGO.GetComponent<Image>();
+        Sprite slotFrame = CarregarSprite("Assets/assets/UI/skill_card/cartaskill.png", "slot_frame");
+        if (slotFrame != null) { slotImg.sprite = slotFrame; slotImg.type = Image.Type.Sliced; slotImg.fillCenter = false; }
+        else { slotImg.color = new Color(0.6f, 0.1f, 0.1f, 0.5f); }
+        slotImg.color = Color.white;
+        slotImg.raycastTarget = false;
+
+        // IconInner: ícone da skill preenchendo o interior do slot
+        var innerGO = new GameObject("IconInner", typeof(RectTransform), typeof(Image));
+        innerGO.transform.SetParent(slotGO.transform, false);
+        var innerRT = innerGO.GetComponent<RectTransform>();
+        innerRT.anchorMin = new Vector2(0.1f, 0.1f); innerRT.anchorMax = new Vector2(0.9f, 0.9f);
+        innerRT.anchoredPosition = Vector2.zero; innerRT.sizeDelta = Vector2.zero;
+        var innerImg = innerGO.GetComponent<Image>();
+        innerImg.preserveAspect = true; innerImg.raycastTarget = false;
+        if (skill.icon != null) { innerImg.sprite = skill.icon; }
+
+        // ── NameArea ──────────────────────────────────────────────────────────
+        CriarTextoArea(cardObj, "NameArea", "NameText", $"<b>{skill.skillName}</b>",
+            new Vector2(0f, 0.50f), new Vector2(1f, 0.68f), 14, new Color(0.95f, 0.82f, 0.40f), true);
+
+        // ── DescArea ──────────────────────────────────────────────────────────
+        CriarTextoArea(cardObj, "DescArea", "DescText", skill.description,
+            new Vector2(0.05f, 0.22f), new Vector2(0.95f, 0.58f), 11, new Color(0.90f, 0.82f, 0.65f), false);
+
+        // ── StatsArea ─────────────────────────────────────────────────────────
+        CriarTextoArea(cardObj, "StatsArea", "StatsText", GetManualStatsText(skill),
+            new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.22f), 11, new Color(0.95f, 0.82f, 0.40f), false);
+
+        // ── Raridade ──────────────────────────────────────────────────────────
+        CriarTextoArea(cardObj, "RarityArea", "RarityText", "RARE",
+            new Vector2(0.2f, 0.13f), new Vector2(0.8f, 0.24f), 12, new Color(0.80f, 0.55f, 0.25f), false);
 
         Button button = cardObj.GetComponent<Button>();
-        if (button != null)
-        {
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => OnSkillSelected(skill));
-        }
+        button.onClick.AddListener(() => OnSkillSelected(skill));
 
         Debug.LogWarning($"🚨 Card de emergência criado para: {skill.skillName}");
+    }
+
+    private Sprite CarregarSprite(string path, string spriteName)
+    {
+#if UNITY_EDITOR
+        var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+        foreach (var a in all) if (a is Sprite s && s.name == spriteName) return s;
+#endif
+        return null;
+    }
+
+    private void CriarTextoArea(GameObject parent, string areaName, string textName,
+        string content, Vector2 anchorMin, Vector2 anchorMax,
+        float fontSize, Color cor, bool bold)
+    {
+        var area = new GameObject(areaName, typeof(RectTransform));
+        area.transform.SetParent(parent.transform, false);
+        var aRT = area.GetComponent<RectTransform>();
+        aRT.anchorMin = anchorMin; aRT.anchorMax = anchorMax;
+        aRT.anchoredPosition = Vector2.zero; aRT.sizeDelta = Vector2.zero;
+
+        var txtGO = new GameObject(textName, typeof(RectTransform));
+        txtGO.transform.SetParent(area.transform, false);
+        var tRT = txtGO.GetComponent<RectTransform>();
+        tRT.anchorMin = Vector2.zero; tRT.anchorMax = Vector2.one;
+        tRT.anchoredPosition = Vector2.zero; tRT.sizeDelta = Vector2.zero;
+
+        var txt = txtGO.AddComponent<TMPro.TextMeshProUGUI>();
+        txt.text = content; txt.fontSize = fontSize; txt.color = cor;
+        txt.alignment = TMPro.TextAlignmentOptions.Center;
+        txt.textWrappingMode = TMPro.TextWrappingModes.Normal;
+        if (bold) txt.fontStyle = TMPro.FontStyles.Bold;
     }
 
     private void SetupSkillCardManually(GameObject cardObj, SkillData skill)
@@ -478,12 +558,23 @@ public class SkillChoiceUI : MonoBehaviour
             }
         }
 
-        Image[] images = cardObj.GetComponentsInChildren<Image>();
-        foreach (Image img in images)
+        if (skill.icon != null)
         {
-            if ((img.name.Contains("Icon") || img.name.Contains("Image")) && skill.icon != null)
+            var innerT = cardObj.transform.Find("IconArea/IconImageSlot/IconInner");
+            Image iconImg = innerT != null ? innerT.GetComponent<Image>() : null;
+            if (iconImg == null)
             {
-                img.sprite = skill.icon;
+                foreach (var img in cardObj.GetComponentsInChildren<Image>())
+                {
+                    if (img.name == "IconInner" || img.name.Contains("Icon") || img.name.Contains("Image"))
+                    { iconImg = img; break; }
+                }
+            }
+            if (iconImg != null)
+            {
+                iconImg.sprite = skill.icon;
+                iconImg.type = Image.Type.Simple;
+                iconImg.preserveAspect = false;
             }
         }
     }

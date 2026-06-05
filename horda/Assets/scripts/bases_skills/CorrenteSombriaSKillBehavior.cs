@@ -30,8 +30,16 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
         linhasAtivas.Clear();
     }
 
+    static readonly Color COR_ORIG = new Color(0.5f, 0.1f, 0.9f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano    = data.attackBonus > 0f          ? data.attackBonus        : 12f;
         intervalo   = data.activationInterval > 0f   ? data.activationInterval : 5f;
         duracaoAtiva = data.duration > 0f            ? data.duration           : 3f;
@@ -137,6 +145,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
                     if (ic != null && !ic.estaMorrendo && ic.gameObject != null)
                     {
                         ic.ReceberDano(DanoAtual * danoMult, false);
+                        SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual * danoMult, this);
                         StartCoroutine(FlashAlvo(ic.transform));
                         if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante))
                         {

@@ -27,8 +27,16 @@ public class CristaisGeloSkillBehavior : SkillBehavior, ISkillComRecarga
         timer = intervaloTiro;
     }
 
+    static readonly Color COR_ORIG = new Color(0.45f, 0.88f, 1f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano       = data.attackBonus > 0f          ? data.attackBonus        : 18f;
         intervaloTiro  = data.activationInterval > 0f   ? data.activationInterval : 1.2f;
         qtdCristais    = data.projectileCount > 0        ? data.projectileCount    : 3;
@@ -98,7 +106,9 @@ public class CristaisGeloSkillBehavior : SkillBehavior, ISkillComRecarga
         // Cria projétil
         var go = new GameObject("ProjetilGelo");
         go.transform.position = origem;
-        go.AddComponent<ProjetilGelo>().Iniciar(alvo, velocProjetil, DanoAtual,
+        var pg = go.AddComponent<ProjetilGelo>();
+        pg.skillDataRef = skillData;
+        pg.Iniciar(alvo, velocProjetil, DanoAtual,
             SkillEvolutionManager.Tem(SkillEvolutionType.CristaisExplosivos));
     }
 
@@ -242,6 +252,7 @@ public class CristalOrbital : MonoBehaviour
 
 public class ProjetilGelo : MonoBehaviour
 {
+    public SkillData  skillDataRef;
     InimigoController alvo;
     Vector2           dir;
     float             vel, dano;
@@ -293,6 +304,7 @@ public class ProjetilGelo : MonoBehaviour
         if (ic == null) return;
         atingiu = true;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
 
         // Lentidão
         EvolutionFX.AplicarLentidao(ic, 2f, 0.45f);

@@ -16,8 +16,16 @@ public class EspelhoMagicoSkillBehavior : SkillBehavior, ISkillComRecarga
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(0.6f, 0.9f, 1f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         if (data.cooldown > 0f)           recarga = data.cooldown;
         if (data.activationInterval > 0f) duracao = data.activationInterval;
     }
@@ -61,7 +69,7 @@ public class EspelhoMagicoSkillBehavior : SkillBehavior, ISkillComRecarga
         }
         // EspelhoAmplificado — 150%, padrão — 100%
         float mult = SkillEvolutionManager.Tem(SkillEvolutionType.EspelhoAmplificado) ? 1.5f : 1.0f;
-        if (alvo != null) alvo.ReceberDano(dano * mult, false);
+        if (alvo != null) { alvo.ReceberDano(dano * mult, false); SkillElementEffect.Aplicar(skillData, alvo.gameObject, dano * mult, this); }
 
         // EspelhoExplosivo — explosão em área no alvo
         if (SkillEvolutionManager.Tem(SkillEvolutionType.EspelhoExplosivo) && alvo != null)

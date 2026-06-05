@@ -18,8 +18,16 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(1f, 0.5f, 0.1f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano   = data.attackBonus > 0f        ? data.attackBonus        : 12f;
         intervalo  = data.activationInterval > 0f ? data.activationInterval : 6f;
         qtdMisseis = data.projectileCount > 0     ? data.projectileCount    : 3;
@@ -53,7 +61,9 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
             // Lança em espiral ao redor do player
             float angSpiral = (360f / qtdReal * i) * Mathf.Deg2Rad;
             go.transform.position = origem + new Vector2(Mathf.Cos(angSpiral), Mathf.Sin(angSpiral)) * 0.5f;
-            go.AddComponent<MissilProjetil>().Iniciar(alvo, velocidade, DanoAtual);
+            var mp = go.AddComponent<MissilProjetil>();
+            mp.skillDataRef = skillData;
+            mp.Iniciar(alvo, velocidade, DanoAtual);
             yield return new WaitForSeconds(0.12f);
         }
     }
@@ -99,6 +109,7 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
 
 public class MissilProjetil : MonoBehaviour
 {
+    public SkillData skillDataRef;
     InimigoController alvo;
     Vector2 dir;
     float   vel, dano;
@@ -157,6 +168,7 @@ public class MissilProjetil : MonoBehaviour
         if (ic == null) return;
         atingiu = true;
         ic.ReceberDano(dano, false);
+        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
         if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisExplosivos))
             EvolutionFX.SpawnExplosao(transform.position, 2f, dano * 0.6f, new Color(1f, 0.5f, 0.1f), this);
         StartCoroutine(EfeitoImpacto());

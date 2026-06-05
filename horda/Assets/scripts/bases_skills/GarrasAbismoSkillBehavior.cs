@@ -28,8 +28,16 @@ public class GarrasAbismoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
     }
 public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
+    static readonly Color COR_ORIG = new Color(0.45f, 0.1f, 0.7f);
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void ConfigurarDeSkillData(SkillData data)
     {
+        this.skillData = data;
         baseDano      = data.attackBonus > 0f          ? data.attackBonus        : 25f;
         intervalo     = data.activationInterval > 0f   ? data.activationInterval : 4f;
         qtdAlvos      = data.projectileCount > 0 ? data.projectileCount : 2;
@@ -87,10 +95,11 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
         // Dano e prende
         bool execucao = SkillEvolutionManager.Tem(SkillEvolutionType.Execucao) &&
                         ic.vidaAtual / Mathf.Max(1f, ic.vidaMaxima) < 0.25f;
-        if (execucao) { ic.ReceberDano(ic.vidaAtual + 1f, false); }
+        if (execucao) { ic.ReceberDano(ic.vidaAtual + 1f, false); SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this); }
         else
         {
             ic.ReceberDano(DanoAtual, false);
+            SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.GarrasVenenosas))
                 EvolutionFX.AplicarVeneno(ic, DanoAtual * 0.4f, 2.5f);
         }
