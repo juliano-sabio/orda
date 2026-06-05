@@ -21,7 +21,7 @@ MonoBehaviour:
   duration: 5
   element: 3
   specialEffect: "Inimigos atra\xEDdos recebem tint roxo e arcos el\xE9tricos."
-  ultimateType: 0
+  ultimateType: 56
   specialValue: 0
   behaviorScriptName: PulsoMagneticoUltimate
   visualEffectPrefab: {fileID: 0}

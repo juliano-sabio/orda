@@ -21,7 +21,7 @@ MonoBehaviour:
   duration: 4
   element: 2
   specialEffect: "Inimigos congelados ficam im\xF3veis e com tint azul."
-  ultimateType: 0
+  ultimateType: 46
   specialValue: 0
   behaviorScriptName: CampoDeGeloUltimate
   visualEffectPrefab: {fileID: 0}

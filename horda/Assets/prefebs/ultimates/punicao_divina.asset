@@ -22,7 +22,7 @@ MonoBehaviour:
   duration: 3
   element: 2
   specialEffect: "Raio branco-dourado largo + explos\xE3o de luz + 3 raios secund\xE1rios."
-  ultimateType: 0
+  ultimateType: 57
   specialValue: 0
   behaviorScriptName: PunicaoDivinaUltimate
   visualEffectPrefab: {fileID: 0}

@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: +80% de vida do escudo.
   icone: {fileID: -1949818493086652813, guid: fa4be220979e19748a6d727ccdc38d22, type: 3}
   corDestaque: {r: 0.2, g: 0.6, b: 1, a: 1}
-  skillAlvo: 38
+  skillAlvo: 32
   tipoEvolucao: 43
   raridade: 2

@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: +50% de alcance dos cortes.
   icone: {fileID: -3114996697606224331, guid: 71436e97be366334287171ba430ff64d, type: 3}
   corDestaque: {r: 0.85, g: 0.85, b: 1, a: 1}
-  skillAlvo: 34
+  skillAlvo: 37
   tipoEvolucao: 36
   raridade: 2

@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: "Ao quebrar, explode causando dano em \xE1rea."
   icone: {fileID: -1949818493086652813, guid: fa4be220979e19748a6d727ccdc38d22, type: 3}
   corDestaque: {r: 0.4, g: 0.8, b: 1, a: 1}
-  skillAlvo: 38
+  skillAlvo: 32
   tipoEvolucao: 44
   raridade: 3

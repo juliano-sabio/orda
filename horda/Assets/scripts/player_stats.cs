@@ -969,6 +969,30 @@ public class PlayerStats : MonoBehaviour
 
         float remaining = Mathf.Max(0f, damage - defense * 0.5f);
 
+        // Espelho Mágico — reflete o dano ao atacante mais próximo
+        var espelho = GetComponent<EspelhoMagicoSkillBehavior>();
+        if (espelho != null && espelho.TentarRefletir(remaining))
+        {
+            UpdateUI();
+            return;
+        }
+
+        // Escudo de Karma — absorve o hit completamente
+        var karma = GetComponent<EscudoKarmaSkillBehavior>();
+        if (karma != null && karma.AbsorverHit(damage))
+        {
+            UpdateUI();
+            return;
+        }
+
+        // Barreira Reflexiva — reflete parte do dano
+        var barrReflex = GetComponent<BarreiraReflexivaSkillBehavior>();
+        if (barrReflex != null) remaining = barrReflex.AplicarReflexao(remaining);
+
+        // Aureola — reduz dano enquanto ativa
+        var aureola = GetComponent<AureolaSkillBehavior>();
+        if (aureola != null) remaining = aureola.AplicarReducao(remaining);
+
         if (shieldPoints > 0f)
         {
             float absorbed = Mathf.Min(shieldPoints, remaining);

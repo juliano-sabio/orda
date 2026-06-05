@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
   nomeEvolucao: Cruz Dupla
   descricao: "Dispara em 8 dire\xE7\xF5es (+ e \xD7)."
-  icone: {fileID: 1330450550990237758, guid: 60c473160ebf68e499fd92cd34276c80, type: 3}
+  icone: {fileID: -5297922342500171361, guid: 2618fb617ffb9ad459845b4662aea8ee, type: 3}
   corDestaque: {r: 0.55, g: 0.25, b: 1, a: 1}
   skillAlvo: 28
   tipoEvolucao: 9

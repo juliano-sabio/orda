@@ -23,7 +23,7 @@ MonoBehaviour:
   element: 0
   specialEffect: "Pulsos s\xF4nicos causam 18 de dano base (+25% por pulso). Empurra
     inimigos e desvia proj\xE9teis."
-  ultimateType: 0
+  ultimateType: 54
   specialValue: 0
   behaviorScriptName: EscudoSonicoUltimate
   visualEffectPrefab: {fileID: 0}

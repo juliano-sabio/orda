@@ -23,7 +23,7 @@ MonoBehaviour:
   element: 0
   specialEffect: "Invulnerabilidade + HP cheio ao sair. Estilha\xE7os causam 60 de
     dano em raio 5."
-  ultimateType: 0
+  ultimateType: 51
   specialValue: 0
   behaviorScriptName: CasuloCristalUltimate
   visualEffectPrefab: {fileID: 0}

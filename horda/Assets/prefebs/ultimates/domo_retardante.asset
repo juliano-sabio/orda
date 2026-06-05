@@ -22,7 +22,7 @@ MonoBehaviour:
   duration: 5
   element: 0
   specialEffect: Projeteis inimigos ficam lentos dentro do domo.
-  ultimateType: 0
+  ultimateType: 58
   specialValue: 0
   behaviorScriptName: DomoRetardanteUltimate
   visualEffectPrefab: {fileID: 0}

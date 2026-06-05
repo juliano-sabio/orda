@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: "Ao teleportar, fica invulner\xE1vel por 2s."
   icone: {fileID: 4396318724939022649, guid: ce72fdc3b7cfa294e8d4bc828390be7e, type: 3}
   corDestaque: {r: 0.6, g: 0.2, b: 1, a: 1}
-  skillAlvo: 37
+  skillAlvo: 31
   tipoEvolucao: 41
   raridade: 2

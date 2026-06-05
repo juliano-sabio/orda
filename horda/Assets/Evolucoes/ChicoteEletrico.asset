@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: Inimigos atingidos ficam lentos por 1s.
   icone: {fileID: 6843361105861325913, guid: da8bd35793f74004aba2e7e45b5c39ed, type: 3}
   corDestaque: {r: 0.2, g: 0.8, b: 1, a: 1}
-  skillAlvo: 31
+  skillAlvo: 34
   tipoEvolucao: 15
   raridade: 2

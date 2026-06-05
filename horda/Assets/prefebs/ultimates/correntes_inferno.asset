@@ -23,7 +23,7 @@ MonoBehaviour:
   element: 1
   specialEffect: "8 correntes de fogo em todas as dire\xE7\xF5es; inimigos presos
     queimam continuamente."
-  ultimateType: 0
+  ultimateType: 52
   specialValue: 0
   behaviorScriptName: CorrentesInfernoUltimate
   visualEffectPrefab: {fileID: 0}

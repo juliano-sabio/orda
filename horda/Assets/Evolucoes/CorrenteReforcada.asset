@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: +1 alvo e dano dobrado.
   icone: {fileID: -8977548862602377259, guid: 14481da4c03d07d4f91fb58dea5aa33d, type: 3}
   corDestaque: {r: 0.5, g: 0.15, b: 0.9, a: 1}
-  skillAlvo: 35
+  skillAlvo: 38
   tipoEvolucao: 23
   raridade: 2

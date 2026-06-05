@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
   nomeEvolucao: Drenagem Massiva
   descricao: +50% de raio da aura de drenagem.
-  icone: {fileID: 0}
+  icone: {fileID: -2459815457080990079, guid: a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5, type: 3}
   corDestaque: {r: 0.75, g: 0.05, b: 0.35, a: 1}
   skillAlvo: 53
   tipoEvolucao: 82

@@ -568,6 +568,24 @@ public class SkillManager : MonoBehaviour
             case SpecificSkillType.BarreiraEnergia:
                 AddBehavior<BarreiraEnergiaSkillBehavior>(skill);
                 break;
+            case SpecificSkillType.Aureola:
+                AddBehavior<AureolaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.BarreiraReflexiva:
+                AddBehavior<BarreiraReflexivaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.TeiaProtecao:
+                AddBehavior<TeiaProtecaoSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.InstintoSobrevivencia:
+                AddBehavior<InstintoSobrevivenciaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.EspelhoMagico:
+                AddBehavior<EspelhoMagicoSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.EscudoKarma:
+                AddBehavior<EscudoKarmaSkillBehavior>(skill);
+                break;
             case SpecificSkillType.LancaLuz:
                 AddBehavior<LancaLuzSkillBehavior>(skill);
                 break;

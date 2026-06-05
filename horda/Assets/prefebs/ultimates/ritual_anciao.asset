@@ -23,7 +23,7 @@ MonoBehaviour:
   element: 0
   specialEffect: "Pent\xE1gono roxo que vira vermelho; inimigos acumulam dano crescente;
     explos\xE3o final."
-  ultimateType: 0
+  ultimateType: 49
   specialValue: 0
   behaviorScriptName: RitualAnciaoUltimate
   visualEffectPrefab: {fileID: 0}

@@ -22,7 +22,7 @@ MonoBehaviour:
   duration: 10
   element: 4
   specialEffect: Fantasmas roxos orbitam a zona e atacam inimigos automaticamente.
-  ultimateType: 0
+  ultimateType: 48
   specialValue: 0
   behaviorScriptName: NecropoleUltimate
   visualEffectPrefab: {fileID: 0}

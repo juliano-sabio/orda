@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: Inimigos atingidos propagam 50% do dano para vizinhos.
   icone: {fileID: 6551422454796549251, guid: c03f239cc99ba30418b99d4c90f4848b, type: 3}
   corDestaque: {r: 0.2, g: 1, b: 0.4, a: 1}
-  skillAlvo: 33
+  skillAlvo: 36
   tipoEvolucao: 20
   raridade: 3

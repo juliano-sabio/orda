@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
   nomeEvolucao: Gelo Eterno
   descricao: "+4s de dura\xE7\xE3o total do Campo de Gelo."
-  icone: {fileID: 0}
+  icone: {fileID: -8909505179940084187, guid: 0b30c626fedbeaf44afba239d80252d8, type: 3}
   corDestaque: {r: 0.3, g: 0.7, b: 1, a: 1}
   skillAlvo: 46
   tipoEvolucao: 68

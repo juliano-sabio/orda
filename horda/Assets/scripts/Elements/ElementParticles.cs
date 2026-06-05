@@ -65,7 +65,9 @@ public class ElementParticles : MonoBehaviour
                     new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.6f, 0.5f), new GradientAlphaKey(0f, 1f) });
                 var vel = ps.velocityOverLifetime;
                 vel.enabled = true;
+                vel.x = new ParticleSystem.MinMaxCurve(0f, 0f);
                 vel.y = new ParticleSystem.MinMaxCurve(0.5f, 1.5f);
+                vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
                 break;
 
             case ElementType.Raio:
@@ -99,7 +101,9 @@ public class ElementParticles : MonoBehaviour
                     new[] { new GradientAlphaKey(0.8f, 0f), new GradientAlphaKey(0.4f, 0.6f), new GradientAlphaKey(0f, 1f) });
                 var velT = ps.velocityOverLifetime;
                 velT.enabled = true;
+                velT.x = new ParticleSystem.MinMaxCurve(0f, 0f);
                 velT.y = new ParticleSystem.MinMaxCurve(0.2f, 0.8f);
+                velT.z = new ParticleSystem.MinMaxCurve(0f, 0f);
                 break;
 
             case ElementType.Luz:

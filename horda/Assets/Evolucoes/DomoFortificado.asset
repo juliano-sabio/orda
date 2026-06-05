@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
   nomeEvolucao: Domo Fortificado
   descricao: "+3s de dura\xE7\xE3o e velocidade dentro do domo reduz a 0.3."
-  icone: {fileID: 0}
+  icone: {fileID: -6806036942964783702, guid: 654ab45a4e79e914fabae3ddf64f07fe, type: 3}
   corDestaque: {r: 0.2, g: 0.7, b: 1, a: 1}
   skillAlvo: 58
   tipoEvolucao: 91

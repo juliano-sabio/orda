@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
   nomeEvolucao: Gelo Absoluto
   descricao: Inimigos congelados recebem 50% mais dano de todas as fontes.
-  icone: {fileID: 0}
+  icone: {fileID: -8909505179940084187, guid: 0b30c626fedbeaf44afba239d80252d8, type: 3}
   corDestaque: {r: 0.5, g: 0.85, b: 1, a: 1}
   skillAlvo: 46
   tipoEvolucao: 67

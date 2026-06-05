@@ -22,7 +22,7 @@ MonoBehaviour:
   duration: 8
   element: 4
   specialEffect: "Entidade roxa com 3 olhos desce tent\xE1culos em inimigos aleat\xF3rios."
-  ultimateType: 0
+  ultimateType: 59
   specialValue: 0
   behaviorScriptName: DespertarAnciaoUltimate
   visualEffectPrefab: {fileID: 0}

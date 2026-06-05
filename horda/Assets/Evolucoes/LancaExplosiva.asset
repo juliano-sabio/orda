@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: "Explode em \xE1rea ao atingir o primeiro inimigo."
   icone: {fileID: -3898843575368328328, guid: c67cd95abc64cd248aa05d3f147e4794, type: 3}
   corDestaque: {r: 1, g: 0.7, b: 0.1, a: 1}
-  skillAlvo: 30
+  skillAlvo: 33
   tipoEvolucao: 14
   raridade: 3

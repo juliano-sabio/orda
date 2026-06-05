@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
   nomeEvolucao: Despertar Furioso
   descricao: "Intervalo entre golpes tent\xE1culo reduz para 0.35s."
-  icone: {fileID: 0}
+  icone: {fileID: 484392071834553536, guid: c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7, type: 3}
   corDestaque: {r: 0.35, g: 0, b: 0.55, a: 1}
   skillAlvo: 59
   tipoEvolucao: 93

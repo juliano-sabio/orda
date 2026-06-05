@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
   nomeEvolucao: Domo Inversor
   descricao: "Ao sair do domo, proj\xE9teis s\xE3o redirecionados para inimigos."
-  icone: {fileID: 0}
+  icone: {fileID: -6806036942964783702, guid: 654ab45a4e79e914fabae3ddf64f07fe, type: 3}
   corDestaque: {r: 0.1, g: 0.5, b: 1, a: 1}
   skillAlvo: 58
   tipoEvolucao: 92

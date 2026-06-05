@@ -4,49 +4,31 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// Exibe 3 cartas de status para o jogador escolher no level-up.
-// Funciona com qualquer prefab de carta — encontra textos e imagens por nome.
 public class StatusCardChoiceUI : MonoBehaviour
 {
     [Header("Referências UI")]
-    public GameObject choicePanel;
-    public Transform  cardsContainer;
+    public GameObject       choicePanel;
+    public Transform        cardsContainer;
+    public TextMeshProUGUI  titleText;
 
-    [Header("Prefabs de Carta por Raridade")]
-    public GameObject commonCardPrefab;
-    public GameObject rareCardPrefab;
-    public GameObject mysticCardPrefab;
-    public GameObject curseCardPrefab;
-    public GameObject fallbackCardPrefab;   // usado se o de raridade não estiver atribuído
+    [Header("Prefab de Carta (mesmo das skills)")]
+    public GameObject cardPrefab;   // arraste aqui o mesmo prefab usado nas skill cards
 
-    [Header("Icones por Tipo de Status")]
-    public Sprite healthIcon;
-    public Sprite attackIcon;
-    public Sprite defenseIcon;
-    public Sprite speedIcon;
-    public Sprite regenIcon;
-    public Sprite critIcon;
-    public Sprite attackSpeedIcon;
-
-    [Header("Título")]
-    public TextMeshProUGUI titleText;
-    public string titleMessage = "ESCOLHA UMA CARTA DE STATUS";
+    [Header("Sprites (override do carregamento automático)")]
+    public Sprite fundoCarta;   // fundoteste.png → fundoteste_0
+    public Sprite frameSlot;    // cartaskill.png → carta_frame
 
     [Header("Configurações")]
-    public bool pauseGameDuringChoice = true;
-    public float cardSpacing = 30f;
-    public Vector2 cardSize = new Vector2(300f, 450f);
-
-    // Cores de fundo por raridade (caso os prefabs usem a mesma Image)
-    [Header("Cores de Raridade (fallback)")]
-    public Color commonColor  = new Color(0.30f, 0.40f, 0.60f);
-    public Color rareColor    = new Color(0.50f, 0.20f, 0.70f);
-    public Color mysticColor  = new Color(0.70f, 0.55f, 0.10f);
-    public Color curseColor   = new Color(0.55f, 0.10f, 0.10f);
+    public bool    pauseGameDuringChoice = true;
+    public float   cardSpacing           = 30f;
+    public Vector2 cardSize              = new Vector2(300f, 450f);
+    public float   tempoEscolha          = 20f;
+    public string  titleMessage          = "ESCOLHA UMA CARTA DE STATUS";
 
     private System.Action<StatusCardInfo> onCardChosen;
     private List<GameObject> spawnedCards = new List<GameObject>();
     private float previousTimeScale;
+    private Coroutine contadorCoroutine;
 
     void Awake()
     {
@@ -59,152 +41,277 @@ public class StatusCardChoiceUI : MonoBehaviour
     {
         onCardChosen = callback;
 
-        if (!gameObject.activeInHierarchy)
-            gameObject.SetActive(true);
+        if (!gameObject.activeInHierarchy) gameObject.SetActive(true);
 
-        if (choicePanel != null)
-            choicePanel.SetActive(true);
+        if (choicePanel != null) choicePanel.SetActive(true);
 
-        if (titleText != null)
-            titleText.text = titleMessage;
+        if (titleText != null) titleText.text = titleMessage;
 
-        if (pauseGameDuringChoice)
-        {
-            previousTimeScale = Time.timeScale;
-            Time.timeScale = 0f;
-        }
-
+        PauseGame();
         SetupLayout();
+
+        if (contadorCoroutine != null) StopCoroutine(contadorCoroutine);
+        contadorCoroutine = StartCoroutine(ContadorEscolha());
+
         StartCoroutine(SpawnCards(cards));
     }
 
-    // ── Internos ─────────────────────────────────────────────────────────────
+    public void ClosePanel()
+    {
+        if (contadorCoroutine != null) { StopCoroutine(contadorCoroutine); contadorCoroutine = null; }
+        ResumeGame();
+        if (choicePanel != null) choicePanel.SetActive(false);
+        ClearCards();
+        onCardChosen = null;
+        gameObject.SetActive(false);
+    }
+
+    // ── Layout ───────────────────────────────────────────────────────────────
 
     private void SetupLayout()
     {
         if (cardsContainer == null) return;
-
-        HorizontalLayoutGroup layout = cardsContainer.GetComponent<HorizontalLayoutGroup>();
-        if (layout == null) layout = cardsContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
-
-        layout.spacing           = cardSpacing;
-        layout.padding           = new RectOffset(30, 30, 20, 20);
-        layout.childAlignment    = TextAnchor.MiddleCenter;
-        layout.childControlWidth = false;
+        var layout = cardsContainer.GetComponent<HorizontalLayoutGroup>()
+                  ?? cardsContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing            = cardSpacing;
+        layout.padding            = new RectOffset(30, 30, 20, 20);
+        layout.childAlignment     = TextAnchor.MiddleCenter;
+        layout.childControlWidth  = false;
         layout.childControlHeight = false;
         layout.childForceExpandWidth  = false;
         layout.childForceExpandHeight = false;
     }
 
+    // ── Criação de cartas ────────────────────────────────────────────────────
+
     private IEnumerator SpawnCards(List<StatusCardInfo> cards)
     {
         ClearCards();
-        yield return new WaitForEndOfFrame();
-
-        foreach (StatusCardInfo card in cards)
-            SpawnCard(card);
-
-        yield return StartCoroutine(RefreshLayout());
+        yield return null;
+        foreach (var card in cards) SpawnCard(card);
+        yield return null;
+        if (cardsContainer != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(cardsContainer as RectTransform);
     }
 
     private void SpawnCard(StatusCardInfo card)
     {
-        GameObject prefab = GetPrefabForRarity(card.rarity);
-        if (prefab == null)
+        // 1. Prefab manual no Inspector
+        if (cardPrefab != null) { SpawnCardDoPrefab(card, cardPrefab); return; }
+
+        // 2. Mesmo prefab genérico do SkillChoiceUI
+        var skillUI = FindFirstObjectByType<SkillChoiceUI>();
+        if (skillUI != null && skillUI.skillChoicePrefab != null)
         {
-            Debug.LogWarning($"[StatusCardChoiceUI] Sem prefab para raridade {card.rarity}, criando emergencial");
-            SpawnEmergencyCard(card);
+            SpawnCardDoPrefab(card, skillUI.skillChoicePrefab);
             return;
         }
 
-        GameObject obj = Instantiate(prefab, cardsContainer);
-        obj.name = $"StatusCard_{card.rarity}_{card.statType}";
-        obj.SetActive(true);
-        spawnedCards.Add(obj);
+        // 3. Template visual das skill cards (mesmo look garantido)
+        string[] templatePaths = { "Cards/Aureola", "Cards/EscudoEspinhoso", "Cards/barreira_reflexiva" };
+        foreach (var tp in templatePaths)
+        {
+            var t = Resources.Load<GameObject>(tp);
+            if (t != null) { SpawnCardDoPrefab(card, t); return; }
+        }
 
-        RectTransform rt = obj.GetComponent<RectTransform>();
-        if (rt != null) rt.sizeDelta = cardSize;
+        // 4. Prefab por raridade na pasta Resources/card_status/
+        string path = card.rarity switch
+        {
+            CardRarity.Common => "card_status/card_status_comun",
+            CardRarity.Rare   => "card_status/card_status_rare",
+            CardRarity.Mystic => "card_status/card_status_mystic",
+            CardRarity.Curse  => "card_status/card_status_corrupted",
+            _                 => "card_status/StatusCardPrefab"
+        };
+        var prefab = Resources.Load<GameObject>(path);
+        if (prefab != null) { SpawnCardDoPrefab(card, prefab); return; }
 
-        PopulateCard(obj, card);
-        WireButton(obj, card);
+        // 5. Totalmente programático
+        SpawnCardProgramatico(card);
     }
 
-    private void PopulateCard(GameObject obj, StatusCardInfo card)
+    // Instancia o prefab e popula campos por nome
+    private void SpawnCardDoPrefab(StatusCardInfo card, GameObject prefab)
     {
-        Color rarityColor = GetRarityColor(card.rarity);
-        string rarityLabel = GetRarityLabel(card.rarity);
+        var cardObj = Instantiate(prefab, cardsContainer);
+        cardObj.name = $"StatusCard_{card.statType}";
+        cardObj.SetActive(true);
+        spawnedCards.Add(cardObj);
 
-        // Textos — mesma estratégia de busca por nome que SkillChoiceUI
-        foreach (TextMeshProUGUI text in obj.GetComponentsInChildren<TextMeshProUGUI>(true))
+        // Tamanho
+        var rt = cardObj.GetComponent<RectTransform>();
+        if (rt != null) { rt.localScale = Vector3.one; rt.sizeDelta = cardSize; }
+        var le = cardObj.GetComponent<LayoutElement>()
+              ?? cardObj.AddComponent<LayoutElement>();
+        le.preferredWidth = cardSize.x; le.preferredHeight = cardSize.y;
+        le.flexibleWidth  = le.flexibleHeight = 0;
+
+        Color rColor = GetRarityColor(card.rarity);
+
+        // Fundo da carta — sobrescreve sprite do prefab com fundoteste
+        var cardBg = cardObj.GetComponent<Image>();
+        if (cardBg != null)
         {
-            string n = text.name.ToLower();
-            if (n.Contains("name") || n.Contains("nome") || n.Contains("title"))
-                text.text = card.cardName;
-            else if (n.Contains("desc") || n.Contains("detail"))
-                text.text = card.description;
-            else if (n.Contains("rarity") || n.Contains("rarid"))
-                text.text = rarityLabel;
-            else if (n.Contains("stat") || n.Contains("bonus") || n.Contains("status"))
-                text.text = card.description;
-            // Botão de raridade (ex.: "comun", "rare", "curse")
-            else if (n.Contains("button") || n.Contains("comun") || n.Contains("rare")
-                     || n.Contains("curse") || n.Contains("mistico"))
-                text.text = rarityLabel;
+            Sprite fundo = fundoCarta
+                ?? CarregarSprite("Assets/assets/UI/charselection/fundoteste.png", "fundoteste_0");
+            if (fundo != null) { cardBg.sprite = fundo; cardBg.color = Color.white; cardBg.type = Image.Type.Simple; }
         }
 
-        // Também verifica textos Unity legados
-        foreach (Text text in obj.GetComponentsInChildren<Text>(true))
+        // Textos por nome (mesma convenção das skill cards)
+        foreach (var txt in cardObj.GetComponentsInChildren<TextMeshProUGUI>(true))
         {
-            string n = text.name.ToLower();
-            if (n.Contains("name") || n.Contains("nome") || n.Contains("title"))
-                text.text = card.cardName;
-            else if (n.Contains("rarity") || n.Contains("comun") || n.Contains("rare") || n.Contains("curse"))
-                text.text = rarityLabel;
+            string n = txt.name.ToLower();
+            if      (n.Contains("name")  || n.Contains("nome")  || n.Contains("title"))
+                txt.text = card.cardName;
+            else if (n.Contains("desc")  || n.Contains("detail"))
+                txt.text = card.description;
+            else if (n.Contains("stats") || n.Contains("bonus") || n.Contains("atq") || n.Contains("status"))
+                txt.text = FormatarBonus(card);
+            else if (n.Contains("rarity") || n.Contains("rarid") || n.Contains("rare")
+                  || n.Contains("comun")  || n.Contains("curse") || n.Contains("mistico"))
+                { txt.text = GetRarityLabel(card.rarity); txt.color = rColor; }
         }
 
-        // Ícone do tipo de status
-        Sprite icon = GetIconForStat(card.statType);
-        if (icon != null)
-        {
-            foreach (Image img in obj.GetComponentsInChildren<Image>(true))
-            {
-                string n = img.name.ToLower();
-                if (n.Contains("icon") || n.Contains("icone") || n.Contains("image"))
-                {
-                    img.sprite = icon;
-                    img.color  = Color.white;
-                    break;
-                }
-            }
-        }
+        // Ícone — remove sprite da skill anterior, pinta com cor da raridade
+        var innerImg = cardObj.transform.Find("IconArea/IconImageSlot/IconInner")
+                              ?.GetComponent<Image>();
+        if (innerImg == null)
+            foreach (var img in cardObj.GetComponentsInChildren<Image>(true))
+                if (img.name == "IconInner") { innerImg = img; break; }
+        if (innerImg != null) { innerImg.sprite = null; innerImg.color = rColor; }
 
-    }
-
-    private void WireButton(GameObject obj, StatusCardInfo card)
-    {
-        // Tenta o Button no root primeiro, depois qualquer filho
-        Button btn = obj.GetComponent<Button>();
-        if (btn == null) btn = obj.GetComponentInChildren<Button>();
-
+        // Botão
+        var btn = cardObj.GetComponent<Button>()
+               ?? cardObj.GetComponentInChildren<Button>();
         if (btn != null)
         {
             btn.onClick.RemoveAllListeners();
             btn.onClick.AddListener(() => OnCardSelected(card));
         }
-        else
-        {
-            // Sem Button — adiciona um transparente sobre o card inteiro
-            Button newBtn = obj.AddComponent<Button>();
-            Image btnImage = obj.GetComponent<Image>();
-            if (btnImage == null) btnImage = obj.AddComponent<Image>();
-            btnImage.color = new Color(0, 0, 0, 0);
-            newBtn.targetGraphic = btnImage;
-            newBtn.onClick.AddListener(() => OnCardSelected(card));
-        }
+
+        // Hover igual às skill cards
+        cardObj.AddComponent<CartaSkillAnimador>().Iniciar(cardObj);
     }
+
+    // Fallback totalmente programático (sem prefab)
+    private void SpawnCardProgramatico(StatusCardInfo card)
+    {
+        var cardObj = new GameObject($"StatusCard_{card.statType}",
+            typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+        cardObj.transform.SetParent(cardsContainer);
+        cardObj.SetActive(true);
+        spawnedCards.Add(cardObj);
+
+        Color rColor = GetRarityColor(card.rarity);
+
+        // Fundo da carta — fundoteste
+        var bgImg = cardObj.GetComponent<Image>();
+        Sprite spFundo = fundoCarta
+            ?? CarregarSprite("Assets/assets/UI/charselection/fundoteste.png", "fundoteste_0");
+        if (spFundo != null) { bgImg.sprite = spFundo; bgImg.color = Color.white; bgImg.type = Image.Type.Simple; }
+        else bgImg.color = new Color(0.07f, 0.05f, 0.10f, 0.97f);
+        bgImg.raycastTarget = true;
+
+        var rt = cardObj.GetComponent<RectTransform>();
+        rt.localScale = Vector3.one; rt.sizeDelta = cardSize;
+        var le = cardObj.GetComponent<LayoutElement>();
+        le.preferredWidth = cardSize.x; le.preferredHeight = cardSize.y;
+        le.flexibleWidth = le.flexibleHeight = 0;
+
+        // Borda de raridade
+        var bordGO = new GameObject("RarityBorder", typeof(Image));
+        bordGO.transform.SetParent(cardObj.transform, false);
+        var bordImg = bordGO.GetComponent<Image>();
+        bordImg.color = new Color(rColor.r, rColor.g, rColor.b, 0.7f);
+        var bordRT = bordGO.GetComponent<RectTransform>();
+        bordRT.anchorMin = Vector2.zero; bordRT.anchorMax = Vector2.one;
+        bordRT.offsetMin = new Vector2(-2f, -2f); bordRT.offsetMax = new Vector2(2f, 2f);
+        bordGO.transform.SetAsFirstSibling();
+
+        // Área de ícone
+        var iconArea = new GameObject("IconArea", typeof(RectTransform));
+        iconArea.transform.SetParent(cardObj.transform, false);
+        var iaRT = iconArea.GetComponent<RectTransform>();
+        iaRT.anchorMin = new Vector2(0f, 0.68f); iaRT.anchorMax = new Vector2(1f, 0.97f);
+        iaRT.anchoredPosition = Vector2.zero; iaRT.sizeDelta = Vector2.zero;
+
+        // IconImageSlot — usa carta_frame do cartaskill.png
+        var slotGO = new GameObject("IconImageSlot", typeof(RectTransform), typeof(Image));
+        slotGO.transform.SetParent(iconArea.transform, false);
+        var slotRT = slotGO.GetComponent<RectTransform>();
+        slotRT.anchorMin = new Vector2(0.05f, 0.05f); slotRT.anchorMax = new Vector2(0.95f, 0.95f);
+        slotRT.anchoredPosition = Vector2.zero; slotRT.sizeDelta = Vector2.zero;
+        var slotImg = slotGO.GetComponent<Image>();
+        Sprite spSlot = frameSlot
+            ?? CarregarSprite("Assets/assets/UI/skill_card/cartaskill.png", "carta_frame");
+        if (spSlot != null) { slotImg.sprite = spSlot; slotImg.color = Color.white; slotImg.type = Image.Type.Sliced; slotImg.fillCenter = true; }
+        else slotImg.color = new Color(rColor.r * 0.4f, rColor.g * 0.4f, rColor.b * 0.4f, 0.6f);
+        slotImg.raycastTarget = false;
+
+        // IconInner — usa skill_slot_card.aseprite
+        var innerGO = new GameObject("IconInner", typeof(RectTransform), typeof(Image));
+        innerGO.transform.SetParent(slotGO.transform, false);
+        var innerRT = innerGO.GetComponent<RectTransform>();
+        innerRT.anchorMin = new Vector2(0.1f, 0.1f); innerRT.anchorMax = new Vector2(0.9f, 0.9f);
+        innerRT.anchoredPosition = Vector2.zero; innerRT.sizeDelta = Vector2.zero;
+        var innerImg = innerGO.GetComponent<Image>();
+        Sprite spInner = CarregarSprite("Assets/assets/UI/skill_card/skill_slot_card.aseprite", "skill_slot_card");
+        if (spInner != null) { innerImg.sprite = spInner; innerImg.color = Color.white; }
+        else innerImg.color = rColor;
+        innerImg.raycastTarget = false;
+
+        CriarTextoArea(cardObj, "NameArea",   "NameText",  $"<b>{card.cardName}</b>",
+            new Vector2(0f, 0.50f), new Vector2(1f, 0.68f), 14, new Color(0.95f, 0.82f, 0.40f), true);
+        CriarTextoArea(cardObj, "DescArea",   "DescText",  card.description,
+            new Vector2(0.05f, 0.22f), new Vector2(0.95f, 0.58f), 11, new Color(0.90f, 0.82f, 0.65f), false);
+        CriarTextoArea(cardObj, "StatsArea",  "StatsText", FormatarBonus(card),
+            new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.22f), 11, new Color(0.95f, 0.82f, 0.40f), false);
+        CriarTextoArea(cardObj, "RarityArea", "RarityText", GetRarityLabel(card.rarity),
+            new Vector2(0.2f, 0.13f), new Vector2(0.8f, 0.24f), 12, rColor, false);
+
+        var btn = cardObj.GetComponent<Button>();
+        btn.onClick.RemoveAllListeners();
+        btn.onClick.AddListener(() => OnCardSelected(card));
+
+        cardObj.AddComponent<CartaSkillAnimador>().Iniciar(cardObj);
+    }
+
+    // ── Contador ─────────────────────────────────────────────────────────────
+
+    private IEnumerator ContadorEscolha()
+    {
+        Transform pai = choicePanel != null ? choicePanel.transform : transform;
+        var timerGO = new GameObject("TimerEscolha");
+        timerGO.transform.SetParent(pai, false);
+
+        var txt = timerGO.AddComponent<TextMeshProUGUI>();
+        txt.fontSize  = 28; txt.fontStyle = FontStyles.Bold;
+        txt.alignment = TextAlignmentOptions.Center;
+
+        var tr = timerGO.GetComponent<RectTransform>();
+        tr.anchorMin = new Vector2(0.5f, 0f); tr.anchorMax = new Vector2(0.5f, 0f);
+        tr.pivot     = new Vector2(0.5f, 0f);
+        tr.anchoredPosition = new Vector2(0f, 30f); tr.sizeDelta = new Vector2(160f, 50f);
+
+        float restante = tempoEscolha;
+        while (restante > 0f)
+        {
+            restante -= Time.unscaledDeltaTime;
+            txt.text  = Mathf.CeilToInt(Mathf.Max(0f, restante)).ToString();
+            txt.color = restante < 5f ? Color.red : Color.white;
+            yield return null;
+        }
+
+        contadorCoroutine = null;
+        ClosePanel();
+    }
+
+    // ── Seleção ──────────────────────────────────────────────────────────────
 
     private void OnCardSelected(StatusCardInfo card)
     {
+        if (contadorCoroutine != null) { StopCoroutine(contadorCoroutine); contadorCoroutine = null; }
         ResumeGame();
         if (choicePanel != null) choicePanel.SetActive(false);
         ClearCards();
@@ -212,68 +319,90 @@ public class StatusCardChoiceUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
     private void ClearCards()
     {
-        foreach (GameObject g in spawnedCards)
-            if (g != null) Destroy(g);
+        foreach (var g in spawnedCards) if (g != null) Destroy(g);
         spawnedCards.Clear();
-
         if (cardsContainer != null)
-            foreach (Transform t in cardsContainer)
-                Destroy(t.gameObject);
+            foreach (Transform t in cardsContainer) Destroy(t.gameObject);
+    }
+
+    private void PauseGame()
+    {
+        if (!pauseGameDuringChoice) return;
+        previousTimeScale = Time.timeScale;
+        Time.timeScale = 0f;
+        AudioListener.pause = true;
     }
 
     private void ResumeGame()
     {
-        if (pauseGameDuringChoice)
-            Time.timeScale = previousTimeScale > 0f ? previousTimeScale : 1f;
+        if (!pauseGameDuringChoice) return;
+        Time.timeScale = previousTimeScale > 0f ? previousTimeScale : 1f;
+        AudioListener.pause = false;
     }
 
-    private IEnumerator RefreshLayout()
+    private void CriarTextoArea(GameObject parent, string areaName, string textName,
+        string content, Vector2 anchorMin, Vector2 anchorMax,
+        float fontSize, Color cor, bool bold)
     {
-        if (cardsContainer != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(cardsContainer as RectTransform);
-        }
-        yield return new WaitForEndOfFrame();
-        if (cardsContainer != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(cardsContainer as RectTransform);
+        var area = new GameObject(areaName, typeof(RectTransform));
+        area.transform.SetParent(parent.transform, false);
+        var aRT = area.GetComponent<RectTransform>();
+        aRT.anchorMin = anchorMin; aRT.anchorMax = anchorMax;
+        aRT.anchoredPosition = Vector2.zero; aRT.sizeDelta = Vector2.zero;
+
+        var txtGO = new GameObject(textName, typeof(RectTransform));
+        txtGO.transform.SetParent(area.transform, false);
+        var tRT = txtGO.GetComponent<RectTransform>();
+        tRT.anchorMin = Vector2.zero; tRT.anchorMax = Vector2.one;
+        tRT.anchoredPosition = Vector2.zero; tRT.sizeDelta = Vector2.zero;
+
+        var txt = txtGO.AddComponent<TextMeshProUGUI>();
+        txt.text     = content; txt.fontSize = fontSize; txt.color = cor;
+        txt.alignment = TextAlignmentOptions.Center;
+        txt.textWrappingMode = TextWrappingModes.Normal;
+        if (bold) txt.fontStyle = FontStyles.Bold;
     }
 
-    // ── Helpers de raridade ──────────────────────────────────────────────────
-
-    private GameObject GetPrefabForRarity(CardRarity rarity)
+    private string FormatarBonus(StatusCardInfo card)
     {
-        GameObject prefab = rarity switch
+        string statNome = card.statType switch
         {
-            CardRarity.Common => commonCardPrefab,
-            CardRarity.Rare   => rareCardPrefab,
-            CardRarity.Mystic => mysticCardPrefab,
-            CardRarity.Curse  => curseCardPrefab,
-            _                 => null
+            StatusCardType.Health         => "Vida",
+            StatusCardType.Attack         => "Ataque",
+            StatusCardType.Defense        => "Defesa",
+            StatusCardType.Speed          => "Velocidade",
+            StatusCardType.Regen          => "Regeneracao",
+            StatusCardType.CriticalChance => "Critico",
+            StatusCardType.AttackSpeed    => "Vel. Ataque",
+            _                             => card.statType.ToString()
         };
-        return prefab != null ? prefab : fallbackCardPrefab;
+        string txt = $"+{card.bonus:F0} {statNome}";
+        if (card.HasPenalty)
+        {
+            string penNome = card.penaltyStatType switch
+            {
+                StatusCardType.Health  => "Vida",
+                StatusCardType.Attack  => "Ataque",
+                StatusCardType.Defense => "Defesa",
+                StatusCardType.Speed   => "Velocidade",
+                _                      => card.penaltyStatType.ToString()
+            };
+            txt += $"\n-{card.penalty:F0} {penNome}";
+        }
+        return txt;
     }
 
     private Color GetRarityColor(CardRarity rarity) => rarity switch
     {
-        CardRarity.Common => commonColor,
-        CardRarity.Rare   => rareColor,
-        CardRarity.Mystic => mysticColor,
-        CardRarity.Curse  => curseColor,
+        CardRarity.Common => new Color(0.30f, 0.40f, 0.60f),
+        CardRarity.Rare   => new Color(0.50f, 0.20f, 0.70f),
+        CardRarity.Mystic => new Color(0.70f, 0.55f, 0.10f),
+        CardRarity.Curse  => new Color(0.55f, 0.10f, 0.10f),
         _                 => Color.white
-    };
-
-    private Sprite GetIconForStat(StatusCardType statType) => statType switch
-    {
-        StatusCardType.Health         => healthIcon,
-        StatusCardType.Attack         => attackIcon,
-        StatusCardType.Defense        => defenseIcon,
-        StatusCardType.Speed          => speedIcon,
-        StatusCardType.Regen          => regenIcon,
-        StatusCardType.CriticalChance => critIcon,
-        StatusCardType.AttackSpeed    => attackSpeedIcon,
-        _                             => null
     };
 
     private string GetRarityLabel(CardRarity rarity) => rarity switch
@@ -285,80 +414,13 @@ public class StatusCardChoiceUI : MonoBehaviour
         _                 => "Comum"
     };
 
-    // ── Carta emergencial (nenhum prefab atribuído) ──────────────────────────
-
-    private void AplicarEstileDarkFantasyStatusCard(GameObject obj, StatusCardInfo card)
+    private Sprite CarregarSprite(string path, string spriteName)
     {
-        // Textos dark fantasy
-        foreach (var txt in obj.GetComponentsInChildren<TextMeshProUGUI>(true))
-        {
-            string n = txt.name.ToLower();
-            if (n.Contains("name") || n.Contains("title"))
-                txt.color = new Color(0.95f, 0.82f, 0.40f);
-            else if (n.Contains("rarity") || n.Contains("rarid"))
-                txt.color = GetRarityColor(card.rarity);
-            else
-                txt.color = new Color(0.90f, 0.82f, 0.65f);
-        }
-        // Borda colorida por raridade
-        var bord = obj.transform.Find("DFRarityBorder")?.GetComponent<Image>();
-        if (bord == null) {
-            var bordGO = new GameObject("DFRarityBorder", typeof(Image));
-            bordGO.transform.SetParent(obj.transform, false);
-            bord = bordGO.GetComponent<Image>();
-            var bRT = bordGO.GetComponent<RectTransform>();
-            bRT.anchorMin = Vector2.zero; bRT.anchorMax = Vector2.one;
-            bRT.offsetMin = new Vector2(-2f,-2f); bRT.offsetMax = new Vector2(2f,2f);
-            bordGO.transform.SetAsFirstSibling();
-        }
-        Color rc = GetRarityColor(card.rarity);
-        bord.color = new Color(rc.r, rc.g, rc.b, 0.65f);
-    }
-
-    private void SpawnEmergencyCard(StatusCardInfo card)
-    {
-        GameObject obj = new GameObject($"EmergencyCard_{card.statType}", typeof(RectTransform));
-        obj.transform.SetParent(cardsContainer);
-
-        RectTransform rt = obj.GetComponent<RectTransform>();
-        rt.sizeDelta = cardSize;
-
-        // Dark fantasy: card_frame como fundo
-        Image bg = obj.AddComponent<Image>();
-        var cardSprite = Resources.Load<Sprite>("UI/carta_frame");
-        #if UNITY_EDITOR
-        if (cardSprite == null)
-            cardSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/assets/UI/skill_card/cartaskill.png");
-        #endif
-        if (cardSprite != null) { bg.sprite = cardSprite; bg.color = Color.white; bg.type = Image.Type.Sliced; }
-        else bg.color = new Color(0.07f, 0.05f, 0.10f, 0.97f);
-
-        // Borda colorida por raridade
-        var bord = new GameObject("RarityBorder", typeof(Image));
-        bord.transform.SetParent(obj.transform, false);
-        var bordImg = bord.GetComponent<Image>();
-        bordImg.color = new Color(GetRarityColor(card.rarity).r, GetRarityColor(card.rarity).g,
-                                   GetRarityColor(card.rarity).b, 0.7f);
-        var bordRT = bord.GetComponent<RectTransform>();
-        bordRT.anchorMin = Vector2.zero; bordRT.anchorMax = Vector2.one;
-        bordRT.offsetMin = new Vector2(-2f,-2f); bordRT.offsetMax = new Vector2(2f,2f);
-        bord.transform.SetAsFirstSibling();
-
-        // Texto
-        GameObject textGO = new GameObject("Name", typeof(RectTransform));
-        textGO.transform.SetParent(obj.transform);
-        TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
-        tmp.text = $"<b>{card.cardName}</b>\n{card.description}\n<size=10>[{GetRarityLabel(card.rarity)}]</size>";
-        tmp.fontSize = 14;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = new Color(0.90f, 0.82f, 0.65f);
-
-        RectTransform tr = textGO.GetComponent<RectTransform>();
-        tr.anchorMin = new Vector2(0.05f, 0.1f);
-        tr.anchorMax = new Vector2(0.95f, 0.9f);
-        tr.offsetMin = tr.offsetMax = Vector2.zero;
-
-        spawnedCards.Add(obj);
-        WireButton(obj, card);
+#if UNITY_EDITOR
+        var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+        foreach (var a in all)
+            if (a is Sprite s && s.name == spriteName) return s;
+#endif
+        return null;
     }
 }

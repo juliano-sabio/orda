@@ -24,7 +24,7 @@ MonoBehaviour:
   element: 0
   specialEffect: Aura laranja girando, rugido a cada 2s com onda de empurrao, burst
     final com 12 raios radiais.
-  ultimateType: 0
+  ultimateType: 55
   specialValue: 0
   behaviorScriptName: FormaBestialUltimate
   visualEffectPrefab: {fileID: 0}

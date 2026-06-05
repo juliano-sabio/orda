@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
   nomeEvolucao: Despertar Gigante
   descricao: "+60% de raio de impacto dos tent\xE1culos e +50% de dano."
-  icone: {fileID: 0}
+  icone: {fileID: 484392071834553536, guid: c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7, type: 3}
   corDestaque: {r: 0.5, g: 0, b: 0.8, a: 1}
   skillAlvo: 59
   tipoEvolucao: 94

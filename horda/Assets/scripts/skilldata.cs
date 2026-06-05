@@ -335,6 +335,15 @@ public class SkillData : ScriptableObject
             case SpecificSkillType.IceBarrier:
             case SpecificSkillType.Heal:
             case SpecificSkillType.HealthRegen:
+            case SpecificSkillType.Aureola:
+            case SpecificSkillType.BarreiraReflexiva:
+            case SpecificSkillType.BarreiraEnergia:
+            case SpecificSkillType.TeiaProtecao:
+            case SpecificSkillType.InstintoSobrevivencia:
+            case SpecificSkillType.EspelhoMagico:
+            case SpecificSkillType.EscudoKarma:
+            case SpecificSkillType.SegundaChance:
+            case SpecificSkillType.FugaSombras:
                 return false;
         }
 

@@ -116,7 +116,9 @@ public static class EnemyStatusVisual
                     new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.8f, 0.4f), new GradientAlphaKey(0f, 1f) });
                 var velFogo = ps.velocityOverLifetime;
                 velFogo.enabled = true;
+                velFogo.x = new ParticleSystem.MinMaxCurve(0f, 0f);
                 velFogo.y = new ParticleSystem.MinMaxCurve(0.8f, 2f);
+                velFogo.z = new ParticleSystem.MinMaxCurve(0f, 0f);
                 shape.radius = 0.3f;
                 break;
 
@@ -141,7 +143,9 @@ public static class EnemyStatusVisual
                 shape.radius = 0.1f;
                 var velStun = ps.velocityOverLifetime;
                 velStun.enabled = true;
+                velStun.x = new ParticleSystem.MinMaxCurve(0f, 0f);
                 velStun.y = new ParticleSystem.MinMaxCurve(0.5f, 1.5f);
+                velStun.z = new ParticleSystem.MinMaxCurve(0f, 0f);
                 go.transform.localPosition = new Vector3(0f, 0.6f, 0f); // acima da cabeça
                 gradient.SetKeys(
                     new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(new Color(1f,1f,0.3f), 0.4f), new GradientColorKey(new Color(0.8f,0.8f,0.8f), 1f) },
@@ -167,7 +171,9 @@ public static class EnemyStatusVisual
                 emission.rateOverTime = 18f;
                 var velVeneno = ps.velocityOverLifetime;
                 velVeneno.enabled = true;
-                velVeneno.y = new ParticleSystem.MinMaxCurve(-0.3f, -0.8f); // goteja pra baixo
+                velVeneno.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+                velVeneno.y = new ParticleSystem.MinMaxCurve(-0.3f, -0.8f);
+                velVeneno.z = new ParticleSystem.MinMaxCurve(0f, 0f);
                 gradient.SetKeys(
                     new[] { new GradientColorKey(new Color(0.6f,1f,0.3f), 0f), new GradientColorKey(new Color(0.2f,0.8f,0.1f), 0.6f), new GradientColorKey(new Color(0.1f,0.3f,0f), 1f) },
                     new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.7f, 0.5f), new GradientAlphaKey(0f, 1f) });
@@ -195,7 +201,9 @@ public static class EnemyStatusVisual
                 emission.rateOverTime = 20f;
                 var velMald = ps.velocityOverLifetime;
                 velMald.enabled = true;
+                velMald.x = new ParticleSystem.MinMaxCurve(0f, 0f);
                 velMald.y = new ParticleSystem.MinMaxCurve(0.2f, 0.6f);
+                velMald.z = new ParticleSystem.MinMaxCurve(0f, 0f);
                 gradient.SetKeys(
                     new[] { new GradientColorKey(new Color(0.7f,0.2f,1f), 0f), new GradientColorKey(new Color(0.3f,0f,0.6f), 0.5f), new GradientColorKey(Color.black, 1f) },
                     new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0.5f, 0.5f), new GradientAlphaKey(0f, 1f) });
@@ -244,7 +252,9 @@ public static class EnemyStatusVisual
                 emission.rateOverTime = 20f;
                 var velRV = ps.velocityOverLifetime;
                 velRV.enabled = true;
-                velRV.y = new ParticleSystem.MinMaxCurve(-1f, -2f); // vai pro player (sobe)
+                velRV.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+                velRV.y = new ParticleSystem.MinMaxCurve(-1f, -2f);
+                velRV.z = new ParticleSystem.MinMaxCurve(0f, 0f);
                 gradient.SetKeys(
                     new[] { new GradientColorKey(new Color(1f,0.1f,0.5f), 0f), new GradientColorKey(new Color(0.8f,0f,0.4f), 0.5f), new GradientColorKey(new Color(0.5f,0f,0.2f), 1f) },
                     new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.6f, 0.5f), new GradientAlphaKey(0f, 1f) });

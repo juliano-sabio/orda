@@ -22,7 +22,7 @@ MonoBehaviour:
   duration: 5
   element: 6
   specialEffect: "Tr\xEAs an\xE9is verdes girando com 8 part\xEDculas orbitando."
-  ultimateType: 0
+  ultimateType: 47
   specialValue: 0
   behaviorScriptName: VorticeUltimate
   visualEffectPrefab: {fileID: 0}

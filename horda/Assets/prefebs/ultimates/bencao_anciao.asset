@@ -22,7 +22,7 @@ MonoBehaviour:
   duration: 6
   element: 0
   specialEffect: Totem cura 8% HP e reduz 0.5s dos cooldowns de habilidades por pulso.
-  ultimateType: 0
+  ultimateType: 50
   specialValue: 0
   behaviorScriptName: BencaoAnciaoUltimate
   visualEffectPrefab: {fileID: 0}

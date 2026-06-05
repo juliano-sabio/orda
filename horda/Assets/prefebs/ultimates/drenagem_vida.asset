@@ -23,7 +23,7 @@ MonoBehaviour:
   element: 4
   specialEffect: "Feixes de energia vermelhos saindo dos inimigos em dire\xE7\xE3o
     ao jogador."
-  ultimateType: 0
+  ultimateType: 53
   specialValue: 0
   behaviorScriptName: DrenagemDeVidaUltimate
   visualEffectPrefab: {fileID: 0}

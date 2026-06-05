@@ -295,6 +295,7 @@ public class SkillChoiceUI : MonoBehaviour
 
         SetupCardTransform(cardObj);
         InitializeCardWithSkillData(cardObj, skill);
+        cardObj.AddComponent<CartaSkillAnimador>().Iniciar(cardObj);
 
     }
 
@@ -924,5 +925,39 @@ public class SkillChoiceUI : MonoBehaviour
             }
         }
 
+    }
+}
+
+// ── Animador dinâmico das cartas de skill ─────────────────────────────────────
+public class CartaSkillAnimador : MonoBehaviour
+{
+    GameObject card;
+    bool hover;
+    float t;
+    Vector3 escalaOriginal;
+    bool entrou;
+
+    RectTransform cardRT;
+
+    public void Iniciar(GameObject c)
+    {
+        card   = c;
+        cardRT = c.GetComponent<RectTransform>();
+        escalaOriginal = c.transform.localScale;
+        entrou = true;
+    }
+
+    void Update()
+    {
+        if (!entrou || card == null || cardRT == null) return;
+
+        // Detecta mouse sobre o card diretamente via RectTransform
+        hover = RectTransformUtility.RectangleContainsScreenPoint(
+            cardRT, Input.mousePosition, null);
+
+        float escalaAlvo = hover ? 1.15f : 1f;
+        float escalaAtual = card.transform.localScale.x / escalaOriginal.x;
+        float novaEscala = Mathf.Lerp(escalaAtual, escalaAlvo, Time.unscaledDeltaTime * 12f);
+        card.transform.localScale = escalaOriginal * novaEscala;
     }
 }

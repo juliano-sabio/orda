@@ -22,7 +22,7 @@ MonoBehaviour:
   duration: 6
   element: 1
   specialEffect: "Meteoro laranja com marcador de alvo e explos\xE3o de fogo."
-  ultimateType: 0
+  ultimateType: 45
   specialValue: 0
   behaviorScriptName: ChuvaMeteorosUltimate
   visualEffectPrefab: {fileID: 0}

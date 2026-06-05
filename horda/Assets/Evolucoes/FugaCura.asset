@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: "Ao teleportar, recupera 20% do HP m\xE1ximo."
   icone: {fileID: 4396318724939022649, guid: ce72fdc3b7cfa294e8d4bc828390be7e, type: 3}
   corDestaque: {r: 0.5, g: 0.1, b: 0.9, a: 1}
-  skillAlvo: 37
+  skillAlvo: 31
   tipoEvolucao: 42
   raridade: 3

@@ -16,6 +16,6 @@ MonoBehaviour:
   descricao: "+2 m\xEDsseis por ativa\xE7\xE3o."
   icone: {fileID: 2189855817262734761, guid: 13a9755d7b0785c469d526adab2ecd11, type: 3}
   corDestaque: {r: 1, g: 0.5, b: 0.1, a: 1}
-  skillAlvo: 32
+  skillAlvo: 35
   tipoEvolucao: 17
   raridade: 2

@@ -21,7 +21,7 @@ MonoBehaviour:
   duration: 1
   element: 3
   specialEffect: "Ricochete em cadeia com visual de raio branco-ciano."
-  ultimateType: 0
+  ultimateType: 43
   specialValue: 5
   behaviorScriptName: RaioCerteiroUltimate
   visualEffectPrefab: {fileID: 0}

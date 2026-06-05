@@ -22,7 +22,7 @@ MonoBehaviour:
   duration: 5
   element: 3
   specialEffect: Raios em zigue-zague com flash branco no impacto.
-  ultimateType: 0
+  ultimateType: 44
   specialValue: 0
   behaviorScriptName: TempestadeEletricaUltimate
   visualEffectPrefab: {fileID: 0}
