@@ -715,7 +715,8 @@ public class SkillChoiceUI : MonoBehaviour
     {
         if (pauseGameDuringChoice)
         {
-            previousTimeScale = Time.timeScale;
+            // Guarda 1 se o jogo já estava pausado por outra UI, para não travar ao fechar
+            previousTimeScale = Time.timeScale > 0f ? Time.timeScale : 1f;
             Time.timeScale = 0f;
             AudioListener.pause = true;
         }

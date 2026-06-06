@@ -100,6 +100,16 @@ public class StatusCardChoiceUI : MonoBehaviour
         layout.childControlHeight = false;
         layout.childForceExpandWidth  = false;
         layout.childForceExpandHeight = false;
+
+        var containerRect = cardsContainer as RectTransform;
+        if (containerRect != null)
+        {
+            containerRect.sizeDelta        = new Vector2(1200f, 500f);
+            containerRect.anchoredPosition = new Vector2(0f, 3f);
+            containerRect.anchorMin        = new Vector2(0.5f, 0.5f);
+            containerRect.anchorMax        = new Vector2(0.5f, 0.5f);
+            containerRect.pivot            = new Vector2(0.5f, 0.5f);
+        }
     }
 
     // ── Criação de cartas ────────────────────────────────────────────────────

@@ -92,6 +92,8 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
 
     // ─── LÓGICA ─────────────────────────────────────────────────────────────
 
+    const int MAX_DRENADOS = 6;
+
     void AtualizarDrenados()
     {
         var noRaio = new HashSet<GameObject>();
@@ -103,7 +105,7 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
         }
 
         foreach (var go in noRaio)
-            if (!JaDrenado(go)) AdicionarDrenado(go);
+            if (!JaDrenado(go) && drenados.Count < MAX_DRENADOS) AdicionarDrenado(go);
 
         for (int i = drenados.Count - 1; i >= 0; i--)
         {

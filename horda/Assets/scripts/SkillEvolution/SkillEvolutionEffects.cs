@@ -49,13 +49,8 @@ public static class EvolutionFX
         if (go != null) Object.Destroy(go);
     }
 
-    // Explosão simples
+    // Explosão simples — corre no próprio GO, não depende do owner
     public static void SpawnExplosao(Vector2 pos, float raio, float dano, Color cor, MonoBehaviour owner)
-    {
-        owner.StartCoroutine(ExplosaoCoroutine(pos, raio, dano, cor));
-    }
-
-    static IEnumerator ExplosaoCoroutine(Vector2 pos, float raio, float dano, Color cor)
     {
         var hits = Physics2D.OverlapCircleAll(pos, raio);
         foreach (var col in hits)
@@ -64,24 +59,9 @@ public static class EvolutionFX
             if (ic != null && !ic.estaMorrendo) ic.ReceberDano(dano, false);
         }
 
-        const int S = 40;
         var go = new GameObject("Explosao");
         go.transform.position = pos;
-        var lr = go.AddComponent<LineRenderer>();
-        lr.useWorldSpace = true; lr.loop = true; lr.positionCount = S;
-        lr.material = new Material(Shader.Find("Sprites/Default")); lr.sortingOrder = 13;
-        Object.Destroy(go, 1f); // failsafe
-        float dur = 0.35f;
-        for (float t = 0f; t < dur; t += Time.deltaTime)
-        {
-            if (go == null) yield break;
-            float p = t / dur; float r = Mathf.Lerp(0.1f, raio, p);
-            lr.startWidth = lr.endWidth = Mathf.Lerp(0.3f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(cor.r, cor.g, cor.b, Mathf.Lerp(1f, 0f, p));
-            for (int i = 0; i < S; i++) { float a = 360f / S * i * Mathf.Deg2Rad; lr.SetPosition(i, pos + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r); }
-            yield return null;
-        }
-        if (go != null) Object.Destroy(go);
+        go.AddComponent<ExplosaoSelfAnimator>().Iniciar(pos, raio, cor, 0.35f);
     }
 
     public static void AplicarLentidao(InimigoController ic, float duracao, float fator = 0.4f)
@@ -153,5 +133,29 @@ public class VenenoEvolutionFX : MonoBehaviour
             if (ic != null && !ic.estaMorrendo) ic.ReceberDano(dano, false);
         }
         Destroy(this);
+    }
+}
+
+// Anima e destrói o próprio GO da explosão — não depende de nenhum owner externo
+public class ExplosaoSelfAnimator : MonoBehaviour
+{
+    public void Iniciar(Vector2 pos, float raio, Color cor, float dur)
+        => StartCoroutine(Animar(pos, raio, cor, dur));
+
+    IEnumerator Animar(Vector2 pos, float raio, Color cor, float dur)
+    {
+        const int S = 40;
+        var lr = gameObject.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true; lr.loop = true; lr.positionCount = S;
+        lr.material = new Material(Shader.Find("Sprites/Default")); lr.sortingOrder = 13;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            float p = t / dur; float r = Mathf.Lerp(0.1f, raio, p);
+            lr.startWidth = lr.endWidth = Mathf.Lerp(0.3f, 0.02f, p);
+            lr.startColor = lr.endColor = new Color(cor.r, cor.g, cor.b, Mathf.Lerp(1f, 0f, p));
+            for (int i = 0; i < S; i++) { float a = 360f / S * i * Mathf.Deg2Rad; lr.SetPosition(i, pos + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r); }
+            yield return null;
+        }
+        Destroy(gameObject);
     }
 }

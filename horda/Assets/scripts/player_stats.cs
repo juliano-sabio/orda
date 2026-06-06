@@ -10,6 +10,7 @@ public class PlayerStats : MonoBehaviour
     public static event System.Action OnDanoRecebido;
     public static event System.Action<float> OnXPColetado;
     public static event System.Action OnUltimateAtivada;
+    public static event System.Action OnPlayerMorreu;
 
     [Header("Configuração de Dados (ScriptableObject)")]
     public CharacterData characterData;
@@ -104,6 +105,7 @@ public class PlayerStats : MonoBehaviour
     private bool ultimateBehaviorAtivo; // qualquer behavior de ultimate gerencia o próprio input
     private SkillManager skillManager;
     private StatusCardSystem cardSystem;
+    private bool escolhaSkillEmAndamento;
 
     float       speedOriginalAntesSlow;
     bool        estaSlowado;
@@ -913,7 +915,8 @@ public class PlayerStats : MonoBehaviour
 
         if (isSkillLevel && skillManager != null)
         {
-            StartCoroutine(AbrirEscolhaSkill());
+            if (!escolhaSkillEmAndamento)
+                StartCoroutine(AbrirEscolhaSkill());
         }
         else if (cardSystem != null)
         {
@@ -926,25 +929,28 @@ public class PlayerStats : MonoBehaviour
 
     private IEnumerator AbrirEscolhaSkill()
     {
-        // Fecha a notificação de level-up imediatamente
+        escolhaSkillEmAndamento = true;
+
         if (UIManager.Instance != null && UIManager.Instance.skillAcquiredPanel != null)
             UIManager.Instance.skillAcquiredPanel.SetActive(false);
 
         yield return new WaitForSecondsRealtime(0.4f);
 
-        if (skillManager == null) yield break;
+        if (skillManager == null) { escolhaSkillEmAndamento = false; yield break; }
 
         var choiceUI = FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
-        if (choiceUI == null) yield break;
+        if (choiceUI == null) { escolhaSkillEmAndamento = false; yield break; }
 
-        // Aplica filtro de slot
         int proximoSlot = skillManager.activeSkills.Count + 1;
         bool ehAtaque   = (proximoSlot % 2 == 1);
         choiceUI.somenteSkillsDeAtaque = ehAtaque;
         choiceUI.somenteSkillsDeDefesa = !ehAtaque;
 
-        // Chama diretamente sem passar pelo OfferSkillChoice
-        choiceUI.ShowRandomSkillChoice(skill => { if (skillManager != null) skillManager.AddSkill(skill); });
+        choiceUI.ShowRandomSkillChoice(skill =>
+        {
+            if (skillManager != null) skillManager.AddSkill(skill);
+            escolhaSkillEmAndamento = false;
+        });
     }
 
     private float CalculateXPForNextLevel()
@@ -1655,6 +1661,7 @@ public class PlayerStats : MonoBehaviour
 
     private void Die()
     {
+        OnPlayerMorreu?.Invoke();
         GetComponent<PlayerDeathEffect>()?.Executar();
         StartCoroutine(MorteComEfeito());
     }

@@ -250,7 +250,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         go.transform.SetParent(painelPassivas.transform, false);
         go.AddComponent<RectTransform>();
         var le = go.AddComponent<UnityEngine.UI.LayoutElement>();
-        le.preferredHeight = 58f;
+        le.preferredHeight = 100f;
         le.flexibleWidth   = 1f;
 
         var img = go.AddComponent<UnityEngine.UI.Image>();
@@ -283,8 +283,8 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             var goIcon = new GameObject("Icone");
             goIcon.transform.SetParent(go.transform, false);
             var rIcon = goIcon.AddComponent<RectTransform>();
-            rIcon.anchorMin = new Vector2(0.05f, 0.46f);
-            rIcon.anchorMax = new Vector2(0.22f, 0.96f);
+            rIcon.anchorMin = new Vector2(0.02f, 0.06f);
+            rIcon.anchorMax = new Vector2(0.20f, 0.94f);
             rIcon.offsetMin = rIcon.offsetMax = Vector2.zero;
             var imgIcon = goIcon.AddComponent<UnityEngine.UI.Image>();
             imgIcon.sprite         = pd.passiveIcon;
@@ -292,16 +292,16 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             imgIcon.raycastTarget  = false;
         }
 
-        float nomeX = temIcone ? 0.26f : 0.07f;
+        float nomeX = temIcone ? 0.25f : 0.07f;
 
         var goNome = new GameObject("Nome");
         goNome.transform.SetParent(go.transform, false);
         var rNome = goNome.AddComponent<RectTransform>();
-        rNome.anchorMin = new Vector2(nomeX, 0.68f); rNome.anchorMax = new Vector2(0.97f, 0.97f);
+        rNome.anchorMin = new Vector2(nomeX, 0.70f); rNome.anchorMax = new Vector2(0.97f, 0.97f);
         rNome.offsetMin = rNome.offsetMax = Vector2.zero;
         var txtNome = goNome.AddComponent<TMPro.TextMeshProUGUI>();
         txtNome.text      = TextUtils.SemAcento(pd.passiveName);
-        txtNome.fontSize  = 9.5f;
+        txtNome.fontSize  = 12f;
         txtNome.fontStyle = TMPro.FontStyles.Bold;
         txtNome.color     = new Color(0.92f, 0.82f, 0.62f);
         txtNome.alignment = TMPro.TextAlignmentOptions.MidlineLeft;
@@ -310,28 +310,29 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         var goBonus = new GameObject("Bonus");
         goBonus.transform.SetParent(go.transform, false);
         var rBonus = goBonus.AddComponent<RectTransform>();
-        rBonus.anchorMin = new Vector2(nomeX, 0.42f); rBonus.anchorMax = new Vector2(0.97f, 0.68f);
+        rBonus.anchorMin = new Vector2(nomeX, 0.48f); rBonus.anchorMax = new Vector2(0.97f, 0.68f);
         rBonus.offsetMin = rBonus.offsetMax = Vector2.zero;
         var txtBonus = goBonus.AddComponent<TMPro.TextMeshProUGUI>();
         txtBonus.text             = pd.GetBonusDescription();
-        txtBonus.fontSize         = 7.5f;
+        txtBonus.fontSize         = 9f;
         txtBonus.color            = new Color(0.90f, 0.82f, 0.65f);
         txtBonus.alignment        = TMPro.TextAlignmentOptions.MidlineLeft;
-        txtBonus.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+        txtBonus.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtBonus.richText         = true;
 
+        float descX = temIcone ? 0.25f : 0.07f;
         var goDesc = new GameObject("Desc");
         goDesc.transform.SetParent(go.transform, false);
         var rDesc = goDesc.AddComponent<RectTransform>();
-        rDesc.anchorMin = new Vector2(0.07f, 0.03f); rDesc.anchorMax = new Vector2(0.97f, 0.42f);
+        rDesc.anchorMin = new Vector2(descX, 0.02f); rDesc.anchorMax = new Vector2(0.97f, 0.46f);
         rDesc.offsetMin = rDesc.offsetMax = Vector2.zero;
         var txtDesc = goDesc.AddComponent<TMPro.TextMeshProUGUI>();
         txtDesc.text             = pd.description;
-        txtDesc.fontSize         = 7.5f;
+        txtDesc.fontSize         = 9.5f;
         txtDesc.color            = new Color(0.60f, 0.55f, 0.45f);
         txtDesc.alignment        = TMPro.TextAlignmentOptions.TopLeft;
         txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
-        txtDesc.overflowMode     = TMPro.TextOverflowModes.Truncate;
+        txtDesc.overflowMode     = TMPro.TextOverflowModes.Ellipsis;
 
         var goSel = new GameObject("SelBar");
         goSel.transform.SetParent(go.transform, false);
@@ -418,7 +419,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rect.anchorMax = new Vector2(0.5f, 0f);
         rect.pivot     = new Vector2(0.5f, 0f);
         rect.anchoredPosition = new Vector2(0f, 20f);
-        rect.sizeDelta = new Vector2(700f, 160f);
+        rect.sizeDelta = new Vector2(750f, 195f);
 
         Image bg = painelUltimates.AddComponent<Image>();
         bg.color = new Color(0.05f, 0.05f, 0.15f, 0.92f);
@@ -475,7 +476,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     float CalcularPosXBotao(int index, int total)
     {
-        float largura = 200f, espaco = 20f;
+        float largura = 220f, espaco = 16f;
         float totalW  = total * largura + (total - 1) * espaco;
         return -totalW / 2f + largura / 2f + index * (largura + espaco);
     }
@@ -487,7 +488,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         go.transform.SetParent(painelUltimates.transform, false);
         go.AddComponent<RectTransform>();
         var le = go.AddComponent<LayoutElement>();
-        le.preferredHeight = 60f;
+        le.preferredHeight = 100f;
         le.flexibleWidth   = 1f;
 
         Color corAcento = ud.GetElementColor();
@@ -521,17 +522,17 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             var goIcon = new GameObject("Icone");
             goIcon.transform.SetParent(go.transform, false);
             var rIcon = goIcon.AddComponent<RectTransform>();
-            rIcon.anchorMin = new Vector2(0.05f, 0.46f);
-            rIcon.anchorMax = new Vector2(0.22f, 0.96f);
+            rIcon.anchorMin = new Vector2(0.02f, 0.06f);
+            rIcon.anchorMax = new Vector2(0.20f, 0.94f);
             rIcon.offsetMin = rIcon.offsetMax = Vector2.zero;
             var imgIcon = goIcon.AddComponent<Image>();
-            imgIcon.sprite        = ud.ultimateIcon;
+            imgIcon.sprite         = ud.ultimateIcon;
             imgIcon.preserveAspect = true;
-            imgIcon.color         = Color.white;
-            imgIcon.raycastTarget = false;
+            imgIcon.color          = Color.white;
+            imgIcon.raycastTarget  = false;
         }
 
-        float nomeX = temIcone ? 0.26f : 0.07f;
+        float nomeX = temIcone ? 0.25f : 0.07f;
         var goNome = new GameObject("Nome");
         goNome.transform.SetParent(go.transform, false);
         var rNome = goNome.AddComponent<RectTransform>();
@@ -539,36 +540,37 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rNome.offsetMin = rNome.offsetMax = Vector2.zero;
         var txtNome = goNome.AddComponent<TextMeshProUGUI>();
         txtNome.text      = TextUtils.SemAcento(ud.ultimateName);
-        txtNome.fontSize  = 9.5f;
+        txtNome.fontSize  = 12f;
         txtNome.fontStyle = FontStyles.Bold;
         txtNome.color     = corAcento;
         txtNome.alignment = TextAlignmentOptions.MidlineLeft;
         txtNome.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
-        float cdX = temIcone ? 0.26f : 0.07f;
+        float cdX = temIcone ? 0.25f : 0.07f;
         var goCD = new GameObject("CD");
         goCD.transform.SetParent(go.transform, false);
         var rCD = goCD.AddComponent<RectTransform>();
-        rCD.anchorMin = new Vector2(cdX, 0.46f); rCD.anchorMax = new Vector2(0.97f, 0.68f);
+        rCD.anchorMin = new Vector2(cdX, 0.48f); rCD.anchorMax = new Vector2(0.97f, 0.68f);
         rCD.offsetMin = rCD.offsetMax = Vector2.zero;
         var txtCD = goCD.AddComponent<TextMeshProUGUI>();
         txtCD.text      = $"CD:{ud.cooldown}s  |  {ud.duration}s";
-        txtCD.fontSize  = 7.5f;
+        txtCD.fontSize  = 9f;
         txtCD.color     = new Color(0.75f, 0.70f, 0.55f);
         txtCD.alignment = TextAlignmentOptions.MidlineLeft;
 
+        float descX = temIcone ? 0.25f : 0.07f;
         var goDesc = new GameObject("Desc");
         goDesc.transform.SetParent(go.transform, false);
         var rDesc = goDesc.AddComponent<RectTransform>();
-        rDesc.anchorMin = new Vector2(0.07f, 0.02f); rDesc.anchorMax = new Vector2(0.97f, 0.46f);
+        rDesc.anchorMin = new Vector2(descX, 0.02f); rDesc.anchorMax = new Vector2(0.97f, 0.46f);
         rDesc.offsetMin = rDesc.offsetMax = Vector2.zero;
         var txtDesc = goDesc.AddComponent<TextMeshProUGUI>();
         txtDesc.text             = TextUtils.SemAcento(ud.description);
-        txtDesc.fontSize         = 7.5f;
+        txtDesc.fontSize         = 9.5f;
         txtDesc.color            = new Color(0.60f, 0.55f, 0.45f);
         txtDesc.alignment        = TextAlignmentOptions.TopLeft;
         txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
-        txtDesc.overflowMode     = TextOverflowModes.Truncate;
+        txtDesc.overflowMode     = TextOverflowModes.Ellipsis;
 
         var goSel = new GameObject("SelBar");
         goSel.transform.SetParent(go.transform, false);
@@ -591,7 +593,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         r.anchorMin = new Vector2(0.5f, 0.5f); r.anchorMax = new Vector2(0.5f, 0.5f);
         r.pivot = new Vector2(0.5f, 0.5f);
         r.anchoredPosition = new Vector2(posX, -15f);
-        r.sizeDelta = new Vector2(195f, 110f);
+        r.sizeDelta = new Vector2(220f, 150f);
 
         Image img = go.AddComponent<Image>();
         img.color = new Color(0.1f, 0.1f, 0.25f, 1f);
@@ -603,28 +605,48 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         btn.colors = cb;
         btn.targetGraphic = img;
 
+        // Ícone
+        bool temIcone = ud.ultimateIcon != null;
+        if (temIcone)
+        {
+            var goIcon = new GameObject("Icone");
+            goIcon.transform.SetParent(go.transform, false);
+            var rIcon = goIcon.AddComponent<RectTransform>();
+            rIcon.anchorMin = new Vector2(0.03f, 0.13f);
+            rIcon.anchorMax = new Vector2(0.27f, 0.87f);
+            rIcon.offsetMin = rIcon.offsetMax = Vector2.zero;
+            var imgIcon = goIcon.AddComponent<Image>();
+            imgIcon.sprite         = ud.ultimateIcon;
+            imgIcon.preserveAspect = true;
+            imgIcon.color          = Color.white;
+            imgIcon.raycastTarget  = false;
+        }
+
+        float textX = temIcone ? 0.30f : 0f;
+
         // Nome
         GameObject goNome = new GameObject("Nome");
         goNome.transform.SetParent(go.transform, false);
         RectTransform rNome = goNome.AddComponent<RectTransform>();
-        rNome.anchorMin = new Vector2(0f, 1f); rNome.anchorMax = new Vector2(1f, 1f);
+        rNome.anchorMin = new Vector2(textX, 1f); rNome.anchorMax = new Vector2(1f, 1f);
         rNome.pivot = new Vector2(0.5f, 1f);
         rNome.anchoredPosition = new Vector2(0f, -6f);
-        rNome.sizeDelta = new Vector2(-8f, 22f);
+        rNome.sizeDelta = new Vector2(-8f, 24f);
         TextMeshProUGUI txtNome = goNome.AddComponent<TextMeshProUGUI>();
         txtNome.text = TextUtils.SemAcento(ud.ultimateName);
-        txtNome.fontSize = 13f;
+        txtNome.fontSize = 12f;
         txtNome.fontStyle = FontStyles.Bold;
         txtNome.color = ud.GetElementColor();
         txtNome.alignment = TextAlignmentOptions.Center;
+        txtNome.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
         // Elemento
         GameObject goElem = new GameObject("Elemento");
         goElem.transform.SetParent(go.transform, false);
         RectTransform rElem = goElem.AddComponent<RectTransform>();
-        rElem.anchorMin = new Vector2(0f, 1f); rElem.anchorMax = new Vector2(1f, 1f);
+        rElem.anchorMin = new Vector2(textX, 1f); rElem.anchorMax = new Vector2(1f, 1f);
         rElem.pivot = new Vector2(0.5f, 1f);
-        rElem.anchoredPosition = new Vector2(0f, -30f);
+        rElem.anchoredPosition = new Vector2(0f, -34f);
         rElem.sizeDelta = new Vector2(-8f, 18f);
         TextMeshProUGUI txtElem = goElem.AddComponent<TextMeshProUGUI>();
         txtElem.text = $"{ud.GetElementIcon()} {ud.element}  |  CD: {ud.cooldown}s";
@@ -632,19 +654,19 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         txtElem.color = new Color(0.8f, 0.8f, 0.8f);
         txtElem.alignment = TextAlignmentOptions.Center;
 
-        // Descrição
+        // Descrição — ocupa a parte de baixo do card
         GameObject goDesc = new GameObject("Desc");
         goDesc.transform.SetParent(go.transform, false);
         RectTransform rDesc = goDesc.AddComponent<RectTransform>();
-        rDesc.anchorMin = new Vector2(0f, 0f); rDesc.anchorMax = new Vector2(1f, 1f);
-        rDesc.offsetMin = new Vector2(6f, 6f); rDesc.offsetMax = new Vector2(-6f, -52f);
+        rDesc.anchorMin = new Vector2(0.02f, 0f); rDesc.anchorMax = new Vector2(1f, 1f);
+        rDesc.offsetMin = new Vector2(6f, 6f); rDesc.offsetMax = new Vector2(-6f, -58f);
         TextMeshProUGUI txtDesc = goDesc.AddComponent<TextMeshProUGUI>();
         txtDesc.text = TextUtils.SemAcento(ud.description);
-        txtDesc.fontSize = 9.5f;
+        txtDesc.fontSize = 10f;
         txtDesc.color = new Color(0.75f, 0.75f, 0.75f);
         txtDesc.alignment = TextAlignmentOptions.Center;
         txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
-        txtDesc.overflowMode = TextOverflowModes.Truncate;
+        txtDesc.overflowMode = TextOverflowModes.Ellipsis;
 
         return go;
     }

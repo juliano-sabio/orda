@@ -119,9 +119,21 @@ public class SkillManager : MonoBehaviour
 
     private void CheckForInitialSkillChoice()
     {
+        if (initialChoiceOffered) return;
+
+        // Re-busca playerStats caso ainda não tenha sido encontrado
+        if (playerStats == null)
+            playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) return;
+
         bool level1IsMilestone = System.Array.Exists(levelUpMilestones, milestone => milestone == 1);
 
-        if (!initialChoiceOffered && playerStats != null && playerStats.level == 1 && level1IsMilestone)
+        // Condição principal: level 1 é milestone e player não tem skills ainda
+        bool deveOferecerEscolha = level1IsMilestone &&
+                                   playerStats.level == 1 &&
+                                   activeSkills.Count == 0;
+
+        if (deveOferecerEscolha)
         {
             initialChoiceOffered = true;
             StartCoroutine(DelayedInitialChoice());
@@ -177,24 +189,35 @@ public class SkillManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        playerStats = FindFirstObjectByType<PlayerStats>();
+        // Aguardar 2 frames antes de buscar referências — garante que Awake/Start
+        // de todos os objetos da nova cena já rodaram
+        StartCoroutine(ConfigurarAposCarregarCena());
+    }
+
+    IEnumerator ConfigurarAposCarregarCena()
+    {
+        yield return null;
+        yield return null;
+
+        playerStats  = FindFirstObjectByType<PlayerStats>();
         skillChoiceUI = FindSkillChoiceUIInUIManager();
+        if (skillChoiceUI == null)
+            skillChoiceUI = FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
 
-        if (skillChoiceUI != null)
-        {
-            if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
-                skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
-        }
+        if (skillChoiceUI != null &&
+            (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0))
+            skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
 
-        // RECONECTAR SKILL EQUIPADA APÓS CARREGAR CENA
+        // Reconectar skill equipada após carregar cena
         if (currentlyEquippedSkill != null && activeSkills.Contains(currentlyEquippedSkill))
-        {
             OnSkillEquippedChanged?.Invoke(currentlyEquippedSkill);
-        }
         else if (activeSkills.Count > 0)
-        {
             EquipSkill(activeSkills[0]);
-        }
+
+        // Retry escolha inicial: disparar mesmo que playerStats seja null agora
+        // (DelayedInitialCheck buscará de novo depois de 1s)
+        if (!initialChoiceOffered)
+            StartCoroutine(DelayedInitialCheck());
     }
 
     public bool IsSkillLevel(int level)
@@ -232,13 +255,23 @@ public class SkillManager : MonoBehaviour
         // Re-busca referências se nulas
         if (playerStats == null)
             playerStats = FindFirstObjectByType<PlayerStats>();
-        if (playerStats == null) { Debug.LogError("❌ PlayerStats não encontrado!"); return; }
+        if (playerStats == null)
+        {
+            Debug.LogError("❌ PlayerStats não encontrado!");
+            initialChoiceOffered = false; // permite retry na próxima cena
+            return;
+        }
 
         if (skillChoiceUI == null)
             skillChoiceUI = FindSkillChoiceUIInUIManager();
         if (skillChoiceUI == null)
             skillChoiceUI = FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
-        if (skillChoiceUI == null) { Debug.LogError("❌ SkillChoiceUI não encontrado!"); return; }
+        if (skillChoiceUI == null)
+        {
+            Debug.LogError("❌ SkillChoiceUI não encontrado!");
+            initialChoiceOffered = false; // permite retry na próxima cena
+            return;
+        }
 
         if (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0)
             skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
@@ -611,6 +644,9 @@ public class SkillManager : MonoBehaviour
                 break;
             case SpecificSkillType.CorrenteSombria:
                 AddBehavior<CorrenteSombriaSkillBehavior>(skill);
+                break;
+            case SpecificSkillType.CristaisGelo:
+                AddBehavior<CristaisGeloSkillBehavior>(skill);
                 break;
 
             case SpecificSkillType.HealthRegen:

@@ -1164,7 +1164,19 @@ void LimparSlimePercurso()
 
         var sm = SkillManager.Instance;
         if (sm == null) { Debug.LogWarning("[Evolução] SkillManager não encontrado."); yield break; }
-        if (sm.activeSkills.Count == 0) { Debug.LogWarning("[Evolução] Player não tem skills ativas."); yield break; }
+        if (sm.activeSkills.Count == 0)
+        {
+            // Sem skills ativas → ofertar escolha inicial de skill em vez de pular
+            Debug.LogWarning("[Evolução] Player não tem skills ativas — abrindo escolha inicial de skill.");
+            var choiceUI = UnityEngine.Object.FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
+            if (choiceUI != null)
+            {
+                choiceUI.somenteSkillsDeAtaque = true;
+                choiceUI.somenteSkillsDeDefesa = false;
+                choiceUI.ShowRandomSkillChoice(skill => { sm.AddSkill(skill); });
+            }
+            yield break;
+        }
 
         if (todasEvolucoes == null || todasEvolucoes.Count == 0)
         {
