@@ -78,6 +78,8 @@ public class CorrentesInfernoUltimate : MonoBehaviour
 
     // ─── COROUTINE PRINCIPAL ────────────────────────────────────────────────
 
+    const float TICK_INTERVAL = 0.5f;
+
     IEnumerator CorotinaAtivacao()
     {
         ativo            = true;
@@ -87,14 +89,22 @@ public class CorrentesInfernoUltimate : MonoBehaviour
 
         AcorrentarInimigos();
 
-        float elapsed = 0f;
+        float elapsed   = 0f;
+        float tickAccum = 0f;
         while (elapsed < duracao)
         {
-            elapsed += Time.deltaTime;
-            AplicarDano();
+            float dt = Time.deltaTime;
+            elapsed  += dt;
+            tickAccum += dt;
+            if (tickAccum >= TICK_INTERVAL)
+            {
+                AplicarDano(tickAccum);
+                tickAccum = 0f;
+            }
             AtualizarVisuais(elapsed);
             yield return null;
         }
+        if (tickAccum > 0f) AplicarDano(tickAccum);
 
         yield return StartCoroutine(LiberarTodos());
         ativo = false;
@@ -167,17 +177,19 @@ public class CorrentesInfernoUltimate : MonoBehaviour
         });
     }
 
-    void AplicarDano()
+    void AplicarDano(float dt)
     {
         float danoEfetivo = danoPorSegundo;
         if (SkillEvolutionManager.Tem(SkillEvolutionType.InfernoIntensidade))
             danoEfetivo *= 2f;
 
+        float danoTick = danoEfetivo * dt;
+
         var mortos = new List<EstadoAcorrentado>();
         foreach (var e in acorrentados)
         {
             if (e.ic == null || e.go == null) { mortos.Add(e); continue; }
-            e.ic.ReceberDano(danoEfetivo * Time.deltaTime, false, false);
+            e.ic.ReceberDano(danoTick, false, true);
 
             if (SkillEvolutionManager.Tem(SkillEvolutionType.InfernoPropagado))
             {
@@ -185,7 +197,7 @@ public class CorrentesInfernoUltimate : MonoBehaviour
                 {
                     var icViz = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
                     if (icViz != null && icViz != e.ic)
-                        icViz.ReceberDano(danoEfetivo * 0.35f * Time.deltaTime, false, false);
+                        icViz.ReceberDano(danoTick * 0.35f, false, false);
                 }
             }
         }

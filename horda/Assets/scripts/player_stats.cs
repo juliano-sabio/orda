@@ -524,7 +524,7 @@ public class PlayerStats : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠️ CharacterSelectionManager não encontrado! Usando configurações padrão.");
+            Debug.Log("CharacterSelectionManager não encontrado. Usando configurações padrão.");
             InitializeDefaultSkills();
         }
 
@@ -1359,7 +1359,8 @@ public class PlayerStats : MonoBehaviour
                 c.cooldown          = ultimateData.cooldown;
                 c.duracao           = ultimateData.duration;
                 c.raio              = ultimateData.areaOfEffect;
-                c.danoPorSegundo    = ultimateData.baseDamage;
+                if (ultimateData.baseDamage > 0f)
+                    c.danoPorSegundo = ultimateData.baseDamage;
                 break;
             }
             case "EscudoSonicoUltimate":

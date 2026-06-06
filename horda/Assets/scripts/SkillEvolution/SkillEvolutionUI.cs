@@ -139,7 +139,6 @@ public class SkillEvolutionUI : MonoBehaviour
 
     IEnumerator Fechar(SkillEvolutionData opcao, System.Action<SkillEvolutionData> callback)
     {
-        StartCoroutine(EfeitoFlashTela());
         yield return new WaitForSecondsRealtime(0.35f);
 
         LimparTudo();
@@ -149,66 +148,6 @@ public class SkillEvolutionUI : MonoBehaviour
         AudioListener.pause = false;
 
         callback?.Invoke(opcao);
-    }
-
-    IEnumerator EfeitoCartaSelecionada(GameObject carta)
-    {
-        if (carta == null) yield break;
-        var images        = carta.GetComponentsInChildren<Image>();
-        var corsOriginais = System.Array.ConvertAll(images, img => img.color);
-        Color corFlash    = new Color(1f, 0.92f, 0.2f);
-
-        float dur = 0.3f;
-        for (float t = 0f; t < dur; t += Time.unscaledDeltaTime)
-        {
-            if (carta == null) yield break;
-            float p = t / dur;
-            float ease = 1f - Mathf.Pow(1f - p, 2f);
-            carta.transform.localScale = Vector3.one * (1f + ease * 0.25f);
-            for (int i = 0; i < images.Length; i++)
-                if (images[i] != null)
-                    images[i].color = Color.Lerp(corsOriginais[i], corFlash, ease * 0.85f);
-            yield return null;
-        }
-    }
-
-    IEnumerator EfeitoFlashTela()
-    {
-        var go = new GameObject("EvoFlashOverlay");
-        var cvs = go.AddComponent<Canvas>();
-        cvs.renderMode   = RenderMode.ScreenSpaceOverlay;
-        cvs.sortingOrder = 250;
-        go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-
-        var imgGO = new GameObject("Img");
-        imgGO.transform.SetParent(go.transform, false);
-        var img = imgGO.AddComponent<Image>();
-        var rt  = img.GetComponent<RectTransform>();
-        rt.anchorMin     = Vector2.zero;
-        rt.anchorMax     = Vector2.one;
-        rt.offsetMin     = rt.offsetMax = Vector2.zero;
-        img.raycastTarget = false;
-        img.color         = Color.clear;
-
-        Color corAlvo = new Color(1f, 0.85f, 0.1f, 0.40f);
-
-        float durIn = 0.1f;
-        for (float t = 0f; t < durIn; t += Time.unscaledDeltaTime)
-        {
-            if (img == null) break;
-            img.color = Color.Lerp(Color.clear, corAlvo, t / durIn);
-            yield return null;
-        }
-
-        float durOut = 0.55f;
-        for (float t = 0f; t < durOut; t += Time.unscaledDeltaTime)
-        {
-            if (img == null) break;
-            img.color = Color.Lerp(corAlvo, Color.clear, t / durOut);
-            yield return null;
-        }
-
-        if (go != null) Destroy(go);
     }
 
     IEnumerator ContadorEscolha(List<SkillEvolutionData> opcoes, System.Action<SkillEvolutionData> callback)

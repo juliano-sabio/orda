@@ -28,6 +28,7 @@ public class SilenciadorLog : MonoBehaviour
                 if (msg.Contains("was not found in the") && msg.Contains("font asset")) return;
                 if (msg.Contains("atlas texture. Please make the texture") && msg.Contains("readable")) return;
                 if (msg.Contains("Unable to add the requested character to font asset")) return;
+                if (msg.Contains("CharacterSelectionManager não encontrado")) return;
             }
             catch { }
             inner.LogFormat(logType, context, format, args);

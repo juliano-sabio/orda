@@ -167,10 +167,17 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
         if (playerStats == null) return;
 
         rootVisual = new GameObject("BarreiraReflexivaVisual");
-        // Não parentar ao player: a escala do player (ex: 3,3,1) distorceria
-        // os LineRenderers em useWorldSpace=false. A posição é sincronizada em
-        // AtualizarVisual() a cada frame.
-        rootVisual.transform.position = playerStats.transform.position;
+        // Parentar ao player e neutralizar a escala não-uniforme (ex: 3,3,1)
+        // com localScale inverso — assim os LineRenderers useWorldSpace=false
+        // recebem escala (1,1,1) no mundo e não ficam distorcidos nem atrasados.
+        rootVisual.transform.SetParent(playerStats.transform, false);
+        rootVisual.transform.localPosition = Vector3.zero;
+        var ws = playerStats.transform.lossyScale;
+        rootVisual.transform.localScale = new Vector3(
+            Mathf.Abs(ws.x) > 0.001f ? 1f / ws.x : 1f,
+            Mathf.Abs(ws.y) > 0.001f ? 1f / ws.y : 1f,
+            1f
+        );
 
         // Hexágono externo
         var goExt = new GameObject("HexExt");
@@ -207,12 +214,6 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
             lr.SetPosition(i, new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r, 0f));
         }
         return lr;
-    }
-
-    void LateUpdate()
-    {
-        if (rootVisual != null && playerStats != null)
-            rootVisual.transform.position = playerStats.transform.position;
     }
 
     void AtualizarVisual()

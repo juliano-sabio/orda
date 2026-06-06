@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class movi_inimigo : MonoBehaviour
 {
@@ -26,8 +27,7 @@ public class movi_inimigo : MonoBehaviour
     private Vector2 direcaoMovimento;
     private bool procurandoPlayer = false;
 
-    // Buffer estático reutilizável (Unity é single-thread, sem problema de concorrência)
-    private static readonly Collider2D[] _buf = new Collider2D[12];
+    private static readonly List<Collider2D> _buf = new List<Collider2D>(12);
 
     void Start()
     {
@@ -99,10 +99,11 @@ public class movi_inimigo : MonoBehaviour
     // Afasta inimigos que estejam muito próximos uns dos outros
     Vector2 AplicarSeparacao(Vector2 dir)
     {
-        int n = Physics2D.OverlapCircleNonAlloc(transform.position, raioSeparacao, _buf);
+        _buf.Clear();
+        Physics2D.OverlapCircle(transform.position, raioSeparacao, ContactFilter2D.noFilter, _buf);
 
         Vector2 sep = Vector2.zero;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < _buf.Count; i++)
         {
             Collider2D col = _buf[i];
             if (col == null || col.gameObject == gameObject) continue;

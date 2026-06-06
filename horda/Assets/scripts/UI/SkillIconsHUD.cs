@@ -199,7 +199,7 @@ public class SkillIconsHUD : MonoBehaviour
         nomeTxt.fontSize  = 9f;
         nomeTxt.alignment = TextAlignmentOptions.Center;
         nomeTxt.color     = new Color(1f, 1f, 1f, 0.75f);
-        nomeTxt.enableWordWrapping = false;
+        nomeTxt.textWrappingMode = TextWrappingModes.NoWrap;
         nomeTxt.overflowMode = TextOverflowModes.Truncate;
 
         // Registrar slot para lookup posterior

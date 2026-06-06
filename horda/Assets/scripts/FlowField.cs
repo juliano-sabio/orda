@@ -90,8 +90,9 @@ public class FlowField : MonoBehaviour
         Transform alvo = AlvoOverride != null ? AlvoOverride : playerTransform;
         if (alvo == null) return;
 
-        if (!Valido(MundoParaCelula(alvo.position))
-            && Time.time - tempoUltimaReconstrucao >= intervaloReconstrucao)
+        if (caminhavel == null
+            || (!Valido(MundoParaCelula(alvo.position))
+                && Time.time - tempoUltimaReconstrucao >= intervaloReconstrucao))
         {
             ConstruirGridEmTorno(alvo.position);
             tempoUltimaReconstrucao = Time.time;
@@ -102,6 +103,7 @@ public class FlowField : MonoBehaviour
 
     void Recalcular()
     {
+        if (caminhavel == null) return;
         Transform alvo = AlvoOverride != null ? AlvoOverride : playerTransform;
         if (alvo == null) return;
         Vector2Int dest = MundoParaCelula(alvo.position);

@@ -458,6 +458,18 @@ void TentarIniciarEvento()
         return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
     }
 
+    // Retorna true para eventos em que o progresso de kills/coleta deve aparecer no timer
+    bool EventoMostraProgresso()
+    {
+        if (eventoAtual == null || eventoAtual.quantidade <= 0) return false;
+        return eventoAtual.tipo == TipoEvento.MatarInimigos
+            || eventoAtual.tipo == TipoEvento.Colapso
+            || eventoAtual.tipo == TipoEvento.ZonaEliminacao
+            || eventoAtual.tipo == TipoEvento.ColetarXP
+            || eventoAtual.tipo == TipoEvento.UsarUltimate
+            || eventoAtual.tipo == TipoEvento.ColetarEspirito;
+    }
+
     void AtualizarUI()
     {
         float pct = Mathf.Clamp01(timerContagem / eventoAtual.duracao);
@@ -465,15 +477,16 @@ void TentarIniciarEvento()
         if (barraFill != null)
             barraFill.anchorMax = new Vector2(pct, 1f);
 
-        if (textoTimer != null)
-            textoTimer.text = Mathf.CeilToInt(timerContagem) + "s";
-
+        // Progresso integrado no timer para ficar bem visível
         if (textoProgresso != null)
+            textoProgresso.text = "";
+
+        if (textoTimer != null)
         {
-            if (eventoAtual.quantidade > 0)
-                textoProgresso.text = $"{progresso}/{eventoAtual.quantidade}";
-            else
-                textoProgresso.text = "";
+            string timerStr = Mathf.CeilToInt(timerContagem) + "s";
+            textoTimer.text = EventoMostraProgresso()
+                ? $"{progresso}/{eventoAtual.quantidade}  •  {timerStr}"
+                : timerStr;
         }
 
         // Timer fica vermelho nos últimos 5 segundos

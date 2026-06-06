@@ -210,7 +210,7 @@ public class ElementApplicationUI : MonoBehaviour
                 var desc = CriarTexto(card, "Desc", car.descricao, new Color(0.75f, 0.70f, 0.60f), 11f);
                 Ancora(desc, new Vector2(0.1f, 0f), new Vector2(0.85f, 0.55f), new Vector2(8f, 2f), Vector2.zero);
                 var dTxt = desc.GetComponent<TextMeshProUGUI>();
-                dTxt.enableWordWrapping = true;
+                dTxt.textWrappingMode = TextWrappingModes.Normal;
                 dTxt.alignment = TextAlignmentOptions.TopLeft;
 
                 var btn = card.AddComponent<Button>(); btn.targetGraphic = cardImg;
