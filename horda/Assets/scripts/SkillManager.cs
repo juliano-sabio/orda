@@ -156,15 +156,23 @@ public class SkillManager : MonoBehaviour
 
             skillUI = uiManager.GetComponentInChildren<SkillChoiceUI>(true);
             if (skillUI != null) return skillUI;
-
-            Debug.LogWarning("⚠️ SkillChoiceUI não encontrado como componente ou child do UIManager");
         }
         else
         {
             Debug.LogError("❌ UIManager não encontrado na cena!");
         }
 
-        return null;
+        // Busca no canvas dedicado ou em qualquer objeto da cena
+        GameObject skillChoiceCanvas = GameObject.Find("SkillChoice_Canvas");
+        if (skillChoiceCanvas != null)
+        {
+            SkillChoiceUI skillUI = skillChoiceCanvas.GetComponent<SkillChoiceUI>();
+            if (skillUI != null) return skillUI;
+            skillUI = skillChoiceCanvas.GetComponentInChildren<SkillChoiceUI>(true);
+            if (skillUI != null) return skillUI;
+        }
+
+        return FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)

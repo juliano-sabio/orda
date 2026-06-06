@@ -44,6 +44,7 @@ public class SkillChoiceUI : MonoBehaviour
     private List<GameObject> currentButtons = new List<GameObject>();
     private float previousTimeScale;
     private Coroutine contadorCoroutine;
+    private int skillCardIndex = 0;
 
     void Awake()
     {
@@ -57,6 +58,22 @@ public class SkillChoiceUI : MonoBehaviour
     {
         StartCoroutine(InitializeWithDelay());
     }
+
+    void Update()
+    {
+        if (currentButtons.Count == 0 || choicePanel == null || !choicePanel.activeSelf) return;
+
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+            skillCardIndex = (skillCardIndex - 1 + currentButtons.Count) % currentButtons.Count;
+        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+            skillCardIndex = (skillCardIndex + 1) % currentButtons.Count;
+        else if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+        {
+            if (skillCardIndex >= 0 && skillCardIndex < currentChoices.Count)
+                OnSkillSelected(currentChoices[skillCardIndex]);
+        }
+    }
+
 
     private IEnumerator InitializeWithDelay()
     {
@@ -225,8 +242,9 @@ public class SkillChoiceUI : MonoBehaviour
             choicePanel.SetActive(true);
         }
 
-        currentChoices = skills;
-        onSkillChosen = callback;
+        currentChoices  = skills;
+        onSkillChosen   = callback;
+        skillCardIndex  = 0;
 
         PauseGame();
         if (contadorCoroutine != null) StopCoroutine(contadorCoroutine);

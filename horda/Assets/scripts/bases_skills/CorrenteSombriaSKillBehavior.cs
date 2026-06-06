@@ -16,7 +16,8 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
     public float RecargaTotal => intervalo;
 
     readonly List<GameObject> linhasAtivas = new List<GameObject>();
-    readonly Dictionary<InimigoController, float> velOriginal = new Dictionary<InimigoController, float>();
+    readonly Dictionary<InimigoController, float> velOriginal     = new Dictionary<InimigoController, float>();
+    readonly Dictionary<InimigoController, float> velOriginalDist = new Dictionary<InimigoController, float>();
 
     float DanoAtual => baseDano + (playerStats != null ? playerStats.attack * multiplicador : 0f);
 
@@ -152,10 +153,16 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
                             var movi = ic.GetComponent<movi_inimigo>();
                             if (movi != null)
                             {
-                                // Só salva a velocidade original se ainda não foi salva (evita sobrescrever com 0)
                                 if (!velOriginal.ContainsKey(ic))
                                     velOriginal[ic] = movi.velocidade;
                                 movi.velocidade = 0f;
+                            }
+                            var moviDist = ic.GetComponent<movi_inimigo_manter_distancia>();
+                            if (moviDist != null)
+                            {
+                                if (!velOriginalDist.ContainsKey(ic))
+                                    velOriginalDist[ic] = moviDist.velocidade;
+                                moviDist.velocidade = 0f;
                             }
                             var rb2 = ic.GetComponent<Rigidbody2D>();
                             if (rb2 != null) rb2.linearVelocity = Vector2.zero;
@@ -187,8 +194,12 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
                     var movi = ic.GetComponent<movi_inimigo>();
                     if (movi != null && velOriginal.TryGetValue(ic, out float velSalva))
                         movi.velocidade = velSalva;
+                    var moviDist = ic.GetComponent<movi_inimigo_manter_distancia>();
+                    if (moviDist != null && velOriginalDist.TryGetValue(ic, out float velSalvaDist))
+                        moviDist.velocidade = velSalvaDist;
                 }
         velOriginal.Clear();
+        velOriginalDist.Clear();
 
         // Destrói todas as linhas imediatamente
         foreach (var lr in linhas)

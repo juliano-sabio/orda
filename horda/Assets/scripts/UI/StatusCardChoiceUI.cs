@@ -26,7 +26,9 @@ public class StatusCardChoiceUI : MonoBehaviour
     public string  titleMessage          = "ESCOLHA UMA CARTA DE STATUS";
 
     private System.Action<StatusCardInfo> onCardChosen;
-    private List<GameObject> spawnedCards = new List<GameObject>();
+    private List<GameObject>    spawnedCards  = new List<GameObject>();
+    private List<StatusCardInfo> cartasAtuais = new List<StatusCardInfo>();
+    private int   cardIndex        = 0;
     private float previousTimeScale;
     private Coroutine contadorCoroutine;
 
@@ -35,11 +37,29 @@ public class StatusCardChoiceUI : MonoBehaviour
         if (choicePanel != null) choicePanel.SetActive(false);
     }
 
+    void Update()
+    {
+        if (spawnedCards.Count == 0) return;
+
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+            cardIndex = (cardIndex - 1 + spawnedCards.Count) % spawnedCards.Count;
+        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+            cardIndex = (cardIndex + 1) % spawnedCards.Count;
+        else if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+        {
+            if (cardIndex >= 0 && cardIndex < cartasAtuais.Count)
+                OnCardSelected(cartasAtuais[cardIndex]);
+        }
+    }
+
+
     // ── API pública ──────────────────────────────────────────────────────────
 
     public void Show(List<StatusCardInfo> cards, System.Action<StatusCardInfo> callback)
     {
-        onCardChosen = callback;
+        onCardChosen  = callback;
+        cartasAtuais  = new List<StatusCardInfo>(cards);
+        cardIndex     = 0;
 
         if (!gameObject.activeInHierarchy) gameObject.SetActive(true);
 
@@ -173,13 +193,18 @@ public class StatusCardChoiceUI : MonoBehaviour
                 { txt.text = GetRarityLabel(card.rarity); txt.color = rColor; }
         }
 
-        // Ícone — remove sprite da skill anterior, pinta com cor da raridade
+        // Ícone — usa o ícone gerado pelo StatusCardIconGenerator
         var innerImg = cardObj.transform.Find("IconArea/IconImageSlot/IconInner")
                               ?.GetComponent<Image>();
         if (innerImg == null)
             foreach (var img in cardObj.GetComponentsInChildren<Image>(true))
                 if (img.name == "IconInner") { innerImg = img; break; }
-        if (innerImg != null) { innerImg.sprite = null; innerImg.color = rColor; }
+        if (innerImg != null)
+        {
+            var statIcon = StatusCardIconGenerator.GetIcon(card.statType, rColor);
+            if (statIcon != null) { innerImg.sprite = statIcon; innerImg.color = Color.white; innerImg.preserveAspect = true; }
+            else { innerImg.sprite = null; innerImg.color = rColor; }
+        }
 
         // Botão
         var btn = cardObj.GetComponent<Button>()
@@ -249,7 +274,7 @@ public class StatusCardChoiceUI : MonoBehaviour
         else slotImg.color = new Color(rColor.r * 0.4f, rColor.g * 0.4f, rColor.b * 0.4f, 0.6f);
         slotImg.raycastTarget = false;
 
-        // IconInner — usa skill_slot_card.aseprite
+        // IconInner — usa skill_slot_card.aseprite como fundo
         var innerGO = new GameObject("IconInner", typeof(RectTransform), typeof(Image));
         innerGO.transform.SetParent(slotGO.transform, false);
         var innerRT = innerGO.GetComponent<RectTransform>();
@@ -260,6 +285,18 @@ public class StatusCardChoiceUI : MonoBehaviour
         if (spInner != null) { innerImg.sprite = spInner; innerImg.color = Color.white; }
         else innerImg.color = rColor;
         innerImg.raycastTarget = false;
+
+        // Ícone do stat por cima do slot
+        var statIconGO = new GameObject("StatIcon", typeof(RectTransform), typeof(Image));
+        statIconGO.transform.SetParent(innerGO.transform, false);
+        var statIconRT = statIconGO.GetComponent<RectTransform>();
+        statIconRT.anchorMin = new Vector2(0.1f, 0.1f); statIconRT.anchorMax = new Vector2(0.9f, 0.9f);
+        statIconRT.anchoredPosition = Vector2.zero; statIconRT.sizeDelta = Vector2.zero;
+        var statIconImg = statIconGO.GetComponent<Image>();
+        var statSp = StatusCardIconGenerator.GetIcon(card.statType, rColor);
+        if (statSp != null) { statIconImg.sprite = statSp; statIconImg.color = Color.white; statIconImg.preserveAspect = true; }
+        else { statIconImg.sprite = null; statIconImg.color = new Color(rColor.r, rColor.g, rColor.b, 0.8f); }
+        statIconImg.raycastTarget = false;
 
         CriarTextoArea(cardObj, "NameArea",   "NameText",  $"<b>{card.cardName}</b>",
             new Vector2(0f, 0.50f), new Vector2(1f, 0.68f), 14, new Color(0.95f, 0.82f, 0.40f), true);

@@ -99,13 +99,13 @@ MonoBehaviour:
     m_ColorMax: {r: 0, g: 0, b: 0, a: 0}
   isPassive: 1
   activationInterval: 5
-  skillType: 0
+  skillType: 6
   cooldown: 360
   rarity: 2
   requiredLevel: 1
   isUnique: 1
   requiredSkills: []
-  specificType: 29
+  specificType: 31
   specialValue: 20
   stackable: 1
   maxStacks: 1

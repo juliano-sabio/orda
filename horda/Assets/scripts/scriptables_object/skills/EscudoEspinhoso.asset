@@ -101,7 +101,7 @@ MonoBehaviour:
     m_ColorMax: {r: 0, g: 0, b: 0, a: 0}
   isPassive: 1
   activationInterval: 2
-  skillType: 0
+  skillType: 6
   cooldown: 3
   rarity: 1
   requiredLevel: 1

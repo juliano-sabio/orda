@@ -21,6 +21,7 @@ public class RitualAnciaoUltimate : MonoBehaviour
     PlayerStats playerStats;
 
     readonly Dictionary<InimigoController, float> temposDentro = new Dictionary<InimigoController, float>();
+    float proxTick;
 
     // ── Cores do ritual ──────────────────────────────────────────────────────
     static readonly Color COR_INICIO  = new Color(0.55f, 0.25f, 1.00f);
@@ -65,6 +66,7 @@ public class RitualAnciaoUltimate : MonoBehaviour
         cooldownRestante = cooldown;
         centroRitual     = transform.position;
         temposDentro.Clear();
+        proxTick         = 0f;
 
         // RitualAmpliado: +40% de raio
         float raioOriginal = raio;
@@ -103,6 +105,10 @@ public class RitualAnciaoUltimate : MonoBehaviour
 
     void AtualizarInimigos(float elapsed)
     {
+        proxTick -= Time.deltaTime;
+        bool tick = proxTick <= 0f;
+        if (tick) proxTick = 0.5f;
+
         var dentroAgora = new HashSet<InimigoController>();
 
         foreach (var c in Physics2D.OverlapCircleAll(centroRitual, raio))
@@ -118,9 +124,12 @@ public class RitualAnciaoUltimate : MonoBehaviour
             if (!temposDentro.ContainsKey(ic)) temposDentro[ic] = 0f;
             temposDentro[ic] += Time.deltaTime;
 
-            float t    = Mathf.Clamp01(temposDentro[ic] / tempoRampa);
-            float dano = Mathf.Lerp(danoInicial, danoFinal, t) * Time.deltaTime;
-            ic.ReceberDano(dano, false, false);
+            if (tick)
+            {
+                float t    = Mathf.Clamp01(temposDentro[ic] / tempoRampa);
+                float dano = Mathf.Lerp(danoInicial, danoFinal, t) * 0.5f;
+                ic.ReceberDano(dano, false);
+            }
 
             // Tentáculo visual ao alvo
             if (Random.value < 0.04f)
@@ -313,12 +322,12 @@ public class RitualAnciaoUltimate : MonoBehaviour
         // Runas aparecem uma a uma com flash
         var runas = new List<SpriteRenderer>();
         foreach (var sr in srs)
-            if (sr.gameObject.name.StartsWith("Runa")) runas.Add(sr);
+            if (sr.gameObject.name.StartsWith("Runa") && !sr.gameObject.name.EndsWith("Glow")) runas.Add(sr);
 
         for (int i = 0; i < runas.Count; i++)
         {
             runas[i].color = new Color(1f, 1f, 1f, 1f);
-            SpawnFlashRuna((Vector2)runas[i].transform.position + centroRitual);
+            SpawnFlashRuna(runas[i].transform.position);
             yield return new WaitForSeconds(0.1f);
         }
     }

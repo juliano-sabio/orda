@@ -125,6 +125,13 @@ public class UIManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+        else if (gameObject.name == "UIManager_Canvas")
+        {
+            // UIManager_Canvas tem prioridade — destrói o singleton antigo
+            Destroy(Instance.gameObject);
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
         else
         {
             Destroy(gameObject);
@@ -141,6 +148,7 @@ public class UIManager : MonoBehaviour
         FindPauseManager();
 
         InitializeUI();
+        SetupStatusPanel();
         UpdateSkillIcons();
 
         ConnectToEquippedSkill();
@@ -1075,6 +1083,111 @@ public class UIManager : MonoBehaviour
                 ultimateCooldownText.color = Color.gray;
             }
         }
+    }
+
+    // ── Setup centralizado do StatusPanel ────────────────────────────────────
+    private bool statusPanelSetupFeito = false;
+
+    private void SetupStatusPanel()
+    {
+        if (statusPanel == null || statusPanelSetupFeito) return;
+        statusPanelSetupFeito = true;
+
+        foreach (Transform filho in statusPanel.transform)
+            filho.gameObject.SetActive(false);
+
+        var containerGO = new GameObject("StatsContent", typeof(RectTransform));
+        containerGO.transform.SetParent(statusPanel.transform, false);
+        var containerRT = containerGO.GetComponent<RectTransform>();
+        containerRT.anchorMin = Vector2.zero;
+        containerRT.anchorMax = Vector2.one;
+        containerRT.offsetMin = new Vector2(20f, 18f);
+        containerRT.offsetMax = new Vector2(-20f, -18f);
+
+        var vl = containerGO.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+        vl.spacing                = 8f;
+        vl.childAlignment         = TextAnchor.UpperCenter;
+        vl.childControlWidth      = true;
+        vl.childControlHeight     = true;
+        vl.childForceExpandWidth  = true;
+        vl.childForceExpandHeight = false;
+        vl.padding = new RectOffset(6, 6, 35, 8);
+
+        CriarTextoStatusPanel(containerGO.transform, "STATUS", 15f,
+            new Color(1f, 0.85f, 0.3f), bold: true, altura: 30f);
+
+        CriarSeparadorStatusPanel(containerGO.transform, new Color(1f, 0.85f, 0.3f, 0.5f));
+
+        damageText          = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Attack,         new Color(1.00f, 0.55f, 0.25f));
+        defenseText         = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Defense,        new Color(0.35f, 0.75f, 1.00f));
+        critChanceText      = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.CriticalChance, new Color(1.00f, 0.85f, 0.20f));
+        attackSpeedText     = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.AttackSpeed,    new Color(0.80f, 0.40f, 1.00f));
+        maxHealthStatusText = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Health,         new Color(0.30f, 1.00f, 0.45f));
+        speedText           = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Speed,          new Color(0.30f, 0.90f, 1.00f));
+        healthRegenText     = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Regen,          new Color(0.50f, 1.00f, 0.70f));
+    }
+
+    private TextMeshProUGUI CriarLinhaStatusPanel(Transform pai, StatusCardType stat, Color cor)
+    {
+        var row = new GameObject("StatRow", typeof(RectTransform));
+        row.transform.SetParent(pai, false);
+        var le = row.AddComponent<UnityEngine.UI.LayoutElement>();
+        le.preferredHeight = 30f;
+        le.flexibleHeight  = 0f;
+
+        var hl = row.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+        hl.spacing                = 8f;
+        hl.childAlignment         = TextAnchor.MiddleCenter;
+        hl.childControlWidth      = false;
+        hl.childControlHeight     = true;
+        hl.childForceExpandWidth  = false;
+        hl.childForceExpandHeight = true;
+        hl.padding = new RectOffset(0, 0, 0, 0);
+
+        var iconeGO = new GameObject("Icone", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+        iconeGO.transform.SetParent(row.transform, false);
+        iconeGO.GetComponent<RectTransform>().sizeDelta = new Vector2(24f, 24f);
+        var iconeImg = iconeGO.GetComponent<UnityEngine.UI.Image>();
+        iconeImg.preserveAspect = true;
+        var sp = StatusCardIconGenerator.GetIcon(stat, cor);
+        if (sp != null) iconeImg.sprite = sp;
+        else            iconeImg.color  = cor;
+
+        var txtGO = new GameObject("Texto", typeof(RectTransform));
+        txtGO.transform.SetParent(row.transform, false);
+        txtGO.GetComponent<RectTransform>().sizeDelta = new Vector2(200f, 30f);
+        var txt = txtGO.AddComponent<TextMeshProUGUI>();
+        txt.fontSize  = 13f;
+        txt.color     = cor;
+        txt.alignment = TextAlignmentOptions.MidlineLeft;
+        txt.text      = "---";
+
+        return txt;
+    }
+
+    private void CriarTextoStatusPanel(Transform pai, string texto, float tamanho, Color cor, bool bold, float altura)
+    {
+        var go = new GameObject("Titulo", typeof(RectTransform));
+        go.transform.SetParent(pai, false);
+        var le = go.AddComponent<UnityEngine.UI.LayoutElement>();
+        le.preferredHeight = altura;
+        le.flexibleHeight  = 0f;
+        var txt = go.AddComponent<TextMeshProUGUI>();
+        txt.text      = texto;
+        txt.fontSize  = tamanho;
+        txt.color     = cor;
+        txt.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
+        txt.alignment = TextAlignmentOptions.Center;
+    }
+
+    private void CriarSeparadorStatusPanel(Transform pai, Color cor)
+    {
+        var go = new GameObject("Separador", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+        go.transform.SetParent(pai, false);
+        var le = go.AddComponent<UnityEngine.UI.LayoutElement>();
+        le.preferredHeight = 2f;
+        le.flexibleHeight  = 0f;
+        go.GetComponent<UnityEngine.UI.Image>().color = cor;
     }
 
     public void ToggleStatusPanel()

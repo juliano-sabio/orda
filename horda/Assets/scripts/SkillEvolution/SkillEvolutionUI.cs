@@ -4,19 +4,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// Reutiliza o painel, container e prefab do SkillChoiceUI para garantir visual idêntico.
 public class SkillEvolutionUI : MonoBehaviour
 {
     public static SkillEvolutionUI Instance { get; private set; }
-    public GameObject cardPrefab;   // atribuído pelo CriarCartaEvolucaoPrefab (não usado diretamente — SkillChoiceUI.skillChoicePrefab tem prioridade)
+    public GameObject cardPrefab;
     public float tempoEscolha = 20f;
 
     bool      visivel    = false;
     bool      selecionou = false;
     Coroutine contadorCoroutine;
     List<GameObject> cartasCriadas = new List<GameObject>();
-    Canvas    painelCanvas;
-    GameObject containerEvo;  // container de cartas criado por nós dentro do choicePanel
+    GameObject painelEvo;       // container transparente criado em runtime
 
     public bool Visivel => visivel;
 
@@ -35,7 +33,7 @@ public class SkillEvolutionUI : MonoBehaviour
         StartCoroutine(Mostrar(opcoes, callback));
     }
 
-    // ── Fluxo ─────────────────────────────────────────────────────────────────
+    // ── Fluxo principal ───────────────────────────────────────────────────────
 
     IEnumerator Mostrar(List<SkillEvolutionData> opcoes, System.Action<SkillEvolutionData> callback)
     {
@@ -47,232 +45,396 @@ public class SkillEvolutionUI : MonoBehaviour
         visivel    = true;
         selecionou = false;
 
-        // Reutiliza o mesmo painel do SkillChoiceUI
-        if (ui.choicePanel != null)
-        {
-            ui.choicePanel.SetActive(true);
+        // Limpa sessão anterior
+        LimparTudo();
 
-            // Garante que o painel aparece na frente de tudo
-            painelCanvas = ui.choicePanel.GetComponent<Canvas>();
-            if (painelCanvas == null)
-            {
-                painelCanvas = ui.choicePanel.AddComponent<Canvas>();
-                ui.choicePanel.AddComponent<GraphicRaycaster>();
-            }
-            painelCanvas.overrideSorting = true;
-            painelCanvas.sortingOrder    = 999;
-        }
+        // Encontra o Canvas raiz do SkillChoiceUI para herdar escala/resolução
+        var canvas = ui.GetComponentInParent<Canvas>();
+        if (canvas == null) canvas = Object.FindFirstObjectByType<Canvas>();
+        if (canvas == null) yield break;
 
-        // Atualiza o título
-        if (ui.titleTextTMP != null) ui.titleTextTMP.text = "ESCOLHA UMA EVOLUCAO";
-        else if (ui.titleText != null) ui.titleText.text  = "ESCOLHA UMA EVOLUCAO";
+        // Cria container fullscreen com fundo preto semi-transparente
+        painelEvo = new GameObject("EvoPanel", typeof(RectTransform), typeof(Image));
+        painelEvo.transform.SetParent(canvas.transform, false);
+        painelEvo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);
+        var painelRT = painelEvo.GetComponent<RectTransform>();
+        painelRT.anchorMin = Vector2.zero;
+        painelRT.anchorMax = Vector2.one;
+        painelRT.offsetMin = Vector2.zero;
+        painelRT.offsetMax = Vector2.zero;
 
-        // Limpa cartas anteriores
-        LimparCartas(ui);
+        // Canvas proprio para garantir que fica na frente de tudo
+        var evoCanvas = painelEvo.AddComponent<Canvas>();
+        evoCanvas.overrideSorting = true;
+        evoCanvas.sortingOrder    = 999;
+        painelEvo.AddComponent<GraphicRaycaster>();
 
-        // Container próprio dentro do painel (não depende de skillsContainer)
-        if (containerEvo != null) Destroy(containerEvo);
-        containerEvo = new GameObject("EvoCardsContainer", typeof(RectTransform));
-        containerEvo.transform.SetParent(ui.choicePanel.transform, false);
-        var contRT = containerEvo.GetComponent<RectTransform>();
-        contRT.anchorMin = new Vector2(0.5f, 0.5f); contRT.anchorMax = new Vector2(0.5f, 0.5f);
+        // Container horizontal das cartas (centrado na tela)
+        var containerGO = new GameObject("EvoCardsRow", typeof(RectTransform));
+        containerGO.transform.SetParent(painelEvo.transform, false);
+        var contRT = containerGO.GetComponent<RectTransform>();
+        contRT.anchorMin = new Vector2(0.5f, 0.5f);
+        contRT.anchorMax = new Vector2(0.5f, 0.5f);
         contRT.pivot     = new Vector2(0.5f, 0.5f);
         contRT.sizeDelta = new Vector2(1200f, 500f);
-        contRT.anchoredPosition = new Vector2(0f, -20f);
-        var evoLayout = containerEvo.AddComponent<HorizontalLayoutGroup>();
-        evoLayout.spacing = ui.cardSpacing; evoLayout.childAlignment = TextAnchor.MiddleCenter;
-        evoLayout.padding = new RectOffset(30, 30, 20, 20);
-        evoLayout.childControlWidth = false; evoLayout.childControlHeight = false;
-        evoLayout.childForceExpandWidth = false; evoLayout.childForceExpandHeight = false;
+        contRT.anchoredPosition = Vector2.zero;
 
-        // Cria uma carta por opção
-        int idx = 0;
-        foreach (var op in opcoes)
+        var hLayout = containerGO.AddComponent<HorizontalLayoutGroup>();
+        hLayout.spacing             = ui.cardSpacing;
+        hLayout.childAlignment      = TextAnchor.MiddleCenter;
+        hLayout.padding             = new RectOffset(30, 30, 20, 20);
+        hLayout.childControlWidth   = false;
+        hLayout.childControlHeight  = false;
+        hLayout.childForceExpandWidth  = false;
+        hLayout.childForceExpandHeight = false;
+
+        // 1) Cria todas as cartas primeiro (sem animar ainda)
+        yield return null;
+        for (int i = 0; i < opcoes.Count; i++)
         {
-            var card = CriarCarta(ui, op);
-            if (card == null) { idx++; continue; }
-
-            card.transform.SetParent(containerEvo.transform, false);
+            var card = CriarCarta(ui, containerGO.transform, opcoes[i], callback);
+            if (card == null) continue;
             cartasCriadas.Add(card);
-
-            // Bloqueia raycast nos filhos
-            foreach (var g in card.GetComponentsInChildren<Graphic>(true))
-                g.raycastTarget = false;
-            foreach (var b in card.GetComponentsInChildren<Button>(true))
-            { b.onClick.RemoveAllListeners(); b.interactable = false; }
-
-            // Overlay de clique
-            var ov = new GameObject("EvoOverlay", typeof(RectTransform), typeof(Image), typeof(Button));
-            ov.transform.SetParent(card.transform, false);
-            var ovRT = ov.GetComponent<RectTransform>();
-            ovRT.anchorMin = Vector2.zero; ovRT.anchorMax = Vector2.one;
-            ovRT.offsetMin = ovRT.offsetMax = Vector2.zero;
-            ov.GetComponent<Image>().color = Color.clear;
-            ov.GetComponent<Image>().raycastTarget = true;
-            var local = op;
-            ov.GetComponent<Button>().onClick.AddListener(() => Selecionar(local, callback, ui));
-
-            // Hover + animação de entrada
-            card.AddComponent<CartaSkillAnimador>().Iniciar(card);
-            StartCoroutine(AnimarEntrada(card, idx * 0.1f));
-            idx++;
         }
 
+        // 2) Reconstrói o layout — agora as cartas estão nas posições corretas
         yield return null;
-        if (containerEvo != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(containerEvo.GetComponent<RectTransform>());
+        LayoutRebuilder.ForceRebuildLayoutImmediate(contRT);
+        Canvas.ForceUpdateCanvases();
+        yield return null; // mais um frame para o layout aplicar
+
+        // 3) Só agora inicia animações — capturam posição já calculada pelo layout
+        for (int i = 0; i < cartasCriadas.Count; i++)
+        {
+            cartasCriadas[i].AddComponent<EvoCardAnimador>();
+            StartCoroutine(AnimarEntrada(cartasCriadas[i], i * 0.12f));
+        }
 
         // Contador
         if (contadorCoroutine != null) StopCoroutine(contadorCoroutine);
-        contadorCoroutine = StartCoroutine(Contador(ui, opcoes, callback));
+        contadorCoroutine = StartCoroutine(ContadorEscolha(opcoes, callback));
     }
 
-    void Selecionar(SkillEvolutionData opcao, System.Action<SkillEvolutionData> callback, SkillChoiceUI ui)
+    void Selecionar(SkillEvolutionData opcao, System.Action<SkillEvolutionData> callback, GameObject cartaSelecionada = null)
     {
         if (selecionou) return;
         selecionou = true;
         if (contadorCoroutine != null) { StopCoroutine(contadorCoroutine); contadorCoroutine = null; }
-        StartCoroutine(Fechar(opcao, callback, ui));
-    }
 
-    IEnumerator Fechar(SkillEvolutionData opcao, System.Action<SkillEvolutionData> callback, SkillChoiceUI ui)
-    {
-        yield return new WaitForSecondsRealtime(0.15f);
-
-        LimparCartas(ui);
-
-        // Remove o Canvas de override que adicionamos
-        if (painelCanvas != null)
+        foreach (var c in cartasCriadas)
         {
-            painelCanvas.overrideSorting = false;
-            painelCanvas.sortingOrder    = 0;
+            if (c == null) continue;
+            var btn = c.GetComponent<Button>();
+            if (btn == null) btn = c.GetComponentInChildren<Button>();
+            if (btn != null) btn.interactable = false;
         }
 
-        if (ui.choicePanel != null) ui.choicePanel.SetActive(false);
-        visivel = false;
-        Time.timeScale = 1f;
+        if (cartaSelecionada != null)
+            StartCoroutine(EfeitoCartaSelecionada(cartaSelecionada));
+
+        StartCoroutine(Fechar(opcao, callback));
+    }
+
+    IEnumerator Fechar(SkillEvolutionData opcao, System.Action<SkillEvolutionData> callback)
+    {
+        StartCoroutine(EfeitoFlashTela());
+        yield return new WaitForSecondsRealtime(0.35f);
+
+        LimparTudo();
+
+        visivel             = false;
+        Time.timeScale      = 1f;
         AudioListener.pause = false;
 
         callback?.Invoke(opcao);
     }
 
-    IEnumerator Contador(SkillChoiceUI ui, List<SkillEvolutionData> opcoes, System.Action<SkillEvolutionData> callback)
+    IEnumerator EfeitoCartaSelecionada(GameObject carta)
     {
-        // Cria texto de contador no painel
-        var go = new GameObject("EvoTimer", typeof(RectTransform), typeof(TextMeshProUGUI));
-        go.transform.SetParent(ui.choicePanel != null ? ui.choicePanel.transform : ui.skillsContainer, false);
-        var rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 0f); rt.anchorMax = new Vector2(0.5f, 0f);
-        rt.pivot = new Vector2(0.5f, 0f);
-        rt.anchoredPosition = new Vector2(0f, 30f); rt.sizeDelta = new Vector2(120f, 45f);
-        var txt = go.GetComponent<TextMeshProUGUI>();
-        txt.fontSize = 28; txt.fontStyle = FontStyles.Bold; txt.alignment = TextAlignmentOptions.Center;
+        if (carta == null) yield break;
+        var images        = carta.GetComponentsInChildren<Image>();
+        var corsOriginais = System.Array.ConvertAll(images, img => img.color);
+        Color corFlash    = new Color(1f, 0.92f, 0.2f);
 
-        for (float r = tempoEscolha; r > 0f; r -= Time.unscaledDeltaTime)
+        float dur = 0.3f;
+        for (float t = 0f; t < dur; t += Time.unscaledDeltaTime)
+        {
+            if (carta == null) yield break;
+            float p = t / dur;
+            float ease = 1f - Mathf.Pow(1f - p, 2f);
+            carta.transform.localScale = Vector3.one * (1f + ease * 0.25f);
+            for (int i = 0; i < images.Length; i++)
+                if (images[i] != null)
+                    images[i].color = Color.Lerp(corsOriginais[i], corFlash, ease * 0.85f);
+            yield return null;
+        }
+    }
+
+    IEnumerator EfeitoFlashTela()
+    {
+        var go = new GameObject("EvoFlashOverlay");
+        var cvs = go.AddComponent<Canvas>();
+        cvs.renderMode   = RenderMode.ScreenSpaceOverlay;
+        cvs.sortingOrder = 250;
+        go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
+        var imgGO = new GameObject("Img");
+        imgGO.transform.SetParent(go.transform, false);
+        var img = imgGO.AddComponent<Image>();
+        var rt  = img.GetComponent<RectTransform>();
+        rt.anchorMin     = Vector2.zero;
+        rt.anchorMax     = Vector2.one;
+        rt.offsetMin     = rt.offsetMax = Vector2.zero;
+        img.raycastTarget = false;
+        img.color         = Color.clear;
+
+        Color corAlvo = new Color(1f, 0.85f, 0.1f, 0.40f);
+
+        float durIn = 0.1f;
+        for (float t = 0f; t < durIn; t += Time.unscaledDeltaTime)
+        {
+            if (img == null) break;
+            img.color = Color.Lerp(Color.clear, corAlvo, t / durIn);
+            yield return null;
+        }
+
+        float durOut = 0.55f;
+        for (float t = 0f; t < durOut; t += Time.unscaledDeltaTime)
+        {
+            if (img == null) break;
+            img.color = Color.Lerp(corAlvo, Color.clear, t / durOut);
+            yield return null;
+        }
+
+        if (go != null) Destroy(go);
+    }
+
+    IEnumerator ContadorEscolha(List<SkillEvolutionData> opcoes, System.Action<SkillEvolutionData> callback)
+    {
+        if (painelEvo == null) yield break;
+
+        var go = new GameObject("EvoTimer", typeof(RectTransform), typeof(TextMeshProUGUI));
+        go.transform.SetParent(painelEvo.transform, false);
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin        = new Vector2(0.5f, 0f);
+        rt.anchorMax        = new Vector2(0.5f, 0f);
+        rt.pivot            = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0f, 50f);
+        rt.sizeDelta        = new Vector2(160f, 50f);
+
+        var txt = go.GetComponent<TextMeshProUGUI>();
+        txt.fontSize  = 28;
+        txt.fontStyle = FontStyles.Bold;
+        txt.alignment = TextAlignmentOptions.Center;
+
+        float restante = tempoEscolha;
+        while (restante > 0f)
         {
             if (go == null) yield break;
-            txt.text  = Mathf.CeilToInt(r).ToString();
-            txt.color = r < 5f ? Color.red : Color.white;
+            restante -= Time.unscaledDeltaTime;
+            int seg   = Mathf.CeilToInt(Mathf.Max(0f, restante));
+            txt.text  = seg.ToString();
+            txt.color = restante < 5f ? Color.red : Color.white;
             yield return null;
         }
 
         if (go != null) Destroy(go);
         contadorCoroutine = null;
         if (!selecionou && opcoes.Count > 0)
-            Selecionar(opcoes[Random.Range(0, opcoes.Count)], callback, ui);
+            Selecionar(opcoes[Random.Range(0, opcoes.Count)], callback);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── Criação de carta ──────────────────────────────────────────────────────
 
-
-    GameObject CriarCarta(SkillChoiceUI ui, SkillEvolutionData data)
+    GameObject CriarCarta(SkillChoiceUI ui, Transform container, SkillEvolutionData data, System.Action<SkillEvolutionData> callback)
     {
-        // Prioridade: skillChoicePrefab do SkillChoiceUI → cardPrefab local → Resources
-        var prefab = ui.skillChoicePrefab
-                  ?? cardPrefab
-                  ?? Resources.Load<GameObject>("CartaEvolucao");
+        // Prefab: cardPrefab local → skillChoicePrefab → qualquer skill disponível → Resources
+        GameObject prefab = null;
+        if (cardPrefab != null)               prefab = cardPrefab;
+        else if (ui.skillChoicePrefab != null) prefab = ui.skillChoicePrefab;
+        else if (ui.allAvailableSkills != null)
+            foreach (var s in ui.allAvailableSkills)
+                if (s != null && s.cardPrefab != null) { prefab = s.cardPrefab; break; }
+        if (prefab == null) prefab = Resources.Load<GameObject>("Cards/SkillCard_Auto");
 
-        GameObject card;
-        if (prefab != null)
+        if (prefab == null)
         {
-            card = Object.Instantiate(prefab);
+            Debug.LogError("SkillEvolutionUI: nenhum prefab de carta encontrado!");
+            return null;
+        }
 
-            // Desativa SkillCardRuntimeManager para não sobrescrever nossos dados
-            var rm = card.GetComponent<SkillCardRuntimeManager>();
-            if (rm != null) rm.enabled = false;
+        var card = Object.Instantiate(prefab, container);
+        card.name = $"{data.nomeEvolucao}_Evo";
+        card.SetActive(true);
 
-            // Força todos os gráficos visíveis
-            foreach (var g in card.GetComponentsInChildren<Graphic>(true))
-            {
-                if (g.color.a < 0.05f) continue;
-                var c = g.color; c.a = 1f; g.color = c;
-            }
+        // Mesmo SetupCardTransform do SkillChoiceUI
+        var rect = card.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.localScale       = Vector3.one;
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta        = ui.cardSize;
+        }
+        var le = card.GetComponent<LayoutElement>();
+        if (le == null) le = card.AddComponent<LayoutElement>();
+        le.preferredWidth  = ui.cardSize.x;
+        le.preferredHeight = ui.cardSize.y;
+        le.flexibleWidth   = 0;
+        le.flexibleHeight  = 0;
 
-            // Popula textos
-            foreach (var t in card.GetComponentsInChildren<TextMeshProUGUI>(true))
-            {
-                string n = t.name.ToLower();
-                if      (n.Contains("name") || n.Contains("nome") || n.Contains("title"))
-                    { t.text = $"<b>{TextUtils.SemAcento(data.nomeEvolucao)}</b>"; t.color = data.corDestaque; }
-                else if (n.Contains("desc") || n.Contains("detail"))
-                    { t.text = TextUtils.SemAcento(data.descricao); t.color = Color.white; }
-                else if (n.Contains("stats") || n.Contains("bonus") || n.Contains("atq")
-                      || n.Contains("rarity") || n.Contains("rarid"))
-                    { t.text = data.raridade.ToString().ToUpper(); t.color = data.corDestaque; }
-                t.textWrappingMode = TMPro.TextWrappingModes.Normal;
-            }
-
-            // Ícone
-            Image innerImg = null;
-            var found = card.transform.Find("IconArea/IconImageSlot/IconInner");
-            if (found != null) innerImg = found.GetComponent<Image>();
-            if (innerImg == null)
-                foreach (var img in card.GetComponentsInChildren<Image>(true))
-                    if (img.name == "IconInner") { innerImg = img; break; }
-            if (innerImg != null && data.icone != null)
-                { innerImg.sprite = data.icone; innerImg.color = Color.white; }
+        // Inicializa via SkillCardRuntimeManager com SkillData temporário
+        var rm = card.GetComponent<SkillCardRuntimeManager>();
+        if (rm != null)
+        {
+            var tempSkill = ScriptableObject.CreateInstance<SkillData>();
+            tempSkill.skillName   = data.nomeEvolucao;
+            tempSkill.description = data.descricao;
+            tempSkill.icon        = data.icone;
+            tempSkill.rarity      = data.raridade;
+            tempSkill.element     = PlayerStats.Element.None;
+            rm.InitializeRuntime(tempSkill);
+            Destroy(tempSkill);
         }
         else
         {
-            // Fallback mínimo
-            card = new GameObject("EvoCard", typeof(RectTransform), typeof(Image), typeof(Button));
-            card.GetComponent<Image>().color = new Color(0.08f, 0.06f, 0.12f, 1f);
+            // Fallback manual
+            foreach (var t in card.GetComponentsInChildren<TextMeshProUGUI>(true))
+            {
+                string n = t.name.ToLower();
+                if      (n.Contains("name")  || n.Contains("nome")  || n.Contains("title"))
+                    { t.text = $"<b>{data.nomeEvolucao}</b>"; t.color = data.corDestaque; }
+                else if (n.Contains("desc")  || n.Contains("detail"))
+                    { t.text = data.descricao; t.color = Color.white; }
+                else if (n.Contains("rarity") || n.Contains("rarid"))
+                    { t.text = data.raridade.ToString().ToUpper(); t.color = data.corDestaque; }
+                t.textWrappingMode = TMPro.TextWrappingModes.Normal;
+            }
+            foreach (var img in card.GetComponentsInChildren<Image>(true))
+                if (img.name == "IconInner" && data.icone != null)
+                    { img.sprite = data.icone; img.color = Color.white; break; }
         }
 
-        var le = card.GetComponent<LayoutElement>() ?? card.AddComponent<LayoutElement>();
-        le.preferredWidth  = ui.cardSize.x;
-        le.preferredHeight = ui.cardSize.y;
+        // Botão
+        var button = card.GetComponent<Button>();
+        if (button == null) button = card.GetComponentInChildren<Button>();
+        if (button != null)
+        {
+            button.onClick.RemoveAllListeners();
+            var local      = data;
+            var cardCapture = card;
+            button.onClick.AddListener(() => Selecionar(local, callback, cardCapture));
+            button.interactable = true;
+        }
 
         return card;
     }
 
-    void LimparCartas(SkillChoiceUI ui)
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    void LimparTudo()
     {
         foreach (var c in cartasCriadas) if (c != null) Destroy(c);
         cartasCriadas.Clear();
 
-        if (containerEvo != null) { Destroy(containerEvo); containerEvo = null; }
-
-        if (ui?.choicePanel != null)
-        {
-            var timer = ui.choicePanel.transform.Find("EvoTimer");
-            if (timer != null) Destroy(timer.gameObject);
-        }
+        if (painelEvo != null) { Destroy(painelEvo); painelEvo = null; }
     }
 
     IEnumerator AnimarEntrada(GameObject card, float delay)
     {
+        // Sempre espera ao menos 1 frame + o stagger
+        yield return null;
         for (float t = 0f; t < delay; t += Time.unscaledDeltaTime) yield return null;
         if (card == null) yield break;
+
+        var rt = card.GetComponent<RectTransform>();
+        Vector2 posAlvo = rt != null ? rt.anchoredPosition : Vector2.zero;
+
         card.transform.localScale = Vector3.zero;
-        for (float e = 0f; e < 0.28f; e += Time.unscaledDeltaTime)
+        if (rt != null) rt.anchoredPosition = posAlvo + new Vector2(0f, -120f);
+
+        for (float e = 0f; e < 0.4f; e += Time.unscaledDeltaTime)
         {
             if (card == null) yield break;
-            float p = e / 0.28f;
-            float s = (1f - Mathf.Pow(1f - p, 3f)) * (1f + Mathf.Sin(p * Mathf.PI) * 0.13f);
-            card.transform.localScale = Vector3.one * s;
+            float p = e / 0.4f;
+            float ease = 1f - Mathf.Pow(1f - p, 3f);
+            float bounce = 1f + Mathf.Sin(p * Mathf.PI) * 0.18f;
+            card.transform.localScale = Vector3.one * (ease * bounce);
+            if (rt != null) rt.anchoredPosition = Vector2.LerpUnclamped(posAlvo + new Vector2(0f, -120f), posAlvo, ease);
             yield return null;
         }
-        if (card != null) card.transform.localScale = Vector3.one;
+        if (card != null)
+        {
+            card.transform.localScale = Vector3.one;
+            if (rt != null) rt.anchoredPosition = posAlvo;
+            // Sinaliza ao animador que a entrada acabou
+            var anim = card.GetComponent<EvoCardAnimador>();
+            if (anim != null) anim.EntradaConcluida(posAlvo);
+        }
+    }
+}
+
+// ── Animador dinâmico exclusivo das cartas de evolução ────────────────────────
+public class EvoCardAnimador : MonoBehaviour
+{
+    RectTransform rt;
+    bool          entradaPronta;
+    Vector2       posBase;
+    float         floatFase;
+    float         floatTimer;
+
+    void Awake()
+    {
+        rt        = GetComponent<RectTransform>();
+        floatFase = Random.Range(0f, Mathf.PI * 2f);
+    }
+
+    public void EntradaConcluida(Vector2 posicaoBase)
+    {
+        posBase      = posicaoBase;
+        entradaPronta = true;
+    }
+
+    void Update()
+    {
+        if (!entradaPronta || rt == null) return;
+
+        floatTimer += Time.unscaledDeltaTime;
+
+        bool hover = RectTransformUtility.RectangleContainsScreenPoint(rt, Input.mousePosition, null);
+
+        // ── Escala no hover ───────────────────────────────────────────────────
+        float escalaAlvo  = hover ? 1.12f : 1f;
+        float escalaAtual = transform.localScale.x;
+        float novaEscala  = Mathf.Lerp(escalaAtual, escalaAlvo, Time.unscaledDeltaTime * 10f);
+        transform.localScale = Vector3.one * novaEscala;
+
+        // ── Flutuação vertical (pausa enquanto hovering) ──────────────────────
+        if (!hover)
+        {
+            float yOffset = Mathf.Sin(floatTimer * 1.4f + floatFase) * 7f;
+            rt.anchoredPosition = new Vector2(posBase.x, posBase.y + yOffset);
+        }
+        else
+        {
+            rt.anchoredPosition = Vector2.Lerp(rt.anchoredPosition, posBase, Time.unscaledDeltaTime * 8f);
+        }
+
+        // ── Tilt 3D baseado na posição do mouse sobre a carta ─────────────────
+        if (hover)
+        {
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                rt, Input.mousePosition, null, out var localPt);
+            float tiltX = -(localPt.y / (rt.rect.height * 0.5f)) * 10f;
+            float tiltY =  (localPt.x / (rt.rect.width  * 0.5f)) * 10f;
+            var alvoRot = Quaternion.Euler(tiltX, tiltY, 0f);
+            transform.localRotation = Quaternion.Slerp(
+                transform.localRotation, alvoRot, Time.unscaledDeltaTime * 9f);
+        }
+        else
+        {
+            transform.localRotation = Quaternion.Slerp(
+                transform.localRotation, Quaternion.identity, Time.unscaledDeltaTime * 6f);
+        }
     }
 }

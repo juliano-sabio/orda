@@ -300,6 +300,35 @@ public class SkillIconsHUD : MonoBehaviour
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
     }
 
+    public void FlashEvolucao()
+    {
+        foreach (var slot in slots)
+            StartCoroutine(FlashSlot(slot));
+    }
+
+    IEnumerator FlashSlot(GameObject slot)
+    {
+        if (slot == null) yield break;
+        var imgs = slot.GetComponentsInChildren<Image>();
+        float t = 0f;
+        while (t < 0.5f)
+        {
+            float alpha = Mathf.PingPong(t * 6f, 1f);
+            foreach (var img in imgs)
+            {
+                var c = img.color;
+                img.color = new Color(c.r, c.g, c.b, alpha);
+            }
+            t += Time.deltaTime;
+            yield return null;
+        }
+        foreach (var img in imgs)
+        {
+            var c = img.color;
+            img.color = new Color(c.r, c.g, c.b, 1f);
+        }
+    }
+
     static Sprite GerarAnel(int sz, int espessura)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);

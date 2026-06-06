@@ -43,6 +43,8 @@ public class SkillEvolutionManager : MonoBehaviour
         evolucoesAtivas.Add(data.tipoEvolucao);
         Debug.Log($"[Evolução] +{data.tipoEvolucao} (total: {evolucoesAtivas.Count})");
 
+        SkillIconsHUD.Instance?.FlashEvolucao();
+
         var player = FindFirstObjectByType<PlayerStats>();
         if (player == null) return;
 
