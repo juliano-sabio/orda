@@ -54,6 +54,7 @@ public class GerenciadorEventos : MonoBehaviour
     [Header("Visual — Painel")]
     public Vector2 tamanhoDoPanel    = new Vector2(330f, 110f);
     public Vector2 posicaoVisivel    = new Vector2(-10f, -10f);
+    public Sprite  spritePainelEvento;
     public Color   corFundo          = new Color(0.04f, 0.04f, 0.12f, 0.92f);
     public Color   corBorda          = new Color(0.3f, 0.5f, 1f, 0.4f);
 
@@ -176,6 +177,21 @@ public class GerenciadorEventos : MonoBehaviour
         playerStats   = FindAnyObjectByType<PlayerStats>();
         uiManager     = FindAnyObjectByType<UIManager>();
         timerManager  = FindAnyObjectByType<TimerManager>();
+
+#if UNITY_EDITOR
+        if (spritePainelEvento == null)
+        {
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/evento/painel_evento.ase"))
+            {
+                if (a is Sprite s && a.name == "painel_evento")
+                {
+                    spritePainelEvento = s;
+                    break;
+                }
+            }
+        }
+#endif
 
         CriarPainelUI();
         proximoEventoTempo = delayInicial; // não usa TempoDecorrido() aqui — TimerManager ainda não inicializou
@@ -1313,71 +1329,50 @@ void LimparSlimePercurso()
         painelCG.alpha = 0f;
 
         Image fundo = painelEvento.AddComponent<Image>();
-        fundo.color = corFundo;
+        if (spritePainelEvento != null)
+        {
+            fundo.sprite = spritePainelEvento;
+            fundo.type   = Image.Type.Simple;
+            fundo.color  = Color.white;
+        }
+        else
+        {
+            fundo.color = corFundo;
+        }
 
-        // Borda colorida (painel interno levemente menor)
-        GameObject borda = new GameObject("Borda");
-        borda.transform.SetParent(painelEvento.transform, false);
-        RectTransform rectBorda = borda.AddComponent<RectTransform>();
-        rectBorda.anchorMin = Vector2.zero;
-        rectBorda.anchorMax = Vector2.one;
-        rectBorda.offsetMin = new Vector2(2f, 2f);
-        rectBorda.offsetMax = new Vector2(-2f, -2f);
-        Image imgBorda = borda.AddComponent<Image>();
-        imgBorda.color = corBorda;
-
-        // Nome do evento
+        // Nome do evento — topo (30% superior), com contorno
         textoNome = CriarTMP(painelEvento, "NomeEvento",
-            anchorMin: new Vector2(0f, 1f), anchorMax: new Vector2(1f, 1f),
+            anchorMin: new Vector2(0f, 0.72f), anchorMax: new Vector2(1f, 1f),
             pivot: new Vector2(0.5f, 1f),
-            anchoredPos: new Vector2(0f, -6f), size: new Vector2(0f, 26f),
+            anchoredPos: new Vector2(0f, -10f), size: new Vector2(-20f, 0f),
             fontSize: tamanhoFonteNome, style: FontStyles.Bold,
             color: corNome, align: TextAlignmentOptions.Center);
+        textoNome.outlineWidth = 0.25f;
+        textoNome.outlineColor = new Color32(0, 0, 0, 200);
 
+        // Descrição — centro (entre 24% e 72%)
         textoDesc = CriarTMP(painelEvento, "DescEvento",
-            anchorMin: new Vector2(0f, 1f), anchorMax: new Vector2(1f, 1f),
-            pivot: new Vector2(0.5f, 1f),
-            anchoredPos: new Vector2(0f, -34f), size: new Vector2(-16f, 36f),
+            anchorMin: new Vector2(0.03f, 0.24f), anchorMax: new Vector2(0.97f, 0.72f),
+            pivot: new Vector2(0.5f, 0.5f),
+            anchoredPos: new Vector2(0f, 0f), size: new Vector2(0f, 0f),
             fontSize: tamanhoFonteDesc, style: FontStyles.Normal,
             color: corDesc, align: TextAlignmentOptions.Center);
 
+        // Timer — centralizado abaixo da descrição
         textoTimer = CriarTMP(painelEvento, "TimerEvento",
-            anchorMin: new Vector2(0f, 0f), anchorMax: new Vector2(0.4f, 0f),
-            pivot: new Vector2(0f, 0f),
-            anchoredPos: new Vector2(10f, 22f), size: new Vector2(0f, 22f),
-            fontSize: tamanhoFonteTimer, style: FontStyles.Bold,
-            color: Color.white, align: TextAlignmentOptions.Left);
+            anchorMin: new Vector2(0f, 0f), anchorMax: new Vector2(1f, 0.24f),
+            pivot: new Vector2(0.5f, 0.5f),
+            anchoredPos: new Vector2(0f, 0f), size: new Vector2(0f, 0f),
+            fontSize: tamanhoFonteTimer - 2f, style: FontStyles.Bold,
+            color: new Color(0.9f, 0.9f, 1f), align: TextAlignmentOptions.Center);
 
+        // Progresso — canto superior direito do painel
         textoProgresso = CriarTMP(painelEvento, "ProgressoEvento",
-            anchorMin: new Vector2(0.6f, 0f), anchorMax: new Vector2(1f, 0f),
-            pivot: new Vector2(1f, 0f),
-            anchoredPos: new Vector2(-10f, 22f), size: new Vector2(0f, 22f),
-            fontSize: tamanhoFonteTimer, style: FontStyles.Bold,
-            color: Color.white, align: TextAlignmentOptions.Right);
-
-        // Barra de progresso de tempo
-        GameObject barraBG = new GameObject("BarraBG");
-        barraBG.transform.SetParent(painelEvento.transform, false);
-        RectTransform rectBG = barraBG.AddComponent<RectTransform>();
-        rectBG.anchorMin = new Vector2(0f, 0f);
-        rectBG.anchorMax = new Vector2(1f, 0f);
-        rectBG.pivot = new Vector2(0.5f, 0f);
-        rectBG.anchoredPosition = new Vector2(0f, 6f);
-        rectBG.sizeDelta = new Vector2(-16f, 10f);
-        Image imgBG = barraBG.AddComponent<Image>();
-        imgBG.color = new Color(0.15f, 0.15f, 0.15f, 1f);
-
-        // Fill da barra
-        GameObject barraFillGO = new GameObject("BarraFill");
-        barraFillGO.transform.SetParent(barraBG.transform, false);
-        barraFill = barraFillGO.AddComponent<RectTransform>();
-        barraFill.anchorMin = new Vector2(0f, 0f);
-        barraFill.anchorMax = new Vector2(1f, 1f);
-        barraFill.sizeDelta = Vector2.zero;
-        barraFill.offsetMin = Vector2.zero;
-        barraFill.offsetMax = Vector2.zero;
-        barraFillImg = barraFillGO.AddComponent<Image>();
-        barraFillImg.color = corBarraAtiva;
+            anchorMin: new Vector2(0.6f, 0.82f), anchorMax: new Vector2(1f, 1f),
+            pivot: new Vector2(1f, 1f),
+            anchoredPos: new Vector2(-8f, -6f), size: new Vector2(0f, 0f),
+            fontSize: tamanhoFonteTimer - 3f, style: FontStyles.Normal,
+            color: new Color(0.8f, 0.8f, 0.8f), align: TextAlignmentOptions.Right);
 
         // painel começa fora da tela (POS_ESCONDIDO) e invisível — sem SetActive(false)
     }

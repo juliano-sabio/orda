@@ -53,6 +53,9 @@ public class BarreiraEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga
     void OnDestroy()
     {
         if (rootVisual != null) Destroy(rootVisual);
+        if (particulas != null)
+            foreach (var p in particulas)
+                if (p != null) Destroy(p);
     }
 
     void AtivarEscudo()

@@ -72,12 +72,12 @@ public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
             if (timerRecarga <= 0f) { Reativar(); StartCoroutine(EfeitoRecarga()); }
         }
 
-        // Cria visual se ainda não existe
         if (rootVisual == null && playerStats != null)
-        {
             CriarVisual();
-        }
+    }
 
+    void LateUpdate()
+    {
         if (rootVisual != null && playerStats != null)
             rootVisual.transform.position = playerStats.transform.position;
     }

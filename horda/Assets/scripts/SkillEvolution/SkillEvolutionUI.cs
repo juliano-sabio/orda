@@ -30,6 +30,7 @@ public class SkillEvolutionUI : MonoBehaviour
     public void MostrarOpcoes(List<SkillEvolutionData> opcoes, System.Action<SkillEvolutionData> callback)
     {
         if (opcoes == null || opcoes.Count == 0) return;
+        if (visivel) return; // já está exibindo ou animando — ignora chamada duplicada
         StartCoroutine(Mostrar(opcoes, callback));
     }
 
@@ -130,9 +131,10 @@ public class SkillEvolutionUI : MonoBehaviour
         }
 
         if (cartaSelecionada != null)
-            StartCoroutine(EfeitoCartaSelecionada(cartaSelecionada));
-
-        StartCoroutine(Fechar(opcao, callback));
+            CartaSelecaoEfeito.Executar(cartaSelecionada, cartasCriadas,
+                () => StartCoroutine(Fechar(opcao, callback)));
+        else
+            StartCoroutine(Fechar(opcao, callback));
     }
 
     IEnumerator Fechar(SkillEvolutionData opcao, System.Action<SkillEvolutionData> callback)

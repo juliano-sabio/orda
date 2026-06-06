@@ -61,6 +61,10 @@ public class EscudoKarmaSkillBehavior : SkillBehavior, ISkillComRecarga
             timerRecarga -= Time.deltaTime;
             if (timerRecarga <= 0f) { Ativar(); StartCoroutine(EfeitoRecarga()); }
         }
+    }
+
+    void LateUpdate()
+    {
         if (playerStats != null && orbs != null) AtualizarPosOrbs();
     }
 

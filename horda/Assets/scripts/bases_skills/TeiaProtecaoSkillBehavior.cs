@@ -8,8 +8,9 @@ public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga
     float raio      = 3.5f;
     float forcaEmpurrao = 8f;
 
-    float timerRecarga = 0f;
-    bool  ativa        = false;
+    float      timerRecarga = 0f;
+    bool       ativa        = false;
+    GameObject visualAtivo;
 
     public bool  EmRecarga    => timerRecarga > 0f;
     public float TimerRecarga => timerRecarga;
@@ -81,10 +82,17 @@ public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga
         ativa = true;
         float duracaoReal = duracao * (SkillEvolutionManager.Tem(SkillEvolutionType.TeiaPermanente) ? 2f : 1f);
         var visual = CriarVisual();
+        visualAtivo = visual;
         StartCoroutine(AnimarVisual(visual, duracaoReal));
         yield return new WaitForSeconds(duracaoReal);
         ativa = false;
+        visualAtivo = null;
         if (visual != null) StartCoroutine(FadeDestruir(visual, 0.3f));
+    }
+
+    void OnDestroy()
+    {
+        if (visualAtivo != null) Destroy(visualAtivo);
     }
 
     GameObject CriarVisual()

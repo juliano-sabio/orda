@@ -626,15 +626,10 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void OnSkillSelected(SkillData selectedSkill)
     {
-
         if (selectedSkill != null)
-        {
             StartCoroutine(SelectionConfirmationEffect(selectedSkill));
-        }
         else
-        {
             ClosePanel();
-        }
     }
 
     private IEnumerator SelectionConfirmationEffect(SkillData selectedSkill)

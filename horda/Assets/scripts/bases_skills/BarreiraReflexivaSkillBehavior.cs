@@ -209,11 +209,15 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
         return lr;
     }
 
+    void LateUpdate()
+    {
+        if (rootVisual != null && playerStats != null)
+            rootVisual.transform.position = playerStats.transform.position;
+    }
+
     void AtualizarVisual()
     {
         if (rootVisual == null || playerStats == null) return;
-
-        rootVisual.transform.position = playerStats.transform.position;
 
         float pulso  = Mathf.Sin(elapsed * 4f) * 0.5f + 0.5f;
         float pulso2 = Mathf.Sin(elapsed * 6f + 0.8f) * 0.5f + 0.5f;
