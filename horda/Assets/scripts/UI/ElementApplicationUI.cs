@@ -38,7 +38,18 @@ public class ElementApplicationUI : MonoBehaviour
 
     void Awake()
     {
-        if (_instance != null && _instance != this) { Destroy(gameObject); return; }
+        if (_instance != null && _instance != this) { Destroy(this); return; }
+
+        // Se compartilhando GO com outros scripts, isolar em GO dedicado
+        if (GetComponents<MonoBehaviour>().Length > 1)
+        {
+            var root = new GameObject("ElementApplicationUI_Persistent");
+            DontDestroyOnLoad(root);
+            _instance = root.AddComponent<ElementApplicationUI>();
+            Destroy(this);
+            return;
+        }
+
         _instance = this;
         DontDestroyOnLoad(gameObject);
         CriarCanvas();

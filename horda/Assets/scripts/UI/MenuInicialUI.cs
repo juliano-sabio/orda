@@ -26,6 +26,7 @@ public class MenuInicialUI : MonoBehaviour
     float[]         pVel  = new float[QTD_P];
 
     // ── Refs ────────────────────────────────────────────────────────────
+    Sprite     sprBotao;
     GameObject canvasRef;
     GameObject painelOpcoes;
     GameObject painelMulti;
@@ -43,14 +44,21 @@ public class MenuInicialUI : MonoBehaviour
         }
 
         canvasRef = CriarCanvas();
+
+#if UNITY_EDITOR
+        foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+            "Assets/assets/UI/charselection/bar_charselect.png"))
+            if (a is Sprite s) { sprBotao = s; break; }
+#endif
+
         CriarFundo();
         CriarParticulas();
-        var logo = CriarLogo();
+
         CriarBotoes();
         CriarRodape();
 
         StartCoroutine(AnimarParticulas());
-        StartCoroutine(AnimarLogo(logo));
+
     }
 
     // ── Canvas ──────────────────────────────────────────────────────────
@@ -71,26 +79,40 @@ public class MenuInicialUI : MonoBehaviour
     // ── Fundo simples ───────────────────────────────────────────────────
     void CriarFundo()
     {
-        // base
-        Esticar(CriarImg("Fundo", corFundo));
+        // base — tenta usar a imagem de fundo, senão usa cor sólida
+        var goFundo = new GameObject("Fundo");
+        goFundo.transform.SetParent(canvasRef.transform, false);
+        var rtFundo = goFundo.AddComponent<RectTransform>();
+        rtFundo.anchorMin = Vector2.zero; rtFundo.anchorMax = Vector2.one;
+        rtFundo.offsetMin = rtFundo.offsetMax = Vector2.zero;
+        var imgFundo = goFundo.AddComponent<Image>();
 
-        // brilho suave atrás do título (apenas 1 camada)
-        var glow = CriarImg("GlowTitulo", new Color(corAcento.r, corAcento.g, corAcento.b, 0.08f));
-        var rg = glow.GetComponent<RectTransform>();
-        rg.anchorMin = new Vector2(0.1f, 0.60f); rg.anchorMax = new Vector2(0.9f, 1.0f);
-        rg.offsetMin = rg.offsetMax = Vector2.zero;
+        Sprite bgSprite = null;
+#if UNITY_EDITOR
+        foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+            "Assets/assets/UI/menu_inicial/IMG_6856 (1).png"))
+            if (a is Sprite s) { bgSprite = s; break; }
+#endif
+        if (bgSprite != null)
+        {
+            imgFundo.sprite = bgSprite;
+            imgFundo.type   = Image.Type.Simple;
+            imgFundo.color  = Color.white;
+            imgFundo.preserveAspect = false;
+        }
+        else
+        {
+            imgFundo.color = corFundo;
+        }
 
-        // painel escuro atrás dos botões
-        var painel = CriarImg("PainelBotoes", new Color(0.06f, 0.04f, 0.13f, 0.85f));
-        var rp = painel.GetComponent<RectTransform>();
-        rp.anchorMin = new Vector2(0.25f, 0.20f); rp.anchorMax = new Vector2(0.75f, 0.78f);
-        rp.offsetMin = rp.offsetMax = Vector2.zero;
+        // overlay escuro sobre a imagem para legibilidade
+        var goOverlay = new GameObject("Overlay");
+        goOverlay.transform.SetParent(canvasRef.transform, false);
+        var rtO = goOverlay.AddComponent<RectTransform>();
+        rtO.anchorMin = Vector2.zero; rtO.anchorMax = Vector2.one;
+        rtO.offsetMin = rtO.offsetMax = Vector2.zero;
+        goOverlay.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.45f);
 
-        // linha roxa no topo do painel
-        var linha = CriarImg("LinhaTopo", corAcento);
-        var rl = linha.GetComponent<RectTransform>();
-        rl.anchorMin = new Vector2(0.25f, 0.778f); rl.anchorMax = new Vector2(0.75f, 0.778f);
-        rl.offsetMin = Vector2.zero; rl.offsetMax = new Vector2(0f, 2f);
     }
 
     // ── Partículas ──────────────────────────────────────────────────────
@@ -150,10 +172,10 @@ public class MenuInicialUI : MonoBehaviour
     // ── Botões ──────────────────────────────────────────────────────────
     void CriarBotoes()
     {
-        CriarBotaoMenu("▶  JOGAR",     0.63f, 0.74f, corAcento,                       28f, () => SceneManager.LoadScene(cenaSelecaoPersonagem));
-        CriarBotaoMenu("MULTIJOGADOR", 0.50f, 0.61f, new Color(0.10f, 0.30f, 0.50f),  22f, AbrirMultijogador);
-        CriarBotaoMenu("OPÇÕES",       0.37f, 0.48f, new Color(0.20f, 0.20f, 0.38f),  22f, AbrirOpcoes);
-        CriarBotaoMenu("SAIR",         0.24f, 0.35f, new Color(0.40f, 0.06f, 0.06f),  22f, Sair);
+        CriarBotaoMenu("▶  JOGAR",     0.38f, 0.47f, corAcento,                       20f, () => SceneManager.LoadScene(cenaSelecaoPersonagem));
+        CriarBotaoMenu("MULTIJOGADOR", 0.30f, 0.39f, new Color(0.10f, 0.30f, 0.50f),  16f, AbrirMultijogador);
+        CriarBotaoMenu("OPÇÕES",       0.22f, 0.31f, new Color(0.20f, 0.20f, 0.38f),  16f, AbrirOpcoes);
+        CriarBotaoMenu("SAIR",         0.14f, 0.23f, new Color(0.40f, 0.06f, 0.06f),  16f, Sair);
     }
 
     void CriarBotaoMenu(string label, float yMin, float yMax,
@@ -162,21 +184,22 @@ public class MenuInicialUI : MonoBehaviour
         var go = new GameObject($"Btn_{label.Trim()}");
         go.transform.SetParent(canvasRef.transform, false);
         var r = go.AddComponent<RectTransform>();
-        r.anchorMin = new Vector2(0.30f, yMin);
-        r.anchorMax = new Vector2(0.70f, yMax);
+        r.anchorMin = new Vector2(0.42f, yMin);
+        r.anchorMax = new Vector2(0.58f, yMax);
         r.offsetMin = r.offsetMax = Vector2.zero;
 
         var img = go.AddComponent<Image>();
-        img.color = corBotao;
-
-        var borda = new GameObject("Borda");
-        borda.transform.SetParent(go.transform, false);
-        var rb = borda.AddComponent<RectTransform>();
-        rb.anchorMin = Vector2.zero;
-        rb.anchorMax = new Vector2(0f, 1f);
-        rb.offsetMin = Vector2.zero;
-        rb.offsetMax = new Vector2(5f, 0f);
-        borda.AddComponent<Image>().color = corBorda;
+        if (sprBotao != null)
+        {
+            img.sprite = sprBotao;
+            img.type   = Image.Type.Simple;
+            img.color  = Color.white;
+            img.preserveAspect = false;
+        }
+        else
+        {
+            img.color = corBotao;
+        }
 
         var txt = CriarTexto(go, "Txt", Vector2.zero, Vector2.one,
             label, fontSize, FontStyles.Bold, Color.white);
@@ -189,10 +212,10 @@ public class MenuInicialUI : MonoBehaviour
 
         var hover = go.AddComponent<BotaoMenuHover>();
         hover.img       = img;
-        hover.corNormal = corBotao;
-        hover.corHover  = corBotaoHover;
-        hover.corBorda  = corBorda;
-        hover.bordaGO   = borda;
+        hover.corNormal = sprBotao != null ? Color.white : corBotao;
+        hover.corHover  = sprBotao != null ? new Color(0.75f, 0.75f, 0.75f) : corBotaoHover;
+        hover.corBorda  = Color.clear;
+        hover.bordaGO   = null;
     }
 
     // ── Rodapé ──────────────────────────────────────────────────────────
@@ -208,8 +231,8 @@ public class MenuInicialUI : MonoBehaviour
         int nivel  = PlayerPrefs.GetInt("PlayerLevel", 1);
         int moedas = PlayerPrefs.GetInt("PlayerCoins", 0);
         CriarTexto(go, "Info", Vector2.zero, Vector2.one,
-            $"Nível  {nivel}        Moedas  {moedas}",
-            13f, FontStyles.Normal, new Color(0.55f, 0.45f, 0.70f))
+            "SPIRIT MASK",
+            13f, FontStyles.Bold, new Color(0.55f, 0.45f, 0.70f))
             .alignment = TextAlignmentOptions.Center;
     }
 

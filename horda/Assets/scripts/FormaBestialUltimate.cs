@@ -5,8 +5,8 @@ using UnityEngine;
 public class FormaBestialUltimate : MonoBehaviour
 {
     [Header("Configurações")]
-    public float cooldown               = 32f;
-    public float duracao                = 6f;
+    public float cooldown                = 32f;
+    public float duracao                 = 6f;
     public float multiplicadorVelocidade = 2f;
 
     [Header("Melee")]
@@ -23,13 +23,18 @@ public class FormaBestialUltimate : MonoBehaviour
     public float CooldownRestante => cooldownRestante;
     public bool  Ativo            => ativo;
 
-    private float        cooldownRestante;
-    private bool         ativo;
-    private PlayerStats  playerStats;
+    private float       cooldownRestante;
+    private bool        ativo;
+    private PlayerStats playerStats;
     private SpriteRenderer sr;
-    private Color        corOriginal;
-    private float        velocidadeOriginal;
-    private GameObject   auraAtiva;
+    private Color       corOriginal;
+    private float       velocidadeOriginal;
+    private GameObject  auraRoot;
+    private Coroutine   corAura;
+
+    static readonly Color COR_BESTA  = new Color(1.00f, 0.45f, 0.05f);
+    static readonly Color COR_CHAMA  = new Color(1.00f, 0.72f, 0.10f);
+    static readonly Color COR_BRASA  = new Color(1.00f, 0.18f, 0.02f);
 
     void Start()
     {
@@ -63,15 +68,12 @@ public class FormaBestialUltimate : MonoBehaviour
     void OnDestroy()
     {
         if (!ativo) return;
-        if (playerStats != null)
-        {
-            playerStats.speed = velocidadeOriginal;
-            playerStats.CancelarTimerSlow();
-        }
+        if (playerStats != null) { playerStats.speed = velocidadeOriginal; playerStats.CancelarTimerSlow(); }
         if (sr != null) sr.color = corOriginal;
         var sm = SkillManager.Instance;
         if (sm != null) sm.enabled = true;
-        if (auraAtiva != null) Destroy(auraAtiva);
+        if (corAura != null) StopCoroutine(corAura);
+        if (auraRoot != null) Destroy(auraRoot);
     }
 
     // ── Coroutine principal ──────────────────────────────────────────────────
@@ -87,13 +89,15 @@ public class FormaBestialUltimate : MonoBehaviour
         var sm = SkillManager.Instance;
         if (sm != null) sm.enabled = false;
 
-        if (sr != null) { corOriginal = sr.color; sr.color = new Color(1f, 0.5f, 0.05f); }
-        auraAtiva = CriarAura();
+        if (sr != null) { corOriginal = sr.color; sr.color = COR_BESTA; }
 
-        // Rugido imediato ao ativar
+        StartCoroutine(FlashAtivacao());
+
+        auraRoot = new GameObject("AuraFormaBestial");
+        corAura  = StartCoroutine(AuraLoop());
+
         Rugido();
 
-        // BestialFrenesi: intervalo melee reduzido para 0.2s
         float intervaloMeleeEfetivo = intervaloMelee;
         if (SkillEvolutionManager.Tem(SkillEvolutionType.BestialFrenesi))
             intervaloMeleeEfetivo = 0.2f;
@@ -108,55 +112,52 @@ public class FormaBestialUltimate : MonoBehaviour
             proxMelee  -= Time.deltaTime;
             proxRugido -= Time.deltaTime;
 
-            if (auraAtiva != null) auraAtiva.transform.position = transform.position;
+            if (auraRoot != null) auraRoot.transform.position = transform.position;
 
-            if (proxMelee <= 0f)
-            {
-                proxMelee = intervaloMeleeEfetivo;
-                AtaqueMelee();
-            }
-
-            if (proxRugido <= 0f)
-            {
-                proxRugido = intervaloRugido;
-                Rugido();
-            }
+            if (proxMelee <= 0f)  { proxMelee = intervaloMeleeEfetivo; AtaqueMelee(); }
+            if (proxRugido <= 0f) { proxRugido = intervaloRugido;        Rugido();      }
 
             yield return null;
         }
 
-        // Burst final ao sair da forma
         BurstFinal();
 
         if (sr != null) sr.color = corOriginal;
         playerStats.speed = velocidadeOriginal;
         playerStats.CancelarTimerSlow();
         if (sm != null) sm.enabled = true;
-        if (auraAtiva != null) { Destroy(auraAtiva); auraAtiva = null; }
+        if (corAura != null) { StopCoroutine(corAura); corAura = null; }
+        if (auraRoot != null) { Destroy(auraRoot); auraRoot = null; }
         ativo = false;
     }
 
-    // ── Lógica ──────────────────────────────────────────────────────────────
+    // ── Lógica ───────────────────────────────────────────────────────────────
 
     void AtaqueMelee()
     {
         Vector2 centro = transform.position;
+        bool acertou = false;
         foreach (var col in Physics2D.OverlapCircleAll(centro, raioMelee))
         {
             if (col.gameObject == gameObject) continue;
             var ic = col.GetComponent<InimigoController>()
                   ?? col.GetComponentInParent<InimigoController>();
             if (ic != null && !ic.estaMorrendo)
+            {
                 ic.ReceberDano(danoMelee);
+                StartCoroutine(ParticulasImpacto(ic.transform.position));
+                acertou = true;
+            }
         }
+        if (!acertou)
+            StartCoroutine(ParticulasImpacto(centro + Random.insideUnitCircle * raioMelee * 0.5f));
     }
 
     void Rugido()
     {
-        // BestialRugidoMortal: +80% dano rugido
-        float danoRugidoEfetivo = danoRugido;
+        float danoEfetivo = danoRugido;
         if (SkillEvolutionManager.Tem(SkillEvolutionType.BestialRugidoMortal))
-            danoRugidoEfetivo *= 1.8f;
+            danoEfetivo *= 1.8f;
 
         Vector2 centro = transform.position;
         foreach (var col in Physics2D.OverlapCircleAll(centro, raioRugido))
@@ -165,8 +166,7 @@ public class FormaBestialUltimate : MonoBehaviour
             var ic = col.GetComponent<InimigoController>()
                   ?? col.GetComponentInParent<InimigoController>();
             if (ic == null) continue;
-
-            ic.ReceberDano(danoRugidoEfetivo);
+            ic.ReceberDano(danoEfetivo);
             var rb = col.GetComponent<Rigidbody2D>() ?? ic.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -175,17 +175,14 @@ public class FormaBestialUltimate : MonoBehaviour
                 rb.AddForce(dir * forcaRugido, ForceMode2D.Impulse);
             }
         }
-
-        StartCoroutine(AnimarOndaRugido());
+        StartCoroutine(ParticulasRugido(centro, raioRugido));
     }
 
     void BurstFinal()
     {
-        // BestialRugidoMortal: burst final também com +80% dano
-        float multRugido = SkillEvolutionManager.Tem(SkillEvolutionType.BestialRugidoMortal) ? 1.8f : 1f;
-
         float raioFinal = raioRugido * 1.6f;
         Vector2 centro  = transform.position;
+        float mult = SkillEvolutionManager.Tem(SkillEvolutionType.BestialRugidoMortal) ? 1.8f : 1f;
 
         foreach (var col in Physics2D.OverlapCircleAll(centro, raioFinal))
         {
@@ -193,8 +190,7 @@ public class FormaBestialUltimate : MonoBehaviour
             var ic = col.GetComponent<InimigoController>()
                   ?? col.GetComponentInParent<InimigoController>();
             if (ic == null) continue;
-
-            ic.ReceberDano(danoMelee * 3f * multRugido);
+            ic.ReceberDano(danoMelee * 3f * mult);
             var rb = col.GetComponent<Rigidbody2D>() ?? ic.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -203,170 +199,226 @@ public class FormaBestialUltimate : MonoBehaviour
                 rb.AddForce(dir * forcaRugido * 2.2f, ForceMode2D.Impulse);
             }
         }
-
-        StartCoroutine(AnimarBurstFinal(raioFinal));
+        StartCoroutine(ParticulasBurst(centro, raioFinal));
     }
 
     // ── Visuais ──────────────────────────────────────────────────────────────
 
-    GameObject CriarAura()
+    IEnumerator FlashAtivacao()
     {
-        var root = new GameObject("AuraFormaBestial");
-        root.transform.position = transform.position;
-
-        CriarAnelLocal(root, 0.75f, new Color(1f, 0.6f,  0.1f, 0.60f), 0.10f, "AuraInt");
-        CriarAnelLocal(root, 1.30f, new Color(1f, 0.4f,  0.0f, 0.38f), 0.07f, "AuraMed");
-        CriarAnelLocal(root, 2.00f, new Color(1f, 0.25f, 0.0f, 0.20f), 0.05f, "AuraExt");
-
-        StartCoroutine(AnimarAura(root));
-        return root;
+        // Rajada de faíscas de ativação
+        for (int i = 0; i < 40; i++)
+        {
+            Vector2 pos = (Vector2)transform.position + Random.insideUnitCircle * 0.5f;
+            float sz    = Random.Range(0.18f, 0.55f);
+            Color c     = Color.Lerp(COR_BESTA, COR_CHAMA, Random.value);
+            c.a = 0.9f;
+            Vector2 vel = Random.insideUnitCircle.normalized * Random.Range(3f, 7f);
+            SpawnParticula(pos, sz, c, vel, Random.Range(0.2f, 0.45f));
+        }
+        yield return null;
     }
 
-    static void CriarAnelLocal(GameObject parent, float r, Color cor, float larg, string nome)
+    IEnumerator AuraLoop()
     {
-        const int SEGS = 40;
-        var go = new GameObject(nome);
-        go.transform.SetParent(parent.transform, false);
-        var lr = go.AddComponent<LineRenderer>();
-        lr.useWorldSpace = false;
-        lr.loop          = true;
-        lr.positionCount = SEGS;
-        lr.material      = new Material(Shader.Find("Sprites/Default"));
-        lr.sortingOrder  = 12;
-        lr.startWidth    = lr.endWidth = larg;
-        lr.startColor    = lr.endColor = cor;
-        for (int i = 0; i < SEGS; i++)
+        float timerBrasa  = 0f;
+        float timerFaisca = 0f;
+        float t           = 0f;
+
+        while (auraRoot != null)
         {
-            float a = (360f / SEGS) * i * Mathf.Deg2Rad;
-            lr.SetPosition(i, new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r));
+            float dt = Time.deltaTime;
+            t           += dt;
+            timerBrasa  += dt;
+            timerFaisca += dt;
+
+            Vector2 centro = transform.position;
+
+            if (timerBrasa >= 0.055f)
+            {
+                timerBrasa = 0f;
+                SpawnBrasa(centro);
+                SpawnBrasa(centro);
+            }
+
+            if (timerFaisca >= 0.10f)
+            {
+                timerFaisca = 0f;
+                SpawnFaisca(centro);
+            }
+
+            // Pulso no sprite
+            if (sr != null)
+            {
+                float p = Mathf.Sin(t * 9f) * 0.12f + 0.88f;
+                sr.color = new Color(
+                    Mathf.Clamp01(COR_BESTA.r),
+                    Mathf.Clamp01(COR_BESTA.g * p),
+                    Mathf.Clamp01(COR_BESTA.b));
+            }
+
+            yield return null;
         }
     }
 
-    IEnumerator AnimarAura(GameObject root)
+    void SpawnBrasa(Vector2 centro)
     {
+        Vector2 offset = Random.insideUnitCircle * 0.7f;
+        Color c = Color.Lerp(COR_BRASA, COR_CHAMA, Random.value);
+        c.a = Random.Range(0.6f, 0.95f);
+        Vector2 vel = (offset.normalized * 0.6f + Vector2.up * 0.4f + Random.insideUnitCircle * 0.4f).normalized
+                      * Random.Range(1.0f, 2.5f);
+        SpawnParticula(centro + offset, Random.Range(0.07f, 0.20f), c, vel, Random.Range(0.28f, 0.55f), ordem: 11);
+    }
+
+    void SpawnFaisca(Vector2 centro)
+    {
+        float ang  = Random.Range(0f, Mathf.PI * 2f);
+        float dist = Random.Range(0.2f, 1.1f);
+        Vector2 pos = centro + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * dist;
+        Color c = Color.Lerp(COR_CHAMA, Color.white, Random.value * 0.5f);
+        c.a = Random.Range(0.75f, 1f);
+        Vector2 vel = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * Random.Range(0.6f, 1.8f);
+        SpawnParticula(pos, Random.Range(0.04f, 0.11f), c, vel, Random.Range(0.12f, 0.25f), ordem: 12);
+    }
+
+    IEnumerator ParticulasImpacto(Vector2 pos)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            Color c = Color.Lerp(COR_BESTA, COR_CHAMA, Random.value);
+            c.a = 0.9f;
+            Vector2 vel = Random.insideUnitCircle.normalized * Random.Range(2f, 5f);
+            SpawnParticula(pos + Random.insideUnitCircle * 0.25f,
+                Random.Range(0.10f, 0.30f), c, vel, Random.Range(0.18f, 0.35f), ordem: 14);
+        }
+        yield return null;
+    }
+
+    IEnumerator ParticulasRugido(Vector2 centro, float raio)
+    {
+        int qtd = 56;
+        for (int i = 0; i < qtd; i++)
+        {
+            float ang = i / (float)qtd * Mathf.PI * 2f + Random.Range(-0.12f, 0.12f);
+            Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+            Vector2 pos = centro + dir * Random.Range(0.2f, 0.5f);
+            Color c = Color.Lerp(COR_BESTA, COR_CHAMA, Random.value);
+            c.a = Random.Range(0.75f, 1f);
+            float speed = Random.Range(5f, raio * 2.2f);
+            SpawnParticula(pos, Random.Range(0.12f, 0.38f), c, dir * speed, Random.Range(0.30f, 0.55f), ordem: 14);
+        }
+        // Partículas de poeira no centro
+        for (int i = 0; i < 14; i++)
+        {
+            Vector2 pos = centro + Random.insideUnitCircle * 0.4f;
+            Color c = new Color(1f, 0.6f, 0.2f, Random.Range(0.5f, 0.8f));
+            Vector2 vel = Random.insideUnitCircle.normalized * Random.Range(0.5f, 1.5f);
+            SpawnParticula(pos, Random.Range(0.20f, 0.45f), c, vel, Random.Range(0.4f, 0.7f), ordem: 13);
+        }
+        yield return null;
+    }
+
+    IEnumerator ParticulasBurst(Vector2 centro, float raioFinal)
+    {
+        // Flash central
+        for (int j = 0; j < 3; j++)
+        {
+            var flash = new GameObject("FlashBurst");
+            flash.transform.position = centro;
+            var fspr = flash.AddComponent<SpriteRenderer>();
+            fspr.sprite = GerarDisco();
+            fspr.sortingOrder = 16;
+            float fs = (1.5f - j * 0.4f) * 2f * (1f / 100f);
+            flash.transform.localScale = Vector3.one * fs;
+            Color fc = j == 0 ? Color.white : COR_CHAMA;
+            fc.a = 0.85f - j * 0.2f;
+            fspr.color = fc;
+            StartCoroutine(FadeOut(flash, 0.18f + j * 0.05f));
+        }
+
+        // Onda principal de partículas
+        int qtd = 110;
+        for (int i = 0; i < qtd; i++)
+        {
+            float ang = i / (float)qtd * Mathf.PI * 2f + Random.Range(-0.15f, 0.15f);
+            Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+            Vector2 pos = centro + dir * Random.Range(0.1f, 0.7f);
+            Color c = Color.Lerp(COR_BESTA, Color.white, Random.value * 0.35f);
+            c.a = Random.Range(0.8f, 1f);
+            float speed = Random.Range(6f, raioFinal * 2.8f);
+            SpawnParticula(pos, Random.Range(0.15f, 0.52f), c, dir * speed, Random.Range(0.35f, 0.75f), ordem: 15);
+        }
+        yield return null;
+    }
+
+    // ── Utilitários ───────────────────────────────────────────────────────────
+
+    void SpawnParticula(Vector2 pos, float tamanho, Color cor, Vector2 vel, float dur, int ordem = 12)
+    {
+        var go = new GameObject("PBestial");
+        go.transform.position = pos;
+        go.transform.localScale = Vector3.one * tamanho;
+        var spr = go.AddComponent<SpriteRenderer>();
+        spr.sprite = GerarDisco();
+        spr.sortingOrder = ordem;
+        spr.color = cor;
+        StartCoroutine(MoverEFadeOut(go, spr, vel, dur));
+    }
+
+    IEnumerator MoverEFadeOut(GameObject go, SpriteRenderer spr, Vector2 vel, float dur)
+    {
+        if (go == null) yield break;
         float t = 0f;
-        while (root != null)
+        float a0 = spr.color.a;
+        Color c  = spr.color;
+        while (t < dur && go != null)
         {
             t += Time.deltaTime;
-            float pulso = Mathf.Sin(t * 6f) * 0.5f + 0.5f;
-
-            root.transform.Rotate(0f, 0f, Time.deltaTime * 55f);
-
-            var lrs = root.GetComponentsInChildren<LineRenderer>();
-            foreach (var lr in lrs)
-            {
-                Color c = lr.startColor;
-                c.a = Mathf.Clamp01(c.a * 0.75f + pulso * 0.25f);
-                lr.startColor = lr.endColor = c;
-            }
-
+            float pct = t / dur;
+            go.transform.position += (Vector3)(vel * Time.deltaTime);
+            vel *= Mathf.Max(0f, 1f - Time.deltaTime * 4.5f);
+            c.a = Mathf.Lerp(a0, 0f, pct * pct);
+            if (spr != null) spr.color = c;
             yield return null;
         }
-    }
-
-    IEnumerator AnimarOndaRugido()
-    {
-        var go = new GameObject("OndaRugido");
-        go.transform.position = transform.position;
-        var lr = go.AddComponent<LineRenderer>();
-        lr.useWorldSpace = true;
-        lr.loop          = true;
-        lr.positionCount = 48;
-        lr.material      = new Material(Shader.Find("Sprites/Default"));
-        lr.sortingOrder  = 14;
-
-        Vector2 centro = go.transform.position;
-        float   dur    = 0.5f;
-
-        for (float t = 0f; t < dur; t += Time.deltaTime)
-        {
-            if (go == null) yield break;
-            float p    = t / dur;
-            float r    = Mathf.Lerp(0.1f, raioRugido, p);
-            float a    = Mathf.Lerp(0.95f, 0f, p);
-            float larg = Mathf.Lerp(0.38f, 0.04f, p);
-
-            lr.startColor = lr.endColor = new Color(1f, 0.3f, 0f, a);
-            lr.startWidth = lr.endWidth = larg;
-
-            for (int i = 0; i < 48; i++)
-            {
-                float ang = i / 48f * Mathf.PI * 2f;
-                lr.SetPosition(i, centro + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * r);
-            }
-            yield return null;
-        }
-
         if (go != null) Destroy(go);
     }
 
-    IEnumerator AnimarBurstFinal(float raioFinal)
+    IEnumerator FadeOut(GameObject go, float dur)
     {
-        Vector3 centro = transform.position;
-
-        // Anel principal
-        var go = new GameObject("BurstFinal");
-        go.transform.position = centro;
-        var lr = go.AddComponent<LineRenderer>();
-        lr.useWorldSpace = true;
-        lr.loop          = true;
-        lr.positionCount = 48;
-        lr.material      = new Material(Shader.Find("Sprites/Default"));
-        lr.sortingOrder  = 15;
-
-        // 12 raios radiais
-        const int QTD_RAIOS = 12;
-        var raios = new List<(GameObject go, LineRenderer lr)>();
-        for (int i = 0; i < QTD_RAIOS; i++)
+        if (go == null) yield break;
+        var spr = go.GetComponent<SpriteRenderer>();
+        float t = 0f;
+        Color c = spr != null ? spr.color : Color.white;
+        float a0 = c.a;
+        while (t < dur && go != null)
         {
-            var rGO = new GameObject($"RaioBestial_{i}");
-            rGO.transform.position = centro;
-            var rLR = rGO.AddComponent<LineRenderer>();
-            rLR.useWorldSpace = true;
-            rLR.positionCount = 2;
-            rLR.material      = new Material(Shader.Find("Sprites/Default"));
-            rLR.sortingOrder  = 14;
-            raios.Add((rGO, rLR));
-        }
-
-        float dur = 0.7f;
-        for (float t = 0f; t < dur; t += Time.deltaTime)
-        {
-            if (go == null) yield break;
-            float p    = t / dur;
-            float r    = Mathf.Lerp(0.1f, raioFinal, Mathf.Pow(p, 0.5f));
-            float a    = Mathf.Lerp(1f,   0f, p);
-            float larg = Mathf.Lerp(0.55f, 0.02f, p);
-
-            lr.startColor = lr.endColor = new Color(1f, 0.45f, 0.05f, a);
-            lr.startWidth = lr.endWidth = larg;
-
-            for (int i = 0; i < 48; i++)
-            {
-                float ang = i / 48f * Mathf.PI * 2f;
-                lr.SetPosition(i, centro + new Vector3(Mathf.Cos(ang), Mathf.Sin(ang)) * r);
-            }
-
-            for (int i = 0; i < QTD_RAIOS; i++)
-            {
-                var (rGO, rLR) = raios[i];
-                if (rGO == null) continue;
-                float ang     = (360f / QTD_RAIOS) * i * Mathf.Deg2Rad;
-                Vector2 dir   = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-                float inicio  = r * 0.8f;
-                float fim     = r + raioFinal * 0.25f * p;
-                rLR.SetPosition(0, (Vector3)((Vector2)centro + dir * inicio));
-                rLR.SetPosition(1, (Vector3)((Vector2)centro + dir * fim));
-                rLR.startWidth = rLR.endWidth = Mathf.Lerp(0.14f, 0.01f, p);
-                rLR.startColor = rLR.endColor = new Color(1f, 0.6f, 0.1f, a * 0.8f);
-            }
-
+            t += Time.deltaTime;
+            if (spr != null) { c.a = Mathf.Lerp(a0, 0f, t / dur); spr.color = c; }
             yield return null;
         }
-
         if (go != null) Destroy(go);
-        foreach (var (rGO, _) in raios)
-            if (rGO != null) Destroy(rGO);
+    }
+
+    static Sprite _discoCache;
+    static Sprite GerarDisco()
+    {
+        if (_discoCache != null) return _discoCache;
+        const int SZ = 32;
+        var tex = new Texture2D(SZ, SZ, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float c = SZ / 2f;
+        for (int y = 0; y < SZ; y++)
+            for (int x = 0; x < SZ; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c, c));
+                float a = Mathf.Clamp01(1f - d / (c - 0.5f));
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+            }
+        tex.Apply();
+        _discoCache = Sprite.Create(tex, new Rect(0, 0, SZ, SZ), Vector2.one * 0.5f, 100f);
+        return _discoCache;
     }
 
     void OnDrawGizmosSelected()

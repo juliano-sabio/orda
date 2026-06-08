@@ -306,8 +306,9 @@ public class ProjetilGelo : MonoBehaviour
         ic.ReceberDano(dano, false);
         SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
 
-        // Lentidão
+        // Lentidão mecânica + visual de partículas
         EvolutionFX.AplicarLentidao(ic, 2f, 0.45f);
+        GeloLentidaoFX.AplicarAo(ic.gameObject, 2f);
 
         if (explosivo)
         {
@@ -393,6 +394,100 @@ public class ProjetilGelo : MonoBehaviour
         var tex = new Texture2D(sz,sz,TextureFormat.RGBA32,false); tex.filterMode=FilterMode.Bilinear; float c=sz*0.5f;
         for(int y=0;y<sz;y++) for(int x=0;x<sz;x++){float d=Vector2.Distance(new Vector2(x+0.5f,y+0.5f),new Vector2(c,c));tex.SetPixel(x,y,new Color(1,1,1,d<c?1:0));}
         tex.Apply(); return Sprite.Create(tex,new Rect(0,0,sz,sz),new Vector2(0.5f,0.5f),sz);
+    }
+}
+
+// ── Efeito Visual de Lentidão (partículas de gelo contínuas no inimigo) ────────
+public class GeloLentidaoFX : MonoBehaviour
+{
+    static readonly Color COR_GELO = new Color(0.45f, 0.88f, 1f);
+    static readonly Color COR_NEVE = new Color(0.85f, 0.97f, 1f);
+
+    Coroutine emissao;
+
+    public static void AplicarAo(GameObject alvo, float dur)
+    {
+        var existente = alvo.GetComponent<GeloLentidaoFX>();
+        if (existente != null) { existente.Refresh(dur); return; }
+        alvo.AddComponent<GeloLentidaoFX>().Iniciar(dur);
+    }
+
+    void Iniciar(float dur)     => emissao = StartCoroutine(Emitir(dur));
+    public void Refresh(float dur) { if (emissao != null) StopCoroutine(emissao); emissao = StartCoroutine(Emitir(dur)); }
+
+    IEnumerator Emitir(float dur)
+    {
+        for (float t = 0f; t < dur; t += 0.08f)
+        {
+            SpawnParticula();
+            if (Random.value < 0.45f) SpawnFloco();
+            yield return new WaitForSeconds(0.08f);
+        }
+        Destroy(this);
+    }
+
+    void SpawnParticula()
+    {
+        float ang  = Random.Range(0f, Mathf.PI * 2f);
+        Vector2 pos = (Vector2)transform.position
+            + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * Random.Range(0.15f, 0.45f);
+
+        var p   = new GameObject("GeloP");
+        p.transform.position   = pos;
+        p.transform.localScale = Vector3.one * Random.Range(0.05f, 0.13f);
+        var psr = p.AddComponent<SpriteRenderer>();
+        psr.sprite       = GerarDisco(8);
+        psr.color        = new Color(COR_GELO.r, COR_GELO.g, COR_GELO.b, Random.Range(0.7f, 1f));
+        psr.sortingOrder = 16;
+        p.AddComponent<AutoDestroyFadeMove>().Iniciar(
+            new Vector2(Random.Range(-0.4f, 0.4f), Random.Range(0.6f, 1.8f)),
+            Random.Range(0.25f, 0.5f));
+        Destroy(p, 0.6f);
+    }
+
+    void SpawnFloco()
+    {
+        float ang  = Random.Range(0f, Mathf.PI * 2f);
+        Vector2 pos = (Vector2)transform.position
+            + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * Random.Range(0.05f, 0.35f);
+
+        var f   = new GameObject("GeloFloco");
+        f.transform.position   = pos;
+        f.transform.localScale = Vector3.one * Random.Range(0.07f, 0.18f);
+        f.transform.rotation   = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
+        var fsr = f.AddComponent<SpriteRenderer>();
+        fsr.sprite       = GerarCristalMini();
+        fsr.color        = new Color(COR_NEVE.r, COR_NEVE.g, COR_NEVE.b, Random.Range(0.5f, 0.85f));
+        fsr.sortingOrder = 16;
+        f.AddComponent<AutoDestroyFadeMove>().Iniciar(
+            new Vector2(Random.Range(-0.3f, 0.3f), Random.Range(0.3f, 1.2f)),
+            Random.Range(0.3f, 0.55f));
+        Destroy(f, 0.7f);
+    }
+
+    static Sprite GerarDisco(int sz)
+    {
+        var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear; float c = sz * 0.5f;
+        for (int y = 0; y < sz; y++) for (int x = 0; x < sz; x++)
+        { float d = Vector2.Distance(new Vector2(x+0.5f,y+0.5f),new Vector2(c,c)); tex.SetPixel(x,y,new Color(1,1,1,d<c?1:0)); }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0,0,sz,sz), new Vector2(0.5f,0.5f), sz);
+    }
+
+    static Sprite GerarCristalMini()
+    {
+        const int W = 6, H = 10;
+        var tex = new Texture2D(W, H, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear; float cx = W * 0.5f;
+        for (int y = 0; y < H; y++) for (int x = 0; x < W; x++)
+        {
+            float nx = Mathf.Abs(x+0.5f-cx)/cx; float ny = y/(float)(H-1);
+            float l  = ny < 0.5f ? (1f-nx)*ny*2f : (1f-nx)*(1f-ny)*2f;
+            tex.SetPixel(x, y, new Color(1,1,1,Mathf.Clamp01(l*2.2f)));
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0,0,W,H), new Vector2(0.5f,0.5f), W);
     }
 }
 

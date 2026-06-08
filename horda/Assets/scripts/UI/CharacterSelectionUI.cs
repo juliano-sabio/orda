@@ -77,9 +77,15 @@ public class CharacterSelectionUI : MonoBehaviour
     // ──────────────────────────────────────────────────────────────────
     void Awake()
     {
-        // Destrói canvas residual ANTES do primeiro frame ser renderizado
         var antigo = GameObject.Find("CanvasPrincipal");
         if (antigo != null) DestroyImmediate(antigo);
+    }
+
+    void OnDestroy()
+    {
+        if (previewPersonagem != null) Destroy(previewPersonagem);
+        if (previewCamera    != null) Destroy(previewCamera.gameObject);
+        if (previewRT        != null) { previewRT.Release(); Destroy(previewRT); }
     }
 
     void Start()
@@ -98,7 +104,7 @@ public class CharacterSelectionUI : MonoBehaviour
         var canvasGO = new GameObject("CanvasPrincipal");
         canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode  = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 0;
+        canvas.sortingOrder = 5;
         var cs = canvasGO.AddComponent<CanvasScaler>();
         cs.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         cs.referenceResolution = new Vector2(1920, 1080);
@@ -911,13 +917,6 @@ public class CharacterSelectionUI : MonoBehaviour
             }
             yield return null;
         }
-    }
-
-    void OnDestroy()
-    {
-        if (previewPersonagem != null) Destroy(previewPersonagem);
-        if (previewCamera    != null) Destroy(previewCamera.gameObject);
-        if (previewRT        != null) { previewRT.Release(); Destroy(previewRT); }
     }
 
     // ── Helpers ────────────────────────────────────────────────────────

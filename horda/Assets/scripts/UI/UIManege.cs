@@ -164,6 +164,10 @@ public class UIManager : MonoBehaviour
         // Adiciona display de cooldown automaticamente
         if (GetComponent<SkillCooldownDisplay>() == null)
             gameObject.AddComponent<SkillCooldownDisplay>();
+
+        // Melhoria visual da barra de vida
+        if (healthBar != null && healthBar.GetComponent<PlayerHealthBarFX>() == null)
+            healthBar.gameObject.AddComponent<PlayerHealthBarFX>();
     }
 
     void CriarSlotPassivaRuntime()
@@ -1481,7 +1485,7 @@ public class UIManager : MonoBehaviour
         card.transform.SetParent(statusCardContainer);
 
         RectTransform rect = card.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(150, 200);
+        rect.sizeDelta = new Vector2(68, 90);
 
         Image image = card.GetComponent<Image>();
         image.color = color;
@@ -1501,7 +1505,7 @@ public class UIManager : MonoBehaviour
         TextMeshProUGUI titleTextComp = titleText.GetComponent<TextMeshProUGUI>();
         titleTextComp.text = title;
         titleTextComp.color = Color.white;
-        titleTextComp.fontSize = 12;
+        titleTextComp.fontSize = 8;
         titleTextComp.alignment = TextAlignmentOptions.Center;
         titleTextComp.fontStyle = FontStyles.Bold;
 
@@ -1516,7 +1520,7 @@ public class UIManager : MonoBehaviour
         TextMeshProUGUI descTextComp = descText.GetComponent<TextMeshProUGUI>();
         descTextComp.text = description;
         descTextComp.color = Color.white;
-        descTextComp.fontSize = 10;
+        descTextComp.fontSize = 7;
         descTextComp.alignment = TextAlignmentOptions.Center;
         descTextComp.textWrappingMode = TextWrappingModes.Normal;
     }

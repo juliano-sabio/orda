@@ -22,6 +22,7 @@ public class StatusCardChoiceUI : MonoBehaviour
     public bool    pauseGameDuringChoice = true;
     public float   cardSpacing           = 30f;
     public Vector2 cardSize              = new Vector2(300f, 450f);
+    public Vector2 panelSize             = new Vector2(1280f, 720f);
     public float   tempoEscolha          = 20f;
     public string  titleMessage          = "ESCOLHA UMA CARTA DE STATUS";
 
@@ -63,7 +64,12 @@ public class StatusCardChoiceUI : MonoBehaviour
 
         if (!gameObject.activeInHierarchy) gameObject.SetActive(true);
 
-        if (choicePanel != null) choicePanel.SetActive(true);
+        if (choicePanel != null)
+        {
+            choicePanel.SetActive(true);
+            var rt = choicePanel.GetComponent<RectTransform>();
+            if (rt != null) rt.sizeDelta = panelSize;
+        }
 
         if (titleText != null) titleText.text = titleMessage;
 

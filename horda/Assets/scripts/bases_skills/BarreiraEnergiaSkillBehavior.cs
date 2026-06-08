@@ -323,7 +323,7 @@ public class BarreiraEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga
 
     IEnumerator FlashTela(Color cor, float dur)
     {
-        var go = new GameObject("FlashBarreira"); DontDestroyOnLoad(go);
+        var go = new GameObject("FlashBarreira");
         var cv = go.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200; go.AddComponent<CanvasScaler>();
         var imgGO = new GameObject("F"); imgGO.transform.SetParent(go.transform, false);
         var rt = imgGO.AddComponent<RectTransform>(); rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;

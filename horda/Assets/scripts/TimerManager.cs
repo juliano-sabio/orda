@@ -6,11 +6,11 @@ using TMPro; // Adicionado para TextMeshPro
 
 public class TimerManager : MonoBehaviour
 {
-    [Header("Configurações do Timer")]
+    [Header("Configuraï¿½ï¿½es do Timer")]
     public float levelDuration = 180f;
     public float currentTime;
 
-    [Header("Referências UI")]
+    [Header("Referï¿½ncias UI")]
     public Slider timeBar;
     public TextMeshProUGUI timeText; // Alterado para TextMeshProUGUI
     public Image timeBarFill;
