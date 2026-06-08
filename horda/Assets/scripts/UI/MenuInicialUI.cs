@@ -172,21 +172,32 @@ public class MenuInicialUI : MonoBehaviour
     // ── Botões ──────────────────────────────────────────────────────────
     void CriarBotoes()
     {
-        CriarBotaoMenu("▶  JOGAR",     0.38f, 0.47f, corAcento,                       20f, () => SceneManager.LoadScene(cenaSelecaoPersonagem));
-        CriarBotaoMenu("MULTIJOGADOR", 0.30f, 0.39f, new Color(0.10f, 0.30f, 0.50f),  16f, AbrirMultijogador);
-        CriarBotaoMenu("OPÇÕES",       0.22f, 0.31f, new Color(0.20f, 0.20f, 0.38f),  16f, AbrirOpcoes);
-        CriarBotaoMenu("SAIR",         0.14f, 0.23f, new Color(0.40f, 0.06f, 0.06f),  16f, Sair);
+        CriarBotaoMenu("▶  JOGAR",     0.40f, 0.52f, corAcento,                       20f, () => SceneManager.LoadScene(cenaSelecaoPersonagem), 0);
+        CriarBotaoMenu("MULTIJOGADOR", 0.28f, 0.40f, new Color(0.10f, 0.30f, 0.50f),  16f, AbrirMultijogador, 1);
+        CriarBotaoMenu("OPÇÕES",       0.16f, 0.28f, new Color(0.20f, 0.20f, 0.38f),  16f, AbrirOpcoes, 2);
+        CriarBotaoMenu("SAIR",         0.04f, 0.16f, new Color(0.40f, 0.06f, 0.06f),  16f, Sair, 3);
     }
 
     void CriarBotaoMenu(string label, float yMin, float yMax,
-        Color corBorda, float fontSize, System.Action acao)
+        Color corBorda, float fontSize, System.Action acao, int indice = 0)
     {
         var go = new GameObject($"Btn_{label.Trim()}");
         go.transform.SetParent(canvasRef.transform, false);
         var r = go.AddComponent<RectTransform>();
-        r.anchorMin = new Vector2(0.42f, yMin);
-        r.anchorMax = new Vector2(0.58f, yMax);
+        r.anchorMin = new Vector2(0.04f, yMin);
+        r.anchorMax = new Vector2(0.26f, yMax);
         r.offsetMin = r.offsetMax = Vector2.zero;
+
+        // barra de acento lateral (aparece no hover)
+        var barra = new GameObject("Barra");
+        barra.transform.SetParent(go.transform, false);
+        var rBarra = barra.AddComponent<RectTransform>();
+        rBarra.anchorMin = Vector2.zero;
+        rBarra.anchorMax = new Vector2(0f, 1f);
+        rBarra.offsetMin = Vector2.zero;
+        rBarra.offsetMax = new Vector2(5f, 0f);
+        var imgBarra = barra.AddComponent<Image>();
+        imgBarra.color = new Color(corBorda.r, corBorda.g, corBorda.b, 0f);
 
         var img = go.AddComponent<Image>();
         if (sprBotao != null)
@@ -212,10 +223,31 @@ public class MenuInicialUI : MonoBehaviour
 
         var hover = go.AddComponent<BotaoMenuHover>();
         hover.img       = img;
+        hover.barraImg  = imgBarra;
+        hover.txt       = txt;
         hover.corNormal = sprBotao != null ? Color.white : corBotao;
-        hover.corHover  = sprBotao != null ? new Color(0.75f, 0.75f, 0.75f) : corBotaoHover;
-        hover.corBorda  = Color.clear;
+        hover.corHover  = sprBotao != null ? new Color(0.82f, 0.82f, 0.82f) : corBotaoHover;
+        hover.corBarra  = corBorda;
         hover.bordaGO   = null;
+
+        StartCoroutine(EntradaBotao(r, indice));
+    }
+
+    IEnumerator EntradaBotao(RectTransform rt, int indice)
+    {
+        var cg = rt.gameObject.AddComponent<CanvasGroup>();
+        cg.alpha = 0f;
+        yield return new WaitForSeconds(indice * 0.09f);
+        float dur = 0.40f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            float ease = 1f - Mathf.Pow(1f - t / dur, 3f);
+            rt.anchoredPosition = new Vector2(Mathf.Lerp(-260f, 0f, ease), 0f);
+            cg.alpha = ease;
+            yield return null;
+        }
+        rt.anchoredPosition = Vector2.zero;
+        cg.alpha = 1f;
     }
 
     // ── Rodapé ──────────────────────────────────────────────────────────
@@ -628,37 +660,47 @@ public class MenuInicialUI : MonoBehaviour
 // ── Hover dos botões ──────────────────────────────────────────────────────
 public class BotaoMenuHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    public Image  img;
-    public Color  corNormal, corHover, corBorda;
-    public GameObject bordaGO;
+    public Image             img;
+    public Image             barraImg;
+    public TextMeshProUGUI   txt;
+    public Color             corNormal, corHover, corBorda, corBarra;
+    public GameObject        bordaGO;
 
     bool  sobre = false;
     float escala = 1f, escalaAlvo = 1f;
+    float barraAlpha = 0f;
 
     void Update()
     {
-        escala = Mathf.Lerp(escala, escalaAlvo, Time.deltaTime * 12f);
+        escala = Mathf.Lerp(escala, escalaAlvo, Time.deltaTime * 16f);
         transform.localScale = Vector3.one * escala;
+
         if (img != null)
-            img.color = Color.Lerp(img.color, sobre ? corHover : corNormal, Time.deltaTime * 10f);
+            img.color = Color.Lerp(img.color, sobre ? corHover : corNormal, Time.deltaTime * 14f);
+
+        // barra lateral aparece/desaparece
+        if (barraImg != null)
+        {
+            barraAlpha = Mathf.Lerp(barraAlpha, sobre ? 1f : 0f, Time.deltaTime * 16f);
+            var c = corBarra;
+            barraImg.color = new Color(c.r, c.g, c.b, barraAlpha);
+        }
+
+        // texto fica levemente mais brilhante no hover
+        if (txt != null)
+            txt.color = Color.Lerp(txt.color, sobre ? new Color(1f, 0.95f, 0.80f) : Color.white, Time.deltaTime * 14f);
     }
 
-    public void OnPointerEnter(PointerEventData e)
-    {
-        sobre = true; escalaAlvo = 1.04f;
-        if (bordaGO != null)
-            bordaGO.GetComponent<Image>().color = new Color(0.75f, 0.35f, 1.00f);
-    }
-
-    public void OnPointerExit(PointerEventData e)
-    {
-        sobre = false; escalaAlvo = 1f;
-        if (bordaGO != null)
-            bordaGO.GetComponent<Image>().color = corBorda;
-    }
-
+    public void OnPointerEnter(PointerEventData e) { sobre = true;  escalaAlvo = 1.07f; }
+    public void OnPointerExit (PointerEventData e) { sobre = false; escalaAlvo = 1.00f; }
     public void OnPointerClick(PointerEventData e) => StartCoroutine(Flash());
 
     System.Collections.IEnumerator Flash()
-    { escalaAlvo = 0.96f; yield return new WaitForSeconds(0.08f); escalaAlvo = 1.04f; }
+    {
+        escalaAlvo = 0.93f;
+        yield return new WaitForSeconds(0.06f);
+        escalaAlvo = 1.10f;
+        yield return new WaitForSeconds(0.08f);
+        escalaAlvo = sobre ? 1.07f : 1.00f;
+    }
 }

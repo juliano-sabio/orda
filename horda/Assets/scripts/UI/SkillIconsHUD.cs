@@ -43,6 +43,7 @@ public class SkillIconsHUD : MonoBehaviour
 
     void Start()
     {
+        return; // HUD de skills desativado
         Instance = this;
         skillManager = FindFirstObjectByType<SkillManager>();
         if (skillManager == null) return;

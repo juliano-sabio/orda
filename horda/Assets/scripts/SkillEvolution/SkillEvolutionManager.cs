@@ -7,7 +7,10 @@ public class SkillEvolutionManager : MonoBehaviour
     public static SkillEvolutionManager Instance { get; private set; }
 
     // Conjunto de evoluções ativas — acumulativo, sem chave de skill
-    readonly HashSet<SkillEvolutionType> evolucoesAtivas = new HashSet<SkillEvolutionType>();
+    readonly HashSet<SkillEvolutionType>     evolucoesAtivas     = new HashSet<SkillEvolutionType>();
+    readonly List<SkillEvolutionData>        evolucoesAtivasData = new List<SkillEvolutionData>();
+    public event System.Action               OnEvolucoesChanged;
+    public IReadOnlyList<SkillEvolutionData> GetEvolucoesData() => evolucoesAtivasData;
 
     void Awake()
     {
@@ -41,7 +44,9 @@ public class SkillEvolutionManager : MonoBehaviour
     {
         if (data == null) return;
         evolucoesAtivas.Add(data.tipoEvolucao);
+        if (!evolucoesAtivasData.Contains(data)) evolucoesAtivasData.Add(data);
         Debug.Log($"[Evolução] +{data.tipoEvolucao} (total: {evolucoesAtivas.Count})");
+        OnEvolucoesChanged?.Invoke();
 
         var player = FindFirstObjectByType<PlayerStats>();
         if (player == null) return;
@@ -86,7 +91,12 @@ public class SkillEvolutionManager : MonoBehaviour
         }
     }
 
-    public void Resetar() => evolucoesAtivas.Clear();
+    public void Resetar()
+    {
+        evolucoesAtivas.Clear();
+        evolucoesAtivasData.Clear();
+        OnEvolucoesChanged?.Invoke();
+    }
 }
 
 // Interface opcional para behaviors que querem ser notificados imediatamente

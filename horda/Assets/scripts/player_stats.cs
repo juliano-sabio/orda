@@ -111,6 +111,11 @@ public class PlayerStats : MonoBehaviour
     bool        estaSlowado;
     Coroutine   corotinaRestaurarSlow;
 
+    bool        estaEnvenenado;
+    Coroutine   corotinaVeneno;
+    Color       corOriginalAnteVeneno;
+    float       tempoVenenoRestante;
+
     void Awake()
     {
         if (characterData != null)
@@ -152,13 +157,15 @@ public class PlayerStats : MonoBehaviour
 
         if (ultimateData != null)
         {
-            ultimateSkill.skillName = ultimateData.ultimateName;
-            ultimateSkill.baseDamage = ultimateData.baseDamage;
+            ultimateSkill.skillName    = ultimateData.ultimateName;
+            ultimateSkill.description  = ultimateData.description;
+            ultimateSkill.specificType = ultimateData.ultimateType;
+            ultimateSkill.baseDamage   = ultimateData.baseDamage;
             ultimateSkill.areaOfEffect = ultimateData.areaOfEffect;
-            ultimateSkill.duration = ultimateData.duration;
-            ultimateSkill.element = ultimateData.element;
-            ultimateSkill.icon = ultimateData.ultimateIcon;
-            ultimateSkill.isActive = true;
+            ultimateSkill.duration     = ultimateData.duration;
+            ultimateSkill.element      = ultimateData.element;
+            ultimateSkill.icon         = ultimateData.ultimateIcon;
+            ultimateSkill.isActive     = true;
 
             if (!string.IsNullOrEmpty(ultimateData.behaviorScriptName))
                 AplicarComportamentoUltimate(ultimateData);
@@ -430,6 +437,8 @@ public class PlayerStats : MonoBehaviour
     public class UltimateSkill
     {
         public string skillName;
+        public string description;
+        public SpecificSkillType specificType = SpecificSkillType.None;
         public float baseDamage;
         public bool isActive;
         public float areaOfEffect;
@@ -503,7 +512,7 @@ public class PlayerStats : MonoBehaviour
         int charIdx    = PlayerPrefs.GetInt("SelectedCharacter", 0);
         int passIdx    = Mathf.Clamp(PlayerPrefs.GetInt($"SelectedPassiva_{charIdx}", 0), 0, characterData.passivasDisponiveis.Length - 1);
         PassiveData p  = characterData.passivasDisponiveis[passIdx];
-        if (p != null) uiManager.SetPassivaIcon(p.passiveIcon, p.passiveName);
+        if (p != null) uiManager.SetPassivaIcon(p.passiveIcon, p.passiveName, p.description ?? "");
     }
 
     public void InitializeFromCharacterSelection()
@@ -1182,7 +1191,7 @@ public class PlayerStats : MonoBehaviour
         if (!string.IsNullOrEmpty(p.behaviorScriptName))
             AplicarComportamentoPassiva(p.behaviorScriptName);
 
-        if (uiManager != null) uiManager.SetPassivaIcon(p.passiveIcon, p.passiveName);
+        if (uiManager != null) uiManager.SetPassivaIcon(p.passiveIcon, p.passiveName, p.description ?? "");
     }
 
     void AplicarComportamentoPassiva(string behaviorName)
@@ -1815,6 +1824,45 @@ public class PlayerStats : MonoBehaviour
         estaSlowado            = false;
         speedOriginalAntesSlow = speed;
     }
+
+    public void AplicarVenenoPlayer(float danoPorTick, float intervalo, float duracao)
+    {
+        if (estaEnvenenado)
+        {
+            // Renova a duração sem reiniciar o tick — evita reset constante pelo OnTriggerStay2D
+            tempoVenenoRestante = Mathf.Max(tempoVenenoRestante, duracao);
+            return;
+        }
+        if (corotinaVeneno != null) StopCoroutine(corotinaVeneno);
+        corotinaVeneno = StartCoroutine(CorotinaVeneno(danoPorTick, intervalo, duracao));
+    }
+
+    System.Collections.IEnumerator CorotinaVeneno(float danoPorTick, float intervalo, float duracao)
+    {
+        var sr = GetComponent<SpriteRenderer>();
+        corOriginalAnteVeneno = sr != null ? sr.color : Color.white;
+        estaEnvenenado        = true;
+        tempoVenenoRestante   = duracao;
+        if (sr != null) sr.color = new Color(0.45f, 0.85f, 0.35f);
+
+        float tickTimer = 0f;
+        while (tempoVenenoRestante > 0f)
+        {
+            tempoVenenoRestante -= Time.deltaTime;
+            tickTimer           += Time.deltaTime;
+            if (tickTimer >= intervalo)
+            {
+                tickTimer -= intervalo;
+                TakeDamage(danoPorTick);
+            }
+            yield return null;
+        }
+
+        estaEnvenenado = false;
+        corotinaVeneno = null;
+        if (sr != null) sr.color = corOriginalAnteVeneno;
+    }
+
     public void AddShieldAuraBehavior(SkillData skill)
     {
         if (GetComponentInChildren<ShieldAuraBehavior>() != null) return;

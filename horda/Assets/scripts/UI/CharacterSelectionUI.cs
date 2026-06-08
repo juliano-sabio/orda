@@ -41,6 +41,9 @@ public class CharacterSelectionUI : MonoBehaviour
     Image   glowFundo;
     Image   glowPreview;
     GameObject painelPreview;
+    GameObject painelInfoRef;
+    GameObject painelStatusRef;
+    Image flashOverlay;
 
     // partículas de fundo
     const int QTD_P = 16;
@@ -68,6 +71,14 @@ public class CharacterSelectionUI : MonoBehaviour
     public Sprite spriteBarraTopo;
     public Sprite spriteBotao;
     public Sprite[] spriteStatIcons; // [0]=vida [1]=atk [2]=def [3]=vel
+    public Sprite spriteSlotPlayer;
+    public Sprite spriteTesteCaractere;
+    public Sprite spriteTesteCaractere01;
+    public Sprite spriteTesteCaractere02;
+    public Sprite spriteTesteCaractere03;
+    public Sprite spriteTeste002;
+    public Sprite spriteTeste003;
+    public Sprite spriteTesteCaractere04;
 
     // ── Paleta dark fantasy ────────────────────────────────────────────
     static readonly Color corFundo  = new Color(0.03f, 0.01f, 0.01f);  // #080303
@@ -90,12 +101,48 @@ public class CharacterSelectionUI : MonoBehaviour
 
     void Start()
     {
+#if UNITY_EDITOR
+        if (spriteSlotPlayer == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/skill_card/slotplayer.ase"))
+                if (a is Sprite s) { spriteSlotPlayer = s; break; }
+        if (spriteTesteCaractere == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/testecaractere.ase"))
+                if (a is Sprite s) { spriteTesteCaractere = s; break; }
+        if (spriteTesteCaractere01 == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/testecaractere01.ase"))
+                if (a is Sprite s) { spriteTesteCaractere01 = s; break; }
+        if (spriteTesteCaractere02 == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/testecaractere02.ase"))
+                if (a is Sprite s) { spriteTesteCaractere02 = s; break; }
+        if (spriteTesteCaractere03 == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/testecaractere03.ase"))
+                if (a is Sprite s) { spriteTesteCaractere03 = s; break; }
+        if (spriteTeste002 == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/teste002.ase"))
+                if (a is Sprite s) { spriteTeste002 = s; break; }
+        if (spriteTeste003 == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/teste003.ase"))
+                if (a is Sprite s) { spriteTeste003 = s; break; }
+        if (spriteTesteCaractere04 == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/testecaractere04.ase"))
+                if (a is Sprite s) { spriteTesteCaractere04 = s; break; }
+#endif
         CriarCanvas();
         CriarUI();
         ConectarManager();
         StartCoroutine(AnimarParticulas());
         StartCoroutine(AnimarGlow());
         StartCoroutine(AnimarParticulasPreview());
+        StartCoroutine(EntradaPaineis());
+        StartCoroutine(EntradaSlots());
     }
 
     // ── Canvas ─────────────────────────────────────────────────────────
@@ -228,7 +275,14 @@ public class CharacterSelectionUI : MonoBehaviour
         le.preferredHeight = 110f;
 
         var bgImg = go.AddComponent<Image>();
-        if (spritePainel != null)
+        if (spriteSlotPlayer != null)
+        {
+            bgImg.sprite = spriteSlotPlayer;
+            bgImg.type   = Image.Type.Simple;
+            bgImg.color  = Color.white;
+            bgImg.preserveAspect = true;
+        }
+        else if (spritePainel != null)
         {
             bgImg.sprite = spritePainel;
             bgImg.type   = Image.Type.Sliced;
@@ -290,7 +344,36 @@ public class CharacterSelectionUI : MonoBehaviour
         painelPreview = new GameObject("Preview");
         painelPreview.transform.SetParent(root.transform, false);
         painelPreview.AddComponent<RectTransform>(); // cria RectTransform antes de Anchors
-        Anchors(painelPreview, new Vector2(0.32f,0.10f), new Vector2(0.68f,0.78f));
+        Anchors(painelPreview, new Vector2(0.35f,0.14f), new Vector2(0.65f,0.74f));
+
+        // moldura pixel art — 4 linhas finas + cantos escuros
+        Color bordaExt  = new Color(0.10f, 0.02f, 0.02f, 1.00f); // quase preto
+        Color bordaMeio = new Color(0.35f, 0.06f, 0.06f, 0.85f); // vermelho escuro
+        Color bordaInt  = new Color(0.55f, 0.10f, 0.10f, 0.45f); // accent suave
+        void BordaLinha(string nome, Vector2 mn, Vector2 mx, Vector2 offMn, Vector2 offMx, Color cor, int idx)
+        {
+            var b = new GameObject(nome); b.transform.SetParent(painelPreview.transform, false);
+            var r = b.AddComponent<RectTransform>();
+            r.anchorMin = mn; r.anchorMax = mx;
+            r.offsetMin = offMn; r.offsetMax = offMx;
+            b.AddComponent<Image>().color = cor;
+            b.transform.SetSiblingIndex(idx);
+        }
+        // camada externa (3px)
+        BordaLinha("BTop",  new Vector2(0,1), new Vector2(1,1), new Vector2(0,-3), new Vector2(0, 0), bordaExt,  0);
+        BordaLinha("BBot",  new Vector2(0,0), new Vector2(1,0), new Vector2(0, 0), new Vector2(0, 3), bordaExt,  1);
+        BordaLinha("BLeft", new Vector2(0,0), new Vector2(0,1), new Vector2(0, 0), new Vector2(3, 0), bordaExt,  2);
+        BordaLinha("BRigh", new Vector2(1,0), new Vector2(1,1), new Vector2(-3,0), new Vector2(0, 0), bordaExt,  3);
+        // camada média (2px, deslocada para dentro)
+        BordaLinha("MTop",  new Vector2(0,1), new Vector2(1,1), new Vector2(3,-5), new Vector2(-3, -3), bordaMeio, 4);
+        BordaLinha("MBot",  new Vector2(0,0), new Vector2(1,0), new Vector2(3, 3), new Vector2(-3,  5), bordaMeio, 5);
+        BordaLinha("MLeft", new Vector2(0,0), new Vector2(0,1), new Vector2(3, 3), new Vector2( 5,-3), bordaMeio, 6);
+        BordaLinha("MRigh", new Vector2(1,0), new Vector2(1,1), new Vector2(-5, 3), new Vector2(-3,-3), bordaMeio, 7);
+        // camada interna (1px accent)
+        BordaLinha("ITop",  new Vector2(0,1), new Vector2(1,1), new Vector2(5,-6), new Vector2(-5, -5), bordaInt,  8);
+        BordaLinha("IBot",  new Vector2(0,0), new Vector2(1,0), new Vector2(5, 5), new Vector2(-5,  6), bordaInt,  9);
+        BordaLinha("ILeft", new Vector2(0,0), new Vector2(0,1), new Vector2(5, 5), new Vector2( 6,-5), bordaInt, 10);
+        BordaLinha("IRigh", new Vector2(1,0), new Vector2(1,1), new Vector2(-6, 5), new Vector2(-5,-5), bordaInt, 11);
 
         // glow atrás do preview
         var glowGO = Img(painelPreview, "GlowPreview",
@@ -307,19 +390,6 @@ public class CharacterSelectionUI : MonoBehaviour
         ConfigurarCameraPreview();
         CriarParticulasPreview(painelPreview);
 
-        if (spriteMolduraPreview != null)
-        {
-            // Moldura posicionada exatamente sobre o campo preto do personagem
-            var molduraGO  = Img(painelPreview, "MolduraPreview",
-                new Vector2(0.02f, 0.05f), new Vector2(0.98f, 0.92f), Color.white);
-            var molduraImg = molduraGO.GetComponent<Image>();
-            molduraImg.sprite     = spriteMolduraPreview;
-            molduraImg.type       = Image.Type.Sliced;
-            molduraImg.fillCenter = false;
-            molduraImg.color      = Color.white;
-            molduraGO.transform.SetAsLastSibling();
-        }
-
         // nome grande no preview
         txtNomePreview = TMP(painelPreview, "NomePrev",
             new Vector2(0f,0.88f), new Vector2(1f,1f),
@@ -330,12 +400,22 @@ public class CharacterSelectionUI : MonoBehaviour
         var info = Img(root, "PainelInfo",
             new Vector2(0.01f,0.10f), new Vector2(0.31f,0.78f),
             corPainel);
-        if (spritePainel != null)
+        painelInfoRef = info;
         {
             var img = info.GetComponent<Image>();
-            img.sprite = spritePainel;
-            img.type   = Image.Type.Sliced;
-            img.color  = Color.white;
+            if (spriteTesteCaractere04 != null)
+            {
+                img.sprite = spriteTesteCaractere04;
+                img.type   = Image.Type.Simple;
+                img.color  = Color.white;
+                img.preserveAspect = false;
+            }
+            else if (spritePainel != null)
+            {
+                img.sprite = spritePainel;
+                img.type   = Image.Type.Sliced;
+                img.color  = Color.white;
+            }
         }
         BarraTopo(info, corAcento);
 
@@ -368,96 +448,85 @@ public class CharacterSelectionUI : MonoBehaviour
         var status = Img(root, "PainelStatus",
             new Vector2(0.69f,0.10f), new Vector2(0.99f,0.78f),
             corPainel);
-        if (spritePainel != null)
+        painelStatusRef = status;
         {
             var img = status.GetComponent<Image>();
-            img.sprite = spritePainel;
-            img.type   = Image.Type.Sliced;
-            img.color  = Color.white;
+            if (spriteTesteCaractere04 != null)
+            {
+                img.sprite = spriteTesteCaractere04;
+                img.type   = Image.Type.Simple;
+                img.color  = Color.white;
+                img.preserveAspect = false;
+            }
+            else if (spritePainel != null)
+            {
+                img.sprite = spritePainel;
+                img.type   = Image.Type.Sliced;
+                img.color  = Color.white;
+            }
         }
-        BarraTopo(status, corAcento);
-
-        var lblSt = TMP(status, "LblSt",
-            new Vector2(0f,0.92f), new Vector2(1f,1f),
-            "STATUS", 12f, FontStyles.Bold, new Color(0.88f,0.80f,0.72f));
-        lblSt.alignment = TextAlignmentOptions.Center;
-
-        string[] labels = { "VIDA", "ATK", "DEF", "VEL" };
-        Color[]  cores  = {
-            new Color(0.9f,0.3f,0.3f),
-            new Color(1.0f,0.6f,0.1f),
-            new Color(0.3f,0.6f,1.0f),
-            new Color(0.3f,0.9f,0.5f),
+        // 7 linhas compactas: ATQ, DEF, Crítico, Vel.Atq, Vida, Vel, Regen
+        string[] statLabels = { "ATQ",      "DEF",      "Crítico",  "Vel.Atq",  "Vida",     "Vel",      "Regen"    };
+        StatusCardType[] statTypes = {
+            StatusCardType.Attack,
+            StatusCardType.Defense,
+            StatusCardType.CriticalChance,
+            StatusCardType.AttackSpeed,
+            StatusCardType.Health,
+            StatusCardType.Speed,
+            StatusCardType.Regen,
+        };
+        Color[] statCores = {
+            new Color(1.00f, 0.55f, 0.10f),  // ATQ    laranja
+            new Color(0.28f, 0.60f, 1.00f),  // DEF    azul
+            new Color(1.00f, 0.85f, 0.10f),  // Crítico dourado
+            new Color(0.70f, 0.40f, 1.00f),  // Vel.Atq roxo
+            new Color(0.90f, 0.28f, 0.28f),  // Vida   vermelho
+            new Color(0.35f, 0.95f, 0.50f),  // Vel    verde
+            new Color(0.55f, 0.90f, 0.60f),  // Regen  verde claro
         };
 
-        for (int i = 0; i < 4; i++)
+        var statusTexts = new TextMeshProUGUI[7];
+        const float sRowH = 0.097f;
+        const float sRowG = 0.002f;
+        float startY = 0.96f;
+
+        for (int i = 0; i < 7; i++)
         {
-            float yMax = 0.90f - i * 0.22f;
-            float yMin = yMax  - 0.18f;
+            float yMax = startY - i * (sRowH + sRowG);
+            float yMin = yMax - sRowH;
 
-            var linha = new GameObject($"Linha_{i}");
-            linha.transform.SetParent(status.transform, false);
-            // Padded para não ultrapassar a moldura do painel (8% de cada lado)
-            Anchors(linha, new Vector2(0.08f, yMin), new Vector2(0.82f, yMax));
+            var row = new GameObject($"StatRow_{i}");
+            row.transform.SetParent(status.transform, false);
+            Anchors(row, new Vector2(0.06f, yMin), new Vector2(0.94f, yMax));
+            var rowImg = row.AddComponent<Image>();
+            rowImg.color = new Color(0.08f, 0.03f, 0.03f, 0.85f);
 
-            var linhaFundo = linha.AddComponent<Image>();
-            linhaFundo.color = new Color(0f, 0f, 0f, 0f);
+            // linha de destaque na cor do stat
+            var rowLn = new GameObject("Ln"); rowLn.transform.SetParent(row.transform, false);
+            var rowLnRT = rowLn.AddComponent<RectTransform>();
+            rowLnRT.anchorMin = Vector2.zero; rowLnRT.anchorMax = new Vector2(1f, 0f);
+            rowLnRT.offsetMin = Vector2.zero; rowLnRT.offsetMax = new Vector2(0f, 2f);
+            rowLn.AddComponent<Image>().color = new Color(statCores[i].r, statCores[i].g, statCores[i].b, 0.60f);
 
-            var indGO = new GameObject("Ind");
-            indGO.transform.SetParent(linha.transform, false);
-            Anchors(indGO, new Vector2(0.03f, 0.06f), new Vector2(0.30f, 0.94f));
-            var indImg = indGO.AddComponent<Image>();
-            if (spriteStatIcons != null && i < spriteStatIcons.Length && spriteStatIcons[i] != null)
-            {
-                indImg.sprite = spriteStatIcons[i];
-                indImg.color  = Color.white;
-                indImg.preserveAspect = true;
-            }
-            else { indImg.color = cores[i]; }
+            // ícone
+            var ico = new GameObject("Ico"); ico.transform.SetParent(row.transform, false);
+            Anchors(ico, new Vector2(0.04f, 0.15f), new Vector2(0.18f, 0.85f));
+            var icoImg = ico.AddComponent<Image>();
+            var spr = StatusCardIconGenerator.GetIcon(statTypes[i], statCores[i]);
+            icoImg.sprite = spr;
+            icoImg.color = Color.white;
+            icoImg.preserveAspect = true;
 
-            // label
-            var lbl = TMP(linha, "Lbl",
-                new Vector2(0.33f, 0.48f), new Vector2(0.90f, 1.0f),
-                labels[i], 8f, FontStyles.Bold, cores[i]);
-            lbl.alignment = TextAlignmentOptions.MidlineLeft;
-
-            // slider
-            var slGO = new GameObject("Slider");
-            slGO.transform.SetParent(linha.transform, false);
-            Anchors(slGO, new Vector2(0.33f, 0.05f), new Vector2(0.65f, 0.48f));
-            sliders[i] = CriarSlider(slGO, cores[i]);
-
-            // nível (oculto atrás do botão)
-            upgradeLevelTexts[i] = TMP(status, "Nv",
-                new Vector2(0.74f, yMin + 0.05f), new Vector2(0.84f, yMax - 0.05f),
-                "Nv.0", 7f, FontStyles.Normal, new Color(0.65f,0.55f,0.35f));
-            upgradeLevelTexts[i].alignment = TextAlignmentOptions.Center;
-
-            int cap = i;
-            var btnGO = new GameObject("BtnUp");
-            btnGO.transform.SetParent(status.transform, false);
-            Anchors(btnGO, new Vector2(0.74f, yMin + 0.05f), new Vector2(0.84f, yMax - 0.05f));
-            var bImg = btnGO.AddComponent<Image>();
-            if (spriteBotao != null)
-            {
-                bImg.sprite = spriteBotao;
-                bImg.type   = Image.Type.Sliced;
-                bImg.color  = new Color(0.20f, 0.50f, 0.20f);
-            }
-            else
-            {
-                bImg.color = new Color(0.15f, 0.45f, 0.15f);
-            }
-            var b = btnGO.AddComponent<Button>();
-            b.transition = Selectable.Transition.None;
-            b.targetGraphic = bImg;
-            b.onClick.AddListener(() => manager?.BuyUpgrade(cap));
-            TMP(btnGO, "T",
-                Vector2.zero, Vector2.one,
-                "+", 14f, FontStyles.Bold, Color.white)
-                .alignment = TextAlignmentOptions.Center;
-            upgradeButtons[i] = b;
+            // texto
+            var txt = TMP(row, "Val",
+                new Vector2(0.20f, 0f), new Vector2(1f, 1f),
+                $"{statLabels[i]}: —", 10f, FontStyles.Bold, Color.white);
+            txt.alignment = TextAlignmentOptions.MidlineLeft;
+            statusTexts[i] = txt;
         }
+
+        manager.statusTexts = statusTexts;
     }
 
     // ── Rodapé ─────────────────────────────────────────────────────────
@@ -721,6 +790,105 @@ public class CharacterSelectionUI : MonoBehaviour
         }
     }
 
+    // ── Entrada animada dos painéis ────────────────────────────────────
+    IEnumerator EntradaPaineis()
+    {
+        var rtInfo   = painelInfoRef  .GetComponent<RectTransform>();
+        var rtStatus = painelStatusRef.GetComponent<RectTransform>();
+        var rtPrev   = painelPreview  .GetComponent<RectTransform>();
+
+        var cgInfo   = painelInfoRef  .AddComponent<CanvasGroup>();
+        var cgStatus = painelStatusRef.AddComponent<CanvasGroup>();
+        var cgPrev   = painelPreview  .AddComponent<CanvasGroup>();
+
+        cgInfo.alpha = cgStatus.alpha = cgPrev.alpha = 0f;
+        rtInfo.anchoredPosition   = new Vector2(-120f, 0f);
+        rtStatus.anchoredPosition = new Vector2( 120f, 0f);
+        rtPrev.localScale         = new Vector3(0.88f, 0.88f, 1f);
+
+        yield return null;
+
+        float dur = 0.55f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            float e = 1f - Mathf.Pow(1f - t / dur, 3f);
+            cgInfo.alpha   = e;
+            cgStatus.alpha = e;
+            cgPrev.alpha   = Mathf.Clamp01(e * 1.4f);
+            rtInfo.anchoredPosition   = new Vector2(Mathf.Lerp(-120f, 0f, e), 0f);
+            rtStatus.anchoredPosition = new Vector2(Mathf.Lerp( 120f, 0f, e), 0f);
+            float s = Mathf.Lerp(0.88f, 1f, e);
+            rtPrev.localScale = new Vector3(s, s, 1f);
+            yield return null;
+        }
+        cgInfo.alpha = cgStatus.alpha = cgPrev.alpha = 1f;
+        rtInfo.anchoredPosition = rtStatus.anchoredPosition = Vector2.zero;
+        rtPrev.localScale = Vector3.one;
+    }
+
+    // ── Entrada dos slots com stagger ──────────────────────────────────
+    IEnumerator EntradaSlots()
+    {
+        if (iconesArray == null) yield break;
+
+        var grupos = new CanvasGroup[iconesArray.Length];
+        for (int i = 0; i < iconesArray.Length; i++)
+        {
+            if (iconesArray[i] == null) continue;
+            grupos[i] = iconesArray[i].gameObject.AddComponent<CanvasGroup>();
+            grupos[i].alpha = 0f;
+        }
+
+        yield return new WaitForSeconds(0.20f);
+
+        for (int i = 0; i < iconesArray.Length; i++)
+        {
+            if (grupos[i] == null) continue;
+            StartCoroutine(AnimarSlot(grupos[i]));
+            yield return new WaitForSeconds(0.07f);
+        }
+    }
+
+    IEnumerator AnimarSlot(CanvasGroup cg)
+    {
+        float dur = 0.25f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            cg.alpha = t / dur;
+            yield return null;
+        }
+        cg.alpha = 1f;
+    }
+
+    // ── Flash ao trocar personagem ─────────────────────────────────────
+    public void FlashPreview(Color cor)
+    {
+        if (flashOverlay == null)
+        {
+            var go = new GameObject("FlashOverlay");
+            go.transform.SetParent(painelPreview.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+            flashOverlay = go.AddComponent<Image>();
+            flashOverlay.raycastTarget = false;
+            go.transform.SetAsLastSibling();
+        }
+        StartCoroutine(AnimarFlash(cor));
+    }
+
+    IEnumerator AnimarFlash(Color cor)
+    {
+        float dur = 0.30f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            float a = Mathf.Sin(t / dur * Mathf.PI) * 0.45f;
+            flashOverlay.color = new Color(cor.r, cor.g, cor.b, a);
+            yield return null;
+        }
+        flashOverlay.color = Color.clear;
+    }
+
     // Chamado pelo manager quando o personagem muda
     public void AtualizarCorElemento(Color cor)
     {
@@ -808,6 +976,7 @@ public class CharacterSelectionUI : MonoBehaviour
     {
         if (previewPersonagem != null) Destroy(previewPersonagem);
         if (data == null || data.characterPrefab == null) return;
+        FlashPreview(data.GetElementColor());
 
         previewPersonagem = Instantiate(data.characterPrefab, PREVIEW_POS, Quaternion.identity);
 

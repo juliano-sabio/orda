@@ -29,10 +29,23 @@ public class EscolherTerrenoUI : MonoBehaviour
     [Header("Cena de voltar")]
     public string cenaVoltar = "CharacterSelection";
 
+    [Header("Assets")]
+    public Sprite spriteCard;
+    public Sprite spriteFundoImg;
+
     // ──────────────────────────────────────────────────────────────
     void Start()
     {
         GarantirEventSystem();
+#if UNITY_EDITOR
+        if (spriteCard == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/testecaractere.ase"))
+                if (a is Sprite s) { spriteCard = s; break; }
+        if (spriteFundoImg == null)
+            spriteFundoImg = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/assets/UI/menu_inicial/IMG_6856 (1).png");
+#endif
 
         GameObject canvasGO = CriarCanvas();
         CriarFundo(canvasGO);
@@ -81,7 +94,18 @@ public class EscolherTerrenoUI : MonoBehaviour
         GameObject go = new GameObject("Fundo");
         go.transform.SetParent(canvas.transform, false);
         Stretch(go);
-        go.AddComponent<Image>().color = new Color(0.06f, 0.06f, 0.12f);
+        var img = go.AddComponent<Image>();
+        if (spriteFundoImg != null)
+        {
+            img.sprite = spriteFundoImg;
+            img.type   = Image.Type.Simple;
+            img.color  = Color.white;
+            img.preserveAspect = false;
+        }
+        else
+        {
+            img.color = new Color(0.06f, 0.06f, 0.12f);
+        }
     }
 
     void CriarTitulo(GameObject canvas)
@@ -133,14 +157,27 @@ public class EscolherTerrenoUI : MonoBehaviour
 
         // Fundo do card
         Image bg = card.AddComponent<Image>();
-        bg.color = fase.desbloqueada
-            ? new Color(fase.cor.r * 0.25f, fase.cor.g * 0.25f, fase.cor.b * 0.25f, 1f)
-            : new Color(0.12f, 0.12f, 0.12f, 1f);
+        if (spriteCard != null)
+        {
+            bg.sprite = spriteCard;
+            bg.type   = Image.Type.Simple;
+            bg.preserveAspect = false;
+            bg.color = fase.desbloqueada
+                ? new Color(Mathf.Max(fase.cor.r, 0.35f), Mathf.Max(fase.cor.g, 0.35f), Mathf.Max(fase.cor.b, 0.35f), 1f)
+                : new Color(0.30f, 0.25f, 0.25f, 1f);
+        }
+        else
+        {
+            bg.color = fase.desbloqueada
+                ? new Color(fase.cor.r * 0.25f, fase.cor.g * 0.25f, fase.cor.b * 0.25f, 1f)
+                : new Color(0.12f, 0.12f, 0.12f, 1f);
+        }
 
         // Botão
         Button btn = card.AddComponent<Button>();
         btn.targetGraphic  = bg;
         btn.interactable   = fase.desbloqueada;
+        card.AddComponent<CardHover>();
 
         if (fase.desbloqueada)
         {
@@ -154,9 +191,10 @@ public class EscolherTerrenoUI : MonoBehaviour
             });
 
             ColorBlock cb  = btn.colors;
-            cb.normalColor      = new Color(fase.cor.r * 0.25f, fase.cor.g * 0.25f, fase.cor.b * 0.25f);
-            cb.highlightedColor = new Color(fase.cor.r * 0.5f,  fase.cor.g * 0.5f,  fase.cor.b * 0.5f);
-            cb.pressedColor     = fase.cor;
+            cb.normalColor      = Color.white;
+            cb.highlightedColor = new Color(1.0f, 0.85f, 0.85f, 1f);
+            cb.pressedColor     = new Color(fase.cor.r * 1.4f, fase.cor.g * 1.4f, fase.cor.b * 1.4f, 1f);
+            cb.colorMultiplier  = 1f;
             btn.colors = cb;
         }
 
@@ -266,5 +304,45 @@ public class EscolherTerrenoUI : MonoBehaviour
         r.anchorMax = Vector2.one;
         r.offsetMin = Vector2.zero;
         r.offsetMax = Vector2.zero;
+    }
+}
+
+public class CardHover : MonoBehaviour,
+    UnityEngine.EventSystems.IPointerEnterHandler,
+    UnityEngine.EventSystems.IPointerExitHandler,
+    UnityEngine.EventSystems.IPointerDownHandler,
+    UnityEngine.EventSystems.IPointerUpHandler
+{
+    Coroutine cor;
+
+    public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData _)
+        => Animar(1.06f, 0.15f);
+
+    public void OnPointerExit(UnityEngine.EventSystems.PointerEventData _)
+        => Animar(1.00f, 0.15f);
+
+    public void OnPointerDown(UnityEngine.EventSystems.PointerEventData _)
+        => Animar(0.97f, 0.08f);
+
+    public void OnPointerUp(UnityEngine.EventSystems.PointerEventData _)
+        => Animar(1.06f, 0.08f);
+
+    void Animar(float alvo, float dur)
+    {
+        if (cor != null) StopCoroutine(cor);
+        cor = StartCoroutine(EscalaParaAlvo(alvo, dur));
+    }
+
+    System.Collections.IEnumerator EscalaParaAlvo(float alvo, float dur)
+    {
+        float inicio = transform.localScale.x;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            float e = 1f - Mathf.Pow(1f - t / dur, 2f);
+            float s = Mathf.Lerp(inicio, alvo, e);
+            transform.localScale = new Vector3(s, s, 1f);
+            yield return null;
+        }
+        transform.localScale = new Vector3(alvo, alvo, 1f);
     }
 }

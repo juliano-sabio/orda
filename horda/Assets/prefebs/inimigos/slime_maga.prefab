@@ -47,6 +47,7 @@ GameObject:
   - component: {fileID: 2117315808568981484}
   - component: {fileID: 7106683467562779947}
   - component: {fileID: 8316568966157113151}
+  - component: {fileID: -8212619259102580316}
   m_Layer: 7
   m_Name: slime_maga
   m_TagString: Enemy
@@ -178,6 +179,8 @@ MonoBehaviour:
     chance: 0.014
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 1
+  mostrarDanoFlutuante: 1
+  imuneAoDano: 0
   podeReceberCura: 1
   multiplicadorCuraRecebida: 1
   mostrarCuraFlutuante: 1
@@ -257,7 +260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad3c22716d1e8294f8bb243c7cdda376, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DanoInimigo
-  dano: 10
+  dano: 20
   intervaloAtaque: 1
   danoContinuo: 0
 --- !u!58 &8316568966157113151
@@ -296,6 +299,27 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0.0020463455, y: 0.014030506}
   m_Radius: 0.07709603
+--- !u!114 &-8212619259102580316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7757409948511854053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ac1d4822817ef14a835362a46de1c68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlimeMagaFireAttack
+  primeiroAtaque: 5
+  intervaloCarga: 8
+  duracaoCarga: 1.6
+  velocidadeProjetil: 6
+  danoExplosao: 15
+  raioExplosao: 2.4
+  duracaoFogo: 5
+  danoPorTick: 15
+  intervaloTick: 0.8
 --- !u!1001 &338456642639037815
 PrefabInstance:
   m_ObjectHideFlags: 0

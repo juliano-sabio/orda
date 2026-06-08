@@ -165,6 +165,8 @@ public class UIManager : MonoBehaviour
         if (GetComponent<SkillCooldownDisplay>() == null)
             gameObject.AddComponent<SkillCooldownDisplay>();
 
+        SkillTooltipHUD.ObterOuCriar();
+
         // Melhoria visual da barra de vida
         if (healthBar != null && healthBar.GetComponent<PlayerHealthBarFX>() == null)
             healthBar.gameObject.AddComponent<PlayerHealthBarFX>();
@@ -277,6 +279,9 @@ public class UIManager : MonoBehaviour
             if (s == null) s = Resources.Load<Sprite>("DashIcon");
             if (s != null) { dashIcon.sprite = s; dashIcon.color = Color.white; dashIcon.preserveAspect = true; }
         }
+        if (dashIcon != null)
+            SkillTooltipHUD.AttachRawPublic(dashIcon, "Dash", "Movimentação rápida.\nConsome uma carga e recarrega com o tempo.",
+                new Color(0.4f, 0.75f, 1f), "DASH");
 
         // Atualiza as barras de vida e XP logo no início
         UpdatePlayerStatus();
@@ -661,7 +666,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void SetPassivaIcon(Sprite icon, string nome)
+    public void SetPassivaIcon(Sprite icon, string nome, string desc = "")
     {
         if (passivaIcon == null) return;
         if (icon != null)
@@ -676,6 +681,7 @@ public class UIManager : MonoBehaviour
             passivaIcon.gameObject.SetActive(true);
         }
         if (passivaLabel != null) passivaLabel.text = RemoverAcentos(nome ?? "");
+        SkillTooltipHUD.AttachPassiva(passivaIcon, nome ?? "", desc);
     }
 
     // 🎯 MÉTODOS EXISTENTES DO UIMANAGER (mantidos)
@@ -749,6 +755,7 @@ public class UIManager : MonoBehaviour
             icon.color = Color.white;
             icon.gameObject.SetActive(true);
             if (nameLabel != null) nameLabel.text = skill.skillName;
+            SkillTooltipHUD.Attach(icon, skill);
 
             if (elementIcon != null)
             {
@@ -813,6 +820,9 @@ public class UIManager : MonoBehaviour
                 if (ultimateSkillElementIcon != null)
                     ultimateSkillElementIcon.gameObject.SetActive(false);
             }
+
+            SkillTooltipHUD.AttachUltimate(ultimateSkillIcon, ultimateSkill.skillName,
+                ultimateSkill.description ?? "", ultimateSkill.specificType);
         }
     }
 
@@ -1532,14 +1542,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowSkillAcquired(string skillName, string description)
     {
-        if (skillAcquiredPanel != null && skillNameText != null && skillDescriptionText != null)
-        {
-            skillNameText.text = TextUtils.SemAcento(skillName);
-            skillDescriptionText.text = TextUtils.SemAcento(description);
-            skillAcquiredPanel.SetActive(true);
-
-            StartCoroutine(HideSkillAcquiredPanel());
-        }
+        // notificação desativada
     }
 
     private IEnumerator HideSkillAcquiredPanel()

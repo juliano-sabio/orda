@@ -11,9 +11,12 @@ public class LoadingScreenUI : MonoBehaviour
     [Header("Tempo mínimo na tela (segundos)")]
     public float tempoMinimo = 2.0f;
 
-    static readonly Color corFundo  = new Color(0.04f, 0.03f, 0.10f);
-    static readonly Color corAcento = new Color(0.55f, 0.15f, 0.85f);
-    static readonly Color corClaro  = new Color(0.75f, 0.35f, 1.00f);
+    [Header("Assets")]
+    public Sprite spriteFundo;
+
+    static readonly Color corFundo  = new Color(0.03f, 0.01f, 0.01f);
+    static readonly Color corAcento = new Color(0.55f, 0.08f, 0.08f);
+    static readonly Color corClaro  = new Color(0.90f, 0.45f, 0.45f);
 
     RectTransform   barraFillRT;
     TextMeshProUGUI txtPorcentagem;
@@ -38,6 +41,11 @@ public class LoadingScreenUI : MonoBehaviour
     void Start()
     {
         canvasGO = CriarCanvas();
+#if UNITY_EDITOR
+        if (spriteFundo == null)
+            spriteFundo = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/assets/UI/charselection/bg_charselection.png");
+#endif
         CriarFundo();
         CriarConteudo();
 
@@ -69,86 +77,153 @@ public class LoadingScreenUI : MonoBehaviour
     // ── Fundo limpo ───────────────────────────────────────────────────
     void CriarFundo()
     {
-        // base
-        Esticar(Img("Fundo", corFundo));
+        // imagem de fundo
+        var fundoGO  = Img("Fundo", Color.white);
+        Esticar(fundoGO);
+        var fundoImg = fundoGO.GetComponent<Image>();
+        if (spriteFundo != null)
+        {
+            fundoImg.sprite = spriteFundo;
+            fundoImg.type   = Image.Type.Simple;
+            fundoImg.preserveAspect = false;
+        }
+        else
+        {
+            fundoImg.color = corFundo;
+        }
 
-        // faixa topo
-        var topo = Img("Topo", new Color(corAcento.r, corAcento.g, corAcento.b, 0.12f));
+        // overlay escuro para legibilidade
+        var ov = Img("Overlay", new Color(0f, 0f, 0f, 0.55f));
+        Esticar(ov);
+
+        // vinheta nas bordas (gradiente simulado com imagem escura nas extremidades)
+        var vig = Img("Vinheta", new Color(0f, 0f, 0f, 0.50f));
+        var rVig = vig.GetComponent<RectTransform>();
+        rVig.anchorMin = Vector2.zero; rVig.anchorMax = Vector2.one;
+        rVig.offsetMin = new Vector2(-60f, -60f); rVig.offsetMax = new Vector2(60f, 60f);
+
+        // faixa topo com accent
+        var topo = Img("Topo", new Color(corAcento.r, corAcento.g, corAcento.b, 0.20f));
         var rt   = topo.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0f, 0.92f); rt.anchorMax = Vector2.one;
+        rt.anchorMin = new Vector2(0f, 0.90f); rt.anchorMax = Vector2.one;
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
+        // linha decorativa topo
+        var lnTopo = Img("LnTopo", new Color(corAcento.r, corAcento.g, corAcento.b, 0.70f));
+        var rlT    = lnTopo.GetComponent<RectTransform>();
+        rlT.anchorMin = new Vector2(0f, 0.90f); rlT.anchorMax = new Vector2(1f, 0.90f);
+        rlT.offsetMin = Vector2.zero; rlT.offsetMax = new Vector2(0f, 2f);
+
         // faixa rodapé
-        var bot = Img("Bot", new Color(0f, 0f, 0f, 0.45f));
+        var bot = Img("Bot", new Color(0f, 0f, 0f, 0.65f));
         var rb  = bot.GetComponent<RectTransform>();
-        rb.anchorMin = Vector2.zero; rb.anchorMax = new Vector2(1f, 0.08f);
+        rb.anchorMin = Vector2.zero; rb.anchorMax = new Vector2(1f, 0.10f);
         rb.offsetMin = rb.offsetMax = Vector2.zero;
+
+        // linha decorativa rodapé
+        var lnBot = Img("LnBot", new Color(corAcento.r, corAcento.g, corAcento.b, 0.70f));
+        var rlB   = lnBot.GetComponent<RectTransform>();
+        rlB.anchorMin = new Vector2(0f, 0.10f); rlB.anchorMax = new Vector2(1f, 0.10f);
+        rlB.offsetMin = Vector2.zero; rlB.offsetMax = new Vector2(0f, 2f);
     }
 
     // ── Conteúdo central ─────────────────────────────────────────────
     void CriarConteudo()
     {
-        // nome da fase / "CARREGANDO"
+        // nome da fase no topo
         txtCarregando = Texto("TxtFase",
-            new Vector2(0f, 0.92f), Vector2.one,
-            "", 28f, FontStyles.Bold, Color.white);
+            new Vector2(0f, 0.90f), Vector2.one,
+            "", 30f, FontStyles.Bold, Color.white);
         txtCarregando.alignment = TextAlignmentOptions.Center;
 
-        // spinner — 8 pontos em arco
+        // spinner — 12 pontos em arco
         var spinGO = new GameObject("Spinner");
         spinGO.transform.SetParent(canvasGO.transform, false);
         spinnerRT = spinGO.AddComponent<RectTransform>();
-        spinnerRT.anchorMin = spinnerRT.anchorMax = new Vector2(0.5f, 0.54f);
+        spinnerRT.anchorMin = spinnerRT.anchorMax = new Vector2(0.5f, 0.56f);
         spinnerRT.pivot     = new Vector2(0.5f, 0.5f);
-        spinnerRT.sizeDelta = new Vector2(80f, 80f);
+        spinnerRT.sizeDelta = new Vector2(70f, 70f);
 
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 12; i++)
         {
-            float ang   = i * 45f;
-            float alpha = Mathf.Lerp(0.10f, 0.90f, i / 7f);
+            float ang   = i * 30f;
+            float alpha = Mathf.Lerp(0.08f, 1.00f, i / 11f);
             float rad   = ang * Mathf.Deg2Rad;
+            float sz    = Mathf.Lerp(5f, 10f, i / 11f);
 
             var dot = new GameObject($"D{i}");
             dot.transform.SetParent(spinGO.transform, false);
             var rd = dot.AddComponent<RectTransform>();
             rd.anchorMin = rd.anchorMax = new Vector2(0.5f, 0.5f);
             rd.pivot     = new Vector2(0.5f, 0.5f);
-            rd.anchoredPosition = new Vector2(Mathf.Sin(rad) * 34f, Mathf.Cos(rad) * 34f);
-            rd.sizeDelta = new Vector2(9f, 9f);
+            rd.anchoredPosition = new Vector2(Mathf.Sin(rad) * 28f, Mathf.Cos(rad) * 28f);
+            rd.sizeDelta = new Vector2(sz, sz);
             dot.AddComponent<Image>().color = new Color(corClaro.r, corClaro.g, corClaro.b, alpha);
         }
 
+        // label "CARREGANDO" abaixo do spinner
+        Texto("LblCarregando",
+            new Vector2(0.30f, 0.46f), new Vector2(0.70f, 0.52f),
+            "CARREGANDO", 13f, FontStyles.Bold,
+            new Color(corClaro.r, corClaro.g, corClaro.b, 0.80f))
+            .alignment = TextAlignmentOptions.Center;
+
+        // linha decorativa acima da barra
+        var lnAcima = Img("LnBarra", new Color(corAcento.r, corAcento.g, corAcento.b, 0.40f));
+        var rlA = lnAcima.GetComponent<RectTransform>();
+        rlA.anchorMin = new Vector2(0.15f, 0.425f); rlA.anchorMax = new Vector2(0.85f, 0.425f);
+        rlA.offsetMin = Vector2.zero; rlA.offsetMax = new Vector2(0f, 1f);
+
         // barra de progresso — fundo
-        var fundoBarra = Img("BarraFundo", new Color(0.12f, 0.08f, 0.20f));
+        var fundoBarra = Img("BarraFundo", new Color(0.08f, 0.03f, 0.03f, 0.90f));
         var rfb = fundoBarra.GetComponent<RectTransform>();
-        rfb.anchorMin = new Vector2(0.15f, 0.38f); rfb.anchorMax = new Vector2(0.85f, 0.43f);
+        rfb.anchorMin = new Vector2(0.15f, 0.38f); rfb.anchorMax = new Vector2(0.85f, 0.42f);
         rfb.offsetMin = rfb.offsetMax = Vector2.zero;
+
+        // barra brilho interno
+        var barraGlow = Img("BarraGlow", new Color(corAcento.r * 0.5f, corAcento.g * 0.5f, corAcento.b * 0.5f, 0.30f));
+        var rfg = barraGlow.GetComponent<RectTransform>();
+        rfg.anchorMin = new Vector2(0.15f, 0.375f); rfg.anchorMax = new Vector2(0.85f, 0.425f);
+        rfg.offsetMin = rfg.offsetMax = Vector2.zero;
 
         // fill
         var fill = Img("BarraFill", corAcento);
         barraFillRT = fill.GetComponent<RectTransform>();
         barraFillRT.anchorMin = new Vector2(0.15f, 0.38f);
-        barraFillRT.anchorMax = new Vector2(0.15f, 0.43f);
+        barraFillRT.anchorMax = new Vector2(0.15f, 0.42f);
         barraFillRT.offsetMin = barraFillRT.offsetMax = Vector2.zero;
+
+        // brilho topo do fill
+        var fillSheen = Img("FillSheen", new Color(1f, 0.7f, 0.7f, 0.25f));
+        var rfs = fillSheen.GetComponent<RectTransform>();
+        rfs.anchorMin = new Vector2(0.15f, 0.41f);
+        rfs.anchorMax = new Vector2(0.15f, 0.42f);
+        rfs.offsetMin = rfs.offsetMax = Vector2.zero;
 
         // porcentagem
         txtPorcentagem = Texto("TxtPct",
-            new Vector2(0.35f, 0.30f), new Vector2(0.65f, 0.38f),
-            "0%", 18f, FontStyles.Bold, new Color(0.80f, 0.70f, 1.00f));
+            new Vector2(0.35f, 0.32f), new Vector2(0.65f, 0.38f),
+            "0%", 16f, FontStyles.Bold, new Color(0.95f, 0.75f, 0.75f));
         txtPorcentagem.alignment = TextAlignmentOptions.Center;
+
+        // separador
+        var sep = Img("Sep", new Color(corAcento.r, corAcento.g, corAcento.b, 0.35f));
+        var rs  = sep.GetComponent<RectTransform>();
+        rs.anchorMin = new Vector2(0.25f, 0.22f); rs.anchorMax = new Vector2(0.75f, 0.22f);
+        rs.offsetMin = Vector2.zero; rs.offsetMax = new Vector2(0f, 1f);
 
         // label DICA
         Texto("LblDica",
-            new Vector2(0.15f, 0.16f), new Vector2(0.85f, 0.22f),
-            "DICA", 12f, FontStyles.Bold,
-            new Color(corAcento.r, corAcento.g, corAcento.b, 0.70f))
+            new Vector2(0.15f, 0.17f), new Vector2(0.85f, 0.22f),
+            "— DICA —", 11f, FontStyles.Bold,
+            new Color(corAcento.r + 0.2f, corAcento.g + 0.1f, corAcento.b + 0.1f, 0.80f))
             .alignment = TextAlignmentOptions.Center;
 
         // texto da dica
         txtDica = Texto("TxtDica",
-            new Vector2(0.15f, 0.08f), new Vector2(0.85f, 0.16f),
+            new Vector2(0.15f, 0.10f), new Vector2(0.85f, 0.17f),
             dicas[Random.Range(0, dicas.Length)],
-            15f, FontStyles.Italic, new Color(0.72f, 0.62f, 0.88f));
+            13f, FontStyles.Italic, new Color(0.85f, 0.72f, 0.72f));
         txtDica.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDica.alignment = TextAlignmentOptions.Center;
     }

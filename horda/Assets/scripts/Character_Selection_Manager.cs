@@ -37,6 +37,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     [Header("🔋 UI - Status")]
     public Slider[] statusSliders;
+    [HideInInspector] public TextMeshProUGUI[] statusTexts;
 
     [Header("+️ Sistema de Upgrades")]
     public Button[] upgradeButtons;
@@ -159,12 +160,31 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         characterElementText.color = CharacterData.GetElementColor(data.baseElement);
         elementBonusText.text = data.GetElementBonusDescription();
 
-        if (statusSliders.Length >= 4)
+        if (statusSliders != null && statusSliders.Length >= 4 && statusSliders[0] != null)
         {
             statusSliders[0].value = (data.maxHealth * (1 + upgradeLevels[0] * 0.05f)) / 500f;
             statusSliders[1].value = (data.baseAttack * (1 + upgradeLevels[1] * 0.05f)) / 100f;
             statusSliders[2].value = (data.baseDefense * (1 + upgradeLevels[2] * 0.05f)) / 50f;
             statusSliders[3].value = (data.baseSpeed * (1 + upgradeLevels[3] * 0.05f)) / 50f;
+        }
+
+        if (statusTexts != null && statusTexts.Length >= 7)
+        {
+            float atq  = data.baseAttack   * (1 + upgradeLevels[1] * 0.05f);
+            float def  = data.baseDefense  * (1 + upgradeLevels[2] * 0.05f);
+            float vel  = data.baseSpeed    * (1 + upgradeLevels[3] * 0.05f);
+            float vida = data.maxHealth    * (1 + upgradeLevels[0] * 0.05f);
+            float regen     = data.baseHealthRegen;
+            float velAtq    = data.baseAttackCooldown;
+            float critico   = 10f; // base padrão
+
+            if (statusTexts[0] != null) statusTexts[0].text = $"ATQ: {atq:F1}";
+            if (statusTexts[1] != null) statusTexts[1].text = $"DEF: {def:F1}";
+            if (statusTexts[2] != null) statusTexts[2].text = $"Crítico: {critico:F1}%";
+            if (statusTexts[3] != null) statusTexts[3].text = $"Vel.Atq: {velAtq:F1}s";
+            if (statusTexts[4] != null) statusTexts[4].text = $"Vida: {vida:F0} / {vida:F0}";
+            if (statusTexts[5] != null) statusTexts[5].text = $"Vel: {vel:F1}";
+            if (statusTexts[6] != null) statusTexts[6].text = $"Regen: {regen:F1}/s";
         }
 
         for (int i = 0; i < upgradeLevelTexts.Length; i++)

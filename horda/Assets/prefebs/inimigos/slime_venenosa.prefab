@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 6887531530363696327}
   - component: {fileID: 1255048352760789719}
   - component: {fileID: 4518246130829382839}
+  - component: {fileID: -8320387637049327779}
   m_Layer: 7
   m_Name: slime_venenosa
   m_TagString: Enemy
@@ -187,6 +188,8 @@ MonoBehaviour:
     chance: 0.014
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 1
+  mostrarDanoFlutuante: 1
+  imuneAoDano: 0
   podeReceberCura: 1
   multiplicadorCuraRecebida: 1
   mostrarCuraFlutuante: 1
@@ -213,6 +216,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::movi_inimigo
   velocidade: 3
   suavizacao: 8
+  raioDesvioLocal: 0.7
+  forcaDesvio: 1.4
+  raioSeparacao: 1.1
+  forcaSeparacao: 0.5
   player: {fileID: 0}
 --- !u!114 &6887531530363696327
 MonoBehaviour:
@@ -271,3 +278,20 @@ MonoBehaviour:
   layerParaAcertar:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &-8320387637049327779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4948002655220041125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28e575a9a1a073747919e4a5d337a80a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlimeVenenosaDeathEffect
+  raioFumaca: 2.5
+  duracaoFumaca: 4
+  danoPorTick: 15
+  intervalTick: 0.8
+  duracaoVeneno: 5
