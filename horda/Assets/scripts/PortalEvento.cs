@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PortalEvento : MonoBehaviour
@@ -13,32 +14,42 @@ public class PortalEvento : MonoBehaviour
     public event Action<int,int> OnProgresso;
 
     PlayerStats player;
-    PortalData  pa, pb;
+    readonly List<PortalData> portais = new List<PortalData>();
     int         fechados;
     float       elapsed;
     bool        indicadoresCriados;
 
-    static readonly Color COR_A = new Color(0.55f, 0.1f,  1f,    0.95f); // roxo
-    static readonly Color COR_B = new Color(1f,    0.45f, 0.05f, 0.95f); // laranja
+    static readonly Color[] PALETA = {
+        new Color(0.55f, 0.1f,  1f,    0.95f), // roxo
+        new Color(1f,    0.45f, 0.05f, 0.95f), // laranja
+        new Color(0.1f,  0.5f,  1f,    0.95f), // azul
+        new Color(0.15f, 0.9f,  0.3f,  0.95f), // verde
+        new Color(0.1f,  0.9f,  0.9f,  0.95f), // ciano
+        new Color(1f,    0.1f,  0.7f,  0.95f), // magenta
+    };
+    static readonly string[] NOMES_COR = { "Roxo", "Laranja", "Azul", "Verde", "Ciano", "Magenta" };
 
     public void Iniciar(PlayerStats ps, Vector2 posA, Vector2 posB,
                         GameObject[] prefabs, float intervalo)
+        => IniciarMultiplo(ps, new[] { posA, posB }, prefabs, intervalo);
+
+    public void IniciarMultiplo(PlayerStats ps, Vector2[] posicoes,
+                                GameObject[] prefabs, float intervalo)
     {
         player          = ps;
         prefabsInimigos = prefabs;
         intervaloSpawn  = intervalo;
 
-        pa = CriarPortal(posA, COR_A);
-        pb = CriarPortal(posB, COR_B);
-
-        StartCoroutine(SpawnLoop(pa));
-        StartCoroutine(SpawnLoop(pb));
-        StartCoroutine(ParticulasLoop(pa));
-        StartCoroutine(ParticulasLoop(pb));
-        StartCoroutine(TendrilLoop(pa));
-        StartCoroutine(TendrilLoop(pb));
-        StartCoroutine(PulsoLoop(pa));
-        StartCoroutine(PulsoLoop(pb));
+        for (int i = 0; i < posicoes.Length; i++)
+        {
+            Color cor = PALETA[i % PALETA.Length];
+            var p = CriarPortal(posicoes[i], cor);
+            portais.Add(p);
+            StartCoroutine(SpawnLoop(p));
+            StartCoroutine(ParticulasLoop(p));
+            StartCoroutine(TendrilLoop(p));
+            StartCoroutine(PulsoLoop(p));
+        }
     }
 
     void Update()
@@ -47,21 +58,22 @@ public class PortalEvento : MonoBehaviour
         elapsed += Time.deltaTime;
 
         Vector2 posPlayer = player.transform.position;
-        AtualizarPortal(pa, posPlayer);
-        AtualizarPortal(pb, posPlayer);
+        foreach (var p in portais)
+            AtualizarPortal(p, posPlayer);
+    }
 
-        if (!indicadoresCriados && elapsed >= 180f)
-        {
-            indicadoresCriados = true;
-            CriarIndicador(pa, "Portal Roxo!");
-            CriarIndicador(pb, "Portal Laranja!");
-        }
+    public void MostrarIndicadores()
+    {
+        if (indicadoresCriados) return;
+        indicadoresCriados = true;
+        for (int i = 0; i < portais.Count; i++)
+            CriarIndicador(portais[i], $"Portal {NOMES_COR[i % NOMES_COR.Length]}!");
     }
 
     void OnDestroy()
     {
-        pa?.DestruirTudo();
-        pb?.DestruirTudo();
+        foreach (var p in portais)
+            p?.DestruirTudo();
     }
 
     // ── Lógica ───────────────────────────────────────────────────────────────────
@@ -120,9 +132,9 @@ public class PortalEvento : MonoBehaviour
         p.fechado = true;
         if (p.indicador != null) { Destroy(p.indicador.gameObject); p.indicador = null; }
         fechados++;
-        OnProgresso?.Invoke(fechados, 2);
+        OnProgresso?.Invoke(fechados, portais.Count);
         StartCoroutine(AnimarFechamento(p));
-        if (fechados >= 2) OnConcluido?.Invoke();
+        if (fechados >= portais.Count) OnConcluido?.Invoke();
     }
 
     void CriarIndicador(PortalData p, string nome)

@@ -15,7 +15,7 @@ MonoBehaviour:
   nomeInimigo: slime_corrupita
   prefab: {fileID: 7895024301611697099, guid: 2b38e505148ac3249a98b2565c7e1019, type: 3}
   icon: {fileID: 0}
-  vidaBase: 50
+  vidaBase: 65
   danoBase: 10
   velocidadeBase: 3
   tamanho: 7

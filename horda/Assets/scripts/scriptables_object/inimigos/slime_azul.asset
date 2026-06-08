@@ -15,9 +15,9 @@ MonoBehaviour:
   nomeInimigo: slime_azul
   prefab: {fileID: 3536106678951210780, guid: 34aa55fb4bda94f418bc264506a2b64b, type: 3}
   icon: {fileID: 0}
-  vidaBase: 50
+  vidaBase: 100
   danoBase: 10
-  velocidadeBase: 5
+  velocidadeBase: 2
   tamanho: 5
   intervaloAtaque: 1
   xpDrop: 10

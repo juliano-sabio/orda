@@ -16,14 +16,14 @@ public class PlayerStats : MonoBehaviour
     public CharacterData characterData;
 
     [Header("Status do Jogador")]
-    public float health = 100f;
-    public float maxHealth = 100f;
-    public float attack = 10f;
-    public float defense = 5f;
+    public float health = 75f;
+    public float maxHealth = 75f;
+    public float attack = 7f;
+    public float defense = 2f;
     public float speed = 8f;
 
     [Header("Sistema de Regeneração")]
-    public float healthRegenRate = 1f;
+    public float healthRegenRate = 0.4f;
     public float healthRegenDelay = 5f;
     private float timeSinceLastDamage = 0f;
     private bool isRegenerating = false;
@@ -32,7 +32,7 @@ public class PlayerStats : MonoBehaviour
     public int level = 1;
     public float currentXP = 0f;
     public float xpToNextLevel = 100f;
-    public float xpMultiplier = 1.5f;
+    public float xpMultiplier = 1.35f;
 
     [Header("💨 Sistema de Dash")]
     public int dashCharges = 0;
@@ -904,13 +904,6 @@ public class PlayerStats : MonoBehaviour
 
         GetComponent<LevelUpEffect>()?.Executar(level);
 
-        maxHealth += 10f;
-        health = Mathf.Min(health, maxHealth);
-        attack += 2f;
-        defense += 1f;
-        speed += 0.5f;
-
-        healthRegenRate += 0.2f;
 
 
         // Garante referência atualizada ao SkillManager

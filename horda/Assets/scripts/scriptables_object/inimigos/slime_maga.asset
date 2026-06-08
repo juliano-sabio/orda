@@ -15,7 +15,7 @@ MonoBehaviour:
   nomeInimigo: slime_maga
   prefab: {fileID: -2253911629886400664, guid: 77e6f85ba15f0b14aa240a00ea406eb5, type: 3}
   icon: {fileID: 0}
-  vidaBase: 50
+  vidaBase: 80
   danoBase: 10
   velocidadeBase: 3
   tamanho: 7

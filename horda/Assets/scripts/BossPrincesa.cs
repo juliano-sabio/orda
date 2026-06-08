@@ -82,7 +82,9 @@ public class BossPrincesa : MonoBehaviour
     private GameObject      bossCanvasGO;
     private Image           hpFill;
     private Image           hpFillGhost;
+    private Image           _bordaImg;
     private TextMeshProUGUI faseText;
+    private TextMeshProUGUI hpText;
 
     // ──────────────────────────────────────────────
     // LIFECYCLE
@@ -877,87 +879,132 @@ public class BossPrincesa : MonoBehaviour
     {
         bossCanvasGO = new GameObject("BossPrincesaCanvas");
         var canvas = bossCanvasGO.AddComponent<Canvas>();
-        canvas.renderMode  = RenderMode.ScreenSpaceOverlay;
+        canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 100;
-        bossCanvasGO.AddComponent<CanvasScaler>();
+        var scaler = bossCanvasGO.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode        = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
         bossCanvasGO.AddComponent<GraphicRaycaster>();
 
-        // Painel central no topo
+        // Painel central no topo — 70% de largura, altura dobrada
         var painelGO = new GameObject("PainelHP");
         painelGO.transform.SetParent(canvas.transform, false);
-
         var rt = painelGO.AddComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.2f, 0.92f);
-        rt.anchorMax = new Vector2(0.8f, 0.99f);
+        rt.anchorMin = new Vector2(0.28f, 0.845f);
+        rt.anchorMax = new Vector2(0.72f, 0.978f);
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
-        // Fundo
+        // Borda brilhante externa
+        var bordaGO = new GameObject("Borda");
+        bordaGO.transform.SetParent(painelGO.transform, false);
+        var bordaRT = bordaGO.AddComponent<RectTransform>();
+        bordaRT.anchorMin = Vector2.zero; bordaRT.anchorMax = Vector2.one;
+        bordaRT.offsetMin = new Vector2(-2f, -2f);
+        bordaRT.offsetMax = new Vector2(2f, 2f);
+        _bordaImg = bordaGO.AddComponent<Image>();
+        _bordaImg.color = new Color(0.85f, 0.2f, 0.9f, 0.7f);
+
+        // Fundo escuro
         var bg = new GameObject("BG");
         bg.transform.SetParent(painelGO.transform, false);
         var bgRT = bg.AddComponent<RectTransform>();
         bgRT.anchorMin = Vector2.zero; bgRT.anchorMax = Vector2.one;
         bgRT.offsetMin = bgRT.offsetMax = Vector2.zero;
-        bg.AddComponent<Image>().color = new Color(0.06f, 0.02f, 0.12f, 0.9f);
+        bg.AddComponent<Image>().color = new Color(0.05f, 0.01f, 0.10f, 0.96f);
+
+        // Nome do boss — metade superior esquerda
+        var nomeGO = new GameObject("Nome");
+        nomeGO.transform.SetParent(painelGO.transform, false);
+        var nomeRT = nomeGO.AddComponent<RectTransform>();
+        nomeRT.anchorMin = new Vector2(0f, 0.52f);
+        nomeRT.anchorMax = new Vector2(0.72f, 1f);
+        nomeRT.offsetMin = new Vector2(10f, 0f);
+        nomeRT.offsetMax = new Vector2(0f, -3f);
+        var nomeTxt = nomeGO.AddComponent<TextMeshProUGUI>();
+        nomeTxt.text      = nomeBoss;
+        nomeTxt.fontSize  = 17f;
+        nomeTxt.fontStyle = FontStyles.Bold;
+        nomeTxt.alignment = TextAlignmentOptions.BottomLeft;
+        nomeTxt.color     = new Color(1f, 0.82f, 1f);
+
+        // Texto de fase — metade superior direita
+        var faseGO = new GameObject("Fase");
+        faseGO.transform.SetParent(painelGO.transform, false);
+        var faseRT = faseGO.AddComponent<RectTransform>();
+        faseRT.anchorMin = new Vector2(0.72f, 0.52f);
+        faseRT.anchorMax = new Vector2(1f, 1f);
+        faseRT.offsetMin = new Vector2(0f, 0f);
+        faseRT.offsetMax = new Vector2(-10f, -3f);
+        faseText = faseGO.AddComponent<TextMeshProUGUI>();
+        faseText.text      = "FASE 1";
+        faseText.fontSize  = 13f;
+        faseText.alignment = TextAlignmentOptions.BottomRight;
+        faseText.color     = new Color(0.75f, 0.55f, 1f);
+
+        // Linha separadora entre header e barra
+        var sepGO = new GameObject("Separador");
+        sepGO.transform.SetParent(painelGO.transform, false);
+        var sepRT = sepGO.AddComponent<RectTransform>();
+        sepRT.anchorMin = new Vector2(0f, 0.49f);
+        sepRT.anchorMax = new Vector2(1f, 0.51f);
+        sepRT.offsetMin = new Vector2(8f, 0f);
+        sepRT.offsetMax = new Vector2(-8f, 0f);
+        sepGO.AddComponent<Image>().color = new Color(0.7f, 0.2f, 0.85f, 0.45f);
 
         // Barra fantasma (amarela, desce devagar)
         var ghostGO = new GameObject("HP_Ghost");
         ghostGO.transform.SetParent(painelGO.transform, false);
         var ghostRT = ghostGO.AddComponent<RectTransform>();
-        ghostRT.anchorMin = new Vector2(0f, 0f);
-        ghostRT.anchorMax = new Vector2(1f, 1f);
-        ghostRT.offsetMin = new Vector2(4f, 4f);
-        ghostRT.offsetMax = new Vector2(-4f, -4f);
-
+        ghostRT.anchorMin = new Vector2(0f, 0.07f);
+        ghostRT.anchorMax = new Vector2(1f, 0.46f);
+        ghostRT.offsetMin = new Vector2(8f, 0f);
+        ghostRT.offsetMax = new Vector2(-8f, 0f);
         hpFillGhost = ghostGO.AddComponent<Image>();
-        hpFillGhost.color      = new Color(1f, 0.88f, 0.25f, 0.9f);
+        hpFillGhost.color      = new Color(1f, 0.85f, 0.2f, 0.88f);
         hpFillGhost.type       = Image.Type.Filled;
-        hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
+        hpFillGhost.fillMethod = Image.FillMethod.Vertical;
         hpFillGhost.fillOrigin = 0;
         hpFillGhost.fillAmount = 1f;
 
-        // Barra de HP principal (rosa, cai rápido)
+        // Barra de HP principal (rosa → vermelho na fase 2)
         var barraGO = new GameObject("HP_Fill");
         barraGO.transform.SetParent(painelGO.transform, false);
         var barraRT = barraGO.AddComponent<RectTransform>();
-        barraRT.anchorMin = new Vector2(0f, 0f);
-        barraRT.anchorMax = new Vector2(1f, 1f);
-        barraRT.offsetMin = new Vector2(4f, 4f);
-        barraRT.offsetMax = new Vector2(-4f, -4f);
-
+        barraRT.anchorMin = new Vector2(0f, 0.07f);
+        barraRT.anchorMax = new Vector2(1f, 0.46f);
+        barraRT.offsetMin = new Vector2(8f, 0f);
+        barraRT.offsetMax = new Vector2(-8f, 0f);
         hpFill = barraGO.AddComponent<Image>();
-        hpFill.color = new Color(0.9f, 0.3f, 0.85f);
-        hpFill.type  = Image.Type.Filled;
-        hpFill.fillMethod  = Image.FillMethod.Horizontal;
-        hpFill.fillOrigin  = 0;
-        hpFill.fillAmount  = 1f;
+        hpFill.color      = new Color(0.92f, 0.28f, 0.86f);
+        hpFill.type       = Image.Type.Filled;
+        hpFill.fillMethod = Image.FillMethod.Vertical;
+        hpFill.fillOrigin = 0;
+        hpFill.fillAmount = 1f;
 
-        // Texto do nome
-        var nomeGO = new GameObject("Nome");
-        nomeGO.transform.SetParent(painelGO.transform, false);
-        var nomeRT = nomeGO.AddComponent<RectTransform>();
-        nomeRT.anchorMin = Vector2.zero; nomeRT.anchorMax = Vector2.one;
-        nomeRT.offsetMin = nomeRT.offsetMax = Vector2.zero;
+        // Faixa de brilho lateral esquerda (efeito de vidro em barra vertical)
+        var shineGO = new GameObject("HP_Shine");
+        shineGO.transform.SetParent(painelGO.transform, false);
+        var shineRT = shineGO.AddComponent<RectTransform>();
+        shineRT.anchorMin = new Vector2(0f, 0.07f);
+        shineRT.anchorMax = new Vector2(0.06f, 0.46f);
+        shineRT.offsetMin = new Vector2(8f, 0f);
+        shineRT.offsetMax = new Vector2(0f, 0f);
+        shineGO.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
 
-        var nomeTxt = nomeGO.AddComponent<TextMeshProUGUI>();
-        nomeTxt.text      = nomeBoss;
-        nomeTxt.fontSize  = 14f;
-        nomeTxt.fontStyle = FontStyles.Bold;
-        nomeTxt.alignment = TextAlignmentOptions.Center;
-        nomeTxt.color     = new Color(1f, 0.8f, 1f);
-
-        // Texto de fase
-        var faseGO = new GameObject("Fase");
-        faseGO.transform.SetParent(painelGO.transform, false);
-        var faseRT = faseGO.AddComponent<RectTransform>();
-        faseRT.anchorMin = new Vector2(0.75f, 0f);
-        faseRT.anchorMax = new Vector2(1f, 1f);
-        faseRT.offsetMin = faseRT.offsetMax = Vector2.zero;
-
-        faseText = faseGO.AddComponent<TextMeshProUGUI>();
-        faseText.text      = "FASE 1";
-        faseText.fontSize  = 11f;
-        faseText.alignment = TextAlignmentOptions.Right;
-        faseText.color     = new Color(0.8f, 0.6f, 1f);
+        // Percentual de HP (texto centralizado sobre a barra)
+        var hpNumGO = new GameObject("HPText");
+        hpNumGO.transform.SetParent(painelGO.transform, false);
+        var hpNumRT = hpNumGO.AddComponent<RectTransform>();
+        hpNumRT.anchorMin = new Vector2(0f, 0.07f);
+        hpNumRT.anchorMax = new Vector2(1f, 0.46f);
+        hpNumRT.offsetMin = new Vector2(8f, 0f);
+        hpNumRT.offsetMax = new Vector2(-8f, 0f);
+        hpText = hpNumGO.AddComponent<TextMeshProUGUI>();
+        hpText.text      = "100%";
+        hpText.fontSize  = 10f;
+        hpText.fontStyle = FontStyles.Bold;
+        hpText.alignment = TextAlignmentOptions.Center;
+        hpText.color     = new Color(1f, 1f, 1f, 0.80f);
     }
 
     void AtualizarUI()
@@ -966,17 +1013,22 @@ public class BossPrincesa : MonoBehaviour
 
         float pct = controller.vidaAtual / controller.vidaMaxima;
 
-        // Barra principal cai rapidamente
         hpFill.fillAmount = Mathf.Lerp(hpFill.fillAmount, pct, Time.deltaTime * 8f);
 
-        // Barra fantasma segue devagar, dando o efeito de "queima"
         if (hpFillGhost != null)
             hpFillGhost.fillAmount = Mathf.MoveTowards(hpFillGhost.fillAmount, pct, Time.deltaTime * 0.35f);
 
-        // Na Fase 2 a barra fica vermelha
         hpFill.color = fase2Ativada
             ? new Color(1f, 0.18f, 0.12f)
-            : new Color(0.9f, 0.3f, 0.85f);
+            : new Color(0.92f, 0.28f, 0.86f);
+
+        if (_bordaImg != null)
+            _bordaImg.color = fase2Ativada
+                ? new Color(1f, 0.15f, 0.08f, 0.7f + 0.2f * Mathf.Sin(Time.time * 4f))
+                : new Color(0.85f, 0.2f, 0.9f, 0.7f);
+
+        if (hpText != null)
+            hpText.text = Mathf.CeilToInt(pct * 100f) + "%";
     }
 
     // ──────────────────────────────────────────────

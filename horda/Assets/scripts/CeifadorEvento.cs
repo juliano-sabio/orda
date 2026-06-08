@@ -27,6 +27,13 @@ public class CeifadorEvento : MonoBehaviour
     private float   proximoDash;
     private bool    isDashing;
     private Vector2 dashDir;
+    private bool    dashAcertouPlayer;
+
+    [Header("Dano de Contato")]
+    public float danoContato      = 60f;
+    public float intervaloContato = 0.6f;
+    public float raioContato      = 0.6f;
+    float proxDanoContato;
 
     private enum Estado { Wander, Perseguindo, Dashing }
     private Estado estado = Estado.Wander;
@@ -52,12 +59,14 @@ void Start()
     EscolherNovaDirecao();
     StartCoroutine(EfeitoSpawn());
 
-    // Reduz o dano de contato do ceifador
+    // Desativa DanoInimigo — dano de contato é tratado manualmente por proximidade
     var danoComp = GetComponent<DanoInimigo>();
-    if (danoComp != null) danoComp.dano *= 0.4f;
+    if (danoComp != null) danoComp.enabled = false;
 
     var ic = GetComponent<InimigoController>();
     if (ic != null) ic.danoAtual *= 0.4f;
+
+    IgnorarColisaoPlayer();
 }
 
 IEnumerator EfeitoSpawn()
@@ -172,25 +181,7 @@ void SpawnParticulaPortal(Vector2 centro, float raio)
 
     Vector2 vel = (centro - pos).normalized * Random.Range(0.5f, 1.5f)
                 + Vector2.up * Random.Range(0.3f, 1f);
-    StartCoroutine(AnimarParticula(sr2, vel));
-}
-
-IEnumerator AnimarParticula(SpriteRenderer sr2, Vector2 vel)
-{
-    Color cor = sr2.color;
-    float vida = Random.Range(0.4f, 0.8f);
-    for (float t = 0f; t < vida; t += Time.deltaTime)
-    {
-        vel *= Mathf.Pow(0.92f, Time.deltaTime * 60f);
-        if (sr2 != null)
-        {
-            sr2.transform.position += (Vector3)(vel * Time.deltaTime);
-            sr2.transform.localScale *= 1f + Time.deltaTime * 1.5f;
-            sr2.color = new Color(cor.r, cor.g, cor.b, Mathf.Lerp(cor.a, 0f, t / vida));
-        }
-        yield return null;
-    }
-    if (sr2 != null) Destroy(sr2.gameObject);
+    go.AddComponent<FumacaCeifadorFX>().Iniciar(vel, sr2.color);
 }
 
 static Sprite GerarDisco(int sz)
@@ -223,9 +214,31 @@ void AdicionarBrilhoVermelho()
     luz.shadowsEnabled = false;
 }
 
+    void IgnorarColisaoPlayer()
+    {
+        var ps = FindFirstObjectByType<PlayerStats>();
+        if (ps == null) return;
+        var myCols     = GetComponents<Collider2D>();
+        var playerCols = ps.GetComponents<Collider2D>();
+        foreach (var mc in myCols)
+        foreach (var pc in playerCols)
+            Physics2D.IgnoreCollision(mc, pc, true);
+    }
+
     void Update()
     {
         if (player == null) return;
+
+        // Dano de contato por proximidade (sem colisão física)
+        if (!isDashing && Time.time >= proxDanoContato)
+        {
+            float d = Vector2.Distance(transform.position, player.position);
+            if (d <= raioContato)
+            {
+                player.GetComponent<PlayerStats>()?.TakeDamage(danoContato);
+                proxDanoContato = Time.time + intervaloContato;
+            }
+        }
 
         float dist = Vector2.Distance(transform.position, player.position);
 
@@ -291,15 +304,36 @@ void AdicionarBrilhoVermelho()
     {
         if (player == null) yield break;
 
-        estado    = Estado.Dashing;
-        isDashing = true;
-        dashDir   = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        estado            = Estado.Dashing;
+        isDashing         = true;
+        dashAcertouPlayer = false;
+        dashDir           = ((Vector2)player.position - (Vector2)transform.position).normalized;
 
-        yield return new WaitForSeconds(duracaoDash);
+        float elapsed = 0f;
+        while (elapsed < duracaoDash)
+        {
+            elapsed += Time.deltaTime;
 
-        isDashing  = false;
-        proximoDash = Time.time + cooldownDash;
-        estado     = Estado.Perseguindo;
+            // Detecta passagem pelo player por proximidade
+            if (!dashAcertouPlayer && player != null)
+            {
+                float d = Vector2.Distance(transform.position, player.position);
+                if (d <= raioContato * 1.6f)
+                {
+                    dashAcertouPlayer = true;
+                    EfeitoCorte((Vector2)player.position, dashDir);
+                    player.GetComponent<PlayerStats>()?.TakeDamage(danoContato * 2f);
+                    proxDanoContato = Time.time + intervaloContato;
+                }
+            }
+
+            yield return null;
+        }
+
+        isDashing         = false;
+        dashAcertouPlayer = false;
+        proximoDash       = Time.time + cooldownDash;
+        estado            = Estado.Perseguindo;
     }
 
     void EscolherNovaDirecao()
@@ -324,17 +358,147 @@ void AdicionarBrilhoVermelho()
 
     void OnCollisionEnter2D(Collision2D col)
     {
+        // Player não colide fisicamente — tratado via proximidade no Dash() e Update()
+        if (col.gameObject.CompareTag("Player")) return;
+
         // Cancela dash ao bater em obstáculo
-        if (isDashing && !col.gameObject.CompareTag("Player"))
+        if (isDashing)
         {
             StopAllCoroutines();
-            isDashing   = false;
-            proximoDash = Time.time + cooldownDash;
-            estado      = Estado.Perseguindo;
+            isDashing         = false;
+            dashAcertouPlayer = false;
+            proximoDash       = Time.time + cooldownDash;
+            estado            = Estado.Perseguindo;
         }
-        else if (!isDashing && estado == Estado.Wander && !col.gameObject.CompareTag("Player"))
+        else if (estado == Estado.Wander)
         {
             EscolherNovaDirecao();
         }
+    }
+
+    // ── Efeito de Corte ───────────────────────────────────────────────────────
+
+    void EfeitoCorte(Vector2 pos, Vector2 dir)
+    {
+        // Flash de impacto
+        var flash   = new GameObject("FlashCorte");
+        flash.transform.position = pos;
+        var flashSR = flash.AddComponent<SpriteRenderer>();
+        flashSR.sprite       = GerarDisco(32);
+        flashSR.color        = new Color(1f, 0.85f, 0.85f, 0.95f);
+        flashSR.sortingOrder = 20;
+        flash.transform.localScale = Vector3.one * 0.5f;
+        StartCoroutine(AnimarFlash(flash));
+
+        // 3 riscos em leque perpendiculares ao dash
+        float angBase = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f;
+
+        float[] angulos     = { angBase - 22f, angBase,       angBase + 22f };
+        float[] comprimentos = { 0.85f,          1.15f,         0.85f         };
+        Color[] cores = {
+            new Color(0.85f, 0.20f, 0.20f, 0.90f),
+            new Color(1.00f, 0.90f, 0.90f, 1.00f),
+            new Color(0.85f, 0.20f, 0.20f, 0.90f),
+        };
+
+        for (int i = 0; i < 3; i++)
+        {
+            // Offset lateral para espaçar os riscos
+            float lateralAng = angulos[i] * Mathf.Deg2Rad;
+            Vector2 offset   = new Vector2(Mathf.Cos(lateralAng), Mathf.Sin(lateralAng))
+                             * (i - 1) * 0.18f;
+
+            var risco = new GameObject($"RiscoCorte_{i}");
+            risco.transform.position = (Vector3)pos + (Vector3)offset;
+            risco.transform.rotation = Quaternion.Euler(0f, 0f, angulos[i]);
+
+            var sr2 = risco.AddComponent<SpriteRenderer>();
+            sr2.sprite       = GerarLinhaCorte();
+            sr2.color        = cores[i];
+            sr2.sortingOrder = 20;
+            risco.transform.localScale = new Vector3(comprimentos[i], 0.8f, 1f);
+
+            StartCoroutine(AnimarRisco(sr2, i * 0.025f));
+        }
+    }
+
+    IEnumerator AnimarFlash(GameObject go)
+    {
+        var sr2 = go.GetComponent<SpriteRenderer>();
+        float dur = 0.18f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            float p = t / dur;
+            go.transform.localScale = Vector3.one * Mathf.Lerp(0.5f, 1.2f, p);
+            if (sr2) sr2.color = new Color(1f, 0.85f, 0.85f, 1f - p);
+            yield return null;
+        }
+        if (go != null) Destroy(go);
+    }
+
+    IEnumerator AnimarRisco(SpriteRenderer sr2, float delay)
+    {
+        if (delay > 0f) yield return new WaitForSeconds(delay);
+        if (sr2 == null) yield break;
+
+        Color corBase = sr2.color;
+        float dur     = 0.32f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            if (sr2 == null) yield break;
+            float p = t / dur;
+            // Aparece instantâneo, some com ease-out
+            float alpha = p < 0.06f
+                ? p / 0.06f
+                : 1f - Mathf.Pow((p - 0.06f) / 0.94f, 0.55f);
+            sr2.color = new Color(corBase.r, corBase.g, corBase.b, corBase.a * alpha);
+            yield return null;
+        }
+        if (sr2 != null) Destroy(sr2.gameObject);
+    }
+
+    static Sprite _linhaCorteSprite;
+    static Sprite GerarLinhaCorte()
+    {
+        if (_linhaCorteSprite != null) return _linhaCorteSprite;
+        int w = 128, h = 16;
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float cx = w * 0.5f, cy = h * 0.5f;
+        for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            float ax = 1f - Mathf.Pow(Mathf.Abs(x - cx) / cx, 1.4f);
+            float ay = 1f - Mathf.Pow(Mathf.Abs(y - cy) / cy, 0.7f);
+            tex.SetPixel(x, y, new Color(1f, 1f, 1f, ax * ay));
+        }
+        tex.Apply();
+        _linhaCorteSprite = Sprite.Create(tex, new Rect(0, 0, w, h),
+            new Vector2(0.5f, 0.5f), w);
+        return _linhaCorteSprite;
+    }
+}
+
+// Partícula auto-gerenciada: não depende do ceifador estar vivo
+class FumacaCeifadorFX : MonoBehaviour
+{
+    public void Iniciar(Vector2 vel, Color cor) => StartCoroutine(Mover(vel, cor));
+
+    System.Collections.IEnumerator Mover(Vector2 vel, Color cor)
+    {
+        var sr = GetComponent<SpriteRenderer>();
+        float vida = Random.Range(0.4f, 0.8f);
+        for (float t = 0f; t < vida; t += Time.deltaTime)
+        {
+            vel *= Mathf.Pow(0.92f, Time.deltaTime * 60f);
+            if (sr != null)
+            {
+                transform.position   += (Vector3)(vel * Time.deltaTime);
+                transform.localScale *= 1f + Time.deltaTime * 1.5f;
+                sr.color = new Color(cor.r, cor.g, cor.b, Mathf.Lerp(cor.a, 0f, t / vida));
+            }
+            yield return null;
+        }
+        Destroy(gameObject);
     }
 }

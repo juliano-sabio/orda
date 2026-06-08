@@ -37,12 +37,12 @@ public class TempestadeEletricaEvento : MonoBehaviour
         bordaCG.alpha = 0.12f + Mathf.Sin(tempoOscilacao) * 0.06f;
     }
 
-    // Intervalo varia aleatoriamente dentro de uma faixa que estreita com o tempo
+    // Intervalo diminui exponencialmente: começa lento, fica frenético no final
     float IntervaloAtual()
     {
-        float t   = Mathf.Clamp01(elapsed / duracao);
-        float min = Mathf.Lerp(1.0f, 0.4f, t);
-        float max = Mathf.Lerp(2.5f, 1.0f, t);
+        float t   = Mathf.Pow(Mathf.Clamp01(elapsed / duracao), 1.6f);
+        float min = Mathf.Lerp(2.5f, 0.12f, t);
+        float max = Mathf.Lerp(4.0f, 0.35f, t);
         return Random.Range(min, max);
     }
 
@@ -56,11 +56,11 @@ public class TempestadeEletricaEvento : MonoBehaviour
             yield return new WaitForSeconds(IntervaloAtual());
             if (gameObject == null) yield break;
 
-            // Quantidade de raios simultâneos aumenta com o tempo
-            float t   = Mathf.Clamp01(elapsed / duracao);
-            int   qtd = Mathf.RoundToInt(Mathf.Lerp(3f, 6f, t));
-            qtd += Random.Range(-1, 2); // variação de ±1
-            qtd  = Mathf.Max(2, qtd);
+            // Quantidade de raios simultâneos escala agressivamente com o tempo
+            float t   = Mathf.Pow(Mathf.Clamp01(elapsed / duracao), 1.6f);
+            int   qtd = Mathf.RoundToInt(Mathf.Lerp(1f, 14f, t));
+            qtd += Random.Range(0, 3); // variação extra
+            qtd  = Mathf.Max(1, qtd);
             for (int i = 0; i < qtd; i++)
             {
                 Vector2? pos = EscolherPosicao();

@@ -21,6 +21,7 @@ public enum TipoEvento
     Colapso,
     TempestadeEletrica,
     Portal,
+    NucleoCorrompido,
 }
 
 [Serializable]
@@ -94,8 +95,13 @@ public class GerenciadorEventos : MonoBehaviour
     public float        portalIntervaloSpawn = 5f;
     public GameObject[] prefabsInimigosPortal;
 
+    [Header("Núcleo Corrompido")]
+    public float        nucleoVidaBase       = 2000f;
+    public float        nucleoIntervaloSpawn = 4f;
+    public GameObject[] prefabsInimigosNucleo;
+
     [Header("Tempestade Elétrica")]
-    public float tempestadeDanoJogador = 20f;
+    public float tempestadeDanoJogador = 50f;
     public float tempestadeDanoInimigo = 50f;
     public float tempestadeRaioImpacto = 3f;
 
@@ -119,6 +125,7 @@ public class GerenciadorEventos : MonoBehaviour
     private EventoColapso           colapsoAtivo;
     private TempestadeEletricaEvento tempestadeAtiva;
     private PortalEvento             portalAtivo;
+    private NucleoCorrompidoEvento   nucleoAtivo;
     private readonly List<GameObject> inimigosPercurso = new List<GameObject>();
     private Coroutine corSpawnPercurso;
     private Tilemap[] tilemapsObstaculo;
@@ -287,10 +294,21 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.corSeta = new Color(0.25f, 0.85f, 1f);
         }
 
+        if (eventoAtual.tipo == TipoEvento.Ceifador && portalAtivo != null && timerContagem <= 180f)
+            portalAtivo.MostrarIndicadores();
+
+        if (eventoAtual.tipo == TipoEvento.NucleoCorrompido && nucleoAtivo != null && indicadorSlime == null)
+        {
+            var go = new GameObject("IndicadorNucleo");
+            indicadorSlime = go.AddComponent<IndicadorSlime>();
+            indicadorSlime.alvo    = nucleoAtivo.transform;
+            indicadorSlime.corSeta = new Color(0.1f, 1f, 0.5f);
+        }
+
         if (timerContagem <= 0f)
             EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver
-                        || eventoAtual.tipo == TipoEvento.Ceifador
                         || eventoAtual.tipo == TipoEvento.TempestadeEletrica
+                        || eventoAtual.tipo == TipoEvento.NucleoCorrompido
 
                         || (eventoAtual.tipo == TipoEvento.SlimePercurso && slimePercurso != null && slimePercurso.Chegou)
                         || (eventoAtual.tipo == TipoEvento.Colapso && progresso >= eventoAtual.quantidade));
@@ -319,7 +337,7 @@ void TentarIniciarEvento()
         idx = debugForcarEvento;
     else if (!primeiroEventoDisparado)
     {
-        idx = eventos.FindIndex(e => e.tipo == TipoEvento.Colapso);
+        idx = eventos.FindIndex(e => e.tipo == TipoEvento.NucleoCorrompido);
         if (idx < 0) idx = 0;
     }
     else
@@ -347,8 +365,8 @@ void TentarIniciarEvento()
     }
     else if (eventoAtual.tipo == TipoEvento.Ceifador)
     {
-        int qtd = eventoAtual.quantidade > 0 ? eventoAtual.quantidade : 6;
-        SpawnCeifadores(qtd);
+        SpawnCeifadores(40);
+        IniciarPortaisCeifador();
     }
     else if (eventoAtual.tipo == TipoEvento.SlimePercurso)
     {
@@ -366,9 +384,9 @@ void TentarIniciarEvento()
     {
         IniciarTempestadeEletrica();
     }
-    else if (eventoAtual.tipo == TipoEvento.Portal)
+    else if (eventoAtual.tipo == TipoEvento.NucleoCorrompido)
     {
-        IniciarPortal();
+        IniciarNucleo();
     }
 }
 
@@ -395,6 +413,7 @@ void TentarIniciarEvento()
         LimparColapso();
         LimparTempestadeEletrica();
         LimparPortal();
+        LimparNucleo();
 
         if (sucesso && playerStats != null)
         {
@@ -496,7 +515,8 @@ void TentarIniciarEvento()
             || eventoAtual.tipo == TipoEvento.ZonaEliminacao
             || eventoAtual.tipo == TipoEvento.ColetarXP
             || eventoAtual.tipo == TipoEvento.UsarUltimate
-            || eventoAtual.tipo == TipoEvento.ColetarEspirito;
+            || eventoAtual.tipo == TipoEvento.ColetarEspirito
+            || eventoAtual.tipo == TipoEvento.Ceifador;
     }
 
     void AtualizarUI()
@@ -1088,15 +1108,18 @@ void LimparSlimePercurso()
             recompensaDescricao = "+15% de vida recuperada!"
         });
 
-        AdicionarSeAusente(new EventoAleatorio
+        // Ceifador: sempre atualiza para garantir valores corretos mesmo se já serializado
+        var ceifadorEvt = eventos.Find(e => e.tipo == TipoEvento.Ceifador);
+        if (ceifadorEvt == null)
         {
-            nome = "Ceifador",
-            descricao = "Sobreviva ao ataque dos ceifadores!",
-            tipo = TipoEvento.Ceifador,
-            duracao = 30f,
-            quantidade = 6,
-            recompensaDescricao = "+15% de vida recuperada!"
-        });
+            ceifadorEvt = new EventoAleatorio { tipo = TipoEvento.Ceifador };
+            eventos.Add(ceifadorEvt);
+        }
+        ceifadorEvt.nome                = "Ceifador";
+        ceifadorEvt.descricao           = "Feche os 6 portais espalhados pelo mapa! Os ceifadores vao te impedir!";
+        ceifadorEvt.duracao             = 300f;
+        ceifadorEvt.quantidade          = 6;
+        ceifadorEvt.recompensaDescricao = "+15% de vida recuperada!";
 
         AdicionarSeAusente(new EventoAleatorio
         {
@@ -1120,6 +1143,16 @@ void LimparSlimePercurso()
 
         AdicionarSeAusente(new EventoAleatorio
         {
+            nome = "Nucleo Corrompido",
+            descricao = "Proteja o Nucleo! Inimigos ignoram voce e marcham para destrui-lo!",
+            tipo = TipoEvento.NucleoCorrompido,
+            duracao = 60f,
+            quantidade = 0,
+            recompensaDescricao = "+20% de vida recuperada!"
+        });
+
+        AdicionarSeAusente(new EventoAleatorio
+        {
             nome = "Colapso",
             descricao = "A zona está fechando! Sobreviva e elimine inimigos!",
             tipo = TipoEvento.Colapso,
@@ -1127,6 +1160,7 @@ void LimparSlimePercurso()
             quantidade = 15,
             recompensaDescricao = "+15% de vida recuperada!"
         });
+
     }
 
     void AdicionarSeAusente(EventoAleatorio evento, bool primeiro = false)
@@ -1186,6 +1220,63 @@ void LimparSlimePercurso()
         }
     }
 
+    void IniciarPortaisCeifador()
+    {
+        Bounds mapa;
+        if (terrenoBase != null)
+        {
+            terrenoBase.CompressBounds();
+            mapa = new Bounds();
+            mapa.SetMinMax(
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max));
+        }
+        else mapa = CalcularBoundsMapa();
+
+        int maskObst = camadasObstaculo != 0 ? (int)camadasObstaculo : (1 << 3);
+        Vector2 posPlayer = playerStats != null ? (Vector2)playerStats.transform.position : Vector2.zero;
+
+        var posicoes = new List<Vector2>();
+        for (int i = 0; i < 6; i++)
+        {
+            bool ok = false;
+            for (int t = 0; t < 200; t++)
+            {
+                Vector2 c = new Vector2(
+                    UnityEngine.Random.Range(mapa.min.x + 5f, mapa.max.x - 5f),
+                    UnityEngine.Random.Range(mapa.min.y + 5f, mapa.max.y - 5f));
+                if (!PosicaoValida(c)) continue;
+                if (Physics2D.OverlapCircle(c, 2f, maskObst)) continue;
+                if (Vector2.Distance(c, posPlayer) < 10f) continue;
+                bool longe = true;
+                foreach (var p in posicoes)
+                    if (Vector2.Distance(c, p) < 10f) { longe = false; break; }
+                if (!longe) continue;
+                posicoes.Add(c);
+                ok = true;
+                break;
+            }
+            if (!ok)
+            {
+                Vector2 fb = new Vector2(
+                    UnityEngine.Random.Range(mapa.min.x + 5f, mapa.max.x - 5f),
+                    UnityEngine.Random.Range(mapa.min.y + 5f, mapa.max.y - 5f));
+                posicoes.Add(fb);
+            }
+        }
+
+        var go = new GameObject("PortalEvento");
+        portalAtivo = go.AddComponent<PortalEvento>();
+        portalAtivo.raioFechar  = portalRaioFechar;
+        portalAtivo.tempoFechar = portalTempoFechar;
+
+        portalAtivo.OnConcluido += () => { if (eventoAtivo) EncerrarEvento(true); };
+        portalAtivo.OnProgresso += (atual, total) => { progresso = atual; };
+
+        portalAtivo.IniciarMultiplo(playerStats, posicoes.ToArray(), prefabsInimigosPortal, portalIntervaloSpawn);
+        Debug.Log($"[Ceifador] {posicoes.Count} portais criados.");
+    }
+
     // ──────────────────────────────────────────────────────────
     // Tempestade Elétrica
 
@@ -1206,6 +1297,47 @@ void LimparSlimePercurso()
         {
             Destroy(tempestadeAtiva.gameObject);
             tempestadeAtiva = null;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Núcleo Corrompido
+
+    void IniciarNucleo()
+    {
+        Bounds mapa;
+        if (terrenoBase != null)
+        {
+            terrenoBase.CompressBounds();
+            mapa = new Bounds();
+            mapa.SetMinMax(
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max));
+        }
+        else mapa = CalcularBoundsMapa();
+
+        Vector2 centro = (Vector2)mapa.center;
+
+        var go = new GameObject("NucleoCorrompido");
+        go.transform.position = new Vector3(centro.x, centro.y, 0f);
+        nucleoAtivo = go.AddComponent<NucleoCorrompidoEvento>();
+
+        nucleoAtivo.OnDestruido += () => { if (eventoAtivo) EncerrarEvento(false); };
+
+        var prefabs = prefabsInimigosNucleo != null && prefabsInimigosNucleo.Length > 0
+            ? prefabsInimigosNucleo
+            : prefabsInimigosPortal;
+
+        nucleoAtivo.Iniciar(nucleoVidaBase, prefabs, nucleoIntervaloSpawn);
+        Debug.Log($"[Nucleo] Nucleo criado em {centro}");
+    }
+
+    void LimparNucleo()
+    {
+        if (nucleoAtivo != null)
+        {
+            Destroy(nucleoAtivo.gameObject);
+            nucleoAtivo = null;
         }
     }
 

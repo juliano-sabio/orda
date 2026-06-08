@@ -209,8 +209,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cc35a38ac71afd4e8835f722bd01d91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::movi_inimigo
-  velocidade: 5
+  velocidade: 3
   suavizacao: 8
+  raioDesvioLocal: 0.7
+  forcaDesvio: 1.4
+  raioSeparacao: 1.1
+  forcaSeparacao: 0.5
   player: {fileID: 0}
 --- !u!114 &8507956792960013668
 MonoBehaviour:
@@ -238,6 +242,8 @@ MonoBehaviour:
     chance: 0.014
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 1
+  mostrarDanoFlutuante: 1
+  imuneAoDano: 0
   podeReceberCura: 1
   multiplicadorCuraRecebida: 1
   mostrarCuraFlutuante: 1
@@ -245,7 +251,7 @@ MonoBehaviour:
   temBuffDefesa: 0
   bonusDefesa: 0
   tempoRestanteBuff: 0
-  velocidadeBase: 3
+  velocidadeBase: 2
   velocidadeAtual: 0
   estaAtordoado: 0
   tempoAtordoado: 0
