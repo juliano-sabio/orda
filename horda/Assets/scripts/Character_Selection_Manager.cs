@@ -80,6 +80,10 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
         ultimateSelecionadaIndex = PlayerPrefs.GetInt($"SelectedUltimate_{index}", 0);
         passivaSelecionadaIndex  = PlayerPrefs.GetInt($"SelectedPassiva_{index}", 0);
+
+        if (GameSceneManager.Instance != null)
+            GameSceneManager.Instance.selectedCharacterData = characters[index];
+
         UpdateStatusDisplay(characters[index]);
         AtualizarPainelUltimates(characters[index]);
         AtualizarPainelPassivas(characters[index]);
@@ -105,7 +109,6 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             AtualizarUltimateInfo(characters[charIndex]);
     }
 
-    // ✅ CORREÇÃO: Método que o GameSceneManager usa para passar os dados para o Player
     public void ApplyCharacterToPlayerSystems(PlayerStats playerStats, SkillManager skillManager)
     {
         int index = PlayerPrefs.GetInt("SelectedCharacter", 0);
@@ -113,14 +116,14 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
         CharacterData data = characters[index];
 
-        // Aplica os status base + bônus de upgrade
-        playerStats.maxHealth = data.maxHealth * (1 + upgradeLevels[0] * 0.05f);
+        playerStats.characterData = data;
+        playerStats.ApplyCharacterData();
 
-        // Se der erro nestas linhas, verifique se os nomes no PlayerStats.cs são exatamente esses:
-        // playerStats.baseAttack = data.baseAttack * (1 + upgradeLevels[1] * 0.05f);
-        // playerStats.baseDefense = data.baseDefense * (1 + upgradeLevels[2] * 0.05f);
-        // playerStats.baseSpeed = data.baseSpeed * (1 + upgradeLevels[3] * 0.05f);
-
+        playerStats.maxHealth *= (1 + upgradeLevels[0] * 0.05f);
+        playerStats.health     = playerStats.maxHealth;
+        playerStats.attack    *= (1 + upgradeLevels[1] * 0.05f);
+        playerStats.defense   *= (1 + upgradeLevels[2] * 0.05f);
+        playerStats.speed     *= (1 + upgradeLevels[3] * 0.05f);
     }
 
     // ✅ CORREÇÃO: Método chamado ao selecionar uma fase

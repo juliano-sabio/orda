@@ -11,6 +11,8 @@ public class GameSceneManager : MonoBehaviour
     public string characterSelectionScene = "CharacterSelection";
     public string gameplayScene = "Gameplay";
 
+    [HideInInspector] public CharacterData selectedCharacterData;
+
     void Awake()
     {
         if (Instance == null)
@@ -45,27 +47,32 @@ public class GameSceneManager : MonoBehaviour
 
     private IEnumerator InitializeGameplayCoroutine()
     {
-        // Espera a cena carregar completamente
         yield return new WaitForSeconds(0.1f);
 
-        // 🆕 CORREÇÃO: Usa CharacterSelectionManagerIntegrated
-        CharacterSelectionManagerIntegrated selectionManager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
         PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
-        SkillManager skillManager = SkillManager.Instance;
 
         if (playerStats != null)
         {
-            if (selectionManager != null)
+            if (selectedCharacterData != null)
             {
-                selectionManager.ApplyCharacterToPlayerSystems(playerStats, skillManager);
+                playerStats.characterData = selectedCharacterData;
+                playerStats.ApplyCharacterData();
+
+                int u0 = PlayerPrefs.GetInt("Upgrade_0", 0);
+                int u1 = PlayerPrefs.GetInt("Upgrade_1", 0);
+                int u2 = PlayerPrefs.GetInt("Upgrade_2", 0);
+                int u3 = PlayerPrefs.GetInt("Upgrade_3", 0);
+                playerStats.maxHealth *= (1 + u0 * 0.05f);
+                playerStats.health     = playerStats.maxHealth;
+                playerStats.attack    *= (1 + u1 * 0.05f);
+                playerStats.defense   *= (1 + u2 * 0.05f);
+                playerStats.speed     *= (1 + u3 * 0.05f);
             }
             else
             {
-                // Inicializa com stats padrão
                 playerStats.InitializeDefaultSkills();
             }
 
-            // Força atualização da UI
             playerStats.ForceUIUpdate();
         }
         else

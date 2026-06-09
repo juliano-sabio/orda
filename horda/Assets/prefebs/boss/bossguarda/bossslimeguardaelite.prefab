@@ -179,8 +179,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.1}
-  m_Size: {x: 0.6, y: 0.8}
+  m_Offset: {x: 0.0016595423, y: 0.026552469}
+  m_Size: {x: 0.5037473, y: 0.5037473}
   m_Direction: 0
 --- !u!114 &7776655159444215346
 MonoBehaviour:
@@ -250,6 +250,15 @@ MonoBehaviour:
   prefabsMinions: []
   qtdMinions: 3
   invocarCooldown: 18
+  qtdProjeteis: 5
+  velocidadeProjetil: 8
+  danoProjetil: 15
+  anguloLeque: 60
+  projeteisCooldown: 5
+  giroRaio: 3
+  giroDano: 20
+  giroDuracao: 2.5
+  giroCooldown: 10
   gatilhoFase2: 0.75
   gatilhoFase3: 0.5
   gatilhoFase4: 0.25

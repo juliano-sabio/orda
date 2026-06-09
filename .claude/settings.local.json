@@ -132,7 +132,9 @@
       "Bash(xargs grep -l \"Morrer\\\\|estaMorrendo\")",
       "Bash(xargs grep -l \"void Morrer\\\\|public void Morrer\\\\|OnPreMorte\\\\|OnDeath\")",
       "Bash(grep -E \"\\\\.cs$\")",
-      "Bash(grep -E \"bases_skills.*\\\\.cs$\")"
+      "Bash(grep -E \"bases_skills.*\\\\.cs$\")",
+      "Skill(pixel-art-creator)",
+      "Skill(pixel-art-creator:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda"

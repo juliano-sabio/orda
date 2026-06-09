@@ -180,8 +180,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.185}
-  m_Radius: 0.185
+  m_Offset: {x: 0, y: 0.030948633}
+  m_Radius: 0.080323964
 --- !u!58 &1426366963740101037
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -216,8 +216,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.185}
-  m_Radius: 0.185
+  m_Offset: {x: 0, y: 0.02304852}
+  m_Radius: 0.07044895
 --- !u!114 &854876113297596752
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,3 +285,4 @@ MonoBehaviour:
   velocidadeProjetil: 6
   duracaoBloqueioUlti: 5
   cooldownProjetil: 15
+  maxEscudosPorCast: 1

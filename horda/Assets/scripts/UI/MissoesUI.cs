@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using TMPro;
 using System.Collections;
 
@@ -9,17 +8,24 @@ public class MissoesUI : MonoBehaviour
     [Header("Dados")]
     public CharacterData[] personagens;
 
-    // ── Paleta dark fantasy ──────────────────────────────────────
-    static readonly Color corFundo        = new Color(0.07f, 0.05f, 0.10f, 0.98f);
+    [Header("Sprites Dark Fantasy")]
+    public Sprite spriteFundoPainel;  // bg_dungeon_esgoto
+    public Sprite spriteBarraTopo;
+    public Sprite spriteBotao;
+    public Sprite spriteSlotPlayer;
+
+    // Paleta alinhada com CharacterSelectionUI
+    static readonly Color corFundo        = new Color(0.04f, 0.02f, 0.02f, 0.98f);
+    static readonly Color corBarraTopo    = new Color(0.10f, 0.04f, 0.04f);
     static readonly Color corBorda        = new Color(0.78f, 0.66f, 0.35f);
-    static readonly Color corAba          = new Color(0.12f, 0.10f, 0.18f);
+    static readonly Color corAcento       = new Color(0.55f, 0.08f, 0.08f);
+    static readonly Color corAba          = new Color(0.10f, 0.08f, 0.16f);
     static readonly Color corAbaAtiva     = new Color(0.32f, 0.26f, 0.10f);
-    static readonly Color corAbaTexto     = new Color(0.70f, 0.65f, 0.55f);
+    static readonly Color corAbaTexto     = new Color(0.65f, 0.60f, 0.50f);
     static readonly Color corAbaAtivaTxt  = new Color(0.95f, 0.80f, 0.40f);
-    static readonly Color corCard         = new Color(0.11f, 0.09f, 0.17f);
-    static readonly Color corCardBorda    = new Color(0.22f, 0.18f, 0.30f);
+    static readonly Color corCard         = new Color(0.10f, 0.08f, 0.16f);
     static readonly Color corTitulo       = new Color(0.95f, 0.80f, 0.40f);
-    static readonly Color corTexto        = new Color(0.90f, 0.82f, 0.65f);
+    static readonly Color corTexto        = new Color(0.92f, 0.82f, 0.65f);
     static readonly Color corDesbloqueado = new Color(0.30f, 0.85f, 0.40f);
     static readonly Color corBloqueado    = new Color(0.80f, 0.28f, 0.22f);
 
@@ -37,12 +43,32 @@ public class MissoesUI : MonoBehaviour
     {
         yield return null;
 
-        // Pega dados do CharacterSelectionUI se não foram atribuídos no Inspector
-        if (personagens == null || personagens.Length == 0)
+        var charUI = FindAnyObjectByType<CharacterSelectionUI>();
+        if (charUI != null)
         {
-            var charUI = FindAnyObjectByType<CharacterSelectionUI>();
-            if (charUI != null) personagens = charUI.characters;
+            if (personagens == null || personagens.Length == 0)
+                personagens = charUI.characters;
+            if (spriteBarraTopo == null) spriteBarraTopo = charUI.spriteBarraTopo;
+            if (spriteBotao     == null) spriteBotao     = charUI.spriteBotao;
+            if (spriteSlotPlayer== null) spriteSlotPlayer= charUI.spriteSlotPlayer;
         }
+
+#if UNITY_EDITOR
+        if (spriteFundoPainel == null)
+            spriteFundoPainel = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/assets/UI/bg_dungeon_esgoto.png");
+        if (spriteBarraTopo == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/charselection/bar_charselect.ase"))
+                if (a is Sprite s) { spriteBarraTopo = s; break; }
+        if (spriteBotao == null)
+            spriteBotao = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/assets/UI/charselection/btn_stone.png");
+        if (spriteSlotPlayer == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/skill_card/slotplayer.ase"))
+                if (a is Sprite s) { spriteSlotPlayer = s; break; }
+#endif
 
         var canvasGO = GameObject.Find("CanvasPrincipal");
         if (canvasGO == null) yield break;
@@ -52,7 +78,6 @@ public class MissoesUI : MonoBehaviour
 
     void CriarPainel(GameObject canvas)
     {
-        // Raiz: cobre a tela inteira
         painelRaiz = new GameObject("PainelMissoes");
         painelRaiz.transform.SetParent(canvas.transform, false);
         var rRaiz = painelRaiz.AddComponent<RectTransform>();
@@ -66,42 +91,81 @@ public class MissoesUI : MonoBehaviour
         var rBack = backdrop.AddComponent<RectTransform>();
         rBack.anchorMin = Vector2.zero; rBack.anchorMax = Vector2.one;
         rBack.offsetMin = rBack.offsetMax = Vector2.zero;
-        backdrop.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.72f);
+        backdrop.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.78f);
 
-        // Caixa central do painel
+        // Caixa central
         painelContent = new GameObject("Content");
         painelContent.transform.SetParent(painelRaiz.transform, false);
         var rC = painelContent.AddComponent<RectTransform>();
         rC.anchorMin = new Vector2(0.08f, 0.05f);
         rC.anchorMax = new Vector2(0.92f, 0.95f);
         rC.offsetMin = rC.offsetMax = Vector2.zero;
-        painelContent.AddComponent<Image>().color = corFundo;
+        var imgContent = painelContent.AddComponent<Image>();
+        if (spriteFundoPainel != null)
+        {
+            imgContent.sprite = spriteFundoPainel;
+            imgContent.type   = Image.Type.Simple;
+            // levemente escuro e com leve transparência
+            imgContent.color  = new Color(0.88f, 0.82f, 0.82f, 0.99f);
+        }
+        else
+        {
+            imgContent.color = corFundo;
+        }
 
-        // Bordas douradas (topo, base, esq, dir)
-        CriarBorda(painelContent, "BordaTopo",  new Vector2(0f,  1f), new Vector2(1f, 1f), new Vector2(0f, -2f), new Vector2(0f,  0f));
-        CriarBorda(painelContent, "BordaBase",  new Vector2(0f,  0f), new Vector2(1f, 0f), new Vector2(0f,  0f), new Vector2(0f,  2f));
-        CriarBorda(painelContent, "BordaEsq",   new Vector2(0f,  0f), new Vector2(0f, 1f), new Vector2(0f,  0f), new Vector2(2f,  0f));
-        CriarBorda(painelContent, "BordaDir",   new Vector2(1f,  0f), new Vector2(1f, 1f), new Vector2(-2f, 0f), new Vector2(0f,  0f));
+        // Bordas douradas externas
+        CriarBorda(painelContent, "BordaTopo", new Vector2(0f,1f), new Vector2(1f,1f), new Vector2(0f,-2f), Vector2.zero);
+        CriarBorda(painelContent, "BordaBase", new Vector2(0f,0f), new Vector2(1f,0f), Vector2.zero, new Vector2(0f,2f));
+        CriarBorda(painelContent, "BordaEsq",  new Vector2(0f,0f), new Vector2(0f,1f), Vector2.zero, new Vector2(2f,0f));
+        CriarBorda(painelContent, "BordaDir",  new Vector2(1f,0f), new Vector2(1f,1f), new Vector2(-2f,0f), Vector2.zero);
+
+        // Barra de topo escura (estilo CharacterSelection)
+        var barraTopo = new GameObject("BarraTopo");
+        barraTopo.transform.SetParent(painelContent.transform, false);
+        var rBT = barraTopo.AddComponent<RectTransform>();
+        rBT.anchorMin = new Vector2(0f, 0.92f);
+        rBT.anchorMax = Vector2.one;
+        rBT.offsetMin = rBT.offsetMax = Vector2.zero;
+        var imgBarra = barraTopo.AddComponent<Image>();
+        if (spriteBarraTopo != null)
+        {
+            imgBarra.sprite = spriteBarraTopo;
+            imgBarra.type   = Image.Type.Simple;
+            imgBarra.color  = new Color(0.50f, 0.40f, 0.40f, 1.0f);
+        }
+        else
+        {
+            imgBarra.color = corBarraTopo;
+        }
+
+        // Linha dourada separando barra do conteúdo
+        CriarSeparador(painelContent, new Vector2(0f, 0.918f), new Vector2(1f, 0.922f));
+
+        // Acento carmesim na borda esquerda da barra de topo
+        var acento = new GameObject("AcentoTopo");
+        acento.transform.SetParent(painelContent.transform, false);
+        var rAc = acento.AddComponent<RectTransform>();
+        rAc.anchorMin = new Vector2(0f, 0.92f);
+        rAc.anchorMax = new Vector2(0.004f, 1f);
+        rAc.offsetMin = rAc.offsetMax = Vector2.zero;
+        acento.AddComponent<Image>().color = corAcento;
 
         // Título
         var titulo = CriarTexto(painelContent, "Titulo",
-            new Vector2(0.04f, 0.92f), new Vector2(0.88f, 1f),
-            "MISSOES DE DESBLOQUEIO", 18f, FontStyles.Bold, corTitulo);
+            new Vector2(0.03f, 0.92f), new Vector2(0.88f, 1f),
+            "MISSOES DE DESBLOQUEIO", 17f, FontStyles.Bold, corTitulo);
         titulo.alignment = TextAlignmentOptions.MidlineLeft;
 
-        // Botão fechar (X)
+        // Botão fechar
         CriarBotaoFechar(painelContent);
-
-        // Linha separadora abaixo do título
-        CriarSeparador(painelContent, new Vector2(0.02f, 0.905f), new Vector2(0.98f, 0.908f));
 
         // Abas
         CriarAbas();
 
-        // Linha separadora abaixo das abas
-        CriarSeparador(painelContent, new Vector2(0.02f, 0.835f), new Vector2(0.98f, 0.838f));
+        // Separador abaixo das abas
+        CriarSeparador(painelContent, new Vector2(0.01f, 0.835f), new Vector2(0.99f, 0.837f));
 
-        // Área de conteúdo
+        // Área de conteúdo com scroll
         CriarAreaConteudo();
 
         painelRaiz.SetActive(false);
@@ -125,7 +189,7 @@ public class MissoesUI : MonoBehaviour
         var r = go.AddComponent<RectTransform>();
         r.anchorMin = ancMin; r.anchorMax = ancMax;
         r.offsetMin = r.offsetMax = Vector2.zero;
-        go.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, 0.45f);
+        go.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, 0.5f);
     }
 
     void CriarBotaoFechar(GameObject pai)
@@ -134,11 +198,29 @@ public class MissoesUI : MonoBehaviour
         go.transform.SetParent(pai.transform, false);
         var r = go.AddComponent<RectTransform>();
         r.anchorMin = r.anchorMax = r.pivot = new Vector2(1f, 1f);
-        r.anchoredPosition = new Vector2(-6f, -6f);
-        r.sizeDelta = new Vector2(34f, 28f);
+        r.anchoredPosition = new Vector2(-8f, -6f);
+        r.sizeDelta = new Vector2(36f, 30f);
+
+        // Borda dourada ao redor do botão
+        var borda = new GameObject("Borda");
+        borda.transform.SetParent(go.transform, false);
+        var rb = borda.AddComponent<RectTransform>();
+        rb.anchorMin = Vector2.zero; rb.anchorMax = Vector2.one;
+        rb.offsetMin = new Vector2(-1f,-1f); rb.offsetMax = new Vector2(1f,1f);
+        borda.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, 0.7f);
+        borda.transform.SetAsFirstSibling();
 
         var img = go.AddComponent<Image>();
-        img.color = new Color(0.28f, 0.08f, 0.08f);
+        if (spriteBotao != null)
+        {
+            img.sprite = spriteBotao;
+            img.type   = Image.Type.Simple;
+            img.color  = new Color(0.85f, 0.35f, 0.30f, 0.95f); // tint vermelho escuro
+        }
+        else
+        {
+            img.color = new Color(0.28f, 0.06f, 0.06f);
+        }
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
@@ -155,7 +237,7 @@ public class MissoesUI : MonoBehaviour
         string[] nomes = { "PERSONAGENS", "ULTIMATES", "PASSIVAS" };
         for (int i = 0; i < 3; i++)
         {
-            float xMin = 0.02f + i * (0.32f);
+            float xMin = 0.02f + i * 0.32f;
             float xMax = xMin + 0.30f;
             int idx = i;
 
@@ -163,12 +245,29 @@ public class MissoesUI : MonoBehaviour
             go.transform.SetParent(painelContent.transform, false);
             var r = go.AddComponent<RectTransform>();
             r.anchorMin = new Vector2(xMin, 0.840f);
-            r.anchorMax = new Vector2(xMax, 0.905f);
+            r.anchorMax = new Vector2(xMax, 0.920f);
             r.offsetMin = new Vector2(2f, 2f);
             r.offsetMax = new Vector2(-2f, 0f);
 
             var img = go.AddComponent<Image>();
-            img.color = corAba;
+            if (spriteBotao != null)
+            {
+                img.sprite = spriteBotao;
+                img.type   = Image.Type.Simple;
+                img.color  = new Color(0.50f, 0.40f, 0.55f, 0.80f); // pedra inativa
+            }
+            else
+            {
+                img.color = corAba;
+            }
+
+            // Borda superior da aba (aparece em destaque quando ativa)
+            var bordaAba = new GameObject("BordaAba");
+            bordaAba.transform.SetParent(go.transform, false);
+            var rb = bordaAba.AddComponent<RectTransform>();
+            rb.anchorMin = new Vector2(0f, 1f); rb.anchorMax = new Vector2(1f, 1f);
+            rb.offsetMin = new Vector2(0f, -3f); rb.offsetMax = Vector2.zero;
+            bordaAba.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, 0.3f);
 
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img;
@@ -193,7 +292,7 @@ public class MissoesUI : MonoBehaviour
         rm.anchorMax = new Vector2(0.99f, 0.835f);
         rm.offsetMin = new Vector2(4f, 0f);
         rm.offsetMax = new Vector2(-4f, 0f);
-        mascara.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
+        mascara.AddComponent<Image>().color = Color.clear;
         mascara.AddComponent<Mask>().showMaskGraphic = false;
 
         areaConteudo = new GameObject("Conteudo");
@@ -205,8 +304,8 @@ public class MissoesUI : MonoBehaviour
         rc.offsetMin = rc.offsetMax = Vector2.zero;
 
         var layout = areaConteudo.AddComponent<VerticalLayoutGroup>();
-        layout.spacing                = 5f;
-        layout.padding                = new RectOffset(4, 4, 6, 6);
+        layout.spacing                = 6f;
+        layout.padding                = new RectOffset(6, 6, 8, 8);
         layout.childForceExpandWidth  = true;
         layout.childForceExpandHeight = false;
         layout.childControlWidth      = true;
@@ -231,9 +330,25 @@ public class MissoesUI : MonoBehaviour
         {
             if (botoesAba[i] == null) continue;
             bool ativo = i == (int)aba;
-            botoesAba[i].GetComponent<Image>().color = ativo ? corAbaAtiva : corAba;
+            var imgAba = botoesAba[i].GetComponent<Image>();
+            if (spriteBotao != null)
+                imgAba.color = ativo
+                    ? new Color(0.90f, 0.72f, 0.30f, 1.0f)     // dourado ativo
+                    : new Color(0.50f, 0.40f, 0.55f, 0.80f);   // pedra inativa
+            else
+                imgAba.color = ativo ? corAbaAtiva : corAba;
             if (textosBotoesAba[i] != null)
                 textosBotoesAba[i].color = ativo ? corAbaAtivaTxt : corAbaTexto;
+
+            var bordaAba = botoesAba[i].transform.Find("BordaAba");
+            if (bordaAba != null)
+            {
+                var imgBorda = bordaAba.GetComponent<Image>();
+                if (imgBorda != null)
+                    imgBorda.color = ativo
+                        ? new Color(corBorda.r, corBorda.g, corBorda.b, 1f)
+                        : new Color(corBorda.r, corBorda.g, corBorda.b, 0.3f);
+            }
         }
 
         foreach (Transform filho in areaConteudo.transform)
@@ -258,9 +373,9 @@ public class MissoesUI : MonoBehaviour
         {
             if (p == null) continue;
             bool desbloqueado = p.unlocked || playerLevel >= p.unlockLevel;
-            string status  = desbloqueado ? "DESBLOQUEADO" : $"Nivel {p.unlockLevel} necessario";
+            string status = desbloqueado ? "DESBLOQUEADO" : $"Nivel {p.unlockLevel} necessario";
             CriarCard(p.characterName, status, p.missaoDesbloqueio,
-                CharacterData.GetElementColor(p.baseElement), desbloqueado);
+                CharacterData.GetElementColor(p.baseElement), desbloqueado, p.icon);
         }
     }
 
@@ -274,12 +389,10 @@ public class MissoesUI : MonoBehaviour
             {
                 if (u == null) continue;
                 bool desbloqueado = u.isUnlocked && playerLevel >= u.requiredLevel;
-                string status = desbloqueado
-                    ? "DESBLOQUEADO"
-                    : $"Nivel {u.requiredLevel} necessario";
+                string status = desbloqueado ? "DESBLOQUEADO" : $"Nivel {u.requiredLevel} necessario";
                 CriarCard(u.ultimateName, status,
                     $"[{p.characterName}]  {u.description}",
-                    u.GetElementColor(), desbloqueado);
+                    u.GetElementColor(), desbloqueado, u.ultimateIcon);
             }
         }
     }
@@ -301,7 +414,7 @@ public class MissoesUI : MonoBehaviour
                 string bonus  = passiva.GetBonusDescription();
                 string desc   = string.IsNullOrEmpty(bonus) ? passiva.description : bonus;
                 CriarCard(passiva.passiveName, status, $"[{p.characterName}]  {desc}",
-                    CharacterData.GetElementColor(p.baseElement), desbloqueado);
+                    CharacterData.GetElementColor(p.baseElement), desbloqueado, passiva.passiveIcon);
             }
         }
         if (!alguma)
@@ -309,17 +422,16 @@ public class MissoesUI : MonoBehaviour
                 "As passivas sao desbloqueadas ao subir de nivel e selecionar cartas de habilidade durante a partida.");
     }
 
-    void CriarCard(string nome, string status, string descricao, Color corAccento, bool desbloqueado)
+    void CriarCard(string nome, string status, string descricao, Color corAccento, bool desbloqueado, Sprite icone = null)
     {
         var card = new GameObject($"Card_{nome}");
         card.transform.SetParent(areaConteudo.transform, false);
 
         var le = card.AddComponent<LayoutElement>();
-        le.minHeight       = 80f;
-        le.preferredHeight = 80f;
+        le.minHeight       = 100f;
+        le.preferredHeight = 100f;
 
-        var img = card.AddComponent<Image>();
-        img.color = corCard;
+        card.AddComponent<Image>().color = corCard;
 
         // Borda superior fina (cor do acento)
         var bordaTopo = new GameObject("BordaTopo");
@@ -327,9 +439,9 @@ public class MissoesUI : MonoBehaviour
         var rbt = bordaTopo.AddComponent<RectTransform>();
         rbt.anchorMin = new Vector2(0f, 1f); rbt.anchorMax = new Vector2(1f, 1f);
         rbt.offsetMin = new Vector2(0f, -2f); rbt.offsetMax = Vector2.zero;
-        bordaTopo.AddComponent<Image>().color = corAccento;
+        bordaTopo.AddComponent<Image>().color = new Color(corAccento.r, corAccento.g, corAccento.b, 0.65f);
 
-        // Borda esquerda grossa colorida
+        // Borda esquerda grossa (cor do acento)
         var bordaEsq = new GameObject("BordaEsq");
         bordaEsq.transform.SetParent(card.transform, false);
         var rbe = bordaEsq.AddComponent<RectTransform>();
@@ -337,36 +449,71 @@ public class MissoesUI : MonoBehaviour
         rbe.offsetMin = Vector2.zero; rbe.offsetMax = new Vector2(5f, 0f);
         bordaEsq.AddComponent<Image>().color = corAccento;
 
-        // Borda externa sutil
-        var bordaExt = new GameObject("BordaExt");
-        bordaExt.transform.SetParent(card.transform, false);
-        var rbx = bordaExt.AddComponent<RectTransform>();
-        rbx.anchorMin = Vector2.zero; rbx.anchorMax = Vector2.one;
-        rbx.offsetMin = Vector2.zero; rbx.offsetMax = Vector2.zero;
-        var imgBx = bordaExt.AddComponent<Image>();
-        imgBx.color = corCardBorda;
-        imgBx.raycastTarget = false;
+        // Barra inferior sutil
+        var barraBase = new GameObject("BarraBase");
+        barraBase.transform.SetParent(card.transform, false);
+        var rBb = barraBase.AddComponent<RectTransform>();
+        rBb.anchorMin = Vector2.zero; rBb.anchorMax = new Vector2(1f, 0f);
+        rBb.offsetMin = Vector2.zero; rBb.offsetMax = new Vector2(0f, 2f);
+        barraBase.AddComponent<Image>().color = new Color(corAccento.r, corAccento.g, corAccento.b, 0.2f);
 
-        // Nome
+        // Ícone (se disponível)
+        bool temIcone = icone != null;
+        if (temIcone)
+        {
+            // Slot de fundo do ícone
+            if (spriteSlotPlayer != null)
+            {
+                var goSlot = new GameObject("Slot");
+                goSlot.transform.SetParent(card.transform, false);
+                var rSlot = goSlot.AddComponent<RectTransform>();
+                rSlot.anchorMin = new Vector2(0.01f, 0.05f);
+                rSlot.anchorMax = new Vector2(0.19f, 0.95f);
+                rSlot.offsetMin = rSlot.offsetMax = Vector2.zero;
+                var imgSlot = goSlot.AddComponent<Image>();
+                imgSlot.sprite = spriteSlotPlayer;
+                imgSlot.type   = Image.Type.Sliced;
+                imgSlot.color  = Color.white;
+                imgSlot.raycastTarget = false;
+            }
+
+            var goIcon = new GameObject("Icone");
+            goIcon.transform.SetParent(card.transform, false);
+            var rIcon = goIcon.AddComponent<RectTransform>();
+            rIcon.anchorMin = new Vector2(0.02f, 0.08f);
+            rIcon.anchorMax = new Vector2(0.18f, 0.92f);
+            rIcon.offsetMin = rIcon.offsetMax = Vector2.zero;
+            var imgIcon = goIcon.AddComponent<Image>();
+            imgIcon.sprite         = icone;
+            imgIcon.preserveAspect = true;
+            imgIcon.color          = Color.white;
+            imgIcon.raycastTarget  = false;
+        }
+
+        float textX = temIcone ? 0.22f : 0.07f;
+
+        // Nome (bold, dourado claro)
         var txtNome = CriarTexto(card, "Nome",
-            new Vector2(0.05f, 0.58f), new Vector2(0.82f, 0.96f),
+            new Vector2(textX, 0.60f), new Vector2(0.97f, 0.96f),
             nome, 14f, FontStyles.Bold, corTexto);
-        txtNome.alignment = TextAlignmentOptions.MidlineLeft;
+        txtNome.alignment        = TextAlignmentOptions.MidlineLeft;
+        txtNome.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
-        // Status
+        // Status (desbloqueado / bloqueado)
+        var corSt = desbloqueado ? corDesbloqueado : corBloqueado;
         var txtStatus = CriarTexto(card, "Status",
-            new Vector2(0.05f, 0.36f), new Vector2(0.95f, 0.58f),
-            status, 10f, FontStyles.Bold,
-            desbloqueado ? corDesbloqueado : corBloqueado);
+            new Vector2(textX, 0.38f), new Vector2(0.97f, 0.60f),
+            status, 9f, FontStyles.Bold, corSt);
         txtStatus.alignment = TextAlignmentOptions.MidlineLeft;
 
-        // Descrição
+        // Descrição / missão de desbloqueio
         var txtDesc = CriarTexto(card, "Desc",
-            new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.38f),
+            new Vector2(textX, 0.02f), new Vector2(0.97f, 0.38f),
             descricao, 9f, FontStyles.Normal,
             new Color(0.60f, 0.55f, 0.45f));
-        txtDesc.alignment          = TextAlignmentOptions.MidlineLeft;
+        txtDesc.alignment        = TextAlignmentOptions.TopLeft;
         txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
+        txtDesc.overflowMode     = TMPro.TextOverflowModes.Ellipsis;
     }
 
     void CriarCardInfo(string titulo, string texto)
@@ -380,7 +527,6 @@ public class MissoesUI : MonoBehaviour
 
         card.AddComponent<Image>().color = corCard;
 
-        // Borda topo dourada
         var bordaTopo = new GameObject("BordaTopo");
         bordaTopo.transform.SetParent(card.transform, false);
         var rbt = bordaTopo.AddComponent<RectTransform>();
@@ -388,11 +534,18 @@ public class MissoesUI : MonoBehaviour
         rbt.offsetMin = new Vector2(0f, -2f); rbt.offsetMax = Vector2.zero;
         bordaTopo.AddComponent<Image>().color = corBorda;
 
+        var bordaEsq = new GameObject("BordaEsq");
+        bordaEsq.transform.SetParent(card.transform, false);
+        var rbe = bordaEsq.AddComponent<RectTransform>();
+        rbe.anchorMin = Vector2.zero; rbe.anchorMax = new Vector2(0f, 1f);
+        rbe.offsetMin = Vector2.zero; rbe.offsetMax = new Vector2(5f, 0f);
+        bordaEsq.AddComponent<Image>().color = corBorda;
+
         var t = CriarTexto(card, "Txt",
-            new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.96f),
+            new Vector2(0.05f, 0.04f), new Vector2(0.96f, 0.96f),
             $"<b>{titulo}</b>\n\n{texto}", 11f, FontStyles.Normal, corTexto);
         t.textWrappingMode = TMPro.TextWrappingModes.Normal;
-        t.alignment          = TextAlignmentOptions.TopLeft;
+        t.alignment        = TextAlignmentOptions.TopLeft;
     }
 
     public void TogglePainel()

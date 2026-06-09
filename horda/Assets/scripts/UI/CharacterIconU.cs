@@ -53,7 +53,9 @@ public class CharacterIconUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         if (elementBackground != null)
         {
-            elementBackground.color = data.GetElementColor();
+            Color c = data.GetElementColor();
+            float alpha = data.baseElement == PlayerStats.Element.None ? 0f : 0.2f;
+            elementBackground.color = new Color(c.r, c.g, c.b, alpha);
         }
 
         // 3. Atualiza Status de Bloqueio e Botão
