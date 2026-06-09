@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Adicione este componente ao GameObject do Player.
@@ -116,18 +117,20 @@ public class DomoRetardanteUltimate : MonoBehaviour
             // Saiu do raio → restaura e marca para remoção
             if (Vector2.Distance(rb.position, centro) > raio + 0.3f)
             {
-                // DomoInversor: projéteis saindo são redirecionados para inimigos próximos
+                RestaurarProjetil(rb);
+
+                // DomoInversor: redireciona ao inimigo mais próximo com a velocidade original restaurada
                 if (SkillEvolutionManager.Tem(SkillEvolutionType.DomoInversor))
                 {
                     var inimigo = EncontrarInimigoMaisProximo(rb.position);
                     if (inimigo != null)
                     {
                         Vector2 dirInimigo = ((Vector2)inimigo.transform.position - rb.position).normalized;
-                        float speed = rb.linearVelocity.magnitude;
-                        rb.linearVelocity = dirInimigo * speed;
+                        rb.linearVelocity = dirInimigo * rb.linearVelocity.magnitude;
+                        ConverterParaProjetilAmigo(rb.gameObject);
                     }
                 }
-                RestaurarProjetil(rb);
+
                 sair.Add(rb);
                 continue;
             }
@@ -142,6 +145,22 @@ public class DomoRetardanteUltimate : MonoBehaviour
             velocidadeOriginal.Remove(rb);
             homingMaxOriginal.Remove(rb);
         }
+    }
+
+    void ConverterParaProjetilAmigo(GameObject projetil)
+    {
+        // Cor ciano para identificar projétil redirecionado
+        var sr = projetil.GetComponent<SpriteRenderer>();
+        if (sr != null) sr.color = new Color(1f, 0.84f, 0f);
+
+        var luz = projetil.GetComponent<Light2D>();
+        if (luz != null) luz.color = new Color(1f, 0.84f, 0f);
+
+        var pid = projetil.GetComponent<ProjetilInimigoDano>();
+        if (pid != null) pid.redirecionado = true;
+
+        var homing = projetil.GetComponent<ProjetilHomingPrincesa>();
+        if (homing != null) homing.redirecionado = true;
     }
 
     GameObject EncontrarInimigoMaisProximo(Vector2 pos)

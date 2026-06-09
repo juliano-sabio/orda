@@ -864,11 +864,22 @@ public class BossPrincesa : MonoBehaviour
 
     Vector2 ObterDestino()
     {
-        // Ponto aleatório ao redor do player (ou do centro se sem player)
         Vector2 centro = player != null ? (Vector2)player.position : Vector2.zero;
-        float ang = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-        float dist = Random.Range(raioPadraoVoo * 0.4f, raioPadraoVoo);
-        return centro + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * dist;
+        float raioBody = Mathf.Abs(transform.localScale.x) * 0.22f + 0.15f;
+        int mask = LayerMask.GetMask("obstacles");
+
+        for (int tentativa = 0; tentativa < 30; tentativa++)
+        {
+            float ang  = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            float dist = Random.Range(raioPadraoVoo * 0.4f, raioPadraoVoo);
+            Vector2 alvo = centro + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * dist;
+
+            if (!Physics2D.OverlapCircle(alvo, raioBody, mask))
+                return alvo;
+        }
+
+        // Fallback: posição atual se nenhum ponto livre for encontrado
+        return transform.position;
     }
 
     // ──────────────────────────────────────────────

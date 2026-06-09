@@ -20,6 +20,8 @@ public class ProjetilInimigoDano : MonoBehaviour
     public float intensidadeLuz = 1.8f;
     public float raioExternoLuz = 2.5f;
 
+    [HideInInspector] public bool redirecionado = false;
+
     private Rigidbody2D rb;
     private bool jaAcertou = false;
     private Light2D luz2D;
@@ -71,6 +73,20 @@ public class ProjetilInimigoDano : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (jaAcertou) return;
+
+        if (redirecionado)
+        {
+            var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
+            if (ic != null)
+            {
+                jaAcertou = true;
+                ic.ReceberDano(dano);
+                Destroy(gameObject);
+            }
+            else if (other.CompareTag("Chao") || other.CompareTag("Obstacles"))
+                Destroy(gameObject);
+            return;
+        }
 
         if (other.CompareTag("Player"))
         {

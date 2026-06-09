@@ -12,6 +12,8 @@ public class ProjetilHomingPrincesa : MonoBehaviour
     [Header("Dano")]
     public float dano = 20f;
 
+    [HideInInspector] public bool redirecionado = false;
+
     private Transform player;
     private float timerVida;
     private bool ativo;
@@ -70,11 +72,18 @@ public class ProjetilHomingPrincesa : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (!ativo) return;
-        if (!other.CompareTag("Player")) return;
 
+        if (redirecionado)
+        {
+            var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
+            if (ic != null) { ic.ReceberDano(dano); Destroy(gameObject); }
+            else if (other.gameObject.tag == "Chao" || other.gameObject.tag == "Obstacles") Destroy(gameObject);
+            return;
+        }
+
+        if (!other.CompareTag("Player")) return;
         var ps = other.GetComponent<PlayerStats>();
         if (ps != null) ps.TakeDamage(dano);
-
         Destroy(gameObject);
     }
 }
