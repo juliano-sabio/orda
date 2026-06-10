@@ -129,7 +129,7 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: projetil_noite
     originalName: 
-    pivot: {x: 0.375, y: -0.16666667}
+    pivot: {x: 0.5113325, y: 0.43016735}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
