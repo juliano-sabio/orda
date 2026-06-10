@@ -484,11 +484,13 @@ public class GameOverUI : MonoBehaviour
         GameObject bordaSangue = GameObject.Find("BordaSangue");
         if (bordaSangue != null) Destroy(bordaSangue);
 
-        if (GerenciadorEventos.Instance != null) Destroy(GerenciadorEventos.Instance.gameObject);
-        if (UIManager.Instance != null)          Destroy(UIManager.Instance.gameObject);
-        if (PauseManager.Instance != null)       Destroy(PauseManager.Instance.gameObject);
-        if (SkillManager.Instance != null)       Destroy(SkillManager.Instance.gameObject);
-        if (StatusCardSystem.Instance != null)   Destroy(StatusCardSystem.Instance.gameObject);
+        if (GerenciadorEventos.Instance != null)      Destroy(GerenciadorEventos.Instance.gameObject);
+        if (UIManager.Instance != null)               Destroy(UIManager.Instance.gameObject);
+        if (PauseManager.Instance != null)            Destroy(PauseManager.Instance.gameObject);
+        if (SkillManager.Instance != null)            Destroy(SkillManager.Instance.gameObject);
+        if (StatusCardSystem.Instance != null)        Destroy(StatusCardSystem.Instance.gameObject);
+        if (SkillEvolutionManager.Instance != null)   Destroy(SkillEvolutionManager.Instance.gameObject);
+        if (SkillEvolutionUI.Instance != null)        Destroy(SkillEvolutionUI.Instance.gameObject);
     }
 
     private bool SnapshotEhAzul(Texture2D tex)

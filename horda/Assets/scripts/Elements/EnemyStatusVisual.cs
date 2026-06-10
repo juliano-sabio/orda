@@ -1,6 +1,13 @@
 using UnityEngine;
 using System.Collections;
 
+// Rastreia a cor original do inimigo para evitar corrida entre efeitos sobrepostos
+public class EnemyColorTracker : MonoBehaviour
+{
+    public Color originalColor = Color.white;
+    public int   activeEffects = 0;
+}
+
 // Adiciona/remove efeitos visuais em inimigos quando recebem status elemental
 public static class EnemyStatusVisual
 {
@@ -16,18 +23,30 @@ public static class EnemyStatusVisual
         if (alvo == null) yield break;
 
         var sr = alvo.GetComponent<SpriteRenderer>();
-        Color corOriginal = sr != null ? sr.color : Color.white;
+        if (sr == null) { yield return new WaitForSeconds(duracao); yield break; }
+
+        // Tracker garante que a cor original (pré-qualquer tint) não é corrompida por efeitos sobrepostos
+        var tracker = alvo.GetComponent<EnemyColorTracker>();
+        if (tracker == null) tracker = alvo.AddComponent<EnemyColorTracker>();
+        if (tracker.activeEffects == 0)
+            tracker.originalColor = sr.color;
+        tracker.activeEffects++;
 
         // Adiciona partículas do efeito
         GameObject particulas = CriarParticulasStatus(alvo, tipo);
 
         // Aplica tint no sprite
-        if (sr != null) AplicarTint(sr, tipo);
+        AplicarTint(sr, tipo);
 
         yield return new WaitForSeconds(duracao);
 
-        // Remove efeitos
-        if (sr != null) sr.color = corOriginal;
+        // Remove efeitos — só restaura cor quando todos os efeitos terminaram
+        if (tracker != null)
+        {
+            tracker.activeEffects--;
+            if (tracker.activeEffects <= 0 && sr != null)
+                sr.color = tracker.originalColor;
+        }
         if (particulas != null) Object.Destroy(particulas);
     }
 
