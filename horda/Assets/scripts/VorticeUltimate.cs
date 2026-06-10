@@ -110,8 +110,9 @@ public class VorticeUltimate : MonoBehaviour
         if (SkillEvolutionManager.Tem(SkillEvolutionType.VorticeExpansivo))
             duracaoEfetiva += 2f;
 
-        float elapsed = 0f;
-        float rotacao = 0f;
+        float elapsed  = 0f;
+        float rotacao  = 0f;
+        float danoAcum = 0f;
 
         while (elapsed < duracaoEfetiva)
         {
@@ -124,11 +125,17 @@ public class VorticeUltimate : MonoBehaviour
             // VorticeDestruidor: 15 dano/s nos inimigos dentro do vórtice
             if (SkillEvolutionManager.Tem(SkillEvolutionType.VorticeDestruidor))
             {
-                foreach (var e in atraidos)
+                danoAcum += 15f * Time.deltaTime;
+                if (danoAcum >= 1f)
                 {
-                    if (e.go == null) continue;
-                    var ic = e.go.GetComponent<InimigoController>();
-                    if (ic != null) ic.ReceberDano(15f * Time.deltaTime, false, false);
+                    float danoAplicar = Mathf.Floor(danoAcum);
+                    danoAcum -= danoAplicar;
+                    foreach (var e in atraidos)
+                    {
+                        if (e.go == null) continue;
+                        var ic = e.go.GetComponent<InimigoController>();
+                        if (ic != null) ic.ReceberDano(danoAplicar, false, false);
+                    }
                 }
             }
 

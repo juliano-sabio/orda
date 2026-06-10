@@ -256,6 +256,40 @@ public class SkillEvolutionUI : MonoBehaviour
                     { img.sprite = data.icone; img.color = Color.white; break; }
         }
 
+        // Fundo da carta
+        var cardBg = card.GetComponent<Image>();
+        if (cardBg != null)
+        {
+            Sprite spFundo = CarregarSprite("Assets/assets/UI/skill_card/cartaevolução.ase", "cartaevolução");
+            if (spFundo != null) { cardBg.sprite = spFundo; cardBg.color = Color.white; cardBg.type = Image.Type.Simple; }
+        }
+
+        // Slot do ícone
+        Image slotImg = null;
+        var slotT = card.transform.Find("IconArea/IconImageSlot");
+        if (slotT != null) slotImg = slotT.GetComponent<Image>();
+        if (slotImg == null)
+            foreach (var img in card.GetComponentsInChildren<Image>(true))
+                if (img.name == "IconImageSlot") { slotImg = img; break; }
+        if (slotImg != null)
+        {
+            Sprite spSlot = CarregarSprite("Assets/assets/UI/skill_card/slotevolução.ase", "slotevolução");
+            if (spSlot != null) { slotImg.sprite = spSlot; slotImg.color = Color.white; slotImg.type = Image.Type.Simple; }
+        }
+
+        // IconInner (fundo interno do slot)
+        Image innerImg = null;
+        var innerT2 = card.transform.Find("IconArea/IconImageSlot/IconInner");
+        if (innerT2 != null) innerImg = innerT2.GetComponent<Image>();
+        if (innerImg == null)
+            foreach (var img in card.GetComponentsInChildren<Image>(true))
+                if (img.name == "IconInner") { innerImg = img; break; }
+        if (innerImg != null && data.icone == null)
+        {
+            Sprite spSlot2 = CarregarSprite("Assets/assets/UI/skill_card/slotevolução.ase", "slotevolução");
+            if (spSlot2 != null) { innerImg.sprite = spSlot2; innerImg.color = Color.white; innerImg.type = Image.Type.Simple; }
+        }
+
         // Botão
         var button = card.GetComponent<Button>();
         if (button == null) button = card.GetComponentInChildren<Button>();
@@ -269,6 +303,24 @@ public class SkillEvolutionUI : MonoBehaviour
         }
 
         return card;
+    }
+
+    Sprite CarregarSprite(string path, string spriteName)
+    {
+#if UNITY_EDITOR
+        var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+        Sprite primeiro = null;
+        foreach (var a in all)
+        {
+            if (a is Sprite s)
+            {
+                if (s.name == spriteName) return s;
+                if (primeiro == null) primeiro = s;
+            }
+        }
+        if (primeiro != null) return primeiro;
+#endif
+        return null;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

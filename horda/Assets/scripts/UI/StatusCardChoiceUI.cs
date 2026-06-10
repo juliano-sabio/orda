@@ -15,14 +15,14 @@ public class StatusCardChoiceUI : MonoBehaviour
     public GameObject cardPrefab;   // arraste aqui o mesmo prefab usado nas skill cards
 
     [Header("Sprites (override do carregamento automático)")]
-    public Sprite fundoCarta;   // fundoteste.png → fundoteste_0
-    public Sprite frameSlot;    // cartaskill.png → carta_frame
+    public Sprite fundoCarta;   // cartastatusl.ase → cartastatusl
+    public Sprite frameSlot;    // slotstatus.ase → slotstatus
 
     [Header("Configurações")]
     public bool    pauseGameDuringChoice = true;
     public float   cardSpacing           = 30f;
-    public Vector2 cardSize              = new Vector2(300f, 450f);
-    public Vector2 panelSize             = new Vector2(1280f, 720f);
+    public Vector2 cardSize              = new Vector2(220f, 330f);
+    public Vector2 panelSize             = new Vector2(1300f, 700f);
     public float   tempoEscolha          = 20f;
     public string  titleMessage          = "ESCOLHA UMA CARTA DE STATUS";
 
@@ -68,7 +68,21 @@ public class StatusCardChoiceUI : MonoBehaviour
         {
             choicePanel.SetActive(true);
             var rt = choicePanel.GetComponent<RectTransform>();
-            if (rt != null) rt.sizeDelta = panelSize;
+            if (rt != null)
+            {
+                rt.anchorMin        = new Vector2(0.5f, 0.5f);
+                rt.anchorMax        = new Vector2(0.5f, 0.5f);
+                rt.pivot            = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = Vector2.zero;
+                rt.sizeDelta        = panelSize;
+            }
+            var bg = choicePanel.GetComponent<Image>();
+            if (bg != null)
+            {
+                Sprite fundo = CarregarSprite("Assets/assets/UI/skill_card/fundoteste02.png", "fundoteste02_0");
+                if (fundo != null) { bg.sprite = fundo; bg.color = Color.white; bg.type = Image.Type.Simple; }
+                else { bg.sprite = null; bg.color = new Color(0f, 0f, 0f, 0.95f); }
+            }
         }
 
         if (titleText != null) titleText.text = titleMessage;
@@ -185,12 +199,11 @@ public class StatusCardChoiceUI : MonoBehaviour
 
         Color rColor = GetRarityColor(card.rarity);
 
-        // Fundo da carta — sobrescreve sprite do prefab com fundoteste
+        // Fundo da carta
         var cardBg = cardObj.GetComponent<Image>();
         if (cardBg != null)
         {
-            Sprite fundo = fundoCarta
-                ?? CarregarSprite("Assets/assets/UI/charselection/fundoteste.png", "fundoteste_0");
+            Sprite fundo = CarregarSprite("Assets/assets/UI/skill_card/cartastatusl.ase", "cartastatusl");
             if (fundo != null) { cardBg.sprite = fundo; cardBg.color = Color.white; cardBg.type = Image.Type.Simple; }
         }
 
@@ -207,6 +220,17 @@ public class StatusCardChoiceUI : MonoBehaviour
             else if (n.Contains("rarity") || n.Contains("rarid") || n.Contains("rare")
                   || n.Contains("comun")  || n.Contains("curse") || n.Contains("mistico"))
                 { txt.text = GetRarityLabel(card.rarity); txt.color = rColor; }
+        }
+
+        // Slot do ícone — substitui o frame do prefab por slotstatus
+        var slotImg2 = cardObj.transform.Find("IconArea/IconImageSlot")?.GetComponent<Image>();
+        if (slotImg2 == null)
+            foreach (var img in cardObj.GetComponentsInChildren<Image>(true))
+                if (img.name == "IconImageSlot") { slotImg2 = img; break; }
+        if (slotImg2 != null)
+        {
+            Sprite spSlot = CarregarSprite("Assets/assets/UI/skill_card/slotstatus.ase", "slotstatus");
+            if (spSlot != null) { slotImg2.sprite = spSlot; slotImg2.color = Color.white; slotImg2.type = Image.Type.Simple; }
         }
 
         // Ícone — usa o ícone gerado pelo StatusCardIconGenerator
@@ -248,8 +272,7 @@ public class StatusCardChoiceUI : MonoBehaviour
 
         // Fundo da carta — fundoteste
         var bgImg = cardObj.GetComponent<Image>();
-        Sprite spFundo = fundoCarta
-            ?? CarregarSprite("Assets/assets/UI/charselection/fundoteste.png", "fundoteste_0");
+        Sprite spFundo = CarregarSprite("Assets/assets/UI/skill_card/cartastatusl.ase", "cartastatusl");
         if (spFundo != null) { bgImg.sprite = spFundo; bgImg.color = Color.white; bgImg.type = Image.Type.Simple; }
         else bgImg.color = new Color(0.07f, 0.05f, 0.10f, 0.97f);
         bgImg.raycastTarget = true;
@@ -285,8 +308,8 @@ public class StatusCardChoiceUI : MonoBehaviour
         slotRT.anchoredPosition = Vector2.zero; slotRT.sizeDelta = Vector2.zero;
         var slotImg = slotGO.GetComponent<Image>();
         Sprite spSlot = frameSlot
-            ?? CarregarSprite("Assets/assets/UI/skill_card/cartaskill.png", "carta_frame");
-        if (spSlot != null) { slotImg.sprite = spSlot; slotImg.color = Color.white; slotImg.type = Image.Type.Sliced; slotImg.fillCenter = true; }
+            ?? CarregarSprite("Assets/assets/UI/skill_card/slotstatus.ase", "slotstatus");
+        if (spSlot != null) { slotImg.sprite = spSlot; slotImg.color = Color.white; slotImg.type = Image.Type.Simple; slotImg.preserveAspect = false; }
         else slotImg.color = new Color(rColor.r * 0.4f, rColor.g * 0.4f, rColor.b * 0.4f, 0.6f);
         slotImg.raycastTarget = false;
 
@@ -297,8 +320,9 @@ public class StatusCardChoiceUI : MonoBehaviour
         innerRT.anchorMin = new Vector2(0.1f, 0.1f); innerRT.anchorMax = new Vector2(0.9f, 0.9f);
         innerRT.anchoredPosition = Vector2.zero; innerRT.sizeDelta = Vector2.zero;
         var innerImg = innerGO.GetComponent<Image>();
-        Sprite spInner = CarregarSprite("Assets/assets/UI/skill_card/skill_slot_card.aseprite", "skill_slot_card");
-        if (spInner != null) { innerImg.sprite = spInner; innerImg.color = Color.white; }
+        Sprite spInner = frameSlot
+            ?? CarregarSprite("Assets/assets/UI/skill_card/slotstatus.ase", "slotstatus");
+        if (spInner != null) { innerImg.sprite = spInner; innerImg.color = Color.white; innerImg.type = Image.Type.Simple; }
         else innerImg.color = rColor;
         innerImg.raycastTarget = false;
 
@@ -471,8 +495,16 @@ public class StatusCardChoiceUI : MonoBehaviour
     {
 #if UNITY_EDITOR
         var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+        Sprite primeiro = null;
         foreach (var a in all)
-            if (a is Sprite s && s.name == spriteName) return s;
+        {
+            if (a is Sprite s)
+            {
+                if (s.name == spriteName) return s;
+                if (primeiro == null) primeiro = s;
+            }
+        }
+        if (primeiro != null) return primeiro;
 #endif
         return null;
     }

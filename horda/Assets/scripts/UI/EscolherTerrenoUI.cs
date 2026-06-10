@@ -40,11 +40,12 @@ public class EscolherTerrenoUI : MonoBehaviour
 #if UNITY_EDITOR
         if (spriteCard == null)
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
-                "Assets/assets/UI/charselection/testecaractere.ase"))
+                "Assets/assets/UI/skill_card/cartaextra.ase"))
                 if (a is Sprite s) { spriteCard = s; break; }
         if (spriteFundoImg == null)
-            spriteFundoImg = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/assets/UI/menu_inicial/IMG_6856 (1).png");
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/bg_dungeon_tocha.png"))
+                if (a is Sprite s) { spriteFundoImg = s; break; }
 #endif
 
         GameObject canvasGO = CriarCanvas();
@@ -93,19 +94,27 @@ public class EscolherTerrenoUI : MonoBehaviour
     {
         GameObject go = new GameObject("Fundo");
         go.transform.SetParent(canvas.transform, false);
+        go.transform.SetAsFirstSibling();
         Stretch(go);
         var img = go.AddComponent<Image>();
         if (spriteFundoImg != null)
         {
-            img.sprite = spriteFundoImg;
-            img.type   = Image.Type.Simple;
-            img.color  = Color.white;
+            img.sprite         = spriteFundoImg;
+            img.type           = Image.Type.Simple;
+            img.color          = Color.white;
             img.preserveAspect = false;
+            img.raycastTarget  = false;
         }
         else
         {
             img.color = new Color(0.06f, 0.06f, 0.12f);
         }
+
+        // Partículas de brasa
+        GameObject brasas = new GameObject("Brasas");
+        brasas.transform.SetParent(go.transform, false);
+        Stretch(brasas);
+        brasas.AddComponent<BrasasAnimador>();
     }
 
     void CriarTitulo(GameObject canvas)
@@ -157,9 +166,30 @@ public class EscolherTerrenoUI : MonoBehaviour
 
         // Fundo do card
         Image bg = card.AddComponent<Image>();
-        if (spriteCard != null)
+        Sprite spriteEscolhido = spriteCard;
+#if UNITY_EDITOR
+        if (fase.nome == "Segunda Fase")
         {
-            bg.sprite = spriteCard;
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/skill_card/cartastatusl.ase"))
+                if (a is Sprite s) { spriteEscolhido = s; break; }
+        }
+        else if (fase.nome == "Terceira Fase")
+        {
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/skill_card/cartaevolução.ase"))
+                if (a is Sprite s) { spriteEscolhido = s; break; }
+        }
+        else if (fase.nome.Contains("Sobreviv"))
+        {
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/skill_card/cartaskill.ase"))
+                if (a is Sprite s) { spriteEscolhido = s; break; }
+        }
+#endif
+        if (spriteEscolhido != null)
+        {
+            bg.sprite = spriteEscolhido;
             bg.type   = Image.Type.Simple;
             bg.preserveAspect = false;
             bg.color = fase.desbloqueada
@@ -304,6 +334,89 @@ public class EscolherTerrenoUI : MonoBehaviour
         r.anchorMax = Vector2.one;
         r.offsetMin = Vector2.zero;
         r.offsetMax = Vector2.zero;
+    }
+}
+
+// ── Partículas de brasa ───────────────────────────────────────────────────────
+public class BrasasAnimador : MonoBehaviour
+{
+    struct Brasa
+    {
+        public RectTransform rt;
+        public Image         img;
+        public float         velY;
+        public float         velX;
+        public float         vida;
+        public float         vidaMax;
+        public float         oscFase;
+    }
+
+    const int MAX = 18;
+    Brasa[] brasas = new Brasa[MAX];
+    RectTransform area;
+
+    void Awake()
+    {
+        area = GetComponent<RectTransform>();
+        for (int i = 0; i < MAX; i++)
+            brasas[i] = CriarBrasa(Random.Range(0f, 1f));  // stagger inicial
+    }
+
+    Brasa CriarBrasa(float vidaInicial = 0f)
+    {
+        var go = new GameObject("Brasa", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(transform, false);
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(Random.Range(3f, 7f), Random.Range(3f, 7f));
+        rt.anchorMin = rt.anchorMax = new Vector2(Random.Range(0.05f, 0.95f), 0f);
+        rt.anchoredPosition = new Vector2(0f, Random.Range(0f, 80f));
+
+        var img = go.GetComponent<Image>();
+        img.color        = new Color(1f, Random.Range(0.3f, 0.7f), 0f, 0f);
+        img.raycastTarget = false;
+
+        float vidaMax = Random.Range(2.5f, 5f);
+        return new Brasa
+        {
+            rt      = rt,
+            img     = img,
+            velY    = Random.Range(40f, 100f),
+            velX    = Random.Range(-15f, 15f),
+            vida    = vidaInicial * vidaMax,
+            vidaMax = vidaMax,
+            oscFase = Random.Range(0f, Mathf.PI * 2f),
+        };
+    }
+
+    void Update()
+    {
+        float dt = Time.deltaTime;
+        for (int i = 0; i < MAX; i++)
+        {
+            ref var b = ref brasas[i];
+            if (b.rt == null) { brasas[i] = CriarBrasa(); continue; }
+
+            b.vida += dt;
+            if (b.vida >= b.vidaMax)
+            {
+                Destroy(b.rt.gameObject);
+                brasas[i] = CriarBrasa();
+                continue;
+            }
+
+            float prog  = b.vida / b.vidaMax;
+            float alpha = prog < 0.2f
+                ? Mathf.Lerp(0f, 0.9f, prog / 0.2f)
+                : Mathf.Lerp(0.9f, 0f, (prog - 0.2f) / 0.8f);
+
+            var c = b.img.color;
+            c.a = alpha;
+            b.img.color = c;
+
+            float osc = Mathf.Sin(b.vida * 3f + b.oscFase) * 12f;
+            b.rt.anchoredPosition += new Vector2((b.velX + osc) * dt, b.velY * dt);
+        }
     }
 }
 
