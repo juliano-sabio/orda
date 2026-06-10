@@ -149,7 +149,7 @@ public class UIManager : MonoBehaviour
 
         InitializeUI();
         SetupStatusPanel();
-        UpdateSkillIcons();
+        StartCoroutine(AtualizarIconesComDelay());
 
         ConnectToEquippedSkill();
 
@@ -170,6 +170,13 @@ public class UIManager : MonoBehaviour
         // Melhoria visual da barra de vida
         if (healthBar != null && healthBar.GetComponent<PlayerHealthBarFX>() == null)
             healthBar.gameObject.AddComponent<PlayerHealthBarFX>();
+    }
+
+    IEnumerator AtualizarIconesComDelay()
+    {
+        yield return null; // aguarda 1 frame para PlayerStats.Start() terminar
+        if (playerStats == null) playerStats = FindAnyObjectByType<PlayerStats>();
+        UpdateSkillIcons();
     }
 
     void CriarSlotPassivaRuntime()
@@ -516,7 +523,7 @@ public class UIManager : MonoBehaviour
 
             // Efeito de brilho
             float glow = Mathf.PingPong(elapsed * 3f, 0.3f);
-            slot.color = Color.Lerp(originalColor, Color.yellow, glow);
+            slot.color = Color.Lerp(originalColor, Color.white, glow);
 
             elapsed += Time.deltaTime;
             yield return null;
@@ -787,7 +794,6 @@ public class UIManager : MonoBehaviour
     {
         UpdateAttackSkillIcons();
         UpdateDefenseSkillIcons();
-        UpdateUltimateSkillIcon();
     }
 
     private void UpdateUltimateSkillIcon()
@@ -803,14 +809,21 @@ public class UIManager : MonoBehaviour
                     ? ultimateSkill.icon
                     : GetSkillIcon(ultimateSkill.skillName);
                 ultimateSkillIcon.color = playerStats.ultimateBloqueada ? Color.red
-                                        : playerStats.IsUltimateReady() ? Color.yellow
-                                        : Color.white;
+                    : playerStats.IsUltimateReady() ? new Color(1f, 0.85f, 0.45f, 1f)
+                    : new Color(0.65f, 0.65f, 0.65f, 0.85f);
                 ultimateSkillIcon.gameObject.SetActive(true);
 
                 if (ultimateSkillElementIcon != null)
                 {
-                    ultimateSkillElementIcon.color = GetElementColor(ultimateSkill.element);
-                    ultimateSkillElementIcon.gameObject.SetActive(true);
+                    if (ultimateSkill.element != PlayerStats.Element.None)
+                    {
+                        ultimateSkillElementIcon.color = GetElementColor(ultimateSkill.element);
+                        ultimateSkillElementIcon.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        ultimateSkillElementIcon.gameObject.SetActive(false);
+                    }
                 }
             }
             else
@@ -825,6 +838,8 @@ public class UIManager : MonoBehaviour
                 ultimateSkill.description ?? "", ultimateSkill.specificType);
         }
     }
+
+
 
     private void UpdateElementIcon()
     {
@@ -1711,8 +1726,8 @@ public class UIManager : MonoBehaviour
                 targetIcon = slotIndex == 0 ? defenseSkill1Icon : defenseSkill2Icon;
                 break;
             case "ultimate":
-                targetIcon = ultimateSkillIcon;
-                break;
+                yield break; // ícone da ultimate não participa de highlight de infusão
+
         }
 
         if (targetIcon == null) yield break;
@@ -1724,7 +1739,7 @@ public class UIManager : MonoBehaviour
         while (elapsed < duration)
         {
             float pulse = Mathf.PingPong(elapsed * 3f, 1f);
-            targetIcon.color = Color.Lerp(originalColor, Color.yellow, pulse);
+            targetIcon.color = Color.Lerp(originalColor, Color.white, pulse);
             elapsed += Time.deltaTime;
             yield return null;
         }
