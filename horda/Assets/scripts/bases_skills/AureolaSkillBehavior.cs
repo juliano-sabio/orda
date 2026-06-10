@@ -209,18 +209,18 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
         rootVisual.transform.GetChild(0).localRotation = Quaternion.Euler(0f, 0f, angRot);
         if (lrHaloExt != null)
         {
-            float alpha = emRecarga ? 0.12f : (ativo ? (0.7f + pulso * 0.3f) : (0.35f + pulso * 0.2f));
+            float alpha = emRecarga ? (0.35f + pulso * 0.1f) : (ativo ? (0.7f + pulso * 0.3f) : (0.35f + pulso * 0.2f));
             lrHaloExt.startColor = lrHaloExt.endColor = new Color(COR_DOURADO.r, COR_DOURADO.g, COR_DOURADO.b, alpha);
-            lrHaloExt.startWidth = lrHaloExt.endWidth = emRecarga ? 0.035f : (0.06f + pulso * 0.04f);
+            lrHaloExt.startWidth = lrHaloExt.endWidth = emRecarga ? 0.05f : (0.06f + pulso * 0.04f);
         }
 
         // Halo interno gira no sentido anti-horário
         rootVisual.transform.GetChild(1).localRotation = Quaternion.Euler(0f, 0f, -angRot * 1.4f);
         if (lrHaloInt != null)
         {
-            float alpha = emRecarga ? 0.08f : (ativo ? (0.55f + pulso2 * 0.3f) : (0.22f + pulso2 * 0.15f));
+            float alpha = emRecarga ? (0.22f + pulso2 * 0.08f) : (ativo ? (0.55f + pulso2 * 0.3f) : (0.22f + pulso2 * 0.15f));
             lrHaloInt.startColor = lrHaloInt.endColor = new Color(COR_DOURADO.r, COR_DOURADO.g, COR_DOURADO.b, alpha);
-            lrHaloInt.startWidth = lrHaloInt.endWidth = emRecarga ? 0.025f : (0.035f + pulso2 * 0.025f);
+            lrHaloInt.startWidth = lrHaloInt.endWidth = emRecarga ? 0.035f : (0.035f + pulso2 * 0.025f);
         }
 
         // Anéis extras (ativo)
@@ -240,7 +240,7 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
         // Glow
         if (srGlow != null)
         {
-            float glowAlpha = emRecarga ? 0.01f : (ativo ? (0.07f + pulso * 0.05f) : 0.025f + pulso * 0.015f);
+            float glowAlpha = emRecarga ? 0.025f : (ativo ? (0.07f + pulso * 0.05f) : 0.025f + pulso * 0.015f);
             srGlow.color = new Color(COR_DOURADO.r, COR_DOURADO.g, COR_DOURADO.b, glowAlpha);
         }
     }
@@ -254,6 +254,8 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
 
         while (rootVisual != null && playerStats != null)
         {
+            if (Time.timeScale == 0f) { yield return null; continue; }
+
             // Partículas mais frequentes quando ativo, ocasionais no idle
             int frameInterval = ativo ? 8 : 20;
             if (Time.frameCount % frameInterval == 0)

@@ -116,6 +116,10 @@ public class PlayerStats : MonoBehaviour
     Color       corOriginalAnteVeneno;
     float       tempoVenenoRestante;
 
+    bool        estaParalizado;
+    Coroutine   corotinaParalisia;
+    Color       corOriginalAnteParalisia;
+
     void Awake()
     {
         if (characterData != null)
@@ -1854,6 +1858,28 @@ public class PlayerStats : MonoBehaviour
         estaEnvenenado = false;
         corotinaVeneno = null;
         if (sr != null) sr.color = corOriginalAnteVeneno;
+    }
+
+    public void AplicarParalisiaPlayer(float duracao)
+    {
+        if (corotinaParalisia != null) StopCoroutine(corotinaParalisia);
+        corotinaParalisia = StartCoroutine(CorotinaParalisia(duracao));
+    }
+
+    System.Collections.IEnumerator CorotinaParalisia(float duracao)
+    {
+        var sr = GetComponent<SpriteRenderer>();
+        if (!estaParalizado)
+            corOriginalAnteParalisia = sr != null ? sr.color : Color.white;
+
+        estaParalizado = true;
+        if (sr != null) sr.color = new Color(0.55f, 0.55f, 0.8f);
+
+        yield return new WaitForSeconds(duracao);
+
+        estaParalizado    = false;
+        corotinaParalisia = null;
+        if (sr != null) sr.color = corOriginalAnteParalisia;
     }
 
     public void AddShieldAuraBehavior(SkillData skill)

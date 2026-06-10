@@ -148,7 +148,7 @@ public class ProjectileController2D : MonoBehaviour
 
         if (target != null)
         {
-            Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
+            Vector2 direction = (ObterPontoAlvo() - (Vector2)transform.position).normalized;
 
             if (rb != null)
             {
@@ -229,11 +229,33 @@ public class ProjectileController2D : MonoBehaviour
     {
         if (target == null) return;
 
+        // Usa o collider do alvo quando disponível: alguns inimigos (ex: BossCaveira)
+        // têm o pivot do sprite bem longe do centro do collider, então checar apenas
+        // a distância até transform.position fazia o projétil passar direto sem acertar.
+        Collider2D targetCollider = target.GetComponent<Collider2D>();
+        if (targetCollider != null)
+        {
+            Vector2 pontoMaisProximo = targetCollider.ClosestPoint(transform.position);
+            if (Vector2.Distance(transform.position, pontoMaisProximo) < 0.3f)
+                OnHitTarget();
+            return;
+        }
+
         float distanceToTarget = Vector2.Distance(transform.position, target.position);
         if (distanceToTarget < 0.3f)
         {
             OnHitTarget();
         }
+    }
+
+    // Ponto que o projétil persegue: o centro do collider do alvo, quando existir
+    // (alguns inimigos, como o BossCaveira, têm o pivot do sprite longe do collider —
+    // perseguir transform.position fazia o projétil nunca alcançar a hitbox real).
+    Vector2 ObterPontoAlvo()
+    {
+        if (target == null) return transform.position;
+        Collider2D targetCollider = target.GetComponent<Collider2D>();
+        return targetCollider != null ? (Vector2)targetCollider.bounds.center : (Vector2)target.position;
     }
 
     void OnTriggerEnter2D(Collider2D other)
