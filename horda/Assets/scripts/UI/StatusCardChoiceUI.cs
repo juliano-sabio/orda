@@ -15,13 +15,13 @@ public class StatusCardChoiceUI : MonoBehaviour
     public GameObject cardPrefab;   // arraste aqui o mesmo prefab usado nas skill cards
 
     [Header("Sprites (override do carregamento automático)")]
-    public Sprite fundoCarta;   // cartastatusl.ase → cartastatusl
-    public Sprite frameSlot;    // slotstatus.ase → slotstatus
+    public Sprite fundoCarta;   // fundoteste.png → fundoteste_0
+    public Sprite frameSlot;    // cartaskill.png → carta_frame
 
     [Header("Configurações")]
     public bool    pauseGameDuringChoice = true;
     public float   cardSpacing           = 30f;
-    public Vector2 cardSize              = new Vector2(220f, 330f);
+    public Vector2 cardSize              = new Vector2(300f, 450f);
     public Vector2 panelSize             = new Vector2(1300f, 700f);
     public float   tempoEscolha          = 20f;
     public string  titleMessage          = "ESCOLHA UMA CARTA DE STATUS";
@@ -32,10 +32,20 @@ public class StatusCardChoiceUI : MonoBehaviour
     private int   cardIndex        = 0;
     private float previousTimeScale;
     private Coroutine contadorCoroutine;
+    private Vector2 _scaledCardSize;  // não usado diretamente — mantido para compatibilidade
+    private float   _cardScale = 1f;  // escala relativa ao espaço de 1887px do SkillChoice_Canvas
 
     void Awake()
     {
-        if (choicePanel != null) choicePanel.SetActive(false);
+        if (choicePanel != null)
+        {
+            var scaler = choicePanel.GetComponent<CanvasScaler>()
+                      ?? choicePanel.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode        = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.matchWidthOrHeight  = 0.5f;
+            choicePanel.SetActive(false);
+        }
     }
 
     void Update()
@@ -65,35 +75,13 @@ public class StatusCardChoiceUI : MonoBehaviour
         if (!gameObject.activeInHierarchy) gameObject.SetActive(true);
 
         if (choicePanel != null)
-        {
             choicePanel.SetActive(true);
-            var rt = choicePanel.GetComponent<RectTransform>();
-            if (rt != null)
-            {
-                rt.anchorMin        = new Vector2(0.5f, 0.5f);
-                rt.anchorMax        = new Vector2(0.5f, 0.5f);
-                rt.pivot            = new Vector2(0.5f, 0.5f);
-                rt.anchoredPosition = Vector2.zero;
-                rt.sizeDelta        = panelSize;
-            }
-            var bg = choicePanel.GetComponent<Image>();
-            if (bg != null)
-            {
-                Sprite fundo = CarregarSprite("Assets/assets/UI/skill_card/fundoteste02.png", "fundoteste02_0");
-                if (fundo != null) { bg.sprite = fundo; bg.color = Color.white; bg.type = Image.Type.Simple; }
-                else { bg.sprite = null; bg.color = new Color(0f, 0f, 0f, 0.95f); }
-            }
-        }
 
         if (titleText != null) titleText.text = titleMessage;
 
         PauseGame();
-        SetupLayout();
 
-        if (contadorCoroutine != null) StopCoroutine(contadorCoroutine);
-        contadorCoroutine = StartCoroutine(ContadorEscolha());
-
-        StartCoroutine(SpawnCards(cards));
+        StartCoroutine(IniciarComLayout(cards));
     }
 
     public void ClosePanel()
@@ -106,30 +94,101 @@ public class StatusCardChoiceUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    private IEnumerator IniciarComLayout(List<StatusCardInfo> cards)
+    {
+        yield return null; // frame 1: canvas ativa, CanvasScaler começa a calcular
+        yield return null; // frame 2: CanvasScaler aplica escala (se funcionar)
+        ConfigurarCanvas();
+        SetupLayout();
+        if (contadorCoroutine != null) StopCoroutine(contadorCoroutine);
+        contadorCoroutine = StartCoroutine(ContadorEscolha());
+        StartCoroutine(SpawnCards(cards));
+    }
+
     // ── Layout ───────────────────────────────────────────────────────────────
+
+    private void ConfigurarCanvas()
+    {
+        var cpRT = choicePanel.GetComponent<RectTransform>();
+        cpRT.anchorMin = Vector2.zero;
+        cpRT.anchorMax = Vector2.one;
+        cpRT.offsetMin = Vector2.zero;
+        cpRT.offsetMax = Vector2.zero;
+        Canvas.ForceUpdateCanvases();
+
+        // Escala 1.0: cards em tamanho original igual ao SkillChoiceUI (300×450)
+        _cardScale = 1.0f;
+
+        // Backdrop: tamanho fixo 1300×700 centralizado — espelha o painel do SkillChoiceUI
+        var backdropT = choicePanel.transform.Find("Backdrop");
+        if (backdropT != null)
+        {
+            var rt = backdropT.GetComponent<RectTransform>();
+            rt.anchorMin        = new Vector2(0.5f, 0.5f);
+            rt.anchorMax        = new Vector2(0.5f, 0.5f);
+            rt.pivot            = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta        = new Vector2(1300f, 700f);
+        }
+
+        // Bordas: desativar — o fundo do painel já tem estilo próprio
+        string[] bordas = { "BordaTop", "BordaBot", "BordaLeft", "BordaRight" };
+        foreach (var nome in bordas)
+        {
+            Transform borda = choicePanel.transform.Find(nome);
+            if (borda == null && backdropT != null) borda = backdropT.Find(nome);
+            if (borda != null) borda.gameObject.SetActive(false);
+        }
+
+        // TitleText: FORA do Backdrop, 10px acima do topo dele
+        var titleT = choicePanel.transform.Find("TitleText");
+        if (titleT == null && backdropT != null) titleT = backdropT.Find("TitleText");
+        if (titleT != null && titleT.parent != choicePanel.transform)
+            titleT.SetParent(choicePanel.transform, false);
+        if (titleT != null)
+        {
+            var rt = titleT.GetComponent<RectTransform>();
+            rt.anchorMin        = new Vector2(0.5f, 0.5f);
+            rt.anchorMax        = new Vector2(0.5f, 0.5f);
+            rt.pivot            = new Vector2(0.5f, 0f);   // pivot na base do texto
+            rt.anchoredPosition = new Vector2(0f, 360f);   // 10px acima do topo do backdrop (350)
+            rt.sizeDelta        = new Vector2(1300f, 80f);
+        }
+
+        // cardsContainer: tamanho fixo 1200×500 centralizado no Backdrop — igual ao SkillChoiceUI
+        if (cardsContainer != null && backdropT != null && cardsContainer.parent != backdropT)
+            cardsContainer.SetParent(backdropT, false);
+        if (cardsContainer != null && backdropT != null)
+        {
+            var rt = cardsContainer.GetComponent<RectTransform>();
+            rt.anchorMin        = new Vector2(0.5f, 0.5f);
+            rt.anchorMax        = new Vector2(0.5f, 0.5f);
+            rt.pivot            = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta        = new Vector2(1200f, 500f);
+        }
+        Canvas.ForceUpdateCanvases();
+    }
 
     private void SetupLayout()
     {
         if (cardsContainer == null) return;
+
+        _scaledCardSize = cardSize; // mantido para compatibilidade — escala é via localScale dos cards
+
+        float sc = _cardScale > 0.01f ? _cardScale : 1f;
+
         var layout = cardsContainer.GetComponent<HorizontalLayoutGroup>()
                   ?? cardsContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing            = cardSpacing;
-        layout.padding            = new RectOffset(30, 30, 20, 20);
+        layout.spacing            = cardSpacing * sc;
+        layout.padding            = new RectOffset(
+            Mathf.RoundToInt(20 * sc), Mathf.RoundToInt(20 * sc),
+            Mathf.RoundToInt(10 * sc), Mathf.RoundToInt(10 * sc));
         layout.childAlignment     = TextAnchor.MiddleCenter;
         layout.childControlWidth  = false;
         layout.childControlHeight = false;
         layout.childForceExpandWidth  = false;
         layout.childForceExpandHeight = false;
-
-        var containerRect = cardsContainer as RectTransform;
-        if (containerRect != null)
-        {
-            containerRect.sizeDelta        = new Vector2(1200f, 500f);
-            containerRect.anchoredPosition = new Vector2(0f, 3f);
-            containerRect.anchorMin        = new Vector2(0.5f, 0.5f);
-            containerRect.anchorMax        = new Vector2(0.5f, 0.5f);
-            containerRect.pivot            = new Vector2(0.5f, 0.5f);
-        }
     }
 
     // ── Criação de cartas ────────────────────────────────────────────────────
@@ -189,21 +248,29 @@ public class StatusCardChoiceUI : MonoBehaviour
         cardObj.SetActive(true);
         spawnedCards.Add(cardObj);
 
-        // Tamanho
+        // Escalar card via localScale (preserva layout interno do prefab)
+        float sc = _cardScale > 0.01f ? _cardScale : 1f;
+        Vector2 sz = cardSize; // sizeDelta mantém tamanho original
         var rt = cardObj.GetComponent<RectTransform>();
-        if (rt != null) { rt.localScale = Vector3.one; rt.sizeDelta = cardSize; }
+        if (rt != null)
+        {
+            rt.sizeDelta   = sz;
+            rt.localScale  = new Vector3(sc, sc, 1f); // escala visual proporcional ao SkillChoiceUI
+        }
         var le = cardObj.GetComponent<LayoutElement>()
               ?? cardObj.AddComponent<LayoutElement>();
-        le.preferredWidth = cardSize.x; le.preferredHeight = cardSize.y;
-        le.flexibleWidth  = le.flexibleHeight = 0;
+        le.preferredWidth  = sz.x * sc; // layout group lê o tamanho escalado
+        le.preferredHeight = sz.y * sc;
+        le.flexibleWidth   = le.flexibleHeight = 0;
 
         Color rColor = GetRarityColor(card.rarity);
 
-        // Fundo da carta
+        // Fundo da carta — sobrescreve sprite do prefab com fundoteste
         var cardBg = cardObj.GetComponent<Image>();
         if (cardBg != null)
         {
-            Sprite fundo = CarregarSprite("Assets/assets/UI/skill_card/cartastatusl.ase", "cartastatusl");
+            Sprite fundo = fundoCarta
+                ?? CarregarSprite("Assets/assets/UI/charselection/fundoteste.png", "fundoteste_0");
             if (fundo != null) { cardBg.sprite = fundo; cardBg.color = Color.white; cardBg.type = Image.Type.Simple; }
         }
 
@@ -220,17 +287,6 @@ public class StatusCardChoiceUI : MonoBehaviour
             else if (n.Contains("rarity") || n.Contains("rarid") || n.Contains("rare")
                   || n.Contains("comun")  || n.Contains("curse") || n.Contains("mistico"))
                 { txt.text = GetRarityLabel(card.rarity); txt.color = rColor; }
-        }
-
-        // Slot do ícone — substitui o frame do prefab por slotstatus
-        var slotImg2 = cardObj.transform.Find("IconArea/IconImageSlot")?.GetComponent<Image>();
-        if (slotImg2 == null)
-            foreach (var img in cardObj.GetComponentsInChildren<Image>(true))
-                if (img.name == "IconImageSlot") { slotImg2 = img; break; }
-        if (slotImg2 != null)
-        {
-            Sprite spSlot = CarregarSprite("Assets/assets/UI/skill_card/slotstatus.ase", "slotstatus");
-            if (spSlot != null) { slotImg2.sprite = spSlot; slotImg2.color = Color.white; slotImg2.type = Image.Type.Simple; }
         }
 
         // Ícone — usa o ícone gerado pelo StatusCardIconGenerator
@@ -272,16 +328,21 @@ public class StatusCardChoiceUI : MonoBehaviour
 
         // Fundo da carta — fundoteste
         var bgImg = cardObj.GetComponent<Image>();
-        Sprite spFundo = CarregarSprite("Assets/assets/UI/skill_card/cartastatusl.ase", "cartastatusl");
+        Sprite spFundo = fundoCarta
+            ?? CarregarSprite("Assets/assets/UI/charselection/fundoteste.png", "fundoteste_0");
         if (spFundo != null) { bgImg.sprite = spFundo; bgImg.color = Color.white; bgImg.type = Image.Type.Simple; }
         else bgImg.color = new Color(0.07f, 0.05f, 0.10f, 0.97f);
         bgImg.raycastTarget = true;
 
+        float sc2 = _cardScale > 0.01f ? _cardScale : 1f;
+        Vector2 sz = cardSize;
         var rt = cardObj.GetComponent<RectTransform>();
-        rt.localScale = Vector3.one; rt.sizeDelta = cardSize;
+        rt.sizeDelta  = sz;
+        rt.localScale = new Vector3(sc2, sc2, 1f);
         var le = cardObj.GetComponent<LayoutElement>();
-        le.preferredWidth = cardSize.x; le.preferredHeight = cardSize.y;
-        le.flexibleWidth = le.flexibleHeight = 0;
+        le.preferredWidth  = sz.x * sc2;
+        le.preferredHeight = sz.y * sc2;
+        le.flexibleWidth   = le.flexibleHeight = 0;
 
         // Borda de raridade
         var bordGO = new GameObject("RarityBorder", typeof(Image));
@@ -308,8 +369,8 @@ public class StatusCardChoiceUI : MonoBehaviour
         slotRT.anchoredPosition = Vector2.zero; slotRT.sizeDelta = Vector2.zero;
         var slotImg = slotGO.GetComponent<Image>();
         Sprite spSlot = frameSlot
-            ?? CarregarSprite("Assets/assets/UI/skill_card/slotstatus.ase", "slotstatus");
-        if (spSlot != null) { slotImg.sprite = spSlot; slotImg.color = Color.white; slotImg.type = Image.Type.Simple; slotImg.preserveAspect = false; }
+            ?? CarregarSprite("Assets/assets/UI/skill_card/cartaskill.png", "carta_frame");
+        if (spSlot != null) { slotImg.sprite = spSlot; slotImg.color = Color.white; slotImg.type = Image.Type.Sliced; slotImg.fillCenter = true; }
         else slotImg.color = new Color(rColor.r * 0.4f, rColor.g * 0.4f, rColor.b * 0.4f, 0.6f);
         slotImg.raycastTarget = false;
 
@@ -320,9 +381,8 @@ public class StatusCardChoiceUI : MonoBehaviour
         innerRT.anchorMin = new Vector2(0.1f, 0.1f); innerRT.anchorMax = new Vector2(0.9f, 0.9f);
         innerRT.anchoredPosition = Vector2.zero; innerRT.sizeDelta = Vector2.zero;
         var innerImg = innerGO.GetComponent<Image>();
-        Sprite spInner = frameSlot
-            ?? CarregarSprite("Assets/assets/UI/skill_card/slotstatus.ase", "slotstatus");
-        if (spInner != null) { innerImg.sprite = spInner; innerImg.color = Color.white; innerImg.type = Image.Type.Simple; }
+        Sprite spInner = CarregarSprite("Assets/assets/UI/skill_card/skill_slot_card.aseprite", "skill_slot_card");
+        if (spInner != null) { innerImg.sprite = spInner; innerImg.color = Color.white; }
         else innerImg.color = rColor;
         innerImg.raycastTarget = false;
 
@@ -495,16 +555,8 @@ public class StatusCardChoiceUI : MonoBehaviour
     {
 #if UNITY_EDITOR
         var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
-        Sprite primeiro = null;
         foreach (var a in all)
-        {
-            if (a is Sprite s)
-            {
-                if (s.name == spriteName) return s;
-                if (primeiro == null) primeiro = s;
-            }
-        }
-        if (primeiro != null) return primeiro;
+            if (a is Sprite s && s.name == spriteName) return s;
 #endif
         return null;
     }
