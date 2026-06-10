@@ -18,6 +18,15 @@ public class moviment_player2 : MonoBehaviour
     private Vector2 dashDirection;
     private DashEffect dashEffect;
 
+    private float tempoImobilizado = 0f;
+
+    public void Imobilizar(float duracao)
+    {
+        tempoImobilizado = Mathf.Max(tempoImobilizado, duracao);
+        isDashing = false;
+        playerStats?.AplicarParalisiaPlayer(duracao);
+    }
+
     private void Start()
     {
         playerStats = GetComponent<PlayerStats>();
@@ -37,6 +46,14 @@ public class moviment_player2 : MonoBehaviour
     private void Update()
     {
         if (playerStats == null || rb == null) return;
+
+        if (tempoImobilizado > 0f)
+        {
+            tempoImobilizado -= Time.deltaTime;
+            moveInput = Vector2.zero;
+            if (anim != null) anim.SetFloat("Speed", 0f);
+            return;
+        }
 
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
@@ -61,6 +78,12 @@ public class moviment_player2 : MonoBehaviour
     private void FixedUpdate()
     {
         if (playerStats == null || rb == null) return;
+
+        if (tempoImobilizado > 0f)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
 
         if (isDashing)
             rb.linearVelocity = dashDirection * dashSpeed;

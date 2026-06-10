@@ -1,0 +1,3081 @@
+fileFormatVersion: 2
+guid: d9941e41dc59cb045ba9e914f883c1a5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6212183869837608458
+    second: crop_crystal_0
+  - first:
+      213: -3173161346593993254
+    second: crop_crystal_1
+  - first:
+      213: -8873263727995889201
+    second: crop_crystal_2
+  - first:
+      213: 7960668605708599820
+    second: crop_crystal_3
+  - first:
+      213: 4221295216380448383
+    second: crop_crystal_4
+  - first:
+      213: -37339245694679156
+    second: crop_crystal_5
+  - first:
+      213: -8966143591985851072
+    second: crop_crystal_6
+  - first:
+      213: -6585330359861790927
+    second: crop_crystal_7
+  - first:
+      213: -1494616287388631569
+    second: crop_crystal_8
+  - first:
+      213: 1205871263599825556
+    second: crop_crystal_9
+  - first:
+      213: 1498758084185317273
+    second: crop_crystal_10
+  - first:
+      213: -6935169778284373513
+    second: crop_crystal_11
+  - first:
+      213: -851269871161577933
+    second: crop_crystal_12
+  - first:
+      213: 5676526912582894546
+    second: crop_crystal_13
+  - first:
+      213: -5016243373408274713
+    second: crop_crystal_14
+  - first:
+      213: 9022934154707664358
+    second: crop_crystal_15
+  - first:
+      213: -6773617281914833452
+    second: crop_crystal_16
+  - first:
+      213: -3356353633825362120
+    second: crop_crystal_17
+  - first:
+      213: 3596380297184222197
+    second: crop_crystal_18
+  - first:
+      213: 324592261604332361
+    second: crop_crystal_19
+  - first:
+      213: -5241810633020874912
+    second: crop_crystal_20
+  - first:
+      213: 6922538617423655798
+    second: crop_crystal_21
+  - first:
+      213: -3092377178092393056
+    second: crop_crystal_22
+  - first:
+      213: 3204362654470040271
+    second: crop_crystal_23
+  - first:
+      213: -8537098681907684126
+    second: crop_crystal_24
+  - first:
+      213: 6742237239798685457
+    second: crop_crystal_25
+  - first:
+      213: 3503982449413644464
+    second: crop_crystal_26
+  - first:
+      213: -8999575692421895552
+    second: crop_crystal_27
+  - first:
+      213: -5451100987588495320
+    second: crop_crystal_28
+  - first:
+      213: 4143311335627468876
+    second: crop_crystal_29
+  - first:
+      213: 3254295015278853470
+    second: crop_crystal_30
+  - first:
+      213: -5681127002541320726
+    second: crop_crystal_31
+  - first:
+      213: -8061894559862345458
+    second: crop_crystal_32
+  - first:
+      213: -7781000787466644762
+    second: crop_crystal_33
+  - first:
+      213: -12533789491017398
+    second: crop_crystal_34
+  - first:
+      213: -1036632334967845309
+    second: crop_crystal_35
+  - first:
+      213: -4333255056928522211
+    second: crop_crystal_36
+  - first:
+      213: 5470063445468494954
+    second: crop_crystal_37
+  - first:
+      213: 9179882630940876486
+    second: crop_crystal_38
+  - first:
+      213: -2203212287760591173
+    second: crop_crystal_39
+  - first:
+      213: 7665611344122860331
+    second: crop_crystal_40
+  - first:
+      213: -458064154901869084
+    second: crop_crystal_41
+  - first:
+      213: -8000053142050350402
+    second: crop_crystal_42
+  - first:
+      213: 2021442309564674383
+    second: crop_crystal_43
+  - first:
+      213: 1070196424183845814
+    second: crop_crystal_44
+  - first:
+      213: -7482078421933657820
+    second: crop_crystal_45
+  - first:
+      213: 3439460757591286282
+    second: crop_crystal_46
+  - first:
+      213: -588841132056794007
+    second: crop_crystal_47
+  - first:
+      213: -3533968664276333008
+    second: crop_crystal_48
+  - first:
+      213: -8663054973627895174
+    second: crop_crystal_49
+  - first:
+      213: -1670681445621073890
+    second: crop_crystal_50
+  - first:
+      213: 7215723530168932729
+    second: crop_crystal_51
+  - first:
+      213: -4920268897855095658
+    second: crop_crystal_52
+  - first:
+      213: 3702156311274030161
+    second: crop_crystal_53
+  - first:
+      213: -6559612430934376582
+    second: crop_crystal_54
+  - first:
+      213: -8958415755663462797
+    second: crop_crystal_55
+  - first:
+      213: -4600742532676839914
+    second: crop_crystal_56
+  - first:
+      213: 4993771846003630075
+    second: crop_crystal_57
+  - first:
+      213: -8741274877569687470
+    second: crop_crystal_58
+  - first:
+      213: 7774800716464513931
+    second: crop_crystal_59
+  - first:
+      213: 5199444105285246159
+    second: crop_crystal_60
+  - first:
+      213: -4041787192026913402
+    second: crop_crystal_61
+  - first:
+      213: 1334745867266275789
+    second: crop_crystal_62
+  - first:
+      213: -7970367309891913604
+    second: crop_crystal_63
+  - first:
+      213: 2362948423593100097
+    second: crop_crystal_64
+  - first:
+      213: 6335060592800331759
+    second: crop_crystal_65
+  - first:
+      213: -2049620895038411604
+    second: crop_crystal_66
+  - first:
+      213: 3044889861925451988
+    second: crop_crystal_67
+  - first:
+      213: 7264391147627475038
+    second: crop_crystal_68
+  - first:
+      213: 2689743566132477815
+    second: crop_crystal_69
+  - first:
+      213: -4298258735333509521
+    second: crop_crystal_70
+  - first:
+      213: -7117157596717781526
+    second: crop_crystal_71
+  - first:
+      213: -7906695807773277077
+    second: crop_crystal_72
+  - first:
+      213: -3455965064833935139
+    second: crop_crystal_73
+  - first:
+      213: 5922766074700928263
+    second: crop_crystal_74
+  - first:
+      213: -5668428309331399792
+    second: crop_crystal_75
+  - first:
+      213: -6956615017851141696
+    second: crop_crystal_76
+  - first:
+      213: 6651080505147226691
+    second: crop_crystal_77
+  - first:
+      213: 693852613346013231
+    second: crop_crystal_78
+  - first:
+      213: 1634080726570188021
+    second: crop_crystal_79
+  - first:
+      213: -2649536766145366764
+    second: crop_crystal_80
+  - first:
+      213: 4941017823075659491
+    second: crop_crystal_81
+  - first:
+      213: -3449586364389973641
+    second: crop_crystal_82
+  - first:
+      213: 8328355029483298415
+    second: crop_crystal_83
+  - first:
+      213: 3953747745793465671
+    second: crop_crystal_84
+  - first:
+      213: 8186706124320095271
+    second: crop_crystal_85
+  - first:
+      213: 1910085865411244076
+    second: crop_crystal_86
+  - first:
+      213: -980871581832075848
+    second: crop_crystal_87
+  - first:
+      213: -2010239438653741190
+    second: crop_crystal_88
+  - first:
+      213: 4591402468778137467
+    second: crop_crystal_89
+  - first:
+      213: -5961993302425439935
+    second: crop_crystal_90
+  - first:
+      213: 4550416167827734417
+    second: crop_crystal_91
+  - first:
+      213: 335715442634446626
+    second: crop_crystal_92
+  - first:
+      213: 6547298366537032223
+    second: crop_crystal_93
+  - first:
+      213: 7758795487465518925
+    second: crop_crystal_94
+  - first:
+      213: -5439479768470946916
+    second: crop_crystal_95
+  - first:
+      213: -700329024392620517
+    second: crop_crystal_96
+  - first:
+      213: -9096054686172251571
+    second: crop_crystal_97
+  - first:
+      213: -5112371937720681424
+    second: crop_crystal_98
+  - first:
+      213: -1211800293646083646
+    second: crop_crystal_99
+  - first:
+      213: -5933897463796725777
+    second: crop_crystal_100
+  - first:
+      213: -454317981664801747
+    second: crop_crystal_101
+  - first:
+      213: -2130408737610235313
+    second: crop_crystal_102
+  - first:
+      213: 3990594995241511444
+    second: crop_crystal_103
+  - first:
+      213: 1433794899622346090
+    second: crop_crystal_104
+  - first:
+      213: 2333725418788060996
+    second: crop_crystal_105
+  - first:
+      213: 4791074481496160741
+    second: crop_crystal_106
+  - first:
+      213: -4236543995869524340
+    second: crop_crystal_107
+  - first:
+      213: 1011881369890728112
+    second: crop_crystal_108
+  - first:
+      213: 6760055457682720343
+    second: crop_crystal_109
+  - first:
+      213: 6821525620901177022
+    second: crop_crystal_110
+  - first:
+      213: 4071725488249561579
+    second: crop_crystal_111
+  - first:
+      213: -8217182182685626038
+    second: crop_crystal_112
+  - first:
+      213: 6515865267659865485
+    second: crop_crystal_113
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: crop_crystal_0
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 174
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a060519e05c163650800000000000000
+      internalID: 6212183869837608458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_1
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 170
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: addc341419aa6f3d0800000000000000
+      internalID: -3173161346593993254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_2
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 170
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc95276e6a5dbd480800000000000000
+      internalID: -8873263727995889201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_3
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 172
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c028dd16be9f97e60800000000000000
+      internalID: 7960668605708599820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_4
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 170
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7e896842ad059a30800000000000000
+      internalID: 4221295216380448383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_5
+      rect:
+        serializedVersion: 2
+        x: 524
+        y: 174
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c87003467285b7ff0800000000000000
+      internalID: -37339245694679156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_6
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 170
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 045d98268ebd19380800000000000000
+      internalID: -8966143591985851072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_7
+      rect:
+        serializedVersion: 2
+        x: 692
+        y: 170
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 137b7d3ade43c94a0800000000000000
+      internalID: -6585330359861790927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_8
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 172
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fedffaac76e024be0800000000000000
+      internalID: -1494616287388631569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_9
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 170
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49218b7768d1cb010800000000000000
+      internalID: 1205871263599825556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_10
+      rect:
+        serializedVersion: 2
+        x: 886
+        y: 168
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99f5c1c6988acc410800000000000000
+      internalID: 1498758084185317273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_11
+      rect:
+        serializedVersion: 2
+        x: 958
+        y: 170
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f9d55ca4d351cf90800000000000000
+      internalID: -6935169778284373513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_12
+      rect:
+        serializedVersion: 2
+        x: 1006
+        y: 170
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33eeb69ff8eaf24f0800000000000000
+      internalID: -851269871161577933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_13
+      rect:
+        serializedVersion: 2
+        x: 1038
+        y: 180
+        width: 18
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d3c276c62317ce40800000000000000
+      internalID: 5676526912582894546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_14
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 172
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e6b715aa39b26ab0800000000000000
+      internalID: -5016243373408274713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_15
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 182
+        width: 12
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6edf613eec6e73d70800000000000000
+      internalID: 9022934154707664358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_16
+      rect:
+        serializedVersion: 2
+        x: 1182
+        y: 172
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d5f40368f64ff1a0800000000000000
+      internalID: -6773617281914833452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_17
+      rect:
+        serializedVersion: 2
+        x: 1236
+        y: 172
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83f6f3b1726db61d0800000000000000
+      internalID: -3356353633825362120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_18
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 158
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fb11ea63d8e8e130800000000000000
+      internalID: 3596380297184222197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_19
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 166
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94354c131fe218400800000000000000
+      internalID: 324592261604332361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_20
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 158
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06fdce660095147b0800000000000000
+      internalID: -5241810633020874912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_21
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 154
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 673f573023cc11060800000000000000
+      internalID: 6922538617423655798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_22
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 158
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ad2744375ba515d0800000000000000
+      internalID: -3092377178092393056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_23
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 166
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fcae6375bde287c20800000000000000
+      internalID: 3204362654470040271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_24
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 158
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ecdf64faf1268980800000000000000
+      internalID: -8537098681907684126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_25
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 154
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11f5c953c0d319d50800000000000000
+      internalID: 6742237239798685457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_26
+      rect:
+        serializedVersion: 2
+        x: 934
+        y: 160
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b0e08c0975a0a030800000000000000
+      internalID: 3503982449413644464
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_27
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 160
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08ae3fbe6951b1380800000000000000
+      internalID: -8999575692421895552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_28
+      rect:
+        serializedVersion: 2
+        x: 1150
+        y: 162
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 828b100788cc954b0800000000000000
+      internalID: -5451100987588495320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_29
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 150
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c40bce125bfff7930800000000000000
+      internalID: 4143311335627468876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_30
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 144
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5d350c0314992d20800000000000000
+      internalID: 3254295015278853470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_31
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 150
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae515a157159821b0800000000000000
+      internalID: -5681127002541320726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_32
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 140
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0130ce8c956e1090800000000000000
+      internalID: -8061894559862345458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_33
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 142
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e214026205540490800000000000000
+      internalID: -7781000787466644762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_34
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 152
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a49c2b9b59873dff0800000000000000
+      internalID: -12533789491017398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_35
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 132
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34ece8732642d91f0800000000000000
+      internalID: -1036632334967845309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_36
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 150
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d104c9afb7f2dd3c0800000000000000
+      internalID: -4333255056928522211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_37
+      rect:
+        serializedVersion: 2
+        x: 542
+        y: 144
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6cbff5d8b199eb40800000000000000
+      internalID: 5470063445468494954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_38
+      rect:
+        serializedVersion: 2
+        x: 578
+        y: 150
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ce5201ad9e756f70800000000000000
+      internalID: 9179882630940876486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_39
+      rect:
+        serializedVersion: 2
+        x: 614
+        y: 140
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb6114fe81e9c61e0800000000000000
+      internalID: -2203212287760591173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_40
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 142
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b23d5a047e8b16a60800000000000000
+      internalID: 7665611344122860331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_41
+      rect:
+        serializedVersion: 2
+        x: 714
+        y: 152
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ed0cbaf311a4a9f0800000000000000
+      internalID: -458064154901869084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_42
+      rect:
+        serializedVersion: 2
+        x: 794
+        y: 132
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eba57dbad0a1af090800000000000000
+      internalID: -8000053142050350402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_43
+      rect:
+        serializedVersion: 2
+        x: 970
+        y: 152
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f413c8b021b9d0c10800000000000000
+      internalID: 2021442309564674383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_44
+      rect:
+        serializedVersion: 2
+        x: 1208
+        y: 132
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b31f574af91ade00800000000000000
+      internalID: 1070196424183845814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_45
+      rect:
+        serializedVersion: 2
+        x: 116
+        y: 136
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 421770721515a2890800000000000000
+      internalID: -7482078421933657820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_46
+      rect:
+        serializedVersion: 2
+        x: 532
+        y: 136
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a02ef13065b6bbf20800000000000000
+      internalID: 3439460757591286282
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_47
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 140
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96cad963c1404d7f0800000000000000
+      internalID: -588841132056794007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_48
+      rect:
+        serializedVersion: 2
+        x: 894
+        y: 140
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03e827e3932d4fec0800000000000000
+      internalID: -3533968664276333008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_49
+      rect:
+        serializedVersion: 2
+        x: 950
+        y: 140
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a727a3b7665a6c780800000000000000
+      internalID: -8663054973627895174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_50
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e187beca31c80d8e0800000000000000
+      internalID: -1670681445621073890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_51
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9799525f156632460800000000000000
+      internalID: 7215723530168932729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_52
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69cb1ff8181b7bbb0800000000000000
+      internalID: -4920268897855095658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_53
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 128
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 154857cdc83b06330800000000000000
+      internalID: 3702156311274030161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_54
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 100
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7f7be59f3397f4a0800000000000000
+      internalID: -6559612430934376582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_55
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37eaa6d75505da380800000000000000
+      internalID: -8958415755663462797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_56
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61614c4da01e620c0800000000000000
+      internalID: -4600742532676839914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_57
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bff946a29017d4540800000000000000
+      internalID: 4993771846003630075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_58
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 128
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 250a966efc0c0b680800000000000000
+      internalID: -8741274877569687470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_59
+      rect:
+        serializedVersion: 2
+        x: 712
+        y: 100
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b83e1581f04a5eb60800000000000000
+      internalID: 7774800716464513931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_60
+      rect:
+        serializedVersion: 2
+        x: 966
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fcc960dadd2282840800000000000000
+      internalID: 5199444105285246159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_61
+      rect:
+        serializedVersion: 2
+        x: 1002
+        y: 128
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 685238196ffa8e7c0800000000000000
+      internalID: -4041787192026913402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_62
+      rect:
+        serializedVersion: 2
+        x: 1002
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc9b3d36b48f58210800000000000000
+      internalID: 1334745867266275789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_63
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 92
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c78b1841921936190800000000000000
+      internalID: -7970367309891913604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_64
+      rect:
+        serializedVersion: 2
+        x: 1128
+        y: 100
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14306d26211eac020800000000000000
+      internalID: 2362948423593100097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_65
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 80
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe770786b08aae750800000000000000
+      internalID: 6335060592800331759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_66
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 64
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cac6403c7a84e83e0800000000000000
+      internalID: -2049620895038411604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_67
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 64
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d83148623f914a20800000000000000
+      internalID: 3044889861925451988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_68
+      rect:
+        serializedVersion: 2
+        x: 344
+        y: 84
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e50f3d7a24d40d460800000000000000
+      internalID: 7264391147627475038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_69
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 84
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77ff734c583e35520800000000000000
+      internalID: 2689743566132477815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_70
+      rect:
+        serializedVersion: 2
+        x: 468
+        y: 80
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f66f9bf04748954c0800000000000000
+      internalID: -4298258735333509521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_71
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 64
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aede925cfd6ca3d90800000000000000
+      internalID: -7117157596717781526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_72
+      rect:
+        serializedVersion: 2
+        x: 686
+        y: 64
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b648a96ed06c54290800000000000000
+      internalID: -7906695807773277077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_73
+      rect:
+        serializedVersion: 2
+        x: 760
+        y: 84
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd8d9628512f900d0800000000000000
+      internalID: -3455965064833935139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_74
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 84
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70598426d54e13250800000000000000
+      internalID: 5922766074700928263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_75
+      rect:
+        serializedVersion: 2
+        x: 884
+        y: 80
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09ba88b3c72b551b0800000000000000
+      internalID: -5668428309331399792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_76
+      rect:
+        serializedVersion: 2
+        x: 930
+        y: 64
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c1c5ddbf73257f90800000000000000
+      internalID: -6956615017851141696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_77
+      rect:
+        serializedVersion: 2
+        x: 1102
+        y: 64
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34a73d10b726d4c50800000000000000
+      internalID: 6651080505147226691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_78
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 84
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2037f0964f01a900800000000000000
+      internalID: 693852613346013231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_79
+      rect:
+        serializedVersion: 2
+        x: 1224
+        y: 84
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fc378953cb6da610800000000000000
+      internalID: 1634080726570188021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_80
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 38
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 415719a5954fa3bd0800000000000000
+      internalID: -2649536766145366764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_81
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 32
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ee6c4d0885029440800000000000000
+      internalID: 4941017823075659491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_82
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 34
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77121807a7b9020d0800000000000000
+      internalID: -3449586364389973641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_83
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 36
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6e90b716c2449370800000000000000
+      internalID: 8328355029483298415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_84
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 50
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74d558f70a88ed630800000000000000
+      internalID: 3953747745793465671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_85
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 40
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72c3d9458d50d9170800000000000000
+      internalID: 8186706124320095271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_86
+      rect:
+        serializedVersion: 2
+        x: 266
+        y: 40
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c20f45a79fcf18a10800000000000000
+      internalID: 1910085865411244076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_87
+      rect:
+        serializedVersion: 2
+        x: 286
+        y: 40
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b5af924e7e3362f0800000000000000
+      internalID: -980871581832075848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_88
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 46
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a77209991e13a14e0800000000000000
+      internalID: -2010239438653741190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_89
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 32
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b775f541830f7bf30800000000000000
+      internalID: 4591402468778137467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_90
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 38
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1417cafedaeb24da0800000000000000
+      internalID: -5961993302425439935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_91
+      rect:
+        serializedVersion: 2
+        x: 488
+        y: 32
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19ff09f3563562f30800000000000000
+      internalID: 4550416167827734417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_92
+      rect:
+        serializedVersion: 2
+        x: 510
+        y: 34
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 227d6d79a63b8a400800000000000000
+      internalID: 335715442634446626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_93
+      rect:
+        serializedVersion: 2
+        x: 562
+        y: 36
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f126fefdc2dacda50800000000000000
+      internalID: 6547298366537032223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_94
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 50
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4739435367ccab60800000000000000
+      internalID: 7758795487465518925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_95
+      rect:
+        serializedVersion: 2
+        x: 638
+        y: 40
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9b7d5d58f51384b0800000000000000
+      internalID: -5439479768470946916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_96
+      rect:
+        serializedVersion: 2
+        x: 682
+        y: 40
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b169e2b767ee746f0800000000000000
+      internalID: -700329024392620517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_97
+      rect:
+        serializedVersion: 2
+        x: 702
+        y: 40
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4afc25b47254c180800000000000000
+      internalID: -9096054686172251571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_98
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 46
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03cbb742fc43d09b0800000000000000
+      internalID: -5112371937720681424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_99
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 32
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c9d286ad02de2fe0800000000000000
+      internalID: -1211800293646083646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_100
+      rect:
+        serializedVersion: 2
+        x: 872
+        y: 38
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe70ec022bf86ada0800000000000000
+      internalID: -5933897463796725777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_101
+      rect:
+        serializedVersion: 2
+        x: 904
+        y: 32
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2c0cc7e330f1b9f0800000000000000
+      internalID: -454317981664801747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_102
+      rect:
+        serializedVersion: 2
+        x: 926
+        y: 34
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f428a506a844f62e0800000000000000
+      internalID: -2130408737610235313
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_103
+      rect:
+        serializedVersion: 2
+        x: 978
+        y: 36
+        width: 14
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41a62dd4101716730800000000000000
+      internalID: 3990594995241511444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_104
+      rect:
+        serializedVersion: 2
+        x: 1002
+        y: 50
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6db1c85ddcd5e310800000000000000
+      internalID: 1433794899622346090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_105
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 40
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44f792e57ee036020800000000000000
+      internalID: 2333725418788060996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_106
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 40
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e974025bd05d7240800000000000000
+      internalID: 4791074481496160741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_107
+      rect:
+        serializedVersion: 2
+        x: 1118
+        y: 40
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8e02e29ea5c435c0800000000000000
+      internalID: -4236543995869524340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_108
+      rect:
+        serializedVersion: 2
+        x: 1160
+        y: 46
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b82c27aebcea0e00800000000000000
+      internalID: 1011881369890728112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_109
+      rect:
+        serializedVersion: 2
+        x: 1194
+        y: 32
+        width: 12
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7568e195f9a80dd50800000000000000
+      internalID: 6760055457682720343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_110
+      rect:
+        serializedVersion: 2
+        x: 1226
+        y: 40
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb66a04096deaae50800000000000000
+      internalID: 6821525620901177022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_111
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 32
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be1e40632cca18830800000000000000
+      internalID: 4071725488249561579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_112
+      rect:
+        serializedVersion: 2
+        x: 620
+        y: 32
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a41ba526754b6fd80800000000000000
+      internalID: -8217182182685626038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crop_crystal_113
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 32
+        width: 12
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8dfb2b30f00d6a50800000000000000
+      internalID: 6515865267659865485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      crop_crystal_0: 6212183869837608458
+      crop_crystal_1: -3173161346593993254
+      crop_crystal_10: 1498758084185317273
+      crop_crystal_100: -5933897463796725777
+      crop_crystal_101: -454317981664801747
+      crop_crystal_102: -2130408737610235313
+      crop_crystal_103: 3990594995241511444
+      crop_crystal_104: 1433794899622346090
+      crop_crystal_105: 2333725418788060996
+      crop_crystal_106: 4791074481496160741
+      crop_crystal_107: -4236543995869524340
+      crop_crystal_108: 1011881369890728112
+      crop_crystal_109: 6760055457682720343
+      crop_crystal_11: -6935169778284373513
+      crop_crystal_110: 6821525620901177022
+      crop_crystal_111: 4071725488249561579
+      crop_crystal_112: -8217182182685626038
+      crop_crystal_113: 6515865267659865485
+      crop_crystal_12: -851269871161577933
+      crop_crystal_13: 5676526912582894546
+      crop_crystal_14: -5016243373408274713
+      crop_crystal_15: 9022934154707664358
+      crop_crystal_16: -6773617281914833452
+      crop_crystal_17: -3356353633825362120
+      crop_crystal_18: 3596380297184222197
+      crop_crystal_19: 324592261604332361
+      crop_crystal_2: -8873263727995889201
+      crop_crystal_20: -5241810633020874912
+      crop_crystal_21: 6922538617423655798
+      crop_crystal_22: -3092377178092393056
+      crop_crystal_23: 3204362654470040271
+      crop_crystal_24: -8537098681907684126
+      crop_crystal_25: 6742237239798685457
+      crop_crystal_26: 3503982449413644464
+      crop_crystal_27: -8999575692421895552
+      crop_crystal_28: -5451100987588495320
+      crop_crystal_29: 4143311335627468876
+      crop_crystal_3: 7960668605708599820
+      crop_crystal_30: 3254295015278853470
+      crop_crystal_31: -5681127002541320726
+      crop_crystal_32: -8061894559862345458
+      crop_crystal_33: -7781000787466644762
+      crop_crystal_34: -12533789491017398
+      crop_crystal_35: -1036632334967845309
+      crop_crystal_36: -4333255056928522211
+      crop_crystal_37: 5470063445468494954
+      crop_crystal_38: 9179882630940876486
+      crop_crystal_39: -2203212287760591173
+      crop_crystal_4: 4221295216380448383
+      crop_crystal_40: 7665611344122860331
+      crop_crystal_41: -458064154901869084
+      crop_crystal_42: -8000053142050350402
+      crop_crystal_43: 2021442309564674383
+      crop_crystal_44: 1070196424183845814
+      crop_crystal_45: -7482078421933657820
+      crop_crystal_46: 3439460757591286282
+      crop_crystal_47: -588841132056794007
+      crop_crystal_48: -3533968664276333008
+      crop_crystal_49: -8663054973627895174
+      crop_crystal_5: -37339245694679156
+      crop_crystal_50: -1670681445621073890
+      crop_crystal_51: 7215723530168932729
+      crop_crystal_52: -4920268897855095658
+      crop_crystal_53: 3702156311274030161
+      crop_crystal_54: -6559612430934376582
+      crop_crystal_55: -8958415755663462797
+      crop_crystal_56: -4600742532676839914
+      crop_crystal_57: 4993771846003630075
+      crop_crystal_58: -8741274877569687470
+      crop_crystal_59: 7774800716464513931
+      crop_crystal_6: -8966143591985851072
+      crop_crystal_60: 5199444105285246159
+      crop_crystal_61: -4041787192026913402
+      crop_crystal_62: 1334745867266275789
+      crop_crystal_63: -7970367309891913604
+      crop_crystal_64: 2362948423593100097
+      crop_crystal_65: 6335060592800331759
+      crop_crystal_66: -2049620895038411604
+      crop_crystal_67: 3044889861925451988
+      crop_crystal_68: 7264391147627475038
+      crop_crystal_69: 2689743566132477815
+      crop_crystal_7: -6585330359861790927
+      crop_crystal_70: -4298258735333509521
+      crop_crystal_71: -7117157596717781526
+      crop_crystal_72: -7906695807773277077
+      crop_crystal_73: -3455965064833935139
+      crop_crystal_74: 5922766074700928263
+      crop_crystal_75: -5668428309331399792
+      crop_crystal_76: -6956615017851141696
+      crop_crystal_77: 6651080505147226691
+      crop_crystal_78: 693852613346013231
+      crop_crystal_79: 1634080726570188021
+      crop_crystal_8: -1494616287388631569
+      crop_crystal_80: -2649536766145366764
+      crop_crystal_81: 4941017823075659491
+      crop_crystal_82: -3449586364389973641
+      crop_crystal_83: 8328355029483298415
+      crop_crystal_84: 3953747745793465671
+      crop_crystal_85: 8186706124320095271
+      crop_crystal_86: 1910085865411244076
+      crop_crystal_87: -980871581832075848
+      crop_crystal_88: -2010239438653741190
+      crop_crystal_89: 4591402468778137467
+      crop_crystal_9: 1205871263599825556
+      crop_crystal_90: -5961993302425439935
+      crop_crystal_91: 4550416167827734417
+      crop_crystal_92: 335715442634446626
+      crop_crystal_93: 6547298366537032223
+      crop_crystal_94: 7758795487465518925
+      crop_crystal_95: -5439479768470946916
+      crop_crystal_96: -700329024392620517
+      crop_crystal_97: -9096054686172251571
+      crop_crystal_98: -5112371937720681424
+      crop_crystal_99: -1211800293646083646
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

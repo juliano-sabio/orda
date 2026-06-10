@@ -430,12 +430,16 @@ public class InimigoController : MonoBehaviour
     {
         if (spriteRenderer == null) yield break;
 
-        spriteRenderer.color = Color.red;
+        // Guarda a cor/transparência atuais (não a "corOriginal" do Awake, que pode estar
+        // desatualizada para inimigos que mudam de alpha em runtime, como o BossCaveira
+        // durante a emboscada). Isso evita que o sprite "suma" (alpha=0) após o flash.
+        Color corAntes = spriteRenderer.color;
+        spriteRenderer.color = new Color(1f, 0f, 0f, corAntes.a);
         yield return new WaitForSeconds(0.1f);
 
         if (!estaMorrendo)
         {
-            spriteRenderer.color = corOriginal;
+            spriteRenderer.color = corAntes;
         }
     }
 
@@ -486,11 +490,13 @@ public class InimigoController : MonoBehaviour
             BossPrincesa          princesa = GetComponent<BossPrincesa>();
             BossGuarda            guarda  = GetComponent<BossGuarda>();
             BossSlimeGuardaElite  elite   = GetComponent<BossSlimeGuardaElite>();
+            BossCaveira           caveira = GetComponent<BossCaveira>();
 
             if      (boss    != null) boss.IniciarEfeitoMorte();
             else if (princesa != null) princesa.IniciarEfeitoMorte();
             else if (guarda  != null) guarda.IniciarEfeitoMorte();
             else if (elite   != null) elite.IniciarEfeitoMorte();
+            else if (caveira != null) caveira.IniciarEfeitoMorte();
             else                      Destroy(gameObject);
         }
         else
