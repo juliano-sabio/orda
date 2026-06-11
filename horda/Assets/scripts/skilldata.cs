@@ -584,7 +584,7 @@ public enum SpecificSkillType
     UltCorrentesInferno,
     UltDrenagemDeVida,
     UltEscudoSonico,
-    UltFormaBestial,
+    UltFormaBestial, // removida do jogo - mantida para não deslocar os valores dos enums seguintes
     UltPulsoMagnetico,
     UltPunicaoDivina,
     UltDomoRetardante,
@@ -592,6 +592,8 @@ public enum SpecificSkillType
 
     // Novas skills de ataque
     CristaisGelo,
+
+    UltMareImplacavel,
 }
 
 // 🆕 NOVO ENUM PARA TARGETING ORBITAL

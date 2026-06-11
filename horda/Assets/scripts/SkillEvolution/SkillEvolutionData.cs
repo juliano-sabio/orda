@@ -170,9 +170,9 @@ public enum SkillEvolutionType
     SonicoAmplificado, // dano base por pulso dobrado
     SonicoPercussao,   // knockback 50% maior e atordoa inimigos por 0.5s
 
-    // Forma Bestial
-    BestialFrenesi,   // intervalo de ataque melee reduzido para 0.2s
-    BestialRugidoMortal, // dano do rugido aumenta 80%
+    // Forma Bestial - removida do jogo, valores mantidos para não deslocar os enums seguintes
+    BestialFrenesi,
+    BestialRugidoMortal,
 
     // Pulso Magnético
     MagneticoSupercarregado, // força de repulsão +80% e dano de repulsão +50%
@@ -189,6 +189,10 @@ public enum SkillEvolutionType
     // Despertar do Ancião
     DespertarFurioso,  // intervalo entre golpes reduz para 0.35s
     DespertarGigante,  // raio de impacto +60% e dano +50%
+
+    // Maré Implacável
+    MareEletrica,    // dano de afogamento +50%
+    MarePersistente, // +3s de duração e +1.5 de raio
 }
 
 [CreateAssetMenu(fileName = "New Evolution", menuName = "Survivor/Skill Evolution")]

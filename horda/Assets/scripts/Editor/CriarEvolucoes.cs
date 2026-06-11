@@ -169,10 +169,6 @@ public static class CriarEvolucoes
         lista.Add(Criar("SonicoAmplificado",      "Sônico Amplificado",      "Dano base por pulso é dobrado.",                                    SpecificSkillType.UltEscudoSonico,      SkillEvolutionType.SonicoAmplificado,     SkillRarity.Rare,  new Color(0.6f,  0.9f,  1f)));
         lista.Add(Criar("SonicoPercussao",        "Percussão Brutal",        "Knockback +50% maior e atordoa inimigos por 0.5s.",                 SpecificSkillType.UltEscudoSonico,      SkillEvolutionType.SonicoPercussao,       SkillRarity.Epic,  new Color(0.4f,  0.75f, 1f)));
 
-        // Forma Bestial
-        lista.Add(Criar("BestialFrenesi",         "Frenesi Bestial",         "Intervalo de ataque melee reduzido para 0.2s.",                     SpecificSkillType.UltFormaBestial,      SkillEvolutionType.BestialFrenesi,        SkillRarity.Rare,  new Color(1f,    0.55f, 0.1f)));
-        lista.Add(Criar("BestialRugidoMortal",    "Rugido Mortal",           "Dano do rugido e burst final aumenta 80%.",                         SpecificSkillType.UltFormaBestial,      SkillEvolutionType.BestialRugidoMortal,   SkillRarity.Epic,  new Color(1f,    0.3f,  0.0f)));
-
         // Pulso Magnético
         lista.Add(Criar("MagneticoSupercarregado","Magnético Supercarregado","+80% de força de repulsão e +50% de dano de repulsão.",             SpecificSkillType.UltPulsoMagnetico,    SkillEvolutionType.MagneticoSupercarregado, SkillRarity.Rare, new Color(0.7f, 0.35f, 1f)));
         lista.Add(Criar("MagneticoCentro",        "Centro Gravitacional",    "+1.5s de fase de atração antes da repulsão.",                       SpecificSkillType.UltPulsoMagnetico,    SkillEvolutionType.MagneticoCentro,       SkillRarity.Epic,  new Color(0.55f, 0.2f,  1f)));
@@ -188,6 +184,10 @@ public static class CriarEvolucoes
         // Despertar do Ancião
         lista.Add(Criar("DespertarFurioso",       "Despertar Furioso",       "Intervalo entre golpes tentáculo reduz para 0.35s.",                SpecificSkillType.UltDespertarAnciao,   SkillEvolutionType.DespertarFurioso,      SkillRarity.Rare,  new Color(0.35f, 0.0f,  0.55f)));
         lista.Add(Criar("DespertarGigante",       "Despertar Gigante",       "+60% de raio de impacto dos tentáculos e +50% de dano.",            SpecificSkillType.UltDespertarAnciao,   SkillEvolutionType.DespertarGigante,      SkillRarity.Epic,  new Color(0.5f,  0.0f,  0.8f)));
+
+        // Maré Implacável
+        lista.Add(Criar("MareEletrica",           "Maré Elétrica",           "+50% de dano de afogamento por tick.",                              SpecificSkillType.UltMareImplacavel,    SkillEvolutionType.MareEletrica,          SkillRarity.Rare,  new Color(0.1f,  0.5f,  1f)));
+        lista.Add(Criar("MarePersistente",        "Maré Persistente",        "+3s de duração e +1.5 de raio da maré.",                            SpecificSkillType.UltMareImplacavel,    SkillEvolutionType.MarePersistente,       SkillRarity.Epic,  new Color(0.05f, 0.35f, 0.9f)));
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();

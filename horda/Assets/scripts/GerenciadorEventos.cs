@@ -1407,11 +1407,11 @@ void LimparSlimePercurso()
                 { typeof(CorrentesInfernoUltimate),  SpecificSkillType.UltCorrentesInferno   },
                 { typeof(DrenagemDeVidaUltimate),    SpecificSkillType.UltDrenagemDeVida     },
                 { typeof(EscudoSonicoUltimate),      SpecificSkillType.UltEscudoSonico       },
-                { typeof(FormaBestialUltimate),      SpecificSkillType.UltFormaBestial       },
                 { typeof(PulsoMagneticoUltimate),    SpecificSkillType.UltPulsoMagnetico     },
                 { typeof(PunicaoDivinaUltimate),     SpecificSkillType.UltPunicaoDivina      },
                 { typeof(DomoRetardanteUltimate),    SpecificSkillType.UltDomoRetardante     },
                 { typeof(DespertarAnciaoUltimate),   SpecificSkillType.UltDespertarAnciao    },
+                { typeof(MareImplacavelUltimate),    SpecificSkillType.UltMareImplacavel     },
             };
 
             foreach (var kv in ultimateMap)

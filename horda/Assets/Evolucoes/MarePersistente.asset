@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
+  m_Name: MarePersistente
+  m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
+  nomeEvolucao: Maré Persistente
+  descricao: +3s de duração e +1.5 de raio da maré.
+  icone: {fileID: 3600028234273540921, guid: 7740aa40fcbde9a40aac9c6d883b0713, type: 3}
+  corDestaque: {r: 0.05, g: 0.35, b: 0.9, a: 1}
+  skillAlvo: 61
+  tipoEvolucao: 96
+  raridade: 3

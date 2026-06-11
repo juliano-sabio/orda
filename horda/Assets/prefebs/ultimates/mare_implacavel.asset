@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
+  m_Name: mare_implacavel
+  m_EditorClassIdentifier: Assembly-CSharp::UltimateData
+  ultimateName: Maré Implacável
+  description: Cria uma maré ao redor do jogador que deixa inimigos lentos e os
+    afoga aos poucos.
+  ultimateIcon: {fileID: 3600028234273540921, guid: 7740aa40fcbde9a40aac9c6d883b0713, type: 3}
+  cooldown: 22
+  baseDamage: 6
+  areaOfEffect: 5.5
+  duration: 5
+  element: 2
+  specialEffect: Inimigos dentro da maré ficam lentos e sofrem dano de afogamento a cada segundo.
+  ultimateType: 61
+  specialValue: 0
+  behaviorScriptName: MareImplacavelUltimate
+  visualEffectPrefab: {fileID: 0}
+  requiredLevel: 1
+  isUnlocked: 1

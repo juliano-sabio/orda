@@ -11,7 +11,6 @@ public static class FantasmaAnimSetup
 
     static readonly string[] PrefabPaths =
     {
-        "Assets/prefebs/inimigos/fantasma_veneno.prefab",
         "Assets/prefebs/inimigos/fantasma_veneno_atirador.prefab",
     };
 
@@ -44,7 +43,7 @@ public static class FantasmaAnimSetup
             keyframes[i] = new ObjectReferenceKeyframe
             {
                 time = i / clip.frameRate,
-                objectReferenceValue = sprites[i]
+                value = sprites[i]
             };
         }
         AnimationUtility.SetObjectReferenceCurve(clip, binding, keyframes);

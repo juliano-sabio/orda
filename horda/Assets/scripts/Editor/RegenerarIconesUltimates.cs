@@ -23,7 +23,6 @@ public static class RegenerarIconesUltimates
         ("escudo_sonico",       new Color(0.30f, 0.95f, 0.90f), "sonico"),
         ("correntes_inferno",   new Color(1.00f, 0.30f, 0.10f), "correntes"),
         ("punicao_divina",      new Color(1.00f, 0.90f, 0.25f), "divina"),
-        ("forma_bestial",       new Color(0.80f, 0.35f, 0.10f), "bestial"),
         ("fantasma",            new Color(0.70f, 0.85f, 1.00f), "fantasma"),
         ("drenagem_vida",       new Color(0.85f, 0.15f, 0.40f), "drenagem"),
         ("pulso_magnetico",     new Color(0.30f, 0.75f, 1.00f), "magnetico"),
@@ -85,7 +84,6 @@ public static class RegenerarIconesUltimates
             case "sonico":      DesenharSonico(pixels, SZ, cx, cor);     break;
             case "correntes":   DesenharCorrente(pixels, SZ, cx, cor);   break;
             case "divina":      DesenharDivina(pixels, SZ, cx, cor);     break;
-            case "bestial":     DesenharBestial(pixels, SZ, cx, cor);    break;
             case "fantasma":    DesenharFantasma(pixels, SZ, cx, cor);   break;
             case "drenagem":    DesenharDrenagem(pixels, SZ, cx, cor);   break;
             case "magnetico":   DesenharMagnetico(pixels, SZ, cx, cor);  break;
@@ -495,31 +493,6 @@ public static class RegenerarIconesUltimates
                   new Vector2(cx + Mathf.Cos(ang) * 20f, cx + Mathf.Sin(ang) * 20f),
                   new Color(brilho.r, brilho.g, brilho.b, 0.5f), 1.2f);
         }
-    }
-
-    // FORMA BESTIAL — garras + silhueta de fera
-    static void DesenharBestial(Color[] p, int sz, float cx, Color cor)
-    {
-        Color brilho = Color.Lerp(cor, Color.white, 0.6f);
-        // Corpo bestial (maior e mais largo)
-        Elipse(p, sz, cx, cx, 12f, 15f, cor, 1.8f);
-        // Cabeça com orelhas pontudas
-        Elipse(p, sz, cx, cx + 14f, 8f, 7f, cor, 1.8f);
-        Linha(p, sz, new Vector2(cx - 5f, cx + 18f), new Vector2(cx - 9f, cx + 26f), cor, 2.5f);
-        Linha(p, sz, new Vector2(cx + 5f, cx + 18f), new Vector2(cx + 9f, cx + 26f), cor, 2.5f);
-        // 3 garras
-        float[] gx = { cx - 14f, cx, cx + 14f };
-        for (int i = 0; i < 3; i++)
-        {
-            for (int c2 = -1; c2 <= 1; c2++)
-            {
-                float ox = gx[i] + c2 * 4f;
-                Linha(p, sz, new Vector2(ox, cx - 6f), new Vector2(ox + c2 * 3f, cx - 18f), brilho, 2f);
-            }
-        }
-        // Olhos brilhantes
-        Elipse(p, sz, cx - 3f, cx + 15f, 2f, 2f, Color.white, 4f);
-        Elipse(p, sz, cx + 3f, cx + 15f, 2f, 2f, Color.white, 4f);
     }
 
     // FANTASMA — espírito ascendendo

@@ -1242,7 +1242,7 @@ public class PlayerStats : MonoBehaviour
         var casuloAntigo     = GetComponent<CasuloCristalUltimate>();    if (casuloAntigo     != null) DestroyImmediate(casuloAntigo);
         var escudoAntigo     = GetComponent<EscudoSonicoUltimate>();     if (escudoAntigo     != null) DestroyImmediate(escudoAntigo);
         var raioAntigo       = GetComponent<RaioCerteiroUltimate>();    if (raioAntigo       != null) DestroyImmediate(raioAntigo);
-        var bestialAntigo    = GetComponent<FormaBestialUltimate>();   if (bestialAntigo    != null) DestroyImmediate(bestialAntigo);
+        var mareAntigo       = GetComponent<MareImplacavelUltimate>();  if (mareAntigo       != null) DestroyImmediate(mareAntigo);
 
         switch (ultimateData.behaviorScriptName)
         {
@@ -1387,13 +1387,13 @@ public class PlayerStats : MonoBehaviour
                 c.maxRicochetes    = (int)ultimateData.specialValue;
                 break;
             }
-            case "FormaBestialUltimate":
+            case "MareImplacavelUltimate":
             {
-                var c              = gameObject.AddComponent<FormaBestialUltimate>();
-                c.cooldown         = ultimateData.cooldown;
-                c.duracao          = ultimateData.duration;
-                c.danoMelee        = ultimateData.baseDamage;
-                c.raioRugido       = ultimateData.areaOfEffect;
+                var c          = gameObject.AddComponent<MareImplacavelUltimate>();
+                c.cooldown     = ultimateData.cooldown;
+                c.duracao      = ultimateData.duration;
+                c.raio         = ultimateData.areaOfEffect;
+                c.danoPorTick  = ultimateData.baseDamage;
                 break;
             }
         }
@@ -1421,7 +1421,7 @@ public class PlayerStats : MonoBehaviour
             || GetComponent<CasuloCristalUltimate>()      != null
             || GetComponent<EscudoSonicoUltimate>()       != null
             || GetComponent<RaioCerteiroUltimate>()       != null
-            || GetComponent<FormaBestialUltimate>()       != null;
+            || GetComponent<MareImplacavelUltimate>()     != null;
     }
 
     private void UpdateUI()

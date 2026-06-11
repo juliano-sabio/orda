@@ -808,9 +808,7 @@ public class UIManager : MonoBehaviour
                 ultimateSkillIcon.sprite = ultimateSkill.icon != null
                     ? ultimateSkill.icon
                     : GetSkillIcon(ultimateSkill.skillName);
-                ultimateSkillIcon.color = playerStats.ultimateBloqueada ? Color.red
-                    : playerStats.IsUltimateReady() ? new Color(1f, 0.85f, 0.45f, 1f)
-                    : new Color(0.65f, 0.65f, 0.65f, 0.85f);
+                ultimateSkillIcon.color = Color.white;
                 ultimateSkillIcon.gameObject.SetActive(true);
 
                 if (ultimateSkillElementIcon != null)
