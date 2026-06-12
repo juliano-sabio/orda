@@ -147,7 +147,8 @@ public class ProjetilEspecialPrincesa : MonoBehaviour
 
 }
 
-// Runner leve para executar coroutines independentes do projétil
+// Runner leve para executar coroutines independentes do projétil/efeito,
+// para que não sejam interrompidas quando o objeto que as criou é destruído.
 public class EfeitoRunner : MonoBehaviour
 {
     public static EfeitoRunner Criar()
@@ -156,4 +157,6 @@ public class EfeitoRunner : MonoBehaviour
         Destroy(go, 10f);
         return go.AddComponent<EfeitoRunner>();
     }
+
+    public void Run(IEnumerator rotina) => StartCoroutine(rotina);
 }

@@ -424,22 +424,26 @@ public class CharacterSelectionUI : MonoBehaviour
             "PERSONAGEM", 11f, FontStyles.Bold,
             new Color(0.88f,0.80f,0.72f));
         lblInfo.alignment = TextAlignmentOptions.Center;
+        lblInfo.gameObject.SetActive(false);
 
         txtNome = TMP(info, "Nome",
             new Vector2(0f,0.84f), new Vector2(1f,0.94f),
             "—", 18f, FontStyles.Bold, Color.white);
         txtNome.alignment = TextAlignmentOptions.Center;
+        txtNome.gameObject.SetActive(false);
 
         txtElemento = TMP(info, "Elemento",
             new Vector2(0f,0.78f), new Vector2(1f,0.84f),
             "—", 12f, FontStyles.Normal, Color.yellow);
         txtElemento.alignment = TextAlignmentOptions.Center;
+        txtElemento.gameObject.SetActive(false);
 
         // linha divisória
         var ln = Img(info, "Ln",
             new Vector2(0.05f,0.775f), new Vector2(0.95f,0.775f),
             new Color(1f,1f,1f,0.08f));
         ln.GetComponent<RectTransform>().offsetMax = new Vector2(0f,1f);
+        ln.gameObject.SetActive(false);
 
         // Abas INFO / ULTIMATE / PASSIVAS
         CriarAbasInfo(info);
@@ -594,8 +598,8 @@ public class CharacterSelectionUI : MonoBehaviour
             }
             tabImg.color = i == 0 ? corAtiva : corInativa;
             var tabRT  = tabGO.GetComponent<RectTransform>();
-            tabRT.anchorMin = new Vector2(xMin, 0.70f);
-            tabRT.anchorMax = new Vector2(xMax, 0.77f);
+            tabRT.anchorMin = new Vector2(xMin, 0.88f);
+            tabRT.anchorMax = new Vector2(xMax, 0.95f);
             tabRT.offsetMin = new Vector2(i > 0 ? 2f : 0f, 0f);
             tabRT.offsetMax = new Vector2(i < 2 ? -2f : 0f, 0f);
             var btn = tabGO.AddComponent<Button>();
@@ -611,7 +615,7 @@ public class CharacterSelectionUI : MonoBehaviour
         painelAbaInfo[0] = new GameObject("ConteudoInfo");
         painelAbaInfo[0].transform.SetParent(info.transform, false);
         painelAbaInfo[0].AddComponent<RectTransform>();
-        Anchors(painelAbaInfo[0], Vector2.zero, new Vector2(1f, 0.69f));
+        Anchors(painelAbaInfo[0], Vector2.zero, new Vector2(1f, 0.87f));
 
         txtDesc = TMP(painelAbaInfo[0], "Desc",
             new Vector2(0.04f, 0.26f), new Vector2(0.96f, 0.96f),
@@ -629,14 +633,14 @@ public class CharacterSelectionUI : MonoBehaviour
         painelAbaInfo[1] = new GameObject("ConteudoUltimate");
         painelAbaInfo[1].transform.SetParent(info.transform, false);
         painelAbaInfo[1].AddComponent<RectTransform>();
-        Anchors(painelAbaInfo[1], Vector2.zero, new Vector2(1f, 0.69f));
+        Anchors(painelAbaInfo[1], new Vector2(0.07f, 0.18f), new Vector2(0.94f, 0.87f));
 
         // ScrollRect para lista de ultimates
         var scrollRoot = new GameObject("ScrollUltimates");
         scrollRoot.transform.SetParent(painelAbaInfo[1].transform, false);
         scrollRoot.AddComponent<RectTransform>();
         Anchors(scrollRoot, Vector2.zero, Vector2.one,
-            new Vector2(69.61f, 86.59f), new Vector2(-76.40f, 0f));
+            new Vector2(4f, 4f), new Vector2(-4f, 0f));
 
         var viewport = new GameObject("Viewport");
         viewport.transform.SetParent(scrollRoot.transform, false);
@@ -677,14 +681,14 @@ public class CharacterSelectionUI : MonoBehaviour
         painelAbaInfo[2] = new GameObject("ConteudoPassivas");
         painelAbaInfo[2].transform.SetParent(info.transform, false);
         painelAbaInfo[2].AddComponent<RectTransform>();
-        Anchors(painelAbaInfo[2], Vector2.zero, new Vector2(1f, 0.69f));
+        Anchors(painelAbaInfo[2], new Vector2(0.07f, 0.18f), new Vector2(0.94f, 0.87f));
 
         // ScrollRect para lista de passivas (igual ao de ultimates)
         var scrollPassiva = new GameObject("ScrollPassivas");
         scrollPassiva.transform.SetParent(painelAbaInfo[2].transform, false);
         scrollPassiva.AddComponent<RectTransform>();
         Anchors(scrollPassiva, Vector2.zero, Vector2.one,
-            new Vector2(69.61f, 86.59f), new Vector2(-76.40f, 0f));
+            new Vector2(4f, 4f), new Vector2(-4f, 0f));
 
         var vpPassiva = new GameObject("Viewport");
         vpPassiva.transform.SetParent(scrollPassiva.transform, false);

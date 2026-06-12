@@ -55,8 +55,12 @@ public class MissoesUI : MonoBehaviour
 
 #if UNITY_EDITOR
         if (spriteFundoPainel == null)
-            spriteFundoPainel = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/assets/UI/bg_dungeon_esgoto.png");
+        {
+            spriteFundoPainel = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/assets/UI/painelmissao.ase");
+            if (spriteFundoPainel == null)
+                foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/assets/UI/painelmissao.ase"))
+                    if (a is Sprite s && s.name == "painelmissao") { spriteFundoPainel = s; break; }
+        }
         if (spriteBarraTopo == null)
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
                 "Assets/assets/UI/charselection/bar_charselect.ase"))
@@ -94,7 +98,7 @@ public class MissoesUI : MonoBehaviour
         backdrop.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.78f);
 
         // Caixa central
-        painelContent = new GameObject("Content");
+        painelContent = new GameObject("painelmissao");
         painelContent.transform.SetParent(painelRaiz.transform, false);
         var rC = painelContent.AddComponent<RectTransform>();
         rC.anchorMin = new Vector2(0.08f, 0.05f);
@@ -103,10 +107,10 @@ public class MissoesUI : MonoBehaviour
         var imgContent = painelContent.AddComponent<Image>();
         if (spriteFundoPainel != null)
         {
-            imgContent.sprite = spriteFundoPainel;
-            imgContent.type   = Image.Type.Simple;
-            // levemente escuro e com leve transparência
-            imgContent.color  = new Color(0.88f, 0.82f, 0.82f, 0.99f);
+            imgContent.sprite          = spriteFundoPainel;
+            imgContent.type            = Image.Type.Simple;
+            imgContent.color           = Color.white;
+            imgContent.preserveAspect  = false;
         }
         else
         {

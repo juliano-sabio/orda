@@ -542,6 +542,9 @@ public class PlayerStats : MonoBehaviour
         }
 
         UpdateUI();
+
+        if (uiManager == null) uiManager = UIManager.Instance;
+        if (uiManager != null) uiManager.UpdateSkillIcons();
     }
 
     void InitializeSkills()
@@ -585,15 +588,20 @@ public class PlayerStats : MonoBehaviour
         });
 
         // ⭐ ULTIMATE - JÁ CONFIGURADA E ATIVA
-        ultimateSkill = new UltimateSkill
+        // Se o characterData já configurou a ultimate (via ApplyCharacterData no Awake),
+        // não sobrescrever aqui - só usa o padrão "Fúria do Herói" como fallback.
+        if (characterData == null || ultimateSkill == null || string.IsNullOrEmpty(ultimateSkill.skillName))
         {
-            skillName = "Fúria do Herói",
-            baseDamage = 50f,
-            isActive = true, // ← COMEÇA ATIVA
-            areaOfEffect = 5f,
-            duration = 3f,
-            element = Element.None
-        };
+            ultimateSkill = new UltimateSkill
+            {
+                skillName = "Fúria do Herói",
+                baseDamage = 50f,
+                isActive = true, // ← COMEÇA ATIVA
+                areaOfEffect = 5f,
+                duration = 3f,
+                element = Element.None
+            };
+        }
 
         RecalcMaxShield();
     }

@@ -8,58 +8,57 @@ public static class RegenerarIconesUltimates
     const string PASTA = "Assets/prefebs/ultimates";
     const int    SZ    = 64;
 
-    // (arquivo, cor tema, forma)
-    static readonly (string id, Color cor, string forma)[] ULTIMATES =
+    // (asset de UltimateData, id do ícone/cor tema, forma)
+    static readonly (string asset, string iconId, Color cor, string forma)[] MAPA =
     {
-        ("raio_certeiro",       new Color(0.40f, 0.80f, 1.00f), "raio"),
-        ("tempestade_eletrica", new Color(0.30f, 0.65f, 1.00f), "tempestade"),
-        ("chuva_meteoros",      new Color(1.00f, 0.45f, 0.10f), "meteoros"),
-        ("campo_gelo",          new Color(0.55f, 0.92f, 1.00f), "gelo"),
-        ("tsunami",             new Color(0.10f, 0.50f, 1.00f), "tsunami"),
-        ("vortice",             new Color(0.60f, 0.20f, 1.00f), "vortice"),
-        ("clone_sombra",        new Color(0.45f, 0.15f, 0.85f), "clone"),
-        ("necropole",           new Color(0.25f, 0.75f, 0.35f), "necropole"),
-        ("domo",                new Color(0.20f, 0.70f, 1.00f), "domo"),
-        ("escudo_sonico",       new Color(0.30f, 0.95f, 0.90f), "sonico"),
-        ("correntes_inferno",   new Color(1.00f, 0.30f, 0.10f), "correntes"),
-        ("punicao_divina",      new Color(1.00f, 0.90f, 0.25f), "divina"),
-        ("fantasma",            new Color(0.70f, 0.85f, 1.00f), "fantasma"),
-        ("drenagem_vida",       new Color(0.85f, 0.15f, 0.40f), "drenagem"),
-        ("pulso_magnetico",     new Color(0.30f, 0.75f, 1.00f), "magnetico"),
-        ("coracao_robusto",     new Color(1.00f, 0.25f, 0.35f), "coracao"),
-        ("colheita",            new Color(0.35f, 0.90f, 0.35f), "colheita"),
-        ("anciao",              new Color(1.00f, 0.80f, 0.25f), "anciao"),
-        ("bencao_anciao",       new Color(1.00f, 0.90f, 0.40f), "bencao"),
-        ("cacador",             new Color(0.30f, 0.80f, 0.40f), "cacador"),
-        ("casulo_cristal",      new Color(0.60f, 0.95f, 1.00f), "casulo"),
-        ("ritual_anciao",       new Color(0.80f, 0.50f, 1.00f), "ritual"),
+        ("raio_certeiro",       "raio_certeiro",       new Color(0.40f, 0.80f, 1.00f), "raio"),
+        ("tempestade_eletrica", "tempestade_eletrica", new Color(0.30f, 0.65f, 1.00f), "tempestade"),
+        ("chuva_meteoros",      "chuva_meteoros",      new Color(1.00f, 0.45f, 0.10f), "meteoros"),
+        ("campo_de_gelo",       "campo_gelo",          new Color(0.55f, 0.92f, 1.00f), "gelo"),
+        ("mare_implacavel",     "tsunami",             new Color(0.10f, 0.50f, 1.00f), "tsunami"),
+        ("vortice",             "vortice",             new Color(0.60f, 0.20f, 1.00f), "vortice"),
+        ("necropole",           "necropole",           new Color(0.25f, 0.75f, 0.35f), "necropole"),
+        ("domo_retardante",     "domo",                new Color(0.20f, 0.70f, 1.00f), "domo"),
+        ("escudo_sonico",       "escudo_sonico",       new Color(0.30f, 0.95f, 0.90f), "sonico"),
+        ("correntes_inferno",   "correntes_inferno",   new Color(1.00f, 0.30f, 0.10f), "correntes"),
+        ("punicao_divina",      "punicao_divina",      new Color(1.00f, 0.90f, 0.25f), "divina"),
+        ("drenagem_vida",       "drenagem_vida",       new Color(0.85f, 0.15f, 0.40f), "drenagem"),
+        ("pulso_magnetico",     "pulso_magnetico",     new Color(0.30f, 0.75f, 1.00f), "magnetico"),
+        ("despertar_anciao",    "anciao",              new Color(1.00f, 0.80f, 0.25f), "anciao"),
+        ("bencao_anciao",       "bencao_anciao",       new Color(1.00f, 0.90f, 0.40f), "bencao"),
+        ("casulo_cristal",      "casulo_cristal",      new Color(0.60f, 0.95f, 1.00f), "casulo"),
+        ("ritual_anciao",       "ritual_anciao",       new Color(0.80f, 0.50f, 1.00f), "ritual"),
     };
 
     [MenuItem("Tools/Ultimates/Regenerar Todos os Ícones")]
     public static void RegenerarTodos()
     {
         int ok = 0;
-        foreach (var (id, cor, forma) in ULTIMATES)
+        foreach (var (asset, iconId, cor, forma) in MAPA)
         {
-            string iconPath = $"{PASTA}/{id}_icon.png";
+            string iconPath = $"{PASTA}/{iconId}_icon.png";
             if (File.Exists(Path.Combine(Application.dataPath, "../" + iconPath)))
             { AssetDatabase.DeleteAsset(iconPath); AssetDatabase.Refresh(); }
 
-            var sprite = GerarIcone(id, cor, forma, iconPath);
+            var sprite = GerarIcone(iconId, cor, forma, iconPath);
             if (sprite == null) continue;
 
-            // Atualiza UltimateData se existir
-            foreach (var assetPath in AssetDatabase.FindAssets("t:UltimateData", new[] { PASTA }))
+            string assetPath = $"{PASTA}/{asset}.asset";
+            var ud = AssetDatabase.LoadAssetAtPath<UltimateData>(assetPath);
+            if (ud != null)
             {
-                var ud = AssetDatabase.LoadAssetAtPath<UltimateData>(AssetDatabase.GUIDToAssetPath(assetPath));
-                if (ud != null && ud.ultimateIcon == null)
-                { ud.ultimateIcon = sprite; EditorUtility.SetDirty(ud); }
+                ud.ultimateIcon = sprite;
+                EditorUtility.SetDirty(ud);
+                ok++;
             }
-            ok++;
+            else
+            {
+                Debug.LogWarning($"UltimateData não encontrado em {assetPath}");
+            }
         }
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log($"✅ {ok}/{ULTIMATES.Length} ícones de ultimate regenerados!");
+        Debug.Log($"✅ {ok}/{MAPA.Length} ícones de ultimate regenerados!");
     }
 
     // ── Geração ───────────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 // Fantasma elemental Elétrico: movimento contínuo ondulante com instabilidade elétrica,
 // paralisa o player ao tocar. Periodicamente dispara um raio de cadeia até o player.
@@ -27,6 +28,12 @@ public class FantasmaEletrico : MonoBehaviour
     [Header("Morte: Descarga")]
     public float raioDescarga   = 3f;
     public float danoDescarga   = 18f;
+
+    [Header("Brilho")]
+    public Color corBrilho         = new Color(0.9f, 1f, 0.4f);
+    public float intensidadeBrilho = 1.6f;
+    public float raioInternoBrilho = 0.2f;
+    public float raioExternoBrilho = 1.6f;
 
     Rigidbody2D    rb;
     SpriteRenderer sr;
@@ -59,6 +66,7 @@ public class FantasmaEletrico : MonoBehaviour
         proxRaio      = Random.Range(3f, 7f);
 
         player = FindFirstObjectByType<PlayerStats>();
+        CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
         StartCoroutine(RastroEletrico());
         StartCoroutine(FlashPeriodicoEletrico());
         InimigoController.OnPreMorte += OnPreMorteHandler;
@@ -164,12 +172,18 @@ public class FantasmaEletrico : MonoBehaviour
         lr.positionCount = SEGS + 2;
         lr.material      = new Material(Shader.Find("Sprites/Default"));
         lr.sortingOrder  = 20;
-        lr.startWidth    = lr.endWidth = 0.1f;
-        lr.startColor    = lr.endColor = new Color(0.9f, 1f, 0.3f, 1f);
+        lr.startWidth    = lr.endWidth = 0.16f;
+        lr.startColor    = lr.endColor = new Color(1f, 1f, 0.7f, 1f);
 
+        CriarLuz(go.transform, new Color(0.9f, 1f, 0.3f), 2.5f, 0.1f, 1.2f);
+
+        go.AddComponent<EfeitoRunner>().Run(AnimarRaioCadeia(go, lr, origem, destino, SEGS));
+    }
+
+    IEnumerator AnimarRaioCadeia(GameObject go, LineRenderer lr, Vector2 origem, Vector2 destino, int SEGS)
+    {
         for (float t = 0f; t < 0.35f; t += Time.deltaTime)
         {
-            if (go == null) yield break;
             lr.SetPosition(0, origem);
             for (int i = 1; i <= SEGS; i++)
             {
@@ -183,7 +197,7 @@ public class FantasmaEletrico : MonoBehaviour
 
             float progress = t / 0.35f;
             float alpha = progress < 0.3f ? progress / 0.3f : 1f - (progress - 0.3f) / 0.7f;
-            lr.startColor = lr.endColor = new Color(0.9f, 1f, 0.3f, alpha);
+            lr.startColor = lr.endColor = new Color(1f, 1f, 0.7f, alpha);
             yield return null;
         }
         Destroy(go);
@@ -201,7 +215,7 @@ public class FantasmaEletrico : MonoBehaviour
             go.transform.position   = pos;
             go.transform.localScale = Vector3.one * 0.2f;
             Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-            StartCoroutine(Lancar(go, dir, Random.Range(2f, 4f), 0.3f));
+            go.AddComponent<EfeitoRunner>().Run(Lancar(go, dir, Random.Range(2f, 4f), 0.3f));
         }
         yield break;
     }
@@ -218,23 +232,29 @@ public class FantasmaEletrico : MonoBehaviour
         {
             float ang  = i * 45f * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-            StartCoroutine(RaioSolto(pos, pos + dir * raioDescarga));
+            RaioSolto(pos, pos + dir * raioDescarga);
         }
         yield break;
     }
 
-    IEnumerator RaioSolto(Vector2 origem, Vector2 destino)
+    void RaioSolto(Vector2 origem, Vector2 destino)
     {
         var go = new GameObject("RaioSolto");
         var lr = go.AddComponent<LineRenderer>();
         lr.useWorldSpace = true; lr.positionCount = 4;
         lr.material      = new Material(Shader.Find("Sprites/Default")); lr.sortingOrder = 18;
-        lr.startWidth = lr.endWidth = 0.08f;
-        lr.startColor = lr.endColor = new Color(0.9f, 1f, 0.4f, 1f);
+        lr.startWidth = lr.endWidth = 0.12f;
+        lr.startColor = lr.endColor = new Color(1f, 1f, 0.7f, 1f);
 
+        CriarLuz(go.transform, new Color(0.9f, 1f, 0.4f), 2f, 0.05f, 1f);
+
+        go.AddComponent<EfeitoRunner>().Run(AnimarRaioSolto(go, lr, origem, destino));
+    }
+
+    IEnumerator AnimarRaioSolto(GameObject go, LineRenderer lr, Vector2 origem, Vector2 destino)
+    {
         for (float t = 0f; t < 0.4f; t += Time.deltaTime)
         {
-            if (go == null) yield break;
             lr.SetPosition(0, origem);
             for (int i = 1; i <= 2; i++)
             {
@@ -246,7 +266,7 @@ public class FantasmaEletrico : MonoBehaviour
             }
             lr.SetPosition(3, destino);
             float alpha = 1f - t / 0.4f;
-            lr.startColor = lr.endColor = new Color(0.9f, 1f, 0.4f, alpha);
+            lr.startColor = lr.endColor = new Color(1f, 1f, 0.7f, alpha);
             yield return null;
         }
         Destroy(go);
@@ -263,7 +283,7 @@ public class FantasmaEletrico : MonoBehaviour
             float sz = Random.Range(0.12f, 0.28f);
             go.transform.position   = (Vector3)transform.position + (Vector3)Random.insideUnitCircle * 0.15f;
             go.transform.localScale = Vector3.one * sz;
-            StartCoroutine(FadeOut(go, 0.2f));
+            go.AddComponent<EfeitoRunner>().Run(FadeOut(go, 0.2f));
             yield return new WaitForSeconds(0.08f);
         }
     }
@@ -294,6 +314,19 @@ public class FantasmaEletrico : MonoBehaviour
             yield return null;
         }
         if (go != null) Destroy(go);
+    }
+
+    static void CriarLuz(Transform parent, Color cor, float intensidade, float raioInterno, float raioExterno)
+    {
+        var go = new GameObject("brilho");
+        go.transform.SetParent(parent, false);
+        var light = go.AddComponent<Light2D>();
+        light.lightType = Light2D.LightType.Point;
+        light.color = cor;
+        light.intensity = intensidade;
+        light.pointLightInnerRadius = raioInterno;
+        light.pointLightOuterRadius = raioExterno;
+        light.blendStyleIndex = 0;
     }
 
     static Sprite GerarDisco(int sz, Color cor)

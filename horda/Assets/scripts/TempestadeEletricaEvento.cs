@@ -197,6 +197,7 @@ public class TempestadeEletricaEvento : MonoBehaviour
             Color cor = i < 6 ? new Color(1f, 0.95f, 0.3f) : Color.white;
             float vel = Random.Range(2f, 6f);
             var go    = new GameObject("SparkTempestade");
+            go.transform.SetParent(transform, true);
             go.transform.position = pos;
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite       = GerarDisco(8);
@@ -217,6 +218,7 @@ public class TempestadeEletricaEvento : MonoBehaviour
     {
         const int SEGS = 32;
         var go = new GameObject("AnelImpacto");
+        go.transform.SetParent(transform, true);
         go.transform.position = pos;
         var lr = go.AddComponent<LineRenderer>();
         lr.useWorldSpace = true;
@@ -247,6 +249,7 @@ public class TempestadeEletricaEvento : MonoBehaviour
     IEnumerator GlowImpacto(Vector2 pos)
     {
         var go = new GameObject("GlowImpacto");
+        go.transform.SetParent(transform, true);
         go.transform.position = pos;
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarDisco(32);
@@ -284,6 +287,7 @@ public class TempestadeEletricaEvento : MonoBehaviour
     GameObject CriarLineRenderer(string nome, Vector2[] pontos, float largura, Color cor, int order)
     {
         var go = new GameObject(nome);
+        go.transform.SetParent(transform, true);
         var lr = go.AddComponent<LineRenderer>();
         lr.useWorldSpace = true;
         lr.material      = new Material(Shader.Find("Sprites/Default"));
@@ -316,6 +320,7 @@ public class TempestadeEletricaEvento : MonoBehaviour
     {
         const int SEGS = 32;
         var root = new GameObject("AvisoRaio");
+        root.transform.SetParent(transform, true);
         root.transform.position = pos;
 
         // Borda

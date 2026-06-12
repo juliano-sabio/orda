@@ -40,17 +40,21 @@ public class PauseManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null)
+        // A instância nova (desta cena) tem as referências de UI corretas
+        // para esta cena. Se já existir uma instância persistida de uma
+        // cena anterior, ela está com referências inválidas (PausePanel
+        // antigo já destruído junto com o UIManager_Canvas anterior) —
+        // então a instância antiga é descartada e esta assume.
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            if (Application.isPlaying)
-            {
-                DontDestroyOnLoad(gameObject);
-            }
+            Destroy(Instance.gameObject);
         }
-        else
+
+        Instance = this;
+
+        if (Application.isPlaying)
         {
-            Destroy(gameObject);
+            DontDestroyOnLoad(gameObject);
         }
     }
 
@@ -71,15 +75,16 @@ public class PauseManager : MonoBehaviour
     private void FindUIReferences()
     {
 
-        // Procurar painéis
+        // Procurar painéis (GameObject.Find não encontra objetos inativos,
+        // e os painéis começam desativados na cena)
         if (pausePanel == null)
         {
-            pausePanel = GameObject.Find("PausePanel");
+            pausePanel = FindInactiveObjectByName("PausePanel");
         }
 
         if (settingsPanel == null)
         {
-            settingsPanel = GameObject.Find("SettingsPanel");
+            settingsPanel = FindInactiveObjectByName("SettingsPanel");
         }
 
         // Procurar botões do pause
@@ -126,6 +131,22 @@ public class PauseManager : MonoBehaviour
 
         // 🆕 VERIFICAR SE AINDA FALTAM REFERÊNCIAS
         CheckMissingReferences();
+    }
+
+    private static GameObject FindInactiveObjectByName(string name)
+    {
+        // Procura entre todos os Transforms carregados (incluindo objetos
+        // inativos e objetos persistidos com DontDestroyOnLoad), já que
+        // GameObject.Find e GetRootGameObjects ignoram esses casos.
+        var transforms = Resources.FindObjectsOfTypeAll<Transform>();
+        foreach (var t in transforms)
+        {
+            if (t.name == name && t.gameObject.scene.IsValid())
+            {
+                return t.gameObject;
+            }
+        }
+        return null;
     }
 
     private Button FindButtonInChildren(Transform parent, string path)

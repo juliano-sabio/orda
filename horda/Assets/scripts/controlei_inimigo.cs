@@ -60,6 +60,7 @@ public class InimigoController : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
     private Color corOriginal;
+    private Coroutine _flashDanoCoroutine;
     private Rigidbody2D rb;
     private DanoInimigo danoInimigoComponent;
     private float proximoContato = 0f;
@@ -136,7 +137,8 @@ public class InimigoController : MonoBehaviour
         vidaAtual -= dano;
 
         if (mostrarNumero && mostrarDanoFlutuante) MostrarDanoFlutuante(dano, isCrit);
-        StartCoroutine(EfeitoVisualDano());
+        if (_flashDanoCoroutine != null) StopCoroutine(_flashDanoCoroutine);
+        _flashDanoCoroutine = StartCoroutine(EfeitoVisualDano());
 
         if (vidaAtual <= 0)
         {
@@ -430,17 +432,15 @@ public class InimigoController : MonoBehaviour
     {
         if (spriteRenderer == null) yield break;
 
-        // Guarda a cor/transparência atuais (não a "corOriginal" do Awake, que pode estar
-        // desatualizada para inimigos que mudam de alpha em runtime, como o BossCaveira
-        // durante a emboscada). Isso evita que o sprite "suma" (alpha=0) após o flash.
-        Color corAntes = spriteRenderer.color;
-        spriteRenderer.color = new Color(1f, 0f, 0f, corAntes.a);
+        // Preserva só o alpha atual (BossCaveira muda alpha em runtime),
+        // mas sempre restaura para corOriginal — nunca para cor de outro flash em andamento.
+        float alphaAtual = spriteRenderer.color.a;
+        spriteRenderer.color = new Color(1f, 0f, 0f, alphaAtual);
         yield return new WaitForSeconds(0.1f);
 
-        if (!estaMorrendo)
-        {
-            spriteRenderer.color = corAntes;
-        }
+        if (!estaMorrendo && spriteRenderer != null)
+            spriteRenderer.color = new Color(corOriginal.r, corOriginal.g, corOriginal.b, spriteRenderer.color.a);
+        _flashDanoCoroutine = null;
     }
 
     private IEnumerator EfeitoVisualCura()
