@@ -5,35 +5,72 @@ using System.Linq;
 
 public static class FantasmaAnimSetup
 {
-    const string SpriteSheetPath = "Assets/assets/mobs/fantasma1/fantasma 02.ase";
-    const string ClipPath        = "Assets/assets/mobs/fantasma1/fantasma02_flutuar.anim";
-    const string ControllerPath  = "Assets/assets/mobs/fantasma1/fantasma02_anim.controller";
-
-    static readonly string[] PrefabPaths =
+    struct GhostDef
     {
-        "Assets/prefebs/inimigos/fantasma_veneno_atirador.prefab",
+        public string spriteSheet;
+        public string clipPath;
+        public string controllerPath;
+        public string prefabPath;
+    }
+
+    static readonly GhostDef[] Ghosts = new GhostDef[]
+    {
+        new GhostDef {
+            spriteSheet    = "Assets/assets/mobs/fantasma1/fantasma 02.ase",
+            clipPath       = "Assets/assets/mobs/fantasma1/fantasma02_flutuar.anim",
+            controllerPath = "Assets/assets/mobs/fantasma1/fantasma02_anim.controller",
+            prefabPath     = "Assets/prefebs/inimigos/fantasma_veneno.prefab",
+        },
+        new GhostDef {
+            spriteSheet    = "Assets/assets/mobs/fantasma4/fantasmas 05.aseprite",
+            clipPath       = "Assets/assets/mobs/fantasma4/fantasma05_flutuar.anim",
+            controllerPath = "Assets/assets/mobs/fantasma4/fantasma05_anim.controller",
+            prefabPath     = "Assets/prefebs/inimigos/fantasma_fogo.prefab",
+        },
+        new GhostDef {
+            spriteSheet    = "Assets/assets/mobs/fantasma2/fantasma 03.ase",
+            clipPath       = "Assets/assets/mobs/fantasma2/fantasma03_flutuar.anim",
+            controllerPath = "Assets/assets/mobs/fantasma2/fantasma03_anim.controller",
+            prefabPath     = "Assets/prefebs/inimigos/fantasma_gelo.prefab",
+        },
+        new GhostDef {
+            spriteSheet    = "Assets/assets/mobs/fantasma3/fantasma 04.ase",
+            clipPath       = "Assets/assets/mobs/fantasma3/fantasma04_flutuar.anim",
+            controllerPath = "Assets/assets/mobs/fantasma3/fantasma04_anim.controller",
+            prefabPath     = "Assets/prefebs/inimigos/fantasma_eletrico.prefab",
+        },
     };
 
-    [MenuItem("Tools/Criar Animação Fantasma 02")]
-    public static void CriarAnimacao()
+    [MenuItem("Tools/Criar Animações Fantasmas Elementais")]
+    public static void CriarTodasAnimacoes()
     {
-        var sprites = AssetDatabase.LoadAllAssetsAtPath(SpriteSheetPath)
+        int total = 0;
+        foreach (var g in Ghosts)
+            total += CriarAnimacaoParaFantasma(g);
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("Animações criadas para " + total + "/" + Ghosts.Length + " fantasmas.");
+    }
+
+    static int CriarAnimacaoParaFantasma(GhostDef g)
+    {
+        var sprites = AssetDatabase.LoadAllAssetsAtPath(g.spriteSheet)
             .OfType<Sprite>()
             .OrderBy(s => s.name)
             .ToArray();
 
         if (sprites.Length == 0)
         {
-            Debug.LogError("Nenhum sprite encontrado em " + SpriteSheetPath);
-            return;
+            Debug.LogWarning("Nenhum sprite em: " + g.spriteSheet);
+            return 0;
         }
 
-        // Cria o AnimationClip com troca de sprite (Frame_0..Frame_N)
-        var clip = new AnimationClip { frameRate = 6 };
+        var clip = new AnimationClip { frameRate = 8 };
         var binding = new EditorCurveBinding
         {
-            path = "",
-            type = typeof(SpriteRenderer),
+            path         = "",
+            type         = typeof(SpriteRenderer),
             propertyName = "m_Sprite"
         };
 
@@ -42,8 +79,8 @@ public static class FantasmaAnimSetup
         {
             keyframes[i] = new ObjectReferenceKeyframe
             {
-                time = i / clip.frameRate,
-                value = sprites[i]
+                time  = i / clip.frameRate,
+                value = sprites[i]           // propriedade correta
             };
         }
         AnimationUtility.SetObjectReferenceCurve(clip, binding, keyframes);
@@ -52,36 +89,29 @@ public static class FantasmaAnimSetup
         settings.loopTime = true;
         AnimationUtility.SetAnimationClipSettings(clip, settings);
 
-        AssetDatabase.DeleteAsset(ClipPath);
-        AssetDatabase.CreateAsset(clip, ClipPath);
+        AssetDatabase.DeleteAsset(g.clipPath);
+        AssetDatabase.CreateAsset(clip, g.clipPath);
 
-        // Cria o AnimatorController com um único estado em loop
-        AssetDatabase.DeleteAsset(ControllerPath);
-        var controller = AnimatorController.CreateAnimatorControllerAtPath(ControllerPath);
+        AssetDatabase.DeleteAsset(g.controllerPath);
+        var controller = AnimatorController.CreateAnimatorControllerAtPath(g.controllerPath);
         controller.AddMotion(clip);
 
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-
-        // Adiciona/atualiza o Animator nos prefabs dos fantasmas
-        foreach (var prefabPath in PrefabPaths)
+        var root = PrefabUtility.LoadPrefabContents(g.prefabPath);
+        if (root == null)
         {
-            var root = PrefabUtility.LoadPrefabContents(prefabPath);
-            if (root == null)
-            {
-                Debug.LogWarning("Prefab não encontrado: " + prefabPath);
-                continue;
-            }
-
-            var animator = root.GetComponent<Animator>();
-            if (animator == null) animator = root.AddComponent<Animator>();
-            animator.runtimeAnimatorController = controller;
-            animator.applyRootMotion = false;
-
-            PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
-            PrefabUtility.UnloadPrefabContents(root);
+            Debug.LogWarning("Prefab não encontrado: " + g.prefabPath);
+            return 0;
         }
 
-        Debug.Log($"Animação 'fantasma02_flutuar' criada com {sprites.Length} frames e aplicada aos fantasmas.");
+        var animator = root.GetComponent<Animator>();
+        if (animator == null) animator = root.AddComponent<Animator>();
+        animator.runtimeAnimatorController = controller;
+        animator.applyRootMotion = false;
+
+        PrefabUtility.SaveAsPrefabAsset(root, g.prefabPath);
+        PrefabUtility.UnloadPrefabContents(root);
+
+        Debug.Log(g.prefabPath + " — " + sprites.Length + " frames @ 8fps");
+        return 1;
     }
 }

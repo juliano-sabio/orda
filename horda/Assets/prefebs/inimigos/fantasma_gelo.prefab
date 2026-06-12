@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7453603914777114492}
   - component: {fileID: 7404291949849893953}
   - component: {fileID: 7601734587589011272}
+  - component: {fileID: 8703162788063732552}
   m_Layer: 0
   m_Name: fantasma_gelo
   m_TagString: Untagged
@@ -222,3 +223,25 @@ MonoBehaviour:
   cooldownZona: 9
   raioGeloMorte: 3.5
   duracaoGeloMorte: 4
+--- !u!95 &8703162788063732552
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7240093478448209406}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 0873dbad78c1f254eb777032d51388f4, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
