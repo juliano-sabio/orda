@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7115671524697774619}
   - component: {fileID: 2196367952047460230}
   - component: {fileID: 4681214649346501853}
+  - component: {fileID: 295779054927074427}
   m_Layer: 0
   m_Name: fantasma_fogo
   m_TagString: Untagged
@@ -217,3 +218,25 @@ MonoBehaviour:
   velocidadeCarga: 22
   raioExplosao: 2.5
   danoExplosao: 20
+--- !u!95 &295779054927074427
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1316099733091517309}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d6daf7891c43af4489ce004096481b9c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

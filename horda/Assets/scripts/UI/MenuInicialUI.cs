@@ -31,6 +31,11 @@ public class MenuInicialUI : MonoBehaviour
     Sprite     sprBotaoOpcoes;   // btn_stone  (128×32, 9-slice 10px)
     Sprite     sprHudBar;        // hud_bar    (31×26, tiled)
     Sprite     sprSlotFrame;     // slot_frame (32×32, tiled — handle/knob)
+    Sprite     sprSliderTrack;   // ui_slider_track (64×16, 9-slice)
+    Sprite     sprSliderFill;    // ui_slider_fill  (64×16, 9-slice)
+    Sprite     sprSliderKnob;    // ui_slider_knob  (14×26)
+    Sprite     sprToggleOn;      // ui_toggle_on    (48×20)
+    Sprite     sprToggleOff;     // ui_toggle_off   (48×20)
     GameObject canvasRef;
     GameObject painelOpcoes;
     GameObject painelMulti;
@@ -61,6 +66,16 @@ public class MenuInicialUI : MonoBehaviour
             "Assets/assets/UI/hud/hud_bar.png");
         sprSlotFrame = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
             "Assets/assets/UI/hud/slot_frame.png");
+        sprSliderTrack = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/assets/UI/settings/ui_slider_track.png");
+        sprSliderFill = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/assets/UI/settings/ui_slider_fill.png");
+        sprSliderKnob = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/assets/UI/settings/ui_slider_knob.png");
+        sprToggleOn = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/assets/UI/settings/ui_toggle_on.png");
+        sprToggleOff = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/assets/UI/settings/ui_toggle_off.png");
 #endif
 
         AplicarConfiguracoesSalvas();
@@ -527,8 +542,8 @@ public class MenuInicialUI : MonoBehaviour
         PopularVideo(painelAbas[1]);
         PopularJogo(painelAbas[2]);
 
-        BotaoSimples(painel,"← VOLTAR",new Vector2(0.1f,0.02f),new Vector2(0.9f,0.12f),
-            new Color(0.28f,0.08f,0.06f),()=>{PlayerPrefs.Save();painelOpcoes.SetActive(false);});
+        BotaoSimples(painel,"← VOLTAR",new Vector2(0.08f,0.02f),new Vector2(0.92f,0.12f),
+            new Color(0.10f,0.07f,0.05f),()=>{PlayerPrefs.Save();painelOpcoes.SetActive(false);});
     }
 
     void DFBorda(GameObject pai, string nome, Vector2 ancMin, Vector2 ancMax, Vector2 offMin, Vector2 offMax)
@@ -633,30 +648,63 @@ public class MenuInicialUI : MonoBehaviour
 
     void BotoesQualidade(GameObject p, Vector2 mn, Vector2 mx)
     {
-        string[] n={"Baixa","Média","Alta","Ultra"};
+        string[] n={"Baixa","Media","Alta","Ultra"};
         int atual=QualitySettings.GetQualityLevel();
+        Color corAtv  = new Color(0.22f,0.15f,0.04f);
+        Color corInav = new Color(0.09f,0.06f,0.04f);
         for(int i=0;i<4;i++){
             int idx=i;
-            float x0=mn.x+i*(mx.x-mn.x)/4f+0.005f;
-            float x1=mn.x+(i+1)*(mx.x-mn.x)/4f-0.005f;
+            float x0=mn.x+i*(mx.x-mn.x)/4f+0.004f;
+            float x1=mn.x+(i+1)*(mx.x-mn.x)/4f-0.004f;
+
+            // container sem Image — mesma lógica de sibling do BotaoSimples
             var go=new GameObject($"Q{i}"); go.transform.SetParent(p.transform,false);
             var r=go.AddComponent<RectTransform>();
             r.anchorMin=new Vector2(x0,mn.y); r.anchorMax=new Vector2(x1,mx.y);
             r.offsetMin=r.offsetMax=Vector2.zero;
-            var img=go.AddComponent<Image>();
-            if (sprBotaoOpcoes != null) { img.sprite=sprBotaoOpcoes; img.type=Image.Type.Simple; }
-            img.color=i==atual ? new Color(0.78f,0.62f,0.18f) : new Color(0.32f,0.25f,0.22f);
-            var btn=go.AddComponent<Button>(); btn.targetGraphic=img; btn.transition=Selectable.Transition.None;
+
+            // filho 0: borda dourada (atrás)
+            var bordaQ=new GameObject("BQ"); bordaQ.transform.SetParent(go.transform,false);
+            var rbq=bordaQ.AddComponent<RectTransform>(); rbq.anchorMin=Vector2.zero; rbq.anchorMax=Vector2.one;
+            rbq.offsetMin=new Vector2(-1f,-1f); rbq.offsetMax=new Vector2(1f,1f);
+            bordaQ.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.65f);
+
+            // filho 1: corpo (frente — cobre a borda)
+            var corpo=new GameObject("Corpo"); corpo.transform.SetParent(go.transform,false);
+            var rco=corpo.AddComponent<RectTransform>(); rco.anchorMin=Vector2.zero; rco.anchorMax=Vector2.one; rco.offsetMin=rco.offsetMax=Vector2.zero;
+            var img=corpo.AddComponent<Image>(); img.color=i==atual?corAtv:corInav;
+
+            // filho 2: bevel topo
+            var topQ=new GameObject("TQ"); topQ.transform.SetParent(go.transform,false);
+            var rtq=topQ.AddComponent<RectTransform>(); rtq.anchorMin=new Vector2(0f,1f); rtq.anchorMax=new Vector2(1f,1f);
+            rtq.offsetMin=new Vector2(1f,-2f); rtq.offsetMax=new Vector2(-1f,0f);
+            topQ.AddComponent<Image>().color=new Color(1f,0.9f,0.5f,i==atual?0.20f:0.06f);
+
+            // filho 3: acento esquerdo (ativo = dourado, inativo = sutil)
+            var ac=new GameObject("Ac"); ac.transform.SetParent(go.transform,false);
+            var rac=ac.AddComponent<RectTransform>(); rac.anchorMin=Vector2.zero; rac.anchorMax=new Vector2(0f,1f);
+            rac.offsetMin=Vector2.zero; rac.offsetMax=new Vector2(3f,0f);
+            ac.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,i==atual?0.90f:0.20f);
+
+            var btn=go.AddComponent<Button>(); btn.targetGraphic=img; btn.transition=Selectable.Transition.ColorTint;
+            Color hov=new Color(0.30f,0.22f,0.08f);
+            btn.colors=new ColorBlock{normalColor=i==atual?corAtv:corInav,highlightedColor=hov,pressedColor=new Color(0.08f,0.05f,0.02f),selectedColor=corAtv,disabledColor=corInav,colorMultiplier=1f,fadeDuration=0.08f};
             btn.onClick.AddListener(()=>{
                 QualitySettings.SetQualityLevel(idx,true);
                 PlayerPrefs.SetInt("QualityLevel",idx);
                 for(int j=0;j<go.transform.parent.childCount;j++){
-                    var c=go.transform.parent.GetChild(j).GetComponent<Image>();
-                    if(c!=null)c.color=new Color(0.32f,0.25f,0.22f);
+                    var qgo=go.transform.parent.GetChild(j);
+                    var c=qgo.Find("Corpo"); if(c!=null)c.GetComponent<Image>().color=corInav;
+                    var th=qgo.Find("TQ"); if(th!=null)th.GetComponent<Image>().color=new Color(1f,0.9f,0.5f,0.06f);
+                    var a=qgo.Find("Ac"); if(a!=null)a.GetComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.20f);
                 }
-                img.color=new Color(0.78f,0.62f,0.18f);
+                img.color=corAtv;
+                topQ.GetComponent<Image>().color=new Color(1f,0.9f,0.5f,0.20f);
+                ac.GetComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.90f);
             });
-            CriarTexto(go,"T",Vector2.zero,Vector2.one,n[i],12f,FontStyles.Bold,Color.white);
+            Color corTxtQ=i==atual?dfCorTitulo:new Color(0.60f,0.50f,0.40f);
+            CriarTexto(go,"T",Vector2.zero,Vector2.one,n[i],12f,FontStyles.Bold,corTxtQ)
+                .alignment=TextAlignmentOptions.Center;
         }
     }
 
@@ -691,44 +739,90 @@ public class MenuInicialUI : MonoBehaviour
 
     void Rotulo(GameObject p, string label, float yMin, float yMax)
     {
-        CriarTexto(p,$"L_{label}",new Vector2(0.05f,yMin),new Vector2(0.65f,yMax),
-            label,15f,FontStyles.Bold,dfCorTitulo)
-            .alignment=TextAlignmentOptions.Left;
+        // linha separadora acima do rótulo
+        DFSep(p, new Vector2(0.03f, yMax-0.001f), new Vector2(0.97f, yMax+0.001f));
+
+        // ícone decorativo "▸" antes do texto
+        var row = new GameObject($"Row_{label}"); row.transform.SetParent(p.transform, false);
+        var rr = row.AddComponent<RectTransform>();
+        rr.anchorMin = new Vector2(0.03f, yMin); rr.anchorMax = new Vector2(0.65f, yMax);
+        rr.offsetMin = rr.offsetMax = Vector2.zero;
+
+        var icon = CriarTexto(row, "Ic", Vector2.zero, new Vector2(0.08f, 1f),
+            "▸", 13f, FontStyles.Normal, new Color(dfCorBorda.r, dfCorBorda.g, dfCorBorda.b, 0.85f));
+        icon.alignment = TextAlignmentOptions.MidlineLeft;
+
+        var lbl = CriarTexto(row, "Lbl", new Vector2(0.08f, 0f), Vector2.one,
+            label, 14f, FontStyles.Bold, dfCorTexto);
+        lbl.alignment = TextAlignmentOptions.MidlineLeft;
     }
 
     Slider Slider(GameObject p, string nome, Vector2 mn, Vector2 mx, float val)
     {
+        // container raiz — sem Image (estrutura de irmãos para renderização correta)
         var go=new GameObject(nome); go.transform.SetParent(p.transform,false);
         var r=go.AddComponent<RectTransform>(); r.anchorMin=mn; r.anchorMax=mx; r.offsetMin=r.offsetMax=Vector2.zero;
 
-        // ── trilha: btn_stone Sliced (stone carved channel) ──
-        var bgImg=go.AddComponent<Image>();
-        if (sprBotaoOpcoes != null) { bgImg.sprite=sprBotaoOpcoes; bgImg.type=Image.Type.Sliced; }
-        bgImg.color=new Color(0.18f,0.12f,0.10f);
+        // irmão 0: borda dourada externa
+        var brd=new GameObject("Brd"); brd.transform.SetParent(go.transform,false);
+        var rbrd=brd.AddComponent<RectTransform>(); rbrd.anchorMin=Vector2.zero; rbrd.anchorMax=Vector2.one;
+        rbrd.offsetMin=new Vector2(-1f,-1f); rbrd.offsetMax=new Vector2(1f,1f);
+        brd.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.50f);
 
-        // ── fill area ──
+        // irmão 1: trilha escura (pedra entalhada)
+        var trk=new GameObject("Trk"); trk.transform.SetParent(go.transform,false);
+        var rtrk=trk.AddComponent<RectTransform>(); rtrk.anchorMin=Vector2.zero; rtrk.anchorMax=Vector2.one; rtrk.offsetMin=rtrk.offsetMax=Vector2.zero;
+        trk.AddComponent<Image>().color=new Color(0.07f,0.04f,0.03f);
+        // sombra interna topo (efeito de entalhe)
+        var ist=new GameObject("InT"); ist.transform.SetParent(trk.transform,false);
+        var rist=ist.AddComponent<RectTransform>(); rist.anchorMin=new Vector2(0f,1f); rist.anchorMax=new Vector2(1f,1f);
+        rist.offsetMin=new Vector2(0f,-3f); rist.offsetMax=Vector2.zero;
+        ist.AddComponent<Image>().color=new Color(0f,0f,0f,0.65f);
+        // luz interna base
+        var isl=new GameObject("InB"); isl.transform.SetParent(trk.transform,false);
+        var risl=isl.AddComponent<RectTransform>(); risl.anchorMin=Vector2.zero; risl.anchorMax=new Vector2(1f,0f);
+        risl.offsetMin=Vector2.zero; risl.offsetMax=new Vector2(0f,1f);
+        isl.AddComponent<Image>().color=new Color(1f,0.8f,0.3f,0.05f);
+
+        // irmão 2: fill area (Unity ajusta anchorMax.x conforme valor)
         var fa=new GameObject("FA"); fa.transform.SetParent(go.transform,false);
-        var rfa=fa.AddComponent<RectTransform>();
-        rfa.anchorMin=new Vector2(0f,0.12f); rfa.anchorMax=new Vector2(1f,0.88f);
-        rfa.offsetMin=new Vector2(8f,0f); rfa.offsetMax=new Vector2(-8f,0f);
-
-        // ── fill: hud_bar Tiled dourado ──
+        var rfa=fa.AddComponent<RectTransform>(); rfa.anchorMin=Vector2.zero; rfa.anchorMax=Vector2.one; rfa.offsetMin=rfa.offsetMax=Vector2.zero;
+        // fill principal (âmbar fosco)
         var fi=new GameObject("Fi"); fi.transform.SetParent(fa.transform,false);
         var rfi=fi.AddComponent<RectTransform>(); rfi.anchorMin=Vector2.zero; rfi.anchorMax=Vector2.one; rfi.offsetMin=rfi.offsetMax=Vector2.zero;
-        var fiImg=fi.AddComponent<Image>();
-        if (sprHudBar != null) { fiImg.sprite=sprHudBar; fiImg.type=Image.Type.Tiled; }
-        fiImg.color=new Color(0.88f,0.70f,0.18f);
+        fi.AddComponent<Image>().color=new Color(0.75f,0.45f,0.04f);
+        // highlight topo do fill
+        var fhl=new GameObject("FHl"); fhl.transform.SetParent(fi.transform,false);
+        var rfhl=fhl.AddComponent<RectTransform>(); rfhl.anchorMin=new Vector2(0f,1f); rfhl.anchorMax=new Vector2(1f,1f);
+        rfhl.offsetMin=new Vector2(0f,-1f); rfhl.offsetMax=Vector2.zero;
+        fhl.AddComponent<Image>().color=new Color(1f,0.95f,0.50f,0.40f);
 
-        // ── handle area ──
+        // irmão 3: handle slide area
         var ha=new GameObject("HA"); ha.transform.SetParent(go.transform,false);
-        var rha=ha.AddComponent<RectTransform>(); rha.anchorMin=new Vector2(0f,0.05f); rha.anchorMax=new Vector2(1f,0.95f); rha.offsetMin=new Vector2(8f,0f); rha.offsetMax=new Vector2(-8f,0f);
+        var rha=ha.AddComponent<RectTransform>(); rha.anchorMin=Vector2.zero; rha.anchorMax=Vector2.one; rha.offsetMin=rha.offsetMax=Vector2.zero;
 
-        // ── handle: slot_frame Tiled como knob ──
+        // knob container (Unity posiciona anchorMin.x=anchorMax.x=valor)
         var h=new GameObject("H"); h.transform.SetParent(ha.transform,false);
-        var rh=h.AddComponent<RectTransform>(); rh.sizeDelta=new Vector2(18f,0f);
-        var hImg=h.AddComponent<Image>();
-        if (sprSlotFrame != null) { hImg.sprite=sprSlotFrame; hImg.type=Image.Type.Simple; hImg.preserveAspect=false; }
-        hImg.color=new Color(1f,0.92f,0.55f);
+        var rh=h.AddComponent<RectTransform>();
+        rh.anchorMin=new Vector2(0f,0f); rh.anchorMax=new Vector2(0f,1f);
+        rh.offsetMin=new Vector2(0f,-3f); rh.offsetMax=new Vector2(12f,3f); // 12px wide, 3px overflow
+
+        // knob irmão 0: sombra halo (atrás)
+        var kSh=new GameObject("KSh"); kSh.transform.SetParent(h.transform,false);
+        var rkSh=kSh.AddComponent<RectTransform>(); rkSh.anchorMin=Vector2.zero; rkSh.anchorMax=Vector2.one;
+        rkSh.offsetMin=new Vector2(-1f,-1f); rkSh.offsetMax=new Vector2(1f,1f);
+        kSh.AddComponent<Image>().color=new Color(0f,0f,0f,0.80f);
+
+        // knob irmão 1: corpo dourado
+        var kBd=new GameObject("KBd"); kBd.transform.SetParent(h.transform,false);
+        var rkBd=kBd.AddComponent<RectTransform>(); rkBd.anchorMin=Vector2.zero; rkBd.anchorMax=Vector2.one; rkBd.offsetMin=rkBd.offsetMax=Vector2.zero;
+        var hImg=kBd.AddComponent<Image>(); hImg.color=new Color(0.94f,0.80f,0.28f);
+
+        // knob irmão 2: highlight topo
+        var kHi=new GameObject("KHi"); kHi.transform.SetParent(h.transform,false);
+        var rkHi=kHi.AddComponent<RectTransform>(); rkHi.anchorMin=new Vector2(0f,1f); rkHi.anchorMax=new Vector2(1f,1f);
+        rkHi.offsetMin=new Vector2(1f,-2f); rkHi.offsetMax=new Vector2(-1f,0f);
+        kHi.AddComponent<Image>().color=new Color(1f,0.98f,0.72f,0.65f);
 
         var sl=go.AddComponent<UnityEngine.UI.Slider>();
         sl.fillRect=rfi; sl.handleRect=rh; sl.targetGraphic=hImg;
@@ -738,71 +832,88 @@ public class MenuInicialUI : MonoBehaviour
 
     void Toggle(GameObject p, string nome, Vector2 mn, Vector2 mx, bool val, System.Action<bool> cb)
     {
+        // container raiz — sem Image (mesma lógica do BotaoSimples: filhos renderizam sobre pai)
         var go=new GameObject(nome); go.transform.SetParent(p.transform,false);
         var r=go.AddComponent<RectTransform>(); r.anchorMin=mn; r.anchorMax=mx; r.offsetMin=r.offsetMax=Vector2.zero;
 
-        // ── caixa: btn_stone Sliced ──
-        var bg=go.AddComponent<Image>();
-        if (sprBotaoOpcoes != null) { bg.sprite=sprBotaoOpcoes; bg.type=Image.Type.Sliced; }
-        bg.color=val?new Color(0.12f,0.10f,0.04f):new Color(0.15f,0.07f,0.06f);
+        // filho 0: borda (atrás)
+        var brd=new GameObject("B"); brd.transform.SetParent(go.transform,false);
+        var rbrd=brd.AddComponent<RectTransform>(); rbrd.anchorMin=Vector2.zero; rbrd.anchorMax=Vector2.one;
+        rbrd.offsetMin=new Vector2(-1f,-1f); rbrd.offsetMax=new Vector2(1f,1f);
+        brd.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.55f);
 
-        // ── indicador: slot_frame deslizante ──
+        // filho 1: sprite do toggle (frente — cobre a borda exceto 1px nas bordas)
         bool estado=val;
-        var ck=new GameObject("Ck"); ck.transform.SetParent(go.transform,false);
-        var rc=ck.AddComponent<RectTransform>();
-        rc.anchorMin=val?new Vector2(0.50f,0.08f):new Vector2(0.04f,0.08f);
-        rc.anchorMax=val?new Vector2(0.96f,0.92f):new Vector2(0.50f,0.92f);
-        rc.offsetMin=rc.offsetMax=Vector2.zero;
-        var ic=ck.AddComponent<Image>();
-        if (sprSlotFrame != null) { ic.sprite=sprSlotFrame; ic.type=Image.Type.Simple; ic.preserveAspect=false; }
-        ic.color=val?new Color(0.88f,0.70f,0.18f):new Color(0.52f,0.16f,0.14f);
+        var bgGo=new GameObject("BG"); bgGo.transform.SetParent(go.transform,false);
+        var rbg=bgGo.AddComponent<RectTransform>(); rbg.anchorMin=Vector2.zero; rbg.anchorMax=Vector2.one; rbg.offsetMin=rbg.offsetMax=Vector2.zero;
+        var bg=bgGo.AddComponent<Image>(); bg.type=Image.Type.Simple; bg.color=Color.white;
+        bg.sprite = estado ? sprToggleOn : sprToggleOff;
 
-        // ── texto ON/OFF ──
-        var txt=CriarTexto(go,"Txt",Vector2.zero,Vector2.one,
-            val?"ON":"OFF",11f,FontStyles.Bold,
-            val?dfCorTitulo:new Color(0.55f,0.45f,0.40f));
-        txt.alignment=TextAlignmentOptions.Center;
+        // label ON/OFF à esquerda
+        Color corOn  = new Color(0.95f,0.80f,0.30f);
+        Color corOff = new Color(0.50f,0.36f,0.34f);
+        var lbl=CriarTexto(go,"Lbl",new Vector2(-0.75f,0.1f),new Vector2(0f,0.9f),
+            estado?"ON":"OFF", 11f, FontStyles.Bold, estado?corOn:corOff);
+        lbl.alignment=TextAlignmentOptions.MidlineRight;
 
         var btn=go.AddComponent<Button>();
         btn.targetGraphic=bg; btn.transition=Selectable.Transition.None;
         btn.onClick.AddListener(()=>{
             estado=!estado;
-            bg.color   =estado?new Color(0.12f,0.10f,0.04f):new Color(0.15f,0.07f,0.06f);
-            ic.color   =estado?new Color(0.88f,0.70f,0.18f):new Color(0.52f,0.16f,0.14f);
-            rc.anchorMin=estado?new Vector2(0.50f,0.08f):new Vector2(0.04f,0.08f);
-            rc.anchorMax=estado?new Vector2(0.96f,0.92f):new Vector2(0.50f,0.92f);
-            txt.text   =estado?"ON":"OFF";
-            txt.color  =estado?dfCorTitulo:new Color(0.55f,0.45f,0.40f);
+            bg.sprite=estado?sprToggleOn:sprToggleOff;
+            lbl.text=estado?"ON":"OFF";
+            lbl.color=estado?corOn:corOff;
             cb(estado);
         });
     }
 
     void BotaoSimples(GameObject pai, string label, Vector2 mn, Vector2 mx, Color cor, System.Action acao)
     {
+        // Container raiz — sem Image (filhos renderizam sobre o pai, então img no pai = invisível sob filhos)
         var go=new GameObject($"B_{label}"); go.transform.SetParent(pai.transform,false);
         var r=go.AddComponent<RectTransform>(); r.anchorMin=mn; r.anchorMax=mx; r.offsetMin=r.offsetMax=Vector2.zero;
 
-        // borda dourada
+        // filho 0: borda dourada (1px fora) — renderiza primeiro (por baixo dos outros filhos)
         var borda=new GameObject("Borda"); borda.transform.SetParent(go.transform,false);
         var rb=borda.AddComponent<RectTransform>(); rb.anchorMin=Vector2.zero; rb.anchorMax=Vector2.one;
         rb.offsetMin=new Vector2(-1f,-1f); rb.offsetMax=new Vector2(1f,1f);
-        borda.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.70f);
-        borda.transform.SetAsFirstSibling();
+        borda.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.88f);
 
-        var img=go.AddComponent<Image>();
-        if (sprBotaoOpcoes != null) { img.sprite=sprBotaoOpcoes; img.type=Image.Type.Simple; }
-        img.color=cor;
+        // filho 1: corpo do botão (cobre a borda exceto 1px nas bordas) — É O targetGraphic
+        bool isDanger = cor.r > 0.30f && cor.g < 0.15f && cor.b < 0.15f;
+        var corpo=new GameObject("Corpo"); corpo.transform.SetParent(go.transform,false);
+        var rc=corpo.AddComponent<RectTransform>(); rc.anchorMin=Vector2.zero; rc.anchorMax=Vector2.one; rc.offsetMin=rc.offsetMax=Vector2.zero;
+        var img=corpo.AddComponent<Image>(); img.color=cor;
 
-        var btn=go.AddComponent<Button>(); btn.targetGraphic=img; btn.transition=Selectable.Transition.None;
+        // filho 2: brilho no topo
+        var topo=new GameObject("HiTop"); topo.transform.SetParent(go.transform,false);
+        var rt2=topo.AddComponent<RectTransform>(); rt2.anchorMin=new Vector2(0f,1f); rt2.anchorMax=new Vector2(1f,1f);
+        rt2.offsetMin=new Vector2(0f,-2f); rt2.offsetMax=Vector2.zero;
+        topo.AddComponent<Image>().color=new Color(1f,0.92f,0.65f,isDanger?0.08f:0.14f);
+
+        // filho 3: sombra na base
+        var base2=new GameObject("ShBase"); base2.transform.SetParent(go.transform,false);
+        var rb2=base2.AddComponent<RectTransform>(); rb2.anchorMin=Vector2.zero; rb2.anchorMax=new Vector2(1f,0f);
+        rb2.offsetMin=Vector2.zero; rb2.offsetMax=new Vector2(0f,2f);
+        base2.AddComponent<Image>().color=new Color(0f,0f,0f,0.50f);
+
+        // filho 4: acento lateral (tipo do botão)
+        var ac=new GameObject("Ac"); ac.transform.SetParent(go.transform,false);
+        var rac=ac.AddComponent<RectTransform>(); rac.anchorMin=Vector2.zero; rac.anchorMax=new Vector2(0f,1f);
+        rac.offsetMin=Vector2.zero; rac.offsetMax=new Vector2(4f,0f);
+        ac.AddComponent<Image>().color=isDanger ? new Color(0.95f,0.18f,0.10f,1f)
+                                                : new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.95f);
+
+        // Button no container raiz, targetGraphic = img (corpo)
+        var btn=go.AddComponent<Button>(); btn.targetGraphic=img;
+        btn.transition=Selectable.Transition.ColorTint;
+        Color corHover=new Color(Mathf.Min(cor.r+0.18f,1f),Mathf.Min(cor.g+0.12f,1f),Mathf.Min(cor.b+0.10f,1f),cor.a);
+        Color corPress=new Color(Mathf.Max(cor.r-0.06f,0f),Mathf.Max(cor.g-0.04f,0f),Mathf.Max(cor.b-0.03f,0f),cor.a);
+        btn.colors=new ColorBlock{normalColor=cor,highlightedColor=corHover,pressedColor=corPress,selectedColor=cor,disabledColor=new Color(cor.r*0.5f,cor.g*0.5f,cor.b*0.5f,0.5f),colorMultiplier=1f,fadeDuration=0.1f};
         btn.onClick.AddListener(()=>acao());
 
-        var hover=go.AddComponent<BotaoMenuHover>();
-        hover.img=img; hover.barraImg=null; hover.txt=null; hover.bordaGO=null;
-        hover.corNormal=cor;
-        hover.corHover=new Color(Mathf.Min(cor.r+0.14f,1f),Mathf.Min(cor.g+0.10f,1f),Mathf.Min(cor.b+0.08f,1f),cor.a);
-        hover.corBorda=dfCorBorda;
-
-        CriarTexto(go,"T",Vector2.zero,Vector2.one,label,14f,FontStyles.Bold,Color.white)
+        Color corTxt=isDanger ? new Color(1f,0.72f,0.68f) : dfCorTexto;
+        CriarTexto(go,"T",new Vector2(0.04f,0f),Vector2.one,label,14f,FontStyles.Bold,corTxt)
             .alignment=TextAlignmentOptions.Center;
     }
 
