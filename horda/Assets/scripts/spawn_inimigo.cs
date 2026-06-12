@@ -137,6 +137,7 @@ public class EnemySpawnerCompleto : MonoBehaviour
         if (posicaoValida.HasValue)
         {
             TipoInimigo tipo = EscolherInimigoPorPeso();
+            if (tipo == null || tipo.prefab == null) return;
             GameObject novoInimigo = Instantiate(tipo.prefab, posicaoValida.Value, Quaternion.identity);
             inimigosAtivos.Add(novoInimigo);
         }
@@ -186,7 +187,7 @@ public class EnemySpawnerCompleto : MonoBehaviour
     {
         inimigosDisponiveis.Clear();
         foreach (var inimigo in tiposInimigos)
-            if (tempoTotalJogo >= inimigo.tempoParaAparecer) inimigosDisponiveis.Add(inimigo);
+            if (inimigo.prefab != null && tempoTotalJogo >= inimigo.tempoParaAparecer) inimigosDisponiveis.Add(inimigo);
     }
 
     void IniciarWave(int index)

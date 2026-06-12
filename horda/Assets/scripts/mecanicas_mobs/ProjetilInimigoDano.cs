@@ -83,7 +83,7 @@ public class ProjetilInimigoDano : MonoBehaviour
                 ic.ReceberDano(dano);
                 Destroy(gameObject);
             }
-            else if (other.CompareTag("Chao") || other.CompareTag("Obstacles"))
+            else if (other.CompareTag("chao") || other.CompareTag("obstacles"))
                 Destroy(gameObject);
             return;
         }
@@ -95,7 +95,7 @@ public class ProjetilInimigoDano : MonoBehaviour
             if (stats != null) stats.TakeDamage(dano);
             Destroy(gameObject);
         }
-        else if (other.gameObject.tag == "Chao" || other.gameObject.tag == "Obstacles")
+        else if (other.gameObject.tag == "chao" || other.gameObject.tag == "obstacles")
         {
             Destroy(gameObject);
         }

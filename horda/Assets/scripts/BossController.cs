@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering.Universal;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController))]
@@ -61,12 +62,36 @@ public class BossController : MonoBehaviour
     public float vidaEscudo = 200f;
 
     // ──────────────────────────────────────────────
+    // ATAQUE DE RAIO (FEITIÇO)
+    // ──────────────────────────────────────────────
+    [Header("Ataque de Raio")]
+    [Tooltip("Tempo entre disparos do raio na Fase 1")]
+    public float intervalRaioFase1 = 8f;
+    [Tooltip("Tempo entre disparos do raio na Fase 2")]
+    public float intervalRaioFase2 = 5f;
+    [Tooltip("Duração da mira (telegraph) antes do raio disparar")]
+    public float duracaoTelegraphRaio = 1f;
+    [Tooltip("Duração do raio ativo causando dano")]
+    public float duracaoRaio = 1.5f;
+    [Tooltip("Largura do feixe (world units)")]
+    public float larguraRaio = 0.6f;
+    [Tooltip("Alcance máximo do feixe")]
+    public float alcanceRaio = 14f;
+    [Tooltip("Dano causado por tick enquanto o jogador estiver no feixe")]
+    public float danoRaio = 8f;
+    [Tooltip("Intervalo entre ticks de dano do feixe")]
+    public float intervaloDanoRaio = 0.25f;
+    [Tooltip("Ângulo total de varredura do feixe na Fase 2 (0 = sem varredura)")]
+    public float anguloVarreduraRaio = 60f;
+
+    // ──────────────────────────────────────────────
     // REFERÊNCIAS INTERNAS
     // ──────────────────────────────────────────────
     private InimigoController controller;
     private SpriteRenderer spriteRenderer;
     private Animator animator;
     private Transform player;
+    private PlayerStats playerStats;
 
     private bool fase2Ativada = false;
     private int projeteis; // valor atual (muda na fase 2)
@@ -102,6 +127,7 @@ public class BossController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator      = GetComponent<Animator>();
         player        = GameObject.FindGameObjectWithTag("Player")?.transform;
+        playerStats   = player != null ? player.GetComponent<PlayerStats>() : null;
 
         projeteis = projeteisFase1;
         escalaOriginal = transform.localScale;
@@ -111,6 +137,7 @@ public class BossController : MonoBehaviour
         StartCoroutine(SequenciaEntrada());
         StartCoroutine(LoopTeleporte());
         StartCoroutine(LoopAtaque());
+        StartCoroutine(LoopRaio());
     }
 
     void Update()
@@ -481,6 +508,396 @@ public class BossController : MonoBehaviour
                 }
             }
         }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // ATAQUE DE RAIO (FEITIÇO)
+    // ──────────────────────────────────────────────────────────────
+
+    IEnumerator LoopRaio()
+    {
+        // Começa decalado do ataque normal de projéteis
+        yield return new WaitForSeconds(intervalRaioFase1 * 0.5f);
+
+        while (!controller.estaMorrendo)
+        {
+            float intervalo = fase2Ativada ? intervalRaioFase2 : intervalRaioFase1;
+            yield return new WaitForSeconds(intervalo);
+
+            if (!controller.estaMorrendo && player != null)
+                yield return StartCoroutine(AtaqueRaio());
+        }
+    }
+
+    IEnumerator AtaqueRaio()
+    {
+        if (player == null) yield break;
+
+        Color corNucleo = new Color(1f, 0.95f, 1f);
+        Color corGlow   = new Color(0.7f, 0.25f, 1f);
+
+        // ── Telegraph: feixe fraco acompanhando o jogador + retícula no alvo + orbe carregando ──
+        GameObject telegraph = CriarFeixeVisual(corGlow, corNucleo);
+        GameObject orbeCarga = CriarOrbeRaio(corGlow);
+        GameObject reticula  = CriarReticulaRaio(corNucleo);
+
+        Vector2 dir = Vector2.right;
+        float t = 0f;
+        while (t < duracaoTelegraphRaio)
+        {
+            if (telegraph == null || orbeCarga == null || reticula == null) yield break;
+            t += Time.deltaTime;
+            float p = Mathf.Clamp01(t / duracaoTelegraphRaio);
+
+            Vector3 origem = PosicaoOlho();
+            if (player != null)
+                dir = ((Vector2)player.position - (Vector2)origem).normalized;
+
+            PosicionarFeixe(telegraph, origem, dir, alcanceRaio, larguraRaio * 0.35f, 0f);
+
+            float pulso = 0.12f + Mathf.Abs(Mathf.Sin(Time.time * 12f)) * 0.18f;
+            DefinirAlphaCamadas(telegraph, pulso, 0f);
+
+            float escalaOrbe = Mathf.Lerp(0.15f, 0.6f, p) * (1f + Mathf.Sin(Time.time * 18f) * 0.08f);
+            orbeCarga.transform.position   = origem;
+            orbeCarga.transform.localScale = Vector3.one * escalaOrbe;
+
+            if (player != null)
+            {
+                reticula.transform.position   = player.position;
+                reticula.transform.localScale = Vector3.one * Mathf.Lerp(1.5f, 0.7f, p) * (1f + Mathf.Sin(Time.time * 14f) * 0.1f);
+                SpriteRenderer srR = reticula.GetComponent<SpriteRenderer>();
+                if (srR != null) { Color c = srR.color; c.a = Mathf.Lerp(0.15f, 0.9f, p); srR.color = c; }
+            }
+
+            yield return null;
+        }
+        Destroy(telegraph);
+        Destroy(reticula);
+
+        // Flash de disparo no orbe de carga
+        if (orbeCarga != null)
+        {
+            orbeCarga.transform.localScale = Vector3.one * 0.95f;
+            SpriteRenderer srO = orbeCarga.GetComponent<SpriteRenderer>();
+            if (srO != null) { Color c = srO.color; c.a = 1f; srO.color = c; }
+            StartCoroutine(FadeECrescerDestruir(orbeCarga, 0.2f));
+        }
+
+        CameraShaker.Tremer(0.05f, duracaoRaio);
+
+        // ── Trava a mira final ──────────────────────────────────────────
+        Vector3 origemFinal = PosicaoOlho();
+        Vector2 direcaoFinal = player != null ? ((Vector2)player.position - (Vector2)origemFinal).normalized : dir;
+        float anguloBase = Mathf.Atan2(direcaoFinal.y, direcaoFinal.x) * Mathf.Rad2Deg;
+        float varredura  = fase2Ativada ? anguloVarreduraRaio : 0f;
+        float anguloIni  = anguloBase - varredura * 0.5f;
+
+        // ── Feixe real (núcleo brilhante + glow externo) ────────────────────
+        GameObject feixe = CriarFeixeVisual(corGlow, corNucleo);
+        CriarLuz(feixe.transform, corGlow, 1.8f, 0.05f, larguraRaio * 2.5f);
+
+        // ── Disco de impacto pulsante na ponta do feixe ─────────────────────
+        GameObject impacto = CriarOrbeRaio(corNucleo);
+
+        float proxTick    = 0f;
+        float proxFaisca  = 0f;
+        t = 0f;
+        while (t < duracaoRaio)
+        {
+            if (feixe == null) yield break;
+            t += Time.deltaTime;
+            float p = duracaoRaio > 0f ? Mathf.Clamp01(t / duracaoRaio) : 1f;
+
+            float ang = varredura != 0f ? Mathf.Lerp(anguloIni, anguloIni + varredura, p) : anguloBase;
+            float rad = ang * Mathf.Deg2Rad;
+            Vector2 dirAtual = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+            Vector3 origemAtual = PosicaoOlho();
+            Vector3 pontaFeixe  = origemAtual + (Vector3)(dirAtual * alcanceRaio);
+
+            // Vibração de energia: o núcleo pulsa de intensidade/largura
+            float vibra = 0.8f + Mathf.Sin(Time.time * 25f) * 0.2f;
+            PosicionarFeixe(feixe, origemAtual, dirAtual, alcanceRaio, larguraRaio, vibra);
+            DefinirAlphaCamadas(feixe, 0.55f, vibra);
+
+            if (impacto != null)
+            {
+                impacto.transform.position   = pontaFeixe;
+                float pulsoImpacto = 0.7f + Mathf.Abs(Mathf.Sin(Time.time * 16f)) * 0.3f;
+                impacto.transform.localScale = Vector3.one * pulsoImpacto * (larguraRaio * 1.6f);
+            }
+
+            // Faíscas viajando pelo feixe
+            proxFaisca -= Time.deltaTime;
+            if (proxFaisca <= 0f)
+            {
+                proxFaisca = 0.05f;
+                StartCoroutine(FaiscaRaio(origemAtual, dirAtual, alcanceRaio, corNucleo));
+            }
+
+            // Dano
+            proxTick -= Time.deltaTime;
+            if (proxTick <= 0f)
+            {
+                proxTick = intervaloDanoRaio;
+                if (player != null && playerStats != null)
+                {
+                    float dist = DistanciaPontoSegmentoRaio(player.position, origemAtual, pontaFeixe);
+                    if (dist <= larguraRaio * 0.5f)
+                        playerStats.TakeDamage(danoRaio);
+                }
+            }
+
+            yield return null;
+        }
+
+        Destroy(feixe);
+        if (impacto != null) StartCoroutine(FadeECrescerDestruir(impacto, 0.2f));
+    }
+
+    // ── Feixe composto: camada "Glow" larga e suave + camada "Nucleo" fina e brilhante ──
+    GameObject CriarFeixeVisual(Color corGlow, Color corNucleo)
+    {
+        GameObject root = new GameObject("RaioMaga");
+
+        GameObject glow = CriarCamadaFeixe(ObterTexturaFeixe(0.6f), corGlow);
+        glow.name = "Glow";
+        glow.transform.SetParent(root.transform, false);
+
+        GameObject nucleo = CriarCamadaFeixe(ObterTexturaFeixe(2.5f), corNucleo);
+        nucleo.name = "Nucleo";
+        nucleo.transform.SetParent(root.transform, false);
+        nucleo.transform.localScale = new Vector3(1f, 0.3f, 1f);
+
+        if (spriteRenderer != null)
+        {
+            SpriteRenderer srGlow   = glow.GetComponent<SpriteRenderer>();
+            SpriteRenderer srNucleo = nucleo.GetComponent<SpriteRenderer>();
+            srGlow.sortingLayerID   = srNucleo.sortingLayerID = spriteRenderer.sortingLayerID;
+            srGlow.sortingOrder     = spriteRenderer.sortingOrder + 1;
+            srNucleo.sortingOrder   = spriteRenderer.sortingOrder + 2;
+        }
+
+        DefinirAlphaCamadas(root, 0f, 0f);
+        Destroy(root, 8f); // segurança
+        return root;
+    }
+
+    static GameObject CriarCamadaFeixe(Sprite spr, Color cor)
+    {
+        GameObject go = new GameObject("Camada");
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = spr;
+        sr.color  = cor;
+        return go;
+    }
+
+    // root.localScale.x = alcance, root.localScale.y = largura do glow.
+    // intensidadeNucleo ajusta a largura relativa do núcleo (vibração de energia).
+    void PosicionarFeixe(GameObject root, Vector3 origem, Vector2 dir, float alcance, float largura, float intensidadeNucleo)
+    {
+        root.transform.position = origem;
+        float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        root.transform.rotation   = Quaternion.Euler(0f, 0f, ang);
+        root.transform.localScale = new Vector3(alcance, largura, 1f);
+
+        Transform nucleo = root.transform.Find("Nucleo");
+        if (nucleo != null)
+            nucleo.localScale = new Vector3(1f, Mathf.Clamp(0.3f * Mathf.Max(intensidadeNucleo, 0.3f), 0.1f, 1f), 1f);
+    }
+
+    static void DefinirAlphaCamadas(GameObject root, float alphaGlow, float alphaNucleo)
+    {
+        SpriteRenderer glow   = root.transform.Find("Glow")?.GetComponent<SpriteRenderer>();
+        SpriteRenderer nucleo = root.transform.Find("Nucleo")?.GetComponent<SpriteRenderer>();
+        if (glow   != null) { Color c = glow.color;   c.a = alphaGlow;   glow.color = c; }
+        if (nucleo != null) { Color c = nucleo.color; c.a = alphaNucleo; nucleo.color = c; }
+    }
+
+    // ── Orbe de luz (carga, impacto) ────────────────────────────────────
+    GameObject CriarOrbeRaio(Color cor)
+    {
+        GameObject go = new GameObject("OrbeRaio");
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = ObterTexturaDisco();
+        sr.color  = cor;
+        if (spriteRenderer != null)
+        {
+            sr.sortingLayerID = spriteRenderer.sortingLayerID;
+            sr.sortingOrder   = spriteRenderer.sortingOrder + 3;
+        }
+        CriarLuz(go.transform, cor, 0.6f, 0.05f, 0.6f);
+        Destroy(go, 5f); // segurança
+        return go;
+    }
+
+    // ── Retícula de alvo (anel) ─────────────────────────────────────────
+    GameObject CriarReticulaRaio(Color cor)
+    {
+        GameObject go = new GameObject("ReticulaRaio");
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = ObterTexturaAnel();
+        sr.color  = new Color(cor.r, cor.g, cor.b, 0f);
+        if (spriteRenderer != null)
+        {
+            sr.sortingLayerID = spriteRenderer.sortingLayerID;
+            sr.sortingOrder   = spriteRenderer.sortingOrder + 3;
+        }
+        Destroy(go, 5f); // segurança
+        return go;
+    }
+
+    // ── Faísca que percorre o feixe enquanto ele está ativo ─────────────
+    IEnumerator FaiscaRaio(Vector3 origem, Vector2 dir, float alcance, Color cor)
+    {
+        GameObject go = new GameObject("FaiscaRaio");
+        go.transform.position = origem;
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = ObterTexturaDisco();
+        sr.color  = cor;
+        if (spriteRenderer != null)
+        {
+            sr.sortingLayerID = spriteRenderer.sortingLayerID;
+            sr.sortingOrder   = spriteRenderer.sortingOrder + 2;
+        }
+        go.transform.localScale = Vector3.one * Random.Range(0.1f, 0.2f);
+        Destroy(go, 1f); // segurança
+
+        float dur = 0.3f;
+        float t = 0f;
+        Vector3 destino = origem + (Vector3)(dir * alcance);
+        while (t < dur)
+        {
+            if (go == null) yield break;
+            t += Time.deltaTime;
+            float p = t / dur;
+            go.transform.position = Vector3.Lerp(origem, destino, p);
+            Color c = sr.color; c.a = Mathf.Lerp(0.9f, 0f, p); sr.color = c;
+            yield return null;
+        }
+        if (go != null) Destroy(go);
+    }
+
+    // ── Fade + leve "explosão" de escala antes de destruir ───────────────
+    IEnumerator FadeECrescerDestruir(GameObject go, float duracao)
+    {
+        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+        Color corBase = sr != null ? sr.color : Color.white;
+        float t = 0f;
+        while (t < duracao)
+        {
+            if (go == null) yield break;
+            t += Time.deltaTime;
+            float p = t / duracao;
+            if (sr != null) { Color c = corBase; c.a = Mathf.Lerp(corBase.a, 0f, p); sr.color = c; }
+            go.transform.localScale *= 1f + Time.deltaTime * 3f;
+            yield return null;
+        }
+        if (go != null) Destroy(go);
+    }
+
+    static float DistanciaPontoSegmentoRaio(Vector2 ponto, Vector2 a, Vector2 b)
+    {
+        Vector2 ab = b - a;
+        float comprimentoQuadrado = ab.sqrMagnitude;
+        if (comprimentoQuadrado < 0.0001f) return Vector2.Distance(ponto, a);
+        float tProj = Mathf.Clamp01(Vector2.Dot(ponto - a, ab) / comprimentoQuadrado);
+        Vector2 projecao = a + ab * tProj;
+        return Vector2.Distance(ponto, projecao);
+    }
+
+    // ── Texturas em cache (geradas uma única vez) ────────────────────────
+    static Sprite s_texFeixeGlow, s_texFeixeNucleo, s_texDisco, s_texAnel;
+
+    static Sprite ObterTexturaFeixe(float expoente)
+    {
+        if (expoente >= 1f)
+        {
+            if (s_texFeixeGlow == null) s_texFeixeGlow = GerarTexturaFeixe(expoente);
+            return s_texFeixeGlow;
+        }
+        if (s_texFeixeNucleo == null) s_texFeixeNucleo = GerarTexturaFeixe(expoente);
+        return s_texFeixeNucleo;
+    }
+
+    static Sprite ObterTexturaDisco()
+    {
+        if (s_texDisco == null) s_texDisco = GerarTexturaDisco();
+        return s_texDisco;
+    }
+
+    static Sprite ObterTexturaAnel()
+    {
+        if (s_texAnel == null) s_texAnel = GerarTexturaAnel();
+        return s_texAnel;
+    }
+
+    // Faixa horizontal com brilho suave nas bordas verticais; pivot na esquerda-centro.
+    // expoente baixo -> faixa fina e concentrada (núcleo); alto -> faixa larga e difusa (glow).
+    static Sprite GerarTexturaFeixe(float expoente)
+    {
+        const int sz = 64;
+        Texture2D tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        for (int y = 0; y < sz; y++)
+        for (int x = 0; x < sz; x++)
+        {
+            float dy = Mathf.Abs((y + 0.5f) / sz - 0.5f) * 2f; // 0 no centro, 1 na borda
+            float a  = Mathf.Pow(Mathf.Clamp01(1f - dy), expoente);
+            tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0f, 0.5f), sz);
+    }
+
+    static Sprite GerarTexturaDisco()
+    {
+        const int sz = 32;
+        Texture2D tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float c = sz * 0.5f;
+        for (int y = 0; y < sz; y++)
+        for (int x = 0; x < sz; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c, c)) / c;
+            float a = Mathf.Clamp01(1f - d);
+            a *= a;
+            tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
+    }
+
+    static Sprite GerarTexturaAnel()
+    {
+        const int sz = 32;
+        Texture2D tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float c = sz * 0.5f;
+        const float espessura = 0.18f;
+        for (int y = 0; y < sz; y++)
+        for (int x = 0; x < sz; x++)
+        {
+            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c, c)) / c;
+            float borda = 1f - Mathf.Abs(d - (1f - espessura)) / espessura;
+            float a = Mathf.Clamp01(borda);
+            tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
+    }
+
+    static void CriarLuz(Transform parent, Color cor, float intensidade, float raioInterno, float raioExterno)
+    {
+        GameObject go = new GameObject("brilho");
+        go.transform.SetParent(parent, false);
+        var light = go.AddComponent<Light2D>();
+        light.lightType = Light2D.LightType.Point;
+        light.color = cor;
+        light.intensity = intensidade;
+        light.pointLightInnerRadius = raioInterno;
+        light.pointLightOuterRadius = raioExterno;
+        light.blendStyleIndex = 0;
     }
 
     // ──────────────────────────────────────────────────────────────

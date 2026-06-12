@@ -32,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 1}
+  m_LocalScale: {x: 8, y: 8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -210,17 +210,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FantasmaGelo
   velocidade: 2.5
+  distanciaIdeal: 6
+  toleranciaDistancia: 1.5
   amplitudeOnda: 0.5
   frequenciaOnda: 2
   danoContato: 10
   intervaloContato: 1.5
+  spriteProjetil: {fileID: -5917361544774510345, guid: 2069a223f2a9e1447ad3b54ce381ce62, type: 3}
+  danoProjetil: 10
+  velocidadeProjetil: 8
+  cooldownTiro: 2.2
+  distanciaTiro: 9
+  raioImpactoProjetil: 0.4
+  vidaMaximaProjetil: 4
   reducaoSlow: 0.5
   duracaoSlow: 3.5
   cooldownSlow: 4
   raioZonaGelo: 2.8
   duracaoZonaGelo: 3
   danoZonaGelo: 8
-  cooldownZona: 9
   raioGeloMorte: 3.5
   duracaoGeloMorte: 4
 --- !u!95 &8703162788063732552

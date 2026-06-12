@@ -85,7 +85,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2849089005069279964, guid: 2b1bcc7673ea57846a29419f15b2351e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -206,6 +206,8 @@ MonoBehaviour:
   drops: []
   alturaDanoFlutuante: 2
   mostrarDanoAposMorte: 1
+  mostrarDanoFlutuante: 1
+  imuneAoDano: 0
   podeReceberCura: 1
   multiplicadorCuraRecebida: 1
   mostrarCuraFlutuante: 1

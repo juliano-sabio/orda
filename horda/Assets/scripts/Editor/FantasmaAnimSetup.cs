@@ -114,4 +114,46 @@ public static class FantasmaAnimSetup
         Debug.Log(g.prefabPath + " — " + sprites.Length + " frames @ 8fps");
         return 1;
     }
+
+    [MenuItem("Tools/Configurar Projétil Fantasma Gelo")]
+    public static void ConfigurarProjetilFantasmaGelo()
+    {
+        const string spriteAsset = "Assets/assets/mobs/fantasma2/fantasma 03 projetil.ase";
+        const string prefabPath  = "Assets/prefebs/inimigos/fantasma_gelo.prefab";
+
+        var sprite = AssetDatabase.LoadAllAssetsAtPath(spriteAsset)
+            .OfType<Sprite>()
+            .FirstOrDefault();
+
+        if (sprite == null)
+        {
+            Debug.LogWarning("Sprite de projétil não encontrado em: " + spriteAsset);
+            return;
+        }
+
+        var root = PrefabUtility.LoadPrefabContents(prefabPath);
+        if (root == null)
+        {
+            Debug.LogWarning("Prefab não encontrado: " + prefabPath);
+            return;
+        }
+
+        var fantasmaGelo = root.GetComponent<FantasmaGelo>();
+        if (fantasmaGelo == null)
+        {
+            Debug.LogWarning("Componente FantasmaGelo não encontrado em: " + prefabPath);
+            PrefabUtility.UnloadPrefabContents(root);
+            return;
+        }
+
+        var so = new SerializedObject(fantasmaGelo);
+        so.FindProperty("spriteProjetil").objectReferenceValue = sprite;
+        so.ApplyModifiedProperties();
+
+        PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+        PrefabUtility.UnloadPrefabContents(root);
+
+        AssetDatabase.SaveAssets();
+        Debug.Log("Sprite de projétil configurado em " + prefabPath);
+    }
 }
