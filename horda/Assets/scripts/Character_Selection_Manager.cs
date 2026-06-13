@@ -171,7 +171,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             statusSliders[3].value = (data.baseSpeed * (1 + upgradeLevels[3] * 0.05f)) / 50f;
         }
 
-        if (statusTexts != null && statusTexts.Length >= 7)
+        if (statusTexts != null && statusTexts.Length >= 8)
         {
             float atq  = data.baseAttack   * (1 + upgradeLevels[1] * 0.05f);
             float def  = data.baseDefense  * (1 + upgradeLevels[2] * 0.05f);
@@ -179,6 +179,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             float vida = data.maxHealth    * (1 + upgradeLevels[0] * 0.05f);
             float regen     = data.baseHealthRegen;
             float velAtq    = data.baseAttackCooldown;
+            float velEscudo = data.baseDefenseCooldown;
             float critico   = 10f; // base padrão
 
             if (statusTexts[0] != null) statusTexts[0].text = $"ATQ: {atq:F1}";
@@ -188,6 +189,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             if (statusTexts[4] != null) statusTexts[4].text = $"Vida: {vida:F0} / {vida:F0}";
             if (statusTexts[5] != null) statusTexts[5].text = $"Vel: {vel:F1}";
             if (statusTexts[6] != null) statusTexts[6].text = $"Regen: {regen:F1}/s";
+            if (statusTexts[7] != null) statusTexts[7].text = $"Escudo: {velEscudo:F1}s";
         }
 
         for (int i = 0; i < upgradeLevelTexts.Length; i++)

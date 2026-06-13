@@ -469,8 +469,8 @@ public class CharacterSelectionUI : MonoBehaviour
                 img.color  = Color.white;
             }
         }
-        // 7 linhas compactas: ATQ, DEF, Crítico, Vel.Atq, Vida, Vel, Regen
-        string[] statLabels = { "ATQ",      "DEF",      "Crítico",  "Vel.Atq",  "Vida",     "Vel",      "Regen"    };
+        // 8 linhas compactas: ATQ, DEF, Crítico, Vel.Atq, Vida, Vel, Regen, Escudo
+        string[] statLabels = { "ATQ",      "DEF",      "Crítico",  "Vel.Atq",  "Vida",     "Vel",      "Regen",    "Escudo"   };
         StatusCardType[] statTypes = {
             StatusCardType.Attack,
             StatusCardType.Defense,
@@ -479,6 +479,7 @@ public class CharacterSelectionUI : MonoBehaviour
             StatusCardType.Health,
             StatusCardType.Speed,
             StatusCardType.Regen,
+            StatusCardType.Shield,
         };
         Color[] statCores = {
             new Color(1.00f, 0.55f, 0.10f),  // ATQ    laranja
@@ -488,14 +489,15 @@ public class CharacterSelectionUI : MonoBehaviour
             new Color(0.90f, 0.28f, 0.28f),  // Vida   vermelho
             new Color(0.35f, 0.95f, 0.50f),  // Vel    verde
             new Color(0.55f, 0.90f, 0.60f),  // Regen  verde claro
+            new Color(0.30f, 0.85f, 1.00f),  // Escudo ciano
         };
 
-        var statusTexts = new TextMeshProUGUI[7];
+        var statusTexts = new TextMeshProUGUI[8];
         const float sRowH = 0.097f;
         const float sRowG = 0.002f;
         float startY = 0.96f;
 
-        for (int i = 0; i < 7; i++)
+        for (int i = 0; i < 8; i++)
         {
             float yMax = startY - i * (sRowH + sRowG);
             float yMin = yMax - sRowH;
@@ -618,16 +620,21 @@ public class CharacterSelectionUI : MonoBehaviour
         Anchors(painelAbaInfo[0], Vector2.zero, new Vector2(1f, 0.87f));
 
         txtDesc = TMP(painelAbaInfo[0], "Desc",
-            new Vector2(0.04f, 0.26f), new Vector2(0.96f, 0.96f),
+            new Vector2(0.08f, 0.22f), new Vector2(0.92f, 0.95f),
             "—", 11f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.70f));
         txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDesc.alignment = TextAlignmentOptions.Top;
+        txtDesc.enableAutoSizing = true;
+        txtDesc.fontSizeMin = 11f;
+        txtDesc.fontSizeMax = 18f;
+        txtDesc.lineSpacing = 25f;
 
         txtBonus = TMP(painelAbaInfo[0], "Bonus",
-            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.24f),
+            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.07f),
             "—", 10f, FontStyles.Normal, new Color(0.5f, 1f, 0.6f));
         txtBonus.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtBonus.alignment = TextAlignmentOptions.Center;
+        txtBonus.gameObject.SetActive(false);
 
         // ── Painel ULTIMATE ──────────────────────────────────────────
         painelAbaInfo[1] = new GameObject("ConteudoUltimate");

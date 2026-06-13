@@ -13,7 +13,12 @@ MonoBehaviour:
   m_Name: servo
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   characterName: servo
-  description: 
+  description: "Outrora soberano de uma dimens\xE3o grandiosa, viu seu trono ser
+    tomado e seus poderes arrancados. Exilado do pr\xF3prio destino, encontrou ref\xFAgio
+    em uma clareira habitada por esp\xEDritos. Eles o acolheram como um dos seus,
+    oferecendo companhia e conforto para sua alma ferida. Ainda assim, sob a luz
+    p\xE1lida da lua, as mem\xF3rias de sua antiga gl\xF3ria permanecem vivas, lembrando-o
+    de tudo o que perdeu - e de tudo o que um dia poder\xE1 recuperar."
   icon: {fileID: -3745306912610426398, guid: 0273d57e95b5be74d8fcba6fe6031430, type: 3}
   unlocked: 1
   characterPrefab: {fileID: 2605273054779499284, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}

@@ -337,7 +337,7 @@ void TentarIniciarEvento()
         idx = debugForcarEvento;
     else if (!primeiroEventoDisparado)
     {
-        idx = eventos.FindIndex(e => e.tipo == TipoEvento.TempestadeEletrica);
+        idx = eventos.FindIndex(e => e.tipo == TipoEvento.Colapso);
         if (idx < 0) idx = 0;
     }
     else

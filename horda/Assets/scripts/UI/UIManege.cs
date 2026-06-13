@@ -45,6 +45,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI maxHealthStatusText; // Vida Máxima no painel
     public TextMeshProUGUI critChanceText;      // Chance de Crítico
     public TextMeshProUGUI healthRegenText;
+    public TextMeshProUGUI shieldCooldownText;
     public TextMeshProUGUI attackSpeedText;
     public TextMeshProUGUI elementInfoText;
     public TextMeshProUGUI inventoryText;
@@ -1152,6 +1153,7 @@ public class UIManager : MonoBehaviour
         maxHealthStatusText = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Health,         new Color(0.30f, 1.00f, 0.45f));
         speedText           = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Speed,          new Color(0.30f, 0.90f, 1.00f));
         healthRegenText     = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Regen,          new Color(0.50f, 1.00f, 0.70f));
+        shieldCooldownText  = CriarLinhaStatusPanel(containerGO.transform, StatusCardType.Shield,         new Color(0.30f, 0.85f, 1.00f));
     }
 
     private TextMeshProUGUI CriarLinhaStatusPanel(Transform pai, StatusCardType stat, Color cor)
@@ -1268,6 +1270,9 @@ public class UIManager : MonoBehaviour
 
         if (healthRegenText != null)
             healthRegenText.text = $"Regen: {playerStats.GetHealthRegen():F1}/s";
+
+        if (shieldCooldownText != null)
+            shieldCooldownText.text = $"Escudo: {playerStats.GetDefenseActivationInterval():F1}s";
 
         // ── Level & XP ────────────────────────────────────────────────
         if (statusPointsText != null)

@@ -8,7 +8,8 @@ public enum StatusCardType
     Speed,
     Regen,
     CriticalChance,
-    AttackSpeed
+    AttackSpeed,
+    Shield
 }
 
 public enum CardRarity

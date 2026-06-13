@@ -24,6 +24,7 @@ public static class StatusCardIconGenerator
             case StatusCardType.AttackSpeed:    DesenharRelampago(pixels, SZ, cx, cor); break;
             case StatusCardType.Speed:          DesenharVento(pixels, SZ, cx, cor);     break;
             case StatusCardType.Regen:          DesenharRegen(pixels, SZ, cx, cor);     break;
+            case StatusCardType.Shield:         DesenharEscudoEnergia(pixels, SZ, cx, cor); break;
         }
 
         var tex = new Texture2D(SZ, SZ, TextureFormat.RGBA32, false);
@@ -394,5 +395,33 @@ public static class StatusCardIconGenerator
         Linha(p, sz, new Vector2(cx - 6, cx), new Vector2(cx + 6, cx), branco, 2.5f);
         Linha(p, sz, new Vector2(cx, cx - 6), new Vector2(cx, cx + 6), branco, 2.5f);
         PintarElipse(p, sz, cx, cx, 2f, 2f, Color.white, 4f);
+    }
+
+    // ESCUDO (energia) — barreira hexagonal com anel de energia pulsante
+    static void DesenharEscudoEnergia(Color[] p, int sz, float cx, Color cor)
+    {
+        Color brilho = Color.Lerp(cor, Color.white, 0.65f);
+        Vector2 centro = new Vector2(cx, cx);
+        float raio = 18f;
+
+        // Hexágono preenchido (barreira)
+        Vector2[] hex = new Vector2[6];
+        for (int i = 0; i < 6; i++)
+        {
+            float ang = i / 6f * Mathf.PI * 2f - Mathf.PI * 0.5f;
+            hex[i] = centro + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * raio;
+        }
+        PreencherPoligono(p, sz, hex, cor, 0.55f);
+
+        // Contorno do hexágono
+        for (int i = 0; i < 6; i++)
+            Linha(p, sz, hex[i], hex[(i + 1) % 6], brilho, 1.8f);
+
+        // Anel de energia externo (pulso)
+        Anel(p, sz, centro, raio + 4f, new Color(brilho.r, brilho.g, brilho.b, 0.55f), 1.3f);
+
+        // Brilho central
+        PintarElipse(p, sz, cx, cx, 3.5f, 3.5f, brilho, 3.5f);
+        PintarElipse(p, sz, cx, cx, 1.5f, 1.5f, Color.white, 5f);
     }
 }
