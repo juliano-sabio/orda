@@ -123,43 +123,60 @@ public class ElementApplicationUI : MonoBehaviour
 
     void CriarLinhaSkill(GameObject pai, SkillData skill, bool disponivel, Color corElem)
     {
+        // root sem Image — irmãos controlam renderização
         var go = new GameObject($"Linha_{skill.skillName}");
         go.transform.SetParent(pai.transform, false);
-        go.AddComponent<Image>().color = disponivel ? corBotao : corBloqueado;
+        go.AddComponent<RectTransform>();
         var le = go.AddComponent<LayoutElement>();
-        le.preferredHeight = 54f; le.flexibleWidth = 1f;
+        le.preferredHeight = 62f; le.flexibleWidth = 1f;
 
+        // irmão 0: borda (dourada se disponível, apagada se bloqueada)
+        var brd = new GameObject("Brd"); brd.transform.SetParent(go.transform, false);
+        var brdRT = brd.AddComponent<RectTransform>();
+        brdRT.anchorMin = Vector2.zero; brdRT.anchorMax = Vector2.one;
+        brdRT.offsetMin = new Vector2(-1f,-1f); brdRT.offsetMax = new Vector2(1f,1f);
+        brd.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, disponivel ? 0.55f : 0.20f);
+
+        // irmão 1: corpo
+        var corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
+        var corpoRT = corpo.AddComponent<RectTransform>();
+        corpoRT.anchorMin = Vector2.zero; corpoRT.anchorMax = Vector2.one; corpoRT.offsetMin = corpoRT.offsetMax = Vector2.zero;
+        corpo.AddComponent<Image>().color = disponivel ? corBotao : corBloqueado;
+
+        // irmão 2: acento esquerdo com cor do elemento
+        var ac = new GameObject("Ac"); ac.transform.SetParent(go.transform, false);
+        var acRT = ac.AddComponent<RectTransform>();
+        acRT.anchorMin = Vector2.zero; acRT.anchorMax = new Vector2(0f,1f);
+        acRT.offsetMin = Vector2.zero; acRT.offsetMax = new Vector2(5f,0f);
+        ac.AddComponent<Image>().color = disponivel ? corElem : new Color(corElem.r,corElem.g,corElem.b,0.25f);
+
+        // ícone
         if (skill.icon != null)
         {
             var ic = new GameObject("Icone"); ic.transform.SetParent(go.transform, false);
             var icRT = ic.AddComponent<RectTransform>();
-            icRT.anchorMin = new Vector2(0f, 0f); icRT.anchorMax = new Vector2(0f, 1f);
-            icRT.pivot = new Vector2(0f, 0.5f);
-            icRT.anchoredPosition = new Vector2(6f, 0f); icRT.sizeDelta = new Vector2(44f, -8f);
-            var icImg = ic.AddComponent<Image>();
-            icImg.sprite = skill.icon; icImg.preserveAspect = true;
+            icRT.anchorMin = new Vector2(0f,0f); icRT.anchorMax = new Vector2(0f,1f);
+            icRT.pivot = new Vector2(0f,0.5f);
+            icRT.anchoredPosition = new Vector2(10f,0f); icRT.sizeDelta = new Vector2(44f,-10f);
+            var icImg = ic.AddComponent<Image>(); icImg.sprite = skill.icon; icImg.preserveAspect = true;
         }
 
-        var nome = CriarTexto(go, "Nome", skill.skillName, disponivel ? corTexto : new Color(0.5f, 0.5f, 0.5f), 14f, FontStyles.Bold);
-        Ancora(nome, new Vector2(0f, 0.5f), new Vector2(0.7f, 1f), new Vector2(58f, 0f), Vector2.zero);
+        var nome = CriarTexto(go, "Nome", skill.skillName, disponivel ? corTexto : new Color(0.5f,0.5f,0.5f), 14f, FontStyles.Bold);
+        Ancora(nome, new Vector2(0f,0.5f), new Vector2(0.7f,1f), new Vector2(60f,0f), Vector2.zero);
         nome.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
 
-        var status = CriarTexto(go, "Status",
-            disponivel ? "Sem elemento" : $"Ja tem: {ElementRegistry.Instance?.GetNome(skill.appliedElement) ?? skill.appliedElement.ToString()}",
-            disponivel ? new Color(0.5f, 0.7f, 0.5f) : new Color(0.6f, 0.4f, 0.4f), 10f);
-        Ancora(status, new Vector2(0f, 0f), new Vector2(0.7f, 0.5f), new Vector2(58f, 0f), Vector2.zero);
+        var statusStr = disponivel ? "Sem elemento" : $"Ja tem: {ElementRegistry.Instance?.GetNome(skill.appliedElement) ?? skill.appliedElement.ToString()}";
+        var status = CriarTexto(go, "Status", statusStr,
+            disponivel ? new Color(0.5f,0.7f,0.5f) : new Color(0.6f,0.4f,0.4f), 10f);
+        Ancora(status, new Vector2(0f,0f), new Vector2(0.7f,0.5f), new Vector2(60f,0f), Vector2.zero);
         status.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
 
         if (disponivel)
         {
-            var btn = new GameObject("BtnInfundir"); btn.transform.SetParent(go.transform, false);
-            Ancora(btn, new Vector2(0.72f, 0.15f), new Vector2(0.97f, 0.85f));
-            btn.AddComponent<Image>().color = corElem * 0.5f + corBotao * 0.5f;
-            var b = btn.AddComponent<Button>();
             var cap = skill;
-            b.onClick.AddListener(() => SelecionarSkill(cap));
-            var lbl = CriarTexto(btn, "Txt", "INFUNDIR", corTexto, 11f, FontStyles.Bold);
-            Ancora(lbl, Vector2.zero, Vector2.one);
+            Color corBtn = corElem * 0.5f + corBotao * 0.5f;
+            var btn = CriarBotao(go, "BtnInfundir", "INFUNDIR", corBtn, () => SelecionarSkill(cap));
+            Ancora(btn, new Vector2(0.72f,0.15f), new Vector2(0.97f,0.85f));
         }
     }
 
@@ -174,66 +191,163 @@ public class ElementApplicationUI : MonoBehaviour
         string nomeElem = def != null ? def.nomeDisplay : elementoAtual.ToString();
         Color corElem   = def != null ? def.cor : Color.white;
 
+        // Painel mais largo — estilo SkillChoice
         painelEtapa2 = CriarPainel("PainelEtapa2");
         var rt = painelEtapa2.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.25f, 0.20f);
-        rt.anchorMax = new Vector2(0.75f, 0.85f);
+        rt.anchorMin = new Vector2(0.10f, 0.10f);
+        rt.anchorMax = new Vector2(0.90f, 0.90f);
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
         var titulo = CriarTexto(painelEtapa2, "Titulo",
-            $"{skillSelecionada.skillName} + {nomeElem}", corElem, 20f, FontStyles.Bold);
-        Ancora(titulo, new Vector2(0f, 0.88f), new Vector2(1f, 1f), new Vector2(10f, 0f), new Vector2(-10f, 0f));
+            $"{skillSelecionada.skillName} + {nomeElem}", corElem, 22f, FontStyles.Bold);
+        Ancora(titulo, new Vector2(0f,0.88f), new Vector2(1f,1f), new Vector2(12f,0f), new Vector2(-12f,0f));
 
-        var sub = CriarTexto(painelEtapa2, "Sub", "Escolha o poder do elemento:", corTexto, 12f);
-        Ancora(sub, new Vector2(0f, 0.81f), new Vector2(1f, 0.89f), new Vector2(10f, 0f), new Vector2(-10f, 0f));
+        var sub = CriarTexto(painelEtapa2, "Sub", "Escolha o poder do elemento:", corTexto, 13f);
+        Ancora(sub, new Vector2(0f,0.81f), new Vector2(1f,0.89f), new Vector2(12f,0f), new Vector2(-12f,0f));
+
+        // Container horizontal dos cards
+        var container = new GameObject("CardsContainer");
+        container.transform.SetParent(painelEtapa2.transform, false);
+        var cRT = container.AddComponent<RectTransform>();
+        cRT.anchorMin = new Vector2(0.02f,0.14f); cRT.anchorMax = new Vector2(0.98f,0.80f);
+        cRT.offsetMin = cRT.offsetMax = Vector2.zero;
+        var hlg = container.AddComponent<HorizontalLayoutGroup>();
+        hlg.spacing = 20f;
+        hlg.padding = new RectOffset(12,12,8,8);
+        hlg.childForceExpandWidth  = true;
+        hlg.childForceExpandHeight = true;
+        hlg.childAlignment = TextAnchor.MiddleCenter;
 
         if (def?.caracteristicas != null)
         {
-            float[] yMins  = { 0.50f, 0.18f };
-            float[] yMaxes = { 0.80f, 0.48f };
             for (int i = 0; i < Mathf.Min(def.caracteristicas.Length, 2); i++)
             {
                 var car = def.caracteristicas[i];
                 if (car == null) continue;
-                int idx = i;
-
-                var card = new GameObject($"Card_{i}");
-                card.transform.SetParent(painelEtapa2.transform, false);
-                var cardRT = card.AddComponent<RectTransform>();
-                cardRT.anchorMin = new Vector2(0.04f, yMins[i]);
-                cardRT.anchorMax = new Vector2(0.96f, yMaxes[i]);
-                cardRT.offsetMin = cardRT.offsetMax = Vector2.zero;
-                var cardImg = card.AddComponent<Image>(); cardImg.color = corBotao;
-
-                var bord = new GameObject("Bord"); bord.transform.SetParent(card.transform, false);
-                var bRT = bord.AddComponent<RectTransform>();
-                bRT.anchorMin = Vector2.zero; bRT.anchorMax = new Vector2(0f, 1f);
-                bRT.offsetMin = Vector2.zero; bRT.offsetMax = new Vector2(4f, 0f);
-                bord.AddComponent<Image>().color = corElem;
-
-                var letra = CriarTexto(card, "Letra", i == 0 ? "A" : "B", corElem, 22f, FontStyles.Bold);
-                Ancora(letra, new Vector2(0f, 0f), new Vector2(0.1f, 1f), new Vector2(8f, 0f), Vector2.zero);
-
-                var nomeC = CriarTexto(card, "Nome", car.nome, corTexto, 14f, FontStyles.Bold);
-                Ancora(nomeC, new Vector2(0.1f, 0.55f), new Vector2(0.85f, 1f), new Vector2(8f, 0f), Vector2.zero);
-                nomeC.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
-
-                var desc = CriarTexto(card, "Desc", car.descricao, new Color(0.75f, 0.70f, 0.60f), 11f);
-                Ancora(desc, new Vector2(0.1f, 0f), new Vector2(0.85f, 0.55f), new Vector2(8f, 2f), Vector2.zero);
-                var dTxt = desc.GetComponent<TextMeshProUGUI>();
-                dTxt.textWrappingMode = TextWrappingModes.Normal;
-                dTxt.alignment = TextAlignmentOptions.TopLeft;
-
-                var btn = card.AddComponent<Button>(); btn.targetGraphic = cardImg;
-                btn.onClick.AddListener(() => ConfirmarEscolha(idx));
+                CriarCardPoder(container, car, i, corElem);
             }
         }
 
-        var aviso = CriarTexto(painelEtapa2, "Aviso", "Esta escolha e permanente.", new Color(0.6f, 0.5f, 0.5f), 10f);
-        Ancora(aviso, new Vector2(0f, 0.10f), new Vector2(1f, 0.18f), new Vector2(10f, 0f), new Vector2(-10f, 0f));
+        var aviso = CriarTexto(painelEtapa2, "Aviso", "Esta escolha e permanente.", new Color(0.6f,0.5f,0.5f), 10f);
+        Ancora(aviso, new Vector2(0f,0.07f), new Vector2(1f,0.14f), new Vector2(12f,0f), new Vector2(-12f,0f));
 
-        var btnV = CriarBotao(painelEtapa2, "BtnVoltar", "< VOLTAR", new Color(0.2f, 0.15f, 0.3f), MostrarEtapa1);
-        Ancora(btnV, new Vector2(0.04f, 0.01f), new Vector2(0.45f, 0.10f));
+        var btnV = CriarBotao(painelEtapa2, "BtnVoltar", "< VOLTAR", new Color(0.18f,0.12f,0.28f), MostrarEtapa1);
+        Ancora(btnV, new Vector2(0.30f,0.01f), new Vector2(0.70f,0.08f));
+    }
+
+    static Sprite[] _caricIcons;
+    static Sprite GetCaracteristicaIcone(CharacteristicType tipo)
+    {
+        if (_caricIcons == null)
+            _caricIcons = Resources.LoadAll<Sprite>("UI/caracteristicas_icons");
+        if (_caricIcons == null || _caricIcons.Length == 0) return null;
+        string nome = tipo.ToString();
+        foreach (var s in _caricIcons)
+            if (s.name == nome) return s;
+        return null;
+    }
+
+    void CriarCardPoder(GameObject container, ElementCharacteristic car, int idx, Color corElem)
+    {
+        // root sem Image — sibling pattern
+        var go = new GameObject($"Card_{idx}");
+        go.transform.SetParent(container.transform, false);
+        go.AddComponent<RectTransform>();
+        var le = go.AddComponent<LayoutElement>();
+        le.flexibleWidth = 1f; le.flexibleHeight = 1f;
+
+        // irmão 0: borda da cor do elemento (2px)
+        var brd = new GameObject("Brd"); brd.transform.SetParent(go.transform, false);
+        var brdRT = brd.AddComponent<RectTransform>();
+        brdRT.anchorMin = Vector2.zero; brdRT.anchorMax = Vector2.one;
+        brdRT.offsetMin = new Vector2(-2f,-2f); brdRT.offsetMax = new Vector2(2f,2f);
+        brd.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.75f);
+
+        // irmão 1: corpo escuro
+        var corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
+        var corpoRT = corpo.AddComponent<RectTransform>();
+        corpoRT.anchorMin = Vector2.zero; corpoRT.anchorMax = Vector2.one; corpoRT.offsetMin = corpoRT.offsetMax = Vector2.zero;
+        Image corpoImg = corpo.AddComponent<Image>(); corpoImg.color = corFundo;
+
+        // irmão 2: faixa topo na cor do elemento (header visual)
+        var topBar = new GameObject("TopBar"); topBar.transform.SetParent(go.transform, false);
+        var topRT = topBar.AddComponent<RectTransform>();
+        topRT.anchorMin = new Vector2(0f,1f); topRT.anchorMax = new Vector2(1f,1f);
+        topRT.offsetMin = new Vector2(0f,-36f); topRT.offsetMax = Vector2.zero;
+        topBar.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.18f);
+
+        // irmão 3: badge letra (A/B) centralizado na faixa topo
+        var badge = new GameObject("Badge"); badge.transform.SetParent(go.transform, false);
+        var badgeRT = badge.AddComponent<RectTransform>();
+        badgeRT.anchorMin = new Vector2(0.5f,1f); badgeRT.anchorMax = new Vector2(0.5f,1f);
+        badgeRT.pivot = new Vector2(0.5f,1f);
+        badgeRT.anchoredPosition = Vector2.zero; badgeRT.sizeDelta = new Vector2(44f,36f);
+        badge.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.30f);
+        Sprite caricIcone = GetCaracteristicaIcone(car.tipo);
+        if (caricIcone != null)
+        {
+            var ic = new GameObject("Icon"); ic.transform.SetParent(badge.transform, false);
+            var icRT = ic.AddComponent<RectTransform>();
+            icRT.anchorMin = new Vector2(0.5f,0.5f); icRT.anchorMax = new Vector2(0.5f,0.5f);
+            icRT.pivot = new Vector2(0.5f,0.5f);
+            icRT.anchoredPosition = new Vector2(0f,2f); icRT.sizeDelta = new Vector2(24f,24f);
+            var icImg = ic.AddComponent<Image>(); icImg.sprite = caricIcone; icImg.preserveAspect = true;
+            var letSmall = CriarTexto(badge, "Letra", idx == 0 ? "A" : "B", new Color(corElem.r,corElem.g,corElem.b,0.70f), 8f, FontStyles.Bold);
+            var letRT = letSmall.GetComponent<RectTransform>();
+            letRT.anchorMin = new Vector2(1f,0f); letRT.anchorMax = new Vector2(1f,0f);
+            letRT.pivot = new Vector2(1f,0f);
+            letRT.anchoredPosition = new Vector2(-2f,2f); letRT.sizeDelta = new Vector2(14f,14f);
+        }
+        else
+        {
+            var letraGO = CriarTexto(badge, "Letra", idx == 0 ? "A" : "B", corElem, 26f, FontStyles.Bold);
+            Ancora(letraGO, Vector2.zero, Vector2.one);
+        }
+
+        // separador abaixo do header
+        var sep = new GameObject("Sep"); sep.transform.SetParent(go.transform, false);
+        var sepRT = sep.AddComponent<RectTransform>();
+        sepRT.anchorMin = new Vector2(0.04f,1f); sepRT.anchorMax = new Vector2(0.96f,1f);
+        sepRT.offsetMin = new Vector2(0f,-37f); sepRT.offsetMax = new Vector2(0f,-35f);
+        sep.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.50f);
+
+        // nome do poder
+        var nomeGO = CriarTexto(go, "Nome", car.nome, corTexto, 15f, FontStyles.Bold);
+        Ancora(nomeGO, new Vector2(0.04f,0.62f), new Vector2(0.96f,0.87f));
+        nomeGO.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
+        // linha divisória meio
+        var mid = new GameObject("Mid"); mid.transform.SetParent(go.transform, false);
+        var midRT = mid.AddComponent<RectTransform>();
+        midRT.anchorMin = new Vector2(0.06f,0.60f); midRT.anchorMax = new Vector2(0.94f,0.60f);
+        midRT.offsetMin = new Vector2(0f,-1f); midRT.offsetMax = new Vector2(0f,1f);
+        mid.AddComponent<Image>().color = new Color(corBorda.r,corBorda.g,corBorda.b,0.25f);
+
+        // descrição
+        var descGO = CriarTexto(go, "Desc", car.descricao, new Color(0.80f,0.74f,0.64f), 11f);
+        Ancora(descGO, new Vector2(0.05f,0.12f), new Vector2(0.95f,0.60f), new Vector2(0f,4f), Vector2.zero);
+        var dTxt = descGO.GetComponent<TextMeshProUGUI>();
+        dTxt.textWrappingMode = TextWrappingModes.Normal;
+        dTxt.alignment = TextAlignmentOptions.Top;
+
+        // hint clique
+        var hint = CriarTexto(go, "Hint", "[ CLIQUE PARA ESCOLHER ]",
+            new Color(corElem.r,corElem.g,corElem.b,0.55f), 9f);
+        Ancora(hint, new Vector2(0f,0f), new Vector2(1f,0.12f));
+        hint.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
+        // Button no root — targetGraphic = corpoImg
+        var btn = go.AddComponent<Button>(); btn.targetGraphic = corpoImg;
+        btn.transition = Selectable.Transition.ColorTint;
+        Color hov = new Color(corFundo.r+0.08f, corFundo.g+0.06f, corFundo.b+0.14f, 1f);
+        btn.colors = new ColorBlock{
+            normalColor=corFundo, highlightedColor=hov,
+            pressedColor=new Color(0.03f,0.02f,0.05f,1f),
+            selectedColor=hov, disabledColor=new Color(corFundo.r,corFundo.g,corFundo.b,0.5f),
+            colorMultiplier=1f, fadeDuration=0.1f
+        };
+        int capture = idx;
+        btn.onClick.AddListener(() => ConfirmarEscolha(capture));
     }
 
     void ConfirmarEscolha(int indice)
@@ -290,7 +404,7 @@ public class ElementApplicationUI : MonoBehaviour
         var bdRT = bd.AddComponent<RectTransform>();
         bdRT.anchorMin = Vector2.zero; bdRT.anchorMax = Vector2.one;
         bdRT.offsetMin = bdRT.offsetMax = Vector2.zero;
-        bd.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.72f);
+        bd.AddComponent<Image>().color = new Color(0.04f, 0.02f, 0.08f, 0.88f);
         canvas.gameObject.SetActive(false);
     }
 
@@ -353,10 +467,57 @@ public class ElementApplicationUI : MonoBehaviour
     static GameObject CriarBotao(GameObject pai, string nome, string label, Color cor,
         UnityEngine.Events.UnityAction cb)
     {
+        // container sem Image — irmãos controlam renderização
         var go = new GameObject(nome); go.transform.SetParent(pai.transform, false);
         go.AddComponent<RectTransform>();
-        go.AddComponent<Image>().color = cor;
-        go.AddComponent<Button>().onClick.AddListener(cb);
+
+        // irmão 0: borda dourada
+        var brd = new GameObject("Brd"); brd.transform.SetParent(go.transform, false);
+        var brdRT = brd.AddComponent<RectTransform>();
+        brdRT.anchorMin = Vector2.zero; brdRT.anchorMax = Vector2.one;
+        brdRT.offsetMin = new Vector2(-1f,-1f); brdRT.offsetMax = new Vector2(1f,1f);
+        brd.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, 0.80f);
+
+        // irmão 1: corpo
+        var corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
+        var corpoRT = corpo.AddComponent<RectTransform>();
+        corpoRT.anchorMin = Vector2.zero; corpoRT.anchorMax = Vector2.one;
+        corpoRT.offsetMin = corpoRT.offsetMax = Vector2.zero;
+        Image img = corpo.AddComponent<Image>(); img.color = cor;
+
+        // irmão 2: bevel topo
+        var hit = new GameObject("HiT"); hit.transform.SetParent(go.transform, false);
+        var hitRT = hit.AddComponent<RectTransform>();
+        hitRT.anchorMin = new Vector2(0f,1f); hitRT.anchorMax = new Vector2(1f,1f);
+        hitRT.offsetMin = new Vector2(0f,-2f); hitRT.offsetMax = Vector2.zero;
+        hit.AddComponent<Image>().color = new Color(1f,0.9f,0.6f,0.12f);
+
+        // irmão 3: sombra base
+        var shb = new GameObject("ShB"); shb.transform.SetParent(go.transform, false);
+        var shbRT = shb.AddComponent<RectTransform>();
+        shbRT.anchorMin = Vector2.zero; shbRT.anchorMax = new Vector2(1f,0f);
+        shbRT.offsetMin = Vector2.zero; shbRT.offsetMax = new Vector2(0f,2f);
+        shb.AddComponent<Image>().color = new Color(0f,0f,0f,0.50f);
+
+        // irmão 4: acento lateral dourado
+        var ac = new GameObject("Ac"); ac.transform.SetParent(go.transform, false);
+        var acRT = ac.AddComponent<RectTransform>();
+        acRT.anchorMin = Vector2.zero; acRT.anchorMax = new Vector2(0f,1f);
+        acRT.offsetMin = Vector2.zero; acRT.offsetMax = new Vector2(4f,0f);
+        ac.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, 0.90f);
+
+        // Button
+        Button btn = go.AddComponent<Button>(); btn.targetGraphic = img;
+        btn.transition = Selectable.Transition.ColorTint;
+        Color hov = new Color(Mathf.Min(cor.r*1.4f,1f), Mathf.Min(cor.g*1.4f,1f), Mathf.Min(cor.b*1.4f,1f), cor.a);
+        btn.colors = new ColorBlock{
+            normalColor=cor, highlightedColor=hov,
+            pressedColor=new Color(cor.r*0.6f, cor.g*0.6f, cor.b*0.6f, cor.a),
+            selectedColor=cor, disabledColor=new Color(cor.r, cor.g, cor.b, 0.5f),
+            colorMultiplier=1f, fadeDuration=0.1f
+        };
+        btn.onClick.AddListener(cb);
+
         var lbl = CriarTexto(go, "Label", label, new Color(0.95f, 0.85f, 0.65f), 13f, FontStyles.Bold);
         Ancora(lbl, Vector2.zero, Vector2.one);
         return go;

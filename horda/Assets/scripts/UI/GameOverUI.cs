@@ -218,8 +218,11 @@ public class GameOverUI : MonoBehaviour
 
     // ──────────────────── CRIAÇÃO DE UI ────────────────────────────
 
+    private static readonly Color corBordaGO = new Color(0.78f, 0.63f, 0.16f);
+
     private GameObject CriarCard(Transform pai)
     {
+        // container sem Image — irmãos controlam renderização
         GameObject go = new GameObject("Card");
         go.transform.SetParent(pai, false);
         RectTransform rt = go.AddComponent<RectTransform>();
@@ -227,7 +230,20 @@ public class GameOverUI : MonoBehaviour
         rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = Vector2.zero;
         rt.sizeDelta = new Vector2(560f, 440f);
-        go.AddComponent<Image>().color = new Color(0.07f, 0.05f, 0.13f, 0.96f);
+
+        // irmão 0: borda dourada (2px ao redor)
+        GameObject brd = new GameObject("Brd"); brd.transform.SetParent(go.transform, false);
+        RectTransform rbrd = brd.AddComponent<RectTransform>();
+        rbrd.anchorMin = Vector2.zero; rbrd.anchorMax = Vector2.one;
+        rbrd.offsetMin = new Vector2(-2f,-2f); rbrd.offsetMax = new Vector2(2f,2f);
+        brd.AddComponent<Image>().color = new Color(corBordaGO.r, corBordaGO.g, corBordaGO.b, 0.80f);
+
+        // irmão 1: fundo escuro do card
+        GameObject fundo = new GameObject("Fundo"); fundo.transform.SetParent(go.transform, false);
+        RectTransform rf = fundo.AddComponent<RectTransform>();
+        rf.anchorMin = Vector2.zero; rf.anchorMax = Vector2.one; rf.offsetMin = rf.offsetMax = Vector2.zero;
+        fundo.AddComponent<Image>().color = new Color(0.06f, 0.04f, 0.11f, 0.97f);
+
         return go;
     }
 
@@ -337,6 +353,7 @@ public class GameOverUI : MonoBehaviour
     private GameObject CriarBotao(Transform pai, string label, Vector2 posicao,
         Vector2 tamanho, Color cor, UnityEngine.Events.UnityAction acao)
     {
+        // container sem Image — mesma lógica de irmãos do MenuInicialUI
         GameObject go = new GameObject("Btn");
         go.transform.SetParent(pai, false);
         RectTransform rt = go.AddComponent<RectTransform>();
@@ -344,30 +361,60 @@ public class GameOverUI : MonoBehaviour
         rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = posicao;
         rt.sizeDelta = tamanho;
-        Image img = go.AddComponent<Image>();
-        img.color = cor;
-        Button btn = go.AddComponent<Button>();
-        btn.targetGraphic = img;
-        ColorBlock cb = btn.colors;
-        cb.highlightedColor = Color.Lerp(cor, Color.white, 0.25f);
-        cb.pressedColor = Color.Lerp(cor, Color.black, 0.2f);
-        cb.normalColor = cor;
-        btn.colors = cb;
+
+        // irmão 0: borda dourada (atrás)
+        GameObject brd = new GameObject("Brd"); brd.transform.SetParent(go.transform, false);
+        RectTransform rbrd = brd.AddComponent<RectTransform>();
+        rbrd.anchorMin = Vector2.zero; rbrd.anchorMax = Vector2.one;
+        rbrd.offsetMin = new Vector2(-1f,-1f); rbrd.offsetMax = new Vector2(1f,1f);
+        brd.AddComponent<Image>().color = new Color(corBordaGO.r, corBordaGO.g, corBordaGO.b, 0.80f);
+
+        // irmão 1: corpo (frente — cobre borda)
+        bool isDanger = cor.r > 0.28f && cor.g < 0.15f && cor.b < 0.15f;
+        GameObject corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
+        RectTransform rco = corpo.AddComponent<RectTransform>();
+        rco.anchorMin = Vector2.zero; rco.anchorMax = Vector2.one; rco.offsetMin = rco.offsetMax = Vector2.zero;
+        Image img = corpo.AddComponent<Image>(); img.color = cor;
+
+        // irmão 2: bevel topo
+        GameObject topo = new GameObject("HiT"); topo.transform.SetParent(go.transform, false);
+        RectTransform rtopo = topo.AddComponent<RectTransform>();
+        rtopo.anchorMin = new Vector2(0f,1f); rtopo.anchorMax = new Vector2(1f,1f);
+        rtopo.offsetMin = new Vector2(0f,-2f); rtopo.offsetMax = Vector2.zero;
+        topo.AddComponent<Image>().color = new Color(1f,0.9f,0.6f, isDanger?0.08f:0.14f);
+
+        // irmão 3: sombra base
+        GameObject base2 = new GameObject("ShB"); base2.transform.SetParent(go.transform, false);
+        RectTransform rbase = base2.AddComponent<RectTransform>();
+        rbase.anchorMin = Vector2.zero; rbase.anchorMax = new Vector2(1f,0f);
+        rbase.offsetMin = Vector2.zero; rbase.offsetMax = new Vector2(0f,2f);
+        base2.AddComponent<Image>().color = new Color(0f,0f,0f,0.50f);
+
+        // irmão 4: acento lateral
+        GameObject ac = new GameObject("Ac"); ac.transform.SetParent(go.transform, false);
+        RectTransform rac = ac.AddComponent<RectTransform>();
+        rac.anchorMin = Vector2.zero; rac.anchorMax = new Vector2(0f,1f);
+        rac.offsetMin = Vector2.zero; rac.offsetMax = new Vector2(4f,0f);
+        ac.AddComponent<Image>().color = isDanger
+            ? new Color(0.95f,0.18f,0.10f,1f)
+            : new Color(corBordaGO.r,corBordaGO.g,corBordaGO.b,0.90f);
+
+        // Button
+        Button btn = go.AddComponent<Button>(); btn.targetGraphic = img;
+        btn.transition = Selectable.Transition.ColorTint;
+        Color corHov = new Color(Mathf.Min(cor.r+0.15f,1f),Mathf.Min(cor.g+0.10f,1f),Mathf.Min(cor.b+0.08f,1f),cor.a);
+        Color corPrs = new Color(Mathf.Max(cor.r-0.06f,0f),Mathf.Max(cor.g-0.04f,0f),Mathf.Max(cor.b-0.03f,0f),cor.a);
+        btn.colors = new ColorBlock{normalColor=cor,highlightedColor=corHov,pressedColor=corPrs,selectedColor=cor,disabledColor=new Color(cor.r*0.5f,cor.g*0.5f,cor.b*0.5f,0.5f),colorMultiplier=1f,fadeDuration=0.1f};
         btn.onClick.AddListener(acao);
 
-        GameObject txtGO = new GameObject("Lbl");
-        txtGO.transform.SetParent(go.transform, false);
+        // texto
+        GameObject txtGO = new GameObject("Lbl"); txtGO.transform.SetParent(go.transform, false);
         RectTransform rtTxt = txtGO.AddComponent<RectTransform>();
-        rtTxt.anchorMin = Vector2.zero;
-        rtTxt.anchorMax = Vector2.one;
-        rtTxt.offsetMin = Vector2.zero;
-        rtTxt.offsetMax = Vector2.zero;
+        rtTxt.anchorMin = new Vector2(0.04f,0f); rtTxt.anchorMax = Vector2.one; rtTxt.offsetMin = rtTxt.offsetMax = Vector2.zero;
         TextMeshProUGUI tmp = txtGO.AddComponent<TextMeshProUGUI>();
-        tmp.text = label;
-        tmp.fontSize = 26;
-        tmp.color = Color.white;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.fontStyle = FontStyles.Bold;
+        tmp.text = label; tmp.fontSize = 22;
+        tmp.color = isDanger ? new Color(1f,0.72f,0.68f) : new Color(0.92f,0.82f,0.68f);
+        tmp.alignment = TextAlignmentOptions.Center; tmp.fontStyle = FontStyles.Bold;
 
         return go;
     }
@@ -375,64 +422,61 @@ public class GameOverUI : MonoBehaviour
     private void CriarSlider(Transform pai, Vector2 posicao, Vector2 tamanho,
         float valorInicial, UnityEngine.Events.UnityAction<float> onChange)
     {
+        // mesma lógica do Slider redesenhado do MenuInicialUI
         GameObject sliderGO = new GameObject("Slider");
         sliderGO.transform.SetParent(pai, false);
         RectTransform rtSlider = sliderGO.AddComponent<RectTransform>();
-        rtSlider.anchorMin = new Vector2(0.5f, 0.5f);
-        rtSlider.anchorMax = new Vector2(0.5f, 0.5f);
-        rtSlider.anchoredPosition = posicao;
-        rtSlider.sizeDelta = tamanho;
+        rtSlider.anchorMin = new Vector2(0.5f,0.5f); rtSlider.anchorMax = new Vector2(0.5f,0.5f);
+        rtSlider.anchoredPosition = posicao; rtSlider.sizeDelta = tamanho;
 
-        GameObject bg = new GameObject("Bg");
-        bg.transform.SetParent(sliderGO.transform, false);
-        RectTransform rtBg = bg.AddComponent<RectTransform>();
-        rtBg.anchorMin = new Vector2(0f, 0.3f);
-        rtBg.anchorMax = new Vector2(1f, 0.7f);
-        rtBg.offsetMin = Vector2.zero;
-        rtBg.offsetMax = Vector2.zero;
-        bg.AddComponent<Image>().color = new Color(0.15f, 0.15f, 0.28f, 1f);
+        // irmão 0: borda dourada
+        GameObject brd=new GameObject("Brd"); brd.transform.SetParent(sliderGO.transform,false);
+        RectTransform rbrd=brd.AddComponent<RectTransform>(); rbrd.anchorMin=Vector2.zero; rbrd.anchorMax=Vector2.one;
+        rbrd.offsetMin=new Vector2(-1f,-1f); rbrd.offsetMax=new Vector2(1f,1f);
+        brd.AddComponent<Image>().color=new Color(corBordaGO.r,corBordaGO.g,corBordaGO.b,0.50f);
 
-        GameObject fillArea = new GameObject("FillArea");
-        fillArea.transform.SetParent(sliderGO.transform, false);
-        RectTransform rtFillArea = fillArea.AddComponent<RectTransform>();
-        rtFillArea.anchorMin = new Vector2(0f, 0.3f);
-        rtFillArea.anchorMax = new Vector2(1f, 0.7f);
-        rtFillArea.offsetMin = new Vector2(5f, 0f);
-        rtFillArea.offsetMax = new Vector2(-15f, 0f);
+        // irmão 1: trilha escura com entalhe
+        GameObject trk=new GameObject("Trk"); trk.transform.SetParent(sliderGO.transform,false);
+        RectTransform rtrk=trk.AddComponent<RectTransform>(); rtrk.anchorMin=Vector2.zero; rtrk.anchorMax=Vector2.one; rtrk.offsetMin=rtrk.offsetMax=Vector2.zero;
+        trk.AddComponent<Image>().color=new Color(0.07f,0.04f,0.03f);
+        GameObject ist=new GameObject("InT"); ist.transform.SetParent(trk.transform,false);
+        RectTransform rist=ist.AddComponent<RectTransform>(); rist.anchorMin=new Vector2(0f,1f); rist.anchorMax=new Vector2(1f,1f);
+        rist.offsetMin=new Vector2(0f,-3f); rist.offsetMax=Vector2.zero;
+        ist.AddComponent<Image>().color=new Color(0f,0f,0f,0.65f);
 
-        GameObject fill = new GameObject("Fill");
-        fill.transform.SetParent(fillArea.transform, false);
-        RectTransform rtFill = fill.AddComponent<RectTransform>();
-        rtFill.anchorMin = new Vector2(0f, 0f);
-        rtFill.anchorMax = new Vector2(0f, 1f);
-        rtFill.sizeDelta = Vector2.zero;
-        Image fillImg = fill.AddComponent<Image>();
-        fillImg.color = new Color(0.28f, 0.56f, 0.92f, 1f);
+        // irmão 2: fill area
+        GameObject fa=new GameObject("FA"); fa.transform.SetParent(sliderGO.transform,false);
+        RectTransform rfa=fa.AddComponent<RectTransform>(); rfa.anchorMin=Vector2.zero; rfa.anchorMax=Vector2.one; rfa.offsetMin=rfa.offsetMax=Vector2.zero;
+        GameObject fi=new GameObject("Fi"); fi.transform.SetParent(fa.transform,false);
+        RectTransform rfi=fi.AddComponent<RectTransform>(); rfi.anchorMin=Vector2.zero; rfi.anchorMax=Vector2.one; rfi.offsetMin=rfi.offsetMax=Vector2.zero;
+        fi.AddComponent<Image>().color=new Color(0.75f,0.45f,0.04f);
+        GameObject fhl=new GameObject("FHl"); fhl.transform.SetParent(fi.transform,false);
+        RectTransform rfhl=fhl.AddComponent<RectTransform>(); rfhl.anchorMin=new Vector2(0f,1f); rfhl.anchorMax=new Vector2(1f,1f);
+        rfhl.offsetMin=new Vector2(0f,-1f); rfhl.offsetMax=Vector2.zero;
+        fhl.AddComponent<Image>().color=new Color(1f,0.95f,0.50f,0.40f);
 
-        GameObject handleArea = new GameObject("HandleArea");
-        handleArea.transform.SetParent(sliderGO.transform, false);
-        RectTransform rtHandleArea = handleArea.AddComponent<RectTransform>();
-        rtHandleArea.anchorMin = Vector2.zero;
-        rtHandleArea.anchorMax = Vector2.one;
-        rtHandleArea.offsetMin = new Vector2(10f, 0f);
-        rtHandleArea.offsetMax = new Vector2(-10f, 0f);
+        // irmão 3: handle area
+        GameObject ha=new GameObject("HA"); ha.transform.SetParent(sliderGO.transform,false);
+        RectTransform rha=ha.AddComponent<RectTransform>(); rha.anchorMin=Vector2.zero; rha.anchorMax=Vector2.one; rha.offsetMin=rha.offsetMax=Vector2.zero;
+        GameObject h=new GameObject("H"); h.transform.SetParent(ha.transform,false);
+        RectTransform rh=h.AddComponent<RectTransform>(); rh.anchorMin=new Vector2(0f,0f); rh.anchorMax=new Vector2(0f,1f);
+        rh.offsetMin=new Vector2(0f,-3f); rh.offsetMax=new Vector2(12f,3f);
+        GameObject kSh=new GameObject("KSh"); kSh.transform.SetParent(h.transform,false);
+        RectTransform rkSh=kSh.AddComponent<RectTransform>(); rkSh.anchorMin=Vector2.zero; rkSh.anchorMax=Vector2.one;
+        rkSh.offsetMin=new Vector2(-1f,-1f); rkSh.offsetMax=new Vector2(1f,1f);
+        kSh.AddComponent<Image>().color=new Color(0f,0f,0f,0.80f);
+        GameObject kBd=new GameObject("KBd"); kBd.transform.SetParent(h.transform,false);
+        RectTransform rkBd=kBd.AddComponent<RectTransform>(); rkBd.anchorMin=Vector2.zero; rkBd.anchorMax=Vector2.one; rkBd.offsetMin=rkBd.offsetMax=Vector2.zero;
+        Image handleImg=kBd.AddComponent<Image>(); handleImg.color=new Color(0.94f,0.80f,0.28f);
+        GameObject kHi=new GameObject("KHi"); kHi.transform.SetParent(h.transform,false);
+        RectTransform rkHi=kHi.AddComponent<RectTransform>(); rkHi.anchorMin=new Vector2(0f,1f); rkHi.anchorMax=new Vector2(1f,1f);
+        rkHi.offsetMin=new Vector2(1f,-2f); rkHi.offsetMax=new Vector2(-1f,0f);
+        kHi.AddComponent<Image>().color=new Color(1f,0.98f,0.72f,0.65f);
 
-        GameObject handle = new GameObject("Handle");
-        handle.transform.SetParent(handleArea.transform, false);
-        RectTransform rtHandle = handle.AddComponent<RectTransform>();
-        rtHandle.sizeDelta = new Vector2(20f, 0f);
-        Image handleImg = handle.AddComponent<Image>();
-        handleImg.color = new Color(0.45f, 0.75f, 1f, 1f);
-
-        Slider slider = sliderGO.AddComponent<Slider>();
-        slider.fillRect = rtFill;
-        slider.handleRect = rtHandle;
-        slider.targetGraphic = handleImg;
-        slider.direction = Slider.Direction.LeftToRight;
-        slider.minValue = 0f;
-        slider.maxValue = 1f;
-        slider.value = valorInicial;
-        slider.onValueChanged.AddListener(onChange);
+        Slider slider=sliderGO.AddComponent<Slider>();
+        slider.fillRect=rfi; slider.handleRect=rh; slider.targetGraphic=handleImg;
+        slider.direction=Slider.Direction.LeftToRight; slider.minValue=0f; slider.maxValue=1f;
+        slider.value=valorInicial; slider.onValueChanged.AddListener(onChange);
     }
 
     // ──────────────────── AÇÕES ────────────────────────────────────
