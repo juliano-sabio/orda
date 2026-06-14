@@ -21,9 +21,12 @@ public class FantasmaEletrico : MonoBehaviour
     public float cooldownParalisia = 5f;
 
     [Header("Ataque: Raio de Cadeia")]
-    public float danoRaio       = 20f;
-    public float cooldownRaio   = 7f;
-    public float alcanceRaio    = 12f;
+    public float danoRaio       = 30f;
+    public float cooldownRaio   = 2.5f;
+    public float alcanceRaio    = 18f;
+    public float raioImpactoRaio = 1.2f;
+    [Tooltip("Tempo de aviso (telegraph) antes do raio cair, dando tempo de desviar")]
+    public float tempoTelegraphRaio = 0.5f;
 
     [Header("Morte: Descarga")]
     public float raioDescarga   = 3f;
@@ -160,10 +163,47 @@ public class FantasmaEletrico : MonoBehaviour
     {
         if (player == null) yield break;
 
-        player.TakeDamage(danoRaio);
-
         Vector2 origem  = transform.position;
         Vector2 destino = player.transform.position;
+
+        // Telegraph: marca a área que será atingida e dá tempo do player desviar
+        var marca  = new GameObject("AvisoRaio");
+        marca.transform.position = destino;
+        var srMarca = marca.AddComponent<SpriteRenderer>();
+        srMarca.sprite       = GerarDisco(32, new Color(1f, 1f, 0.4f, 0.35f));
+        srMarca.sortingOrder = 17;
+        marca.transform.localScale = Vector3.one * raioImpactoRaio * 2f;
+        Destroy(marca, tempoTelegraphRaio + 0.1f);
+
+        float t = 0f;
+        while (t < tempoTelegraphRaio)
+        {
+            t += Time.deltaTime;
+            float pulso = Mathf.PingPong(t * 8f, 1f);
+            var c = srMarca.color; c.a = Mathf.Lerp(0.2f, 0.55f, pulso); srMarca.color = c;
+            yield return null;
+        }
+        Destroy(marca);
+
+        // Impacto: aplica dano em área no ponto telegrafado
+        var alvos = Physics2D.OverlapCircleAll(destino, raioImpactoRaio);
+        foreach (var alvo in alvos)
+        {
+            if (!alvo.CompareTag("Player")) continue;
+            var ps = alvo.GetComponent<PlayerStats>();
+            if (ps != null) ps.TakeDamage(danoRaio);
+        }
+
+        var impacto  = new GameObject("ImpactoRaio");
+        impacto.transform.position   = destino;
+        var srImpacto = impacto.AddComponent<SpriteRenderer>();
+        srImpacto.sprite       = GerarDisco(32, new Color(1f, 1f, 0.6f, 0.5f));
+        srImpacto.sortingOrder = 17;
+        impacto.transform.localScale = Vector3.one * raioImpactoRaio * 2f;
+        impacto.AddComponent<EfeitoRunner>().Run(FadeOut(impacto, 0.35f));
+
+        // Atualiza a origem para a posição atual do fantasma (ele se move durante o telegraph)
+        origem = transform.position;
 
         const int SEGS = 8;
         var go = new GameObject("Raio");

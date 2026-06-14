@@ -19,11 +19,19 @@ public class CrystalGlow : MonoBehaviour
     };
 
     void OnEnable()  => BuildLights();
-    void OnDisable() => ClearLights();
+
+    // OnDisable não chama ClearLights: ao descarregar a cena/sair do Play Mode
+    // a própria Unity já destrói os filhos, e Destroy() nesse momento causa
+    // "Assertion failed" no engine nativo. A limpeza acontece em BuildLights,
+    // antes de recriar as luzes (OnEnable), quando o objeto está garantidamente ativo.
 
     void BuildLights()
     {
         ClearLights();
+
+        // "agua" não deve receber as luzes de cristal
+        if (string.Equals(gameObject.name, "agua", System.StringComparison.OrdinalIgnoreCase))
+            return;
 
         Tilemap tilemap = GetComponent<Tilemap>();
         tilemap.CompressBounds();

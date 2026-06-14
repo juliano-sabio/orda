@@ -24,6 +24,16 @@ public class PlayerCollectLight : MonoBehaviour
         luz.enabled = true;
     }
 
+    public void AtualizarPorPercentual(float pct)
+    {
+        pct = Mathf.Clamp01(pct);
+        if (ativaCoroutine != null) { StopCoroutine(ativaCoroutine); ativaCoroutine = null; }
+
+        luz.color = corLuz;
+        luz.intensity = intensidadeAtiva * pct;
+        luz.pointLightOuterRadius = Mathf.Lerp(0.5f, raioAtivo, pct);
+    }
+
     public void Ativar(float duracao)
     {
         if (ativaCoroutine != null)

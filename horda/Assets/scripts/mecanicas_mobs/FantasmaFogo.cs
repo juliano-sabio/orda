@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 // Fantasma elemental de Fogo: orbita o player a média distância e executa um ataque
 // de carga — para, carrega por 0.8s, depois dá um dash veloz em linha reta através do
@@ -15,13 +17,35 @@ public class FantasmaFogo : MonoBehaviour
     public float intervaloContato = 1.2f;
 
     [Header("Ataque: Carga de Fogo")]
-    public float danoCarga      = 28f;
+    public float danoCarga      = 40f;
     public float cooldownCarga  = 6f;
-    public float velocidadeCarga = 22f;
+    public float velocidadeCarga = 32f;
+    public float duracaoCarga   = 0.6f;
+
+    [Header("Ataque: Projéteis Fantasmas")]
+    public int   quantidadeProjeteisFantasmas = 5;
+    public float danoProjetilFantasma       = 18f;
+    public float velocidadeProjetilFantasma = 6f;
+    public float cooldownProjeteisFantasmas = 5f;
+    public float distanciaTiroFantasmas     = 9f;
+    public float anguloSpreadFantasmas      = 50f;
+    public float raioImpactoProjetilFantasma = 0.5f;
+    public float vidaMaximaProjetilFantasma  = 4f;
+
+    [Header("Queimação do Projétil")]
+    public float danoQueimaduraPorTick = 4f;
+    public float intervaloQueimadura   = 1f;
+    public float duracaoQueimadura     = 4f;
 
     [Header("Morte: Explosão")]
     public float raioExplosao   = 2.5f;
     public float danoExplosao   = 20f;
+
+    [Header("Brilho")]
+    public Color corBrilho         = new Color(1f, 0.2f, 0.1f);
+    public float intensidadeBrilho = 1.6f;
+    public float raioInternoBrilho = 0.2f;
+    public float raioExternoBrilho = 1.8f;
 
     Rigidbody2D    rb;
     SpriteRenderer sr;
@@ -32,8 +56,11 @@ public class FantasmaFogo : MonoBehaviour
 
     float proxCarga;
     float proxContato;
+    float proxProjeteisFantasmas;
     bool  atacando;
     Vector2 direcaoMovimento;
+    readonly List<GameObject> projeteisAtivos = new List<GameObject>();
+    GameObject anelCargaAtivo;
 
     void Start()
     {
@@ -52,7 +79,10 @@ public class FantasmaFogo : MonoBehaviour
         escalaBase = transform.localScale;
         ondaFase   = Random.Range(0f, Mathf.PI * 2f);
         proxCarga  = Random.Range(3f, 7f);
+        proxProjeteisFantasmas = Random.Range(1f, cooldownProjeteisFantasmas);
         player     = FindFirstObjectByType<PlayerStats>();
+
+        CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
 
         StartCoroutine(RastroFogo());
         InimigoController.OnPreMorte += OnPreMorteHandler;
@@ -63,7 +93,15 @@ public class FantasmaFogo : MonoBehaviour
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
-        StartCoroutine(ExplosaoMorte(transform.position));
+
+        // Destrói o anel de carregamento se o fantasma morrer durante a conjuração
+        if (anelCargaAtivo != null) { Destroy(anelCargaAtivo); anelCargaAtivo = null; }
+
+        // Remove projéteis ainda em voo para não deixarem rastro de brasas após a morte
+        foreach (var p in projeteisAtivos) if (p != null) Destroy(p);
+        projeteisAtivos.Clear();
+
+        FxRunner.Instance.StartCoroutine(ExplosaoMorte(transform.position));
     }
 
     bool Morto() => inimigoCtrl != null && inimigoCtrl.estaMorrendo;
@@ -73,6 +111,7 @@ public class FantasmaFogo : MonoBehaviour
         if (Morto() || player == null || atacando) return;
 
         proxCarga -= Time.deltaTime;
+        proxProjeteisFantasmas -= Time.deltaTime;
 
         float dist = Vector2.Distance(transform.position, player.transform.position);
         Vector2 dirParaPlayer = dist > 0.1f
@@ -96,6 +135,12 @@ public class FantasmaFogo : MonoBehaviour
             StartCoroutine(CargaFogo());
         }
 
+        if (proxProjeteisFantasmas <= 0f && dist <= distanciaTiroFantasmas)
+        {
+            proxProjeteisFantasmas = cooldownProjeteisFantasmas;
+            StartCoroutine(DispararProjeteisFantasmas(dirParaPlayer));
+        }
+
         float t  = Time.time * 2.6f + ondaFase;
         float sx = 1f + Mathf.Sin(t)         * 0.08f;
         float sy = 1f + Mathf.Cos(t * 1.1f)  * 0.10f;
@@ -107,7 +152,7 @@ public class FantasmaFogo : MonoBehaviour
         if (player == null || Morto() || atacando) { if (!atacando) rb.linearVelocity = Vector2.zero; return; }
         rb.linearVelocity = direcaoMovimento.normalized * velocidade;
         if (direcaoMovimento.sqrMagnitude > 0.001f && Mathf.Abs(direcaoMovimento.x) > 0.05f)
-            sr.flipX = direcaoMovimento.x < 0f;
+            sr.flipX = direcaoMovimento.x > 0f;
     }
 
     void OnTriggerEnter2D(Collider2D other) => TentarAplicarDano(other);
@@ -134,7 +179,7 @@ public class FantasmaFogo : MonoBehaviour
         Vector2 dir = (destino - (Vector2)transform.position).normalized;
         bool    acertou = false;
 
-        for (float t = 0f; t < 0.4f; t += Time.deltaTime)
+        for (float t = 0f; t < duracaoCarga; t += Time.deltaTime)
         {
             rb.linearVelocity = dir * velocidadeCarga;
             SpawnBrasa(transform.position);
@@ -153,22 +198,84 @@ public class FantasmaFogo : MonoBehaviour
         atacando = false;
     }
 
+    IEnumerator DispararProjeteisFantasmas(Vector2 dirBase)
+    {
+        int qtd = Mathf.Max(1, quantidadeProjeteisFantasmas);
+        for (int i = 0; i < qtd; i++)
+        {
+            if (Morto()) yield break;
+
+            float t   = qtd > 1 ? (float)i / (qtd - 1) : 0.5f;
+            float ang = Mathf.Lerp(-anguloSpreadFantasmas, anguloSpreadFantasmas, t) * Mathf.Deg2Rad;
+            float cos = Mathf.Cos(ang), sen = Mathf.Sin(ang);
+            Vector2 dir = new Vector2(
+                dirBase.x * cos - dirBase.y * sen,
+                dirBase.x * sen + dirBase.y * cos);
+
+            StartCoroutine(ProjetilFantasma(transform.position, dir));
+            yield return new WaitForSeconds(0.08f);
+        }
+    }
+
+    IEnumerator ProjetilFantasma(Vector2 origem, Vector2 dir)
+    {
+        var go = new GameObject("ProjetilFantasma");
+        go.transform.position = origem;
+        var sr2 = go.AddComponent<SpriteRenderer>();
+        sr2.sprite       = GerarDisco(10, new Color(1f, 0.35f, 0.05f, 0.95f));
+        sr2.sortingOrder = 8;
+        go.transform.localScale = Vector3.one * 0.35f;
+        CriarLuz(go.transform, new Color(1f, 0.3f, 0.05f), 1.2f, 0.05f, 0.6f);
+        var slow = go.AddComponent<ProjetilFantasmaSlow>();
+        var colSlow = go.AddComponent<CircleCollider2D>();
+        colSlow.isTrigger = true;
+        colSlow.radius    = 0.15f;
+        projeteisAtivos.Add(go);
+
+        for (float t = 0f; t < vidaMaximaProjetilFantasma; t += Time.deltaTime)
+        {
+            if (go == null) yield break;
+            go.transform.position += (Vector3)(dir * velocidadeProjetilFantasma * slow.fatorVelocidade * Time.deltaTime);
+            SpawnBrasa(go.transform.position);
+
+            var alvo = Physics2D.OverlapCircle(go.transform.position, raioImpactoProjetilFantasma);
+            if (alvo != null && alvo.CompareTag("Player"))
+            {
+                var ps = alvo.GetComponent<PlayerStats>();
+                if (ps != null)
+                {
+                    ps.TakeDamage(danoProjetilFantasma);
+                    ps.AplicarQueimaduraPlayer(danoQueimaduraPorTick, intervaloQueimadura, duracaoQueimadura);
+                }
+                projeteisAtivos.Remove(go);
+                StartCoroutine(FadeOut(go, 0.15f));
+                yield break;
+            }
+            yield return null;
+        }
+        projeteisAtivos.Remove(go);
+        if (go != null) Destroy(go);
+    }
+
     IEnumerator EfeitoCarregamento(float dur, Vector2 alvo)
     {
         var go = new GameObject("AnelCarga");
         go.transform.position = transform.position;
+        anelCargaAtivo = go;
         var lr = CriarAnel(go, 1.5f, new Color(1f, 0.4f, 0f, 0.9f), 0.14f);
 
         for (float t = 0f; t < dur; t += Time.deltaTime)
         {
-            if (go != null) go.transform.position = transform.position;
+            if (go == null) yield break;
+            go.transform.position = transform.position;
             float p = t / dur;
-            if (go != null) go.transform.localScale = Vector3.one * (1f + Mathf.Sin(p * Mathf.PI * 6f) * 0.08f);
+            go.transform.localScale = Vector3.one * (1f + Mathf.Sin(p * Mathf.PI * 6f) * 0.08f);
             AlphaLR(lr, Mathf.Sin(p * Mathf.PI) * 0.95f);
             SpawnBrasa(transform.position);
             yield return null;
         }
-        Destroy(go);
+        anelCargaAtivo = null;
+        if (go != null) Destroy(go);
     }
 
     IEnumerator FlashExplosao(Vector2 pos, float raio)
@@ -195,7 +302,7 @@ public class FantasmaFogo : MonoBehaviour
         if (player != null && Vector2.Distance(player.transform.position, pos) <= raioExplosao)
             player.TakeDamage(danoExplosao);
 
-        StartCoroutine(FlashExplosao(pos, raioExplosao));
+        FxRunner.Instance.StartCoroutine(FlashExplosao(pos, raioExplosao));
 
         for (int i = 0; i < 14; i++)
         {
@@ -207,7 +314,7 @@ public class FantasmaFogo : MonoBehaviour
             go.transform.position   = pos;
             go.transform.localScale = Vector3.one * Random.Range(0.25f, 0.55f);
             Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-            StartCoroutine(Lancar(go, dir, Random.Range(3f, 7f), Random.Range(0.5f, 0.9f)));
+            FxRunner.Instance.StartCoroutine(Lancar(go, dir, Random.Range(3f, 7f), Random.Range(0.5f, 0.9f)));
         }
         yield break;
     }
@@ -244,7 +351,7 @@ public class FantasmaFogo : MonoBehaviour
         sr2.sortingOrder = 7;
         go.transform.position   = (Vector3)pos + (Vector3)Random.insideUnitCircle * 0.12f;
         go.transform.localScale = Vector3.one * Random.Range(0.15f, 0.35f);
-        StartCoroutine(FadeOut(go, Random.Range(0.2f, 0.4f)));
+        FxRunner.Instance.StartCoroutine(FadeOut(go, Random.Range(0.2f, 0.4f)));
     }
 
     IEnumerator FadeOut(GameObject go, float vida)
@@ -280,6 +387,19 @@ public class FantasmaFogo : MonoBehaviour
     {
         if (lr == null) return;
         Color c = lr.startColor; c.a = a; lr.startColor = lr.endColor = c;
+    }
+
+    static void CriarLuz(Transform parent, Color cor, float intensidade, float raioInterno, float raioExterno)
+    {
+        var go = new GameObject("brilho");
+        go.transform.SetParent(parent, false);
+        var light = go.AddComponent<Light2D>();
+        light.lightType = Light2D.LightType.Point;
+        light.color = cor;
+        light.intensity = intensidade;
+        light.pointLightInnerRadius = raioInterno;
+        light.pointLightOuterRadius = raioExterno;
+        light.blendStyleIndex = 0;
     }
 
     static Sprite GerarDisco(int sz, Color cor)

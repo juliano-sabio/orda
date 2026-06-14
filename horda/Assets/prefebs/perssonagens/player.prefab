@@ -292,7 +292,9 @@ MonoBehaviour:
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 
+  m_ApplyToSortingLayers:
+  - 0
+  - 3899992551
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -337,7 +339,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCollectLight
   intensidadeAtiva: 3
-  raioAtivo: 5
+  raioAtivo: 12
   corLuz: {r: 1, g: 0.9, b: 0.4, a: 1}
   fadeDuration: 0.3
 --- !u!114 &-2956149126085584735

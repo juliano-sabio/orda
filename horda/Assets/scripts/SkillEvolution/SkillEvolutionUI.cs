@@ -54,9 +54,9 @@ public class SkillEvolutionUI : MonoBehaviour
         if (canvas == null) canvas = Object.FindFirstObjectByType<Canvas>();
         if (canvas == null) yield break;
 
-        // Cria container fullscreen com fundo preto semi-transparente
-        painelEvo = new GameObject("EvoPanel", typeof(RectTransform), typeof(Image));
-        painelEvo.transform.SetParent(canvas.transform, false);
+        // Cria container fullscreen (canvas próprio, independente do canvas pai)
+        // com fundo preto semi-transparente cobrindo toda a câmera/tela
+        painelEvo = new GameObject("EvoPanel", typeof(RectTransform), typeof(Canvas), typeof(GraphicRaycaster), typeof(Image));
         painelEvo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);
         var painelRT = painelEvo.GetComponent<RectTransform>();
         painelRT.anchorMin = Vector2.zero;
@@ -64,11 +64,16 @@ public class SkillEvolutionUI : MonoBehaviour
         painelRT.offsetMin = Vector2.zero;
         painelRT.offsetMax = Vector2.zero;
 
-        // Canvas proprio para garantir que fica na frente de tudo
-        var evoCanvas = painelEvo.AddComponent<Canvas>();
+        // Canvas proprio em tela cheia, garantindo que fica na frente de tudo
+        var evoCanvas = painelEvo.GetComponent<Canvas>();
+        evoCanvas.renderMode      = RenderMode.ScreenSpaceOverlay;
         evoCanvas.overrideSorting = true;
         evoCanvas.sortingOrder    = 999;
-        painelEvo.AddComponent<GraphicRaycaster>();
+
+        var evoScaler = painelEvo.AddComponent<CanvasScaler>();
+        evoScaler.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        evoScaler.referenceResolution = new Vector2(1920f, 1080f);
+        evoScaler.matchWidthOrHeight  = 0.5f;
 
         // Container horizontal das cartas (centrado na tela)
         var containerGO = new GameObject("EvoCardsRow", typeof(RectTransform));

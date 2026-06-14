@@ -79,7 +79,7 @@ public class FantasmaVenenoAtirador : MonoBehaviour
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
-        StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemMorte, duracaoNuvemMorte, danoNuvemMortePorTick));
+        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemMorte, duracaoNuvemMorte, danoNuvemMortePorTick));
     }
 
     bool Morto() => inimigoCtrl != null && inimigoCtrl.estaMorrendo;
@@ -108,7 +108,7 @@ public class FantasmaVenenoAtirador : MonoBehaviour
         if (proxTiro <= 0f && dist <= distanciaTiro)
         {
             proxTiro = cooldownTiro;
-            StartCoroutine(ProjetilVeneno(transform.position, dirParaPlayer));
+            FxRunner.Instance.StartCoroutine(ProjetilVeneno(transform.position, dirParaPlayer));
         }
 
         // Deformação flutuante de fantasma
@@ -146,11 +146,16 @@ public class FantasmaVenenoAtirador : MonoBehaviour
         sr2.sortingOrder = 8;
         go.transform.localScale = Vector3.one * 0.35f;
         CriarLuz(go.transform, new Color(0.4f, 1f, 0.3f), 1.2f, 0.05f, 0.6f);
+        var slow = go.AddComponent<ProjetilFantasmaSlow>();
+        var colSlow = go.AddComponent<CircleCollider2D>();
+        colSlow.isTrigger = true;
+        colSlow.radius    = 0.15f;
+        Destroy(go, vidaMaximaProjetil + 1f);
 
         for (float t = 0f; t < vidaMaximaProjetil; t += Time.deltaTime)
         {
             if (go == null) yield break;
-            go.transform.position += (Vector3)(dir * velocidadeProjetil * Time.deltaTime);
+            go.transform.position += (Vector3)(dir * velocidadeProjetil * slow.fatorVelocidade * Time.deltaTime);
             SpawnParticula(go.transform.position, new Color(0.3f, 1f, 0.4f, 0.5f));
 
             if (player != null &&
@@ -158,7 +163,7 @@ public class FantasmaVenenoAtirador : MonoBehaviour
             {
                 player.TakeDamage(danoProjetil);
                 player.AplicarVenenoPlayer(danoVenenoTick, 1f, duracaoVeneno);
-                StartCoroutine(FadeOut(go, 0.15f));
+                FxRunner.Instance.StartCoroutine(FadeOut(go, 0.15f));
                 yield break;
             }
             yield return null;
@@ -206,7 +211,7 @@ public class FantasmaVenenoAtirador : MonoBehaviour
         float sz = Random.Range(0.1f, 0.22f);
         go.transform.position   = pos;
         go.transform.localScale = Vector3.one * sz;
-        StartCoroutine(FadeOut(go, Random.Range(0.2f, 0.4f)));
+        FxRunner.Instance.StartCoroutine(FadeOut(go, Random.Range(0.2f, 0.4f)));
     }
 
     IEnumerator FadeOut(GameObject go, float vida)

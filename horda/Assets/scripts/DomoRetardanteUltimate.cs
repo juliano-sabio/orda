@@ -17,6 +17,8 @@ public class DomoRetardanteUltimate : MonoBehaviour
     public float cooldown        = 20f;
     [Tooltip("Velocidade máxima dos projéteis dentro do domo")]
     public float velocidadeLenta = 1f;
+    [Tooltip("Fator de velocidade aplicado aos projéteis-fantasma (movidos manualmente) dentro do domo")]
+    public float fatorLentoFantasmas = 0.1f;
 
     public float CooldownRestante => cooldownRestante;
     public bool  Ativo            => ativo;
@@ -32,6 +34,10 @@ public class DomoRetardanteUltimate : MonoBehaviour
     // velocidadeMaxima original do ProjetilHomingPrincesa (só para projéteis homing)
     private readonly Dictionary<Rigidbody2D, float> homingMaxOriginal =
         new Dictionary<Rigidbody2D, float>();
+
+    // projéteis-fantasma (sem Rigidbody2D, movidos manualmente) atualmente dentro do domo
+    private readonly HashSet<ProjetilFantasmaSlow> projeteisFantasmasNoDomo =
+        new HashSet<ProjetilFantasmaSlow>();
 
     // ─── LIFECYCLE ──────────────────────────────────────────────────
 
@@ -90,6 +96,15 @@ public class DomoRetardanteUltimate : MonoBehaviour
             if (col.GetComponentInParent<InimigoController>() != null) continue;
             if (col.GetComponentInParent<movi_inimigo>()      != null) continue;
 
+            // Projéteis-fantasma (sem Rigidbody2D, movidos manualmente)
+            var slowFantasma = col.GetComponent<ProjetilFantasmaSlow>();
+            if (slowFantasma != null)
+            {
+                slowFantasma.fatorVelocidade = fatorLentoFantasmas;
+                projeteisFantasmasNoDomo.Add(slowFantasma);
+                continue;
+            }
+
             var rb = col.GetComponent<Rigidbody2D>();
             if (rb == null || velocidadeOriginal.ContainsKey(rb)) continue;
 
@@ -145,6 +160,20 @@ public class DomoRetardanteUltimate : MonoBehaviour
             velocidadeOriginal.Remove(rb);
             homingMaxOriginal.Remove(rb);
         }
+
+        // Processa projéteis-fantasma registrados
+        var sairFantasmas = new List<ProjetilFantasmaSlow>();
+        foreach (var pf in projeteisFantasmasNoDomo)
+        {
+            if (pf == null) { sairFantasmas.Add(pf); continue; }
+
+            if (Vector2.Distance(pf.transform.position, centro) > raio + 0.3f)
+            {
+                pf.fatorVelocidade = 1f;
+                sairFantasmas.Add(pf);
+            }
+        }
+        foreach (var pf in sairFantasmas) projeteisFantasmasNoDomo.Remove(pf);
     }
 
     void ConverterParaProjetilAmigo(GameObject projetil)
@@ -249,6 +278,10 @@ public class DomoRetardanteUltimate : MonoBehaviour
             RestaurarProjetil(rb);
         velocidadeOriginal.Clear();
         homingMaxOriginal.Clear();
+
+        foreach (var pf in projeteisFantasmasNoDomo)
+            if (pf != null) pf.fatorVelocidade = 1f;
+        projeteisFantasmasNoDomo.Clear();
 
         velocidadeLenta = velocidadeLentaBase; // restaura valor original do campo
         ativo = false;

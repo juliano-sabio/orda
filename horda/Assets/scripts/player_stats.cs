@@ -117,9 +117,22 @@ public class PlayerStats : MonoBehaviour
     Color       corOriginalAnteVeneno;
     float       tempoVenenoRestante;
 
+    bool        estaQueimando;
+    Coroutine   corotinaQueimadura;
+    Color       corOriginalAnteQueimadura;
+    float       tempoQueimaduraRestante;
+
     bool        estaParalizado;
     Coroutine   corotinaParalisia;
     Color       corOriginalAnteParalisia;
+
+    [Header("Segunda Fase: Barra de Luz")]
+    public float luzMaxima      = 100f;
+    public float luzAtual       = 100f;
+    public float taxaDrenagemLuz = 100f / 60f; // unidades por segundo; esvazia em 60s
+
+    bool        semLuzDebuffAtivo;
+    Coroutine   corotinaDebuffLuz;
 
     void Awake()
     {
@@ -660,6 +673,19 @@ public class PlayerStats : MonoBehaviour
         HandleSkillToggleInput();
         HandleElementInput();
         HandleSkillManagerInput();
+        HandleLuzDrain();
+    }
+
+    void HandleLuzDrain()
+    {
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "segunda_fase") return;
+        DrenarLuz(taxaDrenagemLuz * Time.deltaTime);
+
+        float pct = GetLuzPercentual();
+        Fase2LuzManager.SincronizarUI(pct);
+
+        var luz = GetComponent<PlayerCollectLight>();
+        if (luz != null) luz.AtualizarPorPercentual(pct);
     }
 
     void HandleHealthRegeneration()
@@ -922,7 +948,6 @@ public class PlayerStats : MonoBehaviour
         xpToNextLevel = CalculateXPForNextLevel();
 
         GetComponent<LevelUpEffect>()?.Executar(level);
-
 
 
         // Garante referência atualizada ao SkillManager
@@ -1875,6 +1900,44 @@ public class PlayerStats : MonoBehaviour
         if (sr != null) sr.color = corOriginalAnteVeneno;
     }
 
+    public void AplicarQueimaduraPlayer(float danoPorTick, float intervalo, float duracao)
+    {
+        if (estaQueimando)
+        {
+            // Renova a duração sem reiniciar o tick — evita reset constante pelo OnTriggerStay2D
+            tempoQueimaduraRestante = Mathf.Max(tempoQueimaduraRestante, duracao);
+            return;
+        }
+        if (corotinaQueimadura != null) StopCoroutine(corotinaQueimadura);
+        corotinaQueimadura = StartCoroutine(CorotinaQueimadura(danoPorTick, intervalo, duracao));
+    }
+
+    System.Collections.IEnumerator CorotinaQueimadura(float danoPorTick, float intervalo, float duracao)
+    {
+        var sr = GetComponent<SpriteRenderer>();
+        corOriginalAnteQueimadura = sr != null ? sr.color : Color.white;
+        estaQueimando             = true;
+        tempoQueimaduraRestante   = duracao;
+        if (sr != null) sr.color = new Color(1f, 0.5f, 0.3f);
+
+        float tickTimer = 0f;
+        while (tempoQueimaduraRestante > 0f)
+        {
+            tempoQueimaduraRestante -= Time.deltaTime;
+            tickTimer               += Time.deltaTime;
+            if (tickTimer >= intervalo)
+            {
+                tickTimer -= intervalo;
+                TakeDamage(danoPorTick);
+            }
+            yield return null;
+        }
+
+        estaQueimando      = false;
+        corotinaQueimadura = null;
+        if (sr != null) sr.color = corOriginalAnteQueimadura;
+    }
+
     public void AplicarParalisiaPlayer(float duracao)
     {
         if (corotinaParalisia != null) StopCoroutine(corotinaParalisia);
@@ -1895,6 +1958,52 @@ public class PlayerStats : MonoBehaviour
         estaParalizado    = false;
         corotinaParalisia = null;
         if (sr != null) sr.color = corOriginalAnteParalisia;
+    }
+
+    // ─── Segunda Fase: Barra de Luz ─────────────────────────────────
+
+    public float GetLuzPercentual() => luzMaxima > 0f ? Mathf.Clamp01(luzAtual / luzMaxima) : 0f;
+
+    public void AdicionarLuz(float qtd)
+    {
+        luzAtual = Mathf.Clamp(luzAtual + qtd, 0f, luzMaxima);
+
+        if (luzAtual > 0f && semLuzDebuffAtivo)
+        {
+            semLuzDebuffAtivo = false;
+            if (corotinaDebuffLuz != null) { StopCoroutine(corotinaDebuffLuz); corotinaDebuffLuz = null; }
+            CancelarSlow();
+        }
+    }
+
+    public void DrenarLuz(float qtd)
+    {
+        luzAtual = Mathf.Clamp(luzAtual - qtd, 0f, luzMaxima);
+
+        if (luzAtual <= 0f && !semLuzDebuffAtivo)
+            corotinaDebuffLuz = StartCoroutine(CorotinaDebuffSemLuz());
+    }
+
+    System.Collections.IEnumerator CorotinaDebuffSemLuz()
+    {
+        semLuzDebuffAtivo = true;
+        AplicarSlow(0.3f, 9999f);
+
+        float tickTimer = 0f;
+        while (luzAtual <= 0f)
+        {
+            tickTimer += Time.deltaTime;
+            if (tickTimer >= 1f)
+            {
+                tickTimer -= 1f;
+                TakeDamage(15f);
+            }
+            yield return null;
+        }
+
+        semLuzDebuffAtivo = false;
+        corotinaDebuffLuz = null;
+        CancelarSlow();
     }
 
     public void AddShieldAuraBehavior(SkillData skill)

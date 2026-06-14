@@ -13,6 +13,8 @@ public class SilenciadorLog : MonoBehaviour
         Debug.unityLogger.logHandler = new FiltroLog(Debug.unityLogger.logHandler);
     }
 
+    void OnDestroy() => iniciado = false;
+
     class FiltroLog : ILogHandler
     {
         readonly ILogHandler inner;

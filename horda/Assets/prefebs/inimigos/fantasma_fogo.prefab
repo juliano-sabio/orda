@@ -32,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 1}
+  m_LocalScale: {x: 8, y: 8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -218,6 +218,10 @@ MonoBehaviour:
   velocidadeCarga: 22
   raioExplosao: 2.5
   danoExplosao: 20
+  corBrilho: {r: 1, g: 0.2, b: 0.1, a: 1}
+  intensidadeBrilho: 1.6
+  raioInternoBrilho: 0.2
+  raioExternoBrilho: 1.8
 --- !u!95 &295779054927074427
 Animator:
   serializedVersion: 7

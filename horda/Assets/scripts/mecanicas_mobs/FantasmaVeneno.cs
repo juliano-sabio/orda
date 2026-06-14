@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 // Fantasma elemental de Veneno: atravessa obstáculos, deixa rastro de nuvens tóxicas,
 // aplica envenenamento ao tocar o player. Ao morrer, cria uma grande nuvem de veneno.
@@ -25,10 +27,32 @@ public class FantasmaVeneno : MonoBehaviour
     public float duracaoNuvemRastro = 3.5f;
     public float raioNuvemRastro = 1.2f;
 
+    [Header("Ataque: Projéteis Fantasmas")]
+    public Sprite spriteProjetilFantasma;
+    public int   quantidadeProjeteisFantasmas = 2;
+    public float danoProjetilFantasma        = 30f;
+    public float velocidadeProjetilFantasma  = 8f;
+    public float cooldownProjeteisFantasmas  = 5f;
+    public float distanciaTiroFantasmas      = 9f;
+    public float anguloSpreadFantasmas       = 8f;
+    public float raioImpactoProjetilFantasma = 0.8f;
+    public float vidaMaximaProjetilFantasma  = 6f;
+
+    [Header("Explosão do Projétil: Nuvem Venenosa")]
+    public float raioNuvemProjetil        = 2f;
+    public float duracaoNuvemProjetil     = 4f;
+    public float danoNuvemProjetilPorTick = 3f;
+
     [Header("Morte: Nuvem Grande")]
     public float raioNuvemMorte = 3f;
     public float duracaoNuvemMorte = 5f;
     public float danoNuvemMortePorTick = 3f;
+
+    [Header("Brilho")]
+    public Color corBrilho         = new Color(0.3f, 1f, 0.2f);
+    public float intensidadeBrilho = 1.6f;
+    public float raioInternoBrilho = 0.2f;
+    public float raioExternoBrilho = 1.8f;
 
     Rigidbody2D    rb;
     SpriteRenderer sr;
@@ -40,6 +64,8 @@ public class FantasmaVeneno : MonoBehaviour
     float proxVeneno;
     float proxContato;
     float proxRastro;
+    float proxProjeteisFantasmas;
+    readonly List<GameObject> projeteisAtivos = new List<GameObject>();
 
     void Start()
     {
@@ -59,8 +85,11 @@ public class FantasmaVeneno : MonoBehaviour
         ondaFase   = Random.Range(0f, Mathf.PI * 2f);
         proxVeneno = Random.Range(2f, 5f);
         proxRastro = intervaloRastro;
+        proxProjeteisFantasmas = Random.Range(1f, cooldownProjeteisFantasmas);
 
         player = FindFirstObjectByType<PlayerStats>();
+        CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
+
         StartCoroutine(RastroVeneno());
         InimigoController.OnPreMorte += OnPreMorteHandler;
     }
@@ -70,7 +99,11 @@ public class FantasmaVeneno : MonoBehaviour
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
-        StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemMorte, duracaoNuvemMorte, danoNuvemMortePorTick));
+
+        foreach (var p in projeteisAtivos) if (p != null) Destroy(p);
+        projeteisAtivos.Clear();
+
+        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemMorte, duracaoNuvemMorte, danoNuvemMortePorTick));
     }
 
     bool Morto() => inimigoCtrl != null && inimigoCtrl.estaMorrendo;
@@ -80,11 +113,22 @@ public class FantasmaVeneno : MonoBehaviour
         if (Morto() || player == null) return;
         proxVeneno -= Time.deltaTime;
         proxRastro -= Time.deltaTime;
+        proxProjeteisFantasmas -= Time.deltaTime;
 
         if (proxRastro <= 0f)
         {
             proxRastro = intervaloRastro;
-            StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemRastro, duracaoNuvemRastro, danoRastroPorTick));
+            FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemRastro, duracaoNuvemRastro, danoRastroPorTick));
+        }
+
+        float dist = Vector2.Distance(transform.position, player.transform.position);
+        if (proxProjeteisFantasmas <= 0f && dist <= distanciaTiroFantasmas)
+        {
+            proxProjeteisFantasmas = cooldownProjeteisFantasmas;
+            Vector2 dirParaPlayer = dist > 0.1f
+                ? ((Vector2)player.transform.position - (Vector2)transform.position) / dist
+                : Vector2.up;
+            StartCoroutine(DispararProjeteisFantasmas(dirParaPlayer));
         }
 
         // Deformação flutuante de fantasma
@@ -102,7 +146,7 @@ public class FantasmaVeneno : MonoBehaviour
         float   onda = Mathf.Sin(Time.time * frequenciaOnda + ondaFase) * amplitudeOnda;
         Vector2 vel  = (dir + perp * onda).normalized * velocidade;
         rb.linearVelocity = vel;
-        if (Mathf.Abs(vel.x) > 0.05f) sr.flipX = vel.x < 0f;
+        if (Mathf.Abs(vel.x) > 0.05f) sr.flipX = vel.x > 0f;
     }
 
     void OnTriggerEnter2D(Collider2D other) => TentarAplicarEfeito(other);
@@ -137,6 +181,77 @@ public class FantasmaVeneno : MonoBehaviour
             SpawnParticula(transform.position, new Color(0.3f, 1f, 0.4f, 0.65f));
             yield return new WaitForSeconds(0.1f);
         }
+    }
+
+    IEnumerator DispararProjeteisFantasmas(Vector2 dirBase)
+    {
+        int qtd = Mathf.Max(1, quantidadeProjeteisFantasmas);
+        for (int i = 0; i < qtd; i++)
+        {
+            if (Morto()) yield break;
+
+            float t   = qtd > 1 ? (float)i / (qtd - 1) : 0.5f;
+            float ang = Mathf.Lerp(-anguloSpreadFantasmas, anguloSpreadFantasmas, t) * Mathf.Deg2Rad;
+            float cos = Mathf.Cos(ang), sen = Mathf.Sin(ang);
+            Vector2 dir = new Vector2(
+                dirBase.x * cos - dirBase.y * sen,
+                dirBase.x * sen + dirBase.y * cos);
+
+            StartCoroutine(ProjetilFantasma(transform.position, dir));
+            yield return new WaitForSeconds(0.12f);
+        }
+    }
+
+    IEnumerator ProjetilFantasma(Vector2 origem, Vector2 dir)
+    {
+        var go = new GameObject("ProjetilFantasmaVeneno");
+        go.transform.position = origem;
+        var sr2 = go.AddComponent<SpriteRenderer>();
+        if (spriteProjetilFantasma != null)
+        {
+            sr2.sprite = spriteProjetilFantasma;
+            go.transform.localScale = Vector3.one * 1.5f;
+        }
+        else
+        {
+            sr2.sprite = GerarDisco(10, new Color(0.4f, 1f, 0.3f, 0.95f));
+            go.transform.localScale = Vector3.one * 0.35f;
+        }
+        sr2.sortingOrder = 8;
+        CriarLuz(go.transform, new Color(0.4f, 1f, 0.3f), 2.5f, 0.02f, 0.35f);
+        var slow = go.AddComponent<ProjetilFantasmaSlow>();
+        var colSlow = go.AddComponent<CircleCollider2D>();
+        colSlow.isTrigger = true;
+        colSlow.radius    = 0.15f;
+        projeteisAtivos.Add(go);
+
+        for (float t = 0f; t < vidaMaximaProjetilFantasma; t += Time.deltaTime)
+        {
+            if (go == null) yield break;
+            go.transform.position += (Vector3)(dir * velocidadeProjetilFantasma * slow.fatorVelocidade * Time.deltaTime);
+            SpawnParticula(go.transform.position, new Color(0.3f, 1f, 0.4f, 0.5f));
+
+            var alvo = Physics2D.OverlapCircle(go.transform.position, raioImpactoProjetilFantasma);
+            if (alvo != null && alvo.CompareTag("Player"))
+            {
+                var ps = alvo.GetComponent<PlayerStats>();
+                if (ps != null) ps.TakeDamage(danoProjetilFantasma);
+                ExplodirEmFumaca(go.transform.position);
+                projeteisAtivos.Remove(go);
+                Destroy(go);
+                yield break;
+            }
+            yield return null;
+        }
+
+        ExplodirEmFumaca(go.transform.position);
+        projeteisAtivos.Remove(go);
+        if (go != null) Destroy(go);
+    }
+
+    void ExplodirEmFumaca(Vector2 pos)
+    {
+        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(pos, raioNuvemProjetil, duracaoNuvemProjetil, danoNuvemProjetilPorTick));
     }
 
     IEnumerator NuvemDeVeneno(Vector2 pos, float raio, float duracao, float danoPorTick)
@@ -179,7 +294,7 @@ public class FantasmaVeneno : MonoBehaviour
         float sz = Random.Range(0.15f, 0.35f);
         go.transform.position   = (Vector3)pos + (Vector3)Random.insideUnitCircle * 0.18f;
         go.transform.localScale = Vector3.one * sz;
-        StartCoroutine(FadeOut(go, Random.Range(0.3f, 0.6f)));
+        FxRunner.Instance.StartCoroutine(FadeOut(go, Random.Range(0.3f, 0.6f)));
     }
 
     IEnumerator FadeOut(GameObject go, float vida)
@@ -193,6 +308,19 @@ public class FantasmaVeneno : MonoBehaviour
             yield return null;
         }
         if (go != null) Destroy(go);
+    }
+
+    static void CriarLuz(Transform parent, Color cor, float intensidade, float raioInterno, float raioExterno)
+    {
+        var go = new GameObject("brilho");
+        go.transform.SetParent(parent, false);
+        var light = go.AddComponent<Light2D>();
+        light.lightType = Light2D.LightType.Point;
+        light.color = cor;
+        light.intensity = intensidade;
+        light.pointLightInnerRadius = raioInterno;
+        light.pointLightOuterRadius = raioExterno;
+        light.blendStyleIndex = 0;
     }
 
     static Sprite GerarDisco(int sz, Color cor)

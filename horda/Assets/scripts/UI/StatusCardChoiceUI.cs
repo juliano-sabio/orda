@@ -74,9 +74,6 @@ public class StatusCardChoiceUI : MonoBehaviour
 
         if (!gameObject.activeInHierarchy) gameObject.SetActive(true);
 
-        if (choicePanel != null)
-            choicePanel.SetActive(true);
-
         if (titleText != null) titleText.text = titleMessage;
 
         PauseGame();
@@ -98,6 +95,7 @@ public class StatusCardChoiceUI : MonoBehaviour
     {
         yield return null; // frame 1: canvas ativa, CanvasScaler começa a calcular
         yield return null; // frame 2: CanvasScaler aplica escala (se funcionar)
+        if (choicePanel != null) choicePanel.SetActive(true);
         ConfigurarCanvas();
         SetupLayout();
         if (contadorCoroutine != null) StopCoroutine(contadorCoroutine);

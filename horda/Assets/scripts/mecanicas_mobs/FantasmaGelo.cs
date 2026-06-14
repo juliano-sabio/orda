@@ -84,8 +84,8 @@ public class FantasmaGelo : MonoBehaviour
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
-        StartCoroutine(ZonaGelo(transform.position, raioGeloMorte, duracaoGeloMorte));
-        StartCoroutine(ExplodirCristais(transform.position));
+        FxRunner.Instance.StartCoroutine(ZonaGelo(transform.position, raioGeloMorte, duracaoGeloMorte));
+        FxRunner.Instance.StartCoroutine(ExplodirCristais(transform.position));
     }
 
     bool Morto() => inimigoCtrl != null && inimigoCtrl.estaMorrendo;
@@ -116,7 +116,7 @@ public class FantasmaGelo : MonoBehaviour
         if (proxTiro <= 0f && dist <= distanciaTiro)
         {
             proxTiro = cooldownTiro;
-            StartCoroutine(ProjetilGelo(transform.position, dirParaPlayer));
+            FxRunner.Instance.StartCoroutine(ProjetilGelo(transform.position, dirParaPlayer));
         }
 
         // Deformação flutuante de fantasma
@@ -210,8 +210,8 @@ public class FantasmaGelo : MonoBehaviour
                 {
                     player.TakeDamage(danoProjetil);
                     player.AplicarSlow(reducaoSlow, duracaoSlow);
-                    StartCoroutine(ZonaGelo(player.transform.position, raioZonaGelo, duracaoZonaGelo));
-                    StartCoroutine(FadeOut(go, 0.15f));
+                    FxRunner.Instance.StartCoroutine(ZonaGelo(player.transform.position, raioZonaGelo, duracaoZonaGelo));
+                    FxRunner.Instance.StartCoroutine(FadeOut(go, 0.15f));
                     yield break;
                 }
             }
@@ -323,7 +323,7 @@ public class FantasmaGelo : MonoBehaviour
             Vector2 dir  = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
             float   spd  = Random.Range(3f, 7f);
             Destroy(go, 2f); // segurança: garante remoção mesmo se a corrotina for interrompida
-            StartCoroutine(LancarCristal(go, dir, spd));
+            FxRunner.Instance.StartCoroutine(LancarCristal(go, dir, spd));
         }
         yield break;
     }
@@ -358,7 +358,7 @@ public class FantasmaGelo : MonoBehaviour
             go.transform.position   = (Vector3)transform.position + (Vector3)Random.insideUnitCircle * 0.2f;
             go.transform.localScale = Vector3.one * sz;
             Destroy(go, 1.5f); // segurança: garante remoção mesmo se a corrotina for interrompida
-            StartCoroutine(FadeOut(go, Random.Range(0.35f, 0.7f)));
+            FxRunner.Instance.StartCoroutine(FadeOut(go, Random.Range(0.35f, 0.7f)));
             yield return new WaitForSeconds(0.12f);
         }
     }
@@ -373,7 +373,7 @@ public class FantasmaGelo : MonoBehaviour
         go.transform.position   = pos;
         go.transform.localScale = Vector3.one * sz;
         Destroy(go, 1f); // segurança: garante remoção mesmo se a corrotina for interrompida
-        StartCoroutine(FadeOut(go, Random.Range(0.2f, 0.35f)));
+        FxRunner.Instance.StartCoroutine(FadeOut(go, Random.Range(0.2f, 0.35f)));
     }
 
     IEnumerator FadeOut(GameObject go, float vida)
