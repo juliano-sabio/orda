@@ -13,11 +13,13 @@ public class MissoesUI : MonoBehaviour
     public Sprite spriteBarraTopo;
     public Sprite spriteBotao;
     public Sprite spriteSlotPlayer;
+    public Sprite spriteSkillSlotCard;
+    public Sprite spriteEspiritoMissao;
 
     // Paleta alinhada com CharacterSelectionUI
-    static readonly Color corFundo        = new Color(0.04f, 0.02f, 0.02f, 0.98f);
+    static readonly Color corFundo        = new Color(0f, 0f, 0f, 0.90f);
     static readonly Color corBarraTopo    = new Color(0.10f, 0.04f, 0.04f);
-    static readonly Color corBorda        = new Color(0.78f, 0.66f, 0.35f);
+    static readonly Color corBorda        = new Color(0.35f, 0.05f, 0.05f);
     static readonly Color corAcento       = new Color(0.55f, 0.08f, 0.08f);
     static readonly Color corAba          = new Color(0.10f, 0.08f, 0.16f);
     static readonly Color corAbaAtiva     = new Color(0.32f, 0.26f, 0.10f);
@@ -39,11 +41,14 @@ public class MissoesUI : MonoBehaviour
     TextMeshProUGUI[] textosBotoesAba = new TextMeshProUGUI[3];
     bool aberto = false;
 
+    CharacterSelectionUI charSelUI;
+
     IEnumerator Start()
     {
         yield return null;
 
         var charUI = FindAnyObjectByType<CharacterSelectionUI>();
+        charSelUI = charUI;
         if (charUI != null)
         {
             if (personagens == null || personagens.Length == 0)
@@ -72,6 +77,14 @@ public class MissoesUI : MonoBehaviour
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
                 "Assets/assets/UI/skill_card/slotplayer.ase"))
                 if (a is Sprite s) { spriteSlotPlayer = s; break; }
+        if (spriteSkillSlotCard == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/skill_card/skill_slot_card.aseprite"))
+                if (a is Sprite s) { spriteSkillSlotCard = s; break; }
+        if (spriteEspiritoMissao == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/espiritoMissao.ase"))
+                if (a is Sprite s) { spriteEspiritoMissao = s; break; }
 #endif
 
         var canvasGO = GameObject.Find("CanvasPrincipal");
@@ -95,7 +108,7 @@ public class MissoesUI : MonoBehaviour
         var rBack = backdrop.AddComponent<RectTransform>();
         rBack.anchorMin = Vector2.zero; rBack.anchorMax = Vector2.one;
         rBack.offsetMin = rBack.offsetMax = Vector2.zero;
-        backdrop.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.78f);
+        backdrop.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.96f);
 
         // Caixa central
         painelContent = new GameObject("painelmissao");
@@ -109,7 +122,7 @@ public class MissoesUI : MonoBehaviour
         {
             imgContent.sprite          = spriteFundoPainel;
             imgContent.type            = Image.Type.Simple;
-            imgContent.color           = Color.white;
+            imgContent.color           = corFundo;
             imgContent.preserveAspect  = false;
         }
         else
@@ -158,7 +171,7 @@ public class MissoesUI : MonoBehaviour
         var titulo = CriarTexto(painelContent, "Titulo",
             new Vector2(0.03f, 0.92f), new Vector2(0.88f, 1f),
             "MISSOES DE DESBLOQUEIO", 17f, FontStyles.Bold, corTitulo);
-        titulo.alignment = TextAlignmentOptions.MidlineLeft;
+        titulo.alignment = TextAlignmentOptions.Center;
 
         // Botão fechar
         CriarBotaoFechar(painelContent);
@@ -192,7 +205,7 @@ public class MissoesUI : MonoBehaviour
         go.transform.SetParent(pai.transform, false);
         var r = go.AddComponent<RectTransform>();
         r.anchorMin = ancMin; r.anchorMax = ancMax;
-        r.offsetMin = r.offsetMax = Vector2.zero;
+        r.offsetMin = new Vector2(2f, 0f); r.offsetMax = new Vector2(-2f, 0f);
         go.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, 0.5f);
     }
 
@@ -202,8 +215,8 @@ public class MissoesUI : MonoBehaviour
         go.transform.SetParent(pai.transform, false);
         var r = go.AddComponent<RectTransform>();
         r.anchorMin = r.anchorMax = r.pivot = new Vector2(1f, 1f);
-        r.anchoredPosition = new Vector2(-8f, -6f);
-        r.sizeDelta = new Vector2(36f, 30f);
+        r.anchoredPosition = new Vector2(-6f, -5f);
+        r.sizeDelta = new Vector2(30f, 26f);
 
         // Borda dourada ao redor do botão
         var borda = new GameObject("Borda");
@@ -296,7 +309,7 @@ public class MissoesUI : MonoBehaviour
         rm.anchorMax = new Vector2(0.99f, 0.835f);
         rm.offsetMin = new Vector2(4f, 0f);
         rm.offsetMax = new Vector2(-4f, 0f);
-        mascara.AddComponent<Image>().color = Color.clear;
+        mascara.AddComponent<Image>().color = Color.white;
         mascara.AddComponent<Mask>().showMaskGraphic = false;
 
         areaConteudo = new GameObject("Conteudo");
@@ -372,15 +385,55 @@ public class MissoesUI : MonoBehaviour
 
     void PopularPersonagens(int playerLevel)
     {
-        if (personagens == null) return;
+        // Missão de Espírito de Evolução (repetível, recompensa usada na seleção de personagem)
+        int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        int espiritos = EspiritoUpgradeSystem.GetEspiritos(charIndex);
+        bool missaoPendente = PlayerPrefs.GetInt("MissaoEspiritoPendente", 0) == 1;
+
+        if (missaoPendente)
+        {
+            CriarCard("Missão: Espírito de Evolução",
+                "Toque para coletar +1 Espírito",
+                "Derrote 50 inimigos em uma partida para ganhar +1 Espírito de Evolução. Gaste os espíritos na seleção de personagem para evoluir os status.",
+                new Color(0.30f, 0.85f, 1.00f), true, spriteEspiritoMissao,
+                brilhando: true,
+                onClick: () => ColetarMissaoEspirito(charIndex));
+        }
+
+        if (personagens == null)
+        {
+            if (!missaoPendente) CriarCardMissaoApagada(espiritos);
+            return;
+        }
+
         foreach (var p in personagens)
         {
             if (p == null) continue;
             bool desbloqueado = p.unlocked || playerLevel >= p.unlockLevel;
-            string status = desbloqueado ? "DESBLOQUEADO" : $"Nivel {p.unlockLevel} necessario";
+            string status = desbloqueado ? "CONCLUIDO" : "INCOMPLETA";
             CriarCard(p.characterName, status, p.missaoDesbloqueio,
                 CharacterData.GetElementColor(p.baseElement), desbloqueado, p.icon);
         }
+
+        if (!missaoPendente) CriarCardMissaoApagada(espiritos);
+    }
+
+    void CriarCardMissaoApagada(int espiritos)
+    {
+        CriarCard("Missão: Espírito de Evolução",
+            $"Espíritos disponíveis: {espiritos}",
+            "Derrote 50 inimigos em uma partida para ganhar +1 Espírito de Evolução. Gaste os espíritos na seleção de personagem para evoluir os status.",
+            new Color(0.30f, 0.85f, 1.00f), true, spriteEspiritoMissao,
+            apagado: true);
+    }
+
+    void ColetarMissaoEspirito(int charIndex)
+    {
+        EspiritoUpgradeSystem.AdicionarEspirito(charIndex);
+        PlayerPrefs.SetInt("MissaoEspiritoPendente", 0);
+        PlayerPrefs.Save();
+        charSelUI?.AtualizarEspiritos();
+        MostrarAba(abaAtiva);
     }
 
     void PopularUltimates(int playerLevel)
@@ -393,7 +446,7 @@ public class MissoesUI : MonoBehaviour
             {
                 if (u == null) continue;
                 bool desbloqueado = u.isUnlocked && playerLevel >= u.requiredLevel;
-                string status = desbloqueado ? "DESBLOQUEADO" : $"Nivel {u.requiredLevel} necessario";
+                string status = desbloqueado ? "CONCLUIDO" : "INCOMPLETA";
                 CriarCard(u.ultimateName, status,
                     $"[{p.characterName}]  {u.description}",
                     u.GetElementColor(), desbloqueado, u.ultimateIcon);
@@ -414,7 +467,7 @@ public class MissoesUI : MonoBehaviour
                 if (passiva == null) continue;
                 alguma = true;
                 bool desbloqueado = passiva.isUnlocked && playerLevel >= passiva.requiredLevel;
-                string status = desbloqueado ? "DESBLOQUEADO" : $"Nivel {passiva.requiredLevel} necessario";
+                string status = desbloqueado ? "CONCLUIDO" : "INCOMPLETA";
                 string bonus  = passiva.GetBonusDescription();
                 string desc   = string.IsNullOrEmpty(bonus) ? passiva.description : bonus;
                 CriarCard(passiva.passiveName, status, $"[{p.characterName}]  {desc}",
@@ -426,7 +479,7 @@ public class MissoesUI : MonoBehaviour
                 "As passivas sao desbloqueadas ao subir de nivel e selecionar cartas de habilidade durante a partida.");
     }
 
-    void CriarCard(string nome, string status, string descricao, Color corAccento, bool desbloqueado, Sprite icone = null)
+    void CriarCard(string nome, string status, string descricao, Color corAccento, bool desbloqueado, Sprite icone = null, bool brilhando = false, bool apagado = false, System.Action onClick = null)
     {
         var card = new GameObject($"Card_{nome}");
         card.transform.SetParent(areaConteudo.transform, false);
@@ -435,7 +488,22 @@ public class MissoesUI : MonoBehaviour
         le.minHeight       = 100f;
         le.preferredHeight = 100f;
 
-        card.AddComponent<Image>().color = corCard;
+        var imgFundo = card.AddComponent<Image>();
+        imgFundo.color = corCard;
+
+        if (apagado)
+            card.AddComponent<CanvasGroup>().alpha = 0.45f;
+
+        if (onClick != null)
+        {
+            var btn = card.AddComponent<Button>();
+            btn.targetGraphic = imgFundo;
+            var colors = btn.colors;
+            colors.highlightedColor = new Color(1f, 1f, 1f, 1.1f);
+            colors.pressedColor     = new Color(0.85f, 0.85f, 0.85f, 1f);
+            btn.colors = colors;
+            btn.onClick.AddListener(() => onClick());
+        }
 
         // Borda superior fina (cor do acento)
         var bordaTopo = new GameObject("BordaTopo");
@@ -465,18 +533,19 @@ public class MissoesUI : MonoBehaviour
         bool temIcone = icone != null;
         if (temIcone)
         {
-            // Slot de fundo do ícone
-            if (spriteSlotPlayer != null)
+            // Slot de fundo do ícone (quadrado, ancorado na borda esquerda do card)
+            if (spriteSkillSlotCard != null)
             {
                 var goSlot = new GameObject("Slot");
                 goSlot.transform.SetParent(card.transform, false);
                 var rSlot = goSlot.AddComponent<RectTransform>();
-                rSlot.anchorMin = new Vector2(0.01f, 0.05f);
-                rSlot.anchorMax = new Vector2(0.19f, 0.95f);
-                rSlot.offsetMin = rSlot.offsetMax = Vector2.zero;
+                rSlot.anchorMin = new Vector2(0f, 0f);
+                rSlot.anchorMax = new Vector2(0f, 1f);
+                rSlot.offsetMin = new Vector2(5f, 5f);
+                rSlot.offsetMax = new Vector2(95f, -5f);
                 var imgSlot = goSlot.AddComponent<Image>();
-                imgSlot.sprite = spriteSlotPlayer;
-                imgSlot.type   = Image.Type.Sliced;
+                imgSlot.sprite = spriteSkillSlotCard;
+                imgSlot.type   = Image.Type.Simple;
                 imgSlot.color  = Color.white;
                 imgSlot.raycastTarget = false;
             }
@@ -484,9 +553,10 @@ public class MissoesUI : MonoBehaviour
             var goIcon = new GameObject("Icone");
             goIcon.transform.SetParent(card.transform, false);
             var rIcon = goIcon.AddComponent<RectTransform>();
-            rIcon.anchorMin = new Vector2(0.02f, 0.08f);
-            rIcon.anchorMax = new Vector2(0.18f, 0.92f);
-            rIcon.offsetMin = rIcon.offsetMax = Vector2.zero;
+            rIcon.anchorMin = new Vector2(0f, 0f);
+            rIcon.anchorMax = new Vector2(0f, 1f);
+            rIcon.offsetMin = new Vector2(13f, 13f);
+            rIcon.offsetMax = new Vector2(87f, -13f);
             var imgIcon = goIcon.AddComponent<Image>();
             imgIcon.sprite         = icone;
             imgIcon.preserveAspect = true;
@@ -494,11 +564,20 @@ public class MissoesUI : MonoBehaviour
             imgIcon.raycastTarget  = false;
         }
 
-        float textX = temIcone ? 0.22f : 0.07f;
+        float textX = temIcone ? 0.12f : 0.07f;
+
+        // Descrição / missão de desbloqueio (título centralizado no topo)
+        var txtDesc = CriarTexto(card, "Desc",
+            new Vector2(textX, 0.36f), new Vector2(0.97f, 0.66f),
+            descricao, 9f, FontStyles.Normal,
+            new Color(0.60f, 0.55f, 0.45f));
+        txtDesc.alignment        = TextAlignmentOptions.Center;
+        txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
+        txtDesc.overflowMode     = TMPro.TextOverflowModes.Ellipsis;
 
         // Nome (bold, dourado claro)
         var txtNome = CriarTexto(card, "Nome",
-            new Vector2(textX, 0.60f), new Vector2(0.97f, 0.96f),
+            new Vector2(textX, 0.36f), new Vector2(0.97f, 0.66f),
             nome, 14f, FontStyles.Bold, corTexto);
         txtNome.alignment        = TextAlignmentOptions.MidlineLeft;
         txtNome.textWrappingMode = TMPro.TextWrappingModes.Normal;
@@ -506,18 +585,24 @@ public class MissoesUI : MonoBehaviour
         // Status (desbloqueado / bloqueado)
         var corSt = desbloqueado ? corDesbloqueado : corBloqueado;
         var txtStatus = CriarTexto(card, "Status",
-            new Vector2(textX, 0.38f), new Vector2(0.97f, 0.60f),
+            new Vector2(0.78f, 0.36f), new Vector2(0.97f, 0.66f),
             status, 9f, FontStyles.Bold, corSt);
-        txtStatus.alignment = TextAlignmentOptions.MidlineLeft;
+        txtStatus.alignment = TextAlignmentOptions.MidlineRight;
 
-        // Descrição / missão de desbloqueio
-        var txtDesc = CriarTexto(card, "Desc",
-            new Vector2(textX, 0.02f), new Vector2(0.97f, 0.38f),
-            descricao, 9f, FontStyles.Normal,
-            new Color(0.60f, 0.55f, 0.45f));
-        txtDesc.alignment        = TextAlignmentOptions.TopLeft;
-        txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
-        txtDesc.overflowMode     = TMPro.TextOverflowModes.Ellipsis;
+        // Brilho de missão concluída
+        if (brilhando)
+        {
+            var glow = new GameObject("Glow");
+            glow.transform.SetParent(card.transform, false);
+            var rGlow = glow.AddComponent<RectTransform>();
+            rGlow.anchorMin = Vector2.zero;
+            rGlow.anchorMax = Vector2.one;
+            rGlow.offsetMin = rGlow.offsetMax = Vector2.zero;
+            var imgGlow = glow.AddComponent<Image>();
+            imgGlow.color = new Color(corAccento.r, corAccento.g, corAccento.b, 0f);
+            imgGlow.raycastTarget = false;
+            glow.AddComponent<CardGlowEffect>().Setup(imgGlow, corAccento);
+        }
     }
 
     void CriarCardInfo(string titulo, string texto)
@@ -575,5 +660,27 @@ public class MissoesUI : MonoBehaviour
         t.color     = cor;
         t.alignment = TextAlignmentOptions.Center;
         return t;
+    }
+}
+
+// Pulso de brilho usado no card de missão recém-concluída
+public class CardGlowEffect : MonoBehaviour
+{
+    Image img;
+    Color corBase;
+    const float velocidade = 2.5f;
+
+    public void Setup(Image imagem, Color cor)
+    {
+        img = imagem;
+        corBase = cor;
+    }
+
+    void Update()
+    {
+        if (img == null) return;
+        float t = (Mathf.Sin(Time.unscaledTime * velocidade) + 1f) * 0.5f;
+        float a = Mathf.Lerp(0.05f, 0.45f, t);
+        img.color = new Color(corBase.r, corBase.g, corBase.b, a);
     }
 }

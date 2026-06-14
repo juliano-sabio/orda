@@ -97,6 +97,7 @@ public class PlayerStats : MonoBehaviour
     private float defenseTimer = 0f;
     public float shieldPoints = 0f;
     public float maxShieldPoints = 0f;
+    public float bonusShieldPoints = 0f;
     private float shieldImmuneTimer = 0f;
     private const float ShieldBreakImmuneDuration = 0.3f;
 
@@ -132,20 +133,26 @@ public class PlayerStats : MonoBehaviour
     {
         if (characterData == null) return;
 
+        // --- Espíritos de Evolução (upgrades permanentes por personagem) ---
+        int espCharIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+
         // --- Status Base ---
-        maxHealth = characterData.maxHealth;
+        maxHealth = characterData.maxHealth * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 4);
         health = maxHealth;
-        attack = characterData.baseAttack;
-        defense = characterData.baseDefense;
-        speed = characterData.baseSpeed;
+        attack = characterData.baseAttack   * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 0);
+        defense = characterData.baseDefense * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 1);
+        speed = characterData.baseSpeed     * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 5);
 
         // --- Sistema de Regeneração ---
-        healthRegenRate = characterData.baseHealthRegen;
+        healthRegenRate = characterData.baseHealthRegen * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 6);
         healthRegenDelay = characterData.baseRegenDelay;
 
         // --- Sistema de Cooldowns/Intervalos ---
-        attackActivationInterval = characterData.baseAttackCooldown;
-        defenseActivationInterval = characterData.baseDefenseCooldown;
+        attackActivationInterval = characterData.baseAttackCooldown   * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 3);
+        defenseActivationInterval = characterData.baseDefenseCooldown * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 7);
+
+        // --- Crítico ---
+        critChance = 0.1f * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 2);
 
         // --- Progressão ---
         xpMultiplier = characterData.xpMultiplier;
@@ -836,7 +843,7 @@ public class PlayerStats : MonoBehaviour
 
     void RecalcMaxShield()
     {
-        maxShieldPoints = 0f;
+        maxShieldPoints = bonusShieldPoints;
         foreach (var s in defenseSkills)
             if (s.isActive) maxShieldPoints += s.CalculateTotalDefense();
     }

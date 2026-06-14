@@ -17,6 +17,7 @@ public class StatusCardSystem : MonoBehaviour
         new float[] { 0.3f,  0.7f,  1.5f,  2.5f  }, // Regen
         new float[] { 0.02f, 0.05f, 0.10f, 0.20f }, // CriticalChance (+% por raridade)
         new float[] { 0.1f,  0.2f,  0.4f,  0.7f  }, // AttackSpeed (redução em segundos)
+        new float[] { 10f,   20f,   35f,   60f   }, // Shield
     };
 
     // Rarity weights: Common 60%, Rare 30%, Mystic 10% — Curse excluded (future system)
@@ -25,12 +26,12 @@ public class StatusCardSystem : MonoBehaviour
     private static readonly string[] CardTitles =
     {
         "Vitalidade", "Forca", "Resistencia", "Agilidade",
-        "Regeneracao", "Precisao", "Reflexos"
+        "Regeneracao", "Precisao", "Reflexos", "Escudo"
     };
     private static readonly string[] StatLabels =
     {
         "Vida", "ATQ", "DEF", "Vel",
-        "Regen", "Critico", "Vel.Atq"
+        "Regen", "Critico", "Vel.Atq", "Escudo"
     };
     private static readonly string[] RarityLabels = { "Comum", "Raro", "Mistico", "Amaldicoado" };
 
@@ -196,6 +197,11 @@ public class StatusCardSystem : MonoBehaviour
                 float novo  = Mathf.Max(0.2f, atual - bonus);
                 return $"Vel.Atq: {atual:F1}s → {novo:F1}s";
             }
+            case StatusCardType.Shield:
+            {
+                float atual = playerStats.maxShieldPoints;
+                return $"Escudo Max: {atual:F0} → {atual + bonus:F0}";
+            }
             default:
                 return $"{StatLabels[(int)statType]}: +{bonus}";
         }
@@ -222,6 +228,11 @@ public class StatusCardSystem : MonoBehaviour
             case StatusCardType.AttackSpeed:
                 playerStats.attackActivationInterval =
                     Mathf.Max(0.2f, playerStats.attackActivationInterval - card.bonus);
+                break;
+            case StatusCardType.Shield:
+                playerStats.bonusShieldPoints += card.bonus;
+                playerStats.maxShieldPoints   += card.bonus;
+                playerStats.shieldPoints      += card.bonus;
                 break;
         }
 

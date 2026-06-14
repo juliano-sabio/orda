@@ -22,6 +22,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     [Header("📊 UI - Info")]
     public TextMeshProUGUI coinsText;
+    public TextMeshProUGUI espiritosText;
     public TextMeshProUGUI characterNameText;
     public TextMeshProUGUI characterElementText;
     public TextMeshProUGUI characterDescriptionText;
@@ -153,6 +154,16 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         }
     }
 
+    public void UpgradeStatusComEspirito(int statIndex)
+    {
+        int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        if (EspiritoUpgradeSystem.TryUpgrade(charIndex, statIndex))
+        {
+            UpdateStatusDisplay(characters[charIndex]);
+            if (selectionUI != null) selectionUI.AtualizarGlowsEspirito();
+        }
+    }
+
     public void UpdateStatusDisplay(CharacterData data)
     {
         if (!data) return;
@@ -171,16 +182,18 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             statusSliders[3].value = (data.baseSpeed * (1 + upgradeLevels[3] * 0.05f)) / 50f;
         }
 
+        int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+
         if (statusTexts != null && statusTexts.Length >= 8)
         {
-            float atq  = data.baseAttack   * (1 + upgradeLevels[1] * 0.05f);
-            float def  = data.baseDefense  * (1 + upgradeLevels[2] * 0.05f);
-            float vel  = data.baseSpeed    * (1 + upgradeLevels[3] * 0.05f);
-            float vida = data.maxHealth    * (1 + upgradeLevels[0] * 0.05f);
-            float regen     = data.baseHealthRegen;
-            float velAtq    = data.baseAttackCooldown;
-            float velEscudo = data.baseDefenseCooldown;
-            float critico   = 10f; // base padrão
+            float atq  = data.baseAttack   * (1 + upgradeLevels[1] * 0.05f) * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 0);
+            float def  = data.baseDefense  * (1 + upgradeLevels[2] * 0.05f) * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 1);
+            float vel  = data.baseSpeed    * (1 + upgradeLevels[3] * 0.05f) * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 5);
+            float vida = data.maxHealth    * (1 + upgradeLevels[0] * 0.05f) * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 4);
+            float regen     = data.baseHealthRegen     * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 6);
+            float velAtq    = data.baseAttackCooldown  * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 3);
+            float velEscudo = data.baseDefenseCooldown * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 7);
+            float critico   = 10f * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 2); // base padrão
 
             if (statusTexts[0] != null) statusTexts[0].text = $"ATQ: {atq:F1}";
             if (statusTexts[1] != null) statusTexts[1].text = $"DEF: {def:F1}";
@@ -191,6 +204,9 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             if (statusTexts[6] != null) statusTexts[6].text = $"Regen: {regen:F1}/s";
             if (statusTexts[7] != null) statusTexts[7].text = $"Escudo: {velEscudo:F1}s";
         }
+
+        if (espiritosText != null)
+            espiritosText.text = $"{EspiritoUpgradeSystem.GetEspiritos(charIndex)}";
 
         for (int i = 0; i < upgradeLevelTexts.Length; i++)
             if (upgradeLevelTexts[i]) upgradeLevelTexts[i].text = $"Nv. {upgradeLevels[i]}";

@@ -32,6 +32,7 @@ public class EscolherTerrenoUI : MonoBehaviour
     [Header("Assets")]
     public Sprite spriteCard;
     public Sprite spriteFundoImg;
+    public Sprite spriteBotao;
 
     // ──────────────────────────────────────────────────────────────
     void Start()
@@ -46,6 +47,9 @@ public class EscolherTerrenoUI : MonoBehaviour
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
                 "Assets/assets/UI/bg_dungeon_tocha.png"))
                 if (a is Sprite s) { spriteFundoImg = s; break; }
+        if (spriteBotao == null)
+            spriteBotao = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/assets/UI/charselection/btn_stone.png");
 #endif
 
         GameObject canvasGO = CriarCanvas();
@@ -293,15 +297,28 @@ public class EscolherTerrenoUI : MonoBehaviour
         r.sizeDelta        = new Vector2(200f, 55f);
 
         Image img = go.AddComponent<Image>();
-        img.color = new Color(0.5f, 0.1f, 0.1f);
+        if (spriteBotao != null)
+        {
+            img.sprite = spriteBotao;
+            img.type   = Image.Type.Sliced;
+            img.color  = new Color(
+                Mathf.Clamp01(0.45f + 0.45f),
+                Mathf.Clamp01(0.08f + 0.45f),
+                Mathf.Clamp01(0.08f + 0.45f));
+        }
+        else
+        {
+            img.color = new Color(0.45f, 0.08f, 0.08f);
+        }
 
         Button btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
+        btn.transition = Selectable.Transition.None;
         btn.onClick.AddListener(() => SceneManager.LoadScene(cenaVoltar));
 
         AdicionarTexto(go, "Txt",
             Vector2.zero, Vector2.one,
-            "← VOLTAR", 20f, FontStyles.Bold, Color.white);
+            "< VOLTAR", 18f, FontStyles.Bold, Color.white);
     }
 
     // ──────────────────────────────────────────────────────────────

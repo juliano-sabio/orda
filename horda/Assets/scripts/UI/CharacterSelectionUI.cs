@@ -17,10 +17,11 @@ public class CharacterSelectionUI : MonoBehaviour
     CharacterSelectionManagerIntegrated manager;
     Canvas canvas;
 
-    TextMeshProUGUI txtNome, txtElemento, txtDesc, txtBonus, txtMoedas;
+    TextMeshProUGUI txtNome, txtElemento, txtDesc, txtBonus, txtMoedas, txtEspiritos;
     TextMeshProUGUI txtUltimateInfo, txtPassivasInfo, txtNomePreview;
     Slider[]         sliders         = new Slider[4];
     Button[]         upgradeButtons  = new Button[4];
+    GameObject[]     glowsEspirito   = new GameObject[8];
     TextMeshProUGUI[] upgradeLevelTexts = new TextMeshProUGUI[4];
     CharacterIconUI[] iconesArray;
     GameObject[]     painelAbaInfo  = new GameObject[3];
@@ -79,6 +80,7 @@ public class CharacterSelectionUI : MonoBehaviour
     public Sprite spriteTeste002;
     public Sprite spriteTeste003;
     public Sprite spriteTesteCaractere04;
+    public Sprite spriteEspiritoMissao;
 
     // ── Paleta dark fantasy ────────────────────────────────────────────
     static readonly Color corFundo  = new Color(0.03f, 0.01f, 0.01f);  // #080303
@@ -134,10 +136,15 @@ public class CharacterSelectionUI : MonoBehaviour
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
                 "Assets/assets/UI/charselection/testecaractere04.ase"))
                 if (a is Sprite s) { spriteTesteCaractere04 = s; break; }
+        if (spriteEspiritoMissao == null)
+            foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                "Assets/assets/UI/espiritoMissao.ase"))
+                if (a is Sprite s) { spriteEspiritoMissao = s; break; }
 #endif
         CriarCanvas();
         CriarUI();
         ConectarManager();
+        AtualizarGlowsEspirito();
         StartCoroutine(AnimarParticulas());
         StartCoroutine(AnimarGlow());
         StartCoroutine(AnimarParticulasPreview());
@@ -526,13 +533,36 @@ public class CharacterSelectionUI : MonoBehaviour
 
             // texto
             var txt = TMP(row, "Val",
-                new Vector2(0.20f, 0f), new Vector2(1f, 1f),
+                new Vector2(0.20f, 0f), new Vector2(0.82f, 1f),
                 $"{statLabels[i]}: —", 10f, FontStyles.Bold, Color.white);
             txt.alignment = TextAlignmentOptions.MidlineLeft;
             statusTexts[i] = txt;
+
+            // botão de upgrade com Espírito
+            int statIndex = i;
+            var btnUp = CriarBotao(row, "BtnUp",
+                new Vector2(0.85f, 0.12f), new Vector2(0.98f, 0.88f),
+                "+", statCores[i], () => manager.UpgradeStatusComEspirito(statIndex), 12f);
+            glowsEspirito[i] = CriarGlowBotao(btnUp, statCores[i]);
         }
 
         manager.statusTexts = statusTexts;
+
+        // espíritos disponíveis (acima do painel de status)
+        var espiritosArea = new GameObject("EspiritosArea");
+        espiritosArea.transform.SetParent(root.transform, false);
+        Anchors(espiritosArea, new Vector2(0.77f, 0.815f), new Vector2(1.07f, 0.89f));
+
+        var icoEspirito = Img(espiritosArea, "Icone",
+            new Vector2(0f, 0f), new Vector2(0.6f, 1f), Color.white);
+        var icoEspiritoImg = icoEspirito.GetComponent<Image>();
+        icoEspiritoImg.sprite = spriteEspiritoMissao;
+        icoEspiritoImg.preserveAspect = true;
+
+        txtEspiritos = TMP(icoEspirito, "Espiritos",
+            new Vector2(0.25f, 0.5f), new Vector2(0.65f, 1f),
+            "0", 16f, FontStyles.Bold, Color.white);
+        txtEspiritos.alignment = TextAlignmentOptions.TopRight;
     }
 
     // ── Rodapé ─────────────────────────────────────────────────────────
@@ -947,6 +977,7 @@ public class CharacterSelectionUI : MonoBehaviour
         manager.characterDescriptionText = txtDesc;
         manager.elementBonusText         = txtBonus;
         manager.coinsText                = txtMoedas;
+        manager.espiritosText            = txtEspiritos;
         manager.statusSliders            = sliders;
         manager.upgradeButtons           = upgradeButtons;
         manager.upgradeLevelTexts        = upgradeLevelTexts;
@@ -963,6 +994,23 @@ public class CharacterSelectionUI : MonoBehaviour
         stagePlaceholder.AddComponent<RectTransform>();
         stagePlaceholder.SetActive(false);
         manager.painelStages = stagePlaceholder;
+    }
+
+    // Chamado por outras UIs (ex: MissoesUI) para atualizar o contador de espíritos
+    public void AtualizarEspiritos()
+    {
+        int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        manager.UpdateStatusDisplay(characters[charIndex]);
+        AtualizarGlowsEspirito();
+    }
+
+    // Liga/desliga o brilho dos botões "+" de status quando há Espíritos disponíveis
+    public void AtualizarGlowsEspirito()
+    {
+        int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        bool temEspiritos = EspiritoUpgradeSystem.GetEspiritos(charIndex) > 0;
+        foreach (var glow in glowsEspirito)
+            if (glow != null) glow.SetActive(temEspiritos);
     }
 
     // ── Preview com RenderTexture ──────────────────────────────────────
@@ -1123,7 +1171,7 @@ public class CharacterSelectionUI : MonoBehaviour
         return s;
     }
 
-    void CriarBotao(GameObject parent, string nome,
+    GameObject CriarBotao(GameObject parent, string nome,
         Vector2 ancMin, Vector2 ancMax,
         string texto, Color cor, UnityEngine.Events.UnityAction acao,
         float fontSize = 18f)
@@ -1152,6 +1200,26 @@ public class CharacterSelectionUI : MonoBehaviour
         TMP(go, "T", Vector2.zero, Vector2.one,
             texto, fontSize, FontStyles.Bold, Color.white)
             .alignment = TextAlignmentOptions.Center;
+
+        return go;
+    }
+
+    // Overlay de brilho pulsante para indicar que o botão pode ser usado
+    GameObject CriarGlowBotao(GameObject botao, Color cor)
+    {
+        var glow = new GameObject("Glow");
+        glow.transform.SetParent(botao.transform, false);
+        var rGlow = glow.AddComponent<RectTransform>();
+        rGlow.anchorMin = Vector2.zero;
+        rGlow.anchorMax = Vector2.one;
+        rGlow.offsetMin = new Vector2(-3f, -3f);
+        rGlow.offsetMax = new Vector2(3f, 3f);
+        var imgGlow = glow.AddComponent<Image>();
+        imgGlow.color = new Color(cor.r, cor.g, cor.b, 0f);
+        imgGlow.raycastTarget = false;
+        glow.AddComponent<CardGlowEffect>().Setup(imgGlow, cor);
+        glow.SetActive(false);
+        return glow;
     }
 
     void BarraTopo(GameObject pai, Color cor)

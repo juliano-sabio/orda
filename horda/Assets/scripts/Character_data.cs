@@ -92,7 +92,7 @@ public class CharacterData : ScriptableObject
             case PlayerStats.Element.Poison: return "";
             case PlayerStats.Element.Earth: return "";
             case PlayerStats.Element.Wind: return "";
-            default: return "⚪";
+            default: return "[Neutro]";
         }
     }
 
