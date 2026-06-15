@@ -63,7 +63,7 @@ public class TimeBarEffects : MonoBehaviour
     {
         float pulse = pulseCurve.Evaluate(Time.time * pulseSpeed);
         Color targetColor = Color.Lerp(timerManager.criticalColor, Color.white, pulse);
-        timeBarFill.color = targetColor;
+        if (timeBarFill != null) timeBarFill.color = targetColor;
         if (timerText != null) timerText.color = targetColor;
     }
 

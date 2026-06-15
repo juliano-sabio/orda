@@ -212,7 +212,7 @@ public class FantasmaFogo : MonoBehaviour
                 dirBase.x * cos - dirBase.y * sen,
                 dirBase.x * sen + dirBase.y * cos);
 
-            StartCoroutine(ProjetilFantasma(transform.position, dir));
+            FxRunner.Instance.StartCoroutine(ProjetilFantasma(transform.position, dir));
             yield return new WaitForSeconds(0.08f);
         }
     }
@@ -230,6 +230,7 @@ public class FantasmaFogo : MonoBehaviour
         var colSlow = go.AddComponent<CircleCollider2D>();
         colSlow.isTrigger = true;
         colSlow.radius    = 0.15f;
+        Destroy(go, vidaMaximaProjetilFantasma + 1f);
         projeteisAtivos.Add(go);
 
         for (float t = 0f; t < vidaMaximaProjetilFantasma; t += Time.deltaTime)
@@ -248,7 +249,7 @@ public class FantasmaFogo : MonoBehaviour
                     ps.AplicarQueimaduraPlayer(danoQueimaduraPorTick, intervaloQueimadura, duracaoQueimadura);
                 }
                 projeteisAtivos.Remove(go);
-                StartCoroutine(FadeOut(go, 0.15f));
+                FxRunner.Instance.StartCoroutine(FadeOut(go, 0.15f));
                 yield break;
             }
             yield return null;

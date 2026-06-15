@@ -110,27 +110,27 @@ public class MissaoEspiritoManager : MonoBehaviour
         rt.anchorMin        = new Vector2(0f, 1f);
         rt.anchorMax        = new Vector2(1f, 1f);
         rt.pivot            = new Vector2(0.5f, 1f);
-        rt.sizeDelta        = new Vector2(-1567f, 64f);
+        rt.sizeDelta        = new Vector2(-1700f, 46f);
         rt.anchoredPosition = new Vector2(-753.5f, -120f);
 
         var bg = go.AddComponent<Image>();
-        bg.color = new Color(0.05f, 0.03f, 0.08f, 0.94f);
+        bg.color = new Color(0.05f, 0.03f, 0.08f, 0.75f);
 
-        // borda externa dourada
+        // borda externa dourada (sutil)
         var borda = new GameObject("Borda");
         borda.transform.SetParent(go.transform, false);
         borda.transform.SetAsFirstSibling();
         var rb = borda.AddComponent<RectTransform>();
         rb.anchorMin = Vector2.zero; rb.anchorMax = Vector2.one;
-        rb.offsetMin = new Vector2(-2f, -2f); rb.offsetMax = new Vector2(2f, 2f);
-        borda.AddComponent<Image>().color = new Color(0.80f, 0.65f, 0.25f, 1f);
+        rb.offsetMin = new Vector2(-1f, -1f); rb.offsetMax = new Vector2(1f, 1f);
+        borda.AddComponent<Image>().color = new Color(0.80f, 0.65f, 0.25f, 0.55f);
 
         // brilho pulsante por cima da borda
         var glowBorda = new GameObject("GlowBorda");
         glowBorda.transform.SetParent(go.transform, false);
         var rgb = glowBorda.AddComponent<RectTransform>();
         rgb.anchorMin = Vector2.zero; rgb.anchorMax = Vector2.one;
-        rgb.offsetMin = new Vector2(-4f, -4f); rgb.offsetMax = new Vector2(4f, 4f);
+        rgb.offsetMin = new Vector2(-2f, -2f); rgb.offsetMax = new Vector2(2f, 2f);
         var imgGlowBorda = glowBorda.AddComponent<Image>();
         imgGlowBorda.color = new Color(1f, 0.85f, 0.35f, 0f);
         imgGlowBorda.raycastTarget = false;
@@ -141,8 +141,8 @@ public class MissaoEspiritoManager : MonoBehaviour
         faixa.transform.SetParent(go.transform, false);
         var rFaixa = faixa.AddComponent<RectTransform>();
         rFaixa.anchorMin = new Vector2(0f, 0f); rFaixa.anchorMax = new Vector2(0f, 1f);
-        rFaixa.offsetMin = Vector2.zero; rFaixa.offsetMax = new Vector2(5f, 0f);
-        faixa.AddComponent<Image>().color = new Color(0.30f, 0.85f, 1.00f, 0.9f);
+        rFaixa.offsetMin = Vector2.zero; rFaixa.offsetMax = new Vector2(3f, 0f);
+        faixa.AddComponent<Image>().color = new Color(0.30f, 0.85f, 1.00f, 0.6f);
 
         // ícone do espírito
         var icone = new GameObject("Icone");
@@ -150,38 +150,38 @@ public class MissaoEspiritoManager : MonoBehaviour
         var rIco = icone.AddComponent<RectTransform>();
         rIco.anchorMin = new Vector2(0f, 0f); rIco.anchorMax = new Vector2(0f, 1f);
         rIco.pivot     = new Vector2(0f, 0.5f);
-        rIco.sizeDelta = new Vector2(48f, 0f);
-        rIco.anchoredPosition = new Vector2(12f, 0f);
+        rIco.sizeDelta = new Vector2(36f, 0f);
+        rIco.anchoredPosition = new Vector2(8f, 0f);
         var tIco = icone.AddComponent<TextMeshProUGUI>();
         tIco.text      = "✨";
-        tIco.fontSize  = 30;
+        tIco.fontSize  = 20;
         tIco.alignment = TextAlignmentOptions.Center;
-        tIco.color     = new Color(0.30f, 0.85f, 1.00f);
+        tIco.color     = new Color(0.30f, 0.85f, 1.00f, 0.85f);
 
         var titulo = new GameObject("Titulo");
         titulo.transform.SetParent(go.transform, false);
         var rTit = titulo.AddComponent<RectTransform>();
         rTit.anchorMin = new Vector2(0f, 0.5f); rTit.anchorMax = new Vector2(1f, 1f);
-        rTit.offsetMin = new Vector2(64f, 0f); rTit.offsetMax = new Vector2(-12f, -4f);
+        rTit.offsetMin = new Vector2(48f, 0f); rTit.offsetMax = new Vector2(-10f, -2f);
         var tTit = titulo.AddComponent<TextMeshProUGUI>();
         tTit.text      = Loc.T("mission.complete");
-        tTit.fontSize  = 20;
+        tTit.fontSize  = 15;
         tTit.fontStyle = FontStyles.Bold;
         tTit.alignment = TextAlignmentOptions.MidlineLeft;
-        tTit.color     = new Color(0.95f, 0.80f, 0.40f);
-        tTit.outlineWidth = 0.2f;
-        tTit.outlineColor = new Color32(0, 0, 0, 220);
+        tTit.color     = new Color(0.95f, 0.80f, 0.40f, 0.95f);
+        tTit.outlineWidth = 0.1f;
+        tTit.outlineColor = new Color32(0, 0, 0, 180);
 
         var desc = new GameObject("Desc");
         desc.transform.SetParent(go.transform, false);
         var rDesc = desc.AddComponent<RectTransform>();
         rDesc.anchorMin = new Vector2(0f, 0f); rDesc.anchorMax = new Vector2(1f, 0.5f);
-        rDesc.offsetMin = new Vector2(64f, 4f); rDesc.offsetMax = new Vector2(-12f, 0f);
+        rDesc.offsetMin = new Vector2(48f, 3f); rDesc.offsetMax = new Vector2(-10f, 0f);
         var tDesc = desc.AddComponent<TextMeshProUGUI>();
         tDesc.text      = Loc.T("mission.spirit_reward");
-        tDesc.fontSize  = 13;
+        tDesc.fontSize  = 10;
         tDesc.alignment = TextAlignmentOptions.MidlineLeft;
-        tDesc.color     = new Color(0.75f, 0.90f, 1.00f);
+        tDesc.color     = new Color(0.75f, 0.90f, 1.00f, 0.85f);
 
         cardConcluido = go;
         cardConcluido.SetActive(false);

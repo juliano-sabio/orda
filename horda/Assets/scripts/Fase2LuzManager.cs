@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -6,6 +7,9 @@ using TMPro;
 public class Fase2LuzManager : MonoBehaviour
 {
     const string CENA_FASE2 = "segunda_fase";
+    const float DURACAO_ANIMACAO_ENTRADA = 1.5f;
+
+    public static bool AnimandoEntrada { get; private set; }
 
     [Header("Drop de Espíritos de Luz")]
     public float chanceDropEspirito       = 0.50f;
@@ -37,12 +41,48 @@ public class Fase2LuzManager : MonoBehaviour
     {
         CriarUI();
         InimigoController.OnPreMorte += OnPreMorteHandler;
+        SceneManager.sceneLoaded     += OnSceneLoaded;
+
+        if (SceneManager.GetActiveScene().name == CENA_FASE2)
+            StartCoroutine(AnimarEntrada());
     }
 
     void OnDestroy()
     {
         InimigoController.OnPreMorte -= OnPreMorteHandler;
+        SceneManager.sceneLoaded     -= OnSceneLoaded;
         if (_instance == this) _instance = null;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == CENA_FASE2)
+            StartCoroutine(AnimarEntrada());
+    }
+
+    IEnumerator AnimarEntrada()
+    {
+        AnimandoEntrada = true;
+        if (canvasGO != null) canvasGO.SetActive(true);
+
+        var player    = FindFirstObjectByType<PlayerStats>();
+        var luzPlayer = player != null ? player.GetComponent<PlayerCollectLight>() : null;
+        float targetPct = player != null ? player.GetLuzPercentual() : 1f;
+
+        luzPlayer?.AnimarEntrada(DURACAO_ANIMACAO_ENTRADA);
+
+        if (fillTransform != null) fillTransform.localScale = new Vector3(1f, 0f, 1f);
+
+        float t = 0f;
+        while (t < DURACAO_ANIMACAO_ENTRADA)
+        {
+            t += Time.deltaTime;
+            SincronizarUI(Mathf.Lerp(0f, targetPct, t / DURACAO_ANIMACAO_ENTRADA));
+            yield return null;
+        }
+
+        SincronizarUI(targetPct);
+        AnimandoEntrada = false;
     }
 
     void Update()
@@ -64,7 +104,7 @@ public class Fase2LuzManager : MonoBehaviour
         if (SceneManager.GetActiveScene().name != CENA_FASE2) return;
         if (!EhFantasma(ic)) return;
         if (Random.value <= chanceDropEspirito)
-            EspiritoDeLuz.Criar(ic.transform.position, quantidadeLuzPorEspirito);
+            EspiritoDeLuz.Criar(InimigoController.AjustarPosicaoForaDeObstaculo(ic.transform.position), quantidadeLuzPorEspirito);
     }
 
     public static void SincronizarUI(float pct)

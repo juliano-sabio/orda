@@ -145,7 +145,7 @@ public class InimigoController : MonoBehaviour
             vidaAtual = 0;
             estaMorrendo = true;
 
-            MostrarDanoFatal(dano, isCrit);
+            if (mostrarNumero) MostrarDanoFatal(dano, isCrit);
             Morrer();
         }
     }
@@ -505,6 +505,28 @@ public class InimigoController : MonoBehaviour
         }
     }
 
+    // Se o ponto cair dentro de um obstáculo (camadaObstaculos do FlowField),
+    // procura o ponto livre mais próximo em círculos crescentes ao redor.
+    public static Vector3 AjustarPosicaoForaDeObstaculo(Vector3 pos)
+    {
+        var ff = FlowField.Instance;
+        if (ff == null || !Physics2D.OverlapPoint(pos, ff.camadaObstaculos))
+            return pos;
+
+        const int direcoes = 12;
+        for (float raio = 0.5f; raio <= 4f; raio += 0.5f)
+        {
+            for (int i = 0; i < direcoes; i++)
+            {
+                float ang = i * (360f / direcoes) * Mathf.Deg2Rad;
+                Vector2 candidato = (Vector2)pos + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * raio;
+                if (!Physics2D.OverlapPoint(candidato, ff.camadaObstaculos))
+                    return candidato;
+            }
+        }
+        return pos;
+    }
+
     private void DroparOrbesXP()
     {
         if (xpOrbPrefab == null)
@@ -514,10 +536,11 @@ public class InimigoController : MonoBehaviour
         }
 
         int quantidadeOrbes = UnityEngine.Random.Range(minOrbs, maxOrbs + 1);
+        Vector3 posDrop = AjustarPosicaoForaDeObstaculo(transform.position);
 
         for (int i = 0; i < quantidadeOrbes; i++)
         {
-            GameObject orbe = Instantiate(xpOrbPrefab, transform.position, Quaternion.identity);
+            GameObject orbe = Instantiate(xpOrbPrefab, posDrop, Quaternion.identity);
             XPOrb xpOrb = orbe.GetComponent<XPOrb>();
 
             if (xpOrb != null)
@@ -540,11 +563,13 @@ public class InimigoController : MonoBehaviour
 
     private void DroparPowerup()
     {
+        Vector3 posDrop = AjustarPosicaoForaDeObstaculo(transform.position);
+
         foreach (var drop in drops)
         {
             if (drop.prefab == null) continue;
             if (UnityEngine.Random.value <= drop.chance)
-                Instantiate(drop.prefab, transform.position, Quaternion.identity);
+                Instantiate(drop.prefab, posDrop, Quaternion.identity);
         }
 
         if (dadosInimigo != null && dadosInimigo.dropsPossiveis != null)
@@ -553,7 +578,7 @@ public class InimigoController : MonoBehaviour
             {
                 if (drop.prefab == null) continue;
                 if (UnityEngine.Random.value <= drop.chance)
-                    Instantiate(drop.prefab, transform.position, Quaternion.identity);
+                    Instantiate(drop.prefab, posDrop, Quaternion.identity);
             }
         }
 
@@ -564,7 +589,7 @@ public class InimigoController : MonoBehaviour
             {
                 if (drop.prefab == null) continue;
                 if (UnityEngine.Random.value <= drop.chance)
-                    Instantiate(drop.prefab, transform.position, Quaternion.identity);
+                    Instantiate(drop.prefab, posDrop, Quaternion.identity);
             }
         }
     }

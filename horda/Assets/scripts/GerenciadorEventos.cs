@@ -1121,15 +1121,18 @@ void LimparSlimePercurso()
         ceifadorEvt.quantidade          = 6;
         ceifadorEvt.recompensaDescricao = "+15% de vida recuperada!";
 
-        AdicionarSeAusente(new EventoAleatorio
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "segunda_fase")
         {
-            nome = "Slime Percurso",
-            descricao = "Impeça a slime de atravessar o mapa!",
-            tipo = TipoEvento.SlimePercurso,
-            duracao = 60f,
-            quantidade = 0,
-            recompensaDescricao = "+40% de vida recuperada!"
-        });
+            AdicionarSeAusente(new EventoAleatorio
+            {
+                nome = "Slime Percurso",
+                descricao = "Impeça a slime de atravessar o mapa!",
+                tipo = TipoEvento.SlimePercurso,
+                duracao = 60f,
+                quantidade = 0,
+                recompensaDescricao = "+40% de vida recuperada!"
+            });
+        }
 
         AdicionarSeAusente(new EventoAleatorio
         {

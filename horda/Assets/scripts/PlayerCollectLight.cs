@@ -34,6 +34,33 @@ public class PlayerCollectLight : MonoBehaviour
         luz.pointLightOuterRadius = Mathf.Lerp(0.5f, raioAtivo, pct);
     }
 
+    public void AnimarEntrada(float duracao)
+    {
+        if (ativaCoroutine != null) StopCoroutine(ativaCoroutine);
+        ativaCoroutine = StartCoroutine(EntradaCoroutine(duracao));
+    }
+
+    private IEnumerator EntradaCoroutine(float duracao)
+    {
+        luz.color = corLuz;
+        luz.intensity = 0f;
+        luz.pointLightOuterRadius = 0.3f;
+
+        float t = 0f;
+        while (t < duracao)
+        {
+            t += Time.deltaTime;
+            float p = t / duracao;
+            luz.intensity = Mathf.Lerp(0f, intensidadeAtiva, p);
+            luz.pointLightOuterRadius = Mathf.Lerp(0.3f, raioAtivo, p);
+            yield return null;
+        }
+
+        luz.intensity = intensidadeAtiva;
+        luz.pointLightOuterRadius = raioAtivo;
+        ativaCoroutine = null;
+    }
+
     public void Ativar(float duracao)
     {
         if (ativaCoroutine != null)
