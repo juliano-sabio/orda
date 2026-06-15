@@ -255,3 +255,6 @@ MonoBehaviour:
   duracaoDash: 1.8
   cooldownDash: 1.5
   controllerCeifador: {fileID: -9215180055424504383, guid: ba88303d262f9ad4c80aeba9d102385c, type: 3}
+  danoContato: 60
+  intervaloContato: 0.6
+  raioContato: 0.6
