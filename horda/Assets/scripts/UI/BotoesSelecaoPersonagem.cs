@@ -95,7 +95,7 @@ public class BotoesSelecaoPersonagem : MonoBehaviour
         rTxt.offsetMax = Vector2.zero;
 
         TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text = "JOGAR ▶";
+        txt.text = "JOGAR";
         txt.fontSize = 26f;
         txt.fontStyle = FontStyles.Bold;
         txt.color = Color.white;

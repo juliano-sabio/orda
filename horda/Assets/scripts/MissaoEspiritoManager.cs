@@ -73,7 +73,7 @@ public class MissaoEspiritoManager : MonoBehaviour
         {
             mortes = 0;
             PlayerPrefs.SetInt("MissaoEspiritoPendente", 1);
-            UIManager.Instance?.ShowSkillAcquired("Missão Concluída!", "Colete +1 Espírito de Evolução no painel de missões");
+            UIManager.Instance?.ShowSkillAcquired(Loc.T("mission.complete"), Loc.T("mission.spirit_reward"));
             MostrarCardConcluido();
         }
         PlayerPrefs.SetInt("MissaoEspiritoMortes", mortes);
@@ -164,7 +164,7 @@ public class MissaoEspiritoManager : MonoBehaviour
         rTit.anchorMin = new Vector2(0f, 0.5f); rTit.anchorMax = new Vector2(1f, 1f);
         rTit.offsetMin = new Vector2(64f, 0f); rTit.offsetMax = new Vector2(-12f, -4f);
         var tTit = titulo.AddComponent<TextMeshProUGUI>();
-        tTit.text      = "Missão Concluída!";
+        tTit.text      = Loc.T("mission.complete");
         tTit.fontSize  = 20;
         tTit.fontStyle = FontStyles.Bold;
         tTit.alignment = TextAlignmentOptions.MidlineLeft;
@@ -178,7 +178,7 @@ public class MissaoEspiritoManager : MonoBehaviour
         rDesc.anchorMin = new Vector2(0f, 0f); rDesc.anchorMax = new Vector2(1f, 0.5f);
         rDesc.offsetMin = new Vector2(64f, 4f); rDesc.offsetMax = new Vector2(-12f, 0f);
         var tDesc = desc.AddComponent<TextMeshProUGUI>();
-        tDesc.text      = "+1 Espírito de Evolução disponível para coletar";
+        tDesc.text      = Loc.T("mission.spirit_reward");
         tDesc.fontSize  = 13;
         tDesc.alignment = TextAlignmentOptions.MidlineLeft;
         tDesc.color     = new Color(0.75f, 0.90f, 1.00f);

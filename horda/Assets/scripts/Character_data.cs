@@ -12,6 +12,11 @@ public class CharacterData : ScriptableObject
     public bool unlocked = true;
     public GameObject characterPrefab;
 
+    [Header("Localização (chaves GameStrings)")]
+    public string nameKey       = "";
+    public string descriptionKey = "";
+    public string missaoKey     = "";
+
     [Header("Status Base")]
     [Range(50, 500)]
     public float maxHealth = 100f;
@@ -52,7 +57,7 @@ public class CharacterData : ScriptableObject
     public int unlockLevel = 1;
     public float xpMultiplier = 1.0f;
     [TextArea(1,2)]
-    public string missaoDesbloqueio = "Alcance o nível necessário para desbloquear.";
+    public string missaoDesbloqueio = "";
 
     [Header("Bônus Elementais Ativos")]
     [Range(0f, 50f)] public float elementAttackBonus = 0f;
@@ -115,15 +120,32 @@ public class CharacterData : ScriptableObject
         }
     }
 
+    public string GetDisplayName()
+    {
+        return !string.IsNullOrEmpty(nameKey) ? Loc.T(nameKey) : characterName;
+    }
+
+    public string GetDisplayDescription()
+    {
+        return !string.IsNullOrEmpty(descriptionKey) ? Loc.T(descriptionKey) : description;
+    }
+
+    public string GetDisplayMissao()
+    {
+        if (!string.IsNullOrEmpty(missaoKey)) return Loc.T(missaoKey);
+        if (!string.IsNullOrEmpty(missaoDesbloqueio)) return missaoDesbloqueio;
+        return Loc.T("ui.unlock_mission_default");
+    }
+
     public string GetElementBonusDescription()
     {
-        if (baseElement == PlayerStats.Element.None) return "Sem bônus elemental";
+        if (baseElement == PlayerStats.Element.None) return Loc.T("ui.no_element_bonus");
 
         List<string> bonuses = new List<string>();
-        if (elementAttackBonus > 0) bonuses.Add($"+{elementAttackBonus} ATK");
-        if (elementDefenseBonus > 0) bonuses.Add($"+{elementDefenseBonus} DEF");
-        if (elementSpeedBonus > 0) bonuses.Add($"+{elementSpeedBonus} VEL");
-        if (elementCooldownReduction > 0) bonuses.Add($"-{elementCooldownReduction * 100}% CD");
+        if (elementAttackBonus > 0) bonuses.Add($"+{elementAttackBonus} {Loc.T("stat.atk")}");
+        if (elementDefenseBonus > 0) bonuses.Add($"+{elementDefenseBonus} {Loc.T("stat.def")}");
+        if (elementSpeedBonus > 0) bonuses.Add($"+{elementSpeedBonus} {Loc.T("stat.spd")}");
+        if (elementCooldownReduction > 0) bonuses.Add($"-{elementCooldownReduction * 100}% {Loc.T("ui.cd")}");
 
         return string.Join(" | ", bonuses);
     }

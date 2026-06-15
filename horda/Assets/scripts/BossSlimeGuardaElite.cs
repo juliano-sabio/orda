@@ -677,7 +677,7 @@ public class BossSlimeGuardaElite : MonoBehaviour
         tr.anchorMin = new Vector2(0.05f, 0.35f); tr.anchorMax = new Vector2(0.95f, 0.65f);
         tr.offsetMin = tr.offsetMax = Vector2.zero;
         var txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text = $"+  BOSS APARECEU  +\n<size=60%>{nomeBoss.ToUpper()}</size>";
+        txt.text = $"{Loc.T("boss.appeared")}\n<size=60%>{nomeBoss.ToUpper()}</size>";
         txt.fontSize = 52; txt.fontStyle = FontStyles.Bold;
         txt.alignment = TextAlignmentOptions.Center;
         txt.color = new Color(0.9f, 0.55f, 0.1f, 0f);
@@ -767,7 +767,7 @@ public class BossSlimeGuardaElite : MonoBehaviour
         fr.anchorMin = new Vector2(0.75f, 0.92f); fr.anchorMax = new Vector2(0.99f, 1f);
         fr.offsetMin = fr.offsetMax = Vector2.zero;
         faseText = faseGO.AddComponent<TextMeshProUGUI>();
-        faseText.text = "PATRULHANDO"; faseText.fontSize = 13;
+        faseText.text = Loc.T("boss.patrolling"); faseText.fontSize = 13;
         faseText.color = new Color(0.75f, 0.75f, 0.75f); faseText.alignment = TextAlignmentOptions.MidlineRight;
 
         var barBG = CriarUIGO("HPBarBG", painel.transform);
@@ -817,7 +817,7 @@ public class BossSlimeGuardaElite : MonoBehaviour
         if (hpText != null)
             hpText.text = $"{Mathf.RoundToInt(controller.vidaAtual)} / {Mathf.RoundToInt(controller.vidaMaxima)}";
         if (faseText != null && fase == 1)
-            faseText.text = estado == Estado.Perseguir ? "CAÇANDO" : "PATRULHANDO";
+            faseText.text = estado == Estado.Perseguir ? Loc.T("boss.hunting") : Loc.T("boss.patrolling");
     }
 
     IEnumerator MostrarTextoTela(string mensagem, Color cor, float duracao)

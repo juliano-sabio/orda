@@ -170,7 +170,7 @@ public class MissoesUI : MonoBehaviour
         // Título
         var titulo = CriarTexto(painelContent, "Titulo",
             new Vector2(0.03f, 0.92f), new Vector2(0.88f, 1f),
-            "MISSOES DE DESBLOQUEIO", 17f, FontStyles.Bold, corTitulo);
+            Loc.T("missions.title"), 17f, FontStyles.Bold, corTitulo);
         titulo.alignment = TextAlignmentOptions.Center;
 
         // Botão fechar
@@ -251,7 +251,7 @@ public class MissoesUI : MonoBehaviour
 
     void CriarAbas()
     {
-        string[] nomes = { "PERSONAGENS", "ULTIMATES", "PASSIVAS" };
+        string[] nomes = { Loc.T("missions.tab.chars"), Loc.T("missions.tab.ultimates"), Loc.T("missions.tab.passives") };
         for (int i = 0; i < 3; i++)
         {
             float xMin = 0.02f + i * 0.32f;
@@ -410,8 +410,8 @@ public class MissoesUI : MonoBehaviour
         {
             if (p == null) continue;
             bool desbloqueado = p.unlocked || playerLevel >= p.unlockLevel;
-            string status = desbloqueado ? "CONCLUIDO" : "INCOMPLETA";
-            CriarCard(p.characterName, status, p.missaoDesbloqueio,
+            string status = desbloqueado ? Loc.T("missions.done") : Loc.T("missions.incomplete");
+            CriarCard(p.GetDisplayName(), status, p.GetDisplayMissao(),
                 CharacterData.GetElementColor(p.baseElement), desbloqueado, p.icon);
         }
 
@@ -421,7 +421,7 @@ public class MissoesUI : MonoBehaviour
     void CriarCardMissaoApagada(int espiritos)
     {
         CriarCard("Missão: Espírito de Evolução",
-            $"Espíritos disponíveis: {espiritos}",
+            string.Format(Loc.T("missions.spirits"), espiritos),
             "Derrote 50 inimigos em uma partida para ganhar +1 Espírito de Evolução. Gaste os espíritos na seleção de personagem para evoluir os status.",
             new Color(0.30f, 0.85f, 1.00f), true, spriteEspiritoMissao,
             apagado: true);
@@ -446,9 +446,9 @@ public class MissoesUI : MonoBehaviour
             {
                 if (u == null) continue;
                 bool desbloqueado = u.isUnlocked && playerLevel >= u.requiredLevel;
-                string status = desbloqueado ? "CONCLUIDO" : "INCOMPLETA";
-                CriarCard(u.ultimateName, status,
-                    $"[{p.characterName}]  {u.description}",
+                string status = desbloqueado ? Loc.T("missions.done") : Loc.T("missions.incomplete");
+                CriarCard(u.GetDisplayName(), status,
+                    $"[{p.GetDisplayName()}]  {u.GetDisplayDescription()}",
                     u.GetElementColor(), desbloqueado, u.ultimateIcon);
             }
         }
@@ -467,16 +467,15 @@ public class MissoesUI : MonoBehaviour
                 if (passiva == null) continue;
                 alguma = true;
                 bool desbloqueado = passiva.isUnlocked && playerLevel >= passiva.requiredLevel;
-                string status = desbloqueado ? "CONCLUIDO" : "INCOMPLETA";
+                string status = desbloqueado ? Loc.T("missions.done") : Loc.T("missions.incomplete");
                 string bonus  = passiva.GetBonusDescription();
-                string desc   = string.IsNullOrEmpty(bonus) ? passiva.description : bonus;
-                CriarCard(passiva.passiveName, status, $"[{p.characterName}]  {desc}",
+                string desc   = string.IsNullOrEmpty(bonus) ? passiva.GetDisplayDescription() : bonus;
+                CriarCard(passiva.GetDisplayName(), status, $"[{p.GetDisplayName()}]  {desc}",
                     CharacterData.GetElementColor(p.baseElement), desbloqueado, passiva.passiveIcon);
             }
         }
         if (!alguma)
-            CriarCardInfo("Passivas",
-                "As passivas sao desbloqueadas ao subir de nivel e selecionar cartas de habilidade durante a partida.");
+            CriarCardInfo(Loc.T("missions.tab.passives"), Loc.T("ui.no_passives"));
     }
 
     void CriarCard(string nome, string status, string descricao, Color corAccento, bool desbloqueado, Sprite icone = null, bool brilhando = false, bool apagado = false, System.Action onClick = null)

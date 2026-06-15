@@ -3,13 +3,18 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Ultimate", menuName = "Survivor/Ultimate Data")]
 public class UltimateData : ScriptableObject
 {
-    [Header("Identificação")]
+    [Header("IdentificaÃ§Ã£o")]
     public string ultimateName;
     [TextArea(2, 4)]
     public string description;
     public Sprite ultimateIcon;
 
-    [Header("Configurações Básicas")]
+    [Header("LocalizaÃ§Ã£o (chaves GameStrings)")]
+    public string nameKey        = "";
+    public string descriptionKey = "";
+    public string specialEffectKey = "";
+
+    [Header("Configuraï¿½ï¿½es Bï¿½sicas")]
     [Range(30, 60)]
     public float cooldown = 30f;
 
@@ -30,7 +35,7 @@ public class UltimateData : ScriptableObject
     public SpecificSkillType ultimateType = SpecificSkillType.None;
     public float specialValue = 0f;
 
-    [Header("Configurações de Comportamento")]
+    [Header("Configuraï¿½ï¿½es de Comportamento")]
     public string behaviorScriptName;
     public GameObject visualEffectPrefab;
 
@@ -38,7 +43,23 @@ public class UltimateData : ScriptableObject
     public int requiredLevel = 1;
     public bool isUnlocked = true;
 
-    // Métodos de conveniência
+    // MÃ©todos de conveniÃªncia
+    public string GetDisplayName()
+    {
+        return !string.IsNullOrEmpty(nameKey) ? Loc.T(nameKey) : ultimateName;
+    }
+
+    public string GetDisplayDescription()
+    {
+        return !string.IsNullOrEmpty(descriptionKey) ? Loc.T(descriptionKey) : description;
+    }
+
+    public string GetDisplaySpecialEffect()
+    {
+        if (!string.IsNullOrEmpty(specialEffectKey)) return Loc.T(specialEffectKey);
+        return specialEffect;
+    }
+
     public string GetElementIcon()
     {
         return SkillData.GetElementIcon(element);
@@ -52,18 +73,19 @@ public class UltimateData : ScriptableObject
     public string GetFullDescription()
     {
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        sb.AppendLine(description);
+        sb.AppendLine(GetDisplayDescription());
         sb.AppendLine();
-        sb.AppendLine($"Dano Base: {baseDamage}");
-        sb.AppendLine($"Área de Efeito: {areaOfEffect}m");
-        sb.AppendLine($"Duração: {duration}s");
-        sb.AppendLine($"Recarga: {cooldown}s");
+        sb.AppendLine($"{Loc.T("ui.dmg")}: {baseDamage}");
+        sb.AppendLine($"{Loc.T("ui.area")}: {areaOfEffect}m");
+        sb.AppendLine($"{Loc.T("ui.dur")}: {duration}s");
+        sb.AppendLine($"{Loc.T("ui.cd")}: {cooldown}s");
 
         if (element != PlayerStats.Element.None)
-            sb.AppendLine($"Elemento: {element} {GetElementIcon()}");
+            sb.AppendLine($"{Loc.T("element." + element.ToString().ToLower())} {GetElementIcon()}");
 
-        if (!string.IsNullOrEmpty(specialEffect))
-            sb.AppendLine($"Efeito: {specialEffect}");
+        string eff = GetDisplaySpecialEffect();
+        if (!string.IsNullOrEmpty(eff))
+            sb.AppendLine(eff);
 
         return sb.ToString().Trim();
     }

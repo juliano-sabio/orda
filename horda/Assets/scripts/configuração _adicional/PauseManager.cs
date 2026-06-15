@@ -64,6 +64,7 @@ public class PauseManager : MonoBehaviour
         FindUIReferences();
         InitializePauseMenu();
         LoadSettings();
+        Loc.OnLanguageChanged += OnLanguageChanged;
     }
 
     void Update()
@@ -74,63 +75,118 @@ public class PauseManager : MonoBehaviour
     // 🆕 MÉTODO PARA PROCURAR REFERÊNCIAS AUTOMATICAMENTE
     private void FindUIReferences()
     {
-
         // Procurar painéis (GameObject.Find não encontra objetos inativos,
         // e os painéis começam desativados na cena)
         if (pausePanel == null)
-        {
             pausePanel = FindInactiveObjectByName("PausePanel");
-        }
 
         if (settingsPanel == null)
-        {
             settingsPanel = FindInactiveObjectByName("SettingsPanel");
+
+        // Fallback: instanciar dos prefabs em Resources quando não achar na cena
+        if (pausePanel == null || settingsPanel == null)
+        {
+            Canvas canvas = EncontrarOuCriarPauseCanvas();
+            if (pausePanel == null)
+            {
+                var prefab = Resources.Load<GameObject>("UI/Prefabs/PausePanel");
+                if (prefab != null)
+                {
+                    pausePanel = Instantiate(prefab, canvas.transform);
+                    pausePanel.name = "PausePanel";
+                }
+            }
+            if (settingsPanel == null)
+            {
+                var prefab = Resources.Load<GameObject>("UI/Prefabs/SettingsPanel");
+                if (prefab != null)
+                {
+                    settingsPanel = Instantiate(prefab, canvas.transform);
+                    settingsPanel.name = "SettingsPanel";
+                }
+            }
         }
+
+        // CanvasGroup para fade
+        if (pauseCanvasGroup == null && pausePanel != null)
+            pauseCanvasGroup = pausePanel.GetComponent<CanvasGroup>();
 
         // Procurar botões do pause
         if (resumeButton == null && pausePanel != null)
-        {
             resumeButton = FindButtonInChildren(pausePanel.transform, "ResumeButton");
-        }
 
         if (settingsButton == null && pausePanel != null)
-        {
             settingsButton = FindButtonInChildren(pausePanel.transform, "SettingsButton");
-        }
 
         if (exitButton == null && pausePanel != null)
-        {
             exitButton = FindButtonInChildren(pausePanel.transform, "ExitButton");
-        }
 
         // Procurar elementos das configurações
         if (backButton == null && settingsPanel != null)
-        {
             backButton = FindButtonInChildren(settingsPanel.transform, "BackButton");
-        }
 
         if (settingsBackButton == null && settingsPanel != null)
-        {
             settingsBackButton = FindButtonInChildren(settingsPanel.transform, "BackButton");
-        }
 
         if (musicVolumeSlider == null && settingsPanel != null)
-        {
             musicVolumeSlider = FindSliderInChildren(settingsPanel.transform, "MusicSlider/Slider");
-        }
 
         if (sfxVolumeSlider == null && settingsPanel != null)
-        {
             sfxVolumeSlider = FindSliderInChildren(settingsPanel.transform, "SFXSlider/Slider");
-        }
 
         if (fullscreenToggle == null && settingsPanel != null)
-        {
             fullscreenToggle = FindToggleInChildren(settingsPanel.transform, "FullscreenToggle/Toggle");
-        }
+
+        // Aplicar traduções aos textos dos painéis
+        ApplyTranslations();
 
         // 🆕 VERIFICAR SE AINDA FALTAM REFERÊNCIAS
         CheckMissingReferences();
+    }
+
+    private void ApplyTranslations()
+    {
+        ApplyTextInChildren(pausePanel,    "Title",                  "pause.title");
+        ApplyTextInChildren(pausePanel,    "ResumeButton/Text",      "pause.resume");
+        ApplyTextInChildren(pausePanel,    "SettingsButton/Text",    "pause.settings");
+        ApplyTextInChildren(pausePanel,    "ExitButton/Text",        "pause.exit");
+        ApplyTextInChildren(settingsPanel, "SettingsTitle",                "settings.title");
+        ApplyTextInChildren(settingsPanel, "BackButton/Text",             "settings.back");
+        ApplyTextInChildren(settingsPanel, "MusicSlider/Label",           "settings.music");
+        ApplyTextInChildren(settingsPanel, "SFXSlider/Label",             "settings.sfx");
+        ApplyTextInChildren(settingsPanel, "FullscreenToggle/Label",      "settings.fullscreen");
+        ApplyTextInChildren(settingsPanel, "LanguageRow/Label",           "settings.language");
+    }
+
+    private void ApplyTextInChildren(GameObject root, string path, string key)
+    {
+        if (root == null) return;
+        var t = root.transform.Find(path);
+        if (t == null) return;
+        var tmp = t.GetComponent<TMPro.TextMeshProUGUI>();
+        if (tmp != null) tmp.text = Loc.T(key);
+    }
+
+    private Canvas EncontrarOuCriarPauseCanvas()
+    {
+        // Reutiliza o canvas persistente se já existir
+        var existingGo = FindInactiveObjectByName("PauseCanvas");
+        if (existingGo != null)
+        {
+            var c = existingGo.GetComponent<Canvas>();
+            if (c != null) return c;
+        }
+
+        var go = new GameObject("PauseCanvas");
+        DontDestroyOnLoad(go);
+        var canvas = go.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 100;
+        var scaler = go.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        go.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        return canvas;
     }
 
     private static GameObject FindInactiveObjectByName(string name)
@@ -610,12 +666,12 @@ public class PauseManager : MonoBehaviour
     {
     }
 
+    void OnLanguageChanged(Language _) => ApplyTranslations();
+
     void OnDestroy()
     {
-        // Garantir que o jogo não fique pausado
+        Loc.OnLanguageChanged -= OnLanguageChanged;
         if (isPaused)
-        {
             Time.timeScale = 1f;
-        }
     }
 }

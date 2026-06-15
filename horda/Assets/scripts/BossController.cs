@@ -257,7 +257,7 @@ public class BossController : MonoBehaviour
         // Atualiza indicador de fase
         if (faseText != null)
         {
-            faseText.text  = "FASE 2";
+            faseText.text  = Loc.T("boss.phase2");
             faseText.color = new Color(1f, 0.4f, 0.1f);
         }
 
@@ -1095,7 +1095,7 @@ public class BossController : MonoBehaviour
         tr.anchorMax = new Vector2(0.95f, 0.65f);
         tr.offsetMin = tr.offsetMax = Vector2.zero;
         TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text      = "!  BOSS APARECEU  !\n<size=60%>" + nomeBoss.ToUpper() + "</size>";
+        txt.text      = Loc.T("boss.appeared") + "\n<size=60%>" + nomeBoss.ToUpper() + "</size>";
         txt.fontSize  = 52;
         txt.fontStyle = FontStyles.Bold;
         txt.alignment = TextAlignmentOptions.Center;
@@ -1189,7 +1189,7 @@ public class BossController : MonoBehaviour
         fr.anchorMax = new Vector2(0.99f, 1f);
         fr.offsetMin = fr.offsetMax = Vector2.zero;
         faseText           = faseGO.AddComponent<TextMeshProUGUI>();
-        faseText.text      = "FASE 1";
+        faseText.text      = Loc.T("boss.phase1");
         faseText.fontSize  = 14;
         faseText.color     = new Color(0.75f, 0.75f, 0.75f);
         faseText.alignment = TextAlignmentOptions.MidlineRight;

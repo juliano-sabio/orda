@@ -163,7 +163,7 @@ public class BossGuarda : MonoBehaviour
 
             if (faseText != null)
             {
-                faseText.text  = "FURIOSO";
+                faseText.text  = Loc.T("boss.furious");
                 faseText.color = new Color(0.2f, 1f, 0.4f);
             }
 
@@ -357,7 +357,7 @@ public class BossGuarda : MonoBehaviour
         tr.anchorMax = new Vector2(0.95f, 0.65f);
         tr.offsetMin = tr.offsetMax = Vector2.zero;
         TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text      = $"!  BOSS APARECEU  !\n<size=60%>{nomeBoss.ToUpper()}</size>";
+        txt.text      = $"{Loc.T("boss.appeared")}\n<size=60%>{nomeBoss.ToUpper()}</size>";
         txt.fontSize  = 52;
         txt.fontStyle = FontStyles.Bold;
         txt.alignment = TextAlignmentOptions.Center;
@@ -448,7 +448,7 @@ public class BossGuarda : MonoBehaviour
         fr.anchorMin = new Vector2(0.75f, 0.92f); fr.anchorMax = new Vector2(0.99f, 1f);
         fr.offsetMin = fr.offsetMax = Vector2.zero;
         faseText           = faseGO.AddComponent<TextMeshProUGUI>();
-        faseText.text      = "PATRULHANDO";
+        faseText.text      = Loc.T("boss.patrolling");
         faseText.fontSize  = 13;
         faseText.color     = new Color(0.75f, 0.75f, 0.75f);
         faseText.alignment = TextAlignmentOptions.MidlineRight;
@@ -531,8 +531,8 @@ public class BossGuarda : MonoBehaviour
         {
             faseText.text = estado switch
             {
-                Estado.Patrulha  => "PATRULHANDO",
-                Estado.Aproximar => "CAÇANDO",
+                Estado.Patrulha  => Loc.T("boss.patrolling"),
+                Estado.Aproximar => Loc.T("boss.hunting"),
                 _                => faseText.text
             };
         }

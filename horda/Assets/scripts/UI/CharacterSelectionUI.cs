@@ -96,9 +96,16 @@ public class CharacterSelectionUI : MonoBehaviour
 
     void OnDestroy()
     {
+        Loc.OnLanguageChanged -= OnIdiomaAlterado;
         if (previewPersonagem != null) Destroy(previewPersonagem);
         if (previewCamera    != null) Destroy(previewCamera.gameObject);
         if (previewRT        != null) { previewRT.Release(); Destroy(previewRT); }
+    }
+
+    void OnIdiomaAlterado(Language _)
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 
     void Start()
@@ -150,6 +157,7 @@ public class CharacterSelectionUI : MonoBehaviour
         StartCoroutine(AnimarParticulasPreview());
         StartCoroutine(EntradaPaineis());
         StartCoroutine(EntradaSlots());
+        Loc.OnLanguageChanged += OnIdiomaAlterado;
     }
 
     // ── Canvas ─────────────────────────────────────────────────────────
@@ -238,7 +246,7 @@ public class CharacterSelectionUI : MonoBehaviour
 
         var t = TMP(root, "Titulo",
             new Vector2(0f,0.93f), new Vector2(1f, 1f),
-            "SELECAO DE PERSONAGEM", 26f, FontStyles.Bold, Color.white);
+            Loc.T("char.selection.title"), 26f, FontStyles.Bold, Color.white);
         t.alignment = TextAlignmentOptions.Center;
 
         StartCoroutine(PulsarTitulo(t));
@@ -477,7 +485,7 @@ public class CharacterSelectionUI : MonoBehaviour
             }
         }
         // 8 linhas compactas: ATQ, DEF, Crítico, Vel.Atq, Vida, Vel, Regen, Escudo
-        string[] statLabels = { "ATQ",      "DEF",      "Crítico",  "Vel.Atq",  "Vida",     "Vel",      "Regen",    "Escudo"   };
+        string[] statLabels = { Loc.T("stat.atk"), Loc.T("stat.def"), Loc.T("stat.crit"), Loc.T("stat.atkspd"), Loc.T("stat.hp"), Loc.T("stat.spd"), Loc.T("stat.regen"), Loc.T("stat.shield") };
         StatusCardType[] statTypes = {
             StatusCardType.Attack,
             StatusCardType.Defense,
@@ -580,7 +588,7 @@ public class CharacterSelectionUI : MonoBehaviour
 
         CriarBotao(rodape, "BtnVoltar",
             new Vector2(0f,0.08f), new Vector2(0.18f,0.92f),
-            "< VOLTAR", new Color(0.45f,0.08f,0.08f), () =>
+            "< " + Loc.T("ui.back"), new Color(0.45f,0.08f,0.08f), () =>
             {
                 if (GameSceneManager.Instance != null)
                     GameSceneManager.Instance.GoToMainMenu();
@@ -591,12 +599,12 @@ public class CharacterSelectionUI : MonoBehaviour
         // botão MISSÕES
         CriarBotao(rodape, "BtnMissoes",
             new Vector2(0.38f,0.05f), new Vector2(0.62f,0.95f),
-            "MISSOES", new Color(0.10f,0.50f,0.15f),
+            Loc.T("ui.missions"), new Color(0.10f,0.50f,0.15f),
             () => FindAnyObjectByType<MissoesUI>()?.TogglePainel(), 24f);
 
         CriarBotao(rodape, "BtnJogar",
             new Vector2(0.72f,0.04f), new Vector2(1f,0.96f),
-            "JOGAR >", new Color(0.10f,0.50f,0.15f), () =>
+            Loc.T("ui.play") + " >", new Color(0.10f,0.50f,0.15f), () =>
             {
                 if (GameSceneManager.Instance != null)
                     GameSceneManager.Instance.StartGameplay();
@@ -608,7 +616,7 @@ public class CharacterSelectionUI : MonoBehaviour
     // ── Abas do painel de info ─────────────────────────────────────────
     void CriarAbasInfo(GameObject info)
     {
-        string[] nomes  = { "INFO", "ULTIMATE", "PASSIVAS" };
+        string[] nomes  = { Loc.T("char.tab.info"), Loc.T("char.tab.ultimate"), Loc.T("char.tab.passives") };
         Color corAtiva   = new Color(0.55f, 0.10f, 0.10f);
         Color corInativa = new Color(0.18f, 0.07f, 0.07f);
         float tabPadX = 0.07f;

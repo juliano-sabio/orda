@@ -57,6 +57,17 @@ public class EscolherTerrenoUI : MonoBehaviour
         CriarTitulo(canvasGO);
         CriarCards(canvasGO);
         CriarBotaoVoltar(canvasGO);
+        Loc.OnLanguageChanged += OnIdiomaAlterado;
+    }
+
+    void OnDestroy()
+    {
+        Loc.OnLanguageChanged -= OnIdiomaAlterado;
+    }
+
+    void OnIdiomaAlterado(Language _)
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -133,7 +144,7 @@ public class EscolherTerrenoUI : MonoBehaviour
         r.sizeDelta        = new Vector2(0f, 70f);
 
         TextMeshProUGUI t = go.AddComponent<TextMeshProUGUI>();
-        t.text      = "ESCOLHA O TERRENO";
+        t.text      = Loc.T("terrain.title");
         t.fontSize  = 40f;
         t.fontStyle = FontStyles.Bold;
         t.color     = Color.white;
@@ -249,7 +260,7 @@ public class EscolherTerrenoUI : MonoBehaviour
             fase.desbloqueada ? Color.white : Color.gray);
 
         // Dificuldade
-        string[] difs = { "", "FÁCIL", "NORMAL", "DIFÍCIL", "ESPECIALISTA", "MESTRE" };
+        string[] difs = { "", Loc.T("diff.easy"), Loc.T("diff.normal"), Loc.T("diff.hard"), Loc.T("diff.expert"), Loc.T("diff.master") };
         Color[]  cors = { Color.white,
             new Color(0.2f,0.9f,0.2f), new Color(0.9f,0.8f,0.1f),
             new Color(1f,0.4f,0.1f),   new Color(0.8f,0.1f,0.8f), new Color(1f,0.2f,0.2f) };
@@ -271,13 +282,13 @@ public class EscolherTerrenoUI : MonoBehaviour
         {
             AdicionarTexto(card, "Jogar",
                 new Vector2(0f, 0.02f), new Vector2(1f, 0.22f),
-                "▶  JOGAR", 17f, FontStyles.Bold, fase.cor);
+                Loc.T("ui.play"), 17f, FontStyles.Bold, fase.cor);
         }
         else
         {
             AdicionarTexto(card, "Lock",
                 new Vector2(0f, 0.02f), new Vector2(1f, 0.22f),
-                "🔒 BLOQUEADO", 15f, FontStyles.Bold, new Color(0.6f, 0.2f, 0.2f));
+                "🔒 " + Loc.T("terrain.locked"), 15f, FontStyles.Bold, new Color(0.6f, 0.2f, 0.2f));
         }
     }
 
@@ -318,7 +329,7 @@ public class EscolherTerrenoUI : MonoBehaviour
 
         AdicionarTexto(go, "Txt",
             Vector2.zero, Vector2.one,
-            "< VOLTAR", 18f, FontStyles.Bold, Color.white);
+            "< " + Loc.T("ui.back"), 18f, FontStyles.Bold, Color.white);
     }
 
     // ──────────────────────────────────────────────────────────────

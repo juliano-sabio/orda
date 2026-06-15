@@ -126,12 +126,12 @@ public class TutorialUI : MonoBehaviour
         CriarIndicadores(painelTutorial);
 
         // Botão PULAR
-        btnPular = CriarBotao(painelTutorial, "PULAR",
+        btnPular = CriarBotao(painelTutorial, Loc.T("tutorial.skip"),
             new Vector2(0.05f, 0.04f), new Vector2(0.35f, 0.16f),
             new Color(0.3f, 0.1f, 0.1f), Fechar);
 
         // Botão PRÓXIMO
-        btnProximo = CriarBotao(painelTutorial, "PRÓXIMO  ▶",
+        btnProximo = CriarBotao(painelTutorial, Loc.T("tutorial.next"),
             new Vector2(0.55f, 0.04f), new Vector2(0.95f, 0.16f),
             new Color(0.15f, 0.35f, 0.7f), Avancar);
     }
@@ -184,7 +184,7 @@ public class TutorialUI : MonoBehaviour
         // botão próximo vira "JOGAR" no último passo
         bool ultimo = index == passos.Length - 1;
         var txtBtn  = btnProximo.transform.Find("Txt")?.GetComponent<TextMeshProUGUI>();
-        if (txtBtn != null) txtBtn.text = ultimo ? "JOGAR  ▶" : "PRÓXIMO  ▶";
+        if (txtBtn != null) txtBtn.text = ultimo ? Loc.T("ui.play") : Loc.T("tutorial.next");
         btnProximo.GetComponent<Image>().color = ultimo
             ? new Color(0.1f, 0.5f, 0.15f)
             : new Color(0.15f, 0.35f, 0.7f);

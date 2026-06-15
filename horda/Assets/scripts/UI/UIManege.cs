@@ -226,7 +226,7 @@ public class UIManager : MonoBehaviour
         passivaLabel.fontSize = 6.5f;
         passivaLabel.alignment = TextAlignmentOptions.Center;
         passivaLabel.color = new Color(0.5f, 1f, 0.5f, 1f);
-        passivaLabel.text = "Passiva";
+        passivaLabel.text = Loc.T("ui.passive");
 
         if (dashIcon != null)
             StartCoroutine(AlinhararComDash(slotRect));
@@ -551,7 +551,7 @@ public class UIManager : MonoBehaviour
 
         if (cooldownText != null)
         {
-            cooldownText.text = "VAZIO";
+            cooldownText.text = Loc.T("ui.empty");
             cooldownText.color = Color.gray;
         }
     }
@@ -565,7 +565,7 @@ public class UIManager : MonoBehaviour
         if (skill.healthBonus != 0) sb.AppendLine($"Vida: +{skill.healthBonus}");
         if (skill.speedBonus != 0) sb.AppendLine($"Vel: +{skill.speedBonus}");
 
-        if (sb.Length == 0) sb.AppendLine("Bônus Passivo");
+        if (sb.Length == 0) sb.AppendLine(Loc.T("ui.passive_bonus"));
 
         return sb.ToString();
     }
@@ -585,19 +585,19 @@ public class UIManager : MonoBehaviour
 
         if (skillManagerSkillName != null)
         {
-            skillManagerSkillName.text = "Nenhuma Skill Equipada";
+            skillManagerSkillName.text = Loc.T("ui.no_skill_equipped");
             skillManagerSkillName.color = Color.gray;
         }
 
         if (skillManagerElementText != null)
         {
-            skillManagerElementText.text = "⚪ Selecione uma Skill";
+            skillManagerElementText.text = "⚪ " + Loc.T("ui.select_skill");
             skillManagerElementText.color = Color.gray;
         }
 
         if (equippedSkillStatsText != null)
         {
-            equippedSkillStatsText.text = "Equipe uma skill para ver os status";
+            equippedSkillStatsText.text = Loc.T("ui.equip_skill_hint");
         }
 
         if (equippedSkillHighlight != null)
@@ -1056,7 +1056,7 @@ public class UIManager : MonoBehaviour
 
         if (attackCooldownText1 != null)
         {
-            attackCooldownText1.text  = remaining > 0.05f ? $"{remaining:F1}s" : "PRONTO";
+            attackCooldownText1.text  = remaining > 0.05f ? $"{remaining:F1}s" : Loc.T("ui.ready");
             attackCooldownText1.color = remaining > 0.05f ? Color.red : Color.green;
         }
 
@@ -1071,7 +1071,7 @@ public class UIManager : MonoBehaviour
             if (playerStats.defenseSkills.Count > 0)
             {
                 var skill = playerStats.defenseSkills[0];
-                defenseCooldownText1.text  = skill.IsOnCooldown ? $"{skill.currentCooldown:F1}s" : "PRONTO";
+                defenseCooldownText1.text  = skill.IsOnCooldown ? $"{skill.currentCooldown:F1}s" : Loc.T("ui.ready");
                 defenseCooldownText1.color = skill.IsOnCooldown ? Color.red : Color.green;
             }
         }
@@ -1081,7 +1081,7 @@ public class UIManager : MonoBehaviour
             if (playerStats.defenseSkills.Count > 1)
             {
                 var skill = playerStats.defenseSkills[1];
-                defenseCooldownText2.text  = skill.IsOnCooldown ? $"{skill.currentCooldown:F1}s" : "PRONTO";
+                defenseCooldownText2.text  = skill.IsOnCooldown ? $"{skill.currentCooldown:F1}s" : Loc.T("ui.ready");
                 defenseCooldownText2.color = skill.IsOnCooldown ? Color.red : Color.green;
             }
         }
@@ -1320,11 +1320,11 @@ public class UIManager : MonoBehaviour
             var attackSkills = playerStats.GetAttackSkills();
             if (attackSkills.Count == 0)
             {
-                attackSkillsText.text = "Skills ATQ: Nenhuma";
+                attackSkillsText.text = Loc.T("ui.skills_atq") + ": " + Loc.T("ui.active_bonuses_none");
             }
             else
             {
-                var sb = new System.Text.StringBuilder("Skills ATQ:\n");
+                var sb = new System.Text.StringBuilder(Loc.T("ui.skills_atq") + ":\n");
                 foreach (var skill in attackSkills)
                 {
                     string status = skill.isActive ? "[ON]" : "[OFF]";
@@ -1340,11 +1340,11 @@ public class UIManager : MonoBehaviour
             var defenseSkills = playerStats.GetDefenseSkills();
             if (defenseSkills.Count == 0)
             {
-                defenseSkillsText.text = "Skills DEF: Nenhuma";
+                defenseSkillsText.text = Loc.T("ui.skills_def") + ": " + Loc.T("ui.active_bonuses_none");
             }
             else
             {
-                var sb = new System.Text.StringBuilder("Skills DEF:\n");
+                var sb = new System.Text.StringBuilder(Loc.T("ui.skills_def") + ":\n");
                 foreach (var skill in defenseSkills)
                 {
                     string status = skill.isActive ? "[ON]" : "[OFF]";
@@ -1367,7 +1367,7 @@ public class UIManager : MonoBehaviour
             }
             else
             {
-                ultimateSkillsText.text = "Ultimate: disponivel no Level 5";
+                ultimateSkillsText.text = Loc.T("ui.ultimate_level_req");
             }
         }
     }

@@ -84,7 +84,7 @@ public class TimeBarEffects : MonoBehaviour
     void OnTimeUp()
     {
         if (criticalTimeParticles != null) criticalTimeParticles.Stop();
-        if (statusText != null) statusText.text = "TEMPO ESGOTADO!";
+        if (statusText != null) statusText.text = Loc.T("ui.time_up");
     }
 
     private void OnDestroy()

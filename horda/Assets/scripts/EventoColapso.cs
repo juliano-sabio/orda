@@ -114,7 +114,7 @@ public class EventoColapso : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
 
         textoPerigo            = go.AddComponent<TextMeshProUGUI>();
-        textoPerigo.text = "! PERIGO !";
+        textoPerigo.text = Loc.T("event.danger");
         textoPerigo.fontSize   = 42f;
         textoPerigo.fontStyle  = FontStyles.Bold;
         textoPerigo.alignment  = TextAlignmentOptions.Center;

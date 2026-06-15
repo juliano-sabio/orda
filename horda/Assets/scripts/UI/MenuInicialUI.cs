@@ -25,6 +25,10 @@ public class MenuInicialUI : MonoBehaviour
     float[]         pFase = new float[QTD_P];
     float[]         pVel  = new float[QTD_P];
 
+    // ── Idioma ──────────────────────────────────────────────────────────
+    TextMeshProUGUI _langDisplayTxt;
+    int             _langPreviewIdx;
+
     // ── Refs ────────────────────────────────────────────────────────────
     Sprite     sprBotao;
     Sprite     sprFundoOpcoes;   // bg_dungeon_forja
@@ -51,6 +55,8 @@ public class MenuInicialUI : MonoBehaviour
             es.AddComponent<EventSystem>();
             es.AddComponent<StandaloneInputModule>();
         }
+
+        Loc.OnLanguageChanged += OnIdiomaAlterado;
 
         canvasRef = CriarCanvas();
 
@@ -87,6 +93,28 @@ public class MenuInicialUI : MonoBehaviour
 
         StartCoroutine(AnimarParticulas());
 
+    }
+
+    void OnDestroy()
+    {
+        Loc.OnLanguageChanged -= OnIdiomaAlterado;
+    }
+
+    void OnIdiomaAlterado(Language _)
+    {
+        StopAllCoroutines();
+        if (canvasRef != null) UnityEngine.Object.Destroy(canvasRef);
+        painelOpcoes = null;
+        painelMulti  = null;
+        for (int i = 0; i < 3; i++) { painelAbas[i] = null; botoesAbas[i] = null; }
+        _langDisplayTxt = null;
+
+        canvasRef = CriarCanvas();
+        CriarFundo();
+        CriarParticulas();
+        CriarBotoes();
+        CriarRodape();
+        StartCoroutine(AnimarParticulas());
     }
 
     // ── Canvas ──────────────────────────────────────────────────────────
@@ -211,10 +239,10 @@ public class MenuInicialUI : MonoBehaviour
     // ── Botões ──────────────────────────────────────────────────────────
     void CriarBotoes()
     {
-        CriarBotaoMenu("▶  JOGAR",     0.40f, 0.52f, corAcento,                       20f, () => SceneManager.LoadScene(cenaSelecaoPersonagem), 0);
-        CriarBotaoMenu("MULTIJOGADOR", 0.28f, 0.40f, new Color(0.10f, 0.30f, 0.50f),  16f, AbrirMultijogador, 1);
-        CriarBotaoMenu("OPÇÕES",       0.16f, 0.28f, new Color(0.20f, 0.20f, 0.38f),  16f, AbrirOpcoes, 2);
-        CriarBotaoMenu("SAIR",         0.04f, 0.16f, new Color(0.40f, 0.06f, 0.06f),  16f, Sair, 3);
+        CriarBotaoMenu(Loc.T("ui.start"),       0.40f, 0.52f, corAcento,                      20f, () => SceneManager.LoadScene(cenaSelecaoPersonagem), 0);
+        CriarBotaoMenu(Loc.T("ui.multiplayer"), 0.28f, 0.40f, new Color(0.10f, 0.30f, 0.50f), 16f, AbrirMultijogador, 1);
+        CriarBotaoMenu(Loc.T("ui.options"),     0.16f, 0.28f, new Color(0.20f, 0.20f, 0.38f), 16f, AbrirOpcoes, 2);
+        CriarBotaoMenu(Loc.T("ui.quit"),        0.04f, 0.16f, new Color(0.40f, 0.06f, 0.06f), 16f, Sair, 3);
     }
 
     void CriarBotaoMenu(string label, float yMin, float yMax,
@@ -486,11 +514,11 @@ public class MenuInicialUI : MonoBehaviour
 
         // título
         var t = CriarTexto(painel,"Titulo",new Vector2(0.03f,0.90f),new Vector2(0.95f,1f),
-            "CONFIGURAÇÕES",20f,FontStyles.Bold,dfCorTitulo);
+            Loc.T("settings.title"),20f,FontStyles.Bold,dfCorTitulo);
         t.alignment = TextAlignmentOptions.MidlineLeft;
 
         // ── Abas ──
-        string[] nomes = {"ÁUDIO","VÍDEO","JOGO"};
+        string[] nomes = {Loc.T("ui.audio"), Loc.T("ui.video"), Loc.T("ui.game")};
         for (int i = 0; i < 3; i++)
         {
             int idx = i;
@@ -542,7 +570,7 @@ public class MenuInicialUI : MonoBehaviour
         PopularVideo(painelAbas[1]);
         PopularJogo(painelAbas[2]);
 
-        BotaoSimples(painel,"← VOLTAR",new Vector2(0.08f,0.02f),new Vector2(0.92f,0.12f),
+        BotaoSimples(painel,Loc.T("ui.back"),new Vector2(0.08f,0.02f),new Vector2(0.92f,0.12f),
             new Color(0.10f,0.07f,0.05f),()=>{PlayerPrefs.Save();painelOpcoes.SetActive(false);});
     }
 
@@ -586,22 +614,22 @@ public class MenuInicialUI : MonoBehaviour
 
     void PopularAudio(GameObject p)
     {
-        Rotulo(p,"Volume Geral",0.80f,0.92f);
+        Rotulo(p,Loc.T("settings.music"),0.80f,0.92f);
         var sv=Slider(p,"SV",new Vector2(0.05f,0.68f),new Vector2(0.95f,0.80f),PlayerPrefs.GetFloat("MasterVolume",1f));
         sv.onValueChanged.AddListener(v=>{AudioListener.volume=v;PlayerPrefs.SetFloat("MasterVolume",v);});
 
-        Rotulo(p,"Música",0.56f,0.68f);
+        Rotulo(p,Loc.T("settings.music"),0.56f,0.68f);
         var sm=Slider(p,"SM",new Vector2(0.05f,0.44f),new Vector2(0.95f,0.56f),PlayerPrefs.GetFloat("MusicVolume",0.8f));
         sm.onValueChanged.AddListener(v=>PlayerPrefs.SetFloat("MusicVolume",v));
 
-        Rotulo(p,"Efeitos Sonoros",0.32f,0.44f);
+        Rotulo(p,Loc.T("settings.sfx"),0.32f,0.44f);
         var ss=Slider(p,"SS",new Vector2(0.05f,0.20f),new Vector2(0.95f,0.32f),PlayerPrefs.GetFloat("SFXVolume",1f));
         ss.onValueChanged.AddListener(v=>PlayerPrefs.SetFloat("SFXVolume",v));
     }
 
     void PopularVideo(GameObject p)
     {
-        Rotulo(p,"Tela Cheia",0.80f,0.92f);
+        Rotulo(p,Loc.T("settings.fullscreen"),0.80f,0.92f);
         Toggle(p,"TF",new Vector2(0.70f,0.80f),new Vector2(0.90f,0.92f),
             Screen.fullScreen,v=>{Screen.fullScreen=v;PlayerPrefs.SetInt("Fullscreen",v?1:0);});
 
@@ -627,23 +655,124 @@ public class MenuInicialUI : MonoBehaviour
 
     void PopularJogo(GameObject p)
     {
-        Rotulo(p,"Mostrar Tutorial",0.80f,0.92f);
-        Toggle(p,"TT",new Vector2(0.70f,0.80f),new Vector2(0.90f,0.92f),
+        // Idioma — topo da aba JOGO
+        Rotulo(p, Loc.T("settings.language"), 0.82f, 0.94f);
+        SeletorIdiomaRow(p, new Vector2(0.05f, 0.70f), new Vector2(0.95f, 0.82f));
+
+        Rotulo(p,"Mostrar Tutorial",0.54f,0.66f);
+        Toggle(p,"TT",new Vector2(0.70f,0.54f),new Vector2(0.90f,0.66f),
             PlayerPrefs.GetInt("TutorialVisto",0)==0,
             v=>PlayerPrefs.SetInt("TutorialVisto",v?0:1));
 
-        Rotulo(p,"Mostrar FPS na Tela",0.64f,0.76f);
-        Toggle(p,"TF",new Vector2(0.70f,0.64f),new Vector2(0.90f,0.76f),
+        Rotulo(p,"Mostrar FPS na Tela",0.38f,0.50f);
+        Toggle(p,"TF",new Vector2(0.70f,0.38f),new Vector2(0.90f,0.50f),
             PlayerPrefs.GetInt("ShowFPS",0)==1,
             v=>PlayerPrefs.SetInt("ShowFPS",v?1:0));
 
-        Rotulo(p,"Shake de Câmera",0.48f,0.60f);
-        Toggle(p,"TS",new Vector2(0.70f,0.48f),new Vector2(0.90f,0.60f),
+        Rotulo(p,"Shake de Câmera",0.22f,0.34f);
+        Toggle(p,"TS",new Vector2(0.70f,0.22f),new Vector2(0.90f,0.34f),
             PlayerPrefs.GetInt("CameraShake",1)==1,
             v=>PlayerPrefs.SetInt("CameraShake",v?1:0));
 
-        BotaoSimples(p,"APAGAR PROGRESSO",new Vector2(0.10f,0.04f),new Vector2(0.90f,0.18f),
+        BotaoSimples(p,"APAGAR PROGRESSO",new Vector2(0.10f,0.04f),new Vector2(0.90f,0.16f),
             new Color(0.5f,0.05f,0.05f),()=>{PlayerPrefs.DeleteAll();PlayerPrefs.Save();});
+    }
+
+    void SeletorIdiomaRow(GameObject p, Vector2 mn, Vector2 mx)
+    {
+        _langPreviewIdx = (int)Loc.Current;
+
+        var row = new GameObject("IdiomaRow");
+        row.transform.SetParent(p.transform, false);
+        var r = row.AddComponent<RectTransform>();
+        r.anchorMin = mn; r.anchorMax = mx; r.offsetMin = r.offsetMax = Vector2.zero;
+
+        // < (0-12%)
+        BotaoSetaDF(row, "<", new Vector2(0f, 0f), new Vector2(0.12f, 1f), () => CiclarIdioma(-1));
+
+        // Display (12-72%)
+        var display = new GameObject("Display");
+        display.transform.SetParent(row.transform, false);
+        var rd = display.AddComponent<RectTransform>();
+        rd.anchorMin = new Vector2(0.12f, 0f); rd.anchorMax = new Vector2(0.72f, 1f);
+        rd.offsetMin = rd.offsetMax = Vector2.zero;
+        display.AddComponent<Image>().color = new Color(0.04f, 0.02f, 0.02f, 0.60f);
+        _langDisplayTxt = CriarTexto(display, "T", Vector2.zero, Vector2.one,
+            Loc.NativeName(Loc.Current), 13f, FontStyles.Bold, dfCorTitulo);
+        _langDisplayTxt.alignment = TextAlignmentOptions.Center;
+
+        // > (72-84%)
+        BotaoSetaDF(row, ">", new Vector2(0.72f, 0f), new Vector2(0.84f, 1f), () => CiclarIdioma(+1));
+
+        // OK (84-100%) — verde âmbar para destacar
+        var okGo = new GameObject("BtnOK");
+        okGo.transform.SetParent(row.transform, false);
+        var rokGo = okGo.AddComponent<RectTransform>();
+        rokGo.anchorMin = new Vector2(0.84f, 0f); rokGo.anchorMax = Vector2.one;
+        rokGo.offsetMin = rokGo.offsetMax = Vector2.zero;
+
+        var okBorda = new GameObject("Borda"); okBorda.transform.SetParent(okGo.transform, false);
+        var rOkB = okBorda.AddComponent<RectTransform>(); rOkB.anchorMin=Vector2.zero; rOkB.anchorMax=Vector2.one; rOkB.offsetMin=new Vector2(-1f,-1f); rOkB.offsetMax=new Vector2(1f,1f);
+        okBorda.AddComponent<Image>().color = new Color(0.30f, 0.55f, 0.20f, 0.90f);
+
+        var okCorpo = new GameObject("Corpo"); okCorpo.transform.SetParent(okGo.transform, false);
+        var rOkC = okCorpo.AddComponent<RectTransform>(); rOkC.anchorMin=Vector2.zero; rOkC.anchorMax=Vector2.one; rOkC.offsetMin=rOkC.offsetMax=Vector2.zero;
+        var okImg = okCorpo.AddComponent<Image>(); okImg.color = new Color(0.12f, 0.30f, 0.08f);
+
+        CriarTexto(okGo, "T", Vector2.zero, Vector2.one, "OK", 13f, FontStyles.Bold,
+            new Color(0.70f, 0.95f, 0.55f)).alignment = TextAlignmentOptions.Center;
+
+        var okBtn = okGo.AddComponent<Button>(); okBtn.targetGraphic = okImg;
+        var okColors = ColorBlock.defaultColorBlock;
+        okColors.normalColor      = new Color(0.12f, 0.30f, 0.08f);
+        okColors.highlightedColor = new Color(0.20f, 0.48f, 0.12f);
+        okColors.pressedColor     = new Color(0.06f, 0.16f, 0.04f);
+        okColors.colorMultiplier  = 1f;
+        okBtn.colors = okColors;
+        okBtn.onClick.AddListener(AplicarIdioma);
+    }
+
+    void CiclarIdioma(int dir)
+    {
+        int count = System.Enum.GetValues(typeof(Language)).Length;
+        _langPreviewIdx = (_langPreviewIdx + dir + count) % count;
+        if (_langDisplayTxt != null)
+            _langDisplayTxt.text = Loc.NativeName((Language)_langPreviewIdx);
+    }
+
+    void AplicarIdioma()
+    {
+        Loc.Current = (Language)_langPreviewIdx; // dispara OnIdiomaAlterado -> reload
+    }
+
+    void BotaoSetaDF(GameObject pai, string seta, Vector2 mn, Vector2 mx, System.Action acao)
+    {
+        var go = new GameObject("Btn" + seta);
+        go.transform.SetParent(pai.transform, false);
+        var r = go.AddComponent<RectTransform>();
+        r.anchorMin = mn; r.anchorMax = mx; r.offsetMin = r.offsetMax = Vector2.zero;
+
+        var borda = new GameObject("Borda"); borda.transform.SetParent(go.transform, false);
+        var rb = borda.AddComponent<RectTransform>(); rb.anchorMin = Vector2.zero; rb.anchorMax = Vector2.one;
+        rb.offsetMin = new Vector2(-1f,-1f); rb.offsetMax = new Vector2(1f,1f);
+        borda.AddComponent<Image>().color = new Color(dfCorBorda.r, dfCorBorda.g, dfCorBorda.b, 0.88f);
+
+        var corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
+        var rc = corpo.AddComponent<RectTransform>(); rc.anchorMin = Vector2.zero; rc.anchorMax = Vector2.one;
+        rc.offsetMin = rc.offsetMax = Vector2.zero;
+        var img = corpo.AddComponent<Image>(); img.color = new Color(0.10f, 0.07f, 0.05f);
+
+        CriarTexto(go, "T", Vector2.zero, Vector2.one, seta, 15f, FontStyles.Bold, dfCorTitulo)
+            .alignment = TextAlignmentOptions.Center;
+
+        var btn = go.AddComponent<Button>(); btn.targetGraphic = img;
+        var cs = ColorBlock.defaultColorBlock;
+        cs.normalColor     = new Color(0.10f, 0.07f, 0.05f);
+        cs.highlightedColor = new Color(0.28f, 0.20f, 0.07f);
+        cs.pressedColor    = new Color(0.05f, 0.03f, 0.01f);
+        cs.colorMultiplier = 1f;
+        btn.colors = cs;
+        btn.onClick.AddListener(() => acao());
     }
 
     void BotoesQualidade(GameObject p, Vector2 mn, Vector2 mx)
@@ -749,7 +878,7 @@ public class MenuInicialUI : MonoBehaviour
         rr.offsetMin = rr.offsetMax = Vector2.zero;
 
         var icon = CriarTexto(row, "Ic", Vector2.zero, new Vector2(0.08f, 1f),
-            "▸", 13f, FontStyles.Normal, new Color(dfCorBorda.r, dfCorBorda.g, dfCorBorda.b, 0.85f));
+            ">", 13f, FontStyles.Normal, new Color(dfCorBorda.r, dfCorBorda.g, dfCorBorda.b, 0.85f));
         icon.alignment = TextAlignmentOptions.MidlineLeft;
 
         var lbl = CriarTexto(row, "Lbl", new Vector2(0.08f, 0f), Vector2.one,

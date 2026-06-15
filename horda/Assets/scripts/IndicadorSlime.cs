@@ -49,7 +49,7 @@ public class IndicadorSlime : MonoBehaviour
         arrowRT.sizeDelta        = new Vector2(60, 60);
         arrowRT.anchoredPosition = Vector2.zero;
         var arrowTxt = arrowGO.AddComponent<TextMeshProUGUI>();
-        arrowTxt.text      = "▲";
+        arrowTxt.text      = "^";
         arrowTxt.fontSize  = 48;
         arrowTxt.color     = corSeta;
         arrowTxt.alignment = TextAlignmentOptions.Center;

@@ -375,8 +375,8 @@ public class LobbyUI : MonoBehaviour
             "Visibilidade", 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
             .alignment = TextAlignmentOptions.Left;
 
-        CriarBotaoToggle(pai, "Pública", new Vector2(0.05f, 0.12f), new Vector2(0.47f, 0.21f), true);
-        CriarBotaoToggle(pai, "Privada", new Vector2(0.53f, 0.12f), new Vector2(0.95f, 0.21f), false);
+        CriarBotaoToggle(pai, "public", Loc.T("lobby.public"), new Vector2(0.05f, 0.12f), new Vector2(0.47f, 0.21f), true);
+        CriarBotaoToggle(pai, "private", Loc.T("lobby.private"), new Vector2(0.53f, 0.12f), new Vector2(0.95f, 0.21f), false);
 
         var aviso = TextoPN(pai, "Aviso", new Vector2(0.05f, 0.01f), new Vector2(0.95f, 0.11f),
             "⚠  Networking não implementado — aparência apenas",
@@ -551,7 +551,7 @@ public class LobbyUI : MonoBehaviour
                 (string.IsNullOrEmpty(u.specialEffect) ? "" : $"\n<i>{u.specialEffect}</i>");
         }
         else
-            txtUltimateLobby.text = "Nenhuma ultimate disponível.";
+            txtUltimateLobby.text = Loc.T("ui.no_ultimate");
 
         string bonuses = data.GetElementBonusDescription();
         string passivas = (bonuses != "Sem bônus elemental" ? bonuses + "\n\n" : "") +
@@ -590,7 +590,7 @@ public class LobbyUI : MonoBehaviour
     void CriarRodape()
     {
         // botão VOLTAR
-        CriarBotao("← SAIR DO LOBBY",
+        CriarBotao(Loc.T("lobby.exit"),
             new Vector2(0.04f, 0.02f), new Vector2(0.25f, 0.10f),
             new Color(0.35f, 0.06f, 0.06f),
             () => SceneManager.LoadScene(cenaMenu));
@@ -607,7 +607,7 @@ public class LobbyUI : MonoBehaviour
         bPronto.targetGraphic = imgBtnPronto; bPronto.transition = Selectable.Transition.None;
         bPronto.onClick.AddListener(TogglePronto);
         txtBtnPronto = Texto("T", Vector2.zero, Vector2.one,
-            "✔  PRONTO", 18f, FontStyles.Bold, Color.white);
+            Loc.T("lobby.ready"), 18f, FontStyles.Bold, Color.white);
         txtBtnPronto.transform.SetParent(goPronto.transform, false);
         AjustarAnchors(txtBtnPronto, Vector2.zero, Vector2.one);
         txtBtnPronto.alignment = TextAlignmentOptions.Center;
@@ -626,7 +626,7 @@ public class LobbyUI : MonoBehaviour
         bInic.interactable = souHost;
         bInic.onClick.AddListener(IniciarJogo);
         Texto("T", Vector2.zero, Vector2.one,
-            souHost ? "▶  INICIAR JOGO" : "Aguarde o host",
+            souHost ? "INICIAR JOGO" : "Aguarde o host",
             18f, FontStyles.Bold, Color.white)
             .transform.SetParent(goInic.transform, false);
         goInic.transform.GetChild(0).GetComponent<RectTransform>().anchorMin = Vector2.zero;
@@ -647,12 +647,12 @@ public class LobbyUI : MonoBehaviour
         if (estouPronto)
         {
             imgBtnPronto.color = corCinza;
-            txtBtnPronto.text  = "✖  CANCELAR";
+            txtBtnPronto.text  = Loc.T("lobby.cancel");
         }
         else
         {
             imgBtnPronto.color = corVerde;
-            txtBtnPronto.text  = "✔  PRONTO";
+            txtBtnPronto.text  = Loc.T("lobby.ready");
         }
 
         AtualizarSlots();
@@ -704,18 +704,18 @@ public class LobbyUI : MonoBehaviour
                 if (jogadores[i].isHost && i == 0)
                 { statusTxt = "HOST"; statusCor = new Color(1f,0.8f,0.2f); }
                 else if (jogadores[i].pronto)
-                { statusTxt = "✔ PRONTO"; statusCor = corVerde; }
+                { statusTxt = Loc.T("lobby.ready"); statusCor = corVerde; }
                 else
-                { statusTxt = "Aguardando..."; statusCor = corCinza; }
+                { statusTxt = Loc.T("lobby.waiting"); statusCor = corCinza; }
 
                 slotStatus[i].text  = statusTxt;
                 slotStatus[i].color = statusCor;
             }
             else
             {
-                slotNome[i].text  = "Vaga livre";
+                slotNome[i].text  = Loc.T("lobby.free_slot");
                 slotNome[i].color = new Color(0.40f, 0.28f, 0.28f);
-                slotStatus[i].text  = "Aguardando jogador...";
+                slotStatus[i].text  = Loc.T("lobby.waiting_player");
                 slotStatus[i].color = new Color(0.30f, 0.20f, 0.20f);
             }
         }
@@ -812,10 +812,10 @@ public class LobbyUI : MonoBehaviour
         }
     }
 
-    void CriarBotaoToggle(GameObject pai, string label,
+    void CriarBotaoToggle(GameObject pai, string key, string displayText,
         Vector2 mn, Vector2 mx, bool ativo)
     {
-        var go  = new GameObject($"BtnT_{label}");
+        var go  = new GameObject($"BtnT_{key}");
         go.transform.SetParent(pai.transform, false);
         var r   = go.AddComponent<RectTransform>();
         r.anchorMin = mn; r.anchorMax = mx;
@@ -827,11 +827,11 @@ public class LobbyUI : MonoBehaviour
         btn.onClick.AddListener(() =>
         {
             img.color = corAcento;
-            var irmao = go.transform.parent.Find(label == "Pública" ? "BtnT_Privada" : "BtnT_Pública");
+            var irmao = go.transform.parent.Find(key == "public" ? "BtnT_private" : "BtnT_public");
             if (irmao != null) irmao.GetComponent<Image>().color = new Color(0.18f, 0.10f, 0.10f);
         });
         var t = Texto("T", Vector2.zero, Vector2.one,
-            label, 12f, FontStyles.Bold, Color.white);
+            displayText, 12f, FontStyles.Bold, Color.white);
         t.transform.SetParent(go.transform, false);
         AjustarAnchors(t, Vector2.zero, Vector2.one);
         t.alignment = TextAlignmentOptions.Center;

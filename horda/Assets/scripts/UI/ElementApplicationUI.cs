@@ -115,7 +115,7 @@ public class ElementApplicationUI : MonoBehaviour
             var aviso = CriarTexto(lista, "Aviso", msg, corTexto, 13f);
             Ancora(aviso, Vector2.zero, Vector2.one);
 
-            var btnF = CriarBotao(painelEtapa1, "BtnFechar", "DESCARTAR",
+            var btnF = CriarBotao(painelEtapa1, "BtnFechar", Loc.T("ui.discard"),
                 new Color(0.4f, 0.1f, 0.1f), Fechar);
             Ancora(btnF, new Vector2(0.2f, 0.01f), new Vector2(0.8f, 0.07f));
         }
@@ -175,7 +175,7 @@ public class ElementApplicationUI : MonoBehaviour
         {
             var cap = skill;
             Color corBtn = corElem * 0.5f + corBotao * 0.5f;
-            var btn = CriarBotao(go, "BtnInfundir", "INFUNDIR", corBtn, () => SelecionarSkill(cap));
+            var btn = CriarBotao(go, "BtnInfundir", Loc.T("ui.infuse"), corBtn, () => SelecionarSkill(cap));
             Ancora(btn, new Vector2(0.72f,0.15f), new Vector2(0.97f,0.85f));
         }
     }
@@ -231,7 +231,7 @@ public class ElementApplicationUI : MonoBehaviour
         var aviso = CriarTexto(painelEtapa2, "Aviso", "Esta escolha e permanente.", new Color(0.6f,0.5f,0.5f), 10f);
         Ancora(aviso, new Vector2(0f,0.07f), new Vector2(1f,0.14f), new Vector2(12f,0f), new Vector2(-12f,0f));
 
-        var btnV = CriarBotao(painelEtapa2, "BtnVoltar", "< VOLTAR", new Color(0.18f,0.12f,0.28f), MostrarEtapa1);
+        var btnV = CriarBotao(painelEtapa2, "BtnVoltar", "< " + Loc.T("ui.back"), new Color(0.18f,0.12f,0.28f), MostrarEtapa1);
         Ancora(btnV, new Vector2(0.30f,0.01f), new Vector2(0.70f,0.08f));
     }
 

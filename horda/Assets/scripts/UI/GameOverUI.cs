@@ -259,17 +259,17 @@ public class GameOverUI : MonoBehaviour
         CriarLinha(painelPrincipal.transform, new Vector2(0f, 85f), 420f,
             new Color(0.9f, 0.2f, 0.2f, 0.4f));
 
-        botoes[0] = CriarBotao(painelPrincipal.transform, "RECOMEÇAR",
+        botoes[0] = CriarBotao(painelPrincipal.transform, Loc.T("ui.restart"),
             new Vector2(0f, 20f), new Vector2(380f, 62f),
             new Color(0.1f, 0.38f, 0.16f, 1f), Recomecar);
         botoesGroups[0] = botoes[0].AddComponent<CanvasGroup>();
 
-        botoes[1] = CriarBotao(painelPrincipal.transform, "OPÇÕES",
+        botoes[1] = CriarBotao(painelPrincipal.transform, Loc.T("ui.options"),
             new Vector2(0f, -58f), new Vector2(380f, 62f),
             new Color(0.14f, 0.16f, 0.28f, 1f), AbrirOpcoes);
         botoesGroups[1] = botoes[1].AddComponent<CanvasGroup>();
 
-        botoes[2] = CriarBotao(painelPrincipal.transform, "SAIR",
+        botoes[2] = CriarBotao(painelPrincipal.transform, Loc.T("ui.quit"),
             new Vector2(0f, -136f), new Vector2(380f, 62f),
             new Color(0.38f, 0.08f, 0.08f, 1f), Sair);
         botoesGroups[2] = botoes[2].AddComponent<CanvasGroup>();
@@ -277,14 +277,14 @@ public class GameOverUI : MonoBehaviour
 
     private void CriarConteudoOpcoes()
     {
-        CriarTexto(painelOpcoes.transform, "OPÇÕES",
+        CriarTexto(painelOpcoes.transform, Loc.T("ui.options"),
             new Vector2(0f, 158f), new Vector2(500f, 70f),
             46, new Color(0.8f, 0.82f, 0.95f, 1f));
 
         CriarLinha(painelOpcoes.transform, new Vector2(0f, 108f), 420f,
             new Color(0.8f, 0.82f, 0.95f, 0.3f));
 
-        CriarTexto(painelOpcoes.transform, "Música",
+        CriarTexto(painelOpcoes.transform, Loc.T("settings.music"),
             new Vector2(-115f, 58f), new Vector2(150f, 36f),
             24, new Color(0.78f, 0.78f, 0.9f, 1f));
         float musicVol = PlayerPrefs.GetFloat("MusicVolume", AudioListener.volume);
@@ -294,7 +294,7 @@ public class GameOverUI : MonoBehaviour
                 PlayerPrefs.SetFloat("MusicVolume", val);
             });
 
-        CriarTexto(painelOpcoes.transform, "Efeitos",
+        CriarTexto(painelOpcoes.transform, Loc.T("settings.sfx"),
             new Vector2(-115f, 8f), new Vector2(150f, 36f),
             24, new Color(0.78f, 0.78f, 0.9f, 1f));
         float sfxVol = PlayerPrefs.GetFloat("SFXVolume", 1f);
@@ -303,12 +303,12 @@ public class GameOverUI : MonoBehaviour
 
         bool isFullscreen = PlayerPrefs.GetInt("Fullscreen", Screen.fullScreen ? 1 : 0) == 1;
         GameObject btnFS = CriarBotao(painelOpcoes.transform,
-            "Tela Cheia: " + (isFullscreen ? "ON" : "OFF"),
+            Loc.T("ui.fullscreen") + ": " + (isFullscreen ? "ON" : "OFF"),
             new Vector2(0f, -58f), new Vector2(340f, 52f),
             new Color(0.14f, 0.16f, 0.28f, 1f), ToggleFullscreen);
         labelFullscreen = btnFS.GetComponentInChildren<TextMeshProUGUI>();
 
-        CriarBotao(painelOpcoes.transform, "VOLTAR",
+        CriarBotao(painelOpcoes.transform, Loc.T("ui.back"),
             new Vector2(0f, -150f), new Vector2(280f, 56f),
             new Color(0.22f, 0.12f, 0.3f, 1f), FecharOpcoes);
     }
@@ -499,7 +499,7 @@ public class GameOverUI : MonoBehaviour
         Screen.fullScreen = novoEstado;
         PlayerPrefs.SetInt("Fullscreen", novoEstado ? 1 : 0);
         if (labelFullscreen != null)
-            labelFullscreen.text = "Tela Cheia: " + (novoEstado ? "ON" : "OFF");
+            labelFullscreen.text = Loc.T("ui.fullscreen") + ": " + (novoEstado ? "ON" : "OFF");
     }
 
     private void Recomecar()

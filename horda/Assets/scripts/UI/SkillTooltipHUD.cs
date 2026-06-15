@@ -205,7 +205,7 @@ public class SkillTooltipHUD : MonoBehaviour
             var sb = new System.Text.StringBuilder();
             foreach (var evo in evolucoes)
             {
-                sb.Append($"<color=#{ColorToHex(evo.corDestaque)}><b>▸ {evo.nomeEvolucao}</b></color>");
+                sb.Append($"<color=#{ColorToHex(evo.corDestaque)}><b>- {evo.nomeEvolucao}</b></color>");
                 if (!string.IsNullOrEmpty(evo.descricao))
                     sb.Append($"\n{evo.descricao}");
                 sb.Append("\n");

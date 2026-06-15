@@ -168,9 +168,9 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     {
         if (!data) return;
 
-        characterNameText.text = data.characterName;
-        characterDescriptionText.text = TextUtils.SemAcento(data.description);
-        characterElementText.text = $"{CharacterData.GetElementIcon(data.baseElement)} {data.baseElement}";
+        characterNameText.text = data.GetDisplayName();
+        characterDescriptionText.text = data.GetDisplayDescription();
+        characterElementText.text = $"{CharacterData.GetElementIcon(data.baseElement)} {Loc.T("element." + data.baseElement.ToString().ToLower())}";
         characterElementText.color = CharacterData.GetElementColor(data.baseElement);
         elementBonusText.text = data.GetElementBonusDescription();
 
@@ -195,21 +195,21 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             float velEscudo = data.baseDefenseCooldown * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 7);
             float critico   = 10f * EspiritoUpgradeSystem.GetMultiplicador(charIndex, 2); // base padrão
 
-            if (statusTexts[0] != null) statusTexts[0].text = $"ATQ: {atq:F1}";
-            if (statusTexts[1] != null) statusTexts[1].text = $"DEF: {def:F1}";
-            if (statusTexts[2] != null) statusTexts[2].text = $"Crítico: {critico:F1}%";
-            if (statusTexts[3] != null) statusTexts[3].text = $"Vel.Atq: {velAtq:F1}s";
-            if (statusTexts[4] != null) statusTexts[4].text = $"Vida: {vida:F0} / {vida:F0}";
-            if (statusTexts[5] != null) statusTexts[5].text = $"Vel: {vel:F1}";
-            if (statusTexts[6] != null) statusTexts[6].text = $"Regen: {regen:F1}/s";
-            if (statusTexts[7] != null) statusTexts[7].text = $"Escudo: {velEscudo:F1}s";
+            if (statusTexts[0] != null) statusTexts[0].text = $"{Loc.T("stat.atk")}: {atq:F1}";
+            if (statusTexts[1] != null) statusTexts[1].text = $"{Loc.T("stat.def")}: {def:F1}";
+            if (statusTexts[2] != null) statusTexts[2].text = $"{Loc.T("stat.crit")}: {critico:F1}%";
+            if (statusTexts[3] != null) statusTexts[3].text = $"{Loc.T("stat.atkspd")}: {velAtq:F1}s";
+            if (statusTexts[4] != null) statusTexts[4].text = $"{Loc.T("stat.hp")}: {vida:F0}";
+            if (statusTexts[5] != null) statusTexts[5].text = $"{Loc.T("stat.spd")}: {vel:F1}";
+            if (statusTexts[6] != null) statusTexts[6].text = $"{Loc.T("stat.regen")}: {regen:F1}/s";
+            if (statusTexts[7] != null) statusTexts[7].text = $"{Loc.T("stat.shield")}: {velEscudo:F1}s";
         }
 
         if (espiritosText != null)
             espiritosText.text = $"{EspiritoUpgradeSystem.GetEspiritos(charIndex)}";
 
         for (int i = 0; i < upgradeLevelTexts.Length; i++)
-            if (upgradeLevelTexts[i]) upgradeLevelTexts[i].text = $"Nv. {upgradeLevels[i]}";
+            if (upgradeLevelTexts[i]) upgradeLevelTexts[i].text = $"{Loc.T("ui.level_abbr")} {upgradeLevels[i]}";
 
         AtualizarUltimateInfo(data);
         AtualizarPassivasInfo(data);
@@ -224,19 +224,22 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
         if (u != null)
         {
+            string elemName = u.element != PlayerStats.Element.None
+                ? Loc.T("element." + u.element.ToString().ToLower()) : "";
             string elem = u.element != PlayerStats.Element.None
-                ? $"{u.GetElementIcon()} {u.element}  |  " : "";
+                ? $"{u.GetElementIcon()} {elemName}  |  " : "";
+            string eff = u.GetDisplaySpecialEffect();
             ultimateInfoText.text =
-                $"<b>{u.ultimateName}</b>\n" +
-                $"{elem}CD: {u.cooldown}s\n" +
-                $"DMG: {u.baseDamage}  |  Área: {u.areaOfEffect}m  |  Dur: {u.duration}s\n\n" +
-                u.description +
-                (string.IsNullOrEmpty(u.specialEffect) ? "" : $"\n\n<i>{u.specialEffect}</i>");
+                $"<b>{u.GetDisplayName()}</b>\n" +
+                $"{elem}{Loc.T("ui.cd")}: {u.cooldown}s\n" +
+                $"{Loc.T("ui.dmg")}: {u.baseDamage}  |  {Loc.T("ui.area")}: {u.areaOfEffect}m  |  {Loc.T("ui.dur")}: {u.duration}s\n\n" +
+                u.GetDisplayDescription() +
+                (string.IsNullOrEmpty(eff) ? "" : $"\n\n<i>{eff}</i>");
             ultimateInfoText.color = u.GetElementColor();
         }
         else
         {
-            ultimateInfoText.text  = "Nenhuma ultimate\ndisponível para\neste personagem.";
+            ultimateInfoText.text  = Loc.T("ui.no_ultimate");
             ultimateInfoText.color = new Color(0.5f, 0.5f, 0.5f);
         }
     }
@@ -278,7 +281,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         le.preferredHeight = 40f;
         le.flexibleWidth   = 1f;
         var txt = go.AddComponent<TMPro.TextMeshProUGUI>();
-        txt.text      = "Nenhuma passiva disponível.";
+        txt.text      = Loc.T("ui.no_passives");
         txt.fontSize  = 10f;
         txt.color     = new Color(0.5f, 0.5f, 0.5f);
         txt.alignment = TMPro.TextAlignmentOptions.Center;
@@ -341,7 +344,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rNome.anchorMin = new Vector2(nomeX, 0.70f); rNome.anchorMax = new Vector2(0.97f, 0.97f);
         rNome.offsetMin = rNome.offsetMax = Vector2.zero;
         var txtNome = goNome.AddComponent<TMPro.TextMeshProUGUI>();
-        txtNome.text      = TextUtils.SemAcento(pd.passiveName);
+        txtNome.text      = pd.GetDisplayName();
         txtNome.fontSize  = 12f;
         txtNome.fontStyle = TMPro.FontStyles.Bold;
         txtNome.color     = new Color(0.92f, 0.82f, 0.62f);
@@ -368,7 +371,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rDesc.anchorMin = new Vector2(descX, 0.02f); rDesc.anchorMax = new Vector2(0.97f, 0.46f);
         rDesc.offsetMin = rDesc.offsetMax = Vector2.zero;
         var txtDesc = goDesc.AddComponent<TMPro.TextMeshProUGUI>();
-        txtDesc.text             = pd.description;
+        txtDesc.text             = pd.GetDisplayDescription();
         txtDesc.fontSize         = 9.5f;
         txtDesc.color            = new Color(0.60f, 0.55f, 0.45f);
         txtDesc.alignment        = TMPro.TextAlignmentOptions.TopLeft;
@@ -409,19 +412,19 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     void AtualizarPreview(CharacterData data)
     {
         if (selectionUI != null) selectionUI.AtualizarPreviewPrefab(data);
-        if (characterPreviewName != null) characterPreviewName.text = data.characterName;
+        if (characterPreviewName != null) characterPreviewName.text = data.GetDisplayName();
     }
 
     string GetElementEffectDescription(PlayerStats.Element element)
     {
         switch (element)
         {
-            case PlayerStats.Element.Fire:      return "Inimigos atingidos sofrem queimadura contínua.";
-            case PlayerStats.Element.Ice:       return "Ataques têm chance de lentificar inimigos.";
-            case PlayerStats.Element.Lightning: return "Dano em cadeia entre inimigos próximos.";
-            case PlayerStats.Element.Poison:    return "Aplica veneno com dano por segundo.";
-            case PlayerStats.Element.Earth:     return "Ataques pesados têm chance de atordoar.";
-            case PlayerStats.Element.Wind:      return "Bônus de velocidade e repulsão ao colidir.";
+            case PlayerStats.Element.Fire:      return Loc.T("element.effect.fire");
+            case PlayerStats.Element.Ice:       return Loc.T("element.effect.ice");
+            case PlayerStats.Element.Lightning: return Loc.T("element.effect.lightning");
+            case PlayerStats.Element.Poison:    return Loc.T("element.effect.poison");
+            case PlayerStats.Element.Earth:     return Loc.T("element.effect.earth");
+            case PlayerStats.Element.Wind:      return Loc.T("element.effect.wind");
             default:                            return "";
         }
     }
@@ -473,7 +476,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rTitulo.anchoredPosition = new Vector2(0f, -8f);
         rTitulo.sizeDelta = new Vector2(0f, 24f);
         TextMeshProUGUI txtTitulo = titulo.AddComponent<TextMeshProUGUI>();
-        txtTitulo.text = "ESCOLHA SUA ULTIMATE";
+        txtTitulo.text = Loc.T("ui.choose_ultimate");
         txtTitulo.fontSize = 14f;
         txtTitulo.fontStyle = FontStyles.Bold;
         txtTitulo.color = Color.yellow;
@@ -580,7 +583,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rNome.anchorMin = new Vector2(nomeX, 0.70f); rNome.anchorMax = new Vector2(0.97f, 0.97f);
         rNome.offsetMin = rNome.offsetMax = Vector2.zero;
         var txtNome = goNome.AddComponent<TextMeshProUGUI>();
-        txtNome.text      = TextUtils.SemAcento(ud.ultimateName);
+        txtNome.text      = ud.GetDisplayName();
         txtNome.fontSize  = 12f;
         txtNome.fontStyle = FontStyles.Bold;
         txtNome.color     = corAcento;
@@ -594,7 +597,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rCD.anchorMin = new Vector2(cdX, 0.48f); rCD.anchorMax = new Vector2(0.97f, 0.68f);
         rCD.offsetMin = rCD.offsetMax = Vector2.zero;
         var txtCD = goCD.AddComponent<TextMeshProUGUI>();
-        txtCD.text      = $"CD:{ud.cooldown}s  |  {ud.duration}s";
+        txtCD.text      = $"{Loc.T("ui.cd")}:{ud.cooldown}s  |  {ud.duration}s";
         txtCD.fontSize  = 9f;
         txtCD.color     = new Color(0.75f, 0.70f, 0.55f);
         txtCD.alignment = TextAlignmentOptions.MidlineLeft;
@@ -606,7 +609,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rDesc.anchorMin = new Vector2(descX, 0.02f); rDesc.anchorMax = new Vector2(0.97f, 0.46f);
         rDesc.offsetMin = rDesc.offsetMax = Vector2.zero;
         var txtDesc = goDesc.AddComponent<TextMeshProUGUI>();
-        txtDesc.text             = TextUtils.SemAcento(ud.description);
+        txtDesc.text             = ud.GetDisplayDescription();
         txtDesc.fontSize         = 9.5f;
         txtDesc.color            = new Color(0.60f, 0.55f, 0.45f);
         txtDesc.alignment        = TextAlignmentOptions.TopLeft;
@@ -674,7 +677,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rNome.anchoredPosition = new Vector2(0f, -6f);
         rNome.sizeDelta = new Vector2(-8f, 24f);
         TextMeshProUGUI txtNome = goNome.AddComponent<TextMeshProUGUI>();
-        txtNome.text = TextUtils.SemAcento(ud.ultimateName);
+        txtNome.text = ud.GetDisplayName();
         txtNome.fontSize = 12f;
         txtNome.fontStyle = FontStyles.Bold;
         txtNome.color = ud.GetElementColor();
@@ -690,7 +693,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rElem.anchoredPosition = new Vector2(0f, -34f);
         rElem.sizeDelta = new Vector2(-8f, 18f);
         TextMeshProUGUI txtElem = goElem.AddComponent<TextMeshProUGUI>();
-        txtElem.text = $"{ud.GetElementIcon()} {ud.element}  |  CD: {ud.cooldown}s";
+        txtElem.text = $"{ud.GetElementIcon()} {Loc.T("element." + ud.element.ToString().ToLower())}  |  {Loc.T("ui.cd")}: {ud.cooldown}s";
         txtElem.fontSize = 10f;
         txtElem.color = new Color(0.8f, 0.8f, 0.8f);
         txtElem.alignment = TextAlignmentOptions.Center;
@@ -702,7 +705,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rDesc.anchorMin = new Vector2(0.02f, 0f); rDesc.anchorMax = new Vector2(1f, 1f);
         rDesc.offsetMin = new Vector2(6f, 6f); rDesc.offsetMax = new Vector2(-6f, -58f);
         TextMeshProUGUI txtDesc = goDesc.AddComponent<TextMeshProUGUI>();
-        txtDesc.text = TextUtils.SemAcento(ud.description);
+        txtDesc.text = ud.GetDisplayDescription();
         txtDesc.fontSize = 10f;
         txtDesc.color = new Color(0.75f, 0.75f, 0.75f);
         txtDesc.alignment = TextAlignmentOptions.Center;
