@@ -1098,15 +1098,18 @@ void LimparSlimePercurso()
             recompensaDescricao = "+15% de vida recuperada!"
         }, primeiro: true);
 
-        AdicionarSeAusente(new EventoAleatorio
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "segunda_fase")
         {
-            nome = "Eliminar Slime Colorida",
-            descricao = "Encontre e elimine a slime colorida!",
-            tipo = TipoEvento.EliminarSlimeColorida,
-            duracao = 60f,
-            quantidade = 1,
-            recompensaDescricao = "+15% de vida recuperada!"
-        });
+            AdicionarSeAusente(new EventoAleatorio
+            {
+                nome = "Eliminar Slime Colorida",
+                descricao = "Encontre e elimine a slime colorida!",
+                tipo = TipoEvento.EliminarSlimeColorida,
+                duracao = 60f,
+                quantidade = 1,
+                recompensaDescricao = "+15% de vida recuperada!"
+            });
+        }
 
         // Ceifador: sempre atualiza para garantir valores corretos mesmo se já serializado
         var ceifadorEvt = eventos.Find(e => e.tipo == TipoEvento.Ceifador);
