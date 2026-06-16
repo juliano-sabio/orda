@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d95cf877d4ba9b428c9bfeb03732ab0, type: 3}
+  m_Name: fantasminha
+  m_EditorClassIdentifier: Assembly-CSharp::InimigoData
+  nomeInimigo: Fantasminha
+  prefab: {fileID: 0}
+  icon: {fileID: -6458494001477832625, guid: 429f243b1a3455c4e93be3911c44fba7, type: 3}
+  vidaBase: 90
+  danoBase: 8
+  velocidadeBase: 4
+  tamanho: 7
+  intervaloAtaque: 1
+  xpDrop: 8
+  isBoss: 0
+  chanceSpawn: 1
+  efeitoMorte: {fileID: 0}
+  somMorte: {fileID: 0}
+  corDestaque: {r: 1, g: 1, b: 1, a: 1}
+  comportamento: 3
+  distanciaAtaque: 1.5
+  distanciaPerseguicao: 10
+  temCuraEmArea: 0
+  taxaCuraBase: 10
+  raioCuraBase: 5
+  deixaPocaoVeneno: 0
+  danoVenenoTick: 5
+  raioVeneno: 3
+  duracaoVeneno: 5
+  dropsPossiveis: []

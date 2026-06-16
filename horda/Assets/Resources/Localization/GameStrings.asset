@@ -1103,7 +1103,7 @@ MonoBehaviour:
     - Perisai
   - key: terrain.title
     translations:
-    - ESCOLHA O TERRENO
+    - Seleção
     - CHOOSE TERRAIN
     - ELIGE EL TERRENO
     - "TERRAIN W\xC4HLEN"

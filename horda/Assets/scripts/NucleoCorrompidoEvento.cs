@@ -109,7 +109,7 @@ public class NucleoCorrompidoEvento : MonoBehaviour
         if (prefabsInimigos == null || prefabsInimigos.Length == 0) return;
         var ge = GerenciadorEventos.Instance;
         Vector2 centro = transform.position;
-        int maskObst = 1 << 3;
+        int maskObst = ge != null && ge.camadasObstaculo != 0 ? (int)ge.camadasObstaculo : (1 << 3);
 
         for (int i = 0; i < qtd; i++)
         {

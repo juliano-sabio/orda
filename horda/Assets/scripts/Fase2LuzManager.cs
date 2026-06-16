@@ -97,7 +97,9 @@ public class Fase2LuzManager : MonoBehaviour
         ic.GetComponent<FantasmaFogo>()           != null ||
         ic.GetComponent<FantasmaEletrico>()       != null ||
         ic.GetComponent<FantasmaGelo>()           != null ||
-        ic.GetComponent<FantasmaVenenoAtirador>() != null;
+        ic.GetComponent<FantasmaVenenoAtirador>() != null ||
+        (ic.dadosInimigo != null && ic.dadosInimigo.nomeInimigo == "Fantasminha") ||
+        (ic.dadosInimigo != null && ic.dadosInimigo.nomeInimigo == "Fantasminha02");
 
     void OnPreMorteHandler(InimigoController ic)
     {

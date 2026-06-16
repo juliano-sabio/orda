@@ -20,6 +20,7 @@ public static class GerenciadorEventosAutoSetup
         {
             if (ge == null || ge.eventos == null) continue;
             bool alterou = false;
+            bool segundaFase = ge.gameObject.scene.name == "segunda_fase";
 
             alterou |= Adicionar(ge, new EventoAleatorio
             {
@@ -39,32 +40,36 @@ public static class GerenciadorEventosAutoSetup
                 recompensaDescricao = "+15% de vida recuperada!"
             });
 
-            alterou |= Adicionar(ge, new EventoAleatorio
+            // Eliminar Slime Colorida, Ceifador e Slime Percurso ficam de fora da segunda_fase
+            if (!segundaFase)
             {
-                nome = "Eliminar Slime Colorida",
-                descricao = "Encontre e elimine a slime colorida!",
-                tipo = TipoEvento.EliminarSlimeColorida,
-                duracao = 300f, quantidade = 1,
-                recompensaDescricao = "+15% de vida recuperada!"
-            });
+                alterou |= Adicionar(ge, new EventoAleatorio
+                {
+                    nome = "Eliminar Slime Colorida",
+                    descricao = "Encontre e elimine a slime colorida!",
+                    tipo = TipoEvento.EliminarSlimeColorida,
+                    duracao = 300f, quantidade = 1,
+                    recompensaDescricao = "+15% de vida recuperada!"
+                });
 
-            alterou |= Adicionar(ge, new EventoAleatorio
-            {
-                nome = "Ceifador",
-                descricao = "Sobreviva ao ataque dos ceifadores!",
-                tipo = TipoEvento.Ceifador,
-                duracao = 300f, quantidade = 6,
-                recompensaDescricao = "+15% de vida recuperada!"
-            });
+                alterou |= Adicionar(ge, new EventoAleatorio
+                {
+                    nome = "Ceifador",
+                    descricao = "Sobreviva ao ataque dos ceifadores!",
+                    tipo = TipoEvento.Ceifador,
+                    duracao = 300f, quantidade = 6,
+                    recompensaDescricao = "+15% de vida recuperada!"
+                });
 
-            alterou |= Adicionar(ge, new EventoAleatorio
-            {
-                nome = "Slime Percurso",
-                descricao = "Impeça a slime de atravessar o mapa!",
-                tipo = TipoEvento.SlimePercurso,
-                duracao = 300f, quantidade = 0,
-                recompensaDescricao = "+40% de vida recuperada!"
-            });
+                alterou |= Adicionar(ge, new EventoAleatorio
+                {
+                    nome = "Slime Percurso",
+                    descricao = "Impeça a slime de atravessar o mapa!",
+                    tipo = TipoEvento.SlimePercurso,
+                    duracao = 300f, quantidade = 0,
+                    recompensaDescricao = "+40% de vida recuperada!"
+                });
+            }
 
             alterou |= Adicionar(ge, new EventoAleatorio
             {

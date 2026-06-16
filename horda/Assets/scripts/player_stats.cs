@@ -1997,7 +1997,7 @@ public class PlayerStats : MonoBehaviour
             if (tickTimer >= 1f)
             {
                 tickTimer -= 1f;
-                TakeDamage(15f);
+                TakeDamage(7f);
             }
             yield return null;
         }

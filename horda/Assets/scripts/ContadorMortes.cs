@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class ContadorMortes : MonoBehaviour
 {
     int mortes = 0;
+    public int Mortes => mortes;
     TextMeshProUGUI textoContador;
     GameObject canvasGO;
 
