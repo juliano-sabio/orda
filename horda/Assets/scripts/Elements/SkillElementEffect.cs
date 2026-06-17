@@ -325,6 +325,161 @@ public static class SkillElementEffect
         if (alvo == null) return 1f;
         return alvo.GetComponent<BossController>() != null ? 1.5f : 1f;
     }
+
+    // ── Infusão DEFENSIVA ──────────────────────────────────────────────────────
+    // Chamado pela skill defensiva no gatilho. A característica ativa decide se roda
+    // (se o gatilho dela não bate, ignora). 'atacante' pode ser null (ex.: OnAtivar).
+    public static void AplicarDefensivo(SkillData skill, PlayerStats player,
+        DefensiveTrigger gatilho, GameObject atacante, MonoBehaviour caller)
+    {
+        if (skill == null || player == null || caller == null) return;
+        if (skill.appliedElement == ElementType.None || skill.appliedCharacteristicIndex < 0) return;
+
+        var def = ElementRegistry.Instance?.Get(skill.appliedElement);
+        if (def == null || def.caracteristicasDefensivas == null) return;
+        if (skill.appliedCharacteristicIndex >= def.caracteristicasDefensivas.Length) return;
+
+        var car = def.caracteristicasDefensivas[skill.appliedCharacteristicIndex];
+        if (car == null || car.gatilho != gatilho) return;
+
+        AplicarCaracteristicaDefensiva(car, player, atacante, caller);
+    }
+
+    static void AplicarCaracteristicaDefensiva(DefensiveCharacteristic car,
+        PlayerStats player, GameObject atacante, MonoBehaviour caller)
+    {
+        InimigoController icAtacante = atacante != null
+            ? (atacante.GetComponent<InimigoController>() ?? atacante.GetComponentInParent<InimigoController>())
+            : null;
+        Vector2 pos = player.transform.position;
+
+        switch (car.tipo)
+        {
+            case DefensiveCharacteristicType.AuraIgnea:
+                foreach (var ic in InimigosNoRaio(pos, car.valor1 > 0 ? car.valor1 : 2.5f))
+                    ic.ReceberDano(car.valor2 > 0 ? car.valor2 : 4f, false);
+                break;
+
+            case DefensiveCharacteristicType.RetaliacaoChamas:
+                if (icAtacante != null)
+                    caller.StartCoroutine(AplicarDoT(icAtacante, car.valor1 > 0 ? car.valor1 : 5f,
+                        car.valor2 > 0 ? car.valor2 : 3f, 1f));
+                break;
+
+            case DefensiveCharacteristicType.EsquivaVentosa:
+                RenovarEsquiva(player, car.valor1 > 0 ? car.valor1 : 0.25f, car.valor2 > 0 ? car.valor2 : 6f);
+                break;
+
+            case DefensiveCharacteristicType.SoproRepulsor:
+                foreach (var ic in InimigosNoRaio(pos, car.valor1 > 0 ? car.valor1 : 3f))
+                    caller.StartCoroutine(AplicarKnockbackCoroutine(ic.gameObject, car.valor2 > 0 ? car.valor2 : 12f));
+                break;
+
+            case DefensiveCharacteristicType.PeleDePedra:
+                RenovarPeleDePedra(player, car.valor1 > 0 ? car.valor1 : 0.30f, car.valor2 > 0 ? car.valor2 : 6f);
+                break;
+
+            case DefensiveCharacteristicType.FundacaoFirme:
+                RenovarFundacaoFirme(player, car.valor1 > 0 ? car.valor1 : 6f);
+                break;
+
+            case DefensiveCharacteristicType.MareRestauradora:
+                player.Heal(player.maxHealth * (car.valor1 > 0 ? car.valor1 : 0.20f));
+                break;
+
+            case DefensiveCharacteristicType.FluxoVital:
+                player.Heal(car.valor1 > 0 ? car.valor1 : 3f);
+                break;
+
+            case DefensiveCharacteristicType.DescargaReativa:
+                if (icAtacante != null && Random.value <= (car.valor2 > 0 ? car.valor2 : 0.5f))
+                    caller.StartCoroutine(AplicarCC(icAtacante, car.valor1 > 0 ? car.valor1 : 1f, "stun"));
+                break;
+
+            case DefensiveCharacteristicType.CorrenteReflexiva:
+                if (atacante != null)
+                    AplicarCadeia(atacante, car.valor1 > 0 ? car.valor1 : 4f,
+                        car.valor2 > 0 ? car.valor2 : 10f, 3);
+                break;
+
+            case DefensiveCharacteristicType.ArmaduraGelida:
+                player.shieldPoints += car.valor1 > 0 ? car.valor1 : 40f;
+                break;
+
+            case DefensiveCharacteristicType.ToqueCongelante:
+                if (icAtacante != null)
+                    caller.StartCoroutine(AplicarCC(icAtacante, car.valor1 > 0 ? car.valor1 : 2f, "gelo"));
+                break;
+
+            case DefensiveCharacteristicType.Espinhos:
+                if (icAtacante != null)
+                    icAtacante.ReceberDano(car.valor1 > 0 ? car.valor1 : 12f, false);
+                break;
+
+            case DefensiveCharacteristicType.RaizesProtetoras:
+                foreach (var ic in InimigosNoRaio(pos, car.valor1 > 0 ? car.valor1 : 3f))
+                    caller.StartCoroutine(AplicarCC(ic, car.valor2 > 0 ? car.valor2 : 2.5f, "raiz"));
+                break;
+
+            case DefensiveCharacteristicType.DrenagemSombria:
+                AplicarCura(car.valor1 > 0 ? car.valor1 : 8f);
+                break;
+
+            case DefensiveCharacteristicType.MantoAmaldicoado:
+                foreach (var ic in InimigosNoRaio(pos, car.valor1 > 0 ? car.valor1 : 3.5f))
+                    caller.StartCoroutine(AplicarMaldicao(ic, 1.5f, car.valor2 > 0 ? car.valor2 : 0.3f));
+                break;
+
+            case DefensiveCharacteristicType.BencaoSagrada:
+                player.Heal(car.valor1 > 0 ? car.valor1 : 15f);
+                player.shieldPoints += car.valor2 > 0 ? car.valor2 : 25f;
+                break;
+
+            case DefensiveCharacteristicType.LuzOfuscante:
+                foreach (var ic in InimigosNoRaio(pos, car.valor1 > 0 ? car.valor1 : 3f))
+                    caller.StartCoroutine(AplicarCegamento(ic, 1.5f, car.valor2 > 0 ? car.valor2 : 0.4f));
+                break;
+
+            case DefensiveCharacteristicType.CaosDefensivo:
+                int r = Random.Range(0, 3);
+                if (r == 0) player.Heal(player.maxHealth * 0.15f);
+                else if (r == 1) player.shieldPoints += 35f;
+                else RenovarPeleDePedra(player, 0.4f, 4f);
+                break;
+
+            case DefensiveCharacteristicType.PragaReativa:
+                AplicarCadeia(player.gameObject, car.valor1 > 0 ? car.valor1 : 3.5f,
+                    car.valor2 > 0 ? car.valor2 : 8f, 3);
+                break;
+        }
+    }
+
+    static System.Collections.Generic.List<InimigoController> InimigosNoRaio(Vector2 centro, float raio)
+    {
+        var lista = new System.Collections.Generic.List<InimigoController>();
+        foreach (var col in Physics2D.OverlapCircleAll(centro, raio))
+        {
+            var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
+            if (ic != null && !ic.estaMorrendo && !lista.Contains(ic)) lista.Add(ic);
+        }
+        return lista;
+    }
+
+    static void RenovarPeleDePedra(PlayerStats p, float red, float dur)
+    {
+        var m = p.GetComponent<PeleDePedraMarker>() ?? p.gameObject.AddComponent<PeleDePedraMarker>();
+        m.Renovar(dur, red);
+    }
+    static void RenovarFundacaoFirme(PlayerStats p, float dur)
+    {
+        var m = p.GetComponent<FundacaoFirmeMarker>() ?? p.gameObject.AddComponent<FundacaoFirmeMarker>();
+        m.Renovar(dur);
+    }
+    static void RenovarEsquiva(PlayerStats p, float ch, float dur)
+    {
+        var m = p.GetComponent<EsquivaMarker>() ?? p.gameObject.AddComponent<EsquivaMarker>();
+        m.Renovar(dur, ch);
+    }
 }
 
 public class FragilidadeMarker : MonoBehaviour { public float multiplicador = 1.25f; }
