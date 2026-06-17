@@ -106,6 +106,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss
 
     void Start()
     {
+        danoProjetil *= EnemyScaling.BossDanoMult(); // escala de dano do boss no spawn
         rb.gravityScale           = 0f;
         rb.mass                   = 1000f;
         rb.linearDamping          = 20f;

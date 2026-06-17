@@ -93,6 +93,7 @@ public class BossPrincesa : MonoBehaviour, IBoss
     void Start()
     {
         controller     = GetComponent<InimigoController>();
+        danoProjetil  *= EnemyScaling.BossDanoMult(); // escala de dano do boss no spawn
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator       = GetComponent<Animator>();
         rb             = GetComponent<Rigidbody2D>();
