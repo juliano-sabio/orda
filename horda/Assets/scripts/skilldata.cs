@@ -390,34 +390,22 @@ public class SkillData : ScriptableObject
     {
         if (playerStats == null) return;
 
-        // Aplica bônus básicos
-        playerStats.maxHealth += healthBonus;
-        playerStats.health += healthBonus;
-        playerStats.attack += attackBonus;
-        playerStats.defense += defenseBonus;
-        playerStats.speed += speedBonus;
-
-        // Aplica as novas propriedades
-        playerStats.healthRegenRate += healthRegenBonus;
-        playerStats.attackActivationInterval *= attackSpeedMultiplier;
-
+        // 🚫 Skills NÃO modificam mais os status base do player.
+        // Os valores da skill (attackBonus, healthBonus, defenseBonus, speedBonus,
+        // healthRegenBonus, attackSpeedMultiplier) são o "valor próprio da skill",
+        // consumido pelos behaviors dela; o status do player é somado por cima no
+        // momento do efeito (ex.: dano = attackBonus + player.attack × fração;
+        // escudo da BarreiraEnergia = healthBonus → shieldPoints).
+        // Antes, estes bônus eram somados ao player aqui, inflando os status base —
+        // foi exatamente esse comportamento que invertemos.
     }
 
     public void RemoveFromPlayer(PlayerStats playerStats)
     {
         if (playerStats == null) return;
 
-        // Remove bônus básicos
-        playerStats.maxHealth -= healthBonus;
-        playerStats.health = Mathf.Min(playerStats.health, playerStats.maxHealth);
-        playerStats.attack -= attackBonus;
-        playerStats.defense -= defenseBonus;
-        playerStats.speed -= speedBonus;
-
-        // Remove as novas propriedades
-        playerStats.healthRegenRate -= healthRegenBonus;
-        playerStats.attackActivationInterval /= attackSpeedMultiplier;
-
+        // Nada a remover: ApplyToPlayer não altera mais os status base do player.
+        // (Ver comentário em ApplyToPlayer.)
     }
 
     // 🆕 MÉTODOS ESPECÍFICOS PARA PROJÉTEIS
