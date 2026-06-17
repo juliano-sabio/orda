@@ -62,8 +62,16 @@ public class EnemySpawnerCompleto : MonoBehaviour
     public int   limiteInicialInimigos = 15;
     [Tooltip("Limite de inimigos simultâneos no pico de dificuldade")]
     public int   limiteFinalInimigos   = 60;
-    [Tooltip("Tempo (segundos) para atingir dificuldade máxima")]
+    [Tooltip("(legado — não usado pela escala de spawn linear abaixo)")]
     public float tempoParaEscalar   = 360f;
+
+    [Header("ESCALADA DE SPAWN (linear, sem teto de tempo)")]
+    [Tooltip("Quanto o intervalo de spawn CAI por minuto (s/min). Tem piso em intervaloMinimo.")]
+    public float intervaloQuedaPorMinuto = 0.25f;
+    [Tooltip("Quantos inimigos a MAIS no limite simultâneo por minuto (cresce sem teto de tempo).")]
+    public float limiteCrescePorMinuto = 4f;
+    [Tooltip("Teto ABSOLUTO de inimigos simultâneos (segurança de performance).")]
+    public int limiteMaximoAbsoluto = 120;
 
     // Variáveis de controle interno
     private float tempoTotalJogo = 0f;
@@ -97,18 +105,21 @@ public class EnemySpawnerCompleto : MonoBehaviour
     float GetIntervaloAtual()
     {
         if (!escalarDificuldade) return usarWaves && waves.Count > 0 ? waves[waveAtualIndex].intervaloSpaw : 2f;
-        float t = Mathf.Clamp01(tempoTotalJogo / tempoParaEscalar);
-        float curva = t * t * (3f - 2f * t); // smoothstep
-        float base_ = usarWaves && waves.Count > 0 ? waves[waveAtualIndex].intervaloSpaw : intervaloInicial;
-        return Mathf.Lerp(Mathf.Min(base_, intervaloInicial), intervaloMinimo, curva);
+        // Cai linearmente por minuto; piso em intervaloMinimo (não dá pra spawnar infinitamente rápido).
+        float min = tempoTotalJogo / 60f;
+        float baseInicio = usarWaves && waves.Count > 0
+            ? Mathf.Min(waves[waveAtualIndex].intervaloSpaw, intervaloInicial)
+            : intervaloInicial;
+        return Mathf.Max(intervaloMinimo, baseInicio - intervaloQuedaPorMinuto * min);
     }
 
     int GetLimiteAtual()
     {
         if (!escalarDificuldade) return limiteInimigosGlobal;
-        float t = Mathf.Clamp01(tempoTotalJogo / tempoParaEscalar);
-        float curva = t * t * (3f - 2f * t);
-        return Mathf.RoundToInt(Mathf.Lerp(limiteInicialInimigos, limiteFinalInimigos, curva));
+        // Cresce linearmente por minuto, SEM teto de tempo — só o teto absoluto de segurança.
+        float min = tempoTotalJogo / 60f;
+        int limite = limiteInicialInimigos + Mathf.RoundToInt(limiteCrescePorMinuto * min);
+        return Mathf.Min(limite, limiteMaximoAbsoluto);
     }
 
     void GerenciarSistemaWaves()
