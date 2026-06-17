@@ -83,6 +83,7 @@ public class EspelhoMagicoSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator CorotinaEspelho()
     {
         ativoAgora = true;
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
         var visual = CriarVisual();
         StartCoroutine(MostrarTexto("ESPELHO MÁGICO!", new Color(0.6f, 0.9f, 1f)));
         yield return new WaitForSeconds(duracao);

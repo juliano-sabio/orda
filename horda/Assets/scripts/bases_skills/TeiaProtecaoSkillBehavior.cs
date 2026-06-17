@@ -80,6 +80,7 @@ public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator CorotinaAtiva()
     {
         ativa = true;
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
         float duracaoReal = duracao * (SkillEvolutionManager.Tem(SkillEvolutionType.TeiaPermanente) ? 2f : 1f);
         var visual = CriarVisual();
         visualAtivo = visual;

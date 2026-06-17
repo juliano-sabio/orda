@@ -117,6 +117,7 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
     {
         ativo = true;
         regenAcum = 0f;
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
 
         // Anéis extras aparecem quando ativo
         if (lrHaloExtra1 != null) lrHaloExtra1.gameObject.SetActive(true);

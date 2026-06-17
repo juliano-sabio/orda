@@ -52,6 +52,7 @@ public class InstintoSobrevivenciaSkillBehavior : SkillBehavior, ISkillComRecarg
     {
         ativo        = true;
         timerRecarga = recarga;
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
 
         // Aplica buffs
         playerStats.defense         += bonusDefesa;

@@ -65,6 +65,7 @@ public class BarreiraEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga
         float mult = SkillEvolutionManager.Tem(SkillEvolutionType.BarreiraFortificada) ? 1.80f : 1f;
         playerStats.shieldPoints = escudoMax * mult;
         emRecarga = false; timerRecarga = 0f;
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
     }
 
     void Update()

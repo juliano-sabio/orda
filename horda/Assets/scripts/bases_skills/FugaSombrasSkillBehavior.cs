@@ -47,6 +47,7 @@ public class FugaSombrasSkillBehavior : SkillBehavior, ISkillComRecarga
 
     IEnumerator Teleportar()
     {
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
         Vector2 origem = playerStats.transform.position;
         StartCoroutine(EfeitoSaida(origem));
         playerStats.invulneravel = true;

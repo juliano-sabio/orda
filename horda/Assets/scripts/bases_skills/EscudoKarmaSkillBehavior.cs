@@ -52,6 +52,7 @@ public class EscudoKarmaSkillBehavior : SkillBehavior, ISkillComRecarga
             ? Mathf.Max(maxHits, 5) : maxHits;
         ativo = true;
         AtualizarOrbs();
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
     }
 
     void Update()

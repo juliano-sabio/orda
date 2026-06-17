@@ -156,6 +156,7 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator CorotinaAtiva()
     {
         ativo = true;
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
         yield return new WaitForSeconds(duracao);
         ativo = false;
     }

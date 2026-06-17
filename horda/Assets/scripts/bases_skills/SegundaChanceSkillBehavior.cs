@@ -46,6 +46,7 @@ public class SegundaChanceSkillBehavior : SkillBehavior, ISkillComRecarga
         if (emRecarga || playerStats == null) return false;
         emRecarga    = true;
         timerRecarga = recarga;
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
 
         float pct = porcentagemCura;
         if (SkillEvolutionManager.Tem(SkillEvolutionType.SegundaChanceCura))
