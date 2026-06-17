@@ -241,31 +241,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscolherTerrenoUI
   fases:
-  - nome: Primeira Fase
+  - nome: Reino Slime
     nomeCena: primeira_fase
     descricao: "O in\xEDcio da jornada."
     dificuldade: 1
     desbloqueada: 1
     cor: {r: 0.2, g: 0.7, b: 0.2, a: 1}
-  - nome: Segunda Fase
+  - nome: Abismo
     nomeCena: segunda_fase
     descricao: Os inimigos ficam mais fortes.
     dificuldade: 2
     desbloqueada: 1
     cor: {r: 0.8, g: 0.7, b: 0.1, a: 1}
-  - nome: Terceira Fase
+  - nome: Caverna Aranha
     nomeCena: terceira_fase
     descricao: Apenas os mais corajosos.
     dificuldade: 3
-    desbloqueada: 1
+    desbloqueada: 0
     cor: {r: 0.8, g: 0.3, b: 0.1, a: 1}
   - nome: "Modo Sobreviv\xEAncia"
     nomeCena: Modo_sobrevivencia
     descricao: "Sobreviva o m\xE1ximo que puder!"
     dificuldade: 5
-    desbloqueada: 1
+    desbloqueada: 0
     cor: {r: 0.6, g: 0.1, b: 0.8, a: 1}
   cenaVoltar: CharacterSelection
+  spriteCard: {fileID: 0}
+  spriteFundoImg: {fileID: 0}
+  spriteBotao: {fileID: 0}
 --- !u!4 &1551422446
 Transform:
   m_ObjectHideFlags: 0

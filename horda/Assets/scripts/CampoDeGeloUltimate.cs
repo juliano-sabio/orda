@@ -184,10 +184,20 @@ public class CampoDeGeloUltimate : MonoBehaviour
         var movi2 = go.GetComponent<movi_inimigo_manter_distancia>();
         var boss1 = go.GetComponent<BossController>();
         var boss2 = go.GetComponent<BossPrincesa>();
+        var fant1 = go.GetComponent<FantasmaFogo>();
+        var fant2 = go.GetComponent<FantasmaGelo>();
+        var fant3 = go.GetComponent<FantasmaVeneno>();
+        var fant4 = go.GetComponent<FantasmaVenenoAtirador>();
+        var fant5 = go.GetComponent<FantasmaEletrico>();
         if (movi1 != null) { movi1.enabled = false; scripts.Add(movi1); }
         if (movi2 != null) { movi2.enabled = false; scripts.Add(movi2); }
         if (boss1 != null) { boss1.enabled = false; scripts.Add(boss1); }
         if (boss2 != null) { boss2.enabled = false; scripts.Add(boss2); }
+        if (fant1 != null) { fant1.enabled = false; scripts.Add(fant1); }
+        if (fant2 != null) { fant2.enabled = false; scripts.Add(fant2); }
+        if (fant3 != null) { fant3.enabled = false; scripts.Add(fant3); }
+        if (fant4 != null) { fant4.enabled = false; scripts.Add(fant4); }
+        if (fant5 != null) { fant5.enabled = false; scripts.Add(fant5); }
 
         var rb = go.GetComponent<Rigidbody2D>();
         if (rb != null) rb.linearVelocity = Vector2.zero;

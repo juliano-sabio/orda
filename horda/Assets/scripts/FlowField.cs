@@ -169,16 +169,18 @@ public class FlowField : MonoBehaviour
             }
     }
 
-    // Retorna a direção ótima para o player a partir de uma posição do mundo
+    // Retorna a direção ótima para o alvo atual (AlvoOverride ou player) a partir de uma posição do mundo
     public Vector2 ObterDirecao(Vector2 pos)
     {
+        Transform alvoFallback = AlvoOverride != null ? AlvoOverride : playerTransform;
+
         Vector2Int c = MundoParaCelula(pos);
         if (!Valido(c))
-            return playerTransform != null ? ((Vector2)playerTransform.position - pos).normalized : Vector2.zero;
+            return alvoFallback != null ? ((Vector2)alvoFallback.position - pos).normalized : Vector2.zero;
 
         Vector2 v = vetores[c.x, c.y];
-        if (v.sqrMagnitude < 0.01f && playerTransform != null)
-            return ((Vector2)playerTransform.position - pos).normalized;
+        if (v.sqrMagnitude < 0.01f && alvoFallback != null)
+            return ((Vector2)alvoFallback.position - pos).normalized;
         return v;
     }
 

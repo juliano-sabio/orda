@@ -22,6 +22,8 @@ public enum TipoEvento
     TempestadeEletrica,
     Portal,
     NucleoCorrompido,
+    CristaisEnergia,
+    VorticeDevorador,
 }
 
 [Serializable]
@@ -44,6 +46,8 @@ public class GerenciadorEventos : MonoBehaviour
     [Header("Sincronização com TimerManager")]
     public float delayInicial     = 30f;
     public float intervaloEventos = 60f;
+    [Tooltip("Tempo (segundos) até o evento Cristal ser revelado na segunda fase")]
+    public float delayCristal     = 15f;
 
     [Header("Debug")]
     [Tooltip("-1 = aleatório | 0..N = força índice da lista eventos")]
@@ -95,12 +99,23 @@ public class GerenciadorEventos : MonoBehaviour
     public float        portalIntervaloSpawn = 5f;
     public GameObject[] prefabsInimigosPortal;
 
+    [Header("Cristais de Energia")]
+    public float        cristalVidaBase      = 500f;
+    public Color        cristalCor           = new Color(0.25f, 0.75f, 1f);
+
     [Header("Núcleo Corrompido")]
     public float        nucleoVidaBase       = 2000f;
     public float        nucleoIntervaloSpawn = 4f;
     public GameObject[] prefabsInimigosNucleo;
 
-    [Header("Tempestade Elétrica")]
+    [Header("Vórtice Devorador")]
+    public float vorticeRaioAtracao    = 6f;
+    public float vorticeRaioDevorar    = 0.6f;
+    public float vorticeForcaAtracao   = 5f;
+    public float vorticeDanoPorSegundo = 12f;
+    public Color vorticeCor            = new Color(0.5f, 0.1f, 0.7f);
+
+[Header("Tempestade Elétrica")]
     public float tempestadeDanoJogador = 50f;
     public float tempestadeDanoInimigo = 50f;
     public float tempestadeRaioImpacto = 3f;
@@ -126,6 +141,9 @@ public class GerenciadorEventos : MonoBehaviour
     private TempestadeEletricaEvento tempestadeAtiva;
     private PortalEvento             portalAtivo;
     private NucleoCorrompidoEvento   nucleoAtivo;
+    private VorticeDevoradorEvento   vorticeAtivo;
+    private readonly List<CristalEvento>   cristaisAtivos      = new List<CristalEvento>();
+    private readonly List<IndicadorSlime>  indicadoresCristais = new List<IndicadorSlime>();
     private readonly List<GameObject> inimigosPercurso = new List<GameObject>();
     private Coroutine corSpawnPercurso;
     private Tilemap[] tilemapsObstaculo;
@@ -206,7 +224,9 @@ public class GerenciadorEventos : MonoBehaviour
         if (painelEvento == null)
             CriarPainelUI();
 
-        proximoEventoTempo = delayInicial;
+        proximoEventoTempo = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "segunda_fase"
+            ? delayCristal
+            : delayInicial;
 
         PopularEventosPadrao();
 
@@ -229,7 +249,7 @@ public class GerenciadorEventos : MonoBehaviour
     void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
     {
         ReconectarReferencias();
-        proximoEventoTempo = delayInicial;
+        proximoEventoTempo = scene.name == "segunda_fase" ? delayCristal : delayInicial;
         eventoAtivo = false;
     }
 
@@ -297,6 +317,34 @@ public class GerenciadorEventos : MonoBehaviour
         if (eventoAtual.tipo == TipoEvento.Ceifador && portalAtivo != null && timerContagem <= 180f)
             portalAtivo.MostrarIndicadores();
 
+        if (eventoAtual.tipo == TipoEvento.Portal && portalAtivo != null)
+            portalAtivo.MostrarIndicadores();
+
+        if (eventoAtual.tipo == TipoEvento.CristaisEnergia
+            && indicadoresCristais.Count == 0
+            && (eventoAtual.duracao - timerContagem) >= 8f)
+        {
+            foreach (var cristal in cristaisAtivos)
+            {
+                if (cristal == null || cristal.EstaDestruido) continue;
+                var goInd = new GameObject("IndicadorCristal");
+                var ind   = goInd.AddComponent<IndicadorSlime>();
+                ind.alvo    = cristal.transform;
+                ind.corSeta = cristalCor;
+                ind.label   = "Cristal!";
+                indicadoresCristais.Add(ind);
+            }
+        }
+
+        if (eventoAtual.tipo == TipoEvento.VorticeDevorador && vorticeAtivo != null && indicadorSlime == null)
+        {
+            var go = new GameObject("IndicadorVortice");
+            indicadorSlime = go.AddComponent<IndicadorSlime>();
+            indicadorSlime.alvo    = vorticeAtivo.transform;
+            indicadorSlime.corSeta = vorticeCor;
+            indicadorSlime.label   = "Vórtice!";
+        }
+
         if (eventoAtual.tipo == TipoEvento.NucleoCorrompido && nucleoAtivo != null && indicadorSlime == null)
         {
             var go = new GameObject("IndicadorNucleo");
@@ -305,7 +353,7 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.corSeta = new Color(0.1f, 1f, 0.5f);
         }
 
-        if (timerContagem <= 0f)
+if (timerContagem <= 0f)
             EncerrarEvento(eventoAtual.tipo == TipoEvento.Sobreviver
                         || eventoAtual.tipo == TipoEvento.TempestadeEletrica
                         || eventoAtual.tipo == TipoEvento.NucleoCorrompido
@@ -337,7 +385,10 @@ void TentarIniciarEvento()
         idx = debugForcarEvento;
     else if (!primeiroEventoDisparado)
     {
-        idx = eventos.FindIndex(e => e.tipo == TipoEvento.Colapso);
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "segunda_fase")
+            idx = eventos.FindIndex(e => e.tipo == TipoEvento.VorticeDevorador);
+        else
+            idx = eventos.FindIndex(e => e.tipo == TipoEvento.Colapso);
         if (idx < 0) idx = 0;
     }
     else
@@ -388,6 +439,19 @@ void TentarIniciarEvento()
     {
         IniciarNucleo();
     }
+    else if (eventoAtual.tipo == TipoEvento.CristaisEnergia)
+    {
+        SpawnCristais();
+    }
+    else if (eventoAtual.tipo == TipoEvento.VorticeDevorador)
+    {
+        IniciarVortice();
+    }
+    else if (eventoAtual.tipo == TipoEvento.Portal)
+    {
+        IniciarPortal();
+    }
+
 }
 
     void EncerrarEvento(bool sucesso)
@@ -414,6 +478,8 @@ void TentarIniciarEvento()
         LimparTempestadeEletrica();
         LimparPortal();
         LimparNucleo();
+        LimparCristais();
+        LimparVortice();
 
         if (sucesso && playerStats != null)
         {
@@ -512,11 +578,14 @@ void TentarIniciarEvento()
         if (eventoAtual == null || eventoAtual.quantidade <= 0) return false;
         return eventoAtual.tipo == TipoEvento.MatarInimigos
             || eventoAtual.tipo == TipoEvento.Colapso
+            || eventoAtual.tipo == TipoEvento.CristaisEnergia
+            || eventoAtual.tipo == TipoEvento.VorticeDevorador
             || eventoAtual.tipo == TipoEvento.ZonaEliminacao
             || eventoAtual.tipo == TipoEvento.ColetarXP
             || eventoAtual.tipo == TipoEvento.UsarUltimate
             || eventoAtual.tipo == TipoEvento.ColetarEspirito
-            || eventoAtual.tipo == TipoEvento.Ceifador;
+            || eventoAtual.tipo == TipoEvento.Ceifador
+            || eventoAtual.tipo == TipoEvento.Portal;
     }
 
     void AtualizarUI()
@@ -1098,38 +1167,47 @@ void LimparSlimePercurso()
             recompensaDescricao = "+15% de vida recuperada!"
         }, primeiro: true);
 
-        AdicionarSeAusente(new EventoAleatorio
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "segunda_fase")
         {
-            nome = "Eliminar Slime Colorida",
-            descricao = "Encontre e elimine a slime colorida!",
-            tipo = TipoEvento.EliminarSlimeColorida,
-            duracao = 60f,
-            quantidade = 1,
-            recompensaDescricao = "+15% de vida recuperada!"
-        });
-
-        // Ceifador: sempre atualiza para garantir valores corretos mesmo se já serializado
-        var ceifadorEvt = eventos.Find(e => e.tipo == TipoEvento.Ceifador);
-        if (ceifadorEvt == null)
-        {
-            ceifadorEvt = new EventoAleatorio { tipo = TipoEvento.Ceifador };
-            eventos.Add(ceifadorEvt);
+            AdicionarSeAusente(new EventoAleatorio
+            {
+                nome = "Eliminar Slime Colorida",
+                descricao = "Encontre e elimine a slime colorida!",
+                tipo = TipoEvento.EliminarSlimeColorida,
+                duracao = 60f,
+                quantidade = 1,
+                recompensaDescricao = "+15% de vida recuperada!"
+            });
         }
-        ceifadorEvt.nome                = "Ceifador";
-        ceifadorEvt.descricao           = "Feche os 6 portais espalhados pelo mapa! Os ceifadores vao te impedir!";
-        ceifadorEvt.duracao             = 300f;
-        ceifadorEvt.quantidade          = 6;
-        ceifadorEvt.recompensaDescricao = "+15% de vida recuperada!";
 
-        AdicionarSeAusente(new EventoAleatorio
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "segunda_fase")
         {
-            nome = "Slime Percurso",
-            descricao = "Impeça a slime de atravessar o mapa!",
-            tipo = TipoEvento.SlimePercurso,
-            duracao = 60f,
-            quantidade = 0,
-            recompensaDescricao = "+40% de vida recuperada!"
-        });
+            // Ceifador: sempre atualiza para garantir valores corretos mesmo se já serializado
+            var ceifadorEvt = eventos.Find(e => e.tipo == TipoEvento.Ceifador);
+            if (ceifadorEvt == null)
+            {
+                ceifadorEvt = new EventoAleatorio { tipo = TipoEvento.Ceifador };
+                eventos.Add(ceifadorEvt);
+            }
+            ceifadorEvt.nome                = "Ceifador";
+            ceifadorEvt.descricao           = "Feche os 6 portais espalhados pelo mapa! Os ceifadores vao te impedir!";
+            ceifadorEvt.duracao             = 300f;
+            ceifadorEvt.quantidade          = 6;
+            ceifadorEvt.recompensaDescricao = "+15% de vida recuperada!";
+        }
+
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "segunda_fase")
+        {
+            AdicionarSeAusente(new EventoAleatorio
+            {
+                nome = "Slime Percurso",
+                descricao = "Impeça a slime de atravessar o mapa!",
+                tipo = TipoEvento.SlimePercurso,
+                duracao = 60f,
+                quantidade = 0,
+                recompensaDescricao = "+40% de vida recuperada!"
+            });
+        }
 
         AdicionarSeAusente(new EventoAleatorio
         {
@@ -1150,6 +1228,32 @@ void LimparSlimePercurso()
             quantidade = 0,
             recompensaDescricao = "+20% de vida recuperada!"
         });
+
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "segunda_fase")
+        {
+            AdicionarSeAusente(new EventoAleatorio
+            {
+                nome                = "Cristal",
+                descricao           = "Destrua os 3 cristais espalhados pelo mapa antes do tempo acabar!",
+                tipo                = TipoEvento.CristaisEnergia,
+                duracao             = 300f,
+                quantidade          = 3,
+                recompensaDescricao = "+20% de vida recuperada!"
+            });
+        }
+
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "segunda_fase")
+        {
+            AdicionarSeAusente(new EventoAleatorio
+            {
+                nome                = "Vórtice Devorador",
+                descricao           = "Um vortice apareceu no mapa! Atraia os inimigos para dentro dele antes do tempo acabar!",
+                tipo                = TipoEvento.VorticeDevorador,
+                duracao             = 75f,
+                quantidade          = 20,
+                recompensaDescricao = "+15% de vida recuperada!"
+            });
+        }
 
         AdicionarSeAusente(new EventoAleatorio
         {
@@ -1332,9 +1436,23 @@ void LimparSlimePercurso()
         else mapa = CalcularBoundsMapa();
 
         Vector2 centro = (Vector2)mapa.center;
+        int maskObstNucleo = camadasObstaculo != 0 ? (int)camadasObstaculo : (1 << 3);
+
+        // Procura posição válida perto do centro do mapa
+        Vector2 posNucleo = centro;
+        bool achouNucleo = false;
+        for (int t = 0; t < 300 && !achouNucleo; t++)
+        {
+            Vector2 candidato = t == 0 ? centro
+                : centro + UnityEngine.Random.insideUnitCircle * (1f + t * 0.3f);
+            if (!PosicaoValida(candidato)) continue;
+            if (Physics2D.OverlapCircle(candidato, 1.5f, maskObstNucleo)) continue;
+            posNucleo = candidato;
+            achouNucleo = true;
+        }
 
         var go = new GameObject("NucleoCorrompido");
-        go.transform.position = new Vector3(centro.x, centro.y, 0f);
+        go.transform.position = new Vector3(posNucleo.x, posNucleo.y, 0f);
         nucleoAtivo = go.AddComponent<NucleoCorrompidoEvento>();
 
         nucleoAtivo.OnDestruido += () => { if (eventoAtivo) EncerrarEvento(false); };
@@ -1344,7 +1462,7 @@ void LimparSlimePercurso()
             : prefabsInimigosPortal;
 
         nucleoAtivo.Iniciar(nucleoVidaBase, prefabs, nucleoIntervaloSpawn);
-        Debug.Log($"[Nucleo] Nucleo criado em {centro}");
+        Debug.Log($"[Nucleo] Nucleo criado em {posNucleo} (centro={centro}, valido={achouNucleo})");
     }
 
     void LimparNucleo()
@@ -1357,6 +1475,169 @@ void LimparSlimePercurso()
     }
 
     // ──────────────────────────────────────────────────────────
+    // Vórtice Devorador
+
+    void IniciarVortice()
+    {
+        Bounds mapa;
+        if (terrenoBase != null)
+        {
+            terrenoBase.CompressBounds();
+            mapa = new Bounds();
+            mapa.SetMinMax(
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max));
+        }
+        else mapa = CalcularBoundsMapa();
+
+        Vector2 posPlayer = playerStats != null ? (Vector2)playerStats.transform.position : Vector2.zero;
+        int maskObst = camadasObstaculo != 0 ? (int)camadasObstaculo : (1 << 3);
+
+        Vector2 centro = (Vector2)mapa.center;
+        bool encontrou = false;
+        for (int t = 0; t < 150; t++)
+        {
+            Vector2 c = new Vector2(
+                UnityEngine.Random.Range(mapa.min.x + vorticeRaioAtracao, mapa.max.x - vorticeRaioAtracao),
+                UnityEngine.Random.Range(mapa.min.y + vorticeRaioAtracao, mapa.max.y - vorticeRaioAtracao));
+
+            if (!PosicaoValida(c)) continue;
+            if (Vector2.Distance(c, posPlayer) < vorticeRaioAtracao + 5f) continue;
+            if (Physics2D.OverlapCircle(c, vorticeRaioDevorar + 0.5f, maskObst)) continue;
+
+            centro = c;
+            encontrou = true;
+            break;
+        }
+        if (!encontrou) centro = (Vector2)mapa.center;
+
+        var go = new GameObject("VorticeDevorador");
+        go.transform.position = new Vector3(centro.x, centro.y, 0f);
+        vorticeAtivo = go.AddComponent<VorticeDevoradorEvento>();
+        vorticeAtivo.raioAtracao    = vorticeRaioAtracao;
+        vorticeAtivo.raioDevorar    = vorticeRaioDevorar;
+        vorticeAtivo.forcaAtracao   = vorticeForcaAtracao;
+        vorticeAtivo.danoPorSegundo = vorticeDanoPorSegundo;
+        vorticeAtivo.corVortice     = vorticeCor;
+
+        vorticeAtivo.OnProgresso += (atual, total) => { progresso = atual; };
+        vorticeAtivo.OnConcluido += () => { if (eventoAtivo) EncerrarEvento(true); };
+
+        vorticeAtivo.Iniciar(eventoAtual.quantidade);
+
+        Debug.Log($"[VorticeDevorador] Vórtice criado em {centro} (válido={encontrou}), meta={eventoAtual.quantidade}");
+    }
+
+    void LimparVortice()
+    {
+        if (vorticeAtivo != null)
+        {
+            Destroy(vorticeAtivo.gameObject);
+            vorticeAtivo = null;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Cristais de Energia
+
+    void SpawnCristais()
+    {
+        cristaisAtivos.Clear();
+        progresso = 0;
+
+        Bounds mapa;
+        if (terrenoBase != null)
+        {
+            terrenoBase.CompressBounds();
+            mapa = new Bounds();
+            mapa.SetMinMax(
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.min),
+                terrenoBase.transform.TransformPoint(terrenoBase.localBounds.max));
+        }
+        else mapa = CalcularBoundsMapa();
+
+        Vector2 posPlayer = playerStats != null ? (Vector2)playerStats.transform.position : Vector2.zero;
+        int maskObst      = camadasObstaculo != 0 ? (int)camadasObstaculo : (1 << 3);
+        const int QTD     = 3;
+        const float DIST_MINIMA_ENTRE = 15f;
+
+        var posSelecionadas = new List<Vector2>();
+
+        for (int i = 0; i < QTD; i++)
+        {
+            bool achou = false;
+            for (int t = 0; t < 200; t++)
+            {
+                Vector2 c = new Vector2(
+                    UnityEngine.Random.Range(mapa.min.x + 5f, mapa.max.x - 5f),
+                    UnityEngine.Random.Range(mapa.min.y + 5f, mapa.max.y - 5f));
+
+                if (!PosicaoValida(c)) continue;
+                if (Physics2D.OverlapCircle(c, 1.5f, maskObst)) continue;
+                if (Vector2.Distance(c, posPlayer) < 8f) continue;
+
+                bool longe = true;
+                foreach (var p in posSelecionadas)
+                    if (Vector2.Distance(c, p) < DIST_MINIMA_ENTRE) { longe = false; break; }
+                if (!longe) continue;
+
+                posSelecionadas.Add(c);
+                CriarCristal(c);
+                achou = true;
+                break;
+            }
+
+            if (!achou && posSelecionadas.Count > 0)
+            {
+                // Fallback: aceita posição próxima de outra já colocada
+                for (int t = 0; t < 100; t++)
+                {
+                    Vector2 c = new Vector2(
+                        UnityEngine.Random.Range(mapa.min.x + 5f, mapa.max.x - 5f),
+                        UnityEngine.Random.Range(mapa.min.y + 5f, mapa.max.y - 5f));
+                    if (!PosicaoValida(c)) continue;
+                    if (Physics2D.OverlapCircle(c, 1.5f, maskObst)) continue;
+                    posSelecionadas.Add(c);
+                    CriarCristal(c);
+                    break;
+                }
+            }
+        }
+
+        Debug.Log($"[CristaisEnergia] {cristaisAtivos.Count} cristais spawnados.");
+    }
+
+    void CriarCristal(Vector2 pos)
+    {
+        var go     = new GameObject("CristalEnergia");
+        go.transform.position = new Vector3(pos.x, pos.y, 0f);
+        var cristal = go.AddComponent<CristalEvento>();
+        cristal.vidaBase = cristalVidaBase;
+        cristal.corBase  = cristalCor;
+
+        cristal.OnDestruido += () =>
+        {
+            progresso++;
+            if (progresso >= eventoAtual.quantidade && eventoAtivo)
+                EncerrarEvento(true);
+        };
+
+        cristal.Iniciar();
+        cristaisAtivos.Add(cristal);
+    }
+
+    void LimparCristais()
+    {
+        foreach (var c in cristaisAtivos)
+            if (c != null && !c.EstaDestruido) Destroy(c.gameObject);
+        cristaisAtivos.Clear();
+
+        foreach (var ind in indicadoresCristais)
+            if (ind != null) Destroy(ind.gameObject);
+        indicadoresCristais.Clear();
+    }
+
+// ──────────────────────────────────────────────────────────
     // Evolução de skill como recompensa de evento
 
     [Header("Evolução de Skills")]

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class EnemySpawnerCompleto : MonoBehaviour
 {
@@ -28,6 +29,10 @@ public class EnemySpawnerCompleto : MonoBehaviour
     [Header("CAMADAS PROIBIDAS (IMPORTANTE)")]
     [Tooltip("Selecione aqui as Layers que os inimigos NÃO podem nascer em cima (ex: Obstacles, Paredes, Agua)")]
     public LayerMask camadasBloqueadas;
+
+    [Header("TERRENO VÁLIDO")]
+    [Tooltip("Tilemaps onde os inimigos PODEM nascer (ex: terreno, ponte). Se vazio, a checagem de terreno é ignorada.")]
+    public Tilemap[] tilemapsTerreno;
     [Tooltip("O tamanho do 'corpo' do inimigo para checar se cabe no lugar")]
     public float raioDeChecagem = 0.5f;
     [Tooltip("Quantas vezes ele tenta sortear um lugar novo se o primeiro estiver ocupado")]
@@ -161,12 +166,27 @@ public class EnemySpawnerCompleto : MonoBehaviour
             Vector2 ponto   = (Vector2)player.position + direcao * distancia;
 
             if (!ForaDaCamera(ponto)) continue;
+            if (!EstaSobreTerreno(ponto)) continue;
 
             if (Physics2D.OverlapCircle(ponto, raioDeChecagem, camadasBloqueadas) == null)
                 return ponto;
         }
 
         return null;
+    }
+
+    // Garante que o ponto caia sobre um tile real (terreno/ponte), nunca no vazio fora do mapa
+    bool EstaSobreTerreno(Vector2 ponto)
+    {
+        if (tilemapsTerreno == null || tilemapsTerreno.Length == 0) return true;
+
+        foreach (var tm in tilemapsTerreno)
+        {
+            if (tm == null) continue;
+            Vector3Int celula = tm.WorldToCell(ponto);
+            if (tm.HasTile(celula)) return true;
+        }
+        return false;
     }
 
     TipoInimigo EscolherInimigoPorPeso()

@@ -197,7 +197,7 @@ public class FantasmaVeneno : MonoBehaviour
                 dirBase.x * cos - dirBase.y * sen,
                 dirBase.x * sen + dirBase.y * cos);
 
-            StartCoroutine(ProjetilFantasma(transform.position, dir));
+            FxRunner.Instance.StartCoroutine(ProjetilFantasma(transform.position, dir));
             yield return new WaitForSeconds(0.12f);
         }
     }
@@ -223,6 +223,7 @@ public class FantasmaVeneno : MonoBehaviour
         var colSlow = go.AddComponent<CircleCollider2D>();
         colSlow.isTrigger = true;
         colSlow.radius    = 0.15f;
+        Destroy(go, vidaMaximaProjetilFantasma + 1f);
         projeteisAtivos.Add(go);
 
         for (float t = 0f; t < vidaMaximaProjetilFantasma; t += Time.deltaTime)

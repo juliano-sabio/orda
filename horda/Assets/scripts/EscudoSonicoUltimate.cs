@@ -143,6 +143,18 @@ public class EscudoSonicoUltimate : MonoBehaviour
                 if (dir == Vector2.zero) dir = Random.insideUnitCircle.normalized;
                 rb.linearVelocity = dir * (rb.linearVelocity.magnitude + forcaEmpurrao * 0.5f);
             }
+            else
+            {
+                // Projéteis-fantasma se movem via transform.position (sem Rigidbody2D),
+                // então o empurrão é aplicado como deslocamento instantâneo.
+                var slowProjetil = col.GetComponent<ProjetilFantasmaSlow>();
+                if (slowProjetil != null)
+                {
+                    Vector2 dir = ((Vector2)col.transform.position - centro).normalized;
+                    if (dir == Vector2.zero) dir = Random.insideUnitCircle.normalized;
+                    col.transform.position += (Vector3)(dir * forcaEmpurrao * 0.25f);
+                }
+            }
         }
 
         // Visual da onda sônica

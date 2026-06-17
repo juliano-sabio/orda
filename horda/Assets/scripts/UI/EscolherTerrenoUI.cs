@@ -22,10 +22,10 @@ public class EscolherTerrenoUI : MonoBehaviour
     [Header("Fases disponíveis")]
     public ConfigFase[] fases = new ConfigFase[]
     {
-        new ConfigFase { nome = "Primeira Fase",      nomeKey = "terrain.p1.name", nomeCena = "primeira_fase",      descricao = "O início da jornada.",          descricaoKey = "terrain.p1.desc", dificuldade = 1, desbloqueada = true, cor = new Color(0.15f, 0.6f, 0.15f) },
-        new ConfigFase { nome = "Segunda Fase",       nomeKey = "terrain.p2.name", nomeCena = "segunda_fase",       descricao = "Os inimigos ficam mais fortes.", descricaoKey = "terrain.p2.desc", dificuldade = 2, desbloqueada = true, cor = new Color(0.7f,  0.6f, 0.05f) },
-        new ConfigFase { nome = "Terceira Fase",      nomeKey = "terrain.p3.name", nomeCena = "terceira_fase",      descricao = "Apenas os mais corajosos.",      descricaoKey = "terrain.p3.desc", dificuldade = 3, desbloqueada = true, cor = new Color(0.7f,  0.2f, 0.05f) },
-        new ConfigFase { nome = "Sobrevivência",      nomeKey = "terrain.surv.name", nomeCena = "Modo_sobrevivencia", descricao = "Sobreviva o máximo que puder!", descricaoKey = "terrain.surv.desc", dificuldade = 5, desbloqueada = true, cor = new Color(0.5f,  0.05f,0.7f) },
+        new ConfigFase { nome = "Reino Slime",        nomeKey = "terrain.p1.name", nomeCena = "primeira_fase",      descricao = "O início da jornada.",          descricaoKey = "terrain.p1.desc", dificuldade = 1, desbloqueada = true, cor = new Color(0.15f, 0.6f, 0.15f) },
+        new ConfigFase { nome = "Abismo",             nomeKey = "terrain.p2.name", nomeCena = "segunda_fase",       descricao = "Os inimigos ficam mais fortes.", descricaoKey = "terrain.p2.desc", dificuldade = 2, desbloqueada = true, cor = new Color(0.7f,  0.6f, 0.05f) },
+        new ConfigFase { nome = "Caverna Aranha",     nomeKey = "terrain.p3.name", nomeCena = "terceira_fase",      descricao = "Apenas os mais corajosos.",      descricaoKey = "terrain.p3.desc", dificuldade = 3, desbloqueada = false, cor = new Color(0.7f,  0.2f, 0.05f) },
+        new ConfigFase { nome = "Sobrevivência",      nomeKey = "terrain.surv.name", nomeCena = "Modo_sobrevivencia", descricao = "Sobreviva o máximo que puder!", descricaoKey = "terrain.surv.desc", dificuldade = 5, desbloqueada = false, cor = new Color(0.5f,  0.05f,0.7f) },
     };
 
     [Header("Cena de voltar")]
@@ -211,13 +211,13 @@ public class EscolherTerrenoUI : MonoBehaviour
             bg.preserveAspect = false;
             bg.color = fase.desbloqueada
                 ? new Color(Mathf.Max(fase.cor.r, 0.35f), Mathf.Max(fase.cor.g, 0.35f), Mathf.Max(fase.cor.b, 0.35f), 1f)
-                : new Color(0.30f, 0.25f, 0.25f, 1f);
+                : new Color(0.45f, 0.40f, 0.40f, 1f);
         }
         else
         {
             bg.color = fase.desbloqueada
                 ? new Color(fase.cor.r * 0.25f, fase.cor.g * 0.25f, fase.cor.b * 0.25f, 1f)
-                : new Color(0.12f, 0.12f, 0.12f, 1f);
+                : new Color(0.22f, 0.22f, 0.22f, 1f);
         }
 
         // Botão
@@ -253,13 +253,15 @@ public class EscolherTerrenoUI : MonoBehaviour
         rB.pivot     = new Vector2(0.5f, 1f);
         rB.anchoredPosition = Vector2.zero;
         rB.sizeDelta        = new Vector2(0f, 10f);
-        barra.AddComponent<Image>().color = fase.desbloqueada ? fase.cor : Color.gray;
+        barra.AddComponent<Image>().color = fase.desbloqueada
+            ? fase.cor
+            : new Color(fase.cor.r * 0.7f + 0.25f, fase.cor.g * 0.7f + 0.25f, fase.cor.b * 0.7f + 0.25f);
 
         // Nome
         AdicionarTexto(card, "Nome",
             new Vector2(0f, 0.72f), new Vector2(1f, 0.95f),
             string.IsNullOrEmpty(fase.nomeKey) ? fase.nome : Loc.T(fase.nomeKey), 20f, FontStyles.Bold,
-            fase.desbloqueada ? Color.white : Color.gray);
+            fase.desbloqueada ? Color.white : new Color(0.85f, 0.85f, 0.85f));
 
         // Dificuldade
         string[] difs = { "", Loc.T("diff.easy"), Loc.T("diff.normal"), Loc.T("diff.hard"), Loc.T("diff.expert"), Loc.T("diff.master") };
@@ -270,28 +272,56 @@ public class EscolherTerrenoUI : MonoBehaviour
         AdicionarTexto(card, "Dif",
             new Vector2(0f, 0.58f), new Vector2(1f, 0.74f),
             difs[d], 14f, FontStyles.Bold,
-            fase.desbloqueada ? cors[d] : Color.gray);
+            fase.desbloqueada ? cors[d] : new Color(0.75f, 0.75f, 0.75f));
 
         // Descrição
         var desc = AdicionarTexto(card, "Desc",
-            new Vector2(0.05f, 0.25f), new Vector2(0.95f, 0.58f),
+            new Vector2(0.05f, 0.32f), new Vector2(0.95f, 0.58f),
             string.IsNullOrEmpty(fase.descricaoKey) ? fase.descricao : Loc.T(fase.descricaoKey), 13f, FontStyles.Normal,
-            fase.desbloqueada ? new Color(0.8f, 0.8f, 0.8f) : new Color(0.4f, 0.4f, 0.4f));
+            fase.desbloqueada ? new Color(0.8f, 0.8f, 0.8f) : new Color(0.65f, 0.65f, 0.65f));
         desc.textWrappingMode = TMPro.TextWrappingModes.Normal;
 
-        // Rodapé do card
         if (fase.desbloqueada)
         {
+            // Recorde (melhor tempo sobrevivido + mortes)
+            float melhorTempo  = RecordeFaseManager.ObterMelhorTempo(fase.nomeCena);
+            int   melhorMortes = RecordeFaseManager.ObterMelhorMortes(fase.nomeCena);
+            string textoRecorde = (melhorTempo > 0f || melhorMortes > 0)
+                ? $"Recorde: {FormatarTempo(melhorTempo)}  •  {melhorMortes} mortes"
+                : "Ainda sem recorde";
+
+            AdicionarTexto(card, "Recorde",
+                new Vector2(0f, 0.20f), new Vector2(1f, 0.32f),
+                textoRecorde, 11f, FontStyles.Italic,
+                new Color(0.85f, 0.85f, 0.55f));
+
+            // Rodapé
             AdicionarTexto(card, "Jogar",
-                new Vector2(0f, 0.02f), new Vector2(1f, 0.22f),
+                new Vector2(0f, 0.02f), new Vector2(1f, 0.20f),
                 Loc.T("ui.play"), 17f, FontStyles.Bold, fase.cor);
         }
         else
         {
-            AdicionarTexto(card, "Lock",
-                new Vector2(0f, 0.02f), new Vector2(1f, 0.22f),
-                "🔒 " + Loc.T("terrain.locked"), 15f, FontStyles.Bold, new Color(0.6f, 0.2f, 0.2f));
+            // Banner "INDISPONÍVEL" centralizado — substitui o rodapé de fases bloqueadas
+            GameObject banner = new GameObject("Indisponivel");
+            banner.transform.SetParent(card.transform, false);
+            RectTransform rBanner = banner.AddComponent<RectTransform>();
+            rBanner.anchorMin = new Vector2(0f, 0.40f);
+            rBanner.anchorMax = new Vector2(1f, 0.62f);
+            rBanner.offsetMin = Vector2.zero; rBanner.offsetMax = Vector2.zero;
+            banner.AddComponent<Image>().color = new Color(0.15f, 0.15f, 0.15f, 0.35f);
+
+            AdicionarTexto(banner, "Texto",
+                Vector2.zero, Vector2.one,
+                "INDISPONÍVEL", 22f, FontStyles.Bold, new Color(1f, 0.45f, 0.4f));
         }
+    }
+
+    string FormatarTempo(float segundos)
+    {
+        int m = Mathf.FloorToInt(segundos / 60f);
+        int s = Mathf.FloorToInt(segundos % 60f);
+        return $"{m:00}:{s:00}";
     }
 
     // ──────────────────────────────────────────────────────────────

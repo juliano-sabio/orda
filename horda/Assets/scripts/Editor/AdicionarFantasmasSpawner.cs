@@ -7,6 +7,8 @@ public static class AdicionarFantasmasSpawner
 {
     static readonly (string path, string nome, int tempo, float peso)[] FANTASMAS =
     {
+        ("Assets/prefebs/inimigos/fantasminha.prefab",        "Fantasminha",      0,   2.0f),
+        ("Assets/prefebs/inimigos/fantasminha02.prefab",      "Fantasminha02",    180, 2.0f),
         ("Assets/prefebs/inimigos/fantasma_veneno.prefab",   "FantasmaVeneno",   0,   1.5f),
         ("Assets/prefebs/inimigos/fantasma_fogo.prefab",     "FantasmaFogo",     120, 1.2f),
         ("Assets/prefebs/inimigos/fantasma_gelo.prefab",     "FantasmaGelo",     120, 1.2f),

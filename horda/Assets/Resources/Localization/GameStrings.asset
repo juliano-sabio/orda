@@ -1103,7 +1103,7 @@ MonoBehaviour:
     - Perisai
   - key: terrain.title
     translations:
-    - ESCOLHA O TERRENO
+    - Seleção
     - CHOOSE TERRAIN
     - ELIGE EL TERRENO
     - "TERRAIN W\xC4HLEN"
@@ -1215,20 +1215,20 @@ MonoBehaviour:
     - MAHIR
   - key: terrain.p1.name
     translations:
-    - Primeira Fase
-    - First Stage
-    - Primera Fase
-    - Erste Phase
-    - "Premi\xE8re Phase"
-    - Prima Fase
-    - "\u041F\u0435\u0440\u0432\u044B\u0439 \u042D\u0442\u0430\u043F"
-    - Pierwsza Faza
-    - "Birinci A\u015Fama"
-    - "\u7B2C\u4E00\u5173"
-    - "\u7B2C\u4E00\u30B9\u30C6\u30FC\u30B8"
-    - "1\uB2E8\uACC4"
-    - Eerste Fase
-    - Tahap Pertama
+    - Reino Slime
+    - Slime Kingdom
+    - Reino Slime
+    - Schleimreich
+    - Royaume Slime
+    - Regno Slime
+    - "\u041A\u043E\u0440\u043E\u043B\u0435\u0432\u0441\u0442\u0432\u043E \u0441\u043B\u0438\u0437\u043D\u0435\u0439"
+    - "Kr\xF3lestwo Slime"
+    - "Slime Krall\u0131\u011F\u0131"
+    - "\u53F2\u83B1\u59C6\u738B\u56FD"
+    - "\u30B9\u30E9\u30A4\u30E0\u738B\u56FD"
+    - "\uC2AC\uB77C\uC784 \uC655\uAD6D"
+    - Slijmrijk
+    - Kerajaan Slime
   - key: terrain.p1.desc
     translations:
     - "O in\xEDcio da jornada."
@@ -1247,20 +1247,20 @@ MonoBehaviour:
     - Awal perjalanan.
   - key: terrain.p2.name
     translations:
-    - Segunda Fase
-    - Second Stage
-    - Segunda Fase
-    - Zweite Phase
-    - "Deuxi\xE8me Phase"
-    - Seconda Fase
-    - "\u0412\u0442\u043E\u0440\u043E\u0439 \u042D\u0442\u0430\u043F"
-    - Druga Faza
-    - "\u0130kinci A\u015Fama"
-    - "\u7B2C\u4E8C\u5173"
-    - "\u7B2C\u4E8C\u30B9\u30C6\u30FC\u30B8"
-    - "2\uB2E8\uACC4"
-    - Tweede Fase
-    - Tahap Kedua
+    - Abismo
+    - Abyss
+    - Abismo
+    - Abgrund
+    - "Ab\xEEme"
+    - Abisso
+    - "\u0411\u0435\u0437\u0434\u043D\u0430"
+    - "Otch\u0142a\u0144"
+    - "U\u00E7urum"
+    - "\u6DF1\u6E0A"
+    - "\u6DF1\u6DF5"
+    - "\uC2EC\uC5F0"
+    - Afgrond
+    - Jurang
   - key: terrain.p2.desc
     translations:
     - Os inimigos ficam mais fortes.
@@ -1280,20 +1280,20 @@ MonoBehaviour:
     - Musuh semakin kuat.
   - key: terrain.p3.name
     translations:
-    - Terceira Fase
-    - Third Stage
-    - Tercera Fase
-    - Dritte Phase
-    - "Troisi\xE8me Phase"
-    - Terza Fase
-    - "\u0422\u0440\u0435\u0442\u0438\u0439 \u042D\u0442\u0430\u043F"
-    - Trzecia Faza
-    - "\xDC\xE7\xFCnc\xFC A\u015Fama"
-    - "\u7B2C\u4E09\u5173"
-    - "\u7B2C\u4E09\u30B9\u30C6\u30FC\u30B8"
-    - "3\uB2E8\uACC4"
-    - Derde Fase
-    - Tahap Ketiga
+    - Caverna Aranha
+    - Spider Cave
+    - "Cueva Ara\xF1a"
+    - "Spinnenh\xF6hle"
+    - "Grotte Araign\xE9e"
+    - Caverna Ragno
+    - "\u041F\u0430\u0443\u0447\u044C\u044F \u043F\u0435\u0449\u0435\u0440\u0430"
+    - "Paj\u0119cza Jaskinia"
+    - "\u00D6r\u00FCmcek Ma\u011Faras\u0131"
+    - "\u8718\u86DB\u6D1E\u7A9F"
+    - "\u8718\u86DB\u306E\u6D1E\u7A9F"
+    - "\uAC70\uBBF8 \uB3D9\uAD74"
+    - Spinnengrot
+    - Gua Laba-laba
   - key: terrain.p3.desc
     translations:
     - Apenas os mais corajosos.

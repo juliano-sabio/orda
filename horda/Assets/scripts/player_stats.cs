@@ -129,7 +129,7 @@ public class PlayerStats : MonoBehaviour
     [Header("Segunda Fase: Barra de Luz")]
     public float luzMaxima      = 100f;
     public float luzAtual       = 100f;
-    public float taxaDrenagemLuz = 100f / 60f; // unidades por segundo; esvazia em 60s
+    public float taxaDrenagemLuz = 100f / 180f; // unidades por segundo; esvazia em 180s (3 min)
 
     bool        semLuzDebuffAtivo;
     Coroutine   corotinaDebuffLuz;
@@ -679,6 +679,7 @@ public class PlayerStats : MonoBehaviour
     void HandleLuzDrain()
     {
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "segunda_fase") return;
+        if (Fase2LuzManager.AnimandoEntrada) return;
         DrenarLuz(taxaDrenagemLuz * Time.deltaTime);
 
         float pct = GetLuzPercentual();
@@ -1996,7 +1997,7 @@ public class PlayerStats : MonoBehaviour
             if (tickTimer >= 1f)
             {
                 tickTimer -= 1f;
-                TakeDamage(15f);
+                TakeDamage(7f);
             }
             yield return null;
         }
