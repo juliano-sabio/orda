@@ -39,7 +39,7 @@ public class ChuvaMeteorosUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.R) && cooldownRestante <= 0f && !ativo)
+        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }

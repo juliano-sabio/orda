@@ -57,8 +57,9 @@ public class moviment_player2 : MonoBehaviour
             return;
         }
 
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
+        Vector2 eixo = InputBindings.EixoMovimento();
+        float horizontal = eixo.x;
+        float vertical = eixo.y;
         moveInput = new Vector2(horizontal, vertical).normalized;
 
         if (anim != null)
@@ -69,7 +70,7 @@ public class moviment_player2 : MonoBehaviour
         else if (horizontal < 0)
             transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
 
-        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && playerStats.HasDashCharge())
+        if (InputBindings.DashDown() && !isDashing && playerStats.HasDashCharge())
         {
             dashDirection = moveInput != Vector2.zero ? moveInput : new Vector2(transform.localScale.x > 0 ? 1f : -1f, 0f);
             playerStats.ConsumeDashCharge();

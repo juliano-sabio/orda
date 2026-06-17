@@ -9,7 +9,9 @@
       "mcp__unity__execute_code",
       "Bash(xargs grep -l \"EnemySpawnerCompleto\")",
       "mcp__unity__manage_scene",
-      "mcp__unity-mcp__find_gameobjects"
+      "mcp__unity-mcp__find_gameobjects",
+      "mcp__unity-mcp__manage_texture",
+      "mcp__unity-mcp__manage_asset"
     ]
   }
 }

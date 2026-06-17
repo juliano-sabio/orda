@@ -654,7 +654,7 @@ public class PlayerStats : MonoBehaviour
         {
             UpdateUltimateSystem();
 
-            if (Input.GetKeyDown(KeyCode.R) && ultimateReady && ultimateSkill.isActive)
+            if (InputBindings.UltimateDown() && ultimateReady && ultimateSkill.isActive)
             {
                 if (usarUltimateMarcacao)
                 {

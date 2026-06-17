@@ -289,8 +289,8 @@ public class EscolherTerrenoUI : MonoBehaviour
             float melhorTempo  = RecordeFaseManager.ObterMelhorTempo(fase.nomeCena);
             int   melhorMortes = RecordeFaseManager.ObterMelhorMortes(fase.nomeCena);
             string textoRecorde = (melhorTempo > 0f || melhorMortes > 0)
-                ? $"Recorde: {FormatarTempo(melhorTempo)}  •  {melhorMortes} mortes"
-                : "Ainda sem recorde";
+                ? $"{Loc.T("terrain.record")} {FormatarTempo(melhorTempo)}  •  {melhorMortes} {Loc.T("terrain.kills")}"
+                : Loc.T("terrain.no_record");
 
             AdicionarTexto(card, "Recorde",
                 new Vector2(0f, 0.20f), new Vector2(1f, 0.32f),
@@ -315,7 +315,7 @@ public class EscolherTerrenoUI : MonoBehaviour
 
             AdicionarTexto(banner, "Texto",
                 Vector2.zero, Vector2.one,
-                "INDISPONÍVEL", 22f, FontStyles.Bold, new Color(1f, 0.45f, 0.4f));
+                Loc.T("terrain.unavailable"), 22f, FontStyles.Bold, new Color(1f, 0.45f, 0.4f));
         }
     }
 

@@ -43,8 +43,14 @@ public class MenuInicialUI : MonoBehaviour
     GameObject canvasRef;
     GameObject painelOpcoes;
     GameObject painelMulti;
-    GameObject[] painelAbas = new GameObject[3];
-    Button[]     botoesAbas = new Button[3];
+    GameObject[]   painelAbas = new GameObject[4];
+    Button[]       botoesAbas = new Button[4];
+    CanvasGroup[]  abasCG     = new CanvasGroup[4];
+
+    // refs para animação de abertura do painel de opções
+    RectTransform opcoesCaixaRT;
+    CanvasGroup   opcoesCaixaCG;
+    CanvasGroup   opcoesOverlayCG;
 
     // ────────────────────────────────────────────────────────────────────
     void Start()
@@ -106,7 +112,7 @@ public class MenuInicialUI : MonoBehaviour
         if (canvasRef != null) UnityEngine.Object.Destroy(canvasRef);
         painelOpcoes = null;
         painelMulti  = null;
-        for (int i = 0; i < 3; i++) { painelAbas[i] = null; botoesAbas[i] = null; }
+        for (int i = 0; i < 4; i++) { painelAbas[i] = null; botoesAbas[i] = null; }
         _langDisplayTxt = null;
 
         canvasRef = CriarCanvas();
@@ -447,6 +453,59 @@ public class MenuInicialUI : MonoBehaviour
     {
         if (painelOpcoes == null) CriarPainelOpcoes();
         painelOpcoes.SetActive(true);
+        StartCoroutine(AnimarAberturaOpcoes());
+    }
+
+    IEnumerator AnimarAberturaOpcoes()
+    {
+        const float dur = 0.30f;
+        if (opcoesCaixaRT != null) opcoesCaixaRT.localScale = Vector3.one * 0.82f;
+        for (float t = 0f; t < dur; t += Time.unscaledDeltaTime)
+        {
+            float p = t / dur;
+            if (opcoesOverlayCG != null) opcoesOverlayCG.alpha = Mathf.Lerp(0f, 1f, p);
+            if (opcoesCaixaCG   != null) opcoesCaixaCG.alpha   = Mathf.Clamp01(p * 1.7f);
+            if (opcoesCaixaRT   != null)
+            {
+                float s = Mathf.Lerp(0.82f, 1f, EaseOutBackDF(p));
+                opcoesCaixaRT.localScale = new Vector3(s, s, 1f);
+            }
+            yield return null;
+        }
+        if (opcoesOverlayCG != null) opcoesOverlayCG.alpha = 1f;
+        if (opcoesCaixaCG   != null) opcoesCaixaCG.alpha   = 1f;
+        if (opcoesCaixaRT   != null) opcoesCaixaRT.localScale = Vector3.one;
+
+        // anima a aba ativa logo após a entrada
+        for (int i = 0; i < 4; i++)
+            if (painelAbas[i] != null && painelAbas[i].activeSelf)
+                StartCoroutine(AnimarConteudoAba(i));
+    }
+
+    static float EaseOutBackDF(float t)
+    {
+        const float c1 = 1.70158f, c3 = 1.70158f + 1f;
+        return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
+    }
+
+    IEnumerator AnimarConteudoAba(int idx)
+    {
+        var cg = abasCG[idx];
+        var rt = painelAbas[idx] != null ? painelAbas[idx].GetComponent<RectTransform>() : null;
+        if (cg == null) yield break;
+
+        const float dur = 0.22f;
+        Vector2 baseAnchored = rt != null ? rt.anchoredPosition : Vector2.zero;
+        for (float t = 0f; t < dur; t += Time.unscaledDeltaTime)
+        {
+            float p = t / dur;
+            float e = 1f - Mathf.Pow(1f - p, 3f);
+            cg.alpha = e;
+            if (rt != null) rt.anchoredPosition = baseAnchored + new Vector2(0f, Mathf.Lerp(14f, 0f, e));
+            yield return null;
+        }
+        cg.alpha = 1f;
+        if (rt != null) rt.anchoredPosition = baseAnchored;
     }
 
     // paleta dark fantasy só para o painel de opções
@@ -462,6 +521,7 @@ public class MenuInicialUI : MonoBehaviour
         painelOpcoes = new GameObject("PainelOpcoes");
         painelOpcoes.transform.SetParent(canvasRef.transform, false);
         Esticar(AdicionarImagem(painelOpcoes, new Color(0f,0f,0f,0.78f)));
+        opcoesOverlayCG = painelOpcoes.AddComponent<CanvasGroup>();
 
         // ── Caixa central ──
         var painel = new GameObject("Painel");
@@ -469,6 +529,8 @@ public class MenuInicialUI : MonoBehaviour
         var rp = painel.AddComponent<RectTransform>();
         rp.anchorMin = new Vector2(0.22f,0.08f); rp.anchorMax = new Vector2(0.78f,0.92f);
         rp.offsetMin = rp.offsetMax = Vector2.zero;
+        opcoesCaixaRT = rp;
+        opcoesCaixaCG = painel.AddComponent<CanvasGroup>();
         var imgPainel = painel.AddComponent<Image>();
         if (sprFundoOpcoes != null)
         {
@@ -480,6 +542,14 @@ public class MenuInicialUI : MonoBehaviour
         {
             imgPainel.color = new Color(0.04f, 0.02f, 0.02f, 0.98f);
         }
+
+        // brasas subindo no fundo (atrás do conteúdo, sobre a imagem da forja)
+        var brasasGO = new GameObject("Brasas");
+        brasasGO.transform.SetParent(painel.transform, false);
+        var rbr = brasasGO.AddComponent<RectTransform>();
+        rbr.anchorMin = new Vector2(0.02f, 0.10f); rbr.anchorMax = new Vector2(0.98f, 0.80f);
+        rbr.offsetMin = rbr.offsetMax = Vector2.zero;
+        brasasGO.AddComponent<BrasasSubindo>();
 
         // bordas douradas
         DFBorda(painel,"BT",new Vector2(0f,1f),new Vector2(1f,1f),new Vector2(0f,-2f),Vector2.zero);
@@ -513,20 +583,20 @@ public class MenuInicialUI : MonoBehaviour
         ac.AddComponent<Image>().color = new Color(0.55f,0.08f,0.08f);
 
         // título
-        var t = CriarTexto(painel,"Titulo",new Vector2(0.03f,0.90f),new Vector2(0.95f,1f),
+        var t = CriarTexto(painel,"Titulo",new Vector2(0f,0.90f),new Vector2(1f,1f),
             Loc.T("settings.title"),20f,FontStyles.Bold,dfCorTitulo);
-        t.alignment = TextAlignmentOptions.MidlineLeft;
+        t.alignment = TextAlignmentOptions.Center;
 
         // ── Abas ──
-        string[] nomes = {Loc.T("ui.audio"), Loc.T("ui.video"), Loc.T("ui.game")};
-        for (int i = 0; i < 3; i++)
+        string[] nomes = {Loc.T("ui.audio"), Loc.T("ui.video"), Loc.T("ui.game"), Loc.T("settings.controls")};
+        for (int i = 0; i < 4; i++)
         {
             int idx = i;
             var abaGO = new GameObject($"Aba{i}");
             abaGO.transform.SetParent(painel.transform, false);
             var ra = abaGO.AddComponent<RectTransform>();
-            ra.anchorMin = new Vector2(idx/3f+0.005f,0.82f);
-            ra.anchorMax = new Vector2((idx+1)/3f-0.005f,0.90f);
+            ra.anchorMin = new Vector2(idx/4f+0.004f,0.82f);
+            ra.anchorMax = new Vector2((idx+1)/4f-0.004f,0.90f);
             ra.offsetMin = new Vector2(2f,2f); ra.offsetMax = new Vector2(-2f,0f);
             var imgA = abaGO.AddComponent<Image>();
             if (sprBotaoOpcoes != null)
@@ -549,6 +619,7 @@ public class MenuInicialUI : MonoBehaviour
             var btnA = abaGO.AddComponent<Button>();
             btnA.targetGraphic=imgA; btnA.transition=Selectable.Transition.None;
             btnA.onClick.AddListener(()=>MudarAba(idx));
+            abaGO.AddComponent<CardHover>();
             var txA = CriarTexto(abaGO,"T",Vector2.zero,Vector2.one,nomes[i],13f,FontStyles.Bold,
                 i==0 ? dfCorTitulo : dfCorTexto);
             txA.alignment = TextAlignmentOptions.Center;
@@ -559,6 +630,7 @@ public class MenuInicialUI : MonoBehaviour
             var rc = cont.AddComponent<RectTransform>();
             rc.anchorMin=new Vector2(0.02f,0.13f); rc.anchorMax=new Vector2(0.98f,0.82f);
             rc.offsetMin=rc.offsetMax=Vector2.zero;
+            abasCG[i]=cont.AddComponent<CanvasGroup>();
             painelAbas[i]=cont;
             cont.SetActive(i==0);
         }
@@ -569,6 +641,7 @@ public class MenuInicialUI : MonoBehaviour
         PopularAudio(painelAbas[0]);
         PopularVideo(painelAbas[1]);
         PopularJogo(painelAbas[2]);
+        PopularControles(painelAbas[3]);
 
         BotaoSimples(painel,Loc.T("ui.back"),new Vector2(0.08f,0.02f),new Vector2(0.92f,0.12f),
             new Color(0.10f,0.07f,0.05f),()=>{PlayerPrefs.Save();painelOpcoes.SetActive(false);});
@@ -592,9 +665,11 @@ public class MenuInicialUI : MonoBehaviour
 
     void MudarAba(int idx)
     {
-        for (int i=0;i<3;i++)
+        for (int i=0;i<4;i++)
         {
+            bool jaAtiva = painelAbas[i].activeSelf;
             painelAbas[i].SetActive(i==idx);
+            if (i==idx && !jaAtiva) StartCoroutine(AnimarConteudoAba(i));
             var imgAba = botoesAbas[i].GetComponent<Image>();
             imgAba.color = i==idx ? dfCorAbaAtv : dfCorAbaInv;
 
@@ -614,7 +689,7 @@ public class MenuInicialUI : MonoBehaviour
 
     void PopularAudio(GameObject p)
     {
-        Rotulo(p,Loc.T("settings.music"),0.80f,0.92f);
+        Rotulo(p,Loc.T("settings.master"),0.80f,0.92f);
         var sv=Slider(p,"SV",new Vector2(0.05f,0.68f),new Vector2(0.95f,0.80f),PlayerPrefs.GetFloat("MasterVolume",1f));
         sv.onValueChanged.AddListener(v=>{AudioListener.volume=v;PlayerPrefs.SetFloat("MasterVolume",v);});
 
@@ -676,6 +751,102 @@ public class MenuInicialUI : MonoBehaviour
 
         BotaoSimples(p,Loc.T("settings.clear_progress"),new Vector2(0.10f,0.04f),new Vector2(0.90f,0.16f),
             new Color(0.5f,0.05f,0.05f),()=>{PlayerPrefs.DeleteAll();PlayerPrefs.Save();});
+    }
+
+    // ── Aba Controles (remapeamento de teclas) ──────────────────────────────
+    InputBindings.Acao? rebindAlvo = null;
+    int rebindArmadoFrame = -1;
+    TextMeshProUGUI[] rebindTextos = new TextMeshProUGUI[6];
+
+    void PopularControles(GameObject p)
+    {
+        LinhaRebind(p, InputBindings.Acao.Cima,     Loc.T("settings.move_up"),    0.86f, 0.97f);
+        LinhaRebind(p, InputBindings.Acao.Baixo,    Loc.T("settings.move_down"),  0.72f, 0.83f);
+        LinhaRebind(p, InputBindings.Acao.Esquerda, Loc.T("settings.move_left"),  0.58f, 0.69f);
+        LinhaRebind(p, InputBindings.Acao.Direita,  Loc.T("settings.move_right"), 0.44f, 0.55f);
+        LinhaRebind(p, InputBindings.Acao.Dash,     Loc.T("settings.dash"),       0.30f, 0.41f);
+        LinhaRebind(p, InputBindings.Acao.Ultimate, Loc.T("settings.ultimate"),   0.16f, 0.27f);
+
+        BotaoSimples(p, Loc.T("settings.reset_controls"),
+            new Vector2(0.10f,0.03f), new Vector2(0.90f,0.14f),
+            new Color(0.10f,0.07f,0.05f), () =>
+            {
+                InputBindings.ResetarPadrao();
+                for (int i = 0; i < 6; i++) AtualizarTextoRebind((InputBindings.Acao)i);
+            });
+    }
+
+    void LinhaRebind(GameObject p, InputBindings.Acao acao, string label, float yMin, float yMax)
+    {
+        Rotulo(p, label, yMin, yMax);
+
+        // botão da tecla à direita (container sem Image; filhos renderizam por cima)
+        var go = new GameObject("Key_" + acao); go.transform.SetParent(p.transform, false);
+        var r = go.AddComponent<RectTransform>();
+        r.anchorMin = new Vector2(0.66f, yMin + 0.005f); r.anchorMax = new Vector2(0.96f, yMax - 0.005f);
+        r.offsetMin = r.offsetMax = Vector2.zero;
+
+        var brd = new GameObject("Brd"); brd.transform.SetParent(go.transform, false);
+        var rb = brd.AddComponent<RectTransform>(); rb.anchorMin = Vector2.zero; rb.anchorMax = Vector2.one;
+        rb.offsetMin = new Vector2(-1f,-1f); rb.offsetMax = new Vector2(1f,1f);
+        brd.AddComponent<Image>().color = new Color(dfCorBorda.r, dfCorBorda.g, dfCorBorda.b, 0.75f);
+
+        var corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
+        var rc = corpo.AddComponent<RectTransform>(); rc.anchorMin = Vector2.zero; rc.anchorMax = Vector2.one;
+        rc.offsetMin = rc.offsetMax = Vector2.zero;
+        var img = corpo.AddComponent<Image>(); img.color = new Color(0.12f,0.08f,0.05f,0.96f);
+
+        var txt = CriarTexto(go, "T", Vector2.zero, Vector2.one,
+            InputBindings.NomeTecla(InputBindings.Get(acao)), 13f, FontStyles.Bold, dfCorTitulo);
+        txt.alignment = TextAlignmentOptions.Center;
+        rebindTextos[(int)acao] = txt;
+
+        go.AddComponent<CardHover>();
+        var btn = go.AddComponent<Button>(); btn.targetGraphic = img; btn.transition = Selectable.Transition.None;
+        var acaoLocal = acao;
+        btn.onClick.AddListener(() => IniciarRebind(acaoLocal));
+    }
+
+    void IniciarRebind(InputBindings.Acao acao)
+    {
+        rebindAlvo = acao;
+        rebindArmadoFrame = Time.frameCount;
+        if (rebindTextos[(int)acao] != null)
+            rebindTextos[(int)acao].text = Loc.T("settings.press_key");
+    }
+
+    void AtualizarTextoRebind(InputBindings.Acao acao)
+    {
+        if (rebindTextos[(int)acao] != null)
+            rebindTextos[(int)acao].text = InputBindings.NomeTecla(InputBindings.Get(acao));
+    }
+
+    void Update()
+    {
+        if (rebindAlvo == null) return;
+        if (Time.frameCount <= rebindArmadoFrame) return; // ignora o frame do clique
+        if (!Input.anyKeyDown) return;
+
+        var acao = rebindAlvo.Value;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            AtualizarTextoRebind(acao);   // cancela
+            rebindAlvo = null;
+            return;
+        }
+
+        foreach (KeyCode kc in System.Enum.GetValues(typeof(KeyCode)))
+        {
+            if (!InputBindings.EhTeclaValida(kc)) continue;
+            if (Input.GetKeyDown(kc))
+            {
+                InputBindings.Set(acao, kc);
+                AtualizarTextoRebind(acao);
+                rebindAlvo = null;
+                break;
+            }
+        }
     }
 
     void SeletorIdiomaRow(GameObject p, Vector2 mn, Vector2 mx)
@@ -892,39 +1063,54 @@ public class MenuInicialUI : MonoBehaviour
         var go=new GameObject(nome); go.transform.SetParent(p.transform,false);
         var r=go.AddComponent<RectTransform>(); r.anchorMin=mn; r.anchorMax=mx; r.offsetMin=r.offsetMax=Vector2.zero;
 
-        // irmão 0: borda dourada externa
-        var brd=new GameObject("Brd"); brd.transform.SetParent(go.transform,false);
-        var rbrd=brd.AddComponent<RectTransform>(); rbrd.anchorMin=Vector2.zero; rbrd.anchorMax=Vector2.one;
-        rbrd.offsetMin=new Vector2(-1f,-1f); rbrd.offsetMax=new Vector2(1f,1f);
-        brd.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.50f);
+        // irmão 0: borda dourada externa (só quando não há sprite de trilha com moldura própria)
+        if (sprSliderTrack == null)
+        {
+            var brd=new GameObject("Brd"); brd.transform.SetParent(go.transform,false);
+            var rbrd=brd.AddComponent<RectTransform>(); rbrd.anchorMin=Vector2.zero; rbrd.anchorMax=Vector2.one;
+            rbrd.offsetMin=new Vector2(-1f,-1f); rbrd.offsetMax=new Vector2(1f,1f);
+            brd.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.50f);
+        }
 
-        // irmão 1: trilha escura (pedra entalhada)
+        // irmão 1: trilha (sprite pixel-art entalhado, com fallback procedural)
         var trk=new GameObject("Trk"); trk.transform.SetParent(go.transform,false);
         var rtrk=trk.AddComponent<RectTransform>(); rtrk.anchorMin=Vector2.zero; rtrk.anchorMax=Vector2.one; rtrk.offsetMin=rtrk.offsetMax=Vector2.zero;
-        trk.AddComponent<Image>().color=new Color(0.07f,0.04f,0.03f);
-        // sombra interna topo (efeito de entalhe)
-        var ist=new GameObject("InT"); ist.transform.SetParent(trk.transform,false);
-        var rist=ist.AddComponent<RectTransform>(); rist.anchorMin=new Vector2(0f,1f); rist.anchorMax=new Vector2(1f,1f);
-        rist.offsetMin=new Vector2(0f,-3f); rist.offsetMax=Vector2.zero;
-        ist.AddComponent<Image>().color=new Color(0f,0f,0f,0.65f);
-        // luz interna base
-        var isl=new GameObject("InB"); isl.transform.SetParent(trk.transform,false);
-        var risl=isl.AddComponent<RectTransform>(); risl.anchorMin=Vector2.zero; risl.anchorMax=new Vector2(1f,0f);
-        risl.offsetMin=Vector2.zero; risl.offsetMax=new Vector2(0f,1f);
-        isl.AddComponent<Image>().color=new Color(1f,0.8f,0.3f,0.05f);
+        var imgTrk=trk.AddComponent<Image>();
+        if (sprSliderTrack != null)
+        {
+            imgTrk.sprite=sprSliderTrack; imgTrk.type=Image.Type.Sliced; imgTrk.color=Color.white;
+        }
+        else
+        {
+            imgTrk.color=new Color(0.07f,0.04f,0.03f);
+            // sombra interna topo (efeito de entalhe)
+            var ist=new GameObject("InT"); ist.transform.SetParent(trk.transform,false);
+            var rist=ist.AddComponent<RectTransform>(); rist.anchorMin=new Vector2(0f,1f); rist.anchorMax=new Vector2(1f,1f);
+            rist.offsetMin=new Vector2(0f,-3f); rist.offsetMax=Vector2.zero;
+            ist.AddComponent<Image>().color=new Color(0f,0f,0f,0.65f);
+        }
 
-        // irmão 2: fill area (Unity ajusta anchorMax.x conforme valor)
+        // irmão 2: fill area (Unity ajusta a largura do fill conforme o valor)
+        // padding lateral pequeno para o preenchimento respeitar a moldura da trilha
         var fa=new GameObject("FA"); fa.transform.SetParent(go.transform,false);
-        var rfa=fa.AddComponent<RectTransform>(); rfa.anchorMin=Vector2.zero; rfa.anchorMax=Vector2.one; rfa.offsetMin=rfa.offsetMax=Vector2.zero;
-        // fill principal (âmbar fosco)
+        var rfa=fa.AddComponent<RectTransform>(); rfa.anchorMin=Vector2.zero; rfa.anchorMax=Vector2.one;
+        rfa.offsetMin=new Vector2(3f,3f); rfa.offsetMax=new Vector2(-3f,-3f);
+        // fill principal (sprite âmbar, com fallback procedural)
         var fi=new GameObject("Fi"); fi.transform.SetParent(fa.transform,false);
         var rfi=fi.AddComponent<RectTransform>(); rfi.anchorMin=Vector2.zero; rfi.anchorMax=Vector2.one; rfi.offsetMin=rfi.offsetMax=Vector2.zero;
-        fi.AddComponent<Image>().color=new Color(0.75f,0.45f,0.04f);
-        // highlight topo do fill
-        var fhl=new GameObject("FHl"); fhl.transform.SetParent(fi.transform,false);
-        var rfhl=fhl.AddComponent<RectTransform>(); rfhl.anchorMin=new Vector2(0f,1f); rfhl.anchorMax=new Vector2(1f,1f);
-        rfhl.offsetMin=new Vector2(0f,-1f); rfhl.offsetMax=Vector2.zero;
-        fhl.AddComponent<Image>().color=new Color(1f,0.95f,0.50f,0.40f);
+        var imgFi=fi.AddComponent<Image>();
+        if (sprSliderFill != null)
+        {
+            imgFi.sprite=sprSliderFill; imgFi.type=Image.Type.Sliced; imgFi.color=Color.white;
+        }
+        else
+        {
+            imgFi.color=new Color(0.75f,0.45f,0.04f);
+            var fhl=new GameObject("FHl"); fhl.transform.SetParent(fi.transform,false);
+            var rfhl=fhl.AddComponent<RectTransform>(); rfhl.anchorMin=new Vector2(0f,1f); rfhl.anchorMax=new Vector2(1f,1f);
+            rfhl.offsetMin=new Vector2(0f,-1f); rfhl.offsetMax=Vector2.zero;
+            fhl.AddComponent<Image>().color=new Color(1f,0.95f,0.50f,0.40f);
+        }
 
         // irmão 3: handle slide area
         var ha=new GameObject("HA"); ha.transform.SetParent(go.transform,false);
@@ -934,24 +1120,40 @@ public class MenuInicialUI : MonoBehaviour
         var h=new GameObject("H"); h.transform.SetParent(ha.transform,false);
         var rh=h.AddComponent<RectTransform>();
         rh.anchorMin=new Vector2(0f,0f); rh.anchorMax=new Vector2(0f,1f);
-        rh.offsetMin=new Vector2(0f,-3f); rh.offsetMax=new Vector2(12f,3f); // 12px wide, 3px overflow
+        rh.offsetMin=new Vector2(-8f,-5f); rh.offsetMax=new Vector2(8f,5f); // 16px largura, transborda para baixo/cima
 
-        // knob irmão 0: sombra halo (atrás)
-        var kSh=new GameObject("KSh"); kSh.transform.SetParent(h.transform,false);
-        var rkSh=kSh.AddComponent<RectTransform>(); rkSh.anchorMin=Vector2.zero; rkSh.anchorMax=Vector2.one;
-        rkSh.offsetMin=new Vector2(-1f,-1f); rkSh.offsetMax=new Vector2(1f,1f);
-        kSh.AddComponent<Image>().color=new Color(0f,0f,0f,0.80f);
+        Image hImg;
+        if (sprSliderKnob != null)
+        {
+            // sombra do knob (atrás)
+            var kSh=new GameObject("KSh"); kSh.transform.SetParent(h.transform,false);
+            var rkSh=kSh.AddComponent<RectTransform>(); rkSh.anchorMin=Vector2.zero; rkSh.anchorMax=Vector2.one;
+            rkSh.offsetMin=new Vector2(1f,-2f); rkSh.offsetMax=new Vector2(3f,-2f);
+            var imgKSh=kSh.AddComponent<Image>(); imgKSh.sprite=sprSliderKnob; imgKSh.type=Image.Type.Simple;
+            imgKSh.color=new Color(0f,0f,0f,0.55f);
 
-        // knob irmão 1: corpo dourado
-        var kBd=new GameObject("KBd"); kBd.transform.SetParent(h.transform,false);
-        var rkBd=kBd.AddComponent<RectTransform>(); rkBd.anchorMin=Vector2.zero; rkBd.anchorMax=Vector2.one; rkBd.offsetMin=rkBd.offsetMax=Vector2.zero;
-        var hImg=kBd.AddComponent<Image>(); hImg.color=new Color(0.94f,0.80f,0.28f);
+            // corpo do knob (sprite)
+            var kBd=new GameObject("KBd"); kBd.transform.SetParent(h.transform,false);
+            var rkBd=kBd.AddComponent<RectTransform>(); rkBd.anchorMin=Vector2.zero; rkBd.anchorMax=Vector2.one; rkBd.offsetMin=rkBd.offsetMax=Vector2.zero;
+            hImg=kBd.AddComponent<Image>(); hImg.sprite=sprSliderKnob; hImg.type=Image.Type.Simple; hImg.color=Color.white;
+        }
+        else
+        {
+            // knob procedural: sombra + corpo dourado + highlight
+            var kSh=new GameObject("KSh"); kSh.transform.SetParent(h.transform,false);
+            var rkSh=kSh.AddComponent<RectTransform>(); rkSh.anchorMin=Vector2.zero; rkSh.anchorMax=Vector2.one;
+            rkSh.offsetMin=new Vector2(-1f,-1f); rkSh.offsetMax=new Vector2(1f,1f);
+            kSh.AddComponent<Image>().color=new Color(0f,0f,0f,0.80f);
 
-        // knob irmão 2: highlight topo
-        var kHi=new GameObject("KHi"); kHi.transform.SetParent(h.transform,false);
-        var rkHi=kHi.AddComponent<RectTransform>(); rkHi.anchorMin=new Vector2(0f,1f); rkHi.anchorMax=new Vector2(1f,1f);
-        rkHi.offsetMin=new Vector2(1f,-2f); rkHi.offsetMax=new Vector2(-1f,0f);
-        kHi.AddComponent<Image>().color=new Color(1f,0.98f,0.72f,0.65f);
+            var kBd=new GameObject("KBd"); kBd.transform.SetParent(h.transform,false);
+            var rkBd=kBd.AddComponent<RectTransform>(); rkBd.anchorMin=Vector2.zero; rkBd.anchorMax=Vector2.one; rkBd.offsetMin=rkBd.offsetMax=Vector2.zero;
+            hImg=kBd.AddComponent<Image>(); hImg.color=new Color(0.94f,0.80f,0.28f);
+
+            var kHi=new GameObject("KHi"); kHi.transform.SetParent(h.transform,false);
+            var rkHi=kHi.AddComponent<RectTransform>(); rkHi.anchorMin=new Vector2(0f,1f); rkHi.anchorMax=new Vector2(1f,1f);
+            rkHi.offsetMin=new Vector2(1f,-2f); rkHi.offsetMax=new Vector2(-1f,0f);
+            kHi.AddComponent<Image>().color=new Color(1f,0.98f,0.72f,0.65f);
+        }
 
         var sl=go.AddComponent<UnityEngine.UI.Slider>();
         sl.fillRect=rfi; sl.handleRect=rh; sl.targetGraphic=hImg;
@@ -1032,6 +1234,8 @@ public class MenuInicialUI : MonoBehaviour
         rac.offsetMin=Vector2.zero; rac.offsetMax=new Vector2(4f,0f);
         ac.AddComponent<Image>().color=isDanger ? new Color(0.95f,0.18f,0.10f,1f)
                                                 : new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.95f);
+
+        go.AddComponent<CardHover>();
 
         // Button no container raiz, targetGraphic = img (corpo)
         var btn=go.AddComponent<Button>(); btn.targetGraphic=img;

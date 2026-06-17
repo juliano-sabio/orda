@@ -392,9 +392,9 @@ public class MissoesUI : MonoBehaviour
 
         if (missaoPendente)
         {
-            CriarCard("Missão: Espírito de Evolução",
-                "Toque para coletar +1 Espírito",
-                "Derrote 50 inimigos em uma partida para ganhar +1 Espírito de Evolução. Gaste os espíritos na seleção de personagem para evoluir os status.",
+            CriarCard(Loc.T("missions.spirit_mission.title"),
+                Loc.T("missions.spirit_mission.collect"),
+                Loc.T("missions.spirit_mission.desc"),
                 new Color(0.30f, 0.85f, 1.00f), true, spriteEspiritoMissao,
                 brilhando: true,
                 onClick: () => ColetarMissaoEspirito(charIndex));
@@ -420,9 +420,9 @@ public class MissoesUI : MonoBehaviour
 
     void CriarCardMissaoApagada(int espiritos)
     {
-        CriarCard("Missão: Espírito de Evolução",
+        CriarCard(Loc.T("missions.spirit_mission.title"),
             string.Format(Loc.T("missions.spirits"), espiritos),
-            "Derrote 50 inimigos em uma partida para ganhar +1 Espírito de Evolução. Gaste os espíritos na seleção de personagem para evoluir os status.",
+            Loc.T("missions.spirit_mission.desc"),
             new Color(0.30f, 0.85f, 1.00f), true, spriteEspiritoMissao,
             apagado: true);
     }

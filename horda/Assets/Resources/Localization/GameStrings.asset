@@ -109,6 +109,22 @@ MonoBehaviour:
     - "\uB4A4\uB85C"
     - TERUG
     - KEMBALI
+  - key: settings.master
+    translations:
+    - Volume Geral
+    - Master Volume
+    - Volumen General
+    - Gesamtlautstärke
+    - Volume Général
+    - Volume Generale
+    - Общая громкость
+    - Głośność ogólna
+    - Genel Ses
+    - 主音量
+    - 全体音量
+    - 전체 볼륨
+    - Hoofdvolume
+    - Volume Utama
   - key: settings.music
     translations:
     - "Volume M\xFAsica"
@@ -141,6 +157,150 @@ MonoBehaviour:
     - "\uD6A8\uACFC\uC74C \uBCFC\uB968"
     - SFX Volume
     - Volume SFX
+  - key: settings.controls
+    translations:
+    - Controles
+    - Controls
+    - Controles
+    - Steuerung
+    - Commandes
+    - Controlli
+    - Управление
+    - Sterowanie
+    - Kontroller
+    - 控制
+    - 操作
+    - 조작
+    - Besturing
+    - Kontrol
+  - key: settings.move_up
+    translations:
+    - Mover para Cima
+    - Move Up
+    - Mover Arriba
+    - Hoch
+    - Monter
+    - Su
+    - Вверх
+    - W górę
+    - Yukarı
+    - 上移
+    - 上移動
+    - 위로
+    - Omhoog
+    - Naik
+  - key: settings.move_down
+    translations:
+    - Mover para Baixo
+    - Move Down
+    - Mover Abajo
+    - Runter
+    - Descendre
+    - Giù
+    - Вниз
+    - W dół
+    - Aşağı
+    - 下移
+    - 下移動
+    - 아래로
+    - Omlaag
+    - Turun
+  - key: settings.move_left
+    translations:
+    - Mover para Esquerda
+    - Move Left
+    - Mover Izquierda
+    - Links
+    - Gauche
+    - Sinistra
+    - Влево
+    - W lewo
+    - Sol
+    - 左移
+    - 左移動
+    - 왼쪽으로
+    - Links
+    - Kiri
+  - key: settings.move_right
+    translations:
+    - Mover para Direita
+    - Move Right
+    - Mover Derecha
+    - Rechts
+    - Droite
+    - Destra
+    - Вправо
+    - W prawo
+    - Sağ
+    - 右移
+    - 右移動
+    - 오른쪽으로
+    - Rechts
+    - Kanan
+  - key: settings.dash
+    translations:
+    - Dash
+    - Dash
+    - Dash
+    - Dash
+    - Dash
+    - Scatto
+    - Рывок
+    - Doskok
+    - Atılma
+    - 冲刺
+    - ダッシュ
+    - 대시
+    - Dash
+    - Dash
+  - key: settings.ultimate
+    translations:
+    - Ultimate
+    - Ultimate
+    - Definitiva
+    - Ultimate
+    - Ultime
+    - Suprema
+    - Ультимейт
+    - Ostateczna
+    - Ultimate
+    - 终极技
+    - アルティメット
+    - 궁극기
+    - Ultimate
+    - Ultimate
+  - key: settings.press_key
+    translations:
+    - Pressione uma tecla...
+    - Press a key...
+    - Pulsa una tecla...
+    - Taste drücken...
+    - Appuyez sur une touche...
+    - Premi un tasto...
+    - Нажмите клавишу...
+    - Naciśnij klawisz...
+    - Bir tuşa basın...
+    - 按一个键...
+    - キーを押してください...
+    - 키를 누르세요...
+    - Druk op een toets...
+    - Tekan tombol...
+  - key: settings.reset_controls
+    translations:
+    - Restaurar Padrão
+    - Reset to Default
+    - Restaurar Predeterminado
+    - Standard wiederherstellen
+    - Réinitialiser
+    - Ripristina Predefiniti
+    - Сбросить по умолчанию
+    - Przywróć domyślne
+    - Varsayılana Sıfırla
+    - 恢复默认
+    - デフォルトに戻す
+    - 기본값으로 초기화
+    - Standaard herstellen
+    - Atur Ulang
   - key: settings.fullscreen
     translations:
     - Tela Cheia
@@ -1197,6 +1357,70 @@ MonoBehaviour:
     - "\uC7A0\uAE08"
     - GEBLOKKEERD
     - TERKUNCI
+  - key: terrain.unavailable
+    translations:
+    - INDISPON\u00CDVEL
+    - UNAVAILABLE
+    - NO DISPONIBLE
+    - NICHT VERF\u00DCGBAR
+    - INDISPONIBLE
+    - NON DISPONIBILE
+    - \u041D\u0415\u0414\u041E\u0421\u0422\u0423\u041F\u041D\u041E
+    - NIEDOST\u0118PNE
+    - KULLANILAMAZ
+    - \u4E0D\u53EF\u7528
+    - \u5229\u7528\u4E0D\u53EF
+    - \uC0AC\uC6A9 \uBD88\uAC00
+    - NIET BESCHIKBAAR
+    - TIDAK TERSEDIA
+  - key: terrain.record
+    translations:
+    - "Recorde:"
+    - "Record:"
+    - "R\u00E9cord:"
+    - "Rekord:"
+    - "Record :"
+    - "Record:"
+    - "\u0420\u0435\u043A\u043E\u0440\u0434:"
+    - "Rekord:"
+    - "Rekor:"
+    - "\u8BB0\u5F55\uFF1A"
+    - "\u8A18\u9332\uFF1A"
+    - "\uAE30\uB85D:"
+    - "Record:"
+    - "Rekor:"
+  - key: terrain.kills
+    translations:
+    - mortes
+    - kills
+    - muertes
+    - Kills
+    - \u00E9liminations
+    - uccisioni
+    - \u0443\u0431\u0438\u0439\u0441\u0442\u0432
+    - zab\u00F3jstw
+    - \u00F6ld\u00FCrme
+    - \u51FB\u6740
+    - \u6483\u7834
+    - \uCC98\uCE58
+    - kills
+    - kill
+  - key: terrain.no_record
+    translations:
+    - Ainda sem recorde
+    - No record yet
+    - Sin r\u00E9cord a\u00FAn
+    - Noch kein Rekord
+    - Pas encore de record
+    - Ancora nessun record
+    - \u041F\u043E\u043A\u0430 \u043D\u0435\u0442 \u0440\u0435\u043A\u043E\u0440\u0434\u0430
+    - Brak rekordu
+    - Hen\u00FCz rekor yok
+    - \u6682\u65E0\u8BB0\u5F55
+    - \u307E\u3060\u8A18\u9332\u306A\u3057
+    - \uAE30\uB85D \uC5C6\uC74C
+    - Nog geen record
+    - Belum ada rekor
   - key: diff.easy
     translations:
     - "F\xC1CIL"
@@ -1504,6 +1728,54 @@ MonoBehaviour:
     - "\uC0AC\uC6A9 \uAC00\uB2A5\uD55C \uC601\uD63C: {0}"
     - 'Geesten beschikbaar: {0}'
     - 'Roh tersedia: {0}'
+  - key: missions.spirit_mission.title
+    translations:
+    - "Missão: Espírito de Evolução"
+    - "Mission: Evolution Spirit"
+    - "Misión: Espíritu de Evolución"
+    - "Mission: Evolutionsgeist"
+    - "Mission : Esprit d'Évolution"
+    - "Missione: Spirito di Evoluzione"
+    - "Миссия: Дух Эволюции"
+    - "Misja: Duch Ewolucji"
+    - "Görev: Evrim Ruhu"
+    - "任务：进化精灵"
+    - "ミッション：進化の精霊"
+    - "미션: 진화 영혼"
+    - "Missie: Evolutiegeest"
+    - "Misi: Roh Evolusi"
+  - key: missions.spirit_mission.collect
+    translations:
+    - Toque para coletar +1 Espírito
+    - Tap to collect +1 Spirit
+    - Toca para recoger +1 Espíritu
+    - Tippen, um +1 Geist zu sammeln
+    - Touchez pour collecter +1 Esprit
+    - Tocca per raccogliere +1 Spirito
+    - Нажмите, чтобы получить +1 Дух
+    - Dotknij, aby zebrać +1 Ducha
+    - +1 Ruh toplamak için dokun
+    - 点击收集 +1 精灵
+    - タップして+1精霊を獲得
+    - 탭하여 +1 영혼 획득
+    - Tik om +1 Geest te verzamelen
+    - Ketuk untuk mengumpulkan +1 Roh
+  - key: missions.spirit_mission.desc
+    translations:
+    - Derrote 50 inimigos em uma partida para ganhar +1 Espírito de Evolução. Gaste os espíritos na seleção de personagem para evoluir os status.
+    - Defeat 50 enemies in a single match to earn +1 Evolution Spirit. Spend spirits in character selection to upgrade your stats.
+    - Derrota a 50 enemigos en una partida para ganar +1 Espíritu de Evolución. Gasta los espíritus en la selección de personaje para mejorar tus estadísticas.
+    - Besiege 50 Gegner in einem Spiel, um +1 Evolutionsgeist zu erhalten. Gib Geister in der Charakterauswahl aus, um deine Werte zu verbessern.
+    - Vainquez 50 ennemis en une partie pour gagner +1 Esprit d'Évolution. Dépensez les esprits dans la sélection de personnage pour améliorer vos stats.
+    - Sconfiggi 50 nemici in una partita per ottenere +1 Spirito di Evoluzione. Spendi gli spiriti nella selezione del personaggio per potenziare le statistiche.
+    - Победите 50 врагов за один матч, чтобы получить +1 Дух Эволюции. Тратьте духов при выборе персонажа, чтобы улучшать характеристики.
+    - Pokonaj 50 wrogów w jednej rozgrywce, aby zdobyć +1 Ducha Ewolucji. Wydawaj duchy przy wyborze postaci, aby ulepszać statystyki.
+    - "+1 Evrim Ruhu kazanmak için bir maçta 50 düşman yen. Ruhları karakter seçiminde harcayarak statlarını geliştir."
+    - 在一场对局中击败50个敌人即可获得+1进化精灵。在角色选择中消耗精灵来提升属性。
+    - 1試合で敵を50体倒すと+1進化の精霊を獲得。キャラクター選択で精霊を使ってステータスを強化しよう。
+    - 한 판에서 적 50명을 처치하면 +1 진화 영혼을 얻습니다. 캐릭터 선택에서 영혼을 사용해 스탯을 강화하세요.
+    - Versla 50 vijanden in één match om +1 Evolutiegeest te verdienen. Geef geesten uit in de personageselectie om je stats te verbeteren.
+    - Kalahkan 50 musuh dalam satu pertandingan untuk mendapatkan +1 Roh Evolusi. Gunakan roh di pemilihan karakter untuk meningkatkan statistik.
   - key: missions.title
     translations:
     - "MISS\xD5ES DE DESBLOQUEIO"
@@ -3472,20 +3744,20 @@ MonoBehaviour:
     - Servo
   - key: char.servo.desc
     translations:
-    - "Outrora soberano de uma dimens\xE3o grandiosa, encontrou ref\xFAgio entre os esp\xEDritos."
-    - "Once sovereign of a grand dimension, found refuge among the spirits."
-    - "Antaño soberano de una dimensión grandiosa, encontró refugio entre los espíritus."
-    - "Einst Herrscher einer großartigen Dimension, fand Zuflucht bei den Geistern."
-    - "Jadis souverain d'une dimension grandiose, il a trouvé refuge parmi les esprits."
-    - "Un tempo sovrano di una dimensione grandiosa, ha trovato rifugio tra gli spiriti."
-    - "Некогда правитель великого измерения, нашёл убежище среди духов."
-    - "Niegdyś władca wspaniałego wymiaru, znalazł schronienie wśród duchów."
-    - "Bir zamanlar büyük bir boyutun hükümdarı, ruhlar arasında sığınak buldu."
-    - "曾是一个宏伟维度的主宰，在灵魂之间找到了庇护。"
-    - "かつては偉大な次元の支配者、精霊たちの中に避難所を見つけた。"
-    - "한때 웅장한 차원의 지배자였지만, 영혼들 사이에서 피난처를 찾았다."
-    - "Ooit heerser van een grandiose dimensie, vond toevlucht bij de geesten."
-    - "Dulu penguasa dimensi megah, menemukan perlindungan di antara para roh."
+    - "Outrora soberano de uma dimensão grandiosa, viu seu trono ser tomado e seus poderes arrancados. Exilado do próprio destino, encontrou refúgio em uma clareira habitada por espíritos. Eles o acolheram como um dos seus, oferecendo companhia e conforto para sua alma ferida. Ainda assim, sob a luz pálida da lua, as memórias de sua antiga glória permanecem vivas, lembrando-o de tudo o que perdeu — e de tudo o que um dia poderá recuperar."
+    - "Once sovereign of a grand dimension, he watched his throne be seized and his powers torn away. Exiled from his own destiny, he found refuge in a clearing inhabited by spirits. They welcomed him as one of their own, offering companionship and comfort to his wounded soul. Even so, under the pale light of the moon, the memories of his former glory remain alive, reminding him of all he lost — and of all he may one day reclaim."
+    - "Antaño soberano de una dimensión grandiosa, vio cómo le arrebataban el trono y le arrancaban sus poderes. Exiliado de su propio destino, encontró refugio en un claro habitado por espíritus. Lo acogieron como uno de los suyos, ofreciendo compañía y consuelo a su alma herida. Aun así, bajo la pálida luz de la luna, los recuerdos de su antigua gloria siguen vivos, recordándole todo lo que perdió — y todo lo que algún día podrá recuperar."
+    - "Einst Herrscher einer großartigen Dimension, musste er mit ansehen, wie sein Thron geraubt und seine Kräfte entrissen wurden. Aus seinem eigenen Schicksal verbannt, fand er Zuflucht auf einer von Geistern bewohnten Lichtung. Sie nahmen ihn als einen der Ihren auf und schenkten seiner verwundeten Seele Gesellschaft und Trost. Dennoch bleiben im fahlen Licht des Mondes die Erinnerungen an seinen einstigen Ruhm lebendig und erinnern ihn an alles, was er verlor — und an alles, was er eines Tages zurückgewinnen könnte."
+    - "Jadis souverain d'une dimension grandiose, il vit son trône lui être ravi et ses pouvoirs arrachés. Exilé de son propre destin, il trouva refuge dans une clairière habitée par des esprits. Ils l'accueillirent comme l'un des leurs, offrant compagnie et réconfort à son âme blessée. Pourtant, sous la pâle lueur de la lune, les souvenirs de son ancienne gloire demeurent vivaces, lui rappelant tout ce qu'il a perdu — et tout ce qu'il pourra un jour reconquérir."
+    - "Un tempo sovrano di una dimensione grandiosa, vide il suo trono essere usurpato e i suoi poteri strappati via. Esiliato dal proprio destino, trovò rifugio in una radura abitata dagli spiriti. Lo accolsero come uno dei loro, offrendo compagnia e conforto alla sua anima ferita. Eppure, sotto la pallida luce della luna, i ricordi della sua antica gloria restano vivi, ricordandogli tutto ciò che ha perduto — e tutto ciò che un giorno potrà riconquistare."
+    - "Некогда правитель великого измерения, он увидел, как его трон захватили, а силы отняли. Изгнанный из собственной судьбы, он нашёл убежище на поляне, населённой духами. Они приняли его как своего, даря общество и утешение его израненной душе. И всё же в бледном свете луны воспоминания о былой славе остаются живы, напоминая ему обо всём, что он потерял — и обо всём, что однажды сможет вернуть."
+    - "Niegdyś władca wspaniałego wymiaru, ujrzał, jak odbierają mu tron i wydzierają moce. Wygnany z własnego przeznaczenia, znalazł schronienie na polanie zamieszkanej przez duchy. Przyjęły go jak jednego ze swoich, ofiarowując towarzystwo i ukojenie jego zranionej duszy. Mimo to, w bladym świetle księżyca, wspomnienia dawnej chwały wciąż pozostają żywe, przypominając mu o wszystkim, co utracił — i o wszystkim, co pewnego dnia może odzyskać."
+    - "Bir zamanlar büyük bir boyutun hükümdarıyken, tahtının elinden alınışını ve güçlerinin söküp atılışını izledi. Kendi kaderinden sürgün edilmiş halde, ruhların yaşadığı bir açıklıkta sığınak buldu. Onu kendilerinden biri gibi kabul ettiler, yaralı ruhuna arkadaşlık ve teselli sundular. Yine de, ayın soluk ışığında, eski ihtişamının anıları canlı kalır; ona kaybettiği her şeyi — ve bir gün geri kazanabileceği her şeyi hatırlatır."
+    - "他曾是一个宏伟维度的主宰，却眼睁睁看着王座被夺走、力量被剥离。被自己的命运放逐后，他在一片栖息着精灵的林间空地找到了庇护。它们把他当作自己人接纳，为他受伤的灵魂带来陪伴与慰藉。然而，在苍白的月光下，昔日荣耀的记忆依旧鲜活，提醒着他失去的一切——以及有朝一日或许能夺回的一切。"
+    - "かつては偉大な次元の支配者だったが、玉座を奪われ、力を引き裂かれるのを目の当たりにした。自らの運命から追放され、精霊たちが住まう開けた森に避難所を見つけた。彼らは彼を仲間として迎え入れ、傷ついた魂に寄り添いと安らぎを与えた。それでも、淡い月明かりの下、かつての栄光の記憶は今も生き続け、彼が失ったすべて——そしていつの日か取り戻せるかもしれないすべてを思い起こさせる。"
+    - "한때 웅장한 차원의 지배자였던 그는 왕좌를 빼앗기고 힘을 강탈당하는 것을 지켜봐야 했다. 자신의 운명에서 추방된 그는 영혼들이 깃든 숲속 빈터에서 피난처를 찾았다. 그들은 그를 동족처럼 받아들여 상처 입은 영혼에 동무와 위안을 건넸다. 그럼에도 창백한 달빛 아래, 옛 영광의 기억은 여전히 생생하여 그가 잃은 모든 것 — 그리고 언젠가 되찾을지도 모를 모든 것을 일깨운다."
+    - "Ooit heerser van een grandioze dimensie, zag hij zijn troon ingenomen en zijn krachten weggerukt worden. Verbannen uit zijn eigen lot, vond hij toevlucht op een open plek bewoond door geesten. Ze verwelkomden hem als een van hen en schonken gezelschap en troost aan zijn gewonde ziel. Toch blijven onder het bleke licht van de maan de herinneringen aan zijn vroegere glorie levend, die hem herinneren aan alles wat hij verloor — en aan alles wat hij ooit zou kunnen heroveren."
+    - "Dulu penguasa dimensi yang megah, ia menyaksikan takhtanya direbut dan kekuatannya dirampas. Terbuang dari takdirnya sendiri, ia menemukan perlindungan di sebuah tanah lapang yang dihuni para roh. Mereka menyambutnya sebagai salah satu dari mereka, memberikan teman dan penghiburan bagi jiwanya yang terluka. Namun, di bawah cahaya pucat rembulan, kenangan akan kejayaannya yang dahulu tetap hidup, mengingatkannya pada semua yang telah hilang — dan semua yang suatu hari mungkin bisa direbut kembali."
   - key: char.servo.missao
     translations:
     - "Recupere o trono perdido."
