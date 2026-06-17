@@ -123,8 +123,8 @@ public class InimigoController : MonoBehaviour
     }
 
     // Este controller pertence a um boss? (usado pelo TimerManager pra pausar o countdown)
-    public bool EhBoss() => GetComponent<BossController>() != null
-                         || GetComponentInParent<BossController>() != null;
+    public bool EhBoss() => GetComponent<IBoss>() != null
+                         || GetComponentInParent<IBoss>() != null;
 
     public void ReceberDano(float dano, bool isCrit = false, bool mostrarNumero = true)
     {

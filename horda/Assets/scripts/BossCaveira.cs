@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController))]
-public class BossCaveira : MonoBehaviour
+public class BossCaveira : MonoBehaviour, IBoss
 {
     // ──────────────────────────────────────────────
     // IDENTIDADE

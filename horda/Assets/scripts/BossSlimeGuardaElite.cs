@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController), typeof(Rigidbody2D))]
-public class BossSlimeGuardaElite : MonoBehaviour
+public class BossSlimeGuardaElite : MonoBehaviour, IBoss
 {
     // ── IDENTIDADE ───────────────────────────────────────────────────────────────
     [Header("Identidade")]

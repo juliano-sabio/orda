@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(InimigoController))]
-public class BossPrincesa : MonoBehaviour
+public class BossPrincesa : MonoBehaviour, IBoss
 {
     // ──────────────────────────────────────────────
     // IDENTIDADE
