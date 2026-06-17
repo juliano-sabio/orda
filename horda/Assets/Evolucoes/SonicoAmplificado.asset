@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "Dano base por pulso \xE9 dobrado."
   icone: {fileID: -359555808507455121, guid: c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4, type: 3}
   corDestaque: {r: 0.6, g: 0.9, b: 1, a: 1}
+  nameKey: evo.sonicoamplificado.name
+  descriptionKey: evo.sonicoamplificado.desc
   skillAlvo: 54
   tipoEvolucao: 83
   raridade: 2

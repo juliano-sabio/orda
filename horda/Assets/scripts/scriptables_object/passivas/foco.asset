@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: foco
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: Foco
+  nameKey: pass.foco.name
+  descriptionKey: pass.foco.desc
   description: "A cada 18s, garante cr\xEDticos em todos os ataques por 6s."
   passiveIcon: {fileID: -8606170054980849083, guid: 7a8b9c0d1e2f7a8b9c0d1e2f7a8b9c0d, type: 3}
   xpBonusPercent: 0

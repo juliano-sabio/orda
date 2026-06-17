@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: mare_implacavel
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Mar\xE9 Implac\xE1vel"
+  nameKey: ult.mare.name
+  descriptionKey: ult.mare.desc
   description: "Cria uma mar\xE9 ao redor do jogador que deixa inimigos lentos e
     os afoga aos poucos."
   ultimateIcon: {fileID: 3600028234273540921, guid: 7740aa40fcbde9a40aac9c6d883b0713, type: 3}

@@ -60,7 +60,7 @@ public class BotoesSelecaoPersonagem : MonoBehaviour
         rTxt.offsetMax = Vector2.zero;
 
         TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text = "← VOLTAR";
+        txt.text = $"← {Loc.T("ui.back")}";
         txt.fontSize = 22f;
         txt.fontStyle = FontStyles.Bold;
         txt.color = Color.white;
@@ -95,7 +95,7 @@ public class BotoesSelecaoPersonagem : MonoBehaviour
         rTxt.offsetMax = Vector2.zero;
 
         TextMeshProUGUI txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text = "JOGAR";
+        txt.text = Loc.T("ui.play");
         txt.fontSize = 26f;
         txt.fontStyle = FontStyles.Bold;
         txt.color = Color.white;

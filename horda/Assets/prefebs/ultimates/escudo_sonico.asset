@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: escudo_sonico
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Escudo S\xF4nico"
+  nameKey: ult.escudo_sonico.name
+  descriptionKey: ult.escudo_sonico.desc
   description: "Envolve o jogador em ondas s\xF4nicas por 5s. A cada 0.8s dispara
     um pulso que causa dano crescente e empurra inimigos e proj\xE9teis."
   ultimateIcon: {fileID: -359555808507455121, guid: c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4, type: 3}

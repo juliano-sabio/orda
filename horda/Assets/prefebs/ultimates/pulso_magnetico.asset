@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: pulso_magnetico
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Pulso Magn\xE9tico"
+  nameKey: ult.pulso_mag.name
+  descriptionKey: ult.pulso_mag.desc
   description: "Atrai todos os inimigos no raio por 4.5s, depois os repele com for\xE7a."
   ultimateIcon: {fileID: 4991954654029058326, guid: 558e9b9ecb3d39c49ab9d6f5373de702, type: 3}
   cooldown: 22

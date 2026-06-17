@@ -103,7 +103,7 @@ public class LevelUpEffect : MonoBehaviour
         r.sizeDelta           = new Vector2(4f, 1.5f);
 
         TextMeshProUGUI txt   = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text              = $"LEVEL UP!\nNv. {level}";
+        txt.text              = $"{Loc.T("ui.level_up")}\n{Loc.T("ui.level_abbr")} {level}";
         txt.fontSize          = 0.55f;
         txt.fontStyle         = FontStyles.Bold;
         txt.alignment         = TextAlignmentOptions.Center;

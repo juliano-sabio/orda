@@ -186,7 +186,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Skill Name Text (TMP)
         GameObject nameText = CreateTMPText(panel, "SkillNameText", new Vector2(0, 50), new Vector2(480, 60));
         TextMeshProUGUI nameTextComponent = nameText.GetComponent<TextMeshProUGUI>();
-        nameTextComponent.text = "NOVA SKILL ADQUIRIDA!";
+        nameTextComponent.text = Loc.T("ui.new_skill");
         nameTextComponent.color = Color.yellow;
         nameTextComponent.fontSize = 28;
         nameTextComponent.fontStyle = FontStyles.Bold;
@@ -331,7 +331,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Cooldown Text (TMP)
         GameObject cooldownText = CreateTMPText(slot, "CooldownText", new Vector2(0, -45), new Vector2(100, 30));
         TextMeshProUGUI textComponent = cooldownText.GetComponent<TextMeshProUGUI>();
-        textComponent.text = "PRONTO";
+        textComponent.text = Loc.T("ui.ready");
         textComponent.color = Color.green;
         textComponent.fontSize = 12;
         textComponent.fontStyle = FontStyles.Bold;
@@ -359,7 +359,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Cooldown Text (TMP)
         GameObject cooldownText = CreateTMPText(slot, "CooldownText", new Vector2(0, -55), new Vector2(120, 30));
         TextMeshProUGUI textComponent = cooldownText.GetComponent<TextMeshProUGUI>();
-        textComponent.text = "BLOQUEADA";
+        textComponent.text = Loc.T("ui.locked");
         textComponent.color = Color.gray;
         textComponent.fontSize = 11;
         textComponent.fontStyle = FontStyles.Bold;
@@ -504,7 +504,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Advantage Text (TMP)
         GameObject advantageText = CreateTMPText(panel, "AdvantageText", new Vector2(0, 15), new Vector2(280, 25));
         TextMeshProUGUI advantageTextComponent = advantageText.GetComponent<TextMeshProUGUI>();
-        advantageTextComponent.text = "Forte contra: ";
+        advantageTextComponent.text = $"{Loc.T("ui.strong_against")}: ";
         advantageTextComponent.color = Color.green;
         advantageTextComponent.fontSize = 12;
         advantageTextComponent.alignment = TextAlignmentOptions.Left;
@@ -512,7 +512,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Disadvantage Text (TMP)
         GameObject disadvantageText = CreateTMPText(panel, "DisadvantageText", new Vector2(0, -15), new Vector2(280, 25));
         TextMeshProUGUI disadvantageTextComponent = disadvantageText.GetComponent<TextMeshProUGUI>();
-        disadvantageTextComponent.text = "Fraco contra: ";
+        disadvantageTextComponent.text = $"{Loc.T("ui.weak_against")}: ";
         disadvantageTextComponent.color = Color.red;
         disadvantageTextComponent.fontSize = 12;
         disadvantageTextComponent.alignment = TextAlignmentOptions.Left;
@@ -538,7 +538,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Título (TMP)
         GameObject title = CreateTMPText(statusPanel, "Title", new Vector2(0, 280), new Vector2(430, 40));
         TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
-        titleText.text = "STATUS DO JOGADOR";
+        titleText.text = Loc.T("ui.status_player");
         titleText.color = Color.yellow;
         titleText.fontSize = 24;
         titleText.fontStyle = FontStyles.Bold;
@@ -591,7 +591,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Título (TMP)
         GameObject title = CreateTMPText(selectionPanel, "Title", new Vector2(0, 230), new Vector2(680, 40));
         TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
-        titleText.text = "SELECAO DE SKILLS";
+        titleText.text = Loc.T("ui.skill_select_panel");
         titleText.color = Color.yellow;
         titleText.fontSize = 28;
         titleText.fontStyle = FontStyles.Bold;
@@ -652,7 +652,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Título (TMP)
         GameObject title = CreateTMPText(panel, "Title", new Vector2(0, 250), new Vector2(600, 60));
         TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
-        titleText.text = "CARTAS DE STATUS";
+        titleText.text = Loc.T("ui.status_cards");
         titleText.color = Color.yellow;
         titleText.fontSize = 32;
         titleText.fontStyle = FontStyles.Bold;
@@ -661,7 +661,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Status Points Text (TMP)
         GameObject pointsText = CreateTMPText(panel, "StatusPointsText", new Vector2(300, 200), new Vector2(300, 40));
         TextMeshProUGUI pointsTextComponent = pointsText.GetComponent<TextMeshProUGUI>();
-        pointsTextComponent.text = "Pontos Disponiveis: 0";
+        pointsTextComponent.text = $"{Loc.T("ui.points_available")}: 0";
         pointsTextComponent.color = Color.white;
         pointsTextComponent.fontSize = 18;
         pointsTextComponent.fontStyle = FontStyles.Bold;
@@ -686,7 +686,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Bônus Ativos (TMP)
         GameObject bonusesText = CreateTMPText(panel, "ActiveBonusesText", new Vector2(-350, 0), new Vector2(250, 300));
         TextMeshProUGUI bonusesTextComponent = bonusesText.GetComponent<TextMeshProUGUI>();
-        bonusesTextComponent.text = "BONUS ATIVOS:\nNenhum";
+        bonusesTextComponent.text = $"{Loc.T("ui.active_bonuses")}:\n{Loc.T("ui.active_bonuses_none")}";
         bonusesTextComponent.color = Color.green;
         bonusesTextComponent.fontSize = 14;
         bonusesTextComponent.alignment = TextAlignmentOptions.TopLeft;
@@ -695,7 +695,7 @@ public class UIManagerCanvasCreator : EditorWindow
         // Botão Fechar
         GameObject closeButton = CreateTMPButton(panel, "CloseButton", new Vector2(400, -250), new Vector2(100, 40));
         TextMeshProUGUI closeButtonText = closeButton.GetComponentInChildren<TextMeshProUGUI>();
-        closeButtonText.text = "FECHAR (C)";
+        closeButtonText.text = $"{Loc.T("ui.close")} (C)";
         closeButtonText.color = Color.white;
         closeButtonText.fontSize = 14;
 

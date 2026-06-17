@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: pulso_vital
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: Pulso Vital
+  nameKey: pass.pulso.name
+  descriptionKey: pass.pulso.desc
   description: "A cada 20s, drena {0} HP de cada inimigo pr\xF3ximo (raio 4u) e transfere
     o total curado para voc\xEA."
   passiveIcon: {fileID: 82063977124821072, guid: 1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d, type: 3}

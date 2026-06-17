@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: ChicoteEnergia
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Chicote de Energia
+  nameKey: skill.chicoteenergia.name
+  descriptionKey: skill.chicoteenergia.desc
   description: "Um chicote de energia varre 360\xB0 ao redor do player atingindo
     todos os inimigos."
   icon: {fileID: 6843361105861325913, guid: da8bd35793f74004aba2e7e45b5c39ed, type: 3}

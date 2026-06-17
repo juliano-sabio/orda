@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: EscudoEspinhoso
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Escudo Espinhoso
+  nameKey: skill.escudo.name
+  descriptionKey: skill.escudo.desc
   description: 'Um escudo de espinhos orbita ao redor do jogador.
 
     Ao tocar um

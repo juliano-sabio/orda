@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: ChuvaEstrelas
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Chuva de Estrelas
+  nameKey: skill.chuvaestrelas.name
+  descriptionKey: skill.chuvaestrelas.desc
   description: "Estrelas caem do c\xE9u sobre os inimigos mais pr\xF3ximos causando
     dano em \xE1rea."
   icon: {fileID: 7104507654240246053, guid: 748e7f84bf243b840ace2530624cc056, type: 3}

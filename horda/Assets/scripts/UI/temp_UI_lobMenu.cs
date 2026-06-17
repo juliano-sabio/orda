@@ -35,7 +35,7 @@ public class temp_UI_lobMenu : MonoBehaviour
         if (playerLevelText != null)
         {
             int playerLevel = PlayerPrefs.GetInt("PlayerLevel", 1);
-            playerLevelText.text = $"Nível: {playerLevel}";
+            playerLevelText.text = $"{Loc.T("ui.level")}: {playerLevel}";
         }
 
         // Atualizar personagem selecionado
@@ -50,11 +50,11 @@ public class temp_UI_lobMenu : MonoBehaviour
                 charManager.characters[selectedIndex] != null)
             {
                 string charName = charManager.characters[selectedIndex].characterName;
-                selectedCharacterText.text = $"Personagem: {charName}";
+                selectedCharacterText.text = $"{Loc.T("lobby.character")}: {charName}";
             }
             else
             {
-                selectedCharacterText.text = "Personagem: Nenhum";
+                selectedCharacterText.text = $"{Loc.T("lobby.character")}: {Loc.T("lobby.none")}";
             }
         }
 
@@ -62,7 +62,7 @@ public class temp_UI_lobMenu : MonoBehaviour
         if (coinsText != null)
         {
             int coins = PlayerPrefs.GetInt("PlayerCoins", 1000);
-            coinsText.text = $"Moedas: {coins}";
+            coinsText.text = $"{Loc.T("lobby.coins")}: {coins}";
         }
     }
 
@@ -92,7 +92,7 @@ public class temp_UI_lobMenu : MonoBehaviour
         if (coinsText != null)
         {
             int coins = PlayerPrefs.GetInt("PlayerCoins", 1000);
-            coinsText.text = $"Moedas: {coins}";
+            coinsText.text = $"{Loc.T("lobby.coins")}: {coins}";
         }
     }
 
@@ -111,11 +111,11 @@ public class temp_UI_lobMenu : MonoBehaviour
                 charManager.characters[selectedIndex] != null)
             {
                 string charName = charManager.characters[selectedIndex].characterName;
-                selectedCharacterText.text = $"Personagem: {charName}";
+                selectedCharacterText.text = $"{Loc.T("lobby.character")}: {charName}";
             }
             else
             {
-                selectedCharacterText.text = "Personagem: Nenhum";
+                selectedCharacterText.text = $"{Loc.T("lobby.character")}: {Loc.T("lobby.none")}";
             }
         }
     }

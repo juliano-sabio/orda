@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "+3s de dura\xE7\xE3o da tempestade."
   icone: {fileID: -7258724206939660299, guid: f1e2d3c4b5a697886950413200000001, type: 3}
   corDestaque: {r: 1, g: 0.7, b: 0.05, a: 1}
+  nameKey: evo.tempestadecontinua.name
+  descriptionKey: evo.tempestadecontinua.desc
   skillAlvo: 44
   tipoEvolucao: 64
   raridade: 3

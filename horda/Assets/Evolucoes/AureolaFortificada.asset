@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "+80% de regen e +20% de redu\xE7\xE3o de dano."
   icone: {fileID: 3831778685843724948, guid: 2136ad60b4889bb458be8ff4048fe69a, type: 3}
   corDestaque: {r: 1, g: 0.9, b: 0.2, a: 1}
+  nameKey: evo.aureolafortificada.name
+  descriptionKey: evo.aureolafortificada.desc
   skillAlvo: 22
   tipoEvolucao: 55
   raridade: 2

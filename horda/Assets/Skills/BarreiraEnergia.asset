@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: BarreiraEnergia
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Barreira de Energia
+  nameKey: skill.barreiraenergia.name
+  descriptionKey: skill.barreiraenergia.desc
   description: "Cria um escudo com HP pr\xF3prio que absorve dano. Se quebrar, regenera
     ap\xF3s 12s."
   icon: {fileID: -1949818493086652813, guid: fa4be220979e19748a6d727ccdc38d22, type: 3}

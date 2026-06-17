@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: 5 cristais orbitam em vez de 3.
   icone: {fileID: 6565919703495854305, guid: bfba3e0ddedaccd47bdcb21d505a61c1, type: 3}
   corDestaque: {r: 0.45, g: 0.88, b: 1, a: 1}
+  nameKey: evo.cristaisduplos.name
+  descriptionKey: evo.cristaisduplos.desc
   skillAlvo: 60
   tipoEvolucao: 59
   raridade: 2

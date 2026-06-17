@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: servo
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   characterName: servo
+  nameKey: char.servo.name
+  descriptionKey: char.servo.desc
+  missaoKey: char.servo.missao
   description: "Outrora soberano de uma dimens\xE3o grandiosa, viu seu trono ser
     tomado e seus poderes arrancados. Exilado do pr\xF3prio destino, encontrou ref\xFAgio
     em uma clareira habitada por esp\xEDritos. Eles o acolheram como um dos seus,

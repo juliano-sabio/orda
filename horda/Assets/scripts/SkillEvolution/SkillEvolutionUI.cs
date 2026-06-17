@@ -234,8 +234,8 @@ public class SkillEvolutionUI : MonoBehaviour
         if (rm != null)
         {
             var tempSkill = ScriptableObject.CreateInstance<SkillData>();
-            tempSkill.skillName   = data.nomeEvolucao;
-            tempSkill.description = data.descricao;
+            tempSkill.skillName   = data.GetDisplayName();
+            tempSkill.description = data.GetDisplayDescription();
             tempSkill.icon        = data.icone;
             tempSkill.rarity      = data.raridade;
             tempSkill.element     = PlayerStats.Element.None;
@@ -249,9 +249,9 @@ public class SkillEvolutionUI : MonoBehaviour
             {
                 string n = t.name.ToLower();
                 if      (n.Contains("name")  || n.Contains("nome")  || n.Contains("title"))
-                    { t.text = $"<b>{data.nomeEvolucao}</b>"; t.color = data.corDestaque; }
+                    { t.text = $"<b>{data.GetDisplayName()}</b>"; t.color = data.corDestaque; }
                 else if (n.Contains("desc")  || n.Contains("detail"))
-                    { t.text = data.descricao; t.color = Color.white; }
+                    { t.text = data.GetDisplayDescription(); t.color = Color.white; }
                 else if (n.Contains("rarity") || n.Contains("rarid"))
                     { t.text = data.raridade.ToString().ToUpper(); t.color = data.corDestaque; }
                 t.textWrappingMode = TMPro.TextWrappingModes.Normal;

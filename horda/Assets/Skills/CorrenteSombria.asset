@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: CorrenteSombria
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Corrente Sombria
+  nameKey: skill.correntesombria.name
+  descriptionKey: skill.correntesombria.desc
   description: "Correntes sombrias envolvem os 3 inimigos mais pr\xF3ximos e pulsam
     dano por 3 segundos."
   icon: {fileID: -8977548862602377259, guid: 14481da4c03d07d4f91fb58dea5aa33d, type: 3}

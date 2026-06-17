@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: SombrasCruz
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Sombras em Cruz
+  nameKey: skill.sombrascruz.name
+  descriptionKey: skill.sombrascruz.desc
   description: 4 ondas de energia roxas disparam em + atravessando todos os inimigos
     no caminho.
   icon: {fileID: 1330450550990237758, guid: 60c473160ebf68e499fd92cd34276c80, type: 3}

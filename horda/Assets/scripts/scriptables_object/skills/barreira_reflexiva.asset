@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: barreira_reflexiva
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: barreira_reflexiva
+  nameKey: skill.barreira.name
+  descriptionKey: skill.barreira.desc
   description: barreira que reflete os projeteis inimigos como o projetil do player
   icon: {fileID: -3635420313055740377, guid: 7891f33c88ffe3948a027e73b85f53ad, type: 3}
   cardPrefab: {fileID: 5390246736133992548, guid: 3bc19b41346135a478c7a96d9ebbb42b, type: 3}

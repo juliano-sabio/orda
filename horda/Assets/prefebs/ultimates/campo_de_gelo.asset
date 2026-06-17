@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: campo_de_gelo
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: Campo de Gelo
+  nameKey: ult.campo_gelo.name
+  descriptionKey: ult.campo_gelo.desc
   description: Congela todos os inimigos dentro do raio por 4 segundos.
   ultimateIcon: {fileID: -8909505179940084187, guid: 0b30c626fedbeaf44afba239d80252d8, type: 3}
   cooldown: 25

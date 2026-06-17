@@ -53,6 +53,29 @@ public static class Loc
         return idx < NativeNames.Length ? NativeNames[idx] : l.ToString();
     }
 
+    // Mapa fixo de nomes literais (PT) das skills básicas embutidas em
+    // PlayerStats (AttackSkill/DefenseSkill/UltimateSkill) para suas chaves
+    // de localização. Esses objetos não são ScriptableObjects e não têm
+    // nameKey próprio, então o nome literal continua sendo usado como
+    // identificador interno (ex.: matching de SkillModifier) — esta função
+    // serve só para resolver o texto exibido na UI.
+    static readonly System.Collections.Generic.Dictionary<string, string> _builtinSkillKeys =
+        new System.Collections.Generic.Dictionary<string, string>
+    {
+        { "Ataque Automático",  "builtin_skill.auto_attack" },
+        { "Golpe Contínuo",     "builtin_skill.continuous_strike" },
+        { "Proteção Passiva",   "builtin_skill.passive_protection" },
+        { "Escudo Automático",  "builtin_skill.auto_shield" },
+        { "Fúria do Herói",     "builtin_skill.hero_fury" },
+    };
+
+    public static string SkillLabel(string nomeLiteral)
+    {
+        if (!string.IsNullOrEmpty(nomeLiteral) && _builtinSkillKeys.TryGetValue(nomeLiteral, out var key))
+            return T(key);
+        return nomeLiteral;
+    }
+
     public static void Reload()
     {
         _initialized = false;

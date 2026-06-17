@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: SegundaChance
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Segunda Chance
+  nameKey: skill.segundachance.name
+  descriptionKey: skill.segundachance.desc
   description: Ao morrer, revive automaticamente com 30% do HP. Recarga de 6 minutos.
   icon: {fileID: -5297922342500171361, guid: 0c44e74ae5c3d3c42b798e3a6d5ef09b, type: 3}
   cardPrefab: {fileID: 9207106959770819712, guid: 56b047b7fd9a58a4fa1aad0d35373d6a, type: 3}

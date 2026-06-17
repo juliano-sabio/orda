@@ -179,7 +179,8 @@ public class SkillIconsHUD : MonoBehaviour
             txtRT.anchorMin = Vector2.zero; txtRT.anchorMax = Vector2.one;
             txtRT.offsetMin = txtRT.offsetMax = Vector2.zero;
             var txt = txtGO.AddComponent<TextMeshProUGUI>();
-            txt.text      = skill.skillName.Length > 0 ? skill.skillName[0].ToString().ToUpper() : "?";
+            string nomeExibido = skill.GetDisplayName();
+            txt.text      = nomeExibido.Length > 0 ? nomeExibido[0].ToString().ToUpper() : "?";
             txt.fontSize  = sz * 0.45f;
             txt.fontStyle = FontStyles.Bold;
             txt.alignment = TextAlignmentOptions.Center;
@@ -196,7 +197,7 @@ public class SkillIconsHUD : MonoBehaviour
         nomeRT.anchoredPosition = new Vector2(0f, -4f);
         nomeRT.sizeDelta        = new Vector2(sz + 20f, 16f);
         var nomeTxt = nomeGO.AddComponent<TextMeshProUGUI>();
-        nomeTxt.text      = skill.skillName;
+        nomeTxt.text      = skill.GetDisplayName();
         nomeTxt.fontSize  = 9f;
         nomeTxt.alignment = TextAlignmentOptions.Center;
         nomeTxt.color     = new Color(1f, 1f, 1f, 0.75f);

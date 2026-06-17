@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: colheita
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: Colheita
+  nameKey: pass.colheita.name
+  descriptionKey: pass.colheita.desc
   description: "Inimigos derrotados concedem 25% mais XP. A experi\xEAncia acumulada
     acelerando seu crescimento."
   passiveIcon: {fileID: -4353410269930686198, guid: 7c5475d0d65440649ad287c924b15801, type: 3}

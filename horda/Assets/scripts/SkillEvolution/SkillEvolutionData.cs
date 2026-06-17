@@ -205,6 +205,13 @@ public class SkillEvolutionData : ScriptableObject
     public Sprite  icone;
     public Color   corDestaque = new Color(1f, 0.8f, 0.2f);
 
+    [Header("🌐 Localização")]
+    public string nameKey = "";
+    public string descriptionKey = "";
+
+    public string GetDisplayName()        => !string.IsNullOrEmpty(nameKey)        ? Loc.T(nameKey)        : nomeEvolucao;
+    public string GetDisplayDescription() => !string.IsNullOrEmpty(descriptionKey) ? Loc.T(descriptionKey) : descricao;
+
     [Header("Skill Alvo")]
     public SpecificSkillType skillAlvo;
     public SkillEvolutionType tipoEvolucao;

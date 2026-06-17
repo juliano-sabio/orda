@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: FuriaLaminas
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: "F\xFAria de L\xE2minas"
+  nameKey: skill.furialaminas.name
+  descriptionKey: skill.furialaminas.desc
   description: "Dispara l\xE2minas girat\xF3rias nos inimigos mais pr\xF3ximos causando
     dano puro."
   icon: {fileID: -2262114113205104707, guid: 343f7942e7a9d7a429e3a0acc4b73478, type: 3}

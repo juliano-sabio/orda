@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "Dispara em 8 dire\xE7\xF5es (+ e \xD7)."
   icone: {fileID: 1330450550990237758, guid: 60c473160ebf68e499fd92cd34276c80, type: 3}
   corDestaque: {r: 0.55, g: 0.25, b: 1, a: 1}
+  nameKey: evo.cruzdupla.name
+  descriptionKey: evo.cruzdupla.desc
   skillAlvo: 28
   tipoEvolucao: 9
   raridade: 2

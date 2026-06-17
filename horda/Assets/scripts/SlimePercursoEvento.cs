@@ -410,7 +410,7 @@ public class SlimePercursoEvento : MonoBehaviour
         labelRT.offsetMin        = new Vector2(8f, 0f);
         labelRT.offsetMax        = new Vector2(-8f, -3f);
         textoVida                = labelGO.AddComponent<TextMeshProUGUI>();
-        textoVida.text           = "Slime Protetora";
+        textoVida.text           = Loc.T("mob.slime_protetora");
         textoVida.fontSize       = 15f;
         textoVida.fontStyle      = FontStyles.Bold;
         textoVida.color          = new Color(0.2f, 1f, 0.45f);
@@ -465,7 +465,7 @@ public class SlimePercursoEvento : MonoBehaviour
         barraFillImg.fillAmount = pct;
         barraFillImg.color      = Color.Lerp(new Color(1f, 0.3f, 0.1f), new Color(0.2f, 1f, 0.45f), pct);
         if (textoVida != null)
-            textoVida.text = $"Slime Protetora   {inimigoCtrl.vidaAtual:F0} / {inimigoCtrl.vidaMaxima:F0}";
+            textoVida.text = $"{Loc.T("mob.slime_protetora")}   {inimigoCtrl.vidaAtual:F0} / {inimigoCtrl.vidaMaxima:F0}";
     }
 
     // ─── Dano ──────────────────────────────────────────────────────────────────

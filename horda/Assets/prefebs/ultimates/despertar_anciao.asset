@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: despertar_anciao
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Despertar do Anc\xE3o"
+  nameKey: ult.despertar.name
+  descriptionKey: ult.despertar.desc
   description: "Invoca uma entidade anci\xE3 que paira sobre o campo e esmaga inimigos
     com tent\xE1culos por 8s."
   ultimateIcon: {fileID: 484392071834553536, guid: c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7, type: 3}

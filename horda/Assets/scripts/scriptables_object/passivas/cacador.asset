@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: cacador
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: "Ca\xE7ador"
+  nameKey: pass.cacador.name
+  descriptionKey: pass.cacador.desc
   description: "+5 de ataque e 10% mais XP. O predador aprende com cada presa ca\xE7ada."
   passiveIcon: {fileID: -6182427718114342318, guid: e58a199bd899b474caed8add0cec3872, type: 3}
   xpBonusPercent: 0.1

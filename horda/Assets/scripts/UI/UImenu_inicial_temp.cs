@@ -133,13 +133,13 @@ public class MenuManagerCanvasCreator : EditorWindow
         titleText.alignment = TextAnchor.MiddleCenter;
 
         // Botão Play
-        GameObject playButton = CreateMenuButton(panel, "PlayButton", "🎮 JOGAR", new Vector2(0, 50));
+        GameObject playButton = CreateMenuButton(panel, "PlayButton", $"🎮 {Loc.T("ui.play")}", new Vector2(0, 50));
 
         // Botão Opções
-        GameObject optionsButton = CreateMenuButton(panel, "OptionsButton", "⚙️ OPÇÕES", new Vector2(0, -50));
+        GameObject optionsButton = CreateMenuButton(panel, "OptionsButton", $"⚙️ {Loc.T("ui.options")}", new Vector2(0, -50));
 
         // Botão Sair
-        GameObject exitButton = CreateMenuButton(panel, "ExitButton", "🚪 SAIR", new Vector2(0, -150));
+        GameObject exitButton = CreateMenuButton(panel, "ExitButton", $"🚪 {Loc.T("ui.exit")}", new Vector2(0, -150));
 
         return panel;
     }
@@ -152,7 +152,7 @@ public class MenuManagerCanvasCreator : EditorWindow
         // Título das opções
         GameObject title = CreateText(panel, "Title", new Vector2(0, 180), new Vector2(500, 60));
         Text titleText = title.GetComponent<Text>();
-        titleText.text = "CONFIGURACOES";
+        titleText.text = Loc.T("ui.settings");
         titleText.color = Color.white;
         titleText.fontSize = 36;
         titleText.fontStyle = FontStyle.Bold;
@@ -160,7 +160,7 @@ public class MenuManagerCanvasCreator : EditorWindow
 
         // Volume
         GameObject volumeText = CreateText(panel, "VolumeText", new Vector2(-150, 80), new Vector2(200, 30));
-        volumeText.GetComponent<Text>().text = "🔊 VOLUME";
+        volumeText.GetComponent<Text>().text = $"🔊 {Loc.T("ui.volume")}";
         volumeText.GetComponent<Text>().alignment = TextAnchor.MiddleLeft;
         volumeText.GetComponent<Text>().fontSize = 18;
 
@@ -168,14 +168,14 @@ public class MenuManagerCanvasCreator : EditorWindow
 
         // Tela Cheia
         GameObject fullscreenText = CreateText(panel, "FullscreenText", new Vector2(-150, 20), new Vector2(200, 30));
-        fullscreenText.GetComponent<Text>().text = "TELA CHEIA";
+        fullscreenText.GetComponent<Text>().text = Loc.T("ui.fullscreen");
         fullscreenText.GetComponent<Text>().alignment = TextAnchor.MiddleLeft;
         fullscreenText.GetComponent<Text>().fontSize = 18;
 
         GameObject fullscreenToggle = CreateToggle(panel, "FullscreenToggle", new Vector2(50, 20));
 
         // Botão Voltar
-        GameObject backButton = CreateMenuButton(panel, "BackButton", "↩️ VOLTAR", new Vector2(0, -150));
+        GameObject backButton = CreateMenuButton(panel, "BackButton", $"↩️ {Loc.T("ui.back")}", new Vector2(0, -150));
 
         return panel;
     }

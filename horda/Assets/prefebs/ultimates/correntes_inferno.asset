@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: correntes_inferno
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: Correntes do Inferno
+  nameKey: ult.correntes.name
+  descriptionKey: ult.correntes.desc
   description: "Correntes de fogo saem do jogador em 8 dire\xE7\xF5es, prendendo
     e queimando inimigos."
   ultimateIcon: {fileID: 7848804557958275360, guid: f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2, type: 3}

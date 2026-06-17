@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: PulsoRitmico
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: "Pulso R\xEDtmico"
+  nameKey: skill.pulsoritmico.name
+  descriptionKey: skill.pulsoritmico.desc
   description: A cada segundo emite um pulso circular de dano ao redor do player.
   icon: {fileID: 6551422454796549251, guid: c03f239cc99ba30418b99d4c90f4848b, type: 3}
   cardPrefab: {fileID: 9207106959770819712, guid: 56b047b7fd9a58a4fa1aad0d35373d6a, type: 3}

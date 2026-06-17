@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: asceta
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: Asceta
+  nameKey: pass.asceta.name
+  descriptionKey: pass.asceta.desc
   description: "Equil\xEDbrio entre ataque, defesa e recupera\xE7\xE3o. Ganhe +6
     ATQ, +6 DEF, +1/s de regenera\xE7\xE3o e 10% mais XP."
   passiveIcon: {fileID: 2785627645152089310, guid: f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6, type: 3}

@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac3780efc3a699c44bf32b7fde4d9f51, type: 3}
   m_Name: congelar
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
-  ultimateName: 
-  description: 
+  ultimateName: Congelar
+  nameKey: ult.congelar.name
+  descriptionKey: ult.congelar.desc
+  description:
   ultimateIcon: {fileID: -3305714898862992543, guid: 4345f8e660293af418cd2da5dd63d0fb, type: 3}
   cooldown: 30
   baseDamage: 50

@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: tempestade_eletrica
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Tempestade El\xE9trica"
+  nameKey: ult.tempestade.name
+  descriptionKey: ult.tempestade.desc
   description: "Inv\xF3ca raios que atingem inimigos aleat\xF3rios na \xE1rea a cada
     0.45s por 5s."
   ultimateIcon: {fileID: -7258724206939660299, guid: f1e2d3c4b5a697886950413200000001, type: 3}

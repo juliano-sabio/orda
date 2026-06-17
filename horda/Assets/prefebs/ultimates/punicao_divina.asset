@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: punicao_divina
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Puni\xE7\xE3o Divina"
+  nameKey: ult.punicao.name
+  descriptionKey: ult.punicao.desc
   description: "Um raio de luz divina desce sobre o inimigo mais pr\xF3ximo causando
     dano massivo, depois acerta mais 3 inimigos pr\xF3ximos."
   ultimateIcon: {fileID: 4207339811325102189, guid: a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1, type: 3}

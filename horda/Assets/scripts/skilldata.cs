@@ -9,6 +9,13 @@ public class SkillData : ScriptableObject
     [TextArea(3, 5)]
     public string description;
     public Sprite icon;
+
+    [Header("🌐 Localização")]
+    public string nameKey        = "";
+    public string descriptionKey = "";
+
+    public string GetDisplayName()        => !string.IsNullOrEmpty(nameKey)        ? Loc.T(nameKey)        : skillName;
+    public string GetDisplayDescription() => !string.IsNullOrEmpty(descriptionKey) ? Loc.T(descriptionKey) : description;
     [Header("🎨 Prefab do Card")]
     public GameObject cardPrefab;
 
@@ -166,69 +173,68 @@ public class SkillData : ScriptableObject
 
         if (element != PlayerStats.Element.None)
         {
-            sb.AppendLine($"Elemento: {element}");
-            if (elementalBonus != 1.0f) sb.AppendLine($"Bonus Elemental: {elementalBonus}x");
+            sb.AppendLine($"{Loc.T("skill.element")}: {element}");
+            if (elementalBonus != 1.0f) sb.AppendLine($"{Loc.T("skill.elemental_bonus")}: {elementalBonus}x");
         }
 
-        if (healthBonus != 0) sb.AppendLine($"Vida: {FormatBonus(healthBonus)}");
-        if (attackBonus != 0) sb.AppendLine($"ATQ: {FormatBonus(attackBonus)}");
-        if (defenseBonus != 0) sb.AppendLine($"DEF: {FormatBonus(defenseBonus)}");
-        if (speedBonus != 0) sb.AppendLine($"Vel: {FormatBonus(speedBonus)}");
-        if (healthRegenBonus != 0) sb.AppendLine($"Regen: {FormatBonus(healthRegenBonus)}/s");
-        if (attackSpeedMultiplier != 1.0f) sb.AppendLine($"Vel.Atq: {attackSpeedMultiplier}x");
-        // 🆕 ADICIONAR ESTE BLOCO DENTRO DE GetFullDescription()
+        if (healthBonus != 0) sb.AppendLine($"{Loc.T("stat.hp")}: {FormatBonus(healthBonus)}");
+        if (attackBonus != 0) sb.AppendLine($"{Loc.T("stat.atk")}: {FormatBonus(attackBonus)}");
+        if (defenseBonus != 0) sb.AppendLine($"{Loc.T("stat.def")}: {FormatBonus(defenseBonus)}");
+        if (speedBonus != 0) sb.AppendLine($"{Loc.T("stat.spd")}: {FormatBonus(speedBonus)}");
+        if (healthRegenBonus != 0) sb.AppendLine($"{Loc.T("stat.regen")}: {FormatBonus(healthRegenBonus)}/s");
+        if (attackSpeedMultiplier != 1.0f) sb.AppendLine($"{Loc.T("stat.atkspd")}: {attackSpeedMultiplier}x");
         if (specificType == SpecificSkillType.Shield)
         {
-            sb.AppendLine($"Escudo Ativo: Bloqueia 1 hit");
-            if (cooldown > 0) sb.AppendLine($"Recarga: {cooldown}s");
+            sb.AppendLine(Loc.T("skill.shield_active"));
+            if (cooldown > 0) sb.AppendLine($"{Loc.T("skill.cooldown")}: {cooldown}s");
         }
 
         if (specificType == SpecificSkillType.Boomerang)
         {
-            sb.AppendLine($"Bumerangue: {attackBonus} dano");
-            sb.AppendLine($"Alcance: {boomerangThrowRange}m");
-            sb.AppendLine($"Alvos: {boomerangMaxTargets}");
-            sb.AppendLine($"Velocidade: {boomerangThrowSpeed}");
-            sb.AppendLine($"Retorna ao jogador");
+            sb.AppendLine($"{Loc.T("skill.boomerang_label")}: {attackBonus} {Loc.T("skill.damage")}");
+            sb.AppendLine($"{Loc.T("skill.range")}: {boomerangThrowRange}m");
+            sb.AppendLine($"{Loc.T("skill.targets")}: {boomerangMaxTargets}");
+            sb.AppendLine($"{Loc.T("skill.speed_label")}: {boomerangThrowSpeed}");
+            sb.AppendLine(Loc.T("skill.returns_to_player"));
 
             if (boomerangPierceThrough)
-                sb.AppendLine($"Atravessa inimigos");
+                sb.AppendLine(Loc.T("skill.pierces_enemies"));
 
             if (boomerangHealOnReturn)
-                sb.AppendLine($"Cura {boomerangHealPercent * 100}% do dano ao retornar");
+                sb.AppendLine($"{Loc.T("skill.heals")} {boomerangHealPercent * 100}{Loc.T("skill.pct_dmg_on_return")}");
 
             if (boomerangSeekNewTargets)
-                sb.AppendLine($"Busca novos alvos (raio: {boomerangSeekRadius}m)");
+                sb.AppendLine($"{Loc.T("skill.seek_new_targets")} ({Loc.T("skill.range")}: {boomerangSeekRadius}m)");
         }
         else if (specificType == SpecificSkillType.Projectile)
         {
             if (isOrbitalProjectile)
             {
-                sb.AppendLine($"Projeteis Orbitais: {maxOrbitalProjectiles}");
-                sb.AppendLine($"Raio Orbital: {orbitRadius}m");
-                sb.AppendLine($"Vel. Orbital: {orbitSpeed}/s");
-                sb.AppendLine($"Voltas: {numberOfOrbits}");
-                if (continuousOrbitalSpawning) sb.AppendLine($"Spawn: {orbitalSpawnInterval}s");
+                sb.AppendLine($"{Loc.T("skill.orbital_projectiles")}: {maxOrbitalProjectiles}");
+                sb.AppendLine($"{Loc.T("skill.orbital_radius")}: {orbitRadius}m");
+                sb.AppendLine($"{Loc.T("skill.orbital_speed")}: {orbitSpeed}/s");
+                sb.AppendLine($"{Loc.T("skill.orbits")}: {numberOfOrbits}");
+                if (continuousOrbitalSpawning) sb.AppendLine($"{Loc.T("skill.spawn_interval")}: {orbitalSpawnInterval}s");
             }
             else
             {
-                sb.AppendLine($"Projeteis: {projectileCount}");
-                if (projectileSpeed != 8f) sb.AppendLine($"Vel: {projectileSpeed}");
+                sb.AppendLine($"{Loc.T("skill.projectiles")}: {projectileCount}");
+                if (projectileSpeed != 8f) sb.AppendLine($"{Loc.T("stat.spd")}: {projectileSpeed}");
             }
 
-            if (pierceEnemies) sb.AppendLine($"Penetracao: {pierceCount} inimigos");
-            if (bounceBetweenEnemies) sb.AppendLine($"Ricochete: {bounceCount} vezes");
-            if (explodeOnImpact) sb.AppendLine($"Explosao: {explosionRadius}m de raio");
-            if (homingProjectile) sb.AppendLine($"Projetil Guiado");
+            if (pierceEnemies) sb.AppendLine($"{Loc.T("skill.pierce_count")}: {pierceCount}");
+            if (bounceBetweenEnemies) sb.AppendLine($"{Loc.T("skill.bounce_count")}: {bounceCount}");
+            if (explodeOnImpact) sb.AppendLine($"{Loc.T("skill.explosion")}: {explosionRadius}m");
+            if (homingProjectile) sb.AppendLine(Loc.T("skill.homing"));
         }
 
         if (specificType != SpecificSkillType.None && specificType != SpecificSkillType.Boomerang)
-            sb.AppendLine($"Efeito: {GetSpecificTypeDescription()}");
+            sb.AppendLine($"{Loc.T("skill.effect")}: {GetSpecificTypeDescription()}");
 
-        if (cooldown > 0) sb.AppendLine($"Cooldown: {cooldown}s");
-        if (duration > 0) sb.AppendLine($"Duracao: {duration}s");
+        if (cooldown > 0) sb.AppendLine($"{Loc.T("skill.cooldown_label")}: {cooldown}s");
+        if (duration > 0) sb.AppendLine($"{Loc.T("skill.duration_label")}: {duration}s");
 
-        sb.AppendLine($"Raridade: {rarity}");
+        sb.AppendLine($"{Loc.T("skill.rarity_label")}: {rarity}");
 
         return sb.ToString().Trim();
     }
@@ -239,30 +245,30 @@ public class SkillData : ScriptableObject
     {
         switch (specificType)
         {
-            case SpecificSkillType.HealthRegen: return $"Regeneracao de Vida: {specialValue}/s";
-            case SpecificSkillType.CriticalStrike: return $"Chance de Critico: {specialValue}%";
-            case SpecificSkillType.LifeSteal: return $"Roubo de Vida: {specialValue}%";
-            case SpecificSkillType.MovementSpeed: return $"Velocidade de Movimento: +{specialValue}%";
-            case SpecificSkillType.AttackSpeed: return $"Velocidade de Ataque: +{specialValue}%";
-            case SpecificSkillType.AreaDamage: return $"Dano em Area: +{specialValue}%";
-            case SpecificSkillType.Heal: return $"Cura: {specialValue} de vida";
+            case SpecificSkillType.HealthRegen: return $"{Loc.T("skill.type.health_regen")}: {specialValue}/s";
+            case SpecificSkillType.CriticalStrike: return $"{Loc.T("skill.type.crit_chance")}: {specialValue}%";
+            case SpecificSkillType.LifeSteal: return $"{Loc.T("skill.type.lifesteal")}: {specialValue}%";
+            case SpecificSkillType.MovementSpeed: return $"{Loc.T("skill.type.movespeed")}: +{specialValue}%";
+            case SpecificSkillType.AttackSpeed: return $"{Loc.T("skill.type.atkspd")}: +{specialValue}%";
+            case SpecificSkillType.AreaDamage: return $"{Loc.T("skill.type.areadmg")}: +{specialValue}%";
+            case SpecificSkillType.Heal: return $"{Loc.T("skill.type.heal")}: {specialValue} {Loc.T("stat.hp")}";
             case SpecificSkillType.Projectile:
                 if (isOrbitalProjectile)
-                    return $"Projeteis Orbitais: {maxOrbitalProjectiles} | Raio: {orbitRadius}m | Dano: +{attackBonus}";
+                    return $"{Loc.T("skill.orbital_projectiles")}: {maxOrbitalProjectiles} | {Loc.T("skill.range")}: {orbitRadius}m | {Loc.T("stat.atk")}: +{attackBonus}";
                 else
-                    return $"Projeteis: {projectileCount} | Vel: {projectileSpeed} | Dano: +{attackBonus}";
+                    return $"{Loc.T("skill.projectiles")}: {projectileCount} | {Loc.T("stat.spd")}: {projectileSpeed} | {Loc.T("stat.atk")}: +{attackBonus}";
             case SpecificSkillType.Boomerang:
-                return $"Bumerangue: {boomerangThrowRange}m alcance | {attackBonus} dano | {boomerangMaxTargets} alvos";
-            case SpecificSkillType.DamageReflection: return $"Reflexao de Dano: {specialValue}%";
-            case SpecificSkillType.ElementalMastery: return $"Dominio Elemental: +{specialValue}% de dano elemental";
-            case SpecificSkillType.ChainLightning: return $"Relampago em Cadeia: {specialValue} alvos";
-            case SpecificSkillType.PoisonCloud: return $"Nuvem de Veneno: {specialValue} de dano por segundo";
-            case SpecificSkillType.FireAura: return $"Aura de Fogo: {specialValue} de dano por segundo";
-            case SpecificSkillType.IceBarrier: return $"Barreira de Gelo: {specialValue} de defesa";
-            case SpecificSkillType.WindDash: return $"Dash de Vento: +{specialValue}% de velocidade";
-            case SpecificSkillType.EarthStomp: return $"Pisada da Terra: {specialValue} de dano em area";
+                return $"{Loc.T("skill.boomerang_label")}: {boomerangThrowRange}m {Loc.T("skill.range")} | {attackBonus} {Loc.T("skill.damage")} | {boomerangMaxTargets} {Loc.T("skill.targets")}";
+            case SpecificSkillType.DamageReflection: return $"{Loc.T("skill.type.dmg_reflection")}: {specialValue}%";
+            case SpecificSkillType.ElementalMastery: return $"{Loc.T("skill.type.elemental_mastery")}: +{specialValue}%";
+            case SpecificSkillType.ChainLightning: return $"{Loc.T("skill.type.chain_lightning")}: {specialValue} {Loc.T("skill.targets")}";
+            case SpecificSkillType.PoisonCloud: return $"{Loc.T("skill.type.poison_cloud")}: {specialValue}/s";
+            case SpecificSkillType.FireAura: return $"{Loc.T("skill.type.fire_aura")}: {specialValue}/s";
+            case SpecificSkillType.IceBarrier: return $"{Loc.T("skill.type.ice_barrier")}: {specialValue} {Loc.T("stat.def")}";
+            case SpecificSkillType.WindDash: return $"{Loc.T("skill.type.wind_dash")}: +{specialValue}%";
+            case SpecificSkillType.EarthStomp: return $"{Loc.T("skill.type.earth_stomp")}: {specialValue}";
             case SpecificSkillType.Shield:
-                return $"Escudo: Bloqueia dano a cada {cooldown}s";
+                return $"{Loc.T("skill.type.shield_block")} {cooldown}s";
             default: return specificType.ToString();
         }
     }

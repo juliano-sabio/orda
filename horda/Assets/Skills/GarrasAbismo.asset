@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: GarrasAbismo
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Garras do Abismo
+  nameKey: skill.garrasabismo.name
+  descriptionKey: skill.garrasabismo.desc
   description: "Garras surgem do ch\xE3o nos inimigos mais pr\xF3ximos, causando
     dano e prendendo por 1s."
   icon: {fileID: 4567141956391952662, guid: 0d0b019502a576f48b8b9880c21458d0, type: 3}

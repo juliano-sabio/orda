@@ -142,7 +142,7 @@ public class StatusCardSystem : MonoBehaviour
 
         return new StatusCardInfo
         {
-            cardName    = CardTitles[si],
+            cardName    = Loc.T($"card.title.{statType.ToString().ToLower()}"),
             description = desc,
             statType    = statType,
             rarity      = rarity,
@@ -156,54 +156,54 @@ public class StatusCardSystem : MonoBehaviour
             playerStats = FindAnyObjectByType<PlayerStats>();
 
         if (playerStats == null)
-            return $"{StatLabels[(int)statType]}: +{bonus}";
+            return $"{Loc.T($"card.title.{statType.ToString().ToLower()}")}: +{bonus}";
 
         switch (statType)
         {
             case StatusCardType.Health:
             {
                 float atual = playerStats.maxHealth;
-                return $"Vida Max: {atual:F0} → {atual + bonus:F0}";
+                return $"{Loc.T("stat.hp_max")}: {atual:F0} → {atual + bonus:F0}";
             }
             case StatusCardType.Attack:
             {
                 float atual = playerStats.attack;
-                return $"ATQ: {atual:F1} → {atual + bonus:F1}";
+                return $"{Loc.T("stat.atk")}: {atual:F1} → {atual + bonus:F1}";
             }
             case StatusCardType.Defense:
             {
                 float atual = playerStats.defense;
-                return $"DEF: {atual:F1} → {atual + bonus:F1}";
+                return $"{Loc.T("stat.def")}: {atual:F1} → {atual + bonus:F1}";
             }
             case StatusCardType.Speed:
             {
                 float atual = playerStats.speed;
-                return $"Vel: {atual:F1} → {atual + bonus:F1}";
+                return $"{Loc.T("stat.spd")}: {atual:F1} → {atual + bonus:F1}";
             }
             case StatusCardType.Regen:
             {
                 float atual = playerStats.healthRegenRate;
-                return $"Regen: {atual:F1}/s → {atual + bonus:F1}/s";
+                return $"{Loc.T("stat.regen")}: {atual:F1}/s → {atual + bonus:F1}/s";
             }
             case StatusCardType.CriticalChance:
             {
                 float atual = playerStats.critChance * 100f;
                 float novo  = Mathf.Clamp(playerStats.critChance + bonus, 0f, 0.95f) * 100f;
-                return $"Critico: {atual:F0}% → {novo:F0}%";
+                return $"{Loc.T("stat.crit")}: {atual:F0}% → {novo:F0}%";
             }
             case StatusCardType.AttackSpeed:
             {
                 float atual = playerStats.attackActivationInterval;
                 float novo  = Mathf.Max(0.2f, atual - bonus);
-                return $"Vel.Atq: {atual:F1}s → {novo:F1}s";
+                return $"{Loc.T("stat.atkspd")}: {atual:F1}s → {novo:F1}s";
             }
             case StatusCardType.Shield:
             {
                 float atual = playerStats.maxShieldPoints;
-                return $"Escudo Max: {atual:F0} → {atual + bonus:F0}";
+                return $"{Loc.T("stat.shield_max")}: {atual:F0} → {atual + bonus:F0}";
             }
             default:
-                return $"{StatLabels[(int)statType]}: +{bonus}";
+                return $"{Loc.T($"card.title.{statType.ToString().ToLower()}")}: +{bonus}";
         }
     }
 

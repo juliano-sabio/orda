@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "+80% de for\xE7a de repuls\xE3o e +50% de dano de repuls\xE3o."
   icone: {fileID: 4991954654029058326, guid: 558e9b9ecb3d39c49ab9d6f5373de702, type: 3}
   corDestaque: {r: 0.7, g: 0.35, b: 1, a: 1}
+  nameKey: evo.magneticosupercarregado.name
+  descriptionKey: evo.magneticosupercarregado.desc
   skillAlvo: 56
   tipoEvolucao: 87
   raridade: 2

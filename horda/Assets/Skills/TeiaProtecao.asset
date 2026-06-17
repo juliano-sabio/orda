@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: TeiaProtecao
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: "Teia de Prote\xE7\xE3o"
+  nameKey: skill.teiaprotecao.name
+  descriptionKey: skill.teiaprotecao.desc
   description: Cria uma barreira que empurra inimigos para fora. Ativa ao receber
     dano.
   icon: {fileID: 5442318302536508561, guid: 7a8f9f463ee99514d93cb6cdfd1b0c8b, type: 3}

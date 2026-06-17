@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: vortice
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "V\xF3rtice"
+  nameKey: ult.vortice.name
+  descriptionKey: ult.vortice.desc
   description: Cria um tornado que puxa todos os inimigos em espiral para o centro
     por 5s.
   ultimateIcon: {fileID: 5142958066713371779, guid: e6f7a8b9c0d10c2d3e4f5a6b7c000006, type: 3}

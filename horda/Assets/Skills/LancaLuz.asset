@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: LancaLuz
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: "Lan\xE7a de Luz"
+  nameKey: skill.lancaluz.name
+  descriptionKey: skill.lancaluz.desc
   description: "Uma lan\xE7a de luz dispara no inimigo mais pr\xF3ximo causando dano
     alto."
   icon: {fileID: -3898843575368328328, guid: c67cd95abc64cd248aa05d3f147e4794, type: 3}

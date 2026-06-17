@@ -75,7 +75,7 @@ public class ContadorMortes : MonoBehaviour
     void Atualizar()
     {
         if (textoContador != null)
-            textoContador.text = $"Mortes: {mortes}";
+            textoContador.text = $"{Loc.T("ui.deaths")}: {mortes}";
     }
 
     void CriarTexto()

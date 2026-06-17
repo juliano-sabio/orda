@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "+40% de raio de atra\xE7\xE3o e +2s de dura\xE7\xE3o."
   icone: {fileID: 5142958066713371779, guid: e6f7a8b9c0d10c2d3e4f5a6b7c000006, type: 3}
   corDestaque: {r: 0.1, g: 0.85, b: 0.5, a: 1}
+  nameKey: evo.vorticeexpansivo.name
+  descriptionKey: evo.vorticeexpansivo.desc
   skillAlvo: 47
   tipoEvolucao: 70
   raridade: 3

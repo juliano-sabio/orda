@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: EspelhoMagico
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: "Espelho M\xE1gico"
+  nameKey: skill.espelhomagico.name
+  descriptionKey: skill.espelhomagico.desc
   description: Reflete o dano recebido de volta ao inimigo por 4s. Ativa ao receber
     dano.
   icon: {fileID: 935169231618547884, guid: 9cb4a8ef2d672934cbbdf61beb05c1d1, type: 3}

@@ -49,7 +49,7 @@ public class CharacterSelectionCanvasCreator : EditorWindow
         SetRect(titulo, new Vector2(0f, 1f), new Vector2(1f, 1f),
                 new Vector2(0f, -20f), new Vector2(0f, -70f));
         TextMeshProUGUI txtTitulo = titulo.AddComponent<TextMeshProUGUI>();
-        txtTitulo.text = "SELEÇÃO DE PERSONAGEM";
+        txtTitulo.text = Loc.T("char.selection.title");
         txtTitulo.fontSize = 36;
         txtTitulo.fontStyle = FontStyles.Bold;
         txtTitulo.color = Color.white;
@@ -118,7 +118,7 @@ public class CharacterSelectionCanvasCreator : EditorWindow
             Vector2.zero, Vector2.zero,
             new Color(0.08f, 0.08f, 0.18f, 0.9f));
 
-        string[] statLabels = { "Vida", "Ataque", "Defesa", "Velocidade" };
+        string[] statLabels = { Loc.T("stat.hp"), Loc.T("stat.atk.name"), Loc.T("stat.def.name"), Loc.T("stat.spd.name") };
         Slider[] sliders = new Slider[4];
         Button[] upgButtons = new Button[4];
         TextMeshProUGUI[] upgTexts = new TextMeshProUGUI[4];
@@ -201,7 +201,7 @@ public class CharacterSelectionCanvasCreator : EditorWindow
         TextMeshProUGUI txtJogar = CriarTMP(btnJogarGO, "Texto",
             Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
             28f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
-        txtJogar.text = "JOGAR";
+        txtJogar.text = Loc.T("ui.play");
 
         // ── Botão Voltar ─────────────────────────────────────────────
         GameObject btnVoltarGO = CriarGO("BotaoVoltar", painelRodape);
@@ -218,7 +218,7 @@ public class CharacterSelectionCanvasCreator : EditorWindow
         TextMeshProUGUI txtVoltar = CriarTMP(btnVoltarGO, "Texto",
             Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
             18f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
-        txtVoltar.text = "← VOLTAR";
+        txtVoltar.text = $"← {Loc.T("ui.back")}";
 
         // ── Painel Stages (oculto) ────────────────────────────────────
         GameObject painelStages = CriarImagem(canvasGO, "PainelStages",
@@ -232,7 +232,7 @@ public class CharacterSelectionCanvasCreator : EditorWindow
             new Vector2(0f, 1f), new Vector2(1f, 1f),
             new Vector2(0f, -20f), new Vector2(0f, -60f),
             24f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
-        txtStages.text = "ESCOLHA A FASE";
+        txtStages.text = Loc.T("ui.choose_stage");
 
         Button btnFecharStages = painelStages.AddComponent<Button>();
         btnFecharStages.onClick.AddListener(() => manager.ToggleStages(false));

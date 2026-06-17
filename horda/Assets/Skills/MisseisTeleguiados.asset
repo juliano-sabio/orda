@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: MisseisTeleguiados
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: "M\xEDsseis Teleguiados"
+  nameKey: skill.misseisteleguiados.name
+  descriptionKey: skill.misseisteleguiados.desc
   description: "3 m\xEDsseis s\xE3o lan\xE7ados e perseguem os 3 inimigos mais pr\xF3ximos."
   icon: {fileID: 2189855817262734761, guid: 13a9755d7b0785c469d526adab2ecd11, type: 3}
   cardPrefab: {fileID: 9207106959770819712, guid: 56b047b7fd9a58a4fa1aad0d35373d6a, type: 3}

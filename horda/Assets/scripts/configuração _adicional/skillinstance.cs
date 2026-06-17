@@ -37,13 +37,13 @@ public class SkillCardInstance : MonoBehaviour
         if (nameText != null)
         {
             string elementIcon = currentSkillData.GetElementIcon();
-            nameText.text = $"<b>{TextUtils.SemAcento(currentSkillData.skillName)}</b>\n{elementIcon} {currentSkillData.element}";
+            nameText.text = $"<b>{TextUtils.SemAcento(currentSkillData.GetDisplayName())}</b>\n{elementIcon} {currentSkillData.element}";
         }
 
         // Descrição
         if (descriptionText != null)
         {
-            descriptionText.text = TextUtils.SemAcento(currentSkillData.description);
+            descriptionText.text = TextUtils.SemAcento(currentSkillData.GetDisplayDescription());
         }
 
         // Stats
@@ -88,7 +88,7 @@ public class SkillCardInstance : MonoBehaviour
 
         if (rarityText != null)
         {
-            rarityText.text = currentSkillData.rarity.ToString().ToUpper();
+            rarityText.text = Loc.T($"rarity.{currentSkillData.rarity.ToString().ToLower()}");
             rarityText.color = rarityColor;
         }
 
@@ -100,12 +100,12 @@ public class SkillCardInstance : MonoBehaviour
     {
         StringBuilder sb = new StringBuilder();
 
-        if (currentSkillData.healthBonus != 0) sb.Append($"HP:{currentSkillData.healthBonus} ");
-        if (currentSkillData.attackBonus != 0) sb.Append($"ATQ:{currentSkillData.attackBonus} ");
-        if (currentSkillData.defenseBonus != 0) sb.Append($"DEF:{currentSkillData.defenseBonus} ");
-        if (currentSkillData.speedBonus != 0) sb.Append($"Vel:{currentSkillData.speedBonus} ");
+        if (currentSkillData.healthBonus != 0) sb.Append($"{Loc.T("stat.hp")}:{currentSkillData.healthBonus} ");
+        if (currentSkillData.attackBonus != 0) sb.Append($"{Loc.T("stat.atk")}:{currentSkillData.attackBonus} ");
+        if (currentSkillData.defenseBonus != 0) sb.Append($"{Loc.T("stat.def")}:{currentSkillData.defenseBonus} ");
+        if (currentSkillData.speedBonus != 0) sb.Append($"{Loc.T("stat.spd")}:{currentSkillData.speedBonus} ");
 
-        if (sb.Length == 0) sb.Append("Bônus Passivo");
+        if (sb.Length == 0) sb.Append(Loc.T("ui.passive_bonus"));
 
         return sb.ToString();
     }

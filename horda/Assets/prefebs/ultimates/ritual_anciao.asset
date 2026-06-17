@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: ritual_anciao
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Ritual do Anc\xE3o"
+  nameKey: ult.ritual.name
+  descriptionKey: ult.ritual.desc
   description: "Desenha um pent\xE1gono de energia no ch\xE3o; inimigos dentro recebem
     dano crescente quanto mais tempo ficarem dentro."
   ultimateIcon: {fileID: 5318314732264899772, guid: d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0, type: 3}

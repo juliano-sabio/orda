@@ -20,16 +20,19 @@ public class TutorialUI : MonoBehaviour
         public string icone;
         public string descricao;
         public Color  cor;
+        public string tituloKey;
+        public string iconeKey;
+        public string descKey;
     }
 
     readonly Passo[] passos = new Passo[]
     {
-        new Passo { titulo = "MOVIMENTO",      icone = "W A S D",              descricao = "Use WASD para mover o personagem em todas as direções.",                                           cor = new Color(0.2f, 0.6f, 1.0f) },
-        new Passo { titulo = "DASH",           icone = "SHIFT",                descricao = "Pressione SHIFT para dar um dash rápido e escapar dos inimigos.",                                  cor = new Color(0.4f, 0.8f, 0.4f) },
-        new Passo { titulo = "ATAQUE",         icone = "CLIQUE\nESQUERDO",     descricao = "Clique com o botão esquerdo do mouse para atacar na direção do cursor.",                           cor = new Color(1.0f, 0.5f, 0.2f) },
-        new Passo { titulo = "HABILIDADES",    icone = "Q  E",                 descricao = "Use Q e E para ativar suas habilidades especiais. Cada uma tem um cooldown.",                     cor = new Color(0.8f, 0.3f, 1.0f) },
-        new Passo { titulo = "ULTIMATE",       icone = "R",                    descricao = "Pressione R para usar sua Ultimate. Ela carrega conforme você causa dano.",                        cor = new Color(1.0f, 0.8f, 0.1f) },
-        new Passo { titulo = "SOBREVIVA!",     icone = "♥",                    descricao = "Derrote inimigos, colete XP e suba de nível. Se sua vida chegar a zero, é game over.",            cor = new Color(1.0f, 0.3f, 0.3f) },
+        new Passo { titulo = "MOVIMENTO",   icone = "W A S D",         descricao = "Use WASD para mover o personagem em todas as direções.",                                       cor = new Color(0.2f, 0.6f, 1.0f), tituloKey = "tutorial.movement.title", descKey = "tutorial.movement.desc" },
+        new Passo { titulo = "DASH",        icone = "SHIFT",            descricao = "Pressione SHIFT para dar um dash rápido e escapar dos inimigos.",                              cor = new Color(0.4f, 0.8f, 0.4f), tituloKey = "tutorial.dash.title",     descKey = "tutorial.dash.desc" },
+        new Passo { titulo = "ATAQUE",      icone = "CLIQUE\nESQUERDO",descricao = "Clique com o botão esquerdo do mouse para atacar na direção do cursor.",                       cor = new Color(1.0f, 0.5f, 0.2f), tituloKey = "tutorial.attack.title",   descKey = "tutorial.attack.desc",   iconeKey = "tutorial.left_click" },
+        new Passo { titulo = "HABILIDADES", icone = "Q  E",             descricao = "Use Q e E para ativar suas habilidades especiais. Cada uma tem um cooldown.",                 cor = new Color(0.8f, 0.3f, 1.0f), tituloKey = "tutorial.skills.title",   descKey = "tutorial.skills.desc" },
+        new Passo { titulo = "ULTIMATE",    icone = "R",                descricao = "Pressione R para usar sua Ultimate. Ela carrega conforme você causa dano.",                    cor = new Color(1.0f, 0.8f, 0.1f), tituloKey = "tutorial.ultimate.title", descKey = "tutorial.ultimate.desc" },
+        new Passo { titulo = "SOBREVIVA!",  icone = "♥",               descricao = "Derrote inimigos, colete XP e suba de nível. Se sua vida chegar a zero, é game over.",        cor = new Color(1.0f, 0.3f, 0.3f), tituloKey = "tutorial.survive.title",  descKey = "tutorial.survive.desc" },
     };
 
     // ── Estado ───────────────────────────────────────────────────
@@ -162,9 +165,9 @@ public class TutorialUI : MonoBehaviour
         passoAtual = index;
         var p = passos[index];
 
-        txtIcone.text    = p.icone;
-        txtTitulo.text   = p.titulo;
-        txtDescricao.text = p.descricao;
+        txtIcone.text    = string.IsNullOrEmpty(p.iconeKey) ? p.icone : Loc.T(p.iconeKey);
+        txtTitulo.text   = string.IsNullOrEmpty(p.tituloKey) ? p.titulo : Loc.T(p.tituloKey);
+        txtDescricao.text = string.IsNullOrEmpty(p.descKey) ? p.descricao : Loc.T(p.descKey);
         txtIcone.color   = p.cor;
         txtTitulo.color  = p.cor;
 

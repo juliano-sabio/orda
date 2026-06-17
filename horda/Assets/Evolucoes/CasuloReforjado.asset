@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "Ao quebrar, lan\xE7a +8 estilha\xE7os extras."
   icone: {fileID: -2722032896369593618, guid: c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5, type: 3}
   corDestaque: {r: 0.55, g: 0.9, b: 1, a: 1}
+  nameKey: evo.casuloreforjado.name
+  descriptionKey: evo.casuloreforjado.desc
   skillAlvo: 51
   tipoEvolucao: 77
   raridade: 2

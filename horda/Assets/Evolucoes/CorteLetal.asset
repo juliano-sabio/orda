@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: 2 hits no mesmo inimigo causa atordoamento de 1s.
   icone: {fileID: 3839737597979073872, guid: eef9bd520f7b0b644844faadba846285, type: 3}
   corDestaque: {r: 0.5, g: 0.8, b: 1, a: 1}
+  nameKey: evo.corteletal.name
+  descriptionKey: evo.corteletal.desc
   skillAlvo: 29
   tipoEvolucao: 12
   raridade: 3

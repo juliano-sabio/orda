@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: CorteFantasma
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Corte Fantasma
+  nameKey: skill.cortefantasma.name
+  descriptionKey: skill.cortefantasma.desc
   description: "Cortes fantasmag\xF3ricos rasgam em dire\xE7\xE3o aos inimigos mais
     pr\xF3ximos causando dano puro."
   icon: {fileID: 3839737597979073872, guid: eef9bd520f7b0b644844faadba846285, type: 3}

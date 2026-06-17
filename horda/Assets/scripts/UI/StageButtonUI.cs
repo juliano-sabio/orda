@@ -70,7 +70,7 @@ public class StageButtonUI : MonoBehaviour
 
         if (levelRequirementText != null)
         {
-            levelRequirementText.text = $"Nv. {stageData.recommendedLevel}";
+            levelRequirementText.text = $"{Loc.T("ui.level_abbr")} {stageData.recommendedLevel}";
             levelRequirementText.gameObject.SetActive(!stageData.unlocked);
         }
 
@@ -158,12 +158,12 @@ public class StageButtonUI : MonoBehaviour
     {
         switch (difficulty)
         {
-            case 1: return "FÁCIL";
-            case 2: return "NORMAL";
-            case 3: return "DIFÍCIL";
-            case 4: return "EXPERT";
-            case 5: return "MESTRE";
-            default: return $"Nv. {difficulty}";
+            case 1: return Loc.T("difficulty.easy");
+            case 2: return Loc.T("difficulty.normal");
+            case 3: return Loc.T("difficulty.hard");
+            case 4: return Loc.T("difficulty.expert");
+            case 5: return Loc.T("difficulty.master");
+            default: return $"{Loc.T("ui.level_abbr")} {difficulty}";
         }
     }
 

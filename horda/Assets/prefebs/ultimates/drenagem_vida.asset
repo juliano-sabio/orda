@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: drenagem_vida
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: Drenagem de Vida
+  nameKey: ult.drenagem.name
+  descriptionKey: ult.drenagem.desc
   description: Drena vida de todos os inimigos no raio continuamente, convertendo
     50% do dano em cura para o jogador.
   ultimateIcon: {fileID: -2459815457080990079, guid: a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5, type: 3}

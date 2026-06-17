@@ -59,7 +59,7 @@ public class SkillChoiceUICreator : EditorWindow
         // Título
         GameObject title = CreateTextTMP(panel, "TitleText", new Vector2(0, 280), new Vector2(1000, 80));
         TextMeshProUGUI titleText = title.GetComponent<TextMeshProUGUI>();
-        titleText.text = "ESCOLHA UMA SKILL";
+        titleText.text = Loc.T("ui.skill_choice");
         titleText.color = Color.yellow;
         titleText.fontSize = 36;
         titleText.fontStyle = FontStyles.Bold;
@@ -88,7 +88,7 @@ public class SkillChoiceUICreator : EditorWindow
 
         // Botão de confirmar
         GameObject confirmButton = CreateButton(panel, "ConfirmButton", new Vector2(0, -280), new Vector2(200, 60));
-        confirmButton.GetComponentInChildren<TextMeshProUGUI>().text = "CONFIRMAR";
+        confirmButton.GetComponentInChildren<TextMeshProUGUI>().text = Loc.T("ui.confirm");
         confirmButton.GetComponent<Button>().onClick.AddListener(() => skillChoiceUI.ClosePanel());
 
         // Conectar referências ao SkillChoiceUI

@@ -73,7 +73,7 @@ public class CharacterIconUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         if (requiredLevelText != null)
         {
-            requiredLevelText.text = $"Nv. {characterData.unlockLevel}";
+            requiredLevelText.text = $"{Loc.T("ui.level_abbr")} {characterData.unlockLevel}";
             requiredLevelText.gameObject.SetActive(!isUnlocked);
         }
     }

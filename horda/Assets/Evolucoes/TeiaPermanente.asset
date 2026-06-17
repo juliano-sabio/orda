@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "+100% de dura\xE7\xE3o da teia ativa."
   icone: {fileID: 5442318302536508561, guid: 7a8f9f463ee99514d93cb6cdfd1b0c8b, type: 3}
   corDestaque: {r: 0.2, g: 0.9, b: 0.4, a: 1}
+  nameKey: evo.teiapermanente.name
+  descriptionKey: evo.teiapermanente.desc
   skillAlvo: 39
   tipoEvolucao: 46
   raridade: 3

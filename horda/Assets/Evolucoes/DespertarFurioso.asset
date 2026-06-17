@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "Intervalo entre golpes tent\xE1culo reduz para 0.35s."
   icone: {fileID: 484392071834553536, guid: c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7, type: 3}
   corDestaque: {r: 0.35, g: 0, b: 0.55, a: 1}
+  nameKey: evo.despertarfurioso.name
+  descriptionKey: evo.despertarfurioso.desc
   skillAlvo: 59
   tipoEvolucao: 93
   raridade: 2

@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: +3 ricochetes extras na cadeia de raios.
   icone: {fileID: -3305714898862992543, guid: 4345f8e660293af418cd2da5dd63d0fb, type: 3}
   corDestaque: {r: 0.35, g: 0.7, b: 1, a: 1}
+  nameKey: evo.raioeterno.name
+  descriptionKey: evo.raioeterno.desc
   skillAlvo: 43
   tipoEvolucao: 61
   raridade: 2

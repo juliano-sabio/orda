@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "Dano principal +60% e raio de explos\xE3o +50%."
   icone: {fileID: 4207339811325102189, guid: a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1, type: 3}
   corDestaque: {r: 1, g: 0.7, b: 0, a: 1}
+  nameKey: evo.punicaodivina2.name
+  descriptionKey: evo.punicaodivina2.desc
   skillAlvo: 57
   tipoEvolucao: 90
   raridade: 3

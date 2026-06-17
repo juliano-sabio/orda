@@ -439,7 +439,7 @@ public class UIManager : MonoBehaviour
 
         if (skillManagerSkillName != null)
         {
-            skillManagerSkillName.text = TextUtils.SemAcento(equippedSkill.skillName);
+            skillManagerSkillName.text = TextUtils.SemAcento(equippedSkill.GetDisplayName());
             skillManagerSkillName.color = GetElementColor(equippedSkill.element);
         }
 
@@ -560,10 +560,10 @@ public class UIManager : MonoBehaviour
     {
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-        if (skill.attackBonus != 0) sb.AppendLine($"ATQ: +{skill.attackBonus}");
-        if (skill.defenseBonus != 0) sb.AppendLine($"DEF: +{skill.defenseBonus}");
-        if (skill.healthBonus != 0) sb.AppendLine($"Vida: +{skill.healthBonus}");
-        if (skill.speedBonus != 0) sb.AppendLine($"Vel: +{skill.speedBonus}");
+        if (skill.attackBonus != 0) sb.AppendLine($"{Loc.T("stat.atk")}: +{skill.attackBonus}");
+        if (skill.defenseBonus != 0) sb.AppendLine($"{Loc.T("stat.def")}: +{skill.defenseBonus}");
+        if (skill.healthBonus != 0) sb.AppendLine($"{Loc.T("stat.hp")}: +{skill.healthBonus}");
+        if (skill.speedBonus != 0) sb.AppendLine($"{Loc.T("stat.spd")}: +{skill.speedBonus}");
 
         if (sb.Length == 0) sb.AppendLine(Loc.T("ui.passive_bonus"));
 
@@ -762,7 +762,7 @@ public class UIManager : MonoBehaviour
             icon.sprite = skill.icon != null ? skill.icon : defaultSkillIcon;
             icon.color = Color.white;
             icon.gameObject.SetActive(true);
-            if (nameLabel != null) nameLabel.text = skill.skillName;
+            if (nameLabel != null) nameLabel.text = skill.GetDisplayName();
             SkillTooltipHUD.Attach(icon, skill);
 
             if (elementIcon != null)
@@ -833,7 +833,7 @@ public class UIManager : MonoBehaviour
                     ultimateSkillElementIcon.gameObject.SetActive(false);
             }
 
-            SkillTooltipHUD.AttachUltimate(ultimateSkillIcon, ultimateSkill.skillName,
+            SkillTooltipHUD.AttachUltimate(ultimateSkillIcon, Loc.SkillLabel(ultimateSkill.skillName),
                 ultimateSkill.description ?? "", ultimateSkill.specificType);
         }
     }
@@ -1001,7 +1001,7 @@ public class UIManager : MonoBehaviour
 
         if (levelText != null)
         {
-            string novoLvl = $"Level: {playerStats.GetLevel()}";
+            string novoLvl = $"{Loc.T("ui.level_abbr")}: {playerStats.GetLevel()}";
             if (levelText.text != novoLvl) levelText.text = novoLvl;
         }
 
@@ -1014,15 +1014,15 @@ public class UIManager : MonoBehaviour
         if (ultimateChargeText != null)
         {
             float chargePercent = (playerStats.GetUltimateChargeTime() / playerStats.GetUltimateCooldown()) * 100f;
-            string novoTextoUlti = playerStats.ultimateBloqueada ? "ULTIMATE BLOQUEADA!" :
-                playerStats.IsUltimateReady() ? "ULTIMATE PRONTA!" :
-                $"ULTIMATE: {Mathf.FloorToInt(chargePercent)}%";
+            string novoTextoUlti = playerStats.ultimateBloqueada ? Loc.T("ui.ultimate_blocked") :
+                playerStats.IsUltimateReady() ? Loc.T("ui.ultimate_ready") :
+                $"{Loc.T("ui.ultimate")}: {Mathf.FloorToInt(chargePercent)}%";
             if (ultimateChargeText.text != novoTextoUlti)
                 ultimateChargeText.text = novoTextoUlti;
         }
 
         if (currentElementText != null)
-            currentElementText.text = $"Elem: {playerStats.GetCurrentElement()}";
+            currentElementText.text = $"{Loc.T("ui.elem")}: {playerStats.GetCurrentElement()}";
 
         if (ultimateReadyEffect != null)
             ultimateReadyEffect.SetActive(playerStats.IsUltimateReady() && !playerStats.ultimateBloqueada);
@@ -1242,41 +1242,41 @@ public class UIManager : MonoBehaviour
         {
             float sp = playerStats.GetShieldPoints();
             float mp = playerStats.GetMaxShieldPoints();
-            string shieldStr = mp > 0f ? $" (+{sp:F0}/{mp:F0} escudo)" : "";
-            maxHealthStatusText.text = $"Vida: {playerStats.GetCurrentHealth():F0} / {playerStats.GetMaxHealth():F0}{shieldStr}";
+            string shieldStr = mp > 0f ? $" (+{sp:F0}/{mp:F0} {Loc.T("stat.shield")})" : "";
+            maxHealthStatusText.text = $"{Loc.T("stat.hp")}: {playerStats.GetCurrentHealth():F0} / {playerStats.GetMaxHealth():F0}{shieldStr}";
         }
 
         // ── Combate ───────────────────────────────────────────────────
         if (damageText != null)
-            damageText.text = $"ATQ: {playerStats.GetAttack():F1}";
+            damageText.text = $"{Loc.T("stat.atk")}: {playerStats.GetAttack():F1}";
 
         if (defenseText != null)
         {
             float sp = playerStats.GetShieldPoints();
             float mp = playerStats.GetMaxShieldPoints();
-            string shieldStr = mp > 0f ? $" | Escudo: {sp:F0}/{mp:F0}" : "";
-            defenseText.text = $"DEF: {playerStats.GetDefense():F1}{shieldStr}";
+            string shieldStr = mp > 0f ? $" | {Loc.T("stat.shield")}: {sp:F0}/{mp:F0}" : "";
+            defenseText.text = $"{Loc.T("stat.def")}: {playerStats.GetDefense():F1}{shieldStr}";
         }
 
         if (critChanceText != null)
-            critChanceText.text = $"Critico: {playerStats.GetCritChance() * 100f:F1}%";
+            critChanceText.text = $"{Loc.T("stat.crit")}: {playerStats.GetCritChance() * 100f:F1}%";
 
         // ── Velocidade & Regeneração ──────────────────────────────────
         if (speedText != null)
-            speedText.text = $"Vel: {playerStats.GetSpeed():F1}";
+            speedText.text = $"{Loc.T("stat.spd")}: {playerStats.GetSpeed():F1}";
 
         if (attackSpeedText != null)
-            attackSpeedText.text = $"Vel.Atq: {playerStats.GetAttackActivationInterval():F1}s";
+            attackSpeedText.text = $"{Loc.T("stat.atkspd")}: {playerStats.GetAttackActivationInterval():F1}s";
 
         if (healthRegenText != null)
-            healthRegenText.text = $"Regen: {playerStats.GetHealthRegen():F1}/s";
+            healthRegenText.text = $"{Loc.T("stat.regen")}: {playerStats.GetHealthRegen():F1}/s";
 
         if (shieldCooldownText != null)
-            shieldCooldownText.text = $"Escudo: {playerStats.GetDefenseActivationInterval():F1}s";
+            shieldCooldownText.text = $"{Loc.T("stat.shield")}: {playerStats.GetDefenseActivationInterval():F1}s";
 
         // ── Level & XP ────────────────────────────────────────────────
         if (statusPointsText != null)
-            statusPointsText.text = $"Level {playerStats.GetLevel()}  |  XP: {playerStats.GetCurrentXP():F0} / {playerStats.GetXPToNextLevel():F0}";
+            statusPointsText.text = $"{Loc.T("ui.level_abbr")} {playerStats.GetLevel()}  |  XP: {playerStats.GetCurrentXP():F0} / {playerStats.GetXPToNextLevel():F0}";
 
         // ── Bônus Ativos ──────────────────────────────────────────────
         if (activeBonusesText != null)
@@ -1293,25 +1293,25 @@ public class UIManager : MonoBehaviour
             var elem = playerStats.GetCurrentElement();
             float bonus = playerStats.GetElementalBonus();
             if (elem.ToString() != "None")
-                sb.AppendLine($"Elem: {elem}  +{(bonus - 1f) * 100f:F0}%");
+                sb.AppendLine($"{Loc.T("ui.elem")}: {elem}  +{(bonus - 1f) * 100f:F0}%");
 
             // Regen ativa
             if (playerStats.IsRegeneratingHealth())
-                sb.AppendLine("Regenerando vida...");
+                sb.AppendLine(Loc.T("ui.regen_life"));
 
-            activeBonusesText.text = sb.Length > 0 ? sb.ToString().TrimEnd() : "Nenhum bonus ativo";
+            activeBonusesText.text = sb.Length > 0 ? sb.ToString().TrimEnd() : Loc.T("ui.no_bonus");
         }
 
         // ── Elemento (resumo) ─────────────────────────────────────────
         if (elementInfoText != null)
-            elementInfoText.text = $"Elem: {playerStats.GetCurrentElement()}\nBonus: {playerStats.GetElementalBonus():F1}x";
+            elementInfoText.text = $"{Loc.T("ui.elem")}: {playerStats.GetCurrentElement()}\n{Loc.T("ui.bonus")}: {playerStats.GetElementalBonus():F1}x";
 
         // ── Inventário ────────────────────────────────────────────────
         if (inventoryText != null)
         {
             var inventory = playerStats.GetInventory();
-            string inventoryStr = inventory.Count > 0 ? string.Join(", ", inventory) : "Nenhum";
-            inventoryText.text = $"Itens: {inventoryStr}";
+            string inventoryStr = inventory.Count > 0 ? string.Join(", ", inventory) : Loc.T("ui.active_bonuses_none");
+            inventoryText.text = $"{Loc.T("ui.items")}: {inventoryStr}";
         }
 
         // ── Skills de Ataque ──────────────────────────────────────────
@@ -1328,7 +1328,7 @@ public class UIManager : MonoBehaviour
                 foreach (var skill in attackSkills)
                 {
                     string status = skill.isActive ? "[ON]" : "[OFF]";
-                    sb.AppendLine($"{status} {TextUtils.SemAcento(skill.skillName)}  Dano: {skill.baseDamage:F1}");
+                    sb.AppendLine($"{status} {TextUtils.SemAcento(Loc.SkillLabel(skill.skillName))}  {Loc.T("stat.dmg")}: {skill.baseDamage:F1}");
                 }
                 attackSkillsText.text = sb.ToString().TrimEnd();
             }
@@ -1348,7 +1348,7 @@ public class UIManager : MonoBehaviour
                 foreach (var skill in defenseSkills)
                 {
                     string status = skill.isActive ? "[ON]" : "[OFF]";
-                    sb.AppendLine($"{status} {TextUtils.SemAcento(skill.skillName)}  DEF: {skill.baseDefense:F1}");
+                    sb.AppendLine($"{status} {TextUtils.SemAcento(Loc.SkillLabel(skill.skillName))}  {Loc.T("stat.def")}: {skill.baseDefense:F1}");
                 }
                 defenseSkillsText.text = sb.ToString().TrimEnd();
             }
@@ -1361,9 +1361,9 @@ public class UIManager : MonoBehaviour
             if (ultimate.isActive)
             {
                 string readyStr = playerStats.IsUltimateReady()
-                    ? "PRONTA!"
-                    : $"Carregando... {playerStats.GetUltimateChargeTime():F1}s";
-                ultimateSkillsText.text = $"Ultimate: {TextUtils.SemAcento(ultimate.skillName)}\nDano: {ultimate.baseDamage:F1}  {readyStr}";
+                    ? Loc.T("ui.ready")
+                    : $"{Loc.T("ui.ult_loading")}... {playerStats.GetUltimateChargeTime():F1}s";
+                ultimateSkillsText.text = $"{Loc.T("ui.ultimate")}: {TextUtils.SemAcento(Loc.SkillLabel(ultimate.skillName))}\n{Loc.T("stat.dmg")}: {ultimate.baseDamage:F1}  {readyStr}";
             }
             else
             {
@@ -1400,7 +1400,7 @@ public class UIManager : MonoBehaviour
 
         if (availableSkillsText != null)
         {
-            availableSkillsText.text = "Sistema de Skills - Use Q/E para trocar skills equipadas";
+            availableSkillsText.text = Loc.T("ui.skill_system_hint");
         }
 
         CreateSkillSelectionPlaceholders();
@@ -1484,12 +1484,12 @@ public class UIManager : MonoBehaviour
 
         if (statusPointsText != null)
         {
-            statusPointsText.text = "Sistema de Cartas - Use C para abrir/fechar";
+            statusPointsText.text = Loc.T("ui.card_system_hint");
         }
 
         if (activeBonusesText != null)
         {
-            activeBonusesText.text = "BONUS ATIVOS:\nSistema de cartas de status";
+            activeBonusesText.text = $"{Loc.T("ui.active_bonuses")}:\n{Loc.T("ui.card_system")}";
         }
 
         CreateStatusCardPlaceholders();
@@ -1653,8 +1653,8 @@ public class UIManager : MonoBehaviour
     {
         if (elementAdvantagePanel != null && advantageText != null && disadvantageText != null)
         {
-            advantageText.text = $"Forte contra: {strongAgainst}";
-            disadvantageText.text = $"Fraco contra: {weakAgainst}";
+            advantageText.text = $"{Loc.T("ui.strong_against")}: {strongAgainst}";
+            disadvantageText.text = $"{Loc.T("ui.weak_against")}: {weakAgainst}";
             elementAdvantagePanel.SetActive(true);
         }
     }

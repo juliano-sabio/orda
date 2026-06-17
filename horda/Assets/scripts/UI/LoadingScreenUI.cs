@@ -25,16 +25,10 @@ public class LoadingScreenUI : MonoBehaviour
     RectTransform   spinnerRT;
     GameObject      canvasGO;
 
-    static readonly string[] dicas =
+    static readonly string[] dicasKeys =
     {
-        "Desvie dos inimigos para sobreviver mais tempo.",
-        "Colete XP para subir de nível e ganhar habilidades.",
-        "Use a ultimate no momento certo para virar o jogo.",
-        "Inimigos mais fortes aparecem em ondas posteriores.",
-        "Combine skills para potencializar seus ataques.",
-        "O dash tem invencibilidade nos primeiros frames.",
-        "Personagens de Fogo causam efeito de queimadura.",
-        "Observe os padrões de ataque dos chefes.",
+        "loading.tip.0", "loading.tip.1", "loading.tip.2", "loading.tip.3",
+        "loading.tip.4", "loading.tip.5", "loading.tip.6", "loading.tip.7",
     };
 
     // ─────────────────────────────────────────────────────────────────
@@ -164,7 +158,7 @@ public class LoadingScreenUI : MonoBehaviour
         // label "CARREGANDO" abaixo do spinner
         Texto("LblCarregando",
             new Vector2(0.30f, 0.46f), new Vector2(0.70f, 0.52f),
-            "CARREGANDO", 13f, FontStyles.Bold,
+            Loc.T("loading.carregando"), 13f, FontStyles.Bold,
             new Color(corClaro.r, corClaro.g, corClaro.b, 0.80f))
             .alignment = TextAlignmentOptions.Center;
 
@@ -215,14 +209,14 @@ public class LoadingScreenUI : MonoBehaviour
         // label DICA
         Texto("LblDica",
             new Vector2(0.15f, 0.17f), new Vector2(0.85f, 0.22f),
-            "— DICA —", 11f, FontStyles.Bold,
+            Loc.T("loading.dica"), 11f, FontStyles.Bold,
             new Color(corAcento.r + 0.2f, corAcento.g + 0.1f, corAcento.b + 0.1f, 0.80f))
             .alignment = TextAlignmentOptions.Center;
 
         // texto da dica
         txtDica = Texto("TxtDica",
             new Vector2(0.15f, 0.10f), new Vector2(0.85f, 0.17f),
-            dicas[Random.Range(0, dicas.Length)],
+            Loc.T(dicasKeys[Random.Range(0, dicasKeys.Length)]),
             13f, FontStyles.Italic, new Color(0.85f, 0.72f, 0.72f));
         txtDica.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDica.alignment = TextAlignmentOptions.Center;
@@ -300,7 +294,7 @@ public class LoadingScreenUI : MonoBehaviour
 
     IEnumerator AnimarDicas()
     {
-        int idx = Random.Range(0, dicas.Length);
+        int idx = Random.Range(0, dicasKeys.Length);
         yield return new WaitForSeconds(3f);
 
         while (txtDica != null)
@@ -312,8 +306,8 @@ public class LoadingScreenUI : MonoBehaviour
                 yield return null;
             }
 
-            idx = (idx + 1) % dicas.Length;
-            if (txtDica != null) txtDica.text = dicas[idx];
+            idx = (idx + 1) % dicasKeys.Length;
+            if (txtDica != null) txtDica.text = Loc.T(dicasKeys[idx]);
 
             for (float t = 0f; t < 0.35f; t += Time.deltaTime)
             {
@@ -332,10 +326,10 @@ public class LoadingScreenUI : MonoBehaviour
     {
         switch (cena)
         {
-            case "primeira_fase":      return "Primeira Fase";
-            case "segunda_fase":       return "Segunda Fase";
-            case "terceira_fase":      return "Terceira Fase";
-            case "Modo_sobrevivencia": return "Modo Sobrevivência";
+            case "primeira_fase":      return Loc.T("terrain.p1.name");
+            case "segunda_fase":       return Loc.T("terrain.p2.name");
+            case "terceira_fase":      return Loc.T("terrain.p3.name");
+            case "Modo_sobrevivencia": return Loc.T("terrain.surv.name");
             default:                   return cena.Replace("_", " ");
         }
     }

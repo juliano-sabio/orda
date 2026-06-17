@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: aureola
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: aureola
+  nameKey: skill.aureola.name
+  descriptionKey: skill.aureola.desc
   description: bloqueia qualquer dano mas entra em tempo de recarga
   icon: {fileID: 3831778685843724948, guid: 2136ad60b4889bb458be8ff4048fe69a, type: 3}
   cardPrefab: {fileID: 8728022091165569818, guid: 14708d00ab9b5d0439922a541fd3710a, type: 3}

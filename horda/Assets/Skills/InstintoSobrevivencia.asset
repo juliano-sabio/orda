@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: InstintoSobrevivencia
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: "Instinto de Sobreviv\xEAncia"
+  nameKey: skill.instintosobrevivencia.name
+  descriptionKey: skill.instintosobrevivencia.desc
   description: "Ao ficar abaixo de 30% HP, ativa automaticamente aumentando defesa
     e regenera\xE7\xE3o por 8s."
   icon: {fileID: -7211363429524276005, guid: d213c173daf54514f8cdc9a8838c2d71, type: 3}

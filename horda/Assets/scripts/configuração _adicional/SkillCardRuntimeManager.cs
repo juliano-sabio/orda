@@ -69,11 +69,12 @@ public class SkillCardRuntimeManager : MonoBehaviour
         if (nameText != null)
         {
             string elementIcon = SkillData.GetElementIcon();
-            nameText.text = $"<b>{TextUtils.SemAcento(SkillData.skillName)}</b>\n{elementIcon} {SkillData.element}";
+            string elementName = Loc.T($"element.{SkillData.element.ToString().ToLower()}");
+            nameText.text = $"<b>{TextUtils.SemAcento(SkillData.GetDisplayName())}</b>\n{elementIcon} {elementName}";
         }
 
         if (descriptionText != null)
-            descriptionText.text = TextUtils.SemAcento(SkillData.description);
+            descriptionText.text = TextUtils.SemAcento(SkillData.GetDisplayDescription());
 
         if (statsText != null)
             statsText.text = GetFormattedStats();
@@ -107,7 +108,7 @@ public class SkillCardRuntimeManager : MonoBehaviour
 
         if (rarityText != null)
         {
-            rarityText.text = SkillData.rarity.ToString().ToUpper();
+            rarityText.text = Loc.T($"rarity.{SkillData.rarity.ToString().ToLower()}");
             rarityText.color = rarityColor;
         }
 
@@ -119,12 +120,12 @@ public class SkillCardRuntimeManager : MonoBehaviour
     {
         StringBuilder sb = new StringBuilder();
 
-        if (SkillData.healthBonus != 0) sb.Append($"HP:{SkillData.healthBonus} ");
-        if (SkillData.attackBonus != 0) sb.Append($"ATQ:{SkillData.attackBonus} ");
-        if (SkillData.defenseBonus != 0) sb.Append($"DEF:{SkillData.defenseBonus} ");
-        if (SkillData.speedBonus != 0) sb.Append($"Vel:{SkillData.speedBonus} ");
+        if (SkillData.healthBonus != 0) sb.Append($"{Loc.T("stat.hp")}:{SkillData.healthBonus} ");
+        if (SkillData.attackBonus != 0) sb.Append($"{Loc.T("stat.atk")}:{SkillData.attackBonus} ");
+        if (SkillData.defenseBonus != 0) sb.Append($"{Loc.T("stat.def")}:{SkillData.defenseBonus} ");
+        if (SkillData.speedBonus != 0) sb.Append($"{Loc.T("stat.spd")}:{SkillData.speedBonus} ");
 
-        if (sb.Length == 0) sb.Append("Bônus Passivo");
+        if (sb.Length == 0) sb.Append(Loc.T("ui.passive_bonus"));
 
         return sb.ToString();
     }

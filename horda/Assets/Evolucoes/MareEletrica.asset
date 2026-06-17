@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: +50% de dano de afogamento por tick.
   icone: {fileID: 3600028234273540921, guid: 7740aa40fcbde9a40aac9c6d883b0713, type: 3}
   corDestaque: {r: 0.1, g: 0.5, b: 1, a: 1}
+  nameKey: evo.mareeletrica.name
+  descriptionKey: evo.mareeletrica.desc
   skillAlvo: 61
   tipoEvolucao: 95
   raridade: 2

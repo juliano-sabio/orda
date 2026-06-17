@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "A explos\xE3o final tem 2x de raio e dano."
   icone: {fileID: 5318314732264899772, guid: d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0, type: 3}
   corDestaque: {r: 1, g: 0.15, b: 0.1, a: 1}
+  nameKey: evo.ritualexplosivo.name
+  descriptionKey: evo.ritualexplosivo.desc
   skillAlvo: 49
   tipoEvolucao: 74
   raridade: 3

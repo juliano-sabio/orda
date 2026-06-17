@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: FugaSombras
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Fuga das Sombras
+  nameKey: skill.fugasombras.name
+  descriptionKey: skill.fugasombras.desc
   description: "Ao receber dano com HP abaixo de 50%, teleporta para posi\xE7\xE3o
     segura. Recarga de 6 minutos."
   icon: {fileID: 4396318724939022649, guid: ce72fdc3b7cfa294e8d4bc828390be7e, type: 3}

@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "+60% de raio de impacto dos tent\xE1culos e +50% de dano."
   icone: {fileID: 484392071834553536, guid: c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7, type: 3}
   corDestaque: {r: 0.5, g: 0, b: 0.8, a: 1}
+  nameKey: evo.despertargigante.name
+  descriptionKey: evo.despertargigante.desc
   skillAlvo: 59
   tipoEvolucao: 94
   raridade: 3

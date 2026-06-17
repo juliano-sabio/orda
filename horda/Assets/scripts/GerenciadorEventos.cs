@@ -352,7 +352,7 @@ void TentarIniciarEvento()
     Debug.Log($"[GerenciadorEventos] Iniciando evento: {eventoAtual.nome} (tipo={eventoAtual.tipo})");
 
     MostrarPainel(true);
-    uiManager?.ShowSkillAcquired("EVENTO!", eventoAtual.nome);
+    uiManager?.ShowSkillAcquired(Loc.T("event.banner_title"), Loc.T(EventoNomeKey(eventoAtual.tipo)));
 
     if (eventoAtual.tipo == TipoEvento.ColetarEspirito)
     {
@@ -429,8 +429,8 @@ void TentarIniciarEvento()
     IEnumerator MostrarResultado(bool sucesso)
     {
         // Painel já está visível — só atualiza o conteúdo
-        if (textoNome   != null) { textoNome.text = sucesso ? "OK SUCESSO!" : "X FALHOU!"; textoNome.color = sucesso ? new Color(0.2f, 1f, 0.3f) : new Color(1f, 0.3f, 0.3f); }
-        if (textoDesc   != null) textoDesc.text = sucesso ? eventoAtual.recompensaDescricao : "Evento não completado.";
+        if (textoNome   != null) { textoNome.text = sucesso ? Loc.T("event.success") : Loc.T("event.failure"); textoNome.color = sucesso ? new Color(0.2f, 1f, 0.3f) : new Color(1f, 0.3f, 0.3f); }
+        if (textoDesc   != null) textoDesc.text = sucesso ? Loc.T(EventoRecompensaKey(eventoAtual.tipo)) : Loc.T("event.not_completed");
         if (textoTimer  != null) { textoTimer.text = ""; textoTimer.color = Color.white; }
         if (textoProgresso != null) textoProgresso.text = "";
         if (barraFill   != null) barraFill.anchorMax = new Vector2(sucesso ? 1f : 0f, 1f);
@@ -454,8 +454,8 @@ void TentarIniciarEvento()
     {
         if (mostrar)
         {
-            if (textoNome  != null) { textoNome.text = eventoAtual.nome; textoNome.color = Color.yellow; }
-            if (textoDesc  != null) textoDesc.text = TextUtils.SemAcento(eventoAtual.descricao);
+            if (textoNome  != null) { textoNome.text = Loc.T(EventoNomeKey(eventoAtual.tipo)); textoNome.color = Color.yellow; }
+            if (textoDesc  != null) textoDesc.text = TextUtils.SemAcento(Loc.T(EventoDescKey(eventoAtual.tipo)));
             if (barraFillImg != null) barraFillImg.color = corBarraAtiva; //new Color(0.2f, 0.8f, 0.3f);
             StopCoroutine("AnimarSaida");
             StartCoroutine("AnimarEntrada");
@@ -1170,6 +1170,21 @@ void LimparSlimePercurso()
         else eventos.Add(evento);
     }
 
+    // Nome/descrição exibidos ao jogador são sempre resolvidos via Loc.T() pelo
+    // tipo do evento, ignorando os campos nome/descricao serializados (que
+    // existem só como fallback de editor/debug e ficam em PT fixo).
+    static string EventoNomeKey(TipoEvento tipo) => $"event.{tipo.ToString().ToLower()}.nome";
+    static string EventoDescKey(TipoEvento tipo) => $"event.{tipo.ToString().ToLower()}.desc";
+
+    static string EventoRecompensaKey(TipoEvento tipo) => tipo switch
+    {
+        TipoEvento.Ceifador       => "event.reward.heal20",
+        TipoEvento.SlimePercurso  => "event.reward.heal20",
+        TipoEvento.ZonaEliminacao => "event.reward.heal20",
+        TipoEvento.NucleoCorrompido => "event.reward.heal20",
+        _ => "event.reward.heal15",
+    };
+
     // ──────────────────────────────────────────────────────────
     // Portal
 
@@ -1464,7 +1479,7 @@ void LimparSlimePercurso()
         {
             SkillEvolutionManager.Instance?.AplicarEvolucao(evo);
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowSkillAcquired(evo.nomeEvolucao, evo.descricao);
+                UIManager.Instance.ShowSkillAcquired(evo.GetDisplayName(), evo.GetDisplayDescription());
         });
     }
 

@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: "+40% de raio do pent\xE1gono do ritual."
   icone: {fileID: 5318314732264899772, guid: d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0, type: 3}
   corDestaque: {r: 0.7, g: 0.3, b: 1, a: 1}
+  nameKey: evo.ritualampliado.name
+  descriptionKey: evo.ritualampliado.desc
   skillAlvo: 49
   tipoEvolucao: 73
   raridade: 2

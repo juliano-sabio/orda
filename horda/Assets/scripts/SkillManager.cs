@@ -449,7 +449,7 @@ public class SkillManager : MonoBehaviour
             }
 
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowSkillAcquired(skill.skillName, skill.GetFullDescription());
+                UIManager.Instance.ShowSkillAcquired(skill.GetDisplayName(), skill.GetFullDescription());
         }
     }
 

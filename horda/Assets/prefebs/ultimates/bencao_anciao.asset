@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: bencao_anciao
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Ben\xE7\xE3o do Anc\xE3o"
+  nameKey: ult.bencao.name
+  descriptionKey: ult.bencao.desc
   description: Invoca um totem sagrado que pulsa 6 vezes, curando 8% do HP e reduzindo
     cooldowns das habilidades a cada pulso.
   ultimateIcon: {fileID: 4959683054857044893, guid: b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4, type: 3}

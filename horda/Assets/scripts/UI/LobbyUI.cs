@@ -167,7 +167,7 @@ public class LobbyUI : MonoBehaviour
             StartCoroutine(FlashCopiar(imgCop));
         });
         var tCop = Texto("T", Vector2.zero, Vector2.one,
-            "COPIAR", 12f, FontStyles.Bold, Color.white);
+            Loc.T("lobby.copy"), 12f, FontStyles.Bold, Color.white);
         tCop.transform.SetParent(btnCop.transform, false);
         tCop.GetComponent<RectTransform>().anchorMin = Vector2.zero;
         tCop.GetComponent<RectTransform>().anchorMax = Vector2.one;
@@ -194,7 +194,7 @@ public class LobbyUI : MonoBehaviour
         BarraTopo(painel, corAcento);
         var lblJ = Texto("LblJ",
             new Vector2(0f, 0.90f), new Vector2(1f, 1f),
-            "JOGADORES", 15f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f));
+            Loc.T("lobby.players"), 15f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f));
         lblJ.transform.SetParent(painel.transform, false);
         lblJ.GetComponent<RectTransform>().anchorMin = new Vector2(0f, 0.92f);
         lblJ.GetComponent<RectTransform>().anchorMax = Vector2.one;
@@ -252,7 +252,7 @@ public class LobbyUI : MonoBehaviour
             // nome
             var nome = Texto($"Nome{i}",
                 new Vector2(0.20f, 0.50f), new Vector2(0.75f, 0.95f),
-                i == 0 ? "Você" : "Aguardando...",
+                i == 0 ? "Você" : Loc.T("lobby.waiting_player"),
                 14f, FontStyles.Bold,
                 i == 0 ? corClaro : new Color(0.40f, 0.28f, 0.28f));
             nome.transform.SetParent(slot.transform, false);
@@ -264,7 +264,7 @@ public class LobbyUI : MonoBehaviour
             // status (PRONTO / HOST / ESPERANDO)
             var status = Texto($"Status{i}",
                 new Vector2(0.20f, 0.05f), new Vector2(0.75f, 0.50f),
-                i == 0 && souHost ? "HOST" : "ESPERANDO",
+                i == 0 && souHost ? "HOST" : Loc.T("lobby.waiting"),
                 11f, FontStyles.Bold,
                 i == 0 && souHost ? new Color(1f, 0.8f, 0.2f) : corCinza);
             status.transform.SetParent(slot.transform, false);
@@ -310,7 +310,7 @@ public class LobbyUI : MonoBehaviour
         Color corAbaAtiva  = new Color(0.35f, 0.20f, 0.08f);
         Color corAbaInativa = new Color(0.10f, 0.05f, 0.05f);
         Image[] tabImgs = new Image[2];
-        string[] tabNomes = { "SALA", "PERSONAGEM" };
+        string[] tabNomes = { Loc.T("lobby.tab.room"), Loc.T("lobby.tab.character") };
 
         for (int i = 0; i < 2; i++)
         {
@@ -361,25 +361,25 @@ public class LobbyUI : MonoBehaviour
     void CriarConteudoSala(GameObject pai)
     {
         TextoPN(pai, "LblConf", new Vector2(0f, 0.92f), Vector2.one,
-            "CONFIGURAÇÕES DA SALA", 13f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
+            Loc.T("lobby.room_config"), 13f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
             .alignment = TextAlignmentOptions.Center;
 
-        CriarOpcaoConf(pai, "Mapa", 0.72f, 0.87f,
-            new[]{ "Fase 1", "Fase 2", "Fase 3", "Sobrev." });
-        CriarOpcaoConf(pai, "Dificuldade", 0.52f, 0.67f,
-            new[]{ "Fácil", "Normal", "Difícil" });
-        CriarOpcaoConf(pai, "Máx. Jogadores", 0.32f, 0.47f,
+        CriarOpcaoConf(pai, Loc.T("lobby.map"), 0.72f, 0.87f,
+            new[]{ Loc.T("terrain.p1.name"), Loc.T("terrain.p2.name"), Loc.T("terrain.p3.name"), Loc.T("terrain.surv.name") });
+        CriarOpcaoConf(pai, Loc.T("lobby.difficulty"), 0.52f, 0.67f,
+            new[]{ Loc.T("diff.easy"), Loc.T("diff.normal"), Loc.T("diff.hard") });
+        CriarOpcaoConf(pai, Loc.T("lobby.max_players"), 0.32f, 0.47f,
             new[]{ "2", "3", "4" });
 
         TextoPN(pai, "LblVis", new Vector2(0.05f, 0.22f), new Vector2(0.50f, 0.31f),
-            "Visibilidade", 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
+            Loc.T("lobby.visibility"), 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
             .alignment = TextAlignmentOptions.Left;
 
         CriarBotaoToggle(pai, "public", Loc.T("lobby.public"), new Vector2(0.05f, 0.12f), new Vector2(0.47f, 0.21f), true);
         CriarBotaoToggle(pai, "private", Loc.T("lobby.private"), new Vector2(0.53f, 0.12f), new Vector2(0.95f, 0.21f), false);
 
         var aviso = TextoPN(pai, "Aviso", new Vector2(0.05f, 0.01f), new Vector2(0.95f, 0.11f),
-            "⚠  Networking não implementado — aparência apenas",
+            Loc.T("lobby.notice"),
             10f, FontStyles.Italic, new Color(0.70f, 0.60f, 0.30f));
         aviso.textWrappingMode = TMPro.TextWrappingModes.Normal;
         aviso.alignment = TextAlignmentOptions.Center;
@@ -388,7 +388,7 @@ public class LobbyUI : MonoBehaviour
     void CriarConteudoPersonagem(GameObject pai)
     {
         TextoPN(pai, "LblP", new Vector2(0f, 0.92f), Vector2.one,
-            "ESCOLHA SEU PERSONAGEM", 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
+            Loc.T("lobby.choose_char"), 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
             .alignment = TextAlignmentOptions.Center;
 
         CriarGridPersonagens(pai);
@@ -576,12 +576,12 @@ public class LobbyUI : MonoBehaviour
     {
         switch (element)
         {
-            case PlayerStats.Element.Fire:      return "Inimigos atingidos sofrem queimadura.";
-            case PlayerStats.Element.Ice:       return "Chance de lentificar inimigos.";
-            case PlayerStats.Element.Lightning: return "Dano em cadeia entre inimigos.";
-            case PlayerStats.Element.Poison:    return "Aplica veneno com dano por segundo.";
-            case PlayerStats.Element.Earth:     return "Chance de atordoar inimigos.";
-            case PlayerStats.Element.Wind:      return "Bônus de velocidade e repulsão.";
+            case PlayerStats.Element.Fire:      return Loc.T("elem.fire.effect");
+            case PlayerStats.Element.Ice:       return Loc.T("elem.ice.effect");
+            case PlayerStats.Element.Lightning: return Loc.T("elem.lightning.effect");
+            case PlayerStats.Element.Poison:    return Loc.T("elem.poison.effect");
+            case PlayerStats.Element.Earth:     return Loc.T("elem.earth.effect");
+            case PlayerStats.Element.Wind:      return Loc.T("elem.wind.effect");
             default:                            return "";
         }
     }
@@ -626,7 +626,7 @@ public class LobbyUI : MonoBehaviour
         bInic.interactable = souHost;
         bInic.onClick.AddListener(IniciarJogo);
         Texto("T", Vector2.zero, Vector2.one,
-            souHost ? "INICIAR JOGO" : "Aguarde o host",
+            souHost ? Loc.T("lobby.start_game") : Loc.T("lobby.wait_host"),
             18f, FontStyles.Bold, Color.white)
             .transform.SetParent(goInic.transform, false);
         goInic.transform.GetChild(0).GetComponent<RectTransform>().anchorMin = Vector2.zero;

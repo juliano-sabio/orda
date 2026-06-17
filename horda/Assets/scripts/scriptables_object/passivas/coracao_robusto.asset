@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: coracao_robusto
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: "Cora\xE7\xE3o Robusto"
+  nameKey: pass.coracao.name
+  descriptionKey: pass.coracao.desc
   description: "Vida m\xE1xima aumentada em 30 pontos. Sua resist\xEAncia supera
     a dos guerreiros comuns."
   passiveIcon: {fileID: -6304973041331225894, guid: 9152b7d707340af44a8dd1bc5630c186, type: 3}

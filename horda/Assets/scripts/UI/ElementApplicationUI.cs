@@ -88,11 +88,11 @@ public class ElementApplicationUI : MonoBehaviour
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
         var titulo = CriarTexto(painelEtapa1, "Titulo",
-            $"Elemento {nomeElem.ToUpper()} coletado!", corElem, 22f, FontStyles.Bold);
+            string.Format(Loc.T("ui.elem_collected_fmt"), nomeElem.ToUpper()), corElem, 22f, FontStyles.Bold);
         Ancora(titulo, new Vector2(0f, 0.88f), new Vector2(1f, 1f), new Vector2(10f, 0f), new Vector2(-10f, 0f));
 
         var sub = CriarTexto(painelEtapa1, "Sub",
-            "Escolha uma skill ativa para infundir:", corTexto, 13f);
+            Loc.T("ui.choose_skill_infuse"), corTexto, 13f);
         Ancora(sub, new Vector2(0f, 0.80f), new Vector2(1f, 0.89f), new Vector2(10f, 0f), new Vector2(-10f, 0f));
 
         var lista = CriarScrollArea(painelEtapa1, "ListaSkills",
@@ -110,8 +110,8 @@ public class ElementApplicationUI : MonoBehaviour
         if (!temDisponivel)
         {
             string msg = skills.Count == 0
-                ? "Adquira skills primeiro!\nVoce ainda nao tem skills."
-                : "Todas as skills ja possuem\num elemento infundido.";
+                ? Loc.T("ui.no_skills_yet")
+                : Loc.T("ui.all_skills_infused");
             var aviso = CriarTexto(lista, "Aviso", msg, corTexto, 13f);
             Ancora(aviso, Vector2.zero, Vector2.one);
 
@@ -161,11 +161,11 @@ public class ElementApplicationUI : MonoBehaviour
             var icImg = ic.AddComponent<Image>(); icImg.sprite = skill.icon; icImg.preserveAspect = true;
         }
 
-        var nome = CriarTexto(go, "Nome", skill.skillName, disponivel ? corTexto : new Color(0.5f,0.5f,0.5f), 14f, FontStyles.Bold);
+        var nome = CriarTexto(go, "Nome", skill.GetDisplayName(), disponivel ? corTexto : new Color(0.5f,0.5f,0.5f), 14f, FontStyles.Bold);
         Ancora(nome, new Vector2(0f,0.5f), new Vector2(0.7f,1f), new Vector2(60f,0f), Vector2.zero);
         nome.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
 
-        var statusStr = disponivel ? "Sem elemento" : $"Ja tem: {ElementRegistry.Instance?.GetNome(skill.appliedElement) ?? skill.appliedElement.ToString()}";
+        var statusStr = disponivel ? Loc.T("ui.no_element") : $"{Loc.T("ui.has_element")}: {ElementRegistry.Instance?.GetNome(skill.appliedElement) ?? skill.appliedElement.ToString()}";
         var status = CriarTexto(go, "Status", statusStr,
             disponivel ? new Color(0.5f,0.7f,0.5f) : new Color(0.6f,0.4f,0.4f), 10f);
         Ancora(status, new Vector2(0f,0f), new Vector2(0.7f,0.5f), new Vector2(60f,0f), Vector2.zero);
@@ -199,10 +199,10 @@ public class ElementApplicationUI : MonoBehaviour
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
         var titulo = CriarTexto(painelEtapa2, "Titulo",
-            $"{skillSelecionada.skillName} + {nomeElem}", corElem, 22f, FontStyles.Bold);
+            $"{skillSelecionada.GetDisplayName()} + {nomeElem}", corElem, 22f, FontStyles.Bold);
         Ancora(titulo, new Vector2(0f,0.88f), new Vector2(1f,1f), new Vector2(12f,0f), new Vector2(-12f,0f));
 
-        var sub = CriarTexto(painelEtapa2, "Sub", "Escolha o poder do elemento:", corTexto, 13f);
+        var sub = CriarTexto(painelEtapa2, "Sub", Loc.T("ui.choose_elem_power"), corTexto, 13f);
         Ancora(sub, new Vector2(0f,0.81f), new Vector2(1f,0.89f), new Vector2(12f,0f), new Vector2(-12f,0f));
 
         // Container horizontal dos cards
@@ -228,7 +228,7 @@ public class ElementApplicationUI : MonoBehaviour
             }
         }
 
-        var aviso = CriarTexto(painelEtapa2, "Aviso", "Esta escolha e permanente.", new Color(0.6f,0.5f,0.5f), 10f);
+        var aviso = CriarTexto(painelEtapa2, "Aviso", Loc.T("ui.choice_permanent"), new Color(0.6f,0.5f,0.5f), 10f);
         Ancora(aviso, new Vector2(0f,0.07f), new Vector2(1f,0.14f), new Vector2(12f,0f), new Vector2(-12f,0f));
 
         var btnV = CriarBotao(painelEtapa2, "BtnVoltar", "< " + Loc.T("ui.back"), new Color(0.18f,0.12f,0.28f), MostrarEtapa1);
@@ -312,7 +312,7 @@ public class ElementApplicationUI : MonoBehaviour
         sep.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.50f);
 
         // nome do poder
-        var nomeGO = CriarTexto(go, "Nome", car.nome, corTexto, 15f, FontStyles.Bold);
+        var nomeGO = CriarTexto(go, "Nome", Loc.T($"characteristic.name.{car.tipo.ToString().ToLower()}"), corTexto, 15f, FontStyles.Bold);
         Ancora(nomeGO, new Vector2(0.04f,0.62f), new Vector2(0.96f,0.87f));
         nomeGO.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
 
@@ -324,14 +324,14 @@ public class ElementApplicationUI : MonoBehaviour
         mid.AddComponent<Image>().color = new Color(corBorda.r,corBorda.g,corBorda.b,0.25f);
 
         // descrição
-        var descGO = CriarTexto(go, "Desc", car.descricao, new Color(0.80f,0.74f,0.64f), 11f);
+        var descGO = CriarTexto(go, "Desc", Loc.T($"characteristic.desc.{car.tipo.ToString().ToLower()}"), new Color(0.80f,0.74f,0.64f), 11f);
         Ancora(descGO, new Vector2(0.05f,0.12f), new Vector2(0.95f,0.60f), new Vector2(0f,4f), Vector2.zero);
         var dTxt = descGO.GetComponent<TextMeshProUGUI>();
         dTxt.textWrappingMode = TextWrappingModes.Normal;
         dTxt.alignment = TextAlignmentOptions.Top;
 
         // hint clique
-        var hint = CriarTexto(go, "Hint", "[ CLIQUE PARA ESCOLHER ]",
+        var hint = CriarTexto(go, "Hint", Loc.T("ui.click_to_choose"),
             new Color(corElem.r,corElem.g,corElem.b,0.55f), 9f);
         Ancora(hint, new Vector2(0f,0f), new Vector2(1f,0.12f));
         hint.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;

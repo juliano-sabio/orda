@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: sombra_veloz
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: Sombra Veloz
+  nameKey: pass.sombra.name
+  descriptionKey: pass.sombra.desc
   description: "Cada kill concede +15% de velocidade por 3s (m\xE1x. 3 pilhas). Com
     3 pilhas, deixa rastro de sombras roxas."
   passiveIcon: {fileID: -7941554050243201907, guid: e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7, type: 3}

@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: EspadaFantasma
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Espada Fantasma
+  nameKey: skill.espadafantasma.name
+  descriptionKey: skill.espadafantasma.desc
   description: "3 cortes r\xE1pidos em leque na dire\xE7\xE3o do inimigo mais pr\xF3ximo."
   icon: {fileID: -3114996697606224331, guid: 71436e97be366334287171ba430ff64d, type: 3}
   cardPrefab: {fileID: 9207106959770819712, guid: 56b047b7fd9a58a4fa1aad0d35373d6a, type: 3}

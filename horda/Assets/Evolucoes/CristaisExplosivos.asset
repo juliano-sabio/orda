@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: Cada tiro de cristal explode em area de gelo ao acertar.
   icone: {fileID: 6565919703495854305, guid: bfba3e0ddedaccd47bdcb21d505a61c1, type: 3}
   corDestaque: {r: 0.3, g: 0.75, b: 1, a: 1}
+  nameKey: evo.cristaisexplosivos.name
+  descriptionKey: evo.cristaisexplosivos.desc
   skillAlvo: 60
   tipoEvolucao: 60
   raridade: 3

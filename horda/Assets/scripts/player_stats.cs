@@ -1143,7 +1143,7 @@ public class PlayerStats : MonoBehaviour
         if (uiManager != null)
         {
             uiManager.OnUltimateActivated();
-            uiManager.ShowUltimateAcquired(ultimateSkill.skillName, "Ultimate ativada!");
+            uiManager.ShowUltimateAcquired(Loc.SkillLabel(ultimateSkill.skillName), Loc.T("ui.ultimate_activated"));
         }
     }
 
@@ -1497,7 +1497,7 @@ public class PlayerStats : MonoBehaviour
                 }
                 applied = true;
                 if (uiManager != null)
-                    uiManager.ShowModifierAcquired(modifier.modifierName, skill.skillName);
+                    uiManager.ShowModifierAcquired(modifier.modifierName, Loc.SkillLabel(skill.skillName));
             }
         }
 
@@ -1512,7 +1512,7 @@ public class PlayerStats : MonoBehaviour
                 }
                 applied = true;
                 if (uiManager != null)
-                    uiManager.ShowModifierAcquired(modifier.modifierName, skill.skillName);
+                    uiManager.ShowModifierAcquired(modifier.modifierName, Loc.SkillLabel(skill.skillName));
             }
         }
 
@@ -1521,7 +1521,7 @@ public class PlayerStats : MonoBehaviour
             ultimateSkill.modifiers.Add(modifier);
             applied = true;
             if (uiManager != null)
-                uiManager.ShowModifierAcquired(modifier.modifierName, ultimateSkill.skillName);
+                uiManager.ShowModifierAcquired(modifier.modifierName, Loc.SkillLabel(ultimateSkill.skillName));
         }
 
         if (!applied)

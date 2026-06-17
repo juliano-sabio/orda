@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: CristaisGelo
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillName: Cristais de Gelo
+  nameKey: skill.cristaisgelo.name
+  descriptionKey: skill.cristaisgelo.desc
   description: 3 cristais orbitam o player e disparam automaticamente nos inimigos
     proximos, aplicando lentidao.
   icon: {fileID: 6565919703495854305, guid: bfba3e0ddedaccd47bdcb21d505a61c1, type: 3}

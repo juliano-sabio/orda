@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: raio_certeiro
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: Raio Certeiro
+  nameKey: ult.raio.name
+  descriptionKey: ult.raio.desc
   description: "Dispara um raio que ricocheteou at\xE9 5 vezes entre os inimigos
     mais pr\xF3ximos, causando dano decrescente a cada salto."
   ultimateIcon: {fileID: -3305714898862992543, guid: 4345f8e660293af418cd2da5dd63d0fb, type: 3}

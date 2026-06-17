@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: Inimigos congelados recebem 50% mais dano de todas as fontes.
   icone: {fileID: -8909505179940084187, guid: 0b30c626fedbeaf44afba239d80252d8, type: 3}
   corDestaque: {r: 0.5, g: 0.85, b: 1, a: 1}
+  nameKey: evo.geloabsoluto.name
+  descriptionKey: evo.geloabsoluto.desc
   skillAlvo: 46
   tipoEvolucao: 67
   raridade: 2

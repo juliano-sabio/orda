@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: necropole
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: "Necr\xF3pole"
+  nameKey: ult.necropole.name
+  descriptionKey: ult.necropole.desc
   description: Cria uma zona sombria; inimigos que morrem dentro ressuscitam como
     fantasmas aliados por 6s.
   ultimateIcon: {fileID: 8854504604341680941, guid: e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9, type: 3}

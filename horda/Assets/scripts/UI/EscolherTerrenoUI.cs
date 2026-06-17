@@ -10,8 +10,10 @@ public class EscolherTerrenoUI : MonoBehaviour
     public class ConfigFase
     {
         public string nome        = "Fase";
+        public string nomeKey     = "";
         public string nomeCena    = "primeira_fase";
         public string descricao   = "Descrição da fase";
+        public string descricaoKey = "";
         public int    dificuldade = 1;
         public bool   desbloqueada = true;
         public Color  cor         = new Color(0.2f, 0.5f, 0.8f);
@@ -20,10 +22,10 @@ public class EscolherTerrenoUI : MonoBehaviour
     [Header("Fases disponíveis")]
     public ConfigFase[] fases = new ConfigFase[]
     {
-        new ConfigFase { nome = "Primeira Fase",      nomeCena = "primeira_fase",      descricao = "O início da jornada.",          dificuldade = 1, desbloqueada = true, cor = new Color(0.15f, 0.6f, 0.15f) },
-        new ConfigFase { nome = "Segunda Fase",       nomeCena = "segunda_fase",       descricao = "Os inimigos ficam mais fortes.", dificuldade = 2, desbloqueada = true, cor = new Color(0.7f,  0.6f, 0.05f) },
-        new ConfigFase { nome = "Terceira Fase",      nomeCena = "terceira_fase",      descricao = "Apenas os mais corajosos.",      dificuldade = 3, desbloqueada = true, cor = new Color(0.7f,  0.2f, 0.05f) },
-        new ConfigFase { nome = "Sobrevivência",      nomeCena = "Modo_sobrevivencia", descricao = "Sobreviva o máximo que puder!",  dificuldade = 5, desbloqueada = true, cor = new Color(0.5f,  0.05f,0.7f)  },
+        new ConfigFase { nome = "Primeira Fase",      nomeKey = "terrain.p1.name", nomeCena = "primeira_fase",      descricao = "O início da jornada.",          descricaoKey = "terrain.p1.desc", dificuldade = 1, desbloqueada = true, cor = new Color(0.15f, 0.6f, 0.15f) },
+        new ConfigFase { nome = "Segunda Fase",       nomeKey = "terrain.p2.name", nomeCena = "segunda_fase",       descricao = "Os inimigos ficam mais fortes.", descricaoKey = "terrain.p2.desc", dificuldade = 2, desbloqueada = true, cor = new Color(0.7f,  0.6f, 0.05f) },
+        new ConfigFase { nome = "Terceira Fase",      nomeKey = "terrain.p3.name", nomeCena = "terceira_fase",      descricao = "Apenas os mais corajosos.",      descricaoKey = "terrain.p3.desc", dificuldade = 3, desbloqueada = true, cor = new Color(0.7f,  0.2f, 0.05f) },
+        new ConfigFase { nome = "Sobrevivência",      nomeKey = "terrain.surv.name", nomeCena = "Modo_sobrevivencia", descricao = "Sobreviva o máximo que puder!", descricaoKey = "terrain.surv.desc", dificuldade = 5, desbloqueada = true, cor = new Color(0.5f,  0.05f,0.7f) },
     };
 
     [Header("Cena de voltar")]
@@ -183,19 +185,19 @@ public class EscolherTerrenoUI : MonoBehaviour
         Image bg = card.AddComponent<Image>();
         Sprite spriteEscolhido = spriteCard;
 #if UNITY_EDITOR
-        if (fase.nome == "Segunda Fase")
+        if (fase.nomeCena == "segunda_fase")
         {
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
                 "Assets/assets/UI/skill_card/cartastatusl.ase"))
                 if (a is Sprite s) { spriteEscolhido = s; break; }
         }
-        else if (fase.nome == "Terceira Fase")
+        else if (fase.nomeCena == "terceira_fase")
         {
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
                 "Assets/assets/UI/skill_card/cartaevolução.ase"))
                 if (a is Sprite s) { spriteEscolhido = s; break; }
         }
-        else if (fase.nome.Contains("Sobreviv"))
+        else if (fase.nomeCena == "Modo_sobrevivencia")
         {
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
                 "Assets/assets/UI/skill_card/cartaskill.ase"))
@@ -256,7 +258,7 @@ public class EscolherTerrenoUI : MonoBehaviour
         // Nome
         AdicionarTexto(card, "Nome",
             new Vector2(0f, 0.72f), new Vector2(1f, 0.95f),
-            fase.nome, 20f, FontStyles.Bold,
+            string.IsNullOrEmpty(fase.nomeKey) ? fase.nome : Loc.T(fase.nomeKey), 20f, FontStyles.Bold,
             fase.desbloqueada ? Color.white : Color.gray);
 
         // Dificuldade
@@ -273,7 +275,7 @@ public class EscolherTerrenoUI : MonoBehaviour
         // Descrição
         var desc = AdicionarTexto(card, "Desc",
             new Vector2(0.05f, 0.25f), new Vector2(0.95f, 0.58f),
-            fase.descricao, 13f, FontStyles.Normal,
+            string.IsNullOrEmpty(fase.descricaoKey) ? fase.descricao : Loc.T(fase.descricaoKey), 13f, FontStyles.Normal,
             fase.desbloqueada ? new Color(0.8f, 0.8f, 0.8f) : new Color(0.4f, 0.4f, 0.4f));
         desc.textWrappingMode = TMPro.TextWrappingModes.Normal;
 

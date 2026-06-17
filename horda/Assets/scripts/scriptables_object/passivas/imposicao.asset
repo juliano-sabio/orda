@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: imposicao
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: "Imposi\xE7\xE3o"
+  nameKey: pass.imposicao.name
+  descriptionKey: pass.imposicao.desc
   description: "A cada 18s emite uma aura por 3s que reduz o dano de todos os inimigos
     pr\xF3ximos em 30%."
   passiveIcon: {fileID: 8704918124540161019, guid: 4d5e6f7a8b9c4d5e6f7a8b9c4d5e6f7a, type: 3}

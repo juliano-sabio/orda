@@ -69,14 +69,14 @@ public class TimeBarEffects : MonoBehaviour
 
     void OnEventTriggered(string eventName)
     {
-        if (statusText != null) statusText.text = $"Evento: {eventName}";
+        if (statusText != null) statusText.text = $"{Loc.T("ui.event")}: {eventName}";
     }
 
     void OnBossSpawn(string bossName)
     {
         if (statusText != null)
         {
-            statusText.text = $"CUIDADO: {bossName}!";
+            statusText.text = $"{Loc.T("ui.warning")}: {bossName}!";
             statusText.color = Color.red;
         }
     }

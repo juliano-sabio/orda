@@ -74,7 +74,7 @@ public class StatusCardChoiceUI : MonoBehaviour
 
         if (!gameObject.activeInHierarchy) gameObject.SetActive(true);
 
-        if (titleText != null) titleText.text = titleMessage;
+        if (titleText != null) titleText.text = Loc.T("ui.choose_status_card");
 
         PauseGame();
 

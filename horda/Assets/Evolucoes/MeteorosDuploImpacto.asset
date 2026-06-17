@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,6 +16,8 @@ MonoBehaviour:
   descricao: Cada meteoro aplica dano duas vezes ao aterrissar.
   icone: {fileID: -3900171204097184066, guid: b3c4d5e6f7a8091a0b1c2d3e4f5a0003, type: 3}
   corDestaque: {r: 1, g: 0.55, b: 0.1, a: 1}
+  nameKey: evo.meteorosduploimpacto.name
+  descriptionKey: evo.meteorosduploimpacto.desc
   skillAlvo: 45
   tipoEvolucao: 65
   raridade: 2

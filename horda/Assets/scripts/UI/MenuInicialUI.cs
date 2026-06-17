@@ -407,12 +407,12 @@ public class MenuInicialUI : MonoBehaviour
 
         BarraTopo(painel, new Color(0.10f, 0.30f, 0.60f));
         CriarTexto(painel, "Titulo", new Vector2(0f,0.84f), new Vector2(1f,1f),
-            "MULTIJOGADOR", 26f, FontStyles.Bold, Color.white);
+            Loc.T("multi.title"), 26f, FontStyles.Bold, Color.white);
         CriarTexto(painel, "Icone", new Vector2(0.3f,0.60f), new Vector2(0.7f,0.82f),
             "🌐", 42f, FontStyles.Normal, new Color(0.4f,0.7f,1f));
 
         CriarTexto(painel, "LblCodigo", new Vector2(0.05f,0.50f), new Vector2(0.95f,0.60f),
-            "CÓDIGO DA SALA", 13f, FontStyles.Bold, new Color(0.6f,0.8f,1f));
+            Loc.T("multi.room_code"), 13f, FontStyles.Bold, new Color(0.6f,0.8f,1f));
 
         var campo = new GameObject("Campo");
         campo.transform.SetParent(painel.transform, false);
@@ -424,21 +424,21 @@ public class MenuInicialUI : MonoBehaviour
             "Ex: SPIRIT-1234",14f,FontStyles.Italic,new Color(0.4f,0.4f,0.5f));
         ph.alignment = TextAlignmentOptions.Left;
 
-        BotaoSimples(painel,"CRIAR SALA",new Vector2(0.05f,0.23f),new Vector2(0.47f,0.37f),
+        BotaoSimples(painel,Loc.T("multi.create_room"),new Vector2(0.05f,0.23f),new Vector2(0.47f,0.37f),
             new Color(0.10f,0.35f,0.65f),()=>{
                 PlayerPrefs.SetInt("LobbyHost",1);
                 PlayerPrefs.SetString("LobbyCode","SPIRIT-" + GerarCodigoSala());
                 SceneManager.LoadScene("lobby");
             });
-        BotaoSimples(painel,"ENTRAR NA SALA",new Vector2(0.53f,0.23f),new Vector2(0.95f,0.37f),
+        BotaoSimples(painel,Loc.T("multi.join_room"),new Vector2(0.53f,0.23f),new Vector2(0.95f,0.37f),
             new Color(0.10f,0.45f,0.25f),()=>{
                 PlayerPrefs.SetInt("LobbyHost",0);
                 SceneManager.LoadScene("lobby");
             });
 
         CriarTexto(painel,"Aviso",new Vector2(0.05f,0.10f),new Vector2(0.95f,0.22f),
-            "⚠  Multiplayer visual apenas (sem rede)",11f,FontStyles.Italic,new Color(0.8f,0.7f,0.3f));
-        BotaoSimples(painel,"← VOLTAR",new Vector2(0.10f,0.02f),new Vector2(0.90f,0.10f),
+            Loc.T("multi.notice"),11f,FontStyles.Italic,new Color(0.8f,0.7f,0.3f));
+        BotaoSimples(painel,"← " + Loc.T("ui.back"),new Vector2(0.10f,0.02f),new Vector2(0.90f,0.10f),
             new Color(0.28f,0.08f,0.08f),()=>painelMulti.SetActive(false));
     }
 
@@ -637,10 +637,10 @@ public class MenuInicialUI : MonoBehaviour
         Toggle(p,"TV",new Vector2(0.70f,0.64f),new Vector2(0.90f,0.76f),
             QualitySettings.vSyncCount>0,v=>{QualitySettings.vSyncCount=v?1:0;PlayerPrefs.SetInt("VSync",v?1:0);});
 
-        Rotulo(p,"Qualidade Gráfica",0.46f,0.60f);
+        Rotulo(p,Loc.T("settings.quality"),0.46f,0.60f);
         BotoesQualidade(p,new Vector2(0.05f,0.34f),new Vector2(0.95f,0.46f));
 
-        Rotulo(p,"Limite de FPS",0.20f,0.32f);
+        Rotulo(p,Loc.T("settings.fps_limit"),0.20f,0.32f);
         var sf=Slider(p,"SF",new Vector2(0.05f,0.08f),new Vector2(0.80f,0.20f),
             Mathf.InverseLerp(30f,240f,PlayerPrefs.GetInt("TargetFPS",60)));
         var tf=CriarTexto(p,"TF2",new Vector2(0.82f,0.08f),new Vector2(0.95f,0.20f),
@@ -659,22 +659,22 @@ public class MenuInicialUI : MonoBehaviour
         Rotulo(p, Loc.T("settings.language"), 0.82f, 0.94f);
         SeletorIdiomaRow(p, new Vector2(0.05f, 0.70f), new Vector2(0.95f, 0.82f));
 
-        Rotulo(p,"Mostrar Tutorial",0.54f,0.66f);
+        Rotulo(p,Loc.T("settings.show_tutorial"),0.54f,0.66f);
         Toggle(p,"TT",new Vector2(0.70f,0.54f),new Vector2(0.90f,0.66f),
             PlayerPrefs.GetInt("TutorialVisto",0)==0,
             v=>PlayerPrefs.SetInt("TutorialVisto",v?0:1));
 
-        Rotulo(p,"Mostrar FPS na Tela",0.38f,0.50f);
+        Rotulo(p,Loc.T("settings.show_fps"),0.38f,0.50f);
         Toggle(p,"TF",new Vector2(0.70f,0.38f),new Vector2(0.90f,0.50f),
             PlayerPrefs.GetInt("ShowFPS",0)==1,
             v=>PlayerPrefs.SetInt("ShowFPS",v?1:0));
 
-        Rotulo(p,"Shake de Câmera",0.22f,0.34f);
+        Rotulo(p,Loc.T("settings.camera_shake"),0.22f,0.34f);
         Toggle(p,"TS",new Vector2(0.70f,0.22f),new Vector2(0.90f,0.34f),
             PlayerPrefs.GetInt("CameraShake",1)==1,
             v=>PlayerPrefs.SetInt("CameraShake",v?1:0));
 
-        BotaoSimples(p,"APAGAR PROGRESSO",new Vector2(0.10f,0.04f),new Vector2(0.90f,0.16f),
+        BotaoSimples(p,Loc.T("settings.clear_progress"),new Vector2(0.10f,0.04f),new Vector2(0.90f,0.16f),
             new Color(0.5f,0.05f,0.05f),()=>{PlayerPrefs.DeleteAll();PlayerPrefs.Save();});
     }
 
@@ -777,7 +777,7 @@ public class MenuInicialUI : MonoBehaviour
 
     void BotoesQualidade(GameObject p, Vector2 mn, Vector2 mx)
     {
-        string[] n={"Baixa","Media","Alta","Ultra"};
+        string[] n={Loc.T("settings.quality.low"),Loc.T("settings.quality.medium"),Loc.T("settings.quality.high"),Loc.T("settings.quality.ultra")};
         int atual=QualitySettings.GetQualityLevel();
         Color corAtv  = new Color(0.22f,0.15f,0.04f);
         Color corInav = new Color(0.09f,0.06f,0.04f);

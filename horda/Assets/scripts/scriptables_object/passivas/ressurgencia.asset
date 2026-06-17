@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: ressurgencia
   m_EditorClassIdentifier: Assembly-CSharp::PassiveData
   passiveName: "Ressurg\xEAncia"
+  nameKey: pass.ressurgencia.name
+  descriptionKey: pass.ressurgencia.desc
   description: A cada 35s, ao matar um inimigo, recupera 25 HP e ganha +15% de velocidade
     por 4s.
   passiveIcon: {fileID: -7128161271713816573, guid: 0d1e2f3a4b5c0d1e2f3a4b5c0d1e2f3a, type: 3}

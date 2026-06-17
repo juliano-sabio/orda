@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: casulo_cristal
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: Casulo de Cristal
+  nameKey: ult.casulo.name
+  descriptionKey: ult.casulo.desc
   description: "Encapsula em um cristal por 2.5s ficando invulner\xE1vel. Ao quebrar,
     estoura em estilha\xE7os e restaura HP cheio."
   ultimateIcon: {fileID: -2722032896369593618, guid: c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5, type: 3}

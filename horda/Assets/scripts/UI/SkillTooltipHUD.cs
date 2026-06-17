@@ -36,7 +36,7 @@ public class SkillTooltipHUD : MonoBehaviour
     {
         if (icon == null || skill == null) return;
         Color cor = CorPorRaridade(skill.rarity);
-        AttachRaw(icon, skill.skillName, skill.description ?? "", cor, "SKILL", skill.specificType);
+        AttachRaw(icon, skill.GetDisplayName(), skill.GetDisplayDescription() ?? "", cor, Loc.T("skill.badge.skill"), skill.specificType);
     }
 
     // Ultimate
@@ -44,7 +44,7 @@ public class SkillTooltipHUD : MonoBehaviour
         SpecificSkillType skillAlvo = SpecificSkillType.None)
     {
         if (icon == null) return;
-        AttachRaw(icon, nome, desc ?? "", new Color(1f, 0.78f, 0.15f), "ULTIMATE", skillAlvo);
+        AttachRaw(icon, nome, desc ?? "", new Color(1f, 0.78f, 0.15f), Loc.T("skilltype.ultimate"), skillAlvo);
     }
 
     // Genérico (dash, etc.)
@@ -55,7 +55,7 @@ public class SkillTooltipHUD : MonoBehaviour
     public static void AttachPassiva(Image icon, string nome, string desc)
     {
         if (icon == null) return;
-        AttachRaw(icon, nome, desc ?? "", new Color(0.35f, 0.90f, 0.45f), "PASSIVA");
+        AttachRaw(icon, nome, desc ?? "", new Color(0.35f, 0.90f, 0.45f), Loc.T("skilltype.passive"));
     }
 
     static void AttachRaw(Image icon, string nome, string desc, Color cor, string tipo,
@@ -205,9 +205,9 @@ public class SkillTooltipHUD : MonoBehaviour
             var sb = new System.Text.StringBuilder();
             foreach (var evo in evolucoes)
             {
-                sb.Append($"<color=#{ColorToHex(evo.corDestaque)}><b>- {evo.nomeEvolucao}</b></color>");
+                sb.Append($"<color=#{ColorToHex(evo.corDestaque)}><b>- {evo.GetDisplayName()}</b></color>");
                 if (!string.IsNullOrEmpty(evo.descricao))
-                    sb.Append($"\n{evo.descricao}");
+                    sb.Append($"\n{evo.GetDisplayDescription()}");
                 sb.Append("\n");
             }
             evoBloco = sb.ToString().TrimEnd('\n');

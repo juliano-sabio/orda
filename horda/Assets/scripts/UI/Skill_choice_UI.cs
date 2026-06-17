@@ -359,11 +359,11 @@ public class SkillChoiceUI : MonoBehaviour
         {
             if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
             {
-                text.text = $"<b>{skill.skillName}</b>";
+                text.text = $"<b>{skill.GetDisplayName()}</b>";
             }
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {
-                text.text = skill.description;
+                text.text = skill.GetDisplayDescription();
             }
             else if (text.name.Contains("Stats") || text.name.Contains("Status") || text.name.Contains("Bonus"))
             {
@@ -505,11 +505,11 @@ public class SkillChoiceUI : MonoBehaviour
         if (skill.icon != null) { innerImg.sprite = skill.icon; }
 
         // ── NameArea ──────────────────────────────────────────────────────────
-        CriarTextoArea(cardObj, "NameArea", "NameText", $"<b>{skill.skillName}</b>",
+        CriarTextoArea(cardObj, "NameArea", "NameText", $"<b>{skill.GetDisplayName()}</b>",
             new Vector2(0f, 0.50f), new Vector2(1f, 0.68f), 14, new Color(0.95f, 0.82f, 0.40f), true);
 
         // ── DescArea ──────────────────────────────────────────────────────────
-        CriarTextoArea(cardObj, "DescArea", "DescText", skill.description,
+        CriarTextoArea(cardObj, "DescArea", "DescText", skill.GetDisplayDescription(),
             new Vector2(0.05f, 0.22f), new Vector2(0.95f, 0.58f), 11, new Color(0.90f, 0.82f, 0.65f), false);
 
         // ── StatsArea ─────────────────────────────────────────────────────────
@@ -565,11 +565,11 @@ public class SkillChoiceUI : MonoBehaviour
         {
             if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
             {
-                text.text = $"<b>{skill.skillName}</b>";
+                text.text = $"<b>{skill.GetDisplayName()}</b>";
             }
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {
-                text.text = skill.description;
+                text.text = skill.GetDisplayDescription();
             }
             else if (text.name.Contains("Stats") || text.name.Contains("Status") || text.name.Contains("Bonus"))
             {
@@ -730,7 +730,7 @@ public class SkillChoiceUI : MonoBehaviour
     {
         PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
         int currentLevel = playerStats != null ? playerStats.level : 1;
-        string title = $"ESCOLHA UMA SKILL (Nivel {currentLevel})";
+        string title = $"{Loc.T("ui.skill_choice")} ({Loc.T("ui.level_abbr")} {currentLevel})";
 
         if (titleTextTMP != null)
         {

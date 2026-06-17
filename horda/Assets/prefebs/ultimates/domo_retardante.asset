@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: domo_retardante
   m_EditorClassIdentifier: Assembly-CSharp::UltimateData
   ultimateName: Domo Retardante
+  nameKey: ult.domo.name
+  descriptionKey: ult.domo.desc
   description: Cria um domo que desacelera todos os projeteis inimigos dentro do
     raio por 5 segundos.
   ultimateIcon: {fileID: -6806036942964783702, guid: 654ab45a4e79e914fabae3ddf64f07fe, type: 3}

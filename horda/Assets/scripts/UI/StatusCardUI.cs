@@ -36,9 +36,9 @@ public class StatusCardUI : MonoBehaviour
 
         cardNameText.text = cardData.cardName;
         descriptionText.text = TextUtils.SemAcento(cardData.description);
-        costText.text = $"Custo: {cardData.cost}";
-        rarityText.text = cardData.rarity.ToString();
-        levelRequirementText.text = $"Nv. {cardData.requiredLevel}";
+        costText.text = $"{Loc.T("ui.cost")}: {cardData.cost}";
+        rarityText.text = Loc.T($"rarity.{cardData.rarity.ToString().ToLower()}");
+        levelRequirementText.text = $"{Loc.T("ui.level_abbr")} {cardData.requiredLevel}";
         cardBackground.color = GetRarityColor(cardData.rarity);
 
         // Atualizar ícone se disponível
