@@ -88,9 +88,14 @@ public class InimigoController : MonoBehaviour
             return;
         }
 
-        vidaAtual = dadosInimigo.vidaBase;
-        vidaMaxima = dadosInimigo.vidaBase;
-        danoAtual = dadosInimigo.danoBase;
+        // Escala de stats por tempo de jogo (linear, sem teto). Aplicada no spawn:
+        // inimigos mais novos nascem mais fortes. Bosses (sem dadosInimigo) não passam por aqui.
+        float multVida = EnemyScaling.VidaMult();
+        float multDano = EnemyScaling.DanoMult();
+
+        vidaMaxima = dadosInimigo.vidaBase * multVida;
+        vidaAtual = vidaMaxima;
+        danoAtual = dadosInimigo.danoBase * multDano;
         danoOriginal = danoAtual;
         velocidadeBase = dadosInimigo.velocidadeBase;
         velocidadeAtual = velocidadeBase;
@@ -98,7 +103,7 @@ public class InimigoController : MonoBehaviour
         DanoInimigo danoComponent = GetComponent<DanoInimigo>();
         if (danoComponent != null)
         {
-            danoComponent.dano = dadosInimigo.danoBase;
+            danoComponent.dano = danoAtual;
             danoComponent.intervaloAtaque = dadosInimigo.intervaloAtaque;
         }
 
