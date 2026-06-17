@@ -84,6 +84,8 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
         AtualizarVisual();
 
         if (ativo && playerStats != null) EmpurrarERefletir();
+        if (ativo && playerStats != null && Time.frameCount % 30 == 0)
+            SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.AuraContinua, null, this);
     }
 
     // Chamado por PlayerStats.TakeDamage — busca o atacante mais próximo internamente

@@ -87,6 +87,8 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
         // Regen contínuo enquanto ativo
         if (ativo && playerStats != null)
         {
+            if (Time.frameCount % 30 == 0)
+                SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.AuraContinua, null, this);
             float regenReal = regenPorSegundo *
                 (SkillEvolutionManager.Tem(SkillEvolutionType.AureolaFortificada) ? 1.8f : 1f);
             regenAcum += regenReal * Time.deltaTime;

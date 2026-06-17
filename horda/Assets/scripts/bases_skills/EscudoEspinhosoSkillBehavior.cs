@@ -79,6 +79,9 @@ public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
             if (timerRecarga <= 0f) { Reativar(); StartCoroutine(EfeitoRecarga()); }
         }
 
+        if (ativo && Time.frameCount % 30 == 0)
+            SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.AuraContinua, null, this);
+
         if (rootVisual == null && playerStats != null)
             CriarVisual();
     }

@@ -92,6 +92,7 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
         {
             timer = intervalo;
             DanificarInimigos();
+            SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.AuraContinua, null, this);
             StartCoroutine(FlashEspinhos());
         }
     }
