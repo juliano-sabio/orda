@@ -26,3 +26,29 @@ public enum CharacteristicType
     // Corrompido
     Caos, Infeccao
 }
+
+public enum DefensiveTrigger { OnAtivar, OnAtingido, AuraContinua }
+
+public enum DefensiveCharacteristicType
+{
+    // Fogo
+    AuraIgnea, RetaliacaoChamas,
+    // Ar
+    EsquivaVentosa, SoproRepulsor,
+    // Terra
+    PeleDePedra, FundacaoFirme,
+    // Agua
+    MareRestauradora, FluxoVital,
+    // Raio
+    DescargaReativa, CorrenteReflexiva,
+    // Gelo
+    ArmaduraGelida, ToqueCongelante,
+    // Planta
+    Espinhos, RaizesProtetoras,
+    // Trevas
+    DrenagemSombria, MantoAmaldicoado,
+    // Luz
+    BencaoSagrada, LuzOfuscante,
+    // Corrompido
+    CaosDefensivo, PragaReativa
+}

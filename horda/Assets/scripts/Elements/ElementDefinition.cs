@@ -12,6 +12,18 @@ public class ElementCharacteristic
 }
 
 [System.Serializable]
+public class DefensiveCharacteristic
+{
+    public string nome;
+    [TextArea(2, 3)]
+    public string descricao;
+    public DefensiveCharacteristicType tipo;
+    public DefensiveTrigger gatilho;
+    public float valor1;
+    public float valor2;
+}
+
+[System.Serializable]
 public class ElementDefinition
 {
     public ElementType tipo;
@@ -20,4 +32,5 @@ public class ElementDefinition
     public Sprite icone;
     [HideInInspector] public string emoji;
     public ElementCharacteristic[] caracteristicas = new ElementCharacteristic[2];
+    public DefensiveCharacteristic[] caracteristicasDefensivas = new DefensiveCharacteristic[2];
 }
