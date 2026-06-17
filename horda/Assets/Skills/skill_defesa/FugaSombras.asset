@@ -16,6 +16,8 @@ MonoBehaviour:
   description: "Ao receber dano alto, teleporta automaticamente para uma posi\xE7\xE3o
     segura pr\xF3xima."
   icon: {fileID: 4396318724939022649, guid: f769e0b9f5c7aaa41904b8b87c18de15, type: 3}
+  nameKey: skill.fugasombras.name
+  descriptionKey: skill.fugasombras.desc
   cardPrefab: {fileID: 9207106959770819712, guid: 56b047b7fd9a58a4fa1aad0d35373d6a, type: 3}
   projectilePrefab: {fileID: 0}
   healthBonus: 0
@@ -28,11 +30,13 @@ MonoBehaviour:
   elementalBonus: 1
   elementalEffectChance: 0.2
   elementalEffectDuration: 3
+  appliedElement: 0
+  appliedCharacteristicIndex: -1
   skillModifiers: []
   visualEffect: {fileID: 0}
   soundEffect: {fileID: 0}
   elementalEffect: {fileID: 0}
-  elementColor: {r: 0.5, g: 0.1, b: 0.9, a: 1}
+  elementColor: {r: 1, g: 1, b: 1, a: 1}
   elementParticleColor:
     m_Mode: 0
     m_GradientMin:

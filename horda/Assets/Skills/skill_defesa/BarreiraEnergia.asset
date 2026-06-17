@@ -16,6 +16,8 @@ MonoBehaviour:
   description: "Cria um escudo de energia com HP pr\xF3prio que absorve dano antes
     da vida real. Se quebrar, regenera ap\xF3s 12s."
   icon: {fileID: -1949818493086652813, guid: c477fc544dd365c4b80b382b78d1332f, type: 3}
+  nameKey: skill.barreiraenergia.name
+  descriptionKey: skill.barreiraenergia.desc
   cardPrefab: {fileID: 9207106959770819712, guid: 56b047b7fd9a58a4fa1aad0d35373d6a, type: 3}
   projectilePrefab: {fileID: 0}
   healthBonus: 150

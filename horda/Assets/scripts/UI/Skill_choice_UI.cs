@@ -517,7 +517,7 @@ public class SkillChoiceUI : MonoBehaviour
             new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.22f), 11, new Color(0.95f, 0.82f, 0.40f), false);
 
         // ── Raridade ──────────────────────────────────────────────────────────
-        CriarTextoArea(cardObj, "RarityArea", "RarityText", "RARE",
+        CriarTextoArea(cardObj, "RarityArea", "RarityText", Loc.T($"rarity.{skill.rarity.ToString().ToLower()}"),
             new Vector2(0.2f, 0.13f), new Vector2(0.8f, 0.24f), 12, new Color(0.80f, 0.55f, 0.25f), false);
 
         Button button = cardObj.GetComponent<Button>();
@@ -602,13 +602,13 @@ public class SkillChoiceUI : MonoBehaviour
     {
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-        if (skill.healthBonus != 0) sb.Append($"HP:{skill.healthBonus} ");
-        if (skill.attackBonus != 0) sb.Append($"ATQ:{skill.attackBonus} ");
-        if (skill.defenseBonus != 0) sb.Append($"DEF:{skill.defenseBonus} ");
-        if (skill.speedBonus != 0) sb.Append($"Vel:{skill.speedBonus} ");
-        if (skill.healthRegenBonus != 0) sb.Append($"Regen:{skill.healthRegenBonus} ");
+        if (skill.healthBonus != 0) sb.Append($"{Loc.T("stat.hp")}:{skill.healthBonus} ");
+        if (skill.attackBonus != 0) sb.Append($"{Loc.T("stat.atk")}:{skill.attackBonus} ");
+        if (skill.defenseBonus != 0) sb.Append($"{Loc.T("stat.def")}:{skill.defenseBonus} ");
+        if (skill.speedBonus != 0) sb.Append($"{Loc.T("stat.spd")}:{skill.speedBonus} ");
+        if (skill.healthRegenBonus != 0) sb.Append($"{Loc.T("stat.regen")}:{skill.healthRegenBonus} ");
 
-        if (sb.Length == 0) sb.Append("Bonus Passivo");
+        if (sb.Length == 0) sb.Append(Loc.T("ui.passive_bonus"));
 
         return sb.ToString();
     }
