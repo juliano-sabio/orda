@@ -1,0 +1,2 @@
+## Git LFS — cenas do Unity (arquivos grandes; o YAML é reserializado inteiro a cada save)
+*.unity filter=lfs diff=lfs merge=lfs -text
