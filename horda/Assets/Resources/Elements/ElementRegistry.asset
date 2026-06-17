@@ -29,6 +29,19 @@ MonoBehaviour:
       tipo: 1
       valor1: 2.5
       valor2: 0.6
+    caracteristicasDefensivas:
+    - nome: "Aura \xCDgnea"
+      descricao: "Aura \xCDgnea"
+      tipo: 0
+      gatilho: 2
+      valor1: 2.5
+      valor2: 4
+    - nome: "Retalia\xE7\xE3o em Chamas"
+      descricao: "Retalia\xE7\xE3o em Chamas"
+      tipo: 1
+      gatilho: 1
+      valor1: 5
+      valor2: 3
   - tipo: 2
     nomeDisplay: Ar
     cor: {r: 0.26666668, g: 0.8, b: 1, a: 1}
@@ -45,6 +58,19 @@ MonoBehaviour:
       tipo: 3
       valor1: 0.7
       valor2: 0
+    caracteristicasDefensivas:
+    - nome: Esquiva Ventosa
+      descricao: Esquiva Ventosa
+      tipo: 2
+      gatilho: 0
+      valor1: 0.25
+      valor2: 6
+    - nome: Sopro Repulsor
+      descricao: Sopro Repulsor
+      tipo: 3
+      gatilho: 0
+      valor1: 3
+      valor2: 12
   - tipo: 3
     nomeDisplay: Terra
     cor: {r: 0.6666667, g: 0.53333336, b: 0.26666668, a: 1}
@@ -60,6 +86,19 @@ MonoBehaviour:
       descricao: Escudo temporario ao ativar
       tipo: 5
       valor1: 0
+      valor2: 0
+    caracteristicasDefensivas:
+    - nome: Pele de Pedra
+      descricao: Pele de Pedra
+      tipo: 4
+      gatilho: 0
+      valor1: 0.3
+      valor2: 6
+    - nome: "Funda\xE7\xE3o Firme"
+      descricao: "Funda\xE7\xE3o Firme"
+      tipo: 5
+      gatilho: 0
+      valor1: 6
       valor2: 0
   - tipo: 4
     nomeDisplay: Agua
@@ -77,6 +116,19 @@ MonoBehaviour:
       tipo: 7
       valor1: 0.15
       valor2: 0
+    caracteristicasDefensivas:
+    - nome: "Mar\xE9 Restauradora"
+      descricao: "Mar\xE9 Restauradora"
+      tipo: 6
+      gatilho: 0
+      valor1: 0.2
+      valor2: 0
+    - nome: Fluxo Vital
+      descricao: Fluxo Vital
+      tipo: 7
+      gatilho: 2
+      valor1: 3
+      valor2: 0
   - tipo: 5
     nomeDisplay: Raio
     cor: {r: 1, g: 0.8666667, b: 0, a: 1}
@@ -93,6 +145,19 @@ MonoBehaviour:
       tipo: 9
       valor1: 1
       valor2: 0.35
+    caracteristicasDefensivas:
+    - nome: Descarga Reativa
+      descricao: Descarga Reativa
+      tipo: 8
+      gatilho: 1
+      valor1: 1
+      valor2: 0.5
+    - nome: Corrente Reflexiva
+      descricao: Corrente Reflexiva
+      tipo: 9
+      gatilho: 1
+      valor1: 4
+      valor2: 10
   - tipo: 6
     nomeDisplay: Gelo
     cor: {r: 0.6666667, g: 0.8666667, b: 1, a: 1}
@@ -109,6 +174,19 @@ MonoBehaviour:
       tipo: 11
       valor1: 3
       valor2: 0.25
+    caracteristicasDefensivas:
+    - nome: "Armadura G\xE9lida"
+      descricao: "Armadura G\xE9lida"
+      tipo: 10
+      gatilho: 0
+      valor1: 40
+      valor2: 0
+    - nome: Toque Congelante
+      descricao: Toque Congelante
+      tipo: 11
+      gatilho: 1
+      valor1: 2
+      valor2: 0
   - tipo: 7
     nomeDisplay: Planta
     cor: {r: 0.26666668, g: 0.6666667, b: 0.26666668, a: 1}
@@ -125,6 +203,19 @@ MonoBehaviour:
       tipo: 13
       valor1: 2.5
       valor2: 0
+    caracteristicasDefensivas:
+    - nome: Espinhos
+      descricao: Espinhos
+      tipo: 12
+      gatilho: 1
+      valor1: 12
+      valor2: 0
+    - nome: "Ra\xEDzes Protetoras"
+      descricao: "Ra\xEDzes Protetoras"
+      tipo: 13
+      gatilho: 0
+      valor1: 3
+      valor2: 2.5
   - tipo: 8
     nomeDisplay: Trevas
     cor: {r: 0.4, g: 0.13333334, b: 0.6666667, a: 1}
@@ -141,6 +232,19 @@ MonoBehaviour:
       tipo: 15
       valor1: 0.2
       valor2: 0
+    caracteristicasDefensivas:
+    - nome: Drenagem Sombria
+      descricao: Drenagem Sombria
+      tipo: 14
+      gatilho: 1
+      valor1: 8
+      valor2: 0
+    - nome: "Manto Amaldi\xE7oado"
+      descricao: "Manto Amaldi\xE7oado"
+      tipo: 15
+      gatilho: 2
+      valor1: 3.5
+      valor2: 0.3
   - tipo: 9
     nomeDisplay: Luz
     cor: {r: 1, g: 0.93333334, b: 0.53333336, a: 1}
@@ -155,6 +259,19 @@ MonoBehaviour:
     - nome: Cegamento
       descricao: -40% dano e vel ataque 3s
       tipo: 17
+      valor1: 3
+      valor2: 0.4
+    caracteristicasDefensivas:
+    - nome: "B\xEAn\xE7\xE3o Sagrada"
+      descricao: "B\xEAn\xE7\xE3o Sagrada"
+      tipo: 16
+      gatilho: 0
+      valor1: 15
+      valor2: 25
+    - nome: Luz Ofuscante
+      descricao: Luz Ofuscante
+      tipo: 17
+      gatilho: 2
       valor1: 3
       valor2: 0.4
   - tipo: 10
@@ -173,3 +290,16 @@ MonoBehaviour:
       tipo: 19
       valor1: 3.5
       valor2: 0.6
+    caracteristicasDefensivas:
+    - nome: Caos Defensivo
+      descricao: Caos Defensivo
+      tipo: 18
+      gatilho: 0
+      valor1: 0
+      valor2: 0
+    - nome: Praga Reativa
+      descricao: Praga Reativa
+      tipo: 19
+      gatilho: 1
+      valor1: 3.5
+      valor2: 8
