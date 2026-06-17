@@ -111,6 +111,7 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
         {
             atacante.ReceberDano(danoRef, false);
             SkillElementEffect.Aplicar(skillData, atacante.gameObject, danoRef, this);
+            SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtingido, atacante.gameObject, this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.BarreiraCongelante))
                 EvolutionFX.AplicarLentidao(atacante, 2f, 0.3f);
             StartCoroutine(FlashReflexao(atacante.transform.position));

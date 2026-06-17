@@ -107,6 +107,7 @@ public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
             ultimoFrameAcerto[id] = Time.frameCount;
 
             ic.ReceberDano(dano, false);
+            SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtingido, ic.gameObject, this);
 
             if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosVenenosos2))
                 EvolutionFX.AplicarVeneno(ic, 2f, 5f);

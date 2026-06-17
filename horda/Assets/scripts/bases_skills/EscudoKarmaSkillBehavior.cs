@@ -78,6 +78,21 @@ public class EscudoKarmaSkillBehavior : SkillBehavior, ISkillComRecarga
         StartCoroutine(EfeitoAbsorcao());
         AtualizarOrbs();
 
+        // OnAtingido (infusão defensiva) — atacante = inimigo mais próximo
+        InimigoController atacanteDef = null;
+        if (playerStats != null)
+        {
+            float menorDistDef = float.MaxValue;
+            Vector2 posDef = playerStats.transform.position;
+            foreach (var icDef in FindObjectsByType<InimigoController>(FindObjectsSortMode.None))
+            {
+                if (icDef == null || icDef.estaMorrendo) continue;
+                float dDef = Vector2.Distance(icDef.transform.position, posDef);
+                if (dDef < menorDistDef) { menorDistDef = dDef; atacanteDef = icDef; }
+            }
+        }
+        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtingido, atacanteDef != null ? atacanteDef.gameObject : null, this);
+
         // KarmaRetribuicao — causa dobro do dano absorvido no atacante mais próximo
         if (SkillEvolutionManager.Tem(SkillEvolutionType.KarmaRetribuicao) && danoAbsorvido > 0f && playerStats != null)
         {
