@@ -1953,6 +1953,8 @@ public class PlayerStats : MonoBehaviour
 
     public void AplicarParalisiaPlayer(float duracao)
     {
+        // Fundação Firme (infusão defensiva) — imune a paralisia/controle enquanto ativa
+        if (GetComponent<FundacaoFirmeMarker>() != null) return;
         if (corotinaParalisia != null) StopCoroutine(corotinaParalisia);
         corotinaParalisia = StartCoroutine(CorotinaParalisia(duracao));
     }

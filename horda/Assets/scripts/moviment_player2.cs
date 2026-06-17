@@ -22,6 +22,8 @@ public class moviment_player2 : MonoBehaviour
 
     public void Imobilizar(float duracao)
     {
+        // Fundação Firme (infusão defensiva) — imune a controle/empurrão enquanto ativa
+        if (GetComponent<FundacaoFirmeMarker>() != null) return;
         tempoImobilizado = Mathf.Max(tempoImobilizado, duracao);
         isDashing = false;
         playerStats?.AplicarParalisiaPlayer(duracao);
