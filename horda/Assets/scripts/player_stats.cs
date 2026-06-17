@@ -1011,6 +1011,14 @@ public class PlayerStats : MonoBehaviour
     {
         if (invulneravel) return;
 
+        // Esquiva Ventosa (infusão defensiva) — chance de evadir totalmente
+        var esquivaMk = GetComponent<EsquivaMarker>();
+        if (esquivaMk != null && UnityEngine.Random.value < esquivaMk.chance)
+        {
+            if (uiManager != null) uiManager.ShowElementChanged("ESQUIVA!");
+            return;
+        }
+
         ShieldAuraBehavior aura = GetComponentInChildren<ShieldAuraBehavior>();
         if (aura != null && aura.TryBlockDamage())
         {
@@ -1021,6 +1029,10 @@ public class PlayerStats : MonoBehaviour
         if (shieldImmuneTimer > 0f) return;
 
         float remaining = Mathf.Max(0f, damage - defense * 0.5f);
+
+        // Pele de Pedra (infusão defensiva) — redução fixa enquanto ativa
+        var peleMk = GetComponent<PeleDePedraMarker>();
+        if (peleMk != null) remaining *= (1f - peleMk.reducao);
 
         // Espelho Mágico — reflete o dano ao atacante mais próximo
         var espelho = GetComponent<EspelhoMagicoSkillBehavior>();
