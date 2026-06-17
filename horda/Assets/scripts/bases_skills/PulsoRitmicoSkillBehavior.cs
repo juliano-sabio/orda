@@ -80,8 +80,9 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
             if (go == null) yield break;
             float p = t / dur;
             float r = Mathf.Lerp(0.2f, raio * 1.1f, p);
+            Color ce = CorElemento();
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.22f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(0.3f, 0.9f, 0.5f, Mathf.Lerp(1f, 0f, p));
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, p));
             for (int i = 0; i < SEGS; i++)
             {
                 float ang = 360f / SEGS * i * Mathf.Deg2Rad;

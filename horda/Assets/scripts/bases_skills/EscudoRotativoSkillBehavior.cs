@@ -34,6 +34,7 @@ public class EscudoRotativoSkillBehavior : SkillBehavior
 
     public void UpdateFromSkillData(SkillData skill)
     {
+        this.skillData = skill; // para refletir elemento infundido nas peças/projétil
         if (skill.attackBonus > 0)          danoReflexao = skill.attackBonus;
         elementoReflexao =                  skill.element;
         if (skill.escudoPrefabVisual != null)  prefabEscudo = skill.escudoPrefabVisual;
@@ -107,6 +108,13 @@ public class EscudoRotativoSkillBehavior : SkillBehavior
             // Rotação: abertura do sprite sempre apontando para o player
             float angParaPlayer = Mathf.Atan2(-offset.y, -offset.x) * Mathf.Rad2Deg;
             pecas[i].GetComponent<Rigidbody2D>().rotation = angParaPlayer + ajusteRotacao;
+
+            // Reflete o elemento infundido tingindo o sprite da peça
+            if (skillData != null && skillData.appliedElement != ElementType.None && ElementRegistry.Instance != null)
+            {
+                var sr = pecas[i].GetComponent<SpriteRenderer>();
+                if (sr != null) sr.color = ElementRegistry.Instance.GetCor(skillData.appliedElement);
+            }
         }
     }
 
@@ -118,6 +126,10 @@ public class EscudoRotativoSkillBehavior : SkillBehavior
         ProjectileController2D ctrl = proj.GetComponent<ProjectileController2D>();
         if (ctrl != null)
         {
+            // Cor do elemento infundido sobrepõe a cor base do projétil refletido
+            if (skillData != null && skillData.appliedElement != ElementType.None && ElementRegistry.Instance != null)
+                ctrl.infusedColorOverride = ElementRegistry.Instance.GetCor(skillData.appliedElement);
+
             ctrl.Initialize(null, danoReflexao, velocidadeProjetil, vidaProjetil, elementoReflexao);
             ctrl.LaunchInDirection(-direcaoProjetil.normalized, velocidadeProjetil);
         }

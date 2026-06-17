@@ -126,6 +126,14 @@ public class LaminaProjetil : MonoBehaviour
 
     SpriteRenderer sr;
 
+    static readonly Color COR_ORIG = new Color(0.85f, 0.92f, 1f);
+    Color CorEl()
+    {
+        if (skillDataRef != null && skillDataRef.appliedElement != ElementType.None)
+            return ElementRegistry.Instance != null ? ElementRegistry.Instance.GetCor(skillDataRef.appliedElement) : COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void Iniciar(Vector2 direcao, float velocidade, float dmg)
     {
         dir    = direcao;
@@ -133,9 +141,10 @@ public class LaminaProjetil : MonoBehaviour
         dano   = dmg;
         origem = transform.position;
 
+        Color cel = CorEl();
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarLamina();
-        sr.color        = new Color(0.85f, 0.92f, 1f);
+        sr.color        = new Color(cel.r, cel.g, cel.b);
         sr.sortingOrder = 12;
         transform.localScale = Vector3.one * 0.55f;
 
@@ -219,9 +228,10 @@ public class LaminaProjetil : MonoBehaviour
         p.transform.position   = transform.position;
         p.transform.rotation   = transform.rotation;
         p.transform.localScale = transform.localScale * 0.7f;
+        Color cel = CorEl();
         var psr = p.AddComponent<SpriteRenderer>();
         psr.sprite       = GerarLamina();
-        psr.color        = new Color(0.6f, 0.75f, 1f, 0.45f);
+        psr.color        = new Color(cel.r * 0.7f, cel.g * 0.85f, cel.b, 0.45f);
         psr.sortingOrder = 11;
         // Usa componente self-managed para não depender do LaminaProjetil
         p.AddComponent<AutoDestroyFade>().Iniciar(0.12f);

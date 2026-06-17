@@ -113,10 +113,11 @@ public class FugaSombrasSkillBehavior : SkillBehavior, ISkillComRecarga
 
     IEnumerator EfeitoSaida(Vector2 pos)
     {
+        Color ce = CorElemento();
         for (int i = 0; i < 6; i++)
         {
             var go = new GameObject("F"); go.transform.position = pos + Random.insideUnitCircle * 0.4f;
-            var sr2 = go.AddComponent<SpriteRenderer>(); sr2.sprite = GerarDisco(10); sr2.color = new Color(0.4f, 0.1f, 0.8f, 0.8f); sr2.sortingOrder = 14;
+            var sr2 = go.AddComponent<SpriteRenderer>(); sr2.sprite = GerarDisco(10); sr2.color = new Color(ce.r, ce.g, ce.b, 0.8f); sr2.sortingOrder = 14;
             go.transform.localScale = Vector3.one * Random.Range(0.15f, 0.35f);
             StartCoroutine(FadeMove(sr2, Random.insideUnitCircle * 1.5f + Vector2.up * 0.5f));
         }
@@ -126,11 +127,12 @@ public class FugaSombrasSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator EfeitoChegada(Vector2 pos)
     {
         yield return StartCoroutine(AnelFX(pos, false));
+        Color ce = CorElemento();
         for (int i = 0; i < 6; i++)
         {
             float ang = i / 6f * Mathf.PI * 2f;
             var go = new GameObject("F"); go.transform.position = pos + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * 0.8f;
-            var sr2 = go.AddComponent<SpriteRenderer>(); sr2.sprite = GerarDisco(8); sr2.color = new Color(0.5f, 0.1f, 0.9f); sr2.sortingOrder = 14;
+            var sr2 = go.AddComponent<SpriteRenderer>(); sr2.sprite = GerarDisco(8); sr2.color = ce; sr2.sortingOrder = 14;
             go.transform.localScale = Vector3.one * Random.Range(0.1f, 0.2f);
             StartCoroutine(FadeMove(sr2, new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * Random.Range(1f, 3f)));
         }
@@ -146,8 +148,9 @@ public class FugaSombrasSkillBehavior : SkillBehavior, ISkillComRecarga
         {
             if (go == null) yield break;
             float p = t / dur; float r = contrair ? Mathf.Lerp(1.2f, 0f, p) : Mathf.Lerp(0f, 2.5f, p);
+            Color ce = CorElemento();
             lr.startWidth = lr.endWidth = contrair ? Mathf.Lerp(0.15f, 0.02f, p) : Mathf.Lerp(0.22f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(0.4f, 0.1f, 0.8f, contrair ? Mathf.Lerp(0.9f, 0f, p) : Mathf.Lerp(1f, 0f, p));
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, contrair ? Mathf.Lerp(0.9f, 0f, p) : Mathf.Lerp(1f, 0f, p));
             for (int i = 0; i < S; i++) { float a = 360f / S * i * Mathf.Deg2Rad; lr.SetPosition(i, pos + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r); }
             yield return null;
         }

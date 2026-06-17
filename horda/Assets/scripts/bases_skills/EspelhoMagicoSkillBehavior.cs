@@ -122,6 +122,7 @@ public class EspelhoMagicoSkillBehavior : SkillBehavior, ISkillComRecarga
             var lrs = root.GetComponentsInChildren<LineRenderer>();
 
             float[] raios = { 1.4f, 1.0f };
+            Color ce = CorElemento();
             for (int r = 0; r < lrs.Length && r < 2; r++)
             {
                 float offAng = r == 0 ? ang : -ang * 1.3f;
@@ -130,7 +131,7 @@ public class EspelhoMagicoSkillBehavior : SkillBehavior, ISkillComRecarga
                     float a = (offAng + 60f * i) * Mathf.Deg2Rad;
                     lrs[r].SetPosition(i, (Vector2)playerStats.transform.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * raios[r]);
                 }
-                Color cor = new Color(0.6f, 0.9f, 1f, (0.5f + pulso * 0.4f) * (r == 0 ? 1f : 0.6f));
+                Color cor = new Color(ce.r, ce.g, ce.b, (0.5f + pulso * 0.4f) * (r == 0 ? 1f : 0.6f));
                 lrs[r].startColor = lrs[r].endColor = cor;
                 lrs[r].startWidth = lrs[r].endWidth = (r == 0 ? 0.1f : 0.05f) + pulso * 0.03f;
             }
@@ -164,8 +165,9 @@ public class EspelhoMagicoSkillBehavior : SkillBehavior, ISkillComRecarga
         {
             if (go == null) yield break;
             float p = t / 0.3f; float r = Mathf.Lerp(0.3f, 2f, p);
+            Color ce = CorElemento();
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.2f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(0.6f, 0.9f, 1f, Mathf.Lerp(1f, 0f, p));
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, p));
             for (int i = 0; i < S; i++) { float a = 360f/S*i*Mathf.Deg2Rad; lr.SetPosition(i, pos + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r); }
             yield return null;
         }

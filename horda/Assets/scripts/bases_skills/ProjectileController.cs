@@ -23,6 +23,9 @@ public class ProjectileController2D : MonoBehaviour
     [Header("Efeitos Visuais")]
     public GameObject hitEffect;
     public TrailRenderer trailRenderer;
+    // Cor de elemento infundido (sobrepõe a cor do elemento base quando definida).
+    // a > 0 = ativa. Definida pelo lançador antes de Initialize.
+    public Color infusedColorOverride = Color.clear;
 
     protected Transform target;
     protected bool hasHit = false;
@@ -384,7 +387,7 @@ public class ProjectileController2D : MonoBehaviour
 
     void SetupVisuals()
     {
-        Color elementColor = GetElementColor();
+        Color elementColor = infusedColorOverride.a > 0f ? infusedColorOverride : GetElementColor();
 
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)

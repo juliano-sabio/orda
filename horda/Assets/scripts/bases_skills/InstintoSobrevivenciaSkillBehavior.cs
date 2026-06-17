@@ -127,7 +127,8 @@ public class InstintoSobrevivenciaSkillBehavior : SkillBehavior, ISkillComRecarg
         {
             t += Time.deltaTime;
             float pulso = Mathf.Sin(t * 5f) * 0.5f + 0.5f;
-            lr.startColor = lr.endColor = new Color(1f, 0.55f + pulso * 0.2f, 0.1f, 0.55f + pulso * 0.4f);
+            Color ce = CorElemento();
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, 0.55f + pulso * 0.4f);
             lr.startWidth = lr.endWidth = 0.08f + pulso * 0.07f;
             go.transform.localRotation = Quaternion.Euler(0f, 0f, t * 40f);
             yield return null;

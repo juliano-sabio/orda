@@ -183,9 +183,10 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
         var go = new GameObject("EstrelaCaindo");
         go.transform.position = origem;
 
+        Color ce = CorElemento();
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarEstrela(16);
-        sr.color        = new Color(1f, 0.9f, 0.3f);
+        sr.color        = ce;
         sr.sortingOrder = 14;
         go.transform.localScale = Vector3.one * 0.5f;
 
@@ -199,7 +200,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
             // Escala brilha mais ao aproximar
             float esc = Mathf.Lerp(0.4f, 0.9f, p);
             go.transform.localScale = Vector3.one * esc;
-            sr.color = Color.Lerp(new Color(1f, 0.9f, 0.3f), Color.white, p);
+            sr.color = Color.Lerp(ce, Color.white, p);
 
             // Spawn partícula de rastro
             if (Time.frameCount % 2 == 0)
@@ -236,8 +237,9 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
             if (go == null) yield break;
             float p = t / dur;
             float r = Mathf.Lerp(0.1f, raioImpacto * 1.4f, p);
+            Color ce = CorElemento();
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.25f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(1f, 0.85f, 0.2f, Mathf.Lerp(1f, 0f, p));
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, p));
             for (int i = 0; i < SEGS; i++)
             {
                 float ang = 360f / SEGS * i * Mathf.Deg2Rad;

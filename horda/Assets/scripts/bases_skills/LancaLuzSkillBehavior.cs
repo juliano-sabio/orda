@@ -136,6 +136,14 @@ public class LancaLuzProjetil : MonoBehaviour
     SpriteRenderer sr;
     SpriteRenderer srBrilho;
 
+    static readonly Color COR_ORIG = new Color(1f, 0.95f, 0.4f);
+    Color CorEl()
+    {
+        if (skillDataRef != null && skillDataRef.appliedElement != ElementType.None)
+            return ElementRegistry.Instance != null ? ElementRegistry.Instance.GetCor(skillDataRef.appliedElement) : COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void Iniciar(Vector2 d, float v, float dmg, float alc)
     {
         dir = d; vel = v; dano = dmg; alcance = alc; origem = transform.position;
@@ -143,8 +151,9 @@ public class LancaLuzProjetil : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, 0f, ang - 90f);
 
         // Sprite principal da lança
+        Color cel = CorEl();
         sr = gameObject.AddComponent<SpriteRenderer>();
-        sr.sprite = GerarLanca(); sr.color = new Color(1f, 0.95f, 0.4f); sr.sortingOrder = 14;
+        sr.sprite = GerarLanca(); sr.color = new Color(cel.r, cel.g, cel.b); sr.sortingOrder = 14;
         transform.localScale = new Vector3(0.55f, 1.4f, 1f);
 
         // Brilho interno branco
@@ -198,7 +207,8 @@ public class LancaLuzProjetil : MonoBehaviour
         {
             t += Time.deltaTime * 8f;
             float p = Mathf.Sin(t) * 0.5f + 0.5f;
-            if (sr != null) sr.color = new Color(1f, Mathf.Lerp(0.75f, 1f, p), Mathf.Lerp(0.2f, 0.6f, p), 1f);
+            Color cel = CorEl();
+            if (sr != null) sr.color = Color.Lerp(cel, Color.white, p * 0.45f);
             if (srBrilho != null) srBrilho.color = new Color(1f, 1f, 0.9f, 0.3f + p * 0.4f);
             yield return null;
         }
@@ -226,9 +236,10 @@ public class LancaLuzProjetil : MonoBehaviour
             t.transform.position = transform.position;
             t.transform.rotation = transform.rotation;
             t.transform.localScale = transform.localScale;
+            Color celT = CorEl();
             var tsr = t.AddComponent<SpriteRenderer>();
             tsr.sprite = GerarLanca();
-            tsr.color = new Color(1f, 0.8f, 0.2f, 0.4f); tsr.sortingOrder = 13;
+            tsr.color = new Color(celT.r, celT.g * 0.85f, celT.b * 0.6f, 0.4f); tsr.sortingOrder = 13;
             t.AddComponent<AutoDestroyFade>().Iniciar(0.1f);
 
             // Trail de luz branca menor

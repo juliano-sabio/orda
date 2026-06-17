@@ -75,7 +75,8 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
         go.transform.position = origem + dir * (alcanceCorte * 0.5f);
         go.transform.rotation = Quaternion.Euler(0f, 0f, ang - 90f);
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = GerarEspada(); sr.color = new Color(0.85f, 0.85f, 1f, 0.9f); sr.sortingOrder = 14;
+        Color cel = CorElemento();
+        sr.sprite = GerarEspada(); sr.color = new Color(cel.r, cel.g, cel.b, 0.9f); sr.sortingOrder = 14;
         go.transform.localScale = new Vector3(0.5f, alcanceCorte * 0.4f, 1f);
 
         // Colisão e dano
@@ -95,7 +96,7 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
         for (float t = 0f; t < 0.2f; t += Time.deltaTime)
         {
             if (sr == null) yield break;
-            sr.color = new Color(0.85f, 0.85f, 1f, Mathf.Lerp(0.9f, 0f, t / 0.2f));
+            sr.color = new Color(cel.r, cel.g, cel.b, Mathf.Lerp(0.9f, 0f, t / 0.2f));
             go.transform.localScale = new Vector3(Mathf.Lerp(0.5f, 0.1f, t / 0.2f), alcanceCorte * 0.4f, 1f);
             yield return null;
         }

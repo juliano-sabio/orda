@@ -141,6 +141,9 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
         var garrasGO = new GameObject("GarrasAbismo");
         garrasGO.transform.position = centro;
 
+        Color cel = CorElemento();
+        Color corGarras = new Color(cel.r, cel.g, cel.b, 0.95f);
+
         var lrs = new LineRenderer[QTD];
         for (int i = 0; i < QTD; i++)
         {
@@ -153,7 +156,7 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
             lr.sortingOrder  = 12;
             lr.startWidth    = 0.18f;
             lr.endWidth      = 0.04f;
-            lr.startColor    = lr.endColor = COR_GARRAS;
+            lr.startColor    = lr.endColor = corGarras;
             lr.numCapVertices = 3;
             lrs[i] = lr;
         }
@@ -165,7 +168,7 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
         lrAnel.useWorldSpace = true; lrAnel.loop = true; lrAnel.positionCount = 32;
         lrAnel.material = new Material(Shader.Find("Sprites/Default")); lrAnel.sortingOrder = 11;
         lrAnel.startWidth = lrAnel.endWidth = 0.12f;
-        lrAnel.startColor = lrAnel.endColor = COR_GARRAS;
+        lrAnel.startColor = lrAnel.endColor = corGarras;
         for (int i = 0; i < 32; i++)
         {
             float a = 360f / 32 * i * Mathf.Deg2Rad;
@@ -192,7 +195,7 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
             AtualizarPosGarras(lrs, centro, alturMax + pulso, QTD);
             // Pulsa cor
             float p2 = Mathf.Sin(t * 6f) * 0.5f + 0.5f;
-            Color cor = new Color(0.45f + p2 * 0.2f, 0.1f, 0.7f + p2 * 0.2f, 0.95f);
+            Color cor = Color.Lerp(corGarras, Color.white, p2 * 0.3f);
             foreach (var lr in lrs) if (lr != null) lr.startColor = lr.endColor = cor;
             lrAnel.startColor = lrAnel.endColor = cor;
             yield return null;
@@ -205,7 +208,7 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
             if (garrasGO == null) yield break;
             float p = t / durRetir;
             AtualizarPosGarras(lrs, centro, alturMax * (1f - p), QTD);
-            Color cor = new Color(COR_GARRAS.r, COR_GARRAS.g, COR_GARRAS.b, Mathf.Lerp(1f, 0f, p));
+            Color cor = new Color(corGarras.r, corGarras.g, corGarras.b, Mathf.Lerp(1f, 0f, p));
             foreach (var lr in lrs) if (lr != null) lr.startColor = lr.endColor = cor;
             lrAnel.startColor = lrAnel.endColor = cor;
             yield return null;

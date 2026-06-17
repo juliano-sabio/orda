@@ -43,9 +43,7 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
         baseDano      = data.attackBonus > 0f ? data.attackBonus : 10f;
         raio      = data.specialValue > 0f   ? data.specialValue       : 3f;
         intervalo = data.activationInterval > 0f ? data.activationInterval : 1.5f;
-        corAura   = data.elementColor != Color.white && data.elementColor != Color.clear
-                    ? data.elementColor
-                    : new Color(0.2f, 1f, 0.3f);
+        corAura   = CorElemento(); // reflete elemento infundido (não mais data.elementColor fixo)
 
         timer = intervalo;
         CriarVisual();
@@ -61,6 +59,9 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
     void Update()
     {
         if (playerStats == null) return;
+
+        // Reflete o elemento infundido em tempo real (anel, fill e espinhos)
+        corAura = CorElemento();
 
         // Segue o player
         Vector2 pos = playerStats.transform.position;

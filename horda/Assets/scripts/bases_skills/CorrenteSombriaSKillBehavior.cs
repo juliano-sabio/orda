@@ -131,8 +131,9 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
 
                 float pulso = Mathf.Sin(t * 10f + i * 2f) * 0.5f + 0.5f;
                 float vidaPct = 1f - t / duracaoAtiva;
-                Color cor = new Color(0.5f + pulso * 0.2f, 0.1f, 0.9f + pulso * 0.1f,
-                                      (0.55f + pulso * 0.45f) * vidaPct);
+                Color ce = CorElemento();
+                Color cor = Color.Lerp(ce, Color.white, pulso * 0.25f);
+                cor.a = (0.55f + pulso * 0.45f) * vidaPct;
                 linhas[i].startColor = linhas[i].endColor = cor;
                 linhas[i].startWidth = linhas[i].endWidth = (0.06f + pulso * 0.1f) * vidaPct;
             }

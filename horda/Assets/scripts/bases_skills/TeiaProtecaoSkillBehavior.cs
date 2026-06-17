@@ -140,7 +140,8 @@ public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga
 
             float prog  = t / dur;
             float pulso = Mathf.Sin(t * 6f) * 0.5f + 0.5f;
-            Color cor   = new Color(0.3f, 1f, 0.5f, (0.5f + pulso * 0.3f) * (1f - prog * 0.5f));
+            Color ce    = CorElemento();
+            Color cor   = new Color(ce.r, ce.g, ce.b, (0.5f + pulso * 0.3f) * (1f - prog * 0.5f));
 
             // Atualiza anéis
             var lrs = root.GetComponentsInChildren<LineRenderer>();

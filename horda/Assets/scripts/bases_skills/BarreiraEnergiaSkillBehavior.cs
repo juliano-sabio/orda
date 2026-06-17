@@ -22,7 +22,7 @@ public class BarreiraEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga
     float        angRot;
     float        elapsed;
 
-    static readonly Color COR_CHEIO   = new Color(0.2f, 0.7f, 1f, 0.95f);
+    Color COR_CHEIO   = new Color(0.2f, 0.7f, 1f, 0.95f); // reflete elemento infundido (atualizado em AtualizarVisual)
     static readonly Color COR_FRACO   = new Color(1f, 0.4f, 0.1f, 0.9f);
     static readonly Color COR_RECARGA = new Color(0.3f, 0.3f, 0.4f, 0.5f);
 
@@ -143,6 +143,9 @@ public class BarreiraEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga
     {
         if (rootVisual == null || playerStats == null) return;
 
+        // reflete elemento infundido em tempo real (mantém alpha do escudo cheio)
+        Color ceB = CorElemento();
+        COR_CHEIO = new Color(ceB.r, ceB.g, ceB.b, 0.95f);
         rootVisual.transform.position = playerStats.transform.position;
 
         // Escudo destruído: oculta tudo completamente

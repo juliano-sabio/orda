@@ -146,6 +146,15 @@ public class CorteFantasmaProjetil : MonoBehaviour
 
     SpriteRenderer    sr;
 
+    static readonly Color COR_ORIG = new Color(0.65f, 0.92f, 1f);
+    // Cor do elemento infundido (ou a cor original se não houver infusão)
+    Color CorEl()
+    {
+        if (skillDataRef != null && skillDataRef.appliedElement != ElementType.None)
+            return ElementRegistry.Instance != null ? ElementRegistry.Instance.GetCor(skillDataRef.appliedElement) : COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void Iniciar(InimigoController alvoIC, float velocidade, float dmg, CorteFantasmaSkillBehavior behavior)
     {
         alvo          = alvoIC;
@@ -160,9 +169,10 @@ public class CorteFantasmaProjetil : MonoBehaviour
         float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, ang - 45f);
 
+        Color cel = CorEl();
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarCorteFantasma();
-        sr.color        = new Color(0.65f, 0.92f, 1f, 0.95f);
+        sr.color        = new Color(cel.r, cel.g, cel.b, 0.95f);
         sr.sortingOrder = 14;
         transform.localScale = Vector3.one * 0.85f;
 
@@ -171,7 +181,7 @@ public class CorteFantasmaProjetil : MonoBehaviour
         glowGO.transform.SetParent(transform, false);
         var gsr = glowGO.AddComponent<SpriteRenderer>();
         gsr.sprite       = GerarCorteFantasma();
-        gsr.color        = new Color(0.4f, 0.75f, 1f, 0.28f);
+        gsr.color        = new Color(cel.r * 0.7f, cel.g * 0.85f, cel.b, 0.28f);
         gsr.sortingOrder = 13;
         glowGO.transform.localScale = Vector3.one * 1.6f;
 
@@ -206,7 +216,8 @@ public class CorteFantasmaProjetil : MonoBehaviour
         if (sr != null)
         {
             float pulso = Mathf.Sin(rot) * 0.12f + 0.88f;
-            sr.color = new Color(0.65f, 0.92f, 1f, pulso);
+            Color cel = CorEl();
+            sr.color = new Color(cel.r, cel.g, cel.b, pulso);
         }
     }
 
@@ -232,18 +243,15 @@ public class CorteFantasmaProjetil : MonoBehaviour
         ic.ReceberDano(dano, false);
         SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
 
-        // CorteLetal: 2 hits no mesmo inimigo = atordoamento
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorteLetal) && skillBehavior != null)
+        // CorteLetal: golpe duplo no MESMO inimigo (2 hits) + atordoamento de 1s.
+        // Antes dependia de 2 cortes distintos acertarem o mesmo alvo, o que quase
+        // nunca acontecia (cada corte mira um inimigo diferente) — então o corte
+        // letal nunca disparava. Agora cada corte letal entrega os 2 hits direto.
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorteLetal))
         {
-            int id = ic.gameObject.GetInstanceID();
-            skillBehavior.hitsInimigo.TryGetValue(id, out int hits);
-            hits++;
-            skillBehavior.hitsInimigo[id] = hits;
-            if (hits >= 2)
-            {
-                skillBehavior.hitsInimigo.Remove(id);
-                EvolutionFX.AplicarLentidao(ic, 1f, 0f); // velocidade 0 = atordoamento
-            }
+            ic.ReceberDano(dano, false); // 2º hit no mesmo inimigo
+            SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+            EvolutionFX.AplicarLentidao(ic, 1f, 0f); // velocidade 0 = atordoamento
         }
 
         StartCoroutine(EfeitoImpacto(transform.position, transform.rotation));
@@ -261,9 +269,10 @@ public class CorteFantasmaProjetil : MonoBehaviour
             t.transform.position   = transform.position;
             t.transform.rotation   = transform.rotation;
             t.transform.localScale = transform.localScale;
+            Color celT = CorEl();
             var tsr = t.AddComponent<SpriteRenderer>();
             tsr.sprite       = GerarCorteFantasma();
-            tsr.color        = new Color(0.45f, 0.82f, 1f, 0.45f);
+            tsr.color        = new Color(celT.r * 0.75f, celT.g * 0.9f, celT.b, 0.45f);
             tsr.sortingOrder = 13;
             t.AddComponent<AutoDestroyFade>().Iniciar(0.18f);
             Destroy(t, 0.35f);

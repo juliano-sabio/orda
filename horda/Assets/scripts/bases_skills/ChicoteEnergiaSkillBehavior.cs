@@ -107,7 +107,8 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
 
             // Estilo do beam principal
             float larg = Mathf.Lerp(0.3f, 0.05f, prog);
-            Color cor  = new Color(0.1f, 0.85f, 1f, Mathf.Lerp(1f, 0f, prog));
+            Color ce   = CorElemento();
+            Color cor  = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, prog));
             lr.startWidth = larg; lr.endWidth = larg * 0.2f;
             lr.startColor = cor; lr.endColor = new Color(cor.r, cor.g, cor.b, 0f);
 
@@ -167,8 +168,9 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
         {
             if (go == null) yield break;
             float p = t / dur; float r = Mathf.Lerp(0.2f, raio * 1.2f, p);
+            Color ce = CorElemento();
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.22f, 0.01f, p);
-            lr.startColor = lr.endColor = new Color(0.1f, 0.85f, 1f, Mathf.Lerp(1f, 0f, p));
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, p));
             for (int i = 0; i < S; i++) { float ang = 360f / S * i * Mathf.Deg2Rad; lr.SetPosition(i, pos + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * r); }
             yield return null;
         }
@@ -188,8 +190,9 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
         {
             if (go == null) yield break;
             float p = t / dur;
+            Color ce = CorElemento();
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.15f, 0f, p);
-            lr.startColor = lr.endColor = new Color(0.1f, 0.85f, 1f, Mathf.Lerp(0.6f, 0f, p));
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(0.6f, 0f, p));
             yield return null;
         }
         if (go != null) Destroy(go);

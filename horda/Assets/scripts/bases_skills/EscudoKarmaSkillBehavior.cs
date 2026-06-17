@@ -105,11 +105,12 @@ public class EscudoKarmaSkillBehavior : SkillBehavior, ISkillComRecarga
     {
         LimparOrbs();
         orbs = new GameObject[maxHits];
+        Color ce = CorElemento();
         for (int i = 0; i < maxHits; i++)
         {
             var go = new GameObject($"KarmaOrb{i}");
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = GerarDisco(12); sr.color = new Color(1f, 0.85f, 0.2f); sr.sortingOrder = 14;
+            sr.sprite = GerarDisco(12); sr.color = ce; sr.sortingOrder = 14;
             go.transform.localScale = Vector3.one * 0.35f;
             orbs[i] = go;
         }
@@ -186,8 +187,9 @@ public class EscudoKarmaSkillBehavior : SkillBehavior, ISkillComRecarga
         {
             if (go == null) yield break;
             float p = t / 0.4f; float r = Mathf.Lerp(0.3f, 2.5f, p);
+            Color ce = CorElemento();
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.25f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(1f, 0.85f, 0.2f, Mathf.Lerp(1f, 0f, p));
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, p));
             for (int i = 0; i < S; i++) { float a = 360f/S*i*Mathf.Deg2Rad; lr.SetPosition(i, (Vector2)playerStats.transform.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r); }
             yield return null;
         }

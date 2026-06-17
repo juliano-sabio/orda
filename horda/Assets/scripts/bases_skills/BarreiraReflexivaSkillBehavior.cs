@@ -24,7 +24,7 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
     SpriteRenderer srGlow;
     float        angRot;
     float        elapsed;
-    static readonly Color COR_CIANO   = new Color(0.35f, 0.88f, 1f, 1f);
+    Color COR_CIANO   = new Color(0.35f, 0.88f, 1f, 1f); // reflete elemento infundido (atualizado em AtualizarVisual)
     static readonly Color COR_RECARGA = new Color(0.35f, 0.88f, 1f, 0.15f);
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
@@ -220,6 +220,7 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
     {
         if (rootVisual == null || playerStats == null) return;
 
+        COR_CIANO = CorElemento(); // reflete elemento infundido em tempo real
         float pulso  = Mathf.Sin(elapsed * 4f) * 0.5f + 0.5f;
         float pulso2 = Mathf.Sin(elapsed * 6f + 0.8f) * 0.5f + 0.5f;
 

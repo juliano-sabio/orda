@@ -125,7 +125,7 @@ public class CristaisGeloSkillBehavior : SkillBehavior, ISkillComRecarga
             float angOffset = i / (float)qtd * 360f;
             var go = new GameObject($"Cristal{i}");
             var c = go.AddComponent<CristalOrbital>();
-            c.Iniciar(playerStats.transform, raioOrbita, angOffset);
+            c.Iniciar(playerStats.transform, raioOrbita, angOffset, CorElemento());
             cristais.Add(c);
         }
     }
@@ -155,13 +155,14 @@ public class CristalOrbital : MonoBehaviour
     float     angulo;
     float     velocOrbita = 90f; // graus/s
     SpriteRenderer sr;
-    static readonly Color COR_CRISTAL = new Color(0.45f, 0.88f, 1f);
+    Color COR_CRISTAL = new Color(0.45f, 0.88f, 1f);
 
-    public void Iniciar(Transform player, float r, float angOffset)
+    public void Iniciar(Transform player, float r, float angOffset, Color cor = default)
     {
         alvo   = player;
         raio   = r;
         angulo = angOffset;
+        if (cor != default && cor.a > 0f) COR_CRISTAL = cor;
 
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite       = GerarCristal();
@@ -259,11 +260,13 @@ public class ProjetilGelo : MonoBehaviour
     bool              atingiu, explosivo;
     SpriteRenderer    sr;
 
-    static readonly Color COR_GELO = new Color(0.45f, 0.88f, 1f);
+    Color COR_GELO = new Color(0.45f, 0.88f, 1f);
 
     public void Iniciar(InimigoController a, float v, float d, bool expl)
     {
         alvo     = a; vel = v; dano = d; explosivo = expl;
+        if (skillDataRef != null && skillDataRef.appliedElement != ElementType.None && ElementRegistry.Instance != null)
+            COR_GELO = ElementRegistry.Instance.GetCor(skillDataRef.appliedElement);
         dir      = alvo != null
             ? ((Vector2)alvo.transform.position - (Vector2)transform.position).normalized
             : Vector2.up;

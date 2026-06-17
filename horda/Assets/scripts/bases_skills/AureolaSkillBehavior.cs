@@ -25,7 +25,7 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
     SpriteRenderer srGlow;
     float        angRot;
     float        elapsed;
-    static readonly Color COR_DOURADO   = new Color(1f, 0.88f, 0.22f, 1f);
+    Color COR_DOURADO   = new Color(1f, 0.88f, 0.22f, 1f); // reflete elemento infundido (atualizado em AtualizarVisual)
     static readonly Color COR_RECARGA   = new Color(1f, 0.88f, 0.22f, 0.15f);
 
     public override void Initialize(PlayerStats stats) => base.Initialize(stats);
@@ -198,6 +198,7 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
     {
         if (rootVisual == null || playerStats == null) return;
 
+        COR_DOURADO = CorElemento(); // reflete elemento infundido em tempo real
         rootVisual.transform.position = playerStats.transform.position;
 
         float pulso  = Mathf.Sin(elapsed * 3f) * 0.5f + 0.5f;

@@ -297,6 +297,10 @@ public class PassiveProjectileSkill2D : SkillBehavior
 
         if (pc != null)
         {
+            // Cor do elemento infundido sobrepõe a cor do elemento base do projétil
+            if (skillData != null && skillData.appliedElement != ElementType.None && ElementRegistry.Instance != null)
+                pc.infusedColorOverride = ElementRegistry.Instance.GetCor(skillData.appliedElement);
+
             pc.Initialize(
                 target,
                 CalculateDamage(),

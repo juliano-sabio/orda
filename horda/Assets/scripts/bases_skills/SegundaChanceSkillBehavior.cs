@@ -105,8 +105,9 @@ public class SegundaChanceSkillBehavior : SkillBehavior, ISkillComRecarga
         {
             if (go == null) yield break;
             float p = t / dur; float r = Mathf.Lerp(0.3f, 5f, p);
+            Color ce = CorElemento();
             lr.startWidth = lr.endWidth = Mathf.Lerp(0.3f, 0.02f, p);
-            lr.startColor = lr.endColor = new Color(1f, 0.85f, 0.1f, Mathf.Lerp(1f, 0f, p));
+            lr.startColor = lr.endColor = new Color(ce.r, ce.g, ce.b, Mathf.Lerp(1f, 0f, p));
             for (int i = 0; i < SEGS; i++) { float a = 360f / SEGS * i * Mathf.Deg2Rad; lr.SetPosition(i, (Vector2)playerStats.transform.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r); }
             yield return null;
         }

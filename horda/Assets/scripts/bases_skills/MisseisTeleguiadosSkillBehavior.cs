@@ -117,6 +117,14 @@ public class MissilProjetil : MonoBehaviour
     float   elapsed;
     SpriteRenderer sr;
 
+    static readonly Color COR_ORIG = new Color(1f, 0.5f, 0.1f);
+    Color CorEl()
+    {
+        if (skillDataRef != null && skillDataRef.appliedElement != ElementType.None)
+            return ElementRegistry.Instance != null ? ElementRegistry.Instance.GetCor(skillDataRef.appliedElement) : COR_ORIG;
+        return COR_ORIG;
+    }
+
     public void Iniciar(InimigoController a, float v, float d)
     {
         alvo = a; vel = v; dano = d;
@@ -125,15 +133,16 @@ public class MissilProjetil : MonoBehaviour
             : Random.insideUnitCircle.normalized;
 
         // Sprite do míssil — formato de foguete
+        Color cel = CorEl();
         sr = gameObject.AddComponent<SpriteRenderer>();
-        sr.sprite = GerarMissil(); sr.color = new Color(1f, 0.5f, 0.1f); sr.sortingOrder = 14;
+        sr.sprite = GerarMissil(); sr.color = new Color(cel.r, cel.g, cel.b); sr.sortingOrder = 14;
         transform.localScale = new Vector3(0.35f, 0.55f, 1f);
 
         // Brilho interno
         var glowGO = new GameObject("Glow");
         glowGO.transform.SetParent(transform, false);
         var glowSR = glowGO.AddComponent<SpriteRenderer>();
-        glowSR.sprite = GerarDisco(8); glowSR.color = new Color(1f, 0.9f, 0.5f, 0.5f); glowSR.sortingOrder = 15;
+        glowSR.sprite = GerarDisco(8); glowSR.color = new Color(Mathf.Min(1f, cel.r + 0.3f), Mathf.Min(1f, cel.g + 0.4f), Mathf.Min(1f, cel.b + 0.4f), 0.5f); glowSR.sortingOrder = 15;
         glowGO.transform.localScale = new Vector3(1.2f, 0.6f, 1f);
 
         var col = gameObject.AddComponent<CapsuleCollider2D>();
@@ -180,7 +189,7 @@ public class MissilProjetil : MonoBehaviour
         {
             // elapsed já é acumulado em Update(); não incrementar aqui para evitar acúmulo duplo
             float p = Mathf.Sin(elapsed * 12f) * 0.5f + 0.5f;
-            if (sr != null) sr.color = new Color(1f, Mathf.Lerp(0.3f, 0.7f, p), 0.05f);
+            if (sr != null) { Color cel = CorEl(); sr.color = Color.Lerp(cel, Color.white, p * 0.35f); }
             yield return null;
         }
     }
@@ -233,8 +242,9 @@ public class MissilProjetil : MonoBehaviour
             t.transform.position = transform.position;
             t.transform.rotation = transform.rotation;
             t.transform.localScale = transform.localScale;
+            Color celT = CorEl();
             var tsr = t.AddComponent<SpriteRenderer>();
-            tsr.sprite = GerarMissil(); tsr.color = new Color(1f, 0.4f, 0.05f, 0.45f); tsr.sortingOrder = 13;
+            tsr.sprite = GerarMissil(); tsr.color = new Color(celT.r, celT.g * 0.8f, celT.b * 0.5f, 0.45f); tsr.sortingOrder = 13;
             t.AddComponent<AutoDestroyFade>().Iniciar(0.08f);
 
             // Chama de fogo menor

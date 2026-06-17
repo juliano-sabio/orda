@@ -24,6 +24,12 @@ public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
     static readonly Color COR_ESPINHO = new Color(0.25f, 0.9f,  0.3f,  1f);
     static readonly Color COR_BRILHO  = new Color(0.65f, 1f,    0.65f, 1f);
 
+    Color CorElemento() {
+        if (skillData != null && skillData.appliedElement != ElementType.None)
+            return ElementRegistry.Instance?.GetCor(skillData.appliedElement) ?? COR_ESPINHO;
+        return COR_ESPINHO;
+    }
+
     public override void Initialize(PlayerStats stats)
     {
         base.Initialize(stats);
@@ -33,6 +39,7 @@ public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
 
     public void UpdateFromSkillData(SkillData skill)
     {
+        this.skillData = skill; // necessário para CorElemento() refletir infusão
         if (skill.attackBonus > 0) dano    = skill.attackBonus;
         if (skill.cooldown    > 0) cooldown = skill.cooldown;
     }
@@ -202,7 +209,7 @@ public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
             if (ativo)
             {
                 float pct = maxHits > 0 ? Mathf.Clamp01((float)hitsRestantes / maxHits) : 1f;
-                Color cor = Color.Lerp(new Color(1f, 0.4f, 0.1f), COR_ESPINHO, pct);
+                Color cor = Color.Lerp(new Color(1f, 0.4f, 0.1f), CorElemento(), pct);
                 foreach (var lr in rootVisual.GetComponentsInChildren<LineRenderer>())
                 {
                     Color c = cor; c.a = 0.65f + pulso * 0.3f;
