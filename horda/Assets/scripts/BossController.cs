@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController))]
-public class BossController : MonoBehaviour
+public class BossController : MonoBehaviour, IBoss
 {
     // ──────────────────────────────────────────────
     // IDENTIDADE
@@ -128,6 +128,12 @@ public class BossController : MonoBehaviour
         animator      = GetComponent<Animator>();
         player        = GameObject.FindGameObjectWithTag("Player")?.transform;
         playerStats   = player != null ? player.GetComponent<PlayerStats>() : null;
+
+        // Escala de dano do boss por tempo (aplicada uma vez no spawn)
+        float multDanoBoss = EnemyScaling.BossDanoMult();
+        danoProjetil         *= multDanoBoss;
+        danoProjetilEspecial *= multDanoBoss;
+        danoRaio             *= multDanoBoss;
 
         projeteis = projeteisFase1;
         escalaOriginal = transform.localScale;

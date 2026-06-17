@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController))]
-public class BossCaveira : MonoBehaviour
+public class BossCaveira : MonoBehaviour, IBoss
 {
     // ──────────────────────────────────────────────
     // IDENTIDADE
@@ -171,6 +171,14 @@ public class BossCaveira : MonoBehaviour
     void Start()
     {
         controller    = GetComponent<InimigoController>();
+        // Escala de dano do boss por tempo (uma vez no spawn)
+        float md = EnemyScaling.BossDanoMult();
+        danoProjetil          *= md;
+        danoProjetilEmboscada *= md;
+        danoInvestida         *= md;
+        danoNuvemVeneno       *= md;
+        danoGritoSonico       *= md;
+        danoGarras            *= md;
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator      = GetComponent<Animator>();
         player        = GameObject.FindGameObjectWithTag("Player")?.transform;

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController), typeof(Rigidbody2D))]
-public class BossGuarda : MonoBehaviour
+public class BossGuarda : MonoBehaviour, IBoss
 {
     // ──────────────────────────────────────────────
     // IDENTIDADE

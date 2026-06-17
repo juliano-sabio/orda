@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController), typeof(Rigidbody2D))]
-public class BossSlimeGuardaElite : MonoBehaviour
+public class BossSlimeGuardaElite : MonoBehaviour, IBoss
 {
     // ── IDENTIDADE ───────────────────────────────────────────────────────────────
     [Header("Identidade")]
@@ -106,6 +106,7 @@ public class BossSlimeGuardaElite : MonoBehaviour
 
     void Start()
     {
+        danoProjetil *= EnemyScaling.BossDanoMult(); // escala de dano do boss no spawn
         rb.gravityScale           = 0f;
         rb.mass                   = 1000f;
         rb.linearDamping          = 20f;

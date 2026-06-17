@@ -84,7 +84,9 @@ public class InimigoController : MonoBehaviour
         {
             // Boss customizado: vida já definida externamente via Awake
             if (vidaMaxima <= 0f) vidaMaxima = 100f;
-            if (vidaAtual  <= 0f) vidaAtual  = vidaMaxima;
+            // Escala de boss por tempo (sobre a vida-base já setada no spawn)
+            vidaMaxima *= EnemyScaling.BossVidaMult();
+            vidaAtual  = vidaMaxima;
             return;
         }
 
@@ -119,6 +121,10 @@ public class InimigoController : MonoBehaviour
         temInimigoSuporte = (suporteComponent != null);
 
     }
+
+    // Este controller pertence a um boss? (usado pelo TimerManager pra pausar o countdown)
+    public bool EhBoss() => GetComponent<IBoss>() != null
+                         || GetComponentInParent<IBoss>() != null;
 
     public void ReceberDano(float dano, bool isCrit = false, bool mostrarNumero = true)
     {

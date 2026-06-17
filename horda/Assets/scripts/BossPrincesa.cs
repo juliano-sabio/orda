@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(InimigoController))]
-public class BossPrincesa : MonoBehaviour
+public class BossPrincesa : MonoBehaviour, IBoss
 {
     // ──────────────────────────────────────────────
     // IDENTIDADE
@@ -93,6 +93,7 @@ public class BossPrincesa : MonoBehaviour
     void Start()
     {
         controller     = GetComponent<InimigoController>();
+        danoProjetil  *= EnemyScaling.BossDanoMult(); // escala de dano do boss no spawn
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator       = GetComponent<Animator>();
         rb             = GetComponent<Rigidbody2D>();

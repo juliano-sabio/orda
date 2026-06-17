@@ -229,11 +229,13 @@ public class EscolherTerrenoUI : MonoBehaviour
         if (fase.desbloqueada)
         {
             string cena = fase.nomeCena;  // captura local
+            int dif = fase.dificuldade;   // captura local
             btn.onClick.AddListener(() =>
             {
                 Debug.Log($"[EscolherTerreno] Indo para: {cena}");
                 Time.timeScale = 1f;
                 PlayerPrefs.SetString("ProximaCena", cena);
+                PlayerPrefs.SetInt("Dificuldade", dif);
                 SceneManager.LoadScene("loading_screen");
             });
 

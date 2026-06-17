@@ -749,6 +749,70 @@ MonoBehaviour:
     - "\uBA54\uC778 \uBA54\uB274"
     - HOOFDMENU
     - MENU UTAMA
+  - key: ui.victory_title
+    translations:
+    - BOSS DERROTADO
+    - BOSS DEFEATED
+    - JEFE DERROTADO
+    - BOSS BESIEGT
+    - BOSS VAINCU
+    - BOSS SCONFITTO
+    - "БОСС ПОВЕРЖЕН"
+    - BOSS POKONANY
+    - "PATRON YENİLDİ"
+    - "首领已击败"
+    - "ボス撃破"
+    - "보스 격파"
+    - BAAS VERSLAGEN
+    - BOS DIKALAHKAN
+  - key: ui.end_run
+    translations:
+    - TERMINAR RUN
+    - END RUN
+    - TERMINAR PARTIDA
+    - LAUF BEENDEN
+    - TERMINER LA PARTIE
+    - TERMINA RUN
+    - "ЗАВЕРШИТЬ ЗАБЕГ"
+    - "ZAKOŃCZ BIEG"
+    - "TURU BİTİR"
+    - "结束游戏"
+    - "ランを終える"
+    - "런 종료"
+    - "RUN BEËINDIGEN"
+    - AKHIRI RUN
+  - key: ui.continue_infinite
+    translations:
+    - MODO INFINITO
+    - INFINITE MODE
+    - MODO INFINITO
+    - ENDLOSMODUS
+    - MODE INFINI
+    - "MODALITÀ INFINITA"
+    - "БЕСКОНЕЧНЫЙ РЕЖИМ"
+    - "TRYB NIESKOŃCZONY"
+    - SONSUZ MOD
+    - "无尽模式"
+    - "無限モード"
+    - "무한 모드"
+    - ONEINDIGE MODUS
+    - MODE TAK TERBATAS
+  - key: ui.victory
+    translations:
+    - "VITÓRIA"
+    - VICTORY
+    - VICTORIA
+    - SIEG
+    - VICTOIRE
+    - VITTORIA
+    - "ПОБЕДА"
+    - "ZWYCIĘSTWO"
+    - ZAFER
+    - "胜利"
+    - "勝利"
+    - "승리"
+    - OVERWINNING
+    - KEMENANGAN
   - key: ui.options
     translations:
     - "OP\xC7\xD5ES"
