@@ -11,7 +11,11 @@
       "mcp__unity__manage_scene",
       "mcp__unity-mcp__find_gameobjects",
       "mcp__unity-mcp__manage_texture",
-      "mcp__unity-mcp__manage_asset"
+      "mcp__unity-mcp__manage_asset",
+      "mcp__unity__refresh_unity",
+      "Bash(grep -aoE \"m_Script: \\\\{fileID: [0-9]+, guid: [a-f0-9]+\" Assets/prefebs/perssonagens/player.prefab)",
+      "mcp__unity__manage_prefabs",
+      "mcp__unity__manage_texture"
     ]
   }
 }

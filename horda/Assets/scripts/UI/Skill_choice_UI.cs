@@ -45,6 +45,7 @@ public class SkillChoiceUI : MonoBehaviour
     private float previousTimeScale;
     private Coroutine contadorCoroutine;
     private int skillCardIndex = 0;
+    private GameObject overlayEscuro;
 
     void Awake()
     {
@@ -256,6 +257,8 @@ public class SkillChoiceUI : MonoBehaviour
             choicePanel.SetActive(true);
         }
 
+        GarantirOverlayEscuro();
+
         UpdateTitleText();
 
         // 🎯 INICIAR COROUTINE COM SEGURANÇA
@@ -364,12 +367,23 @@ public class SkillChoiceUI : MonoBehaviour
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {
                 text.text = skill.GetDisplayDescription();
+                AjustarTextoParaCaber(text, 7f);
             }
             else if (text.name.Contains("Stats") || text.name.Contains("Status") || text.name.Contains("Bonus"))
             {
                 text.text = GetManualStatsText(skill);
+                AjustarTextoParaCaber(text, 7f);
+            }
+            else if (text.name.Contains("Rarity") || text.name.Contains("Rarid") || text.name.Contains("Rare"))
+            {
+                text.gameObject.SetActive(false); // badge de raridade removido dos cards de skill
             }
         }
+
+        // esconde a borda/caixa laranja da raridade também
+        foreach (var img in cardObj.GetComponentsInChildren<Image>(true))
+            if (img.name.Contains("RarityBorder") || img.name.Contains("RarityArea"))
+                img.gameObject.SetActive(false);
 
         if (skill.icon != null)
         {
@@ -453,6 +467,43 @@ public class SkillChoiceUI : MonoBehaviour
         layoutElem.flexibleHeight = 0;
     }
 
+    // Garante um fundo preto semi-transparente cobrindo a tela toda, atrás dos cards.
+    private void GarantirOverlayEscuro()
+    {
+        if (choicePanel == null) return;
+
+        Canvas canvas = choicePanel.GetComponentInParent<Canvas>();
+        canvas = canvas != null ? canvas.rootCanvas : null;
+        if (canvas == null) return;
+
+        // ancestral do painel que fica logo abaixo do Canvas (para ordenar atrás dele)
+        Transform topo = choicePanel.transform;
+        while (topo.parent != null && topo.parent != canvas.transform) topo = topo.parent;
+
+        if (overlayEscuro == null)
+        {
+            overlayEscuro = new GameObject("OverlayEscuro", typeof(RectTransform), typeof(Image));
+            overlayEscuro.transform.SetParent(canvas.transform, false);
+            var rt = overlayEscuro.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+            var img = overlayEscuro.GetComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0.6f);
+            img.raycastTarget = true; // bloqueia cliques no gameplay atrás
+        }
+
+        overlayEscuro.transform.SetParent(canvas.transform, false);
+        overlayEscuro.SetActive(true);
+        // posiciona imediatamente atrás do painel de escolha
+        int idxPainel = topo.GetSiblingIndex();
+        overlayEscuro.transform.SetSiblingIndex(Mathf.Max(0, idxPainel));
+
+        // desliga o backdrop escuro antigo do painel (era uma 2ª camada semi-transparente)
+        var bgAntigo = choicePanel.transform.Find("background");
+        if (bgAntigo != null && bgAntigo.gameObject.activeSelf)
+            bgAntigo.gameObject.SetActive(false);
+    }
+
     private void CreateEmergencySkillButton(SkillData skill, int index)
     {
         // ── Root card ──────────────────────────────────────────────────────────
@@ -516,9 +567,7 @@ public class SkillChoiceUI : MonoBehaviour
         CriarTextoArea(cardObj, "StatsArea", "StatsText", GetManualStatsText(skill),
             new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.22f), 11, new Color(0.95f, 0.82f, 0.40f), false);
 
-        // ── Raridade ──────────────────────────────────────────────────────────
-        CriarTextoArea(cardObj, "RarityArea", "RarityText", Loc.T($"rarity.{skill.rarity.ToString().ToLower()}"),
-            new Vector2(0.2f, 0.13f), new Vector2(0.8f, 0.24f), 12, new Color(0.80f, 0.55f, 0.25f), false);
+        // ── Raridade ── (badge removido dos cards de skill)
 
         Button button = cardObj.GetComponent<Button>();
         button.onClick.AddListener(() => OnSkillSelected(skill));
@@ -533,6 +582,19 @@ public class SkillChoiceUI : MonoBehaviour
         foreach (var a in all) if (a is Sprite s && s.name == spriteName) return s;
 #endif
         return null;
+    }
+
+    // Faz o texto encolher para caber na sua área (não ultrapassa a borda do card).
+    private static void AjustarTextoParaCaber(TMPro.TextMeshProUGUI t, float tamanhoMin)
+    {
+        float tamanhoMax = t.enableAutoSizing ? t.fontSizeMax : t.fontSize;
+        tamanhoMax = Mathf.Min(tamanhoMax, 12f); // letra um pouco menor + margem pra não passar
+        if (tamanhoMax < tamanhoMin) tamanhoMax = tamanhoMin;
+        t.enableAutoSizing = true;
+        t.fontSizeMin = tamanhoMin;
+        t.fontSizeMax = tamanhoMax;
+        t.textWrappingMode = TMPro.TextWrappingModes.Normal;
+        t.overflowMode = TMPro.TextOverflowModes.Truncate;
     }
 
     private void CriarTextoArea(GameObject parent, string areaName, string textName,
@@ -556,6 +618,7 @@ public class SkillChoiceUI : MonoBehaviour
         txt.alignment = TMPro.TextAlignmentOptions.Center;
         txt.textWrappingMode = TMPro.TextWrappingModes.Normal;
         if (bold) txt.fontStyle = TMPro.FontStyles.Bold;
+        AjustarTextoParaCaber(txt, 7f);
     }
 
     private void SetupSkillCardManually(GameObject cardObj, SkillData skill)
@@ -570,10 +633,12 @@ public class SkillChoiceUI : MonoBehaviour
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {
                 text.text = skill.GetDisplayDescription();
+                AjustarTextoParaCaber(text, 7f);
             }
             else if (text.name.Contains("Stats") || text.name.Contains("Status") || text.name.Contains("Bonus"))
             {
                 text.text = GetManualStatsText(skill);
+                AjustarTextoParaCaber(text, 7f);
             }
         }
 
@@ -665,6 +730,8 @@ public class SkillChoiceUI : MonoBehaviour
             choicePanel.SetActive(false);
         }
 
+        if (overlayEscuro != null) overlayEscuro.SetActive(false);
+
         ClearSkillButtons();
         ResumeGame();
         currentChoices = null;
@@ -728,17 +795,21 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void UpdateTitleText()
     {
-        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
-        int currentLevel = playerStats != null ? playerStats.level : 1;
-        string title = $"{Loc.T("ui.skill_choice")} ({Loc.T("ui.level_abbr")} {currentLevel})";
+        string title = "Cartas de Skill";
 
         if (titleTextTMP != null)
         {
             titleTextTMP.text = title;
+            // visual limpo: dourado sólido, sem gradiente/negrito que empastavam
+            titleTextTMP.enableVertexGradient = false;
+            titleTextTMP.characterSpacing = 0f;
+            titleTextTMP.color = new Color(1.00f, 0.80f, 0.35f);
         }
         else if (titleText != null)
         {
             titleText.text = title;
+            titleText.color = new Color(1.00f, 0.82f, 0.35f);
+            titleText.fontStyle = FontStyle.Bold;
         }
     }
 

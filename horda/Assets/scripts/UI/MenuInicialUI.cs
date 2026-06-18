@@ -10,6 +10,10 @@ public class MenuInicialUI : MonoBehaviour
     [Header("Cenas")]
     public string cenaSelecaoPersonagem = "CharacterSelection";
 
+    // Modo "só opções": usado in-game (pause) para reaproveitar este mesmo painel de configurações.
+    [HideInInspector] public bool modoSomenteOpcoes = false;
+    [HideInInspector] public System.Action aoFecharOpcoes;
+
     // ── Paleta ─────────────────────────────────────────────────────────
     static readonly Color corFundo      = new Color(0.04f, 0.03f, 0.10f);
     static readonly Color corAcento     = new Color(0.55f, 0.15f, 0.85f);
@@ -91,6 +95,16 @@ public class MenuInicialUI : MonoBehaviour
 #endif
 
         AplicarConfiguracoesSalvas();
+
+        // In-game (pause): só monta e abre o painel de opções, por cima de tudo.
+        if (modoSomenteOpcoes)
+        {
+            var cv = canvasRef.GetComponent<Canvas>();
+            if (cv != null) cv.sortingOrder = 200; // acima do HUD/pause
+            AbrirOpcoes();
+            return;
+        }
+
         CriarFundo();
         CriarParticulas();
 
@@ -99,6 +113,16 @@ public class MenuInicialUI : MonoBehaviour
 
         StartCoroutine(AnimarParticulas());
 
+    }
+
+    // Fecha o painel de opções quando usado in-game e limpa o helper.
+    void FecharOpcoesInGame()
+    {
+        PlayerPrefs.Save();
+        if (painelOpcoes != null) painelOpcoes.SetActive(false);
+        aoFecharOpcoes?.Invoke();
+        if (canvasRef != null) Destroy(canvasRef);
+        Destroy(gameObject);
     }
 
     void OnDestroy()
@@ -116,6 +140,16 @@ public class MenuInicialUI : MonoBehaviour
         _langDisplayTxt = null;
 
         canvasRef = CriarCanvas();
+
+        // in-game: reconstrói só o painel de opções (nunca o menu principal)
+        if (modoSomenteOpcoes)
+        {
+            var cv = canvasRef.GetComponent<Canvas>();
+            if (cv != null) cv.sortingOrder = 200;
+            AbrirOpcoes();
+            return;
+        }
+
         CriarFundo();
         CriarParticulas();
         CriarBotoes();
@@ -508,13 +542,14 @@ public class MenuInicialUI : MonoBehaviour
         if (rt != null) rt.anchoredPosition = baseAnchored;
     }
 
-    // paleta dark fantasy só para o painel de opções
-    static readonly Color dfCorTopo    = new Color(0.10f, 0.05f, 0.04f);
-    static readonly Color dfCorBorda   = new Color(0.78f, 0.66f, 0.35f);
-    static readonly Color dfCorAbaAtv  = new Color(0.90f, 0.72f, 0.30f, 1.0f);
-    static readonly Color dfCorAbaInv  = new Color(0.40f, 0.32f, 0.30f, 0.85f);
-    static readonly Color dfCorTitulo  = new Color(0.95f, 0.80f, 0.40f);
-    static readonly Color dfCorTexto   = new Color(0.92f, 0.82f, 0.65f);
+    // paleta vermelho escuro + preto + branco só para o painel de opções
+    static readonly Color dfCorTopo    = new Color(0.06f, 0.02f, 0.02f);        // preto avermelhado
+    static readonly Color dfCorBorda   = new Color(0.62f, 0.11f, 0.11f);        // vermelho escuro
+    static readonly Color dfCorAbaAtv  = new Color(0.80f, 0.16f, 0.16f, 1.0f);  // aba ativa: vermelho vivo
+    static readonly Color dfCorAbaInv  = new Color(0.11f, 0.07f, 0.07f, 0.90f); // aba inativa: quase preto
+    static readonly Color dfCorTitulo  = new Color(1.00f, 1.00f, 1.00f);        // branco puro (selecionado)
+    static readonly Color dfCorTexto   = new Color(0.92f, 0.90f, 0.90f);        // branco suave (rótulos)
+    static readonly Color dfCorTxtInv  = new Color(0.55f, 0.48f, 0.48f);        // texto de aba não-selecionada (apagado)
 
     void CriarPainelOpcoes()
     {
@@ -621,7 +656,7 @@ public class MenuInicialUI : MonoBehaviour
             btnA.onClick.AddListener(()=>MudarAba(idx));
             abaGO.AddComponent<CardHover>();
             var txA = CriarTexto(abaGO,"T",Vector2.zero,Vector2.one,nomes[i],13f,FontStyles.Bold,
-                i==0 ? dfCorTitulo : dfCorTexto);
+                i==0 ? dfCorTitulo : dfCorTxtInv);
             txA.alignment = TextAlignmentOptions.Center;
             botoesAbas[i]=btnA;
 
@@ -644,7 +679,10 @@ public class MenuInicialUI : MonoBehaviour
         PopularControles(painelAbas[3]);
 
         BotaoSimples(painel,Loc.T("ui.back"),new Vector2(0.08f,0.02f),new Vector2(0.92f,0.12f),
-            new Color(0.10f,0.07f,0.05f),()=>{PlayerPrefs.Save();painelOpcoes.SetActive(false);});
+            new Color(0.10f,0.07f,0.05f),()=>{
+                if (modoSomenteOpcoes) { FecharOpcoesInGame(); }
+                else { PlayerPrefs.Save(); painelOpcoes.SetActive(false); }
+            });
     }
 
     void DFBorda(GameObject pai, string nome, Vector2 ancMin, Vector2 ancMax, Vector2 offMin, Vector2 offMax)
@@ -683,7 +721,7 @@ public class MenuInicialUI : MonoBehaviour
             }
 
             var txt = botoesAbas[i].GetComponentInChildren<TextMeshProUGUI>();
-            if (txt != null) txt.color = i==idx ? dfCorTitulo : dfCorTexto;
+            if (txt != null) txt.color = i==idx ? dfCorTitulo : dfCorTxtInv;
         }
     }
 
@@ -748,9 +786,6 @@ public class MenuInicialUI : MonoBehaviour
         Toggle(p,"TS",new Vector2(0.70f,0.22f),new Vector2(0.90f,0.34f),
             PlayerPrefs.GetInt("CameraShake",1)==1,
             v=>PlayerPrefs.SetInt("CameraShake",v?1:0));
-
-        BotaoSimples(p,Loc.T("settings.clear_progress"),new Vector2(0.10f,0.04f),new Vector2(0.90f,0.16f),
-            new Color(0.5f,0.05f,0.05f),()=>{PlayerPrefs.DeleteAll();PlayerPrefs.Save();});
     }
 
     // ── Aba Controles (remapeamento de teclas) ──────────────────────────────
@@ -950,8 +985,8 @@ public class MenuInicialUI : MonoBehaviour
     {
         string[] n={Loc.T("settings.quality.low"),Loc.T("settings.quality.medium"),Loc.T("settings.quality.high"),Loc.T("settings.quality.ultra")};
         int atual=QualitySettings.GetQualityLevel();
-        Color corAtv  = new Color(0.22f,0.15f,0.04f);
-        Color corInav = new Color(0.09f,0.06f,0.04f);
+        Color corAtv  = new Color(0.52f,0.11f,0.11f);  // selecionado: vermelho vivo
+        Color corInav = new Color(0.10f,0.06f,0.06f);  // não-selecionado: quase preto
         for(int i=0;i<4;i++){
             int idx=i;
             float x0=mn.x+i*(mx.x-mn.x)/4f+0.004f;
@@ -978,7 +1013,7 @@ public class MenuInicialUI : MonoBehaviour
             var topQ=new GameObject("TQ"); topQ.transform.SetParent(go.transform,false);
             var rtq=topQ.AddComponent<RectTransform>(); rtq.anchorMin=new Vector2(0f,1f); rtq.anchorMax=new Vector2(1f,1f);
             rtq.offsetMin=new Vector2(1f,-2f); rtq.offsetMax=new Vector2(-1f,0f);
-            topQ.AddComponent<Image>().color=new Color(1f,0.9f,0.5f,i==atual?0.20f:0.06f);
+            topQ.AddComponent<Image>().color=new Color(1f,0.95f,0.95f,i==atual?0.25f:0.05f);
 
             // filho 3: acento esquerdo (ativo = dourado, inativo = sutil)
             var ac=new GameObject("Ac"); ac.transform.SetParent(go.transform,false);
@@ -987,22 +1022,24 @@ public class MenuInicialUI : MonoBehaviour
             ac.AddComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,i==atual?0.90f:0.20f);
 
             var btn=go.AddComponent<Button>(); btn.targetGraphic=img; btn.transition=Selectable.Transition.ColorTint;
-            Color hov=new Color(0.30f,0.22f,0.08f);
-            btn.colors=new ColorBlock{normalColor=i==atual?corAtv:corInav,highlightedColor=hov,pressedColor=new Color(0.08f,0.05f,0.02f),selectedColor=corAtv,disabledColor=corInav,colorMultiplier=1f,fadeDuration=0.08f};
+            Color hov=new Color(0.42f,0.13f,0.13f);
+            btn.colors=new ColorBlock{normalColor=i==atual?corAtv:corInav,highlightedColor=hov,pressedColor=new Color(0.06f,0.03f,0.03f),selectedColor=corAtv,disabledColor=corInav,colorMultiplier=1f,fadeDuration=0.08f};
             btn.onClick.AddListener(()=>{
                 QualitySettings.SetQualityLevel(idx,true);
                 PlayerPrefs.SetInt("QualityLevel",idx);
                 for(int j=0;j<go.transform.parent.childCount;j++){
                     var qgo=go.transform.parent.GetChild(j);
                     var c=qgo.Find("Corpo"); if(c!=null)c.GetComponent<Image>().color=corInav;
-                    var th=qgo.Find("TQ"); if(th!=null)th.GetComponent<Image>().color=new Color(1f,0.9f,0.5f,0.06f);
+                    var th=qgo.Find("TQ"); if(th!=null)th.GetComponent<Image>().color=new Color(1f,0.95f,0.95f,0.05f);
                     var a=qgo.Find("Ac"); if(a!=null)a.GetComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.20f);
+                    var tx=qgo.Find("T"); if(tx!=null){var tt=tx.GetComponent<TextMeshProUGUI>(); if(tt!=null)tt.color=dfCorTxtInv;}
                 }
                 img.color=corAtv;
-                topQ.GetComponent<Image>().color=new Color(1f,0.9f,0.5f,0.20f);
+                topQ.GetComponent<Image>().color=new Color(1f,0.95f,0.95f,0.25f);
                 ac.GetComponent<Image>().color=new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.90f);
+                var txAtv=go.transform.Find("T"); if(txAtv!=null){var tt=txAtv.GetComponent<TextMeshProUGUI>(); if(tt!=null)tt.color=dfCorTitulo;}
             });
-            Color corTxtQ=i==atual?dfCorTitulo:new Color(0.60f,0.50f,0.40f);
+            Color corTxtQ=i==atual?dfCorTitulo:dfCorTxtInv;
             CriarTexto(go,"T",Vector2.zero,Vector2.one,n[i],12f,FontStyles.Bold,corTxtQ)
                 .alignment=TextAlignmentOptions.Center;
         }
@@ -1101,15 +1138,15 @@ public class MenuInicialUI : MonoBehaviour
         var imgFi=fi.AddComponent<Image>();
         if (sprSliderFill != null)
         {
-            imgFi.sprite=sprSliderFill; imgFi.type=Image.Type.Sliced; imgFi.color=Color.white;
+            imgFi.sprite=sprSliderFill; imgFi.type=Image.Type.Sliced; imgFi.color=new Color(0.85f,0.18f,0.15f); // vermelho-brasa
         }
         else
         {
-            imgFi.color=new Color(0.75f,0.45f,0.04f);
+            imgFi.color=new Color(0.70f,0.12f,0.10f);
             var fhl=new GameObject("FHl"); fhl.transform.SetParent(fi.transform,false);
             var rfhl=fhl.AddComponent<RectTransform>(); rfhl.anchorMin=new Vector2(0f,1f); rfhl.anchorMax=new Vector2(1f,1f);
             rfhl.offsetMin=new Vector2(0f,-1f); rfhl.offsetMax=Vector2.zero;
-            fhl.AddComponent<Image>().color=new Color(1f,0.95f,0.50f,0.40f);
+            fhl.AddComponent<Image>().color=new Color(1f,0.55f,0.45f,0.45f);
         }
 
         // irmão 3: handle slide area
@@ -1135,7 +1172,7 @@ public class MenuInicialUI : MonoBehaviour
             // corpo do knob (sprite)
             var kBd=new GameObject("KBd"); kBd.transform.SetParent(h.transform,false);
             var rkBd=kBd.AddComponent<RectTransform>(); rkBd.anchorMin=Vector2.zero; rkBd.anchorMax=Vector2.one; rkBd.offsetMin=rkBd.offsetMax=Vector2.zero;
-            hImg=kBd.AddComponent<Image>(); hImg.sprite=sprSliderKnob; hImg.type=Image.Type.Simple; hImg.color=Color.white;
+            hImg=kBd.AddComponent<Image>(); hImg.sprite=sprSliderKnob; hImg.type=Image.Type.Simple; hImg.color=new Color(1f,0.62f,0.50f); // brasa clara
         }
         else
         {
@@ -1147,12 +1184,12 @@ public class MenuInicialUI : MonoBehaviour
 
             var kBd=new GameObject("KBd"); kBd.transform.SetParent(h.transform,false);
             var rkBd=kBd.AddComponent<RectTransform>(); rkBd.anchorMin=Vector2.zero; rkBd.anchorMax=Vector2.one; rkBd.offsetMin=rkBd.offsetMax=Vector2.zero;
-            hImg=kBd.AddComponent<Image>(); hImg.color=new Color(0.94f,0.80f,0.28f);
+            hImg=kBd.AddComponent<Image>(); hImg.color=new Color(0.80f,0.16f,0.14f);
 
             var kHi=new GameObject("KHi"); kHi.transform.SetParent(h.transform,false);
             var rkHi=kHi.AddComponent<RectTransform>(); rkHi.anchorMin=new Vector2(0f,1f); rkHi.anchorMax=new Vector2(1f,1f);
             rkHi.offsetMin=new Vector2(1f,-2f); rkHi.offsetMax=new Vector2(-1f,0f);
-            kHi.AddComponent<Image>().color=new Color(1f,0.98f,0.72f,0.65f);
+            kHi.AddComponent<Image>().color=new Color(1f,0.70f,0.60f,0.65f);
         }
 
         var sl=go.AddComponent<UnityEngine.UI.Slider>();

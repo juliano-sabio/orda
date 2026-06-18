@@ -74,10 +74,16 @@ public class SkillCardRuntimeManager : MonoBehaviour
         }
 
         if (descriptionText != null)
+        {
             descriptionText.text = TextUtils.SemAcento(SkillData.GetDisplayDescription());
+            AjustarParaCaber(descriptionText, 7f);
+        }
 
         if (statsText != null)
+        {
             statsText.text = GetFormattedStats();
+            AjustarParaCaber(statsText, 7f);
+        }
 
         if (iconImage != null && SkillData.icon != null)
         {
@@ -89,12 +95,23 @@ public class SkillCardRuntimeManager : MonoBehaviour
         ApplyRuntimeColors();
     }
 
+    // Garante que o texto encolha para caber na sua área (não ultrapassa a borda do card).
+    private static void AjustarParaCaber(TextMeshProUGUI t, float tamanhoMin)
+    {
+        float tamanhoMax = t.enableAutoSizing ? t.fontSizeMax : t.fontSize;
+        if (tamanhoMax < tamanhoMin) tamanhoMax = tamanhoMin;
+        t.enableAutoSizing = true;
+        t.fontSizeMin = tamanhoMin;
+        t.fontSizeMax = tamanhoMax;
+        t.textWrappingMode = TextWrappingModes.Normal;
+        t.overflowMode = TextOverflowModes.Truncate;
+    }
+
     private void ApplyRuntimeColors()
     {
         if (SkillData == null) return;
 
         Color elementColor = GetElementColor(SkillData.element);
-        Color rarityColor = GetRarityColor(SkillData.rarity);
 
         // 🎯 Só aplica cores em runtime
         if (backgroundImage != null)
@@ -106,14 +123,12 @@ public class SkillCardRuntimeManager : MonoBehaviour
         if (nameText != null)
             nameText.color = Color.Lerp(elementColor, Color.white, 0.3f);
 
+        // badge de raridade removido dos cards de skill
         if (rarityText != null)
-        {
-            rarityText.text = Loc.T($"rarity.{SkillData.rarity.ToString().ToLower()}");
-            rarityText.color = rarityColor;
-        }
+            rarityText.gameObject.SetActive(false);
 
         if (rarityBorder != null)
-            rarityBorder.color = rarityColor;
+            rarityBorder.gameObject.SetActive(false);
     }
 
     private string GetFormattedStats()

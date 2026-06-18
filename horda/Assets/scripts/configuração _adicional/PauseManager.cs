@@ -140,8 +140,99 @@ public class PauseManager : MonoBehaviour
         // Aplicar traduções aos textos dos painéis
         ApplyTranslations();
 
+        // ➕ Botão de sair do jogo
+        CriarBotaoSair();
+
+        // 🎨 Recolore a UI de pausa para o tema vermelho escuro / preto / branco
+        RecolorPauseUI();
+
         // 🆕 VERIFICAR SE AINDA FALTAM REFERÊNCIAS
         CheckMissingReferences();
+    }
+
+    // Cria (uma vez) um botão "Sair" que fecha o jogo, clonando o estilo do ExitButton.
+    private void CriarBotaoSair()
+    {
+        if (pausePanel == null) return;
+        if (pausePanel.transform.Find("QuitButton") != null) return; // já criado
+
+        Transform modelo = pausePanel.transform.Find("ExitButton");
+        if (modelo == null) return;
+
+        var go = Instantiate(modelo.gameObject, pausePanel.transform);
+        go.name = "QuitButton";
+
+        var rt = go.GetComponent<RectTransform>();
+        if (rt != null) rt.anchoredPosition = new Vector2(0f, -190f); // abaixo do "Seleção"
+
+        var txt = go.transform.Find("Text");
+        if (txt != null)
+        {
+            var tmp = txt.GetComponent<TMPro.TextMeshProUGUI>();
+            if (tmp != null) tmp.text = "SAIR";
+        }
+
+        var btn = go.GetComponent<UnityEngine.UI.Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(SairDoJogo);
+        }
+    }
+
+    private void SairDoJogo()
+    {
+        Time.timeScale = 1f;
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    // Tema vermelho escuro / preto / branco (igual ao menu de opções). A UI de pausa
+    // é gerada por ferramenta de editor (cores antigas na cena), então recolorimos em runtime.
+    private void RecolorPauseUI()
+    {
+        Color vermelho = new Color(0.62f, 0.11f, 0.11f);
+        Color corpo    = new Color(0.11f, 0.07f, 0.07f, 1f);
+        Color hover    = new Color(0.42f, 0.13f, 0.13f, 1f);
+
+        foreach (var panel in new[] { pausePanel, settingsPanel })
+        {
+            if (panel == null) continue;
+
+            foreach (var img in panel.GetComponentsInChildren<UnityEngine.UI.Image>(true))
+            {
+                switch (img.name)
+                {
+                    case "Brd":
+                    case "Ac":  img.color = new Color(vermelho.r, vermelho.g, vermelho.b, img.color.a); break;
+                    case "Corpo": img.color = corpo; break;
+                    case "HiT":  img.color = new Color(1f, 1f, 1f, 0.12f); break;
+                    case "Fi":   img.color = new Color(0.85f, 0.18f, 0.15f); break;            // fill slider
+                    case "FHl":  img.color = new Color(1f, 0.55f, 0.45f, 0.40f); break;
+                    case "KBd":  img.color = new Color(0.80f, 0.16f, 0.14f); break;            // knob slider
+                    case "KHi":  img.color = new Color(1f, 0.70f, 0.60f, 0.65f); break;
+                }
+            }
+
+            foreach (var btn in panel.GetComponentsInChildren<UnityEngine.UI.Button>(true))
+            {
+                var cb = btn.colors;
+                cb.normalColor      = corpo;
+                cb.selectedColor    = corpo;
+                cb.highlightedColor = hover;
+                cb.pressedColor     = new Color(0.06f, 0.03f, 0.03f, 1f);
+                btn.colors = cb;
+
+                // hover dinâmico (escala) — reusa o CardHover
+                if (btn.GetComponent<CardHover>() == null) btn.gameObject.AddComponent<CardHover>();
+            }
+
+            foreach (var t in panel.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
+                if (t.name == "Text") t.color = new Color(0.95f, 0.95f, 0.95f);
+        }
     }
 
     private void ApplyTranslations()
@@ -150,6 +241,13 @@ public class PauseManager : MonoBehaviour
         ApplyTextInChildren(pausePanel,    "ResumeButton/Text",      "pause.resume");
         ApplyTextInChildren(pausePanel,    "SettingsButton/Text",    "pause.settings");
         ApplyTextInChildren(pausePanel,    "ExitButton/Text",        "pause.exit");
+        // sobrescreve o rótulo do botão de sair para "Seleção"
+        var exitTxt = pausePanel != null ? pausePanel.transform.Find("ExitButton/Text") : null;
+        if (exitTxt != null)
+        {
+            var tmp = exitTxt.GetComponent<TMPro.TextMeshProUGUI>();
+            if (tmp != null) tmp.text = "SELEÇÃO";
+        }
         ApplyTextInChildren(settingsPanel, "SettingsTitle",                "settings.title");
         ApplyTextInChildren(settingsPanel, "BackButton/Text",             "settings.back");
         ApplyTextInChildren(settingsPanel, "MusicSlider/Label",           "settings.music");
@@ -380,6 +478,9 @@ public class PauseManager : MonoBehaviour
                 StartCoroutine(FadeCanvasGroup(pauseCanvasGroup, 0f, 1f, fadeDuration));
             }
 
+            // entrada dinâmica dos botões/título
+            StartCoroutine(AnimarEntradaPause());
+
             // 🎯 SELECIONAR PRIMEIRO BOTÃO AUTOMATICAMENTE
             StartCoroutine(SelectFirstButton());
         }
@@ -387,6 +488,41 @@ public class PauseManager : MonoBehaviour
         {
             Debug.LogError("❌ PausePanel não atribuído! Não é possível mostrar o menu de pause.");
         }
+    }
+
+    // Entrada dinâmica: título e botões "pulam" pra dentro de forma escalonada.
+    private IEnumerator AnimarEntradaPause()
+    {
+        string[] nomes = { "Title", "ResumeButton", "SettingsButton", "ExitButton", "QuitButton" };
+        var alvos = new System.Collections.Generic.List<Transform>();
+        foreach (var n in nomes)
+        {
+            var t = pausePanel.transform.Find(n);
+            if (t != null) { t.localScale = Vector3.one * 0.7f; alvos.Add(t); }
+        }
+        for (int i = 0; i < alvos.Count; i++)
+            StartCoroutine(PopInUI(alvos[i], i * 0.06f));
+        yield break;
+    }
+
+    private IEnumerator PopInUI(Transform t, float delay)
+    {
+        float e = 0f;
+        while (e < delay) { e += Time.unscaledDeltaTime; yield return null; }
+        const float dur = 0.22f;
+        for (float x = 0f; x < dur; x += Time.unscaledDeltaTime)
+        {
+            float s = Mathf.Lerp(0.7f, 1f, EaseOutBackPause(x / dur));
+            if (t != null) t.localScale = new Vector3(s, s, 1f);
+            yield return null;
+        }
+        if (t != null) t.localScale = Vector3.one;
+    }
+
+    private static float EaseOutBackPause(float t)
+    {
+        const float c1 = 1.70158f, c3 = 2.70158f;
+        return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
     }
 
     private void HidePauseMenu()
@@ -435,26 +571,25 @@ public class PauseManager : MonoBehaviour
     }
 
     // 🎯 CONFIGURAÇÕES - AGORA FUNCIONANDO
+    private GameObject opcoesInGame;
+
     public void OpenSettings()
     {
         PlayButtonClickSound();
 
-        if (settingsPanel != null && pausePanel != null)
-        {
-            settingsPanel.SetActive(true);
+        if (opcoesInGame != null) return; // já aberto
 
-            // 🎯 SELECIONAR BOTÃO DE VOLTAR NAS CONFIGURAÇÕES
-            if (settingsBackButton != null)
-            {
-                settingsBackButton.Select();
-                settingsBackButton.OnSelect(null);
-            }
+        // Abre o MESMO painel de opções da tela inicial (abas Áudio/Vídeo/Jogo/Controles).
+        if (pausePanel != null) pausePanel.SetActive(false);
 
-        }
-        else
+        opcoesInGame = new GameObject("OpcoesInGame");
+        var menu = opcoesInGame.AddComponent<MenuInicialUI>();
+        menu.modoSomenteOpcoes = true;
+        menu.aoFecharOpcoes = () =>
         {
-            Debug.LogError("❌ SettingsPanel ou PausePanel não atribuído!");
-        }
+            opcoesInGame = null;
+            if (pausePanel != null) pausePanel.SetActive(true);
+        };
     }
 
     public void CloseSettings()

@@ -658,7 +658,7 @@ public class CharacterSelectionUI : MonoBehaviour
         Anchors(painelAbaInfo[0], Vector2.zero, new Vector2(1f, 0.87f));
 
         txtDesc = TMP(painelAbaInfo[0], "Desc",
-            new Vector2(0.08f, 0.22f), new Vector2(0.92f, 0.95f),
+            new Vector2(0.08f, 0.22f), new Vector2(0.92f, 1.0f),
             "—", 11f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.70f));
         txtDesc.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtDesc.alignment = TextAlignmentOptions.Top;

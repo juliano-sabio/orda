@@ -17,8 +17,8 @@ public class GameOverUI : MonoBehaviour
     private Image overlayImg;
     private Texture2D bgSnapshot;
 
-    private readonly GameObject[] botoes = new GameObject[3];
-    private readonly CanvasGroup[] botoesGroups = new CanvasGroup[3];
+    private readonly GameObject[] botoes = new GameObject[4];
+    private readonly CanvasGroup[] botoesGroups = new CanvasGroup[4];
 
     public static void Mostrar(Texture2D snapshot = null)
     {
@@ -67,6 +67,7 @@ public class GameOverUI : MonoBehaviour
 
         painelPrincipal = CriarCard(canvasGO.transform);
         cardRT = painelPrincipal.GetComponent<RectTransform>();
+        cardRT.sizeDelta = new Vector2(560f, 520f); // mais alto p/ caber 4 botões
         cardGroup = painelPrincipal.AddComponent<CanvasGroup>();
         cardGroup.alpha = 0f;
         cardRT.localScale = Vector3.one * 0.75f;
@@ -218,7 +219,7 @@ public class GameOverUI : MonoBehaviour
 
     // ──────────────────── CRIAÇÃO DE UI ────────────────────────────
 
-    private static readonly Color corBordaGO = new Color(0.78f, 0.63f, 0.16f);
+    private static readonly Color corBordaGO = new Color(0.62f, 0.11f, 0.11f); // vermelho escuro
 
     private GameObject CriarCard(Transform pai)
     {
@@ -242,7 +243,7 @@ public class GameOverUI : MonoBehaviour
         GameObject fundo = new GameObject("Fundo"); fundo.transform.SetParent(go.transform, false);
         RectTransform rf = fundo.AddComponent<RectTransform>();
         rf.anchorMin = Vector2.zero; rf.anchorMax = Vector2.one; rf.offsetMin = rf.offsetMax = Vector2.zero;
-        fundo.AddComponent<Image>().color = new Color(0.06f, 0.04f, 0.11f, 0.97f);
+        fundo.AddComponent<Image>().color = new Color(0.06f, 0.03f, 0.03f, 0.97f);
 
         return go;
     }
@@ -250,29 +251,36 @@ public class GameOverUI : MonoBehaviour
     private void CriarConteudoPrincipal()
     {
         GameObject tituloGO = CriarTextoGO(painelPrincipal.transform, "GAME OVER",
-            new Vector2(0f, 145f), new Vector2(500f, 90f),
+            new Vector2(0f, 175f), new Vector2(500f, 90f),
             68, new Color(0.9f, 0.2f, 0.2f, 1f));
         tituloText = tituloGO.GetComponent<TextMeshProUGUI>();
         tituloRT = tituloGO.GetComponent<RectTransform>();
         tituloGroup = tituloGO.AddComponent<CanvasGroup>();
 
-        CriarLinha(painelPrincipal.transform, new Vector2(0f, 85f), 420f,
+        CriarLinha(painelPrincipal.transform, new Vector2(0f, 115f), 420f,
             new Color(0.9f, 0.2f, 0.2f, 0.4f));
 
+        Color corpoBtn = new Color(0.11f, 0.07f, 0.07f, 1f); // quase preto (tema vermelho/preto/branco)
+
         botoes[0] = CriarBotao(painelPrincipal.transform, Loc.T("ui.restart"),
-            new Vector2(0f, 20f), new Vector2(380f, 62f),
-            new Color(0.1f, 0.38f, 0.16f, 1f), Recomecar);
+            new Vector2(0f, 55f), new Vector2(380f, 60f),
+            corpoBtn, Recomecar);
         botoesGroups[0] = botoes[0].AddComponent<CanvasGroup>();
 
-        botoes[1] = CriarBotao(painelPrincipal.transform, Loc.T("ui.options"),
-            new Vector2(0f, -58f), new Vector2(380f, 62f),
-            new Color(0.14f, 0.16f, 0.28f, 1f), AbrirOpcoes);
+        botoes[1] = CriarBotao(painelPrincipal.transform, "CONFIGURAÇÕES",
+            new Vector2(0f, -23f), new Vector2(380f, 60f),
+            corpoBtn, AbrirConfiguracoesMenu);
         botoesGroups[1] = botoes[1].AddComponent<CanvasGroup>();
 
-        botoes[2] = CriarBotao(painelPrincipal.transform, Loc.T("ui.quit"),
-            new Vector2(0f, -136f), new Vector2(380f, 62f),
-            new Color(0.38f, 0.08f, 0.08f, 1f), Sair);
+        botoes[2] = CriarBotao(painelPrincipal.transform, "SELEÇÃO",
+            new Vector2(0f, -101f), new Vector2(380f, 60f),
+            corpoBtn, IrParaSelecao);
         botoesGroups[2] = botoes[2].AddComponent<CanvasGroup>();
+
+        botoes[3] = CriarBotao(painelPrincipal.transform, Loc.T("ui.quit"),
+            new Vector2(0f, -179f), new Vector2(380f, 60f),
+            corpoBtn, Sair);
+        botoesGroups[3] = botoes[3].AddComponent<CanvasGroup>();
     }
 
     private void CriarConteudoOpcoes()
@@ -381,7 +389,7 @@ public class GameOverUI : MonoBehaviour
         RectTransform rtopo = topo.AddComponent<RectTransform>();
         rtopo.anchorMin = new Vector2(0f,1f); rtopo.anchorMax = new Vector2(1f,1f);
         rtopo.offsetMin = new Vector2(0f,-2f); rtopo.offsetMax = Vector2.zero;
-        topo.AddComponent<Image>().color = new Color(1f,0.9f,0.6f, isDanger?0.08f:0.14f);
+        topo.AddComponent<Image>().color = new Color(1f,1f,1f, 0.12f);
 
         // irmão 3: sombra base
         GameObject base2 = new GameObject("ShB"); base2.transform.SetParent(go.transform, false);
@@ -413,7 +421,7 @@ public class GameOverUI : MonoBehaviour
         rtTxt.anchorMin = new Vector2(0.04f,0f); rtTxt.anchorMax = Vector2.one; rtTxt.offsetMin = rtTxt.offsetMax = Vector2.zero;
         TextMeshProUGUI tmp = txtGO.AddComponent<TextMeshProUGUI>();
         tmp.text = label; tmp.fontSize = 22;
-        tmp.color = isDanger ? new Color(1f,0.72f,0.68f) : new Color(0.92f,0.82f,0.68f);
+        tmp.color = new Color(0.95f,0.95f,0.95f);
         tmp.alignment = TextAlignmentOptions.Center; tmp.fontStyle = FontStyles.Bold;
 
         return go;
@@ -481,6 +489,24 @@ public class GameOverUI : MonoBehaviour
 
     // ──────────────────── AÇÕES ────────────────────────────────────
 
+    private GameObject opcoesInGameGO;
+
+    // Abre o MESMO painel de opções da tela inicial (abas), igual ao pause.
+    private void AbrirConfiguracoesMenu()
+    {
+        if (opcoesInGameGO != null) return;
+        if (painelPrincipal != null) painelPrincipal.SetActive(false);
+
+        opcoesInGameGO = new GameObject("OpcoesInGame");
+        var menu = opcoesInGameGO.AddComponent<MenuInicialUI>();
+        menu.modoSomenteOpcoes = true;
+        menu.aoFecharOpcoes = () =>
+        {
+            opcoesInGameGO = null;
+            if (painelPrincipal != null) painelPrincipal.SetActive(true);
+        };
+    }
+
     private void AbrirOpcoes()
     {
         painelPrincipal.SetActive(false);
@@ -508,6 +534,14 @@ public class GameOverUI : MonoBehaviour
         if (bgSnapshot != null) Destroy(bgSnapshot);
         LimparManagersPersistentes();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void IrParaSelecao()
+    {
+        Time.timeScale = 1f;
+        if (bgSnapshot != null) Destroy(bgSnapshot);
+        LimparManagersPersistentes();
+        SceneManager.LoadScene("CharacterSelection");
     }
 
     private void Sair()

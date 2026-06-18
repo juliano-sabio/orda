@@ -241,6 +241,17 @@ public class SkillEvolutionUI : MonoBehaviour
             tempSkill.element     = PlayerStats.Element.None;
             rm.InitializeRuntime(tempSkill);
             Destroy(tempSkill);
+
+            // o RuntimeManager esconde a raridade (ajuste das skill cards); aqui re-exibimos nas de evolução
+            foreach (var t in card.GetComponentsInChildren<TextMeshProUGUI>(true))
+            {
+                string nm = t.name.ToLower();
+                if (nm.Contains("rarity") || nm.Contains("rarid"))
+                { t.gameObject.SetActive(true); t.text = data.raridade.ToString().ToUpper(); t.color = data.corDestaque; }
+            }
+            foreach (var img in card.GetComponentsInChildren<Image>(true))
+                if (img.name == "RarityBorder")
+                { img.gameObject.SetActive(true); img.color = data.corDestaque; }
         }
         else
         {
@@ -251,7 +262,13 @@ public class SkillEvolutionUI : MonoBehaviour
                 if      (n.Contains("name")  || n.Contains("nome")  || n.Contains("title"))
                     { t.text = $"<b>{data.GetDisplayName()}</b>"; t.color = data.corDestaque; }
                 else if (n.Contains("desc")  || n.Contains("detail"))
-                    { t.text = data.GetDisplayDescription(); t.color = Color.white; }
+                {
+                    t.text = data.GetDisplayDescription(); t.color = Color.white;
+                    t.enableAutoSizing = true;
+                    t.fontSizeMin = 7f;
+                    t.fontSizeMax = Mathf.Min(t.fontSize, 12f); // encolhe pra caber, não passa da borda
+                    t.overflowMode = TMPro.TextOverflowModes.Truncate;
+                }
                 else if (n.Contains("rarity") || n.Contains("rarid"))
                     { t.text = data.raridade.ToString().ToUpper(); t.color = data.corDestaque; }
                 t.textWrappingMode = TMPro.TextWrappingModes.Normal;

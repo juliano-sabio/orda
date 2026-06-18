@@ -125,9 +125,9 @@ public static class UIPauseCreator
         pauseRect.anchorMax = Vector2.one;
         pauseRect.sizeDelta = Vector2.zero;
 
-        // Background dark + borda dourada
+        // Background dark (preto avermelhado) + borda vermelha
         Image bg = pausePanel.AddComponent<Image>();
-        bg.color = new Color(0.05f, 0.03f, 0.10f, 0.95f);
+        bg.color = new Color(0.05f, 0.02f, 0.02f, 0.95f);
 
         // Adicionar Canvas Group para fade
         CanvasGroup canvasGroup = pausePanel.AddComponent<CanvasGroup>();
@@ -159,9 +159,9 @@ public static class UIPauseCreator
         settingsRect.anchorMax = Vector2.one;
         settingsRect.sizeDelta = Vector2.zero;
 
-        // Background dark fantasy
+        // Background dark fantasy (preto avermelhado)
         Image bg = settingsPanel.AddComponent<Image>();
-        bg.color = new Color(0.06f, 0.04f, 0.12f, 0.97f);
+        bg.color = new Color(0.06f, 0.03f, 0.03f, 0.97f);
 
         // Título
         GameObject title = CreateText("SettingsTitle", settingsPanel.transform, "CONFIGURACOES", 36, TextAlignmentOptions.Center);
@@ -183,8 +183,8 @@ public static class UIPauseCreator
         return settingsPanel;
     }
 
-    private static readonly Color corBordaPause = new Color(0.78f, 0.63f, 0.16f);
-    private static readonly Color corCorpoPause = new Color(0.08f, 0.06f, 0.15f, 1f);
+    private static readonly Color corBordaPause = new Color(0.62f, 0.11f, 0.11f);   // vermelho escuro
+    private static readonly Color corCorpoPause = new Color(0.11f, 0.07f, 0.07f, 1f); // quase preto
 
     private static GameObject CreatePauseButton(string name, Transform parent, string text, Vector2 position)
     {
@@ -212,7 +212,7 @@ public static class UIPauseCreator
         RectTransform rtopo = topo.GetComponent<RectTransform>();
         rtopo.anchorMin = new Vector2(0f,1f); rtopo.anchorMax = new Vector2(1f,1f);
         rtopo.offsetMin = new Vector2(0f,-2f); rtopo.offsetMax = Vector2.zero;
-        topo.AddComponent<Image>().color = new Color(1f,0.9f,0.6f,0.12f);
+        topo.AddComponent<Image>().color = new Color(1f,1f,1f,0.12f);
 
         // irmão 3: sombra base
         GameObject shb = CreateUIObject("ShB", buttonGO.transform);
@@ -231,14 +231,14 @@ public static class UIPauseCreator
         // Button
         Button button = buttonGO.AddComponent<Button>(); button.targetGraphic = image;
         button.transition = Selectable.Transition.ColorTint;
-        Color hov = new Color(0.18f,0.13f,0.30f,1f);
+        Color hov = new Color(0.42f,0.13f,0.13f,1f);
         button.colors = new ColorBlock{normalColor=corCorpoPause,highlightedColor=hov,pressedColor=new Color(0.04f,0.03f,0.08f,1f),selectedColor=corCorpoPause,disabledColor=new Color(0.04f,0.03f,0.08f,0.5f),colorMultiplier=1f,fadeDuration=0.1f};
 
         // Texto
         GameObject textGO = CreateText("Text", buttonGO.transform, text, 22, TextAlignmentOptions.Center);
         RectTransform textRect = textGO.GetComponent<RectTransform>();
         textRect.anchorMin = new Vector2(0.04f,0f); textRect.anchorMax = Vector2.one; textRect.sizeDelta = Vector2.zero;
-        textGO.GetComponent<TextMeshProUGUI>().color = new Color(0.92f,0.82f,0.68f);
+        textGO.GetComponent<TextMeshProUGUI>().color = new Color(0.95f,0.95f,0.95f);
 
         return buttonGO;
     }
@@ -256,7 +256,7 @@ public static class UIPauseCreator
         RectTransform labelRect = labelGO.GetComponent<RectTransform>();
         labelRect.anchorMin = new Vector2(0f,0f); labelRect.anchorMax = new Vector2(0.38f,1f);
         labelRect.sizeDelta = Vector2.zero; labelRect.anchoredPosition = Vector2.zero;
-        labelGO.GetComponent<TextMeshProUGUI>().color = new Color(0.85f,0.75f,0.60f);
+        labelGO.GetComponent<TextMeshProUGUI>().color = new Color(0.92f,0.90f,0.90f);
 
         // slider container (irmãos)
         GameObject sliderGO = CreateUIObject("Slider", container.transform);
@@ -289,12 +289,12 @@ public static class UIPauseCreator
         GameObject fi = CreateUIObject("Fi", fillArea.transform);
         RectTransform rfi = fi.GetComponent<RectTransform>();
         rfi.anchorMin = Vector2.zero; rfi.anchorMax = Vector2.one; rfi.offsetMin = rfi.offsetMax = Vector2.zero;
-        fi.AddComponent<Image>().color = new Color(0.75f,0.45f,0.04f);
+        fi.AddComponent<Image>().color = new Color(0.85f,0.18f,0.15f);
         GameObject fhl = CreateUIObject("FHl", fi.transform);
         RectTransform rfhl = fhl.GetComponent<RectTransform>();
         rfhl.anchorMin = new Vector2(0f,1f); rfhl.anchorMax = new Vector2(1f,1f);
         rfhl.offsetMin = new Vector2(0f,-1f); rfhl.offsetMax = Vector2.zero;
-        fhl.AddComponent<Image>().color = new Color(1f,0.95f,0.50f,0.40f);
+        fhl.AddComponent<Image>().color = new Color(1f,0.55f,0.45f,0.40f);
 
         // irmão 3: handle area
         GameObject ha = CreateUIObject("HA", sliderGO.transform);
@@ -312,12 +312,12 @@ public static class UIPauseCreator
         GameObject kBd = CreateUIObject("KBd", h.transform);
         RectTransform rkBd = kBd.GetComponent<RectTransform>();
         rkBd.anchorMin = Vector2.zero; rkBd.anchorMax = Vector2.one; rkBd.offsetMin = rkBd.offsetMax = Vector2.zero;
-        Image handleImage = kBd.AddComponent<Image>(); handleImage.color = new Color(0.94f,0.80f,0.28f);
+        Image handleImage = kBd.AddComponent<Image>(); handleImage.color = new Color(0.80f,0.16f,0.14f);
         GameObject kHi = CreateUIObject("KHi", h.transform);
         RectTransform rkHi = kHi.GetComponent<RectTransform>();
         rkHi.anchorMin = new Vector2(0f,1f); rkHi.anchorMax = new Vector2(1f,1f);
         rkHi.offsetMin = new Vector2(1f,-2f); rkHi.offsetMax = new Vector2(-1f,0f);
-        kHi.AddComponent<Image>().color = new Color(1f,0.98f,0.72f,0.65f);
+        kHi.AddComponent<Image>().color = new Color(1f,0.70f,0.60f,0.65f);
 
         Slider slider = sliderGO.AddComponent<Slider>();
         slider.fillRect = rfi; slider.handleRect = rh; slider.targetGraphic = handleImage;

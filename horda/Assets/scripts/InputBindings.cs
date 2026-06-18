@@ -20,6 +20,9 @@ public static class InputBindings
         _teclas = new KeyCode[_padrao.Length];
         for (int i = 0; i < _padrao.Length; i++)
             _teclas[i] = (KeyCode)PlayerPrefs.GetInt(Chave(i), (int)_padrao[i]);
+        // [DEBUG-REBIND] remover depois — mostra o que esta sessao carregou do PlayerPrefs
+        Debug.Log($"[REBIND] Init em '{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}': " +
+                  $"Cima={_teclas[0]}, Baixo={_teclas[1]}, Esq={_teclas[2]}, Dir={_teclas[3]}, Dash={_teclas[4]}, Ult={_teclas[5]}");
     }
 
     static string Chave(int i) => "Bind_" + ((Acao)i);
@@ -34,6 +37,9 @@ public static class InputBindings
         _teclas[(int)a] = k;
         PlayerPrefs.SetInt(Chave((int)a), (int)k);
         PlayerPrefs.Save();
+        // [DEBUG-REBIND] remover depois — confirma gravacao e releitura do PlayerPrefs
+        int relido = PlayerPrefs.GetInt(Chave((int)a), -999);
+        Debug.Log($"[REBIND] Set {a} = {k} ({(int)k}); PlayerPrefs relido = {(KeyCode)relido} ({relido})");
     }
 
     public static void ResetarPadrao()

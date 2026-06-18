@@ -32,6 +32,7 @@ public class StatusCardChoiceUI : MonoBehaviour
     private int   cardIndex        = 0;
     private float previousTimeScale;
     private Coroutine contadorCoroutine;
+    private GameObject overlayEscuro;
     private Vector2 _scaledCardSize;  // não usado diretamente — mantido para compatibilidade
     private float   _cardScale = 1f;  // escala relativa ao espaço de 1887px do SkillChoice_Canvas
 
@@ -46,6 +47,12 @@ public class StatusCardChoiceUI : MonoBehaviour
             scaler.matchWidthOrHeight  = 0.5f;
             choicePanel.SetActive(false);
         }
+    }
+
+    void OnDisable()
+    {
+        // o overlay é objeto de topo (sem pai), então não some sozinho ao desativar este objeto
+        if (overlayEscuro != null) overlayEscuro.SetActive(false);
     }
 
     void Update()
@@ -74,7 +81,11 @@ public class StatusCardChoiceUI : MonoBehaviour
 
         if (!gameObject.activeInHierarchy) gameObject.SetActive(true);
 
-        if (titleText != null) titleText.text = Loc.T("ui.choose_status_card");
+        if (titleText != null)
+        {
+            titleText.text = "Carta de Status";
+            titleText.color = new Color(1.00f, 0.80f, 0.35f); // dourado limpo (igual ao de skill)
+        }
 
         PauseGame();
 
@@ -85,6 +96,7 @@ public class StatusCardChoiceUI : MonoBehaviour
     {
         if (contadorCoroutine != null) { StopCoroutine(contadorCoroutine); contadorCoroutine = null; }
         ResumeGame();
+        if (overlayEscuro != null) overlayEscuro.SetActive(false);
         if (choicePanel != null) choicePanel.SetActive(false);
         ClearCards();
         onCardChosen = null;
@@ -97,10 +109,47 @@ public class StatusCardChoiceUI : MonoBehaviour
         yield return null; // frame 2: CanvasScaler aplica escala (se funcionar)
         if (choicePanel != null) choicePanel.SetActive(true);
         ConfigurarCanvas();
+        GarantirOverlayEscuro();
         SetupLayout();
         if (contadorCoroutine != null) StopCoroutine(contadorCoroutine);
         contadorCoroutine = StartCoroutine(ContadorEscolha());
         StartCoroutine(SpawnCards(cards));
+    }
+
+    // Garante um fundo preto semi-transparente cobrindo a tela toda, atrás do painel.
+    private void GarantirOverlayEscuro()
+    {
+        if (choicePanel == null) return;
+
+        // Overlay com Canvas PRÓPRIO em ScreenSpaceOverlay: o Unity força preencher a tela
+        // inteira, independente do canvas dimensionado do painel. Ordem abaixo do painel (100).
+        if (overlayEscuro == null)
+        {
+            overlayEscuro = new GameObject("OverlayEscuro",
+                typeof(RectTransform), typeof(Canvas), typeof(GraphicRaycaster), typeof(Image));
+            var cv = overlayEscuro.GetComponent<Canvas>();
+            cv.renderMode   = RenderMode.ScreenSpaceOverlay;
+            cv.sortingOrder = 99; // raiz respeita sortingOrder direto; acima do gameplay, abaixo do painel (100)
+            var img = overlayEscuro.GetComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0.6f);
+            img.raycastTarget = true; // bloqueia cliques no gameplay atrás
+        }
+
+        // objeto de TOPO (sem pai): só assim o Unity dirige o RectTransform do canvas raiz
+        // ScreenSpaceOverlay para o tamanho da tela. Aninhado sob Transform comum, fica 0×0.
+        overlayEscuro.transform.SetParent(null, false);
+        var rt = overlayEscuro.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+        rt.localScale = Vector3.one;
+        overlayEscuro.SetActive(true);
+
+        // remove o retângulo escuro "background" (irmão do ChoicePanel) que sobrava sobre o gameplay
+        if (choicePanel.transform.parent != null)
+        {
+            var bgSibling = choicePanel.transform.parent.Find("background");
+            if (bgSibling != null) bgSibling.gameObject.SetActive(false);
+        }
     }
 
     // ── Layout ───────────────────────────────────────────────────────────────
@@ -114,6 +163,19 @@ public class StatusCardChoiceUI : MonoBehaviour
         cpRT.pivot            = new Vector2(0.5f, 0.5f);
         cpRT.anchoredPosition = Vector2.zero;
         cpRT.sizeDelta        = new Vector2(1300f, 700f);
+        cpRT.localScale       = Vector3.one; // igual ao painel de skill (escala vem do canvas)
+
+        // mesmo CanvasScaler do painel de skill (UIManager_Canvas): ScaleWithScreenSize 1920×1080 / match 0.5
+        // o canvas-pai do status vinha em Constant Pixel Size, deixando o painel maior que o de skill
+        var parentScaler = choicePanel.transform.parent != null
+            ? choicePanel.transform.parent.GetComponent<CanvasScaler>() : null;
+        if (parentScaler != null)
+        {
+            parentScaler.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            parentScaler.referenceResolution = new Vector2(1920f, 1080f);
+            parentScaler.screenMatchMode     = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            parentScaler.matchWidthOrHeight  = 0.5f;
+        }
         Canvas.ForceUpdateCanvases();
 
         // Escala 1.0: cards em tamanho original igual ao SkillChoiceUI (300×450)
@@ -467,6 +529,7 @@ public class StatusCardChoiceUI : MonoBehaviour
     {
         if (contadorCoroutine != null) { StopCoroutine(contadorCoroutine); contadorCoroutine = null; }
         ResumeGame();
+        if (overlayEscuro != null) overlayEscuro.SetActive(false);
         if (choicePanel != null) choicePanel.SetActive(false);
         ClearCards();
         onCardChosen?.Invoke(card);
