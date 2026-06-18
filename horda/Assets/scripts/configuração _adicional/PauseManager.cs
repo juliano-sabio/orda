@@ -472,6 +472,9 @@ public class PauseManager : MonoBehaviour
 
             pausePanel.SetActive(true);
 
+            // esconde HUD que renderiza por cima (contador de mortes / painel de evento)
+            OcultarHUDExtra(true);
+
             // Fade in suave
             if (pauseCanvasGroup != null)
             {
@@ -525,8 +528,19 @@ public class PauseManager : MonoBehaviour
         return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
     }
 
+    // Esconde/mostra os HUDs que renderizam acima do pause (contador de mortes e painel de evento).
+    private void OcultarHUDExtra(bool ocultar)
+    {
+        var c = GameObject.Find("ContadorMortesCanvas");
+        if (c != null) { var cv = c.GetComponent<Canvas>(); if (cv != null) cv.enabled = !ocultar; }
+        var e = GameObject.Find("EventoCanvas");
+        if (e != null) { var cv = e.GetComponent<Canvas>(); if (cv != null) cv.enabled = !ocultar; }
+    }
+
     private void HidePauseMenu()
     {
+        OcultarHUDExtra(false); // restaura o HUD ao sair do pause
+
         if (settingsPanel != null && settingsPanel.activeSelf)
         {
             CloseSettings();
