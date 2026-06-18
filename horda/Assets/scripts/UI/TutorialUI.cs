@@ -27,10 +27,10 @@ public class TutorialUI : MonoBehaviour
 
     readonly Passo[] passos = new Passo[]
     {
-        new Passo { titulo = "MOVIMENTO",   icone = "W A S D",         descricao = "Use WASD para mover o personagem em todas as direções.",                                       cor = new Color(0.2f, 0.6f, 1.0f), tituloKey = "tutorial.movement.title", descKey = "tutorial.movement.desc" },
-        new Passo { titulo = "DASH",        icone = "SHIFT",            descricao = "Pressione SHIFT para dar um dash rápido e escapar dos inimigos.",                              cor = new Color(0.4f, 0.8f, 0.4f), tituloKey = "tutorial.dash.title",     descKey = "tutorial.dash.desc" },
+        new Passo { titulo = "MOVIMENTO",   icone = "W A S D",         descricao = "Use WASD para mover o personagem em todas as direções.",                                       cor = new Color(0.90f, 0.40f, 0.22f), tituloKey = "tutorial.movement.title", descKey = "tutorial.movement.desc" },
+        new Passo { titulo = "DASH",        icone = "SHIFT",            descricao = "Pressione SHIFT para dar um dash rápido e escapar dos inimigos.",                              cor = new Color(0.95f, 0.60f, 0.22f), tituloKey = "tutorial.dash.title",     descKey = "tutorial.dash.desc" },
         new Passo { titulo = "ATAQUE",      icone = "CLIQUE\nESQUERDO",descricao = "Clique com o botão esquerdo do mouse para atacar na direção do cursor.",                       cor = new Color(1.0f, 0.5f, 0.2f), tituloKey = "tutorial.attack.title",   descKey = "tutorial.attack.desc",   iconeKey = "tutorial.left_click" },
-        new Passo { titulo = "HABILIDADES", icone = "Q  E",             descricao = "Use Q e E para ativar suas habilidades especiais. Cada uma tem um cooldown.",                 cor = new Color(0.8f, 0.3f, 1.0f), tituloKey = "tutorial.skills.title",   descKey = "tutorial.skills.desc" },
+        new Passo { titulo = "HABILIDADES", icone = "Q  E",             descricao = "Use Q e E para ativar suas habilidades especiais. Cada uma tem um cooldown.",                 cor = new Color(0.88f, 0.32f, 0.40f), tituloKey = "tutorial.skills.title",   descKey = "tutorial.skills.desc" },
         new Passo { titulo = "ULTIMATE",    icone = "R",                descricao = "Pressione R para usar sua Ultimate. Ela carrega conforme você causa dano.",                    cor = new Color(1.0f, 0.8f, 0.1f), tituloKey = "tutorial.ultimate.title", descKey = "tutorial.ultimate.desc" },
         new Passo { titulo = "SOBREVIVA!",  icone = "♥",               descricao = "Derrote inimigos, colete XP e suba de nível. Se sua vida chegar a zero, é game over.",        cor = new Color(1.0f, 0.3f, 0.3f), tituloKey = "tutorial.survive.title",  descKey = "tutorial.survive.desc" },
     };
@@ -45,8 +45,9 @@ public class TutorialUI : MonoBehaviour
     GameObject[] indicadores;
 
     // ── Paleta ───────────────────────────────────────────────────
-    static readonly Color corFundo   = new Color(0.04f, 0.04f, 0.12f, 0.96f);
-    static readonly Color corPainel  = new Color(0.08f, 0.06f, 0.18f, 1.00f);
+    static readonly Color corFundo   = new Color(0.05f, 0.02f, 0.02f, 0.96f);   // preto avermelhado
+    static readonly Color corPainel  = new Color(0.10f, 0.06f, 0.06f, 1.00f);   // pedra escura
+    static readonly Color corBordaTut = new Color(0.62f, 0.11f, 0.11f);          // vermelho escuro (moldura)
 
     void Start()
     {
@@ -97,6 +98,20 @@ public class TutorialUI : MonoBehaviour
         rp.offsetMin = rp.offsetMax = Vector2.zero;
         painelTutorial.AddComponent<Image>().color = corPainel;
 
+        // Moldura vermelha (laterais + base) — combina com opções/pause/game over
+        var bBot = CriarImg(painelTutorial, "BordaBaixo", corBordaTut);
+        var rBot = bBot.GetComponent<RectTransform>();
+        rBot.anchorMin = Vector2.zero; rBot.anchorMax = new Vector2(1f, 0f);
+        rBot.offsetMin = Vector2.zero; rBot.offsetMax = new Vector2(0f, 3f);
+        var bEsq = CriarImg(painelTutorial, "BordaEsq", corBordaTut);
+        var rEsq = bEsq.GetComponent<RectTransform>();
+        rEsq.anchorMin = Vector2.zero; rEsq.anchorMax = new Vector2(0f, 1f);
+        rEsq.offsetMin = Vector2.zero; rEsq.offsetMax = new Vector2(3f, 0f);
+        var bDir = CriarImg(painelTutorial, "BordaDir", corBordaTut);
+        var rDir = bDir.GetComponent<RectTransform>();
+        rDir.anchorMin = new Vector2(1f, 0f); rDir.anchorMax = Vector2.one;
+        rDir.offsetMin = new Vector2(-3f, 0f); rDir.offsetMax = Vector2.zero;
+
         // Borda superior colorida (cor dinâmica)
         var borda = CriarImg(painelTutorial, "Borda", Color.white);
         var rb    = borda.GetComponent<RectTransform>();
@@ -131,12 +146,12 @@ public class TutorialUI : MonoBehaviour
         // Botão PULAR
         btnPular = CriarBotao(painelTutorial, Loc.T("tutorial.skip"),
             new Vector2(0.05f, 0.04f), new Vector2(0.35f, 0.16f),
-            new Color(0.3f, 0.1f, 0.1f), Fechar);
+            new Color(0.20f, 0.08f, 0.08f), Fechar);
 
         // Botão PRÓXIMO
         btnProximo = CriarBotao(painelTutorial, Loc.T("tutorial.next"),
             new Vector2(0.55f, 0.04f), new Vector2(0.95f, 0.16f),
-            new Color(0.15f, 0.35f, 0.7f), Avancar);
+            new Color(0.60f, 0.13f, 0.13f), Avancar);
     }
 
     void CriarIndicadores(GameObject parent)
@@ -189,8 +204,8 @@ public class TutorialUI : MonoBehaviour
         var txtBtn  = btnProximo.transform.Find("Txt")?.GetComponent<TextMeshProUGUI>();
         if (txtBtn != null) txtBtn.text = ultimo ? Loc.T("ui.play") : Loc.T("tutorial.next");
         btnProximo.GetComponent<Image>().color = ultimo
-            ? new Color(0.1f, 0.5f, 0.15f)
-            : new Color(0.15f, 0.35f, 0.7f);
+            ? new Color(0.78f, 0.20f, 0.18f)   // JOGAR: vermelho mais vivo
+            : new Color(0.55f, 0.12f, 0.12f);  // PRÓXIMO: vermelho escuro
 
         StartCoroutine(AnimarEntrada());
     }
