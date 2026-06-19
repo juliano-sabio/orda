@@ -52,6 +52,7 @@ public class TimerManager : MonoBehaviour
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == nomeCenaSobrevivencia)
             modoSobrevivencia = true;
 
+        CriarTimerUINovo();
         InitializeTimer();
     }
 
@@ -101,10 +102,111 @@ public class TimerManager : MonoBehaviour
 
         if (timeBarFill != null)
         {
+            timeBarFill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01(timeRatio), 1f);
             if (timeRatio <= criticalThreshold) timeBarFill.color = criticalColor;
             else if (timeRatio <= warningThreshold) timeBarFill.color = warningColor;
             else timeBarFill.color = normalColor;
         }
+    }
+
+    // Reconstrói o cronômetro com visual do tema (moldura vermelha, trilha escura, tempo branco),
+    // reaproveitando a MESMA posição/canvas do cronômetro antigo.
+    void CriarTimerUINovo()
+    {
+        // paleta do tema (brasa/forja): âmbar → laranja → vermelho (substitui o verde/amarelo)
+        normalColor   = new Color(0.86f, 0.60f, 0.18f);
+        warningColor  = new Color(0.90f, 0.42f, 0.12f);
+        criticalColor = new Color(0.82f, 0.16f, 0.14f);
+
+        // referência de posição/tamanho do cronômetro antigo (antes de escondê-lo)
+        RectTransform refRT = null;
+        if (timeBar != null)          refRT = timeBar.GetComponent<RectTransform>();
+        else if (timeBarFill != null) refRT = timeBarFill.rectTransform.parent as RectTransform;
+        if (refRT == null && timeText != null) refRT = timeText.rectTransform.parent as RectTransform;
+
+        // esconde o cronômetro antigo da cena (se houver)
+        if (timeText    != null) timeText.gameObject.SetActive(false);
+        if (timeBar     != null) timeBar.gameObject.SetActive(false);
+        if (timeBarFill != null) timeBarFill.gameObject.SetActive(false);
+
+        var cont = new GameObject("TimerBar", typeof(RectTransform), typeof(Image));
+        var rc = cont.GetComponent<RectTransform>();
+
+        if (refRT != null && refRT.parent != null)
+        {
+            // mesmo lugar do antigo
+            cont.transform.SetParent(refRT.parent, false);
+            rc.anchorMin        = refRT.anchorMin;
+            rc.anchorMax        = refRT.anchorMax;
+            rc.pivot            = refRT.pivot;
+            rc.anchoredPosition = refRT.anchoredPosition;
+            rc.sizeDelta        = refRT.sizeDelta;
+            rc.localScale       = Vector3.one;
+            cont.transform.SetSiblingIndex(refRT.GetSiblingIndex());
+        }
+        else
+        {
+            // fallback: canvas próprio no topo-centro
+            var canvasGO = new GameObject("TimerCanvas");
+            var canvas = canvasGO.AddComponent<Canvas>();
+            canvas.renderMode  = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 60;
+            var cs = canvasGO.AddComponent<CanvasScaler>();
+            cs.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            cs.referenceResolution = new Vector2(1920f, 1080f);
+            cs.matchWidthOrHeight  = 0.5f;
+            canvasGO.AddComponent<GraphicRaycaster>();
+            cont.transform.SetParent(canvasGO.transform, false);
+            rc.anchorMin = new Vector2(0.5f, 1f); rc.anchorMax = new Vector2(0.5f, 1f);
+            rc.pivot = new Vector2(0.5f, 1f);
+            rc.anchoredPosition = new Vector2(0f, -20f);
+            rc.sizeDelta = new Vector2(520f, 38f);
+        }
+        cont.GetComponent<Image>().color = new Color(0.62f, 0.11f, 0.11f, 1f);
+
+        // trilha escura (dentro da moldura)
+        var trk = new GameObject("Track", typeof(RectTransform), typeof(Image));
+        trk.transform.SetParent(cont.transform, false);
+        var rtk = trk.GetComponent<RectTransform>();
+        rtk.anchorMin = Vector2.zero; rtk.anchorMax = Vector2.one;
+        rtk.offsetMin = new Vector2(3f, 3f); rtk.offsetMax = new Vector2(-3f, -3f);
+        trk.GetComponent<Image>().color = new Color(0.09f, 0.05f, 0.05f, 1f);
+
+        // preenchimento (esvazia da esquerda; largura controlada por anchorMax.x)
+        var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+        fillGO.transform.SetParent(trk.transform, false);
+        var rfi = fillGO.GetComponent<RectTransform>();
+        rfi.anchorMin = Vector2.zero; rfi.anchorMax = Vector2.one;
+        rfi.offsetMin = Vector2.zero; rfi.offsetMax = Vector2.zero;
+        var fillImg = fillGO.GetComponent<Image>();
+        fillImg.color = normalColor;
+
+        // brilho no topo do preenchimento (acompanha a largura)
+        var hi = new GameObject("FillHi", typeof(RectTransform), typeof(Image));
+        hi.transform.SetParent(fillGO.transform, false);
+        var rhi = hi.GetComponent<RectTransform>();
+        rhi.anchorMin = new Vector2(0f, 1f); rhi.anchorMax = new Vector2(1f, 1f);
+        rhi.offsetMin = new Vector2(0f, -2f); rhi.offsetMax = Vector2.zero;
+        hi.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.22f);
+
+        // texto do tempo, centralizado e branco
+        var txtGO = new GameObject("TimerText", typeof(RectTransform));
+        txtGO.transform.SetParent(cont.transform, false);
+        var rt = txtGO.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
+        var tmp = txtGO.AddComponent<TextMeshProUGUI>();
+        tmp.text = "00:00";
+        tmp.enableAutoSizing = true;
+        tmp.fontSizeMin = 10f;
+        tmp.fontSizeMax = 24f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        // reaponta as referências para o novo cronômetro
+        timeBar     = null;
+        timeBarFill = fillImg;
+        timeText    = tmp;
     }
 
     string FormatTime(float timeInSeconds)
