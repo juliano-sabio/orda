@@ -29,6 +29,28 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    // Todos os players (single-player: 1; co-op: N). Usado pela IA de inimigo p/ aggro.
+    public static readonly System.Collections.Generic.List<PlayerStats> All =
+        new System.Collections.Generic.List<PlayerStats>();
+
+    // Transform do player mais próximo de uma posição (ou null se não há nenhum).
+    public static Transform MaisProximoTransform(Vector2 pos)
+    {
+        Transform melhor = null;
+        float menor = float.MaxValue;
+        for (int i = 0; i < All.Count; i++)
+        {
+            var p = All[i];
+            if (p == null) continue;
+            float d = ((Vector2)p.transform.position - pos).sqrMagnitude;
+            if (d < menor) { menor = d; melhor = p.transform; }
+        }
+        return melhor;
+    }
+
+    void OnEnable()  { if (!All.Contains(this)) All.Add(this); }
+    void OnDisable() { All.Remove(this); }
+
     [Header("Configuração de Dados (ScriptableObject)")]
     public CharacterData characterData;
 
@@ -1042,6 +1064,7 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        if (!NetCombat.DanoHabilitado) return; // SP2a: sem dano no contexto de rede
         if (invulneravel) return;
 
         // Esquiva Ventosa (infusão defensiva) — chance de evadir totalmente
