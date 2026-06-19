@@ -59,6 +59,9 @@ public class DomoRetardanteUltimate : MonoBehaviour
 
     void Update()
     {
+        // Co-op: cópias remotas (não-dono) não rodam lógica de ultimate.
+        if (playerStats != null && !playerStats.IsLocalAuthority) return;
+
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
 
         if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)

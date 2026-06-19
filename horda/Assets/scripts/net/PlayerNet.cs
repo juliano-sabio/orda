@@ -25,6 +25,12 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             PlayerStats.SetLocal(stats);
             charIndex.Value = PlayerPrefs.GetInt("SelectedCharacter", 0);
         }
+        else
+        {
+            // Cópia remota = fantoche: só um AudioListener deve existir (o do dono local).
+            var al = GetComponentInChildren<AudioListener>(true);
+            if (al != null) al.enabled = false;
+        }
 
         // Aplica o personagem correto em TODAS as cópias (dono e remotas).
         stats.ApplyCharacterData(charIndex.Value);
