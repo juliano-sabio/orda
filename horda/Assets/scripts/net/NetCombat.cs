@@ -2,7 +2,8 @@
 // o SP2b liga (RedeComDano = true). Em single-player o dano é sempre habilitado.
 public static class NetCombat
 {
-    public static bool RedeComDano = false;
+    // SP2c: dano inimigo->player ligado em co-op.
+    public static bool RedeComDano = true;
 
     public static bool DanoHabilitado => !NetSpawn.EmRede || RedeComDano;
 }

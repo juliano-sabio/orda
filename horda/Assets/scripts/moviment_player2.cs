@@ -49,6 +49,7 @@ public class moviment_player2 : MonoBehaviour
     {
         if (playerStats == null || rb == null) return;
         if (!playerStats.IsLocalAuthority) return;
+        if (playerStats.EstaCaido) return;
 
         if (tempoImobilizado > 0f)
         {
@@ -83,6 +84,7 @@ public class moviment_player2 : MonoBehaviour
     {
         if (playerStats == null || rb == null) return;
         if (!playerStats.IsLocalAuthority) return;
+        if (playerStats.EstaCaido) { rb.linearVelocity = Vector2.zero; return; }
 
         if (tempoImobilizado > 0f)
         {

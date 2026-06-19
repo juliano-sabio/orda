@@ -17,11 +17,24 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     readonly NetworkVariable<bool> facingLeft = new NetworkVariable<bool>(
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    // SP2c — downed/revive.
+    readonly NetworkVariable<bool> downed = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    readonly NetworkVariable<float> reviveProgresso = new NetworkVariable<float>(
+        0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    [SerializeField] float reviveRaio = 2.5f;
+    [SerializeField] float tempoRevive = 4f;
+    [SerializeField] float fracaoRevive = 0.5f;
+    bool gameOverDisparado;
+
     PlayerStats stats;
     Vector3 baseScale;
 
     public bool IsNetworked => IsSpawned;
     public bool IsLocalOwner => IsOwner;
+    public bool Caido => downed.Value;
+    public float ReviveProgresso => reviveProgresso.Value;
 
     void Awake()
     {
@@ -45,6 +58,87 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             s.x = facingLeft.Value ? -mag : mag;
             transform.localScale = s;
         }
+
+        if (IsServer) MonitorarHost();
+    }
+
+    // ── SP2c: downed / revive / game over (host-autoritativo) ──────────
+
+    // Dano de inimigo (no host) aplicado no dono.
+    [Rpc(SendTo.Owner)]
+    public void TomarDanoOwnerRpc(float dano) { stats.TakeDamage(dano); }
+
+    // Chamado pelo dono ao cair (health <= 0 em co-op).
+    public void Cair() { if (IsOwner) downed.Value = true; }
+
+    // Host manda o dono reviver.
+    [Rpc(SendTo.Owner)]
+    public void ReviverOwnerRpc(float fracao)
+    {
+        downed.Value = false;
+        stats.ReviverCoop(fracao);
+    }
+
+    // VFX de revive em todos.
+    [Rpc(SendTo.Everyone)]
+    public void ReviveVfxRpc()
+    {
+        var ef = GetComponent<PlayerSpawnEffect>();
+        if (ef != null) ef.SendMessage("Executar", SendMessageOptions.DontRequireReceiver);
+    }
+
+    // Game over de grupo em todos.
+    [Rpc(SendTo.Everyone)]
+    public void GameOverGrupoRpc() { GameOverUI.Mostrar(); }
+
+    void MonitorarHost()
+    {
+        // Revive: se EU estou caído e há companheiro vivo no raio, enche a barra.
+        if (downed.Value)
+        {
+            bool temReanimador = false;
+            for (int i = 0; i < PlayerStats.All.Count; i++)
+            {
+                var p = PlayerStats.All[i];
+                if (p == null || p == stats) continue;
+                var pn = p.GetComponent<PlayerNet>();
+                if (pn != null && pn.Caido) continue; // companheiro também caído
+                float d2 = ((Vector2)p.transform.position - (Vector2)transform.position).sqrMagnitude;
+                if (d2 <= reviveRaio * reviveRaio) { temReanimador = true; break; }
+            }
+            if (temReanimador)
+            {
+                reviveProgresso.Value += Time.deltaTime / tempoRevive;
+                if (reviveProgresso.Value >= 1f)
+                {
+                    reviveProgresso.Value = 0f;
+                    ReviverOwnerRpc(fracaoRevive);
+                    ReviveVfxRpc();
+                }
+            }
+            else if (reviveProgresso.Value > 0f)
+            {
+                reviveProgresso.Value = Mathf.Max(0f, reviveProgresso.Value - Time.deltaTime / tempoRevive);
+            }
+        }
+
+        // Game over de grupo: todos os players caídos (uma vez).
+        if (!gameOverDisparado && PlayerStats.All.Count > 0)
+        {
+            bool todosCaidos = true;
+            for (int i = 0; i < PlayerStats.All.Count; i++)
+            {
+                var pn = PlayerStats.All[i] != null ? PlayerStats.All[i].GetComponent<PlayerNet>() : null;
+                if (pn == null || !pn.Caido) { todosCaidos = false; break; }
+            }
+            if (todosCaidos) { gameOverDisparado = true; GameOverGrupoRpc(); }
+        }
+    }
+
+    void AoMudarDowned(bool _, bool caido)
+    {
+        var sr = GetComponentInChildren<SpriteRenderer>();
+        if (sr != null) sr.color = caido ? new Color(0.5f, 0.25f, 0.25f, 0.9f) : Color.white;
     }
 
     public override void OnNetworkSpawn()
@@ -77,11 +171,16 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
         // Reaplica se o valor chegar/mudar depois (ordem de sincronização).
         charIndex.OnValueChanged += AoMudarPersonagem;
+
+        // Tint visual ao cair/voltar.
+        downed.OnValueChanged += AoMudarDowned;
+        AoMudarDowned(false, downed.Value);
     }
 
     public override void OnNetworkDespawn()
     {
         charIndex.OnValueChanged -= AoMudarPersonagem;
+        downed.OnValueChanged -= AoMudarDowned;
         PlayerStats.ClearLocal(stats);
     }
 
