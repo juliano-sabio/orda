@@ -68,7 +68,7 @@ public class SkillManager : MonoBehaviour
 
     void Start()
     {
-        playerStats = FindFirstObjectByType<PlayerStats>();
+        playerStats = PlayerStats.Local;
         skillChoiceUI = FindSkillChoiceUIInUIManager();
 
         if (skillChoiceUI == null)
@@ -98,7 +98,7 @@ public class SkillManager : MonoBehaviour
 
         if (playerStats == null)
         {
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
         }
 
         if (skillChoiceUI == null)
@@ -123,7 +123,7 @@ public class SkillManager : MonoBehaviour
 
         // Re-busca playerStats caso ainda não tenha sido encontrado
         if (playerStats == null)
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
         if (playerStats == null) return;
 
         bool level1IsMilestone = System.Array.Exists(levelUpMilestones, milestone => milestone == 1);
@@ -199,7 +199,7 @@ public class SkillManager : MonoBehaviour
         yield return null;
         yield return null;
 
-        playerStats  = FindFirstObjectByType<PlayerStats>();
+        playerStats  = PlayerStats.Local;
         skillChoiceUI = FindSkillChoiceUIInUIManager();
         if (skillChoiceUI == null)
             skillChoiceUI = FindFirstObjectByType<SkillChoiceUI>(FindObjectsInactive.Include);
@@ -230,7 +230,7 @@ public class SkillManager : MonoBehaviour
     {
         if (playerStats == null)
         {
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
             if (playerStats == null)
             {
                 Debug.LogError("❌ PlayerStats null no level up!");
@@ -254,7 +254,7 @@ public class SkillManager : MonoBehaviour
     {
         // Re-busca referências se nulas
         if (playerStats == null)
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
         if (playerStats == null)
         {
             Debug.LogError("❌ PlayerStats não encontrado!");
@@ -566,7 +566,7 @@ public class SkillManager : MonoBehaviour
 
             case SpecificSkillType.Shield:
                 if (playerStats == null)
-                    playerStats = FindAnyObjectByType<PlayerStats>();
+                    playerStats = PlayerStats.Local;
 
                 if (playerStats != null)
                     playerStats.AddShieldAuraBehavior(skill);
@@ -663,7 +663,7 @@ public class SkillManager : MonoBehaviour
 
     void AddBehavior<T>(SkillData skill) where T : SkillBehavior
     {
-        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) playerStats = PlayerStats.Local;
         if (playerStats == null) return;
         var old = playerStats.GetComponent<T>();
         if (old != null) Destroy(old);
@@ -677,7 +677,7 @@ public class SkillManager : MonoBehaviour
 
     void AddCorteFantasmaBehaviorToPlayer(SkillData skill)
     {
-        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) playerStats = PlayerStats.Local;
         if (playerStats == null) return;
         var old = playerStats.GetComponent<CorteFantasmaSkillBehavior>();
         if (old != null) Destroy(old);
@@ -688,7 +688,7 @@ public class SkillManager : MonoBehaviour
 
     void AddSombrasCruzBehaviorToPlayer(SkillData skill)
     {
-        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) playerStats = PlayerStats.Local;
         if (playerStats == null) return;
         var old = playerStats.GetComponent<SombrasCruzSkillBehavior>();
         if (old != null) Destroy(old);
@@ -699,7 +699,7 @@ public class SkillManager : MonoBehaviour
 
     void AddFuriaLaminasBehaviorToPlayer(SkillData skill)
     {
-        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) playerStats = PlayerStats.Local;
         if (playerStats == null) return;
         var old = playerStats.GetComponent<FuriaLaminasSkillBehavior>();
         if (old != null) Destroy(old);
@@ -710,7 +710,7 @@ public class SkillManager : MonoBehaviour
 
     void AddGarrasAbismoBehaviorToPlayer(SkillData skill)
     {
-        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) playerStats = PlayerStats.Local;
         if (playerStats == null) return;
         var old = playerStats.GetComponent<GarrasAbismoSkillBehavior>();
         if (old != null) Destroy(old);
@@ -721,7 +721,7 @@ public class SkillManager : MonoBehaviour
 
     void AddChuvaEstrelasBehaviorToPlayer(SkillData skill)
     {
-        if (playerStats == null) playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats == null) playerStats = PlayerStats.Local;
         if (playerStats == null) return;
 
         var old = playerStats.GetComponent<ChuvaEstrelasSkillBehavior>();
@@ -736,7 +736,7 @@ public class SkillManager : MonoBehaviour
     {
         if (playerStats == null)
         {
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
             if (playerStats == null) return;
         }
 
@@ -752,7 +752,7 @@ public class SkillManager : MonoBehaviour
     {
         if (playerStats == null)
         {
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
             if (playerStats == null)
             {
                 Debug.LogError("❌ [yEngine] PlayerStats não encontrado na cena!");
@@ -804,7 +804,7 @@ public class SkillManager : MonoBehaviour
     {
         if (playerStats == null)
         {
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
             if (playerStats == null)
             {
                 Debug.LogError("❌ [yEngine] PlayerStats não encontrado na cena!");
@@ -828,7 +828,7 @@ public class SkillManager : MonoBehaviour
     {
         if (playerStats == null)
         {
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
             if (playerStats == null)
             {
                 Debug.LogError("❌ [SkillManager] PlayerStats não encontrado para EscudoEspinhoso!");
@@ -1146,7 +1146,7 @@ public class SkillManager : MonoBehaviour
 
         if (playerStats == null)
         {
-            playerStats = FindFirstObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
         }
 
         if (playerStats != null)
