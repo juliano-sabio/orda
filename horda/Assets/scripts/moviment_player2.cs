@@ -48,6 +48,7 @@ public class moviment_player2 : MonoBehaviour
     private void Update()
     {
         if (playerStats == null || rb == null) return;
+        if (!playerStats.IsLocalAuthority) return;
 
         if (tempoImobilizado > 0f)
         {
@@ -81,6 +82,7 @@ public class moviment_player2 : MonoBehaviour
     private void FixedUpdate()
     {
         if (playerStats == null || rb == null) return;
+        if (!playerStats.IsLocalAuthority) return;
 
         if (tempoImobilizado > 0f)
         {

@@ -12,6 +12,23 @@ public class PlayerStats : MonoBehaviour
     public static event System.Action OnUltimateAtivada;
     public static event System.Action OnPlayerMorreu;
 
+    // --- Rede (multiplayer co-op) ---
+    // Local = player controlado por esta instância (single-player: o único;
+    // co-op: o que eu sou dono). Setado no Awake (SP) ou pelo PlayerNet (co-op).
+    public static PlayerStats Local { get; private set; }
+    public static void SetLocal(PlayerStats ps) { Local = ps; }
+    public static void ClearLocal(PlayerStats ps) { if (Local == ps) Local = null; }
+
+    // true em single-player (sem componente de rede) ou quando sou o dono.
+    public bool IsLocalAuthority
+    {
+        get
+        {
+            var net = GetComponent<INetOwnership>();
+            return net == null || !net.IsNetworked || net.IsLocalOwner;
+        }
+    }
+
     [Header("Configuração de Dados (ScriptableObject)")]
     public CharacterData characterData;
 
@@ -136,6 +153,11 @@ public class PlayerStats : MonoBehaviour
 
     void Awake()
     {
+        // Single-player (sem componente de rede): este é o player local.
+        // No co-op o PlayerNet registra o Local no dono (OnNetworkSpawn).
+        if (GetComponent<INetOwnership>() == null)
+            Local = this;
+
         if (characterData != null)
         {
             ApplyCharacterData();
@@ -144,10 +166,17 @@ public class PlayerStats : MonoBehaviour
 
     public void ApplyCharacterData()
     {
+        ApplyCharacterData(PlayerPrefs.GetInt("SelectedCharacter", 0));
+    }
+
+    // Overload por índice explícito: usado no co-op para aplicar o personagem
+    // do dono (índice sincronizado) também nas cópias remotas.
+    public void ApplyCharacterData(int selectedCharacter)
+    {
         if (characterData == null) return;
 
         // --- Espíritos de Evolução (upgrades permanentes por personagem) ---
-        int espCharIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        int espCharIndex = selectedCharacter;
 
         // --- Status Base ---
         maxHealth = characterData.maxHealth * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 4);
@@ -175,7 +204,7 @@ public class PlayerStats : MonoBehaviour
         ChangeElement(characterData.baseElement);
 
         // --- Ultimate ---
-        int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
+        int charIndex = selectedCharacter;
         int ultimateIndex = PlayerPrefs.GetInt($"SelectedUltimate_{charIndex}", 0);
         UltimateData ultimateData = characterData.GetUltimate(ultimateIndex);
 
@@ -645,6 +674,10 @@ public class PlayerStats : MonoBehaviour
 
     void Update()
     {
+        // Cópias remotas (não-dono) são fantoches: NetworkTransform/NetworkAnimator
+        // replicam posição e animação. Só a autoridade local roda input/lógica.
+        if (!IsLocalAuthority) return;
+
         HandleMovement();
         HandleHealthRegeneration();
         UpdateSkillCooldowns();
