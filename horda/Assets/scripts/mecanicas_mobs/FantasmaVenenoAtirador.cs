@@ -68,7 +68,7 @@ public class FantasmaVenenoAtirador : MonoBehaviour
         ondaFase   = Random.Range(0f, Mathf.PI * 2f);
         proxTiro   = Random.Range(0.5f, cooldownTiro);
 
-        player = FindFirstObjectByType<PlayerStats>();
+        player = PlayerStats.MaisProximo(transform.position);
         InimigoController.OnPreMorte += OnPreMorteHandler;
 
         CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);

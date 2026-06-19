@@ -151,8 +151,8 @@ public class movi_inimigo_manter_distancia : MonoBehaviour
     void EncontrarPlayer()
     {
         procurandoPlayer = true;
-        GameObject obj = GameObject.FindGameObjectWithTag("Player");
-        if (obj != null) player = obj.transform;
+        var maisProx = PlayerStats.MaisProximoTransform(transform.position);
+        if (maisProx != null) player = maisProx;
         procurandoPlayer = false;
     }
 

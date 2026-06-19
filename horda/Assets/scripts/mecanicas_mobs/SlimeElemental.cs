@@ -122,7 +122,7 @@ public class SlimeElemental : MonoBehaviour
 
     void BuscarPlayer()
     {
-        player = FindFirstObjectByType<PlayerStats>();
+        player = PlayerStats.MaisProximo(transform.position);
         if (player != null) playerRb = player.GetComponent<Rigidbody2D>();
     }
 

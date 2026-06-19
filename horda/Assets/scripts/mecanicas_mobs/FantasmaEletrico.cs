@@ -68,7 +68,7 @@ public class FantasmaEletrico : MonoBehaviour
         proxParalisia = Random.Range(1f, 4f);
         proxRaio      = Random.Range(3f, 7f);
 
-        player = FindFirstObjectByType<PlayerStats>();
+        player = PlayerStats.MaisProximo(transform.position);
         CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
         StartCoroutine(RastroEletrico());
         StartCoroutine(FlashPeriodicoEletrico());

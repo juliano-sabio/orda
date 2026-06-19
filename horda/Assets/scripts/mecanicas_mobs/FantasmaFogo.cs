@@ -80,7 +80,7 @@ public class FantasmaFogo : MonoBehaviour
         ondaFase   = Random.Range(0f, Mathf.PI * 2f);
         proxCarga  = Random.Range(3f, 7f);
         proxProjeteisFantasmas = Random.Range(1f, cooldownProjeteisFantasmas);
-        player     = FindFirstObjectByType<PlayerStats>();
+        player     = PlayerStats.MaisProximo(transform.position);
 
         CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
 

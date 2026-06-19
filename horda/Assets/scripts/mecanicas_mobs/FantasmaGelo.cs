@@ -73,7 +73,7 @@ public class FantasmaGelo : MonoBehaviour
         proxSlow   = Random.Range(1f, 3f);
         proxTiro   = Random.Range(0.5f, cooldownTiro);
 
-        player = FindFirstObjectByType<PlayerStats>();
+        player = PlayerStats.MaisProximo(transform.position);
         CriarLuz(transform, new Color(0.6f, 0.9f, 1f), 1.3f, 0.2f, 2f);
         StartCoroutine(RastroGelo());
         InimigoController.OnPreMorte += OnPreMorteHandler;

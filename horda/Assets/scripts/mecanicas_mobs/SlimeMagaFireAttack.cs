@@ -32,7 +32,7 @@ public class SlimeMagaFireAttack : MonoBehaviour
         pontoDisparo = transform.Find("pivo") ?? transform;
         proxAtaque   = Time.time + primeiroAtaque;
 
-        var ps = FindFirstObjectByType<PlayerStats>();
+        var ps = PlayerStats.MaisProximo(transform.position);
         if (ps != null) playerTr = ps.transform;
     }
 
@@ -43,7 +43,7 @@ public class SlimeMagaFireAttack : MonoBehaviour
 
         if (playerTr == null)
         {
-            var ps = FindFirstObjectByType<PlayerStats>();
+            var ps = PlayerStats.MaisProximo(transform.position);
             if (ps != null) playerTr = ps.transform;
             return;
         }

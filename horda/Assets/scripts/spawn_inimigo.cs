@@ -91,7 +91,8 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
     void Update()
     {
-        if (player == null) return;
+        if (!NetSpawn.PodeSpawnar) return; // clientes não spawnam horda
+        if (player == null && PlayerStats.All.Count == 0) return;
 
         tempoTotalJogo += Time.deltaTime;
         cronometroSpawn += Time.deltaTime;
@@ -154,8 +155,8 @@ public class EnemySpawnerCompleto : MonoBehaviour
         {
             TipoInimigo tipo = EscolherInimigoPorPeso();
             if (tipo == null || tipo.prefab == null) return;
-            GameObject novoInimigo = Instantiate(tipo.prefab, posicaoValida.Value, Quaternion.identity);
-            inimigosAtivos.Add(novoInimigo);
+            GameObject novoInimigo = NetSpawn.Spawnar(tipo.prefab, posicaoValida.Value);
+            if (novoInimigo != null) inimigosAtivos.Add(novoInimigo);
         }
     }
 
@@ -169,12 +170,18 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
     Vector2? ObterPosicaoLivre()
     {
+        // Co-op: spawna ao redor de um player escolhido entre todos. SP: o player único.
+        Transform refPlayer = PlayerStats.All.Count > 0
+            ? PlayerStats.All[Random.Range(0, PlayerStats.All.Count)].transform
+            : player;
+        if (refPlayer == null) return null;
+
         for (int i = 0; i < tentativasMaximas; i++)
         {
             float angulo    = Random.Range(0f, 360f);
             Vector2 direcao = new Vector2(Mathf.Cos(angulo * Mathf.Deg2Rad), Mathf.Sin(angulo * Mathf.Deg2Rad));
             float distancia = Random.Range(distanciaMinima, distanciaMaxima);
-            Vector2 ponto   = (Vector2)player.position + direcao * distancia;
+            Vector2 ponto   = (Vector2)refPlayer.position + direcao * distancia;
 
             if (!ForaDaCamera(ponto)) continue;
             if (!EstaSobreTerreno(ponto)) continue;

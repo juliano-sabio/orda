@@ -87,7 +87,7 @@ public class FantasmaVeneno : MonoBehaviour
         proxRastro = intervaloRastro;
         proxProjeteisFantasmas = Random.Range(1f, cooldownProjeteisFantasmas);
 
-        player = FindFirstObjectByType<PlayerStats>();
+        player = PlayerStats.MaisProximo(transform.position);
         CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
 
         StartCoroutine(RastroVeneno());

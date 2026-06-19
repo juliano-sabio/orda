@@ -33,19 +33,26 @@ public class PlayerStats : MonoBehaviour
     public static readonly System.Collections.Generic.List<PlayerStats> All =
         new System.Collections.Generic.List<PlayerStats>();
 
-    // Transform do player mais próximo de uma posição (ou null se não há nenhum).
-    public static Transform MaisProximoTransform(Vector2 pos)
+    // PlayerStats do player mais próximo de uma posição (ou null se não há nenhum).
+    public static PlayerStats MaisProximo(Vector2 pos)
     {
-        Transform melhor = null;
+        PlayerStats melhor = null;
         float menor = float.MaxValue;
         for (int i = 0; i < All.Count; i++)
         {
             var p = All[i];
             if (p == null) continue;
             float d = ((Vector2)p.transform.position - pos).sqrMagnitude;
-            if (d < menor) { menor = d; melhor = p.transform; }
+            if (d < menor) { menor = d; melhor = p; }
         }
         return melhor;
+    }
+
+    // Transform do player mais próximo de uma posição (ou null se não há nenhum).
+    public static Transform MaisProximoTransform(Vector2 pos)
+    {
+        var p = MaisProximo(pos);
+        return p != null ? p.transform : null;
     }
 
     void OnEnable()  { if (!All.Contains(this)) All.Add(this); }

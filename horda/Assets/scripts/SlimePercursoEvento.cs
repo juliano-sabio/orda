@@ -475,7 +475,7 @@ public class SlimePercursoEvento : MonoBehaviour
         yield return new WaitForSeconds(intervaloOnda);
         while (!Chegou && !morreu)
         {
-            var ps = FindFirstObjectByType<PlayerStats>();
+            var ps = PlayerStats.MaisProximo(transform.position);
             if (ps != null) ps.TakeDamage(danoOnda);
             yield return new WaitForSeconds(intervaloOnda);
         }
@@ -496,7 +496,7 @@ public class SlimePercursoEvento : MonoBehaviour
         Vector2 centro = transform.position;
 
         // Cura o player se estiver no raio
-        var ps = FindFirstObjectByType<PlayerStats>();
+        var ps = PlayerStats.MaisProximo(transform.position);
         if (ps != null && Vector2.Distance(centro, ps.transform.position) <= raioOndaCura)
             ps.Heal(curaOnda);
 

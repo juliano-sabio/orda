@@ -76,7 +76,7 @@ public class SlimeProtetoraInimiga : MonoBehaviour
 
     void BuscarPlayer()
     {
-        var ps = FindFirstObjectByType<PlayerStats>();
+        var ps = PlayerStats.MaisProximo(transform.position);
         if (ps != null) player = ps;
     }
 

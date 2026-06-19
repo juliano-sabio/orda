@@ -39,7 +39,7 @@ public class SlimeGuarda : MonoBehaviour
         inimigoCtrl = GetComponent<InimigoController>();
         escalaBase  = transform.localScale;
 
-        player = FindFirstObjectByType<PlayerStats>();
+        player = PlayerStats.MaisProximo(transform.position);
 
         InimigoController.OnPreMorte += OnPreMorteHandler;
     }
@@ -58,7 +58,7 @@ public class SlimeGuarda : MonoBehaviour
     void Update()
     {
         if (Morto()) return;
-        if (player == null) { player = FindFirstObjectByType<PlayerStats>(); return; }
+        if (player == null) { player = PlayerStats.MaisProximo(transform.position); return; }
 
         if (!sequenciaAtiva)
         {

@@ -42,7 +42,7 @@ public class FlowField : MonoBehaviour
 
     void Start()
     {
-        playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
+        playerTransform = (PlayerStats.All.Count > 0 ? PlayerStats.All[0].transform : null);
         ConstruirGrid();
         if (playerTransform != null) Recalcular();
         InvokeRepeating(nameof(Tick), intervaloAtualizacao, intervaloAtualizacao);
@@ -85,7 +85,7 @@ public class FlowField : MonoBehaviour
     void Tick()
     {
         if (playerTransform == null)
-            playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
+            playerTransform = (PlayerStats.All.Count > 0 ? PlayerStats.All[0].transform : null);
 
         Transform alvo = AlvoOverride != null ? AlvoOverride : playerTransform;
         if (alvo == null) return;
