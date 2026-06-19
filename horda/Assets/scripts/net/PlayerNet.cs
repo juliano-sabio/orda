@@ -24,6 +24,11 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         {
             PlayerStats.SetLocal(stats);
             charIndex.Value = PlayerPrefs.GetInt("SelectedCharacter", 0);
+
+            // Separa os players por cliente pra não nascerem sobrepostos.
+            // Owner-authoritative: setar a posição aqui replica pros demais.
+            float x = ((int)OwnerClientId - 0.5f) * 4f; // host(0) -> -2, client(1) -> +2
+            transform.position = new Vector3(x, 0f, transform.position.z);
         }
         else
         {
