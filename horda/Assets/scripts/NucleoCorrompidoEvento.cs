@@ -121,7 +121,7 @@ public class NucleoCorrompidoEvento : MonoBehaviour
                 if (ge != null && !ge.PosicaoValida(pos)) continue;
                 if (Physics2D.OverlapCircle(pos, 1f, maskObst)) continue;
                 var prefab = prefabsInimigos[UnityEngine.Random.Range(0, prefabsInimigos.Length)];
-                if (prefab != null) Instantiate(prefab, new Vector3(pos.x, pos.y, 0f), Quaternion.identity);
+                if (prefab != null) NetSpawn.Spawnar(prefab, new Vector3(pos.x, pos.y, 0f)); // host-only em rede
                 break;
             }
         }

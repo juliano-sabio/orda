@@ -270,6 +270,10 @@ public class GerenciadorEventos : MonoBehaviour
 
     void Update()
     {
+        // Co-op: eventos são host-autoritativos. Clientes não rodam a lógica de
+        // evento; os inimigos de evento (NetworkObject) spawnados no host replicam.
+        if (!NetSpawn.PodeSpawnar) return;
+
         float tempoDecorrido = TempoDecorrido();
 
         if (!eventoAtivo)
@@ -813,11 +817,10 @@ void TentarIniciarEvento()
             if (!PosicaoValida(candidato)) continue;
             if (Vector2.Distance(candidato, posPlayer) < 8f) continue;
 
-            slimeColoridaAtiva = Instantiate(
+            slimeColoridaAtiva = NetSpawn.Spawnar(
                 slimeColoridaPrefab,
-                new Vector3(candidato.x, candidato.y, 0f),
-                Quaternion.identity
-            );
+                new Vector3(candidato.x, candidato.y, 0f)
+            ); // host-only em rede
             return;
         }
     }
@@ -871,10 +874,9 @@ void SpawnCeifadores(int quantidade)
             if (!longe) continue;
 
             posicoes.Add(candidato);
-            var go = Instantiate(ceifadorPrefab,
-                new Vector3(candidato.x, candidato.y, 0f),
-                Quaternion.identity);
-            ceifadoresMapa.Add(go);
+            var go = NetSpawn.Spawnar(ceifadorPrefab,
+                new Vector3(candidato.x, candidato.y, 0f)); // host-only em rede
+            if (go != null) ceifadoresMapa.Add(go);
             spawned++;
             encontrou = true;
             break;
@@ -981,8 +983,8 @@ void SpawnSlimePercurso()
         Debug.LogWarning($"[SlimePercurso] Cantos muito próximos, usando alternativa: {origem} → {destino}");
     }
 
-    var go = Instantiate(slimePercursoPrefab, new Vector3(origem.x, origem.y, 0f), Quaternion.identity);
-    slimePercurso = go.GetComponent<SlimePercursoEvento>();
+    var go = NetSpawn.Spawnar(slimePercursoPrefab, new Vector3(origem.x, origem.y, 0f)); // host-only em rede
+    slimePercurso = go != null ? go.GetComponent<SlimePercursoEvento>() : null;
     if (slimePercurso == null) { Debug.LogError("[SlimePercurso] prefab sem SlimePercursoEvento!"); Destroy(go); return; }
 
     slimePercurso.OnChegou += () => { if (this != null && eventoAtivo) EncerrarEvento(true);  };
@@ -1019,8 +1021,8 @@ IEnumerator SpawnInimigosPercurso()
             if (Physics2D.OverlapCircle(pos, 1f, maskObst)) continue;
 
             var prefab = prefabsInimigosPercurso[UnityEngine.Random.Range(0, prefabsInimigosPercurso.Length)];
-            var go = Instantiate(prefab, new Vector3(pos.x, pos.y, 0f), Quaternion.identity);
-            inimigosPercurso.Add(go);
+            var go = NetSpawn.Spawnar(prefab, new Vector3(pos.x, pos.y, 0f)); // host-only em rede
+            if (go != null) inimigosPercurso.Add(go);
             spawned++;
             break;
         }

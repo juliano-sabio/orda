@@ -149,7 +149,7 @@ public class TimerManager : MonoBehaviour
     {
         GameObject inst = null;
         if (bossEvent.bossPrefab != null)
-            inst = Instantiate(bossEvent.bossPrefab, bossEvent.spawnPosition, Quaternion.identity);
+            inst = NetSpawn.Spawnar(bossEvent.bossPrefab, bossEvent.spawnPosition); // host-only em rede
         OnBossSpawn?.Invoke(bossEvent.bossName);
         return inst;
     }
