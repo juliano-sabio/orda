@@ -128,6 +128,14 @@ public class InimigoController : MonoBehaviour
 
     public void ReceberDano(float dano, bool isCrit = false, bool mostrarNumero = true)
     {
+        // co-op: numa cópia cliente (fantoche), pede pro host aplicar e sai.
+        var _en = GetComponent<EnemyNet>();
+        if (_en != null && _en.IsSpawned && !_en.IsServer)
+        {
+            _en.ReceberDanoServerRpc(dano, isCrit);
+            return;
+        }
+
         if (estaMorrendo || imuneAoDano) return;
 
         if (temBuffDefesa && bonusDefesa > 0)
@@ -508,7 +516,7 @@ public class InimigoController : MonoBehaviour
             else if (guarda  != null) guarda.IniciarEfeitoMorte();
             else if (elite   != null) elite.IniciarEfeitoMorte();
             else if (caveira != null) caveira.IniciarEfeitoMorte();
-            else                      Destroy(gameObject);
+            else                      NetSpawn.Despawnar(gameObject); // host-autoritativo em rede
         }
         else
         {

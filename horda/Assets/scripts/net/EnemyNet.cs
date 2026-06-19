@@ -22,4 +22,12 @@ public class EnemyNet : NetworkBehaviour
             c.enabled = false;
         }
     }
+
+    // Qualquer cliente pode requisitar dano a qualquer inimigo (co-op de amigos).
+    [ServerRpc(RequireOwnership = false)]
+    public void ReceberDanoServerRpc(float dano, bool isCrit)
+    {
+        var ic = GetComponent<InimigoController>();
+        if (ic != null) ic.ReceberDano(dano, isCrit); // roda no host -> aplica
+    }
 }

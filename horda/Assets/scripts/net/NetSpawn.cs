@@ -28,4 +28,19 @@ public static class NetSpawn
         if (no != null) no.Spawn();
         return go;
     }
+
+    // Despawn dual-mode: host em rede -> NetworkObject.Despawn (destrói em todos);
+    // cliente em rede -> nada; single-player -> Destroy.
+    public static void Despawnar(GameObject go)
+    {
+        if (go == null) return;
+        var nm = NetworkManager.Singleton;
+        var no = go.GetComponent<NetworkObject>();
+        if (nm != null && nm.IsListening && no != null && no.IsSpawned)
+        {
+            if (nm.IsServer) no.Despawn(); // destrói em todos os clientes
+            return;                        // cliente não despawna
+        }
+        Object.Destroy(go); // single-player
+    }
 }
