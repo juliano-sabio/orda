@@ -11,12 +11,41 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     readonly NetworkVariable<int> charIndex = new NetworkVariable<int>(
         0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    // Lado que o player olha (facing). Sincronizado à parte porque o sprite
+    // vira invertendo localScale.x — se isso fosse pelo NetworkTransform com
+    // interpolação, a escala passaria por 0 (sprite encolhe/some ao virar).
+    readonly NetworkVariable<bool> facingLeft = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     PlayerStats stats;
+    Vector3 baseScale;
 
     public bool IsNetworked => IsSpawned;
     public bool IsLocalOwner => IsOwner;
 
-    void Awake() { stats = GetComponent<PlayerStats>(); }
+    void Awake()
+    {
+        stats = GetComponent<PlayerStats>();
+        baseScale = transform.localScale;
+    }
+
+    void Update()
+    {
+        if (!IsSpawned) return;
+        if (IsOwner)
+        {
+            // o moviment_player2 já virou o localScale.x; só publicamos o lado.
+            facingLeft.Value = transform.localScale.x < 0f;
+        }
+        else
+        {
+            // cópia remota: aplica o lado instantâneo (snap), sem passar por 0.
+            float mag = Mathf.Abs(baseScale.x);
+            var s = transform.localScale;
+            s.x = facingLeft.Value ? -mag : mag;
+            transform.localScale = s;
+        }
+    }
 
     public override void OnNetworkSpawn()
     {
