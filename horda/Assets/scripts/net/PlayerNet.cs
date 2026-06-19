@@ -27,9 +27,15 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         }
         else
         {
-            // Cópia remota = fantoche: só um AudioListener deve existir (o do dono local).
+            // Cópia remota = fantoche controlado pelo NetworkTransform.
+            // Só um AudioListener deve existir (o do dono local).
             var al = GetComponentInChildren<AudioListener>(true);
             if (al != null) al.enabled = false;
+
+            // Rigidbody2D Kinematic: impede a física de brigar com o NetworkTransform
+            // (sem isso, o corpo retém a última velocidade e arrasta/jittera).
+            var rb = GetComponent<Rigidbody2D>();
+            if (rb != null) rb.bodyType = RigidbodyType2D.Kinematic;
         }
 
         // Aplica o personagem correto em TODAS as cópias (dono e remotas).
