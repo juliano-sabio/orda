@@ -39,7 +39,22 @@ public class SandboxConnectUI : MonoBehaviour
         if (nm != null && (nm.IsListening || nm.IsConnectedClient))
         {
             GUI.Label(new Rect(10, 10, 700, 30), status);
-            if (GUI.Button(new Rect(10, 45, 140, 36), "Desconectar")) nm.Shutdown();
+
+            float y = 45f;
+            if (!string.IsNullOrEmpty(joinCode))
+            {
+                GUI.Label(new Rect(10, y, 70, 28), "Código:");
+                // campo selecionável (dá pra marcar e Ctrl+C também)
+                GUI.TextField(new Rect(80, y, 150, 28), joinCode);
+                if (GUI.Button(new Rect(240, y - 3, 150, 34), "Copiar código"))
+                {
+                    GUIUtility.systemCopyBuffer = joinCode;
+                    status = "Código copiado: " + joinCode;
+                }
+                y += 42f;
+            }
+
+            if (GUI.Button(new Rect(10, y, 140, 36), "Desconectar")) nm.Shutdown();
             return;
         }
 
