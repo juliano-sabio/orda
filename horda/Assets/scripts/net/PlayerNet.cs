@@ -107,8 +107,9 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     void MonitorarHost()
     {
-        // Enquanto no lobby: sem monitoramento de fase e rearma a volta ao lobby pro próximo run.
-        if (LobbyState.EmLobby) { voltandoAoLobby = false; return; }
+        // Enquanto no lobby: sem monitoramento de fase e rearma os guards pro próximo run
+        // (game over do grupo + volta ao lobby) — os players persistem entre runs.
+        if (LobbyState.EmLobby) { voltandoAoLobby = false; gameOverDisparado = false; return; }
 
         // Revive: se EU estou caído e há companheiro vivo no raio, enche a barra.
         if (downed.Value)
