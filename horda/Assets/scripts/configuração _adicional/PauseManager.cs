@@ -37,6 +37,7 @@ public class PauseManager : MonoBehaviour
     private bool isPaused = false;
     private float previousTimeScale;
     private bool canPause = true;
+    private GameObject timerBadge;   // cronômetro (escondido durante o pause)
 
     void Awake()
     {
@@ -143,6 +144,9 @@ public class PauseManager : MonoBehaviour
         // ➕ Botão de sair do jogo
         CriarBotaoSair();
 
+        // ➕ Botão "Voltar ao Lobby" (só quando o jogo foi iniciado pelo lobby)
+        CriarBotaoVoltarLobby();
+
         // 🎨 Recolore a UI de pausa para o tema vermelho escuro / preto / branco
         RecolorPauseUI();
 
@@ -180,6 +184,17 @@ public class PauseManager : MonoBehaviour
         }
     }
 
+    // Esconde/mostra o cronômetro (TimerBadge) — usado ao pausar/continuar.
+    private void MostrarTimer(bool ativo)
+    {
+        if (timerBadge == null)
+        {
+            var go = GameObject.Find("TimerBadge");   // ativo no momento do 1º pause
+            if (go != null) timerBadge = go;
+        }
+        if (timerBadge != null) timerBadge.SetActive(ativo);
+    }
+
     private void SairDoJogo()
     {
         Time.timeScale = 1f;
@@ -188,6 +203,66 @@ public class PauseManager : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    // Cria (uma vez) o botão "Voltar ao Lobby" — só aparece se o jogo veio do lobby.
+    private void CriarBotaoVoltarLobby()
+    {
+        if (pausePanel == null) return;
+        if (PlayerPrefs.GetInt("VeioDoLobby", 0) != 1) return;     // só quando veio do lobby
+        if (pausePanel.transform.Find("LobbyButton") != null) return; // já criado
+
+        Transform modelo = pausePanel.transform.Find("ExitButton");
+        if (modelo == null) return;
+
+        var go = Instantiate(modelo.gameObject, pausePanel.transform);
+        go.name = "LobbyButton";
+
+        // espaçamento consistente com os demais botões (gap Configurações→Seleção)
+        var exitRT = modelo.GetComponent<RectTransform>();
+        float exitY = exitRT != null ? exitRT.anchoredPosition.y : -112f;
+        float exitX = exitRT != null ? exitRT.anchoredPosition.x : 0f;
+        float espac = 78f;
+        var setRT = pausePanel.transform.Find("SettingsButton") is Transform st ? st.GetComponent<RectTransform>() : null;
+        if (setRT != null) espac = Mathf.Abs(exitY - setRT.anchoredPosition.y);
+
+        var rt = go.GetComponent<RectTransform>();
+        if (rt != null) rt.anchoredPosition = new Vector2(exitX, exitY - espac);
+
+        // empurra o "SAIR" (QuitButton) para baixo, mantendo o mesmo espaçamento
+        var quit = pausePanel.transform.Find("QuitButton");
+        if (quit != null)
+        {
+            var qrt = quit.GetComponent<RectTransform>();
+            if (qrt != null) qrt.anchoredPosition = new Vector2(exitX, exitY - espac * 2f);
+        }
+
+        var txt = go.transform.Find("Text");
+        if (txt != null)
+        {
+            var tmp = txt.GetComponent<TMPro.TextMeshProUGUI>();
+            if (tmp != null) tmp.text = "VOLTAR AO LOBBY";
+        }
+
+        var btn = go.GetComponent<UnityEngine.UI.Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(VoltarAoLobby);
+        }
+    }
+
+    // Volta para a cena do lobby (encerra os managers persistentes do gameplay).
+    public void VoltarAoLobby()
+    {
+        PlayButtonClickSound();
+
+        isPaused = false;
+        Time.timeScale = 1f;
+        if (pausePanel != null) pausePanel.SetActive(false);
+
+        LimparManagersPersistentes();
+        SceneManager.LoadScene("lobby");
     }
 
     // Tema vermelho escuro / preto / branco (igual ao menu de opções). A UI de pausa
@@ -435,6 +510,9 @@ public class PauseManager : MonoBehaviour
         previousTimeScale = Time.timeScale;
         Time.timeScale = 0f;
 
+        // ⏱️ esconde o cronômetro enquanto pausado
+        MostrarTimer(false);
+
         // 🎵 SOM DE PAUSE
         if (pauseSound != null)
             pauseSound.Play();
@@ -450,6 +528,9 @@ public class PauseManager : MonoBehaviour
 
         isPaused = false;
         Time.timeScale = previousTimeScale;
+
+        // ⏱️ mostra o cronômetro de volta
+        MostrarTimer(true);
 
         // 🎵 SOM DE DESPAUSE
         if (unpauseSound != null)
@@ -496,7 +577,7 @@ public class PauseManager : MonoBehaviour
     // Entrada dinâmica: título e botões "pulam" pra dentro de forma escalonada.
     private IEnumerator AnimarEntradaPause()
     {
-        string[] nomes = { "Title", "ResumeButton", "SettingsButton", "ExitButton", "QuitButton" };
+        string[] nomes = { "Title", "ResumeButton", "SettingsButton", "ExitButton", "LobbyButton", "QuitButton" };
         var alvos = new System.Collections.Generic.List<Transform>();
         foreach (var n in nomes)
         {

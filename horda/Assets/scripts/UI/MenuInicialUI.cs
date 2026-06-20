@@ -438,48 +438,95 @@ public class MenuInicialUI : MonoBehaviour
 
         Esticar(AdicionarImagem(painelMulti, new Color(0f, 0f, 0f, 0.82f)));
 
+        // moldura vermelha — IRMÃO atrás do painel (o Image do pai fica atrás dos filhos,
+        // então a borda precisa ser um irmão anterior, senão cobre todo o fundo).
+        var moldura = new GameObject("Moldura");
+        moldura.transform.SetParent(painelMulti.transform, false);
+        var rmd = moldura.AddComponent<RectTransform>();
+        rmd.anchorMin = new Vector2(0.25f, 0.20f); rmd.anchorMax = new Vector2(0.75f, 0.82f);
+        rmd.offsetMin = new Vector2(-3f,-3f); rmd.offsetMax = new Vector2(3f,3f);
+        moldura.AddComponent<Image>().color = new Color(dfCorBorda.r, dfCorBorda.g, dfCorBorda.b, 0.95f);
+
         var painel = new GameObject("Painel");
         painel.transform.SetParent(painelMulti.transform, false);
         var rp = painel.AddComponent<RectTransform>();
         rp.anchorMin = new Vector2(0.25f, 0.20f); rp.anchorMax = new Vector2(0.75f, 0.82f);
         rp.offsetMin = rp.offsetMax = Vector2.zero;
-        painel.AddComponent<Image>().color = new Color(0.05f, 0.08f, 0.16f);
+        painel.AddComponent<Image>().color = new Color(0.07f, 0.045f, 0.05f); // fundo forja (preto avermelhado)
 
-        BarraTopo(painel, new Color(0.10f, 0.30f, 0.60f));
+        BarraTopo(painel, dfCorBorda);
         CriarTexto(painel, "Titulo", new Vector2(0f,0.84f), new Vector2(1f,1f),
             Loc.T("multi.title"), 26f, FontStyles.Bold, Color.white);
-        CriarTexto(painel, "Icone", new Vector2(0.3f,0.60f), new Vector2(0.7f,0.82f),
-            "🌐", 42f, FontStyles.Normal, new Color(0.4f,0.7f,1f));
+
+        // emblema (losango/gema) no lugar do emoji 🌐 que a fonte pixel não renderiza
+        CriarEmblemaMulti(painel);
 
         CriarTexto(painel, "LblCodigo", new Vector2(0.05f,0.50f), new Vector2(0.95f,0.60f),
-            Loc.T("multi.room_code"), 13f, FontStyles.Bold, new Color(0.6f,0.8f,1f));
+            Loc.T("multi.room_code"), 13f, FontStyles.Bold, new Color(0.92f,0.74f,0.40f));
+
+        // moldura do campo (atrás)
+        var campoBorda = new GameObject("CampoBorda");
+        campoBorda.transform.SetParent(painel.transform, false);
+        var rcb = campoBorda.AddComponent<RectTransform>();
+        rcb.anchorMin = new Vector2(0.05f,0.39f); rcb.anchorMax = new Vector2(0.95f,0.50f);
+        rcb.offsetMin = new Vector2(-2f,-2f); rcb.offsetMax = new Vector2(2f,2f);
+        campoBorda.AddComponent<Image>().color = new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.70f);
 
         var campo = new GameObject("Campo");
         campo.transform.SetParent(painel.transform, false);
         var rca = campo.AddComponent<RectTransform>();
         rca.anchorMin = new Vector2(0.05f,0.39f); rca.anchorMax = new Vector2(0.95f,0.50f);
         rca.offsetMin = rca.offsetMax = Vector2.zero;
-        campo.AddComponent<Image>().color = new Color(0.10f,0.14f,0.24f);
+        campo.AddComponent<Image>().color = new Color(0.10f,0.06f,0.055f);
         var ph = CriarTexto(campo,"PH",new Vector2(0.03f,0f),new Vector2(0.97f,1f),
-            "Ex: SPIRIT-1234",14f,FontStyles.Italic,new Color(0.4f,0.4f,0.5f));
+            "Ex: SPIRIT-1234",14f,FontStyles.Italic,new Color(0.5f,0.42f,0.40f));
         ph.alignment = TextAlignmentOptions.Left;
 
+        // Criar = laranja-brasa (ação primária); Entrar = vermelho (ação secundária)
         BotaoSimples(painel,Loc.T("multi.create_room"),new Vector2(0.05f,0.23f),new Vector2(0.47f,0.37f),
-            new Color(0.10f,0.35f,0.65f),()=>{
+            new Color(0.72f,0.34f,0.10f),()=>{
                 PlayerPrefs.SetInt("LobbyHost",1);
                 PlayerPrefs.SetString("LobbyCode","SPIRIT-" + GerarCodigoSala());
                 SceneManager.LoadScene("lobby");
             });
         BotaoSimples(painel,Loc.T("multi.join_room"),new Vector2(0.53f,0.23f),new Vector2(0.95f,0.37f),
-            new Color(0.10f,0.45f,0.25f),()=>{
+            new Color(0.62f,0.16f,0.14f),()=>{
                 PlayerPrefs.SetInt("LobbyHost",0);
                 SceneManager.LoadScene("lobby");
             });
 
         CriarTexto(painel,"Aviso",new Vector2(0.05f,0.10f),new Vector2(0.95f,0.22f),
-            Loc.T("multi.notice"),11f,FontStyles.Italic,new Color(0.8f,0.7f,0.3f));
+            Loc.T("multi.notice"),11f,FontStyles.Italic,new Color(0.85f,0.66f,0.30f));
         BotaoSimples(painel,"← " + Loc.T("ui.back"),new Vector2(0.10f,0.02f),new Vector2(0.90f,0.10f),
             new Color(0.28f,0.08f,0.08f),()=>painelMulti.SetActive(false));
+    }
+
+    // Emblema decorativo (losango em camadas) — substitui o emoji 🌐 não suportado pela fonte.
+    void CriarEmblemaMulti(GameObject painel)
+    {
+        var emb = new GameObject("Emblema");
+        emb.transform.SetParent(painel.transform, false);
+        var re = emb.AddComponent<RectTransform>();
+        re.anchorMin = new Vector2(0.5f,0.71f); re.anchorMax = new Vector2(0.5f,0.71f);
+        re.pivot = new Vector2(0.5f,0.5f); re.anchoredPosition = Vector2.zero;
+        re.sizeDelta = new Vector2(58f,58f);
+        re.localRotation = Quaternion.Euler(0f,0f,45f); // vira losango
+        emb.AddComponent<Image>().color = new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,1f); // borda vermelha
+
+        var inner = new GameObject("Inner");
+        inner.transform.SetParent(emb.transform, false);
+        var ri = inner.AddComponent<RectTransform>();
+        ri.anchorMin = Vector2.zero; ri.anchorMax = Vector2.one;
+        ri.offsetMin = new Vector2(4f,4f); ri.offsetMax = new Vector2(-4f,-4f);
+        inner.AddComponent<Image>().color = new Color(0.10f,0.06f,0.05f,1f); // interior escuro
+
+        var core = new GameObject("Core");
+        core.transform.SetParent(inner.transform, false);
+        var rco = core.AddComponent<RectTransform>();
+        rco.anchorMin = new Vector2(0.5f,0.5f); rco.anchorMax = new Vector2(0.5f,0.5f);
+        rco.pivot = new Vector2(0.5f,0.5f); rco.anchoredPosition = Vector2.zero;
+        rco.sizeDelta = new Vector2(20f,20f);
+        core.AddComponent<Image>().color = new Color(0.86f,0.40f,0.12f,1f); // núcleo brasa
     }
 
     // ── Opções ───────────────────────────────────────────────────────────

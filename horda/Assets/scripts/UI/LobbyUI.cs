@@ -13,15 +13,17 @@ public class LobbyUI : MonoBehaviour
     const string cenaMenu = "menu_inicial";
     const string cenaJogo = "escolher terreno";
 
-    // ── Paleta dark fantasy ───────────────────────────────────────────
+    // ── Paleta forja (combina com Opções/Multijogador) ────────────────
     static readonly Color corFundo     = new Color(0.05f, 0.02f, 0.02f);  // #0D0505 pedra funda
-    static readonly Color corAcento    = new Color(0.78f, 0.66f, 0.25f);  // #C8A840 dourado
+    static readonly Color corAcento    = new Color(0.82f, 0.42f, 0.12f);  // âmbar-brasa (destaque/selecionado)
+    static readonly Color corBorda     = new Color(0.62f, 0.11f, 0.11f);  // vermelho escuro (barras/bordas)
     static readonly Color corClaro     = new Color(0.94f, 0.88f, 0.75f);  // #F0E0C0 creme
-    static readonly Color corPainel    = new Color(0.18f, 0.08f, 0.08f);  // #2D1515 pedra painel
-    static readonly Color corSlotVazio = new Color(0.15f, 0.07f, 0.07f);  // #261212 slot vazio
-    static readonly Color corSlotOcup  = new Color(0.23f, 0.13f, 0.13f);  // #3B2121 slot ocupado
-    static readonly Color corVerde     = new Color(0.15f, 0.55f, 0.20f);  // verde pronto
-    static readonly Color corCinza     = new Color(0.30f, 0.20f, 0.20f);  // pedra cinza
+    static readonly Color corPainel    = new Color(0.14f, 0.07f, 0.07f);  // pedra painel (preto avermelhado)
+    static readonly Color corSlotVazio = new Color(0.04f, 0.02f, 0.02f, 0.55f);  // slot vazio (translúcido)
+    static readonly Color corSlotOcup  = new Color(0.10f, 0.05f, 0.05f, 0.72f);  // slot ocupado
+    static readonly Color corSlotHost  = new Color(0.17f, 0.09f, 0.03f, 0.74f);  // slot do HOST (âmbar escuro)
+    static readonly Color corVerde     = new Color(0.16f, 0.42f, 0.20f);  // verde esmeralda escuro (pronto)
+    static readonly Color corCinza     = new Color(0.28f, 0.18f, 0.18f);  // pedra cinza
 
     // ── Estado dos jogadores (simulado) ───────────────────────────────
     const int MAX_JOGADORES = 4;
@@ -40,6 +42,16 @@ public class LobbyUI : MonoBehaviour
     bool estouPronto = false;
     string codigoSala = "SPIRIT-????";
 
+    // ── Configuração da sala (selecionada nos botões) ─────────────────
+    // Mapas na mesma ordem das opções de "Mapa" (terrain.p1/p2/p3/surv).
+    // Espelha EscolherTerrenoUI: cena de destino, dificuldade e bloqueio.
+    static readonly string[] mapaCenas       = { "primeira_fase", "segunda_fase", "terceira_fase", "Modo_sobrevivencia" };
+    static readonly int[]    mapaDificuldade = { 1, 2, 3, 5 };
+    static readonly bool[]   mapaBloqueado   = { false, false, true, true };
+    int  mapaIdx        = 0;
+    int  maxJogadoresSel = 2;
+    bool salaPublica    = true;
+
     // ── Refs de UI ────────────────────────────────────────────────────
     GameObject   canvasGO;
     GameObject[] slotGOs    = new GameObject[MAX_JOGADORES];
@@ -47,12 +59,28 @@ public class LobbyUI : MonoBehaviour
     TextMeshProUGUI[] slotNome   = new TextMeshProUGUI[MAX_JOGADORES];
     TextMeshProUGUI[] slotStatus = new TextMeshProUGUI[MAX_JOGADORES];
     Image[]      slotIndicador  = new Image[MAX_JOGADORES];
+    Image[]      slotAvatarIcon = new Image[MAX_JOGADORES];   // ícone do personagem no avatar
+    TextMeshProUGUI[] slotAvatarQ = new TextMeshProUGUI[MAX_JOGADORES]; // "?" placeholder
 
     Button btnPronto;
     Button btnIniciar;
     Image  imgBtnPronto;
+    LobbyBotaoHover hovPronto;
     TextMeshProUGUI txtBtnPronto;
     TextMeshProUGUI txtContador;
+
+    // ── Sprites (mesmo kit da seleção de personagem) ──────────────────
+    [Header("Sprites (kit seleção de personagem)")]
+    [Tooltip("btn_stone — botões/abas/toggles/config.")]
+    public Sprite botaoSprite;
+    [Tooltip("panel_stone — fundo dos painéis e slots.")]
+    public Sprite painelSprite;
+    [Tooltip("bg_charselection — imagem de fundo da tela.")]
+    public Sprite fundoSprite;
+    [Tooltip("bar_charselect — barra horizontal (ex.: barra do código da sala).")]
+    public Sprite barraSprite;
+    [Tooltip("testecaractere04 — fundo dos painéis grandes (esticado, não 9-slice).")]
+    public Sprite painelGrandeSprite;
 
     // ── Seleção de personagem ─────────────────────────────────────────
     [Header("Personagens")]
@@ -65,7 +93,24 @@ public class LobbyUI : MonoBehaviour
     GameObject[] subPaineis  = new GameObject[3];
     Button[]     subAbaBtns  = new Button[3];
     Image[]      charIconBGs = new Image[0];
-    TextMeshProUGUI txtInfoLobby, txtUltimateLobby, txtPassivasLobby;
+    TextMeshProUGUI txtInfoLobby;
+
+    // Listas selecionáveis (ULTIMATE / PASSIVAS) com ícones
+    GameObject ultiListContent, passListContent;
+    Image[]    ultiItemBG = new Image[0];
+    Image[]    passItemBG = new Image[0];
+    int        ultimateIdx = 0;
+    int        passivaIdx  = 0;
+
+    // ── Animação / dinâmica ───────────────────────────────────────────
+    TextMeshProUGUI txtTitulo;     // título "LOBBY" (pulsa)
+    Image           topoBar;       // barra de destaque do topo (brilho)
+    const int QTD_BRASAS = 18;
+    RectTransform[] brasaRT   = new RectTransform[QTD_BRASAS];
+    float[]         brasaVel  = new float[QTD_BRASAS];
+    float[]         brasaBaseX = new float[QTD_BRASAS];
+    float[]         brasaAmp  = new float[QTD_BRASAS];
+    float[]         brasaFase = new float[QTD_BRASAS];
 
     // ─────────────────────────────────────────────────────────────────
     void Start()
@@ -97,8 +142,81 @@ public class LobbyUI : MonoBehaviour
 
         AtualizarSlots();
 
+        // animação de entrada (painéis deslizam das laterais + fade), estilo seleção de personagem
+        StartCoroutine(EntradaLobby());
+
         // simula jogador entrando após 3s (para demo)
         StartCoroutine(SimularEntrada());
+    }
+
+    // Entrada do lobby: fade geral + painéis esquerdo/direito deslizando das bordas.
+    IEnumerator EntradaLobby()
+    {
+        var canvasCG = canvasGO.GetComponent<CanvasGroup>();
+        if (canvasCG == null) canvasCG = canvasGO.AddComponent<CanvasGroup>();
+
+        var esq = canvasGO.transform.Find("PainelJogadores") as RectTransform;
+        var dir = canvasGO.transform.Find("PainelDireito")   as RectTransform;
+        Vector2 e0 = esq != null ? esq.anchoredPosition : Vector2.zero;
+        Vector2 d0 = dir != null ? dir.anchoredPosition : Vector2.zero;
+
+        canvasCG.alpha = 0f;
+        if (esq != null) esq.anchoredPosition = e0 + new Vector2(-180f, 0f);
+        if (dir != null) dir.anchoredPosition = d0 + new Vector2( 180f, 0f);
+
+        float dur = 0.45f, e = 0f;
+        while (e < dur)
+        {
+            e += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(e / dur);
+            float ease = 1f - Mathf.Pow(1f - k, 3f);   // easeOutCubic
+            canvasCG.alpha = ease;
+            if (esq != null) esq.anchoredPosition = e0 + new Vector2(Mathf.Lerp(-180f, 0f, ease), 0f);
+            if (dir != null) dir.anchoredPosition = d0 + new Vector2(Mathf.Lerp( 180f, 0f, ease), 0f);
+            yield return null;
+        }
+
+        canvasCG.alpha = 1f;
+        if (esq != null) esq.anchoredPosition = e0;
+        if (dir != null) dir.anchoredPosition = d0;
+    }
+
+    // ── Animações contínuas ───────────────────────────────────────────
+    void Update()
+    {
+        float t = Time.unscaledTime;
+
+        // título "LOBBY" pulsando
+        if (txtTitulo != null)
+        {
+            float s = 1f + Mathf.Sin(t * 2f) * 0.04f;
+            txtTitulo.transform.localScale = new Vector3(s, s, 1f);
+        }
+
+        // barra de destaque do topo com brilho
+        if (topoBar != null)
+        {
+            var c = topoBar.color;
+            c.a = 0.14f + (Mathf.Sin(t * 1.6f) * 0.5f + 0.5f) * 0.14f;
+            topoBar.color = c;
+        }
+
+        // brasas subindo (recicla ao sair do topo)
+        for (int i = 0; i < QTD_BRASAS; i++)
+        {
+            var rb = brasaRT[i];
+            if (rb == null) continue;
+            Vector2 p = rb.anchoredPosition;
+            p.y += brasaVel[i] * Time.unscaledDeltaTime;
+            p.x = brasaBaseX[i] + Mathf.Sin(t * 0.8f + brasaFase[i]) * brasaAmp[i];
+            if (p.y > 1110f)
+            {
+                p.y = -20f;
+                brasaBaseX[i] = Random.Range(0f, 1920f);
+                p.x = brasaBaseX[i];
+            }
+            rb.anchoredPosition = p;
+        }
     }
 
     // ── Canvas ────────────────────────────────────────────────────────
@@ -119,12 +237,56 @@ public class LobbyUI : MonoBehaviour
     // ── Fundo ─────────────────────────────────────────────────────────
     void CriarFundo()
     {
-        Esticar(Img("Fundo", corFundo));
+        var fundoGO = Img("Fundo", corFundo);
+        Esticar(fundoGO);
+        if (fundoSprite != null)
+        {
+            var fimg = fundoGO.GetComponent<Image>();
+            fimg.sprite = fundoSprite;
+            fimg.type   = Image.Type.Simple;
+            fimg.color  = Color.white;
+        }
 
         var topo = Img("Topo", new Color(corAcento.r, corAcento.g, corAcento.b, 0.12f));
         var rt = topo.GetComponent<RectTransform>();
         rt.anchorMin = new Vector2(0f, 0.92f); rt.anchorMax = Vector2.one;
         rt.offsetMin = rt.offsetMax = Vector2.zero;
+        topoBar = topo.GetComponent<Image>();
+
+        CriarBrasas();
+    }
+
+    // Brasas/partículas subindo no fundo (estilo forja).
+    void CriarBrasas()
+    {
+        var cont = new GameObject("Brasas");
+        cont.transform.SetParent(canvasGO.transform, false);
+        var contRT = cont.AddComponent<RectTransform>();
+        contRT.anchorMin = Vector2.zero; contRT.anchorMax = Vector2.one;
+        contRT.offsetMin = contRT.offsetMax = Vector2.zero;
+        var cg = cont.AddComponent<CanvasGroup>();
+        cg.blocksRaycasts = false; cg.interactable = false;
+
+        for (int i = 0; i < QTD_BRASAS; i++)
+        {
+            var b = new GameObject($"Brasa{i}");
+            b.transform.SetParent(cont.transform, false);
+            var rb = b.AddComponent<RectTransform>();
+            rb.anchorMin = rb.anchorMax = Vector2.zero;
+            float tam = Random.Range(3f, 7f);
+            rb.sizeDelta = new Vector2(tam, tam);
+            brasaBaseX[i] = Random.Range(0f, 1920f);
+            float y = Random.Range(0f, 1080f);
+            rb.anchoredPosition = new Vector2(brasaBaseX[i], y);
+            var img = b.AddComponent<Image>();
+            img.raycastTarget = false;
+            img.color = new Color(corAcento.r, corAcento.g * 0.7f, corAcento.b * 0.3f,
+                Random.Range(0.10f, 0.35f));
+            brasaRT[i]   = rb;
+            brasaVel[i]  = Random.Range(25f, 70f);
+            brasaAmp[i]  = Random.Range(8f, 28f);
+            brasaFase[i] = Random.Range(0f, 6.28f);
+        }
     }
 
     // ── Cabeçalho ─────────────────────────────────────────────────────
@@ -134,6 +296,7 @@ public class LobbyUI : MonoBehaviour
         var t = Texto("Titulo", new Vector2(0f, 0.92f), Vector2.one,
             "LOBBY", 32f, FontStyles.Bold, Color.white);
         t.alignment = TextAlignmentOptions.Center;
+        txtTitulo = t;
 
         // código da sala + botão copiar
         var painelCodigo = new GameObject("PainelCodigo");
@@ -141,10 +304,10 @@ public class LobbyUI : MonoBehaviour
         var rpc = painelCodigo.AddComponent<RectTransform>();
         rpc.anchorMin = new Vector2(0.25f, 0.84f); rpc.anchorMax = new Vector2(0.75f, 0.92f);
         rpc.offsetMin = rpc.offsetMax = Vector2.zero;
-        painelCodigo.AddComponent<Image>().color = corPainel;
+        AplicarBarra(painelCodigo.AddComponent<Image>(), corPainel);
 
         var txtCod = Texto("TxtCodigo",
-            new Vector2(0.05f, 0f), new Vector2(0.78f, 1f),
+            new Vector2(0.09f, 0f), new Vector2(0.82f, 1f),
             codigoSala, 22f, FontStyles.Bold,
             new Color(0.94f, 0.88f, 0.75f));
         txtCod.transform.SetParent(painelCodigo.transform, false);
@@ -154,10 +317,10 @@ public class LobbyUI : MonoBehaviour
         var btnCop = new GameObject("BtnCopiar");
         btnCop.transform.SetParent(painelCodigo.transform, false);
         var rbc = btnCop.AddComponent<RectTransform>();
-        rbc.anchorMin = new Vector2(0.80f, 0.10f); rbc.anchorMax = new Vector2(0.98f, 0.90f);
+        rbc.anchorMin = new Vector2(0.84f, 0.18f); rbc.anchorMax = new Vector2(0.98f, 0.74f);
         rbc.offsetMin = rbc.offsetMax = Vector2.zero;
         var imgCop = btnCop.AddComponent<Image>();
-        imgCop.color = new Color(corAcento.r, corAcento.g, corAcento.b, 0.60f);
+        AplicarSpriteBotao(imgCop, corAcento);
         var bCop = btnCop.AddComponent<Button>();
         bCop.targetGraphic = imgCop; bCop.transition = Selectable.Transition.None;
         string codCap = codigoSala;
@@ -173,7 +336,7 @@ public class LobbyUI : MonoBehaviour
         tCop.GetComponent<RectTransform>().anchorMax = Vector2.one;
 
         // linha separadora
-        var linha = Img("Linha", corAcento);
+        var linha = Img("Linha", corBorda);
         var rl = linha.GetComponent<RectTransform>();
         rl.anchorMin = new Vector2(0.05f, 0.837f); rl.anchorMax = new Vector2(0.95f, 0.837f);
         rl.offsetMin = Vector2.zero; rl.offsetMax = new Vector2(0f, 2f);
@@ -188,16 +351,16 @@ public class LobbyUI : MonoBehaviour
         var rp = painel.AddComponent<RectTransform>();
         rp.anchorMin = new Vector2(0.04f, 0.12f); rp.anchorMax = new Vector2(0.52f, 0.84f);
         rp.offsetMin = rp.offsetMax = Vector2.zero;
-        painel.AddComponent<Image>().color = corPainel;
+        AplicarPainelGrande(painel.AddComponent<Image>(), corPainel);
 
         // barra topo
-        BarraTopo(painel, corAcento);
+        BarraTopo(painel, corBorda);
         var lblJ = Texto("LblJ",
             new Vector2(0f, 0.90f), new Vector2(1f, 1f),
             Loc.T("lobby.players"), 15f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f));
         lblJ.transform.SetParent(painel.transform, false);
-        lblJ.GetComponent<RectTransform>().anchorMin = new Vector2(0f, 0.92f);
-        lblJ.GetComponent<RectTransform>().anchorMax = Vector2.one;
+        lblJ.GetComponent<RectTransform>().anchorMin = new Vector2(0f, 0.94f);
+        lblJ.GetComponent<RectTransform>().anchorMax = new Vector2(1f, 1.02f);
         lblJ.alignment = TextAlignmentOptions.Center;
 
         // contador
@@ -206,23 +369,31 @@ public class LobbyUI : MonoBehaviour
             "1 / 4", 13f, FontStyles.Normal, new Color(0.65f, 0.55f, 0.35f));
         txtContador.transform.SetParent(painel.transform, false);
         var rCont = txtContador.GetComponent<RectTransform>();
-        rCont.anchorMin = new Vector2(0.70f, 0.92f); rCont.anchorMax = Vector2.one;
+        rCont.anchorMin = new Vector2(0.62f, 0.94f); rCont.anchorMax = new Vector2(0.85f, 1.02f);
         rCont.offsetMin = rCont.offsetMax = Vector2.zero;
-        txtContador.alignment = TextAlignmentOptions.Right;
+        txtContador.alignment = TextAlignmentOptions.Left;
 
         for (int i = 0; i < MAX_JOGADORES; i++)
         {
-            float yMax = 0.88f - i * 0.22f;
+            float yMax = 0.95f - i * 0.20f;
             float yMin = yMax - 0.18f;
 
             var slot = new GameObject($"Slot{i}");
             slot.transform.SetParent(painel.transform, false);
             var rs = slot.AddComponent<RectTransform>();
-            rs.anchorMin = new Vector2(0.04f, yMin); rs.anchorMax = new Vector2(0.96f, yMax);
+            rs.anchorMin = new Vector2(0.07f, yMin); rs.anchorMax = new Vector2(0.93f, yMax);
             rs.offsetMin = rs.offsetMax = Vector2.zero;
 
+            // fundo liso translúcido (sem a moldura de pedra — evita "moldura dentro de moldura")
             var bg = slot.AddComponent<Image>();
             bg.color = corSlotVazio;
+
+            // bisel sutil no topo (leve brilho)
+            var bev = new GameObject("Bevel"); bev.transform.SetParent(slot.transform, false);
+            var rbev = bev.AddComponent<RectTransform>();
+            rbev.anchorMin = new Vector2(0f, 1f); rbev.anchorMax = new Vector2(1f, 1f);
+            rbev.offsetMin = new Vector2(0f, -1.5f); rbev.offsetMax = Vector2.zero;
+            var bevImg = bev.AddComponent<Image>(); bevImg.color = new Color(1f, 1f, 1f, 0.05f); bevImg.raycastTarget = false;
 
             // indicador de cor (borda esquerda)
             var ind = new GameObject("Ind");
@@ -241,13 +412,26 @@ public class LobbyUI : MonoBehaviour
             rav.offsetMin = rav.offsetMax = Vector2.zero;
             av.AddComponent<Image>().color = new Color(0.20f, 0.10f, 0.10f);
 
-            // ícone no avatar
+            // ícone no avatar (placeholder "?" + sprite do personagem)
             var ic = Texto($"Ic{i}", Vector2.zero, Vector2.one,
                 "?", 18f, FontStyles.Bold, new Color(0.55f, 0.45f, 0.25f));
             ic.transform.SetParent(av.transform, false);
             ic.GetComponent<RectTransform>().anchorMin = Vector2.zero;
             ic.GetComponent<RectTransform>().anchorMax = Vector2.one;
             ic.alignment = TextAlignmentOptions.Center;
+            slotAvatarQ[i] = ic;
+
+            var avIco = new GameObject("AvatarIcone");
+            avIco.transform.SetParent(av.transform, false);
+            var avIcoRT = avIco.AddComponent<RectTransform>();
+            avIcoRT.anchorMin = Vector2.zero;
+            avIcoRT.anchorMax = Vector2.one;
+            avIcoRT.offsetMin = avIcoRT.offsetMax = Vector2.zero;
+            var avIcoImg = avIco.AddComponent<Image>();
+            avIcoImg.raycastTarget = false;
+            avIcoImg.preserveAspect = false;
+            avIcoImg.enabled = false;   // só aparece quando há personagem
+            slotAvatarIcon[i] = avIcoImg;
 
             // nome
             var nome = Texto($"Nome{i}",
@@ -304,8 +488,14 @@ public class LobbyUI : MonoBehaviour
         var rp = painel.AddComponent<RectTransform>();
         rp.anchorMin = new Vector2(0.55f, 0.12f); rp.anchorMax = new Vector2(0.96f, 0.84f);
         rp.offsetMin = rp.offsetMax = Vector2.zero;
-        painel.AddComponent<Image>().color = corPainel;
-        BarraTopo(painel, new Color(0.15f, 0.08f, 0.05f));
+        AplicarPainelGrande(painel.AddComponent<Image>(), corPainel);
+        BarraTopo(painel, corBorda);
+
+        // título permanente no topo do painel (acima das abas; muda conforme a aba)
+        var lblTituloPainel = TextoPN(painel, "TituloPainel",
+            new Vector2(0f, 0.87f), new Vector2(1f, 0.94f),
+            Loc.T("lobby.room_config"), 13f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f));
+        lblTituloPainel.alignment = TextAlignmentOptions.Center;
 
         Color corAbaAtiva  = new Color(0.35f, 0.20f, 0.08f);
         Color corAbaInativa = new Color(0.10f, 0.05f, 0.05f);
@@ -318,13 +508,13 @@ public class LobbyUI : MonoBehaviour
             var tabGO  = new GameObject($"TabMain_{tabNomes[i]}");
             tabGO.transform.SetParent(painel.transform, false);
             var tabImg = tabGO.AddComponent<Image>();
-            tabImg.color = i == 0 ? corAbaAtiva : corAbaInativa;
+            AplicarSpriteBotao(tabImg, i == 0 ? corAbaAtiva : corAbaInativa);
             tabImgs[i] = tabImg;
+            // recuadas pra dentro da linha cinza (alinhadas com os botões de config abaixo)
             var rt = tabGO.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(i * 0.5f, 0.93f);
-            rt.anchorMax = new Vector2((i + 1) * 0.5f, 1.00f);
-            rt.offsetMin = new Vector2(i > 0 ? 1f : 0f, 0f);
-            rt.offsetMax = new Vector2(i < 1 ? -1f : 0f, 0f);
+            rt.anchorMin = new Vector2(i == 0 ? 0.08f : 0.515f, 0.77f);
+            rt.anchorMax = new Vector2(i == 0 ? 0.485f : 0.92f, 0.84f);
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
             var btn = tabGO.AddComponent<Button>();
             btn.targetGraphic = tabImg;
             btn.transition = Selectable.Transition.None;
@@ -332,8 +522,12 @@ public class LobbyUI : MonoBehaviour
             {
                 painelSala.SetActive(idx == 0);
                 painelPersonagem.SetActive(idx == 1);
+                AnimarEntrada(idx == 0 ? painelSala : painelPersonagem);
+                lblTituloPainel.text = idx == 0
+                    ? Loc.T("lobby.room_config")
+                    : Loc.T("lobby.choose_char");
                 for (int j = 0; j < 2; j++)
-                    tabImgs[j].color = j == idx ? corAbaAtiva : corAbaInativa;
+                    tabImgs[j].color = CorBotao(j == idx ? corAbaAtiva : corAbaInativa);
             });
             TextoPN(tabGO, "T", Vector2.zero, Vector2.one,
                 tabNomes[i], 11f, FontStyles.Bold, Color.white)
@@ -344,14 +538,14 @@ public class LobbyUI : MonoBehaviour
         painelSala = new GameObject("ConteudoSala");
         painelSala.transform.SetParent(painel.transform, false);
         painelSala.AddComponent<RectTransform>();
-        SetAnchors(painelSala, Vector2.zero, new Vector2(1f, 0.93f));
+        SetAnchors(painelSala, Vector2.zero, new Vector2(1f, 0.85f));
         CriarConteudoSala(painelSala);
 
         // Conteúdo PERSONAGEM
         painelPersonagem = new GameObject("ConteudoPersonagem");
         painelPersonagem.transform.SetParent(painel.transform, false);
         painelPersonagem.AddComponent<RectTransform>();
-        SetAnchors(painelPersonagem, Vector2.zero, new Vector2(1f, 0.93f));
+        SetAnchors(painelPersonagem, Vector2.zero, new Vector2(1f, 0.85f));
         CriarConteudoPersonagem(painelPersonagem);
 
         painelSala.SetActive(true);
@@ -360,25 +554,25 @@ public class LobbyUI : MonoBehaviour
 
     void CriarConteudoSala(GameObject pai)
     {
-        TextoPN(pai, "LblConf", new Vector2(0f, 0.92f), Vector2.one,
-            Loc.T("lobby.room_config"), 13f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
-            .alignment = TextAlignmentOptions.Center;
+        // Sem a seção Dificuldade (definida pela fase em EscolherTerrenoUI).
+        // Três seções distribuídas uniformemente: Mapa, Máx. Jogadores, Visibilidade.
+        CriarOpcaoConf(pai, Loc.T("lobby.map"), 0.70f, 0.87f,
+            new[]{ Loc.T("terrain.p1.name"), Loc.T("terrain.p2.name"), Loc.T("terrain.p3.name"), Loc.T("terrain.surv.name") },
+            idx => mapaIdx = idx, mapaBloqueado);
+        CriarOpcaoConf(pai, Loc.T("lobby.max_players"), 0.46f, 0.63f,
+            new[]{ "2", "3", "4" },
+            idx => maxJogadoresSel = idx + 2);
 
-        CriarOpcaoConf(pai, Loc.T("lobby.map"), 0.72f, 0.87f,
-            new[]{ Loc.T("terrain.p1.name"), Loc.T("terrain.p2.name"), Loc.T("terrain.p3.name"), Loc.T("terrain.surv.name") });
-        CriarOpcaoConf(pai, Loc.T("lobby.difficulty"), 0.52f, 0.67f,
-            new[]{ Loc.T("diff.easy"), Loc.T("diff.normal"), Loc.T("diff.hard") });
-        CriarOpcaoConf(pai, Loc.T("lobby.max_players"), 0.32f, 0.47f,
-            new[]{ "2", "3", "4" });
-
-        TextoPN(pai, "LblVis", new Vector2(0.05f, 0.22f), new Vector2(0.50f, 0.31f),
+        TextoPN(pai, "LblVis", new Vector2(0.08f, 0.36f), new Vector2(0.50f, 0.45f),
             Loc.T("lobby.visibility"), 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
             .alignment = TextAlignmentOptions.Left;
 
-        CriarBotaoToggle(pai, "public", Loc.T("lobby.public"), new Vector2(0.05f, 0.12f), new Vector2(0.47f, 0.21f), true);
-        CriarBotaoToggle(pai, "private", Loc.T("lobby.private"), new Vector2(0.53f, 0.12f), new Vector2(0.95f, 0.21f), false);
+        CriarBotaoToggle(pai, "public", Loc.T("lobby.public"), new Vector2(0.08f, 0.24f), new Vector2(0.485f, 0.34f), true,
+            () => salaPublica = true);
+        CriarBotaoToggle(pai, "private", Loc.T("lobby.private"), new Vector2(0.515f, 0.24f), new Vector2(0.92f, 0.34f), false,
+            () => salaPublica = false);
 
-        var aviso = TextoPN(pai, "Aviso", new Vector2(0.05f, 0.01f), new Vector2(0.95f, 0.11f),
+        var aviso = TextoPN(pai, "Aviso", new Vector2(0.08f, 0.05f), new Vector2(0.92f, 0.16f),
             Loc.T("lobby.notice"),
             10f, FontStyles.Italic, new Color(0.70f, 0.60f, 0.30f));
         aviso.textWrappingMode = TMPro.TextWrappingModes.Normal;
@@ -387,10 +581,6 @@ public class LobbyUI : MonoBehaviour
 
     void CriarConteudoPersonagem(GameObject pai)
     {
-        TextoPN(pai, "LblP", new Vector2(0f, 0.92f), Vector2.one,
-            Loc.T("lobby.choose_char"), 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
-            .alignment = TextAlignmentOptions.Center;
-
         CriarGridPersonagens(pai);
         CriarSubAbasLobby(pai);
     }
@@ -409,41 +599,65 @@ public class LobbyUI : MonoBehaviour
         }
 
         charIconBGs = new Image[total];
-        int   cols    = Mathf.Min(total, 5);
-        float largura = 0.90f / cols;
-        float altura  = 0.11f;
-        float yBase   = 0.88f;
+        int   slotsTotais = Mathf.Max(total, 5);   // sempre mostra ao menos 5 slots
+        int   cols  = Mathf.Min(slotsTotais, 5);
+        float slotW = 0.135f;     // largura do slot (quadrado-ish dada a proporção do painel)
+        float slotH = 0.18f;
+        float gap   = 0.02f;
+        float yTop  = 0.84f;
 
-        for (int i = 0; i < total; i++)
+        for (int i = 0; i < slotsTotais; i++)
         {
             int   idx = i;
             int   col = i % cols;
             int   row = i / cols;
-            float xMin = 0.05f + col * largura;
-            float xMax = xMin + largura - 0.01f;
-            float yMax = yBase - row * (altura + 0.02f);
-            float yMin = yMax - altura;
+            float xMin = 0.08f + col * (slotW + gap);
+            float xMax = xMin + slotW;
+            float yMax = yTop - row * (slotH + gap);
+            float yMin = yMax - slotH;
 
-            var go  = new GameObject($"CharBtn_{i}");
+            bool  temPersonagem = i < total && characters[i] != null;
+
+            var go  = new GameObject(temPersonagem ? $"CharBtn_{i}" : $"SlotVazio_{i}");
             go.transform.SetParent(pai.transform, false);
             var r   = go.AddComponent<RectTransform>();
             r.anchorMin = new Vector2(xMin, yMin); r.anchorMax = new Vector2(xMax, yMax);
             r.offsetMin = r.offsetMax = Vector2.zero;
             var img = go.AddComponent<Image>();
-            img.color = i == charIdx
-                ? new Color(0.35f, 0.20f, 0.08f)
-                : new Color(0.15f, 0.08f, 0.08f);
-            charIconBGs[i] = img;
-            var btn = go.AddComponent<Button>();
-            btn.targetGraphic = img;
-            btn.transition = Selectable.Transition.None;
-            btn.onClick.AddListener(() => SelecionarPersonagemLobby(idx));
 
-            string nm = characters[i] != null ? characters[i].characterName : "?";
-            if (nm.Length > 7) nm = nm.Substring(0, 7);
-            TextoPN(go, "T", Vector2.zero, Vector2.one,
-                nm, 9f, FontStyles.Bold, Color.white)
-                .alignment = TextAlignmentOptions.Center;
+            if (temPersonagem)
+            {
+                AplicarSpriteBotao(img, i == charIdx
+                    ? new Color(0.35f, 0.20f, 0.08f)
+                    : new Color(0.15f, 0.08f, 0.08f));
+                charIconBGs[i] = img;
+                var btn = go.AddComponent<Button>();
+                btn.targetGraphic = img;
+                btn.transition = Selectable.Transition.None;
+                btn.onClick.AddListener(() => SelecionarPersonagemLobby(idx));
+
+                // ícone do personagem centralizado no slot (sem texto)
+                var icoGO = new GameObject("Icone");
+                icoGO.transform.SetParent(go.transform, false);
+                var icoRT = icoGO.AddComponent<RectTransform>();
+                icoRT.anchorMin = new Vector2(0.14f, 0.12f);
+                icoRT.anchorMax = new Vector2(0.86f, 0.88f);
+                icoRT.offsetMin = icoRT.offsetMax = Vector2.zero;
+                var icoImg = icoGO.AddComponent<Image>();
+                icoImg.raycastTarget = false;
+                icoImg.preserveAspect = true;
+                var sp = characters[i].icon;
+                if (sp != null) { icoImg.sprite = sp; icoImg.color = Color.white; }
+                else            icoImg.color = new Color(1f, 1f, 1f, 0.06f);
+            }
+            else
+            {
+                // slot vazio (placeholder p/ futuros personagens)
+                AplicarSpriteBotao(img, new Color(0.06f, 0.04f, 0.04f));
+                TextoPN(go, "T", Vector2.zero, Vector2.one,
+                    "?", 16f, FontStyles.Bold, new Color(0.40f, 0.32f, 0.30f))
+                    .alignment = TextAlignmentOptions.Center;
+            }
         }
     }
 
@@ -459,10 +673,10 @@ public class LobbyUI : MonoBehaviour
             var tabGO  = new GameObject($"SubTab_{nomes[i]}");
             tabGO.transform.SetParent(pai.transform, false);
             var tabImg = tabGO.AddComponent<Image>();
-            tabImg.color = i == 0 ? corAtiva : corInativa;
+            AplicarSpriteBotao(tabImg, i == 0 ? corAtiva : corInativa);
             var rt = tabGO.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(i * (1f/3f), 0.58f);
-            rt.anchorMax = new Vector2((i+1) * (1f/3f), 0.64f);
+            rt.anchorMin = new Vector2(0.08f + i * (0.84f/3f), 0.58f);
+            rt.anchorMax = new Vector2(0.08f + (i+1) * (0.84f/3f), 0.64f);
             rt.offsetMin = new Vector2(i > 0 ? 1f : 0f, 0f);
             rt.offsetMax = new Vector2(i < 2 ? -1f : 0f, 0f);
             var btn = tabGO.AddComponent<Button>();
@@ -481,32 +695,24 @@ public class LobbyUI : MonoBehaviour
         subPaineis[0].AddComponent<RectTransform>();
         SetAnchors(subPaineis[0], new Vector2(0f, 0.01f), new Vector2(1f, 0.58f));
         txtInfoLobby = TextoPN(subPaineis[0], "Txt",
-            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
+            new Vector2(0.08f, 0.33f), new Vector2(0.92f, 0.98f),
             "—", 10f, FontStyles.Normal, new Color(0.88f, 0.82f, 0.70f));
         txtInfoLobby.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtInfoLobby.alignment = TextAlignmentOptions.TopLeft;
 
-        // ULTIMATE
+        // ULTIMATE (lista selecionável com ícones)
         subPaineis[1] = new GameObject("SubUltimate");
         subPaineis[1].transform.SetParent(pai.transform, false);
         subPaineis[1].AddComponent<RectTransform>();
         SetAnchors(subPaineis[1], new Vector2(0f, 0.01f), new Vector2(1f, 0.58f));
-        txtUltimateLobby = TextoPN(subPaineis[1], "Txt",
-            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
-            "—", 10f, FontStyles.Normal, new Color(0.94f, 0.88f, 0.75f));
-        txtUltimateLobby.textWrappingMode = TMPro.TextWrappingModes.Normal;
-        txtUltimateLobby.alignment = TextAlignmentOptions.TopLeft;
+        ultiListContent = CriarListaScroll(subPaineis[1]);
 
-        // PASSIVAS
+        // PASSIVAS (lista selecionável com ícones)
         subPaineis[2] = new GameObject("SubPassivas");
         subPaineis[2].transform.SetParent(pai.transform, false);
         subPaineis[2].AddComponent<RectTransform>();
         SetAnchors(subPaineis[2], new Vector2(0f, 0.01f), new Vector2(1f, 0.58f));
-        txtPassivasLobby = TextoPN(subPaineis[2], "Txt",
-            new Vector2(0.04f, 0.02f), new Vector2(0.96f, 0.98f),
-            "—", 10f, FontStyles.Normal, new Color(0.72f, 0.88f, 0.68f));
-        txtPassivasLobby.textWrappingMode = TMPro.TextWrappingModes.Normal;
-        txtPassivasLobby.alignment = TextAlignmentOptions.TopLeft;
+        passListContent = CriarListaScroll(subPaineis[2]);
 
         MostrarSubAbaLobby(0);
         SelecionarPersonagemLobby(PlayerPrefs.GetInt("SelectedCharacter", 0));
@@ -522,42 +728,119 @@ public class LobbyUI : MonoBehaviour
         if (charIconBGs != null)
             for (int i = 0; i < charIconBGs.Length; i++)
                 if (charIconBGs[i] != null)
-                    charIconBGs[i].color = i == idx
+                    charIconBGs[i].color = CorBotao(i == idx
                         ? new Color(0.35f, 0.20f, 0.08f)
-                        : new Color(0.15f, 0.08f, 0.08f);
+                        : new Color(0.15f, 0.08f, 0.08f));
 
         var data = characters[idx];
         if (data == null) return;
 
+        // reflete o personagem escolhido no avatar do seu slot ("Você" = slot 0)
+        if (slotAvatarIcon != null && slotAvatarIcon.Length > 0 && slotAvatarIcon[0] != null)
+        {
+            if (data.icon != null)
+            {
+                slotAvatarIcon[0].sprite  = data.icon;
+                slotAvatarIcon[0].enabled = true;
+                if (slotAvatarQ[0] != null) slotAvatarQ[0].gameObject.SetActive(false);
+            }
+            else
+            {
+                slotAvatarIcon[0].enabled = false;
+                if (slotAvatarQ[0] != null) slotAvatarQ[0].gameObject.SetActive(true);
+            }
+        }
+
         string efeito = GetElementEfeitoLobby(data.baseElement);
 
         txtInfoLobby.text =
-            $"<b>{data.characterName}</b>\n" +
+            $"<b>{data.GetDisplayName()}</b>\n" +
             $"{CharacterData.GetElementIcon(data.baseElement)} {data.baseElement}\n\n" +
-            data.description +
+            data.GetDisplayDescription() +
             (string.IsNullOrEmpty(efeito) ? "" : $"\n\n<i>{efeito}</i>");
 
-        var u = data.ultimateSkill;
-        if (u == null && data.HasUltimatesDisponiveis()) u = data.ultimatesDisponiveis[0];
-        if (u != null)
-        {
-            string elem = u.element != PlayerStats.Element.None
-                ? $"{u.GetElementIcon()} {u.element}  |  " : "";
-            txtUltimateLobby.text =
-                $"<b>{u.ultimateName}</b>\n" +
-                $"{elem}CD: {u.cooldown}s\n" +
-                $"DMG: {u.baseDamage}  Área: {u.areaOfEffect}m\n\n" +
-                u.description +
-                (string.IsNullOrEmpty(u.specialEffect) ? "" : $"\n<i>{u.specialEffect}</i>");
-        }
-        else
-            txtUltimateLobby.text = Loc.T("ui.no_ultimate");
+        // carrega a seleção salva deste personagem e reconstrói as listas
+        ultimateIdx = PlayerPrefs.GetInt($"SelectedUltimate_{idx}", 0);
+        passivaIdx  = PlayerPrefs.GetInt($"SelectedPassiva_{idx}", 0);
+        ConstruirListaUltimates(data);
+        ConstruirListaPassivas(data);
+    }
 
-        string bonuses = data.GetElementBonusDescription();
-        string passivas = (bonuses != "Sem bônus elemental" ? bonuses + "\n\n" : "") +
-            $"Regen HP: +{data.baseHealthRegen}/s  (delay {data.baseRegenDelay}s)";
-        if (!string.IsNullOrEmpty(efeito)) passivas += $"\n\n<i>{efeito}</i>";
-        txtPassivasLobby.text = passivas;
+    // ── Listas selecionáveis (ULTIMATE / PASSIVAS) ─────────────────────
+    void ConstruirListaUltimates(CharacterData data)
+    {
+        if (ultiListContent == null) return;
+        for (int i = ultiListContent.transform.childCount - 1; i >= 0; i--)
+            Destroy(ultiListContent.transform.GetChild(i).gameObject);
+
+        UltimateData[] ults = (data.ultimatesDisponiveis != null && data.ultimatesDisponiveis.Length > 0)
+            ? data.ultimatesDisponiveis
+            : (data.ultimateSkill != null ? new[] { data.ultimateSkill } : new UltimateData[0]);
+
+        if (ults.Length == 0) { ultiItemBG = new Image[0]; return; }
+        ultimateIdx = Mathf.Clamp(ultimateIdx, 0, ults.Length - 1);
+        ultiItemBG = new Image[ults.Length];
+
+        for (int i = 0; i < ults.Length; i++)
+        {
+            int   ii = i;
+            var   u  = ults[i];
+            string nome    = u != null ? u.GetDisplayName() : "?";
+            string detalhe = u != null ? $"CD {u.cooldown:0}s · DMG {u.baseDamage:0} · {u.areaOfEffect:0}m" : "";
+            Sprite ico     = u != null ? u.ultimateIcon : null;
+            ultiItemBG[i]  = CriarItemLista(ultiListContent, nome, detalhe, ico,
+                i == ultimateIdx, () => SelecionarUltimateLobby(ii));
+        }
+    }
+
+    void ConstruirListaPassivas(CharacterData data)
+    {
+        if (passListContent == null) return;
+        for (int i = passListContent.transform.childCount - 1; i >= 0; i--)
+            Destroy(passListContent.transform.GetChild(i).gameObject);
+
+        PassiveData[] pass = data.passivasDisponiveis ?? new PassiveData[0];
+        if (pass.Length == 0) { passItemBG = new Image[0]; return; }
+        passivaIdx = Mathf.Clamp(passivaIdx, 0, pass.Length - 1);
+        passItemBG = new Image[pass.Length];
+
+        for (int i = 0; i < pass.Length; i++)
+        {
+            int   ii = i;
+            var   p  = pass[i];
+            string nome    = p != null ? p.GetDisplayName() : "?";
+            string detalhe = p != null ? UmaLinha(p.GetBonusDescription()) : "";
+            Sprite ico     = p != null ? p.passiveIcon : null;
+            passItemBG[i]  = CriarItemLista(passListContent, nome, detalhe, ico,
+                i == passivaIdx, () => SelecionarPassivaLobby(ii));
+        }
+    }
+
+    void SelecionarUltimateLobby(int i)
+    {
+        ultimateIdx = i;
+        PlayerPrefs.SetInt($"SelectedUltimate_{charIdx}", i);
+        PlayerPrefs.Save();
+        for (int k = 0; k < ultiItemBG.Length; k++)
+            if (ultiItemBG[k] != null) EstiloItemLista(ultiItemBG[k], k == i);
+    }
+
+    void SelecionarPassivaLobby(int i)
+    {
+        passivaIdx = i;
+        PlayerPrefs.SetInt($"SelectedPassiva_{charIdx}", i);
+        PlayerPrefs.Save();
+        for (int k = 0; k < passItemBG.Length; k++)
+            if (passItemBG[k] != null) EstiloItemLista(passItemBG[k], k == i);
+    }
+
+    // remove tags e quebras de linha, deixando uma linha curta de bônus
+    static string UmaLinha(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        s = System.Text.RegularExpressions.Regex.Replace(s, "<.*?>", "");
+        s = s.Replace("\n", " · ").Replace("\r", "").Trim();
+        return s;
     }
 
     void MostrarSubAbaLobby(int idx)
@@ -568,8 +851,136 @@ public class LobbyUI : MonoBehaviour
         {
             if (subPaineis[i] != null) subPaineis[i].SetActive(i == idx);
             if (subAbaBtns[i] != null)
-                subAbaBtns[i].GetComponent<Image>().color = i == idx ? corAtiva : corInativa;
+                subAbaBtns[i].GetComponent<Image>().color = CorBotao(i == idx ? corAtiva : corInativa);
         }
+        if (idx >= 0 && idx < 3) AnimarEntrada(subPaineis[idx]);
+    }
+
+    // Animação de entrada: fade + leve escala (transição de aba/sub-aba).
+    void AnimarEntrada(GameObject go)
+    {
+        if (go == null || !go.activeInHierarchy) return;
+        var cg = go.GetComponent<CanvasGroup>();
+        if (cg == null) cg = go.AddComponent<CanvasGroup>();
+        StartCoroutine(FadeEscala(go, cg));
+    }
+
+    IEnumerator FadeEscala(GameObject go, CanvasGroup cg)
+    {
+        var rt = go.GetComponent<RectTransform>();
+        float dur = 0.18f, e = 0f;
+        while (e < dur && go != null && cg != null)
+        {
+            e += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(e / dur);
+            cg.alpha = k;
+            if (rt != null) { float s = 0.97f + 0.03f * k; rt.localScale = new Vector3(s, s, 1f); }
+            yield return null;
+        }
+        if (cg != null) cg.alpha = 1f;
+        if (rt != null) rt.localScale = Vector3.one;
+    }
+
+    // Cria uma lista rolável vertical (ScrollRect) e devolve o Content onde
+    // os itens são adicionados (com VerticalLayoutGroup + ContentSizeFitter).
+    GameObject CriarListaScroll(GameObject pai)
+    {
+        var scrollRoot = new GameObject("Scroll");
+        scrollRoot.transform.SetParent(pai.transform, false);
+        var srRT = scrollRoot.AddComponent<RectTransform>();
+        srRT.anchorMin = new Vector2(0.08f, 0.33f); srRT.anchorMax = new Vector2(0.92f, 0.98f);
+        srRT.offsetMin = srRT.offsetMax = Vector2.zero;
+
+        var viewport = new GameObject("Viewport");
+        viewport.transform.SetParent(scrollRoot.transform, false);
+        var vpRT = viewport.AddComponent<RectTransform>();
+        vpRT.anchorMin = Vector2.zero; vpRT.anchorMax = Vector2.one;
+        vpRT.offsetMin = vpRT.offsetMax = Vector2.zero;
+        viewport.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.0001f);
+        viewport.AddComponent<RectMask2D>();
+
+        var content = new GameObject("Content");
+        content.transform.SetParent(viewport.transform, false);
+        var cRT = content.AddComponent<RectTransform>();
+        cRT.anchorMin = new Vector2(0f, 1f); cRT.anchorMax = new Vector2(1f, 1f);
+        cRT.pivot = new Vector2(0.5f, 1f);
+        cRT.anchoredPosition = Vector2.zero; cRT.sizeDelta = Vector2.zero;
+
+        var vlg = content.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing = 4f; vlg.padding = new RectOffset(2, 2, 2, 2);
+        vlg.childForceExpandWidth = true; vlg.childForceExpandHeight = false;
+        vlg.childControlWidth = true; vlg.childControlHeight = true;
+        vlg.childAlignment = TextAnchor.UpperCenter;
+
+        var csf = content.AddComponent<ContentSizeFitter>();
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var sr = scrollRoot.AddComponent<ScrollRect>();
+        sr.content = cRT; sr.viewport = vpRT;
+        sr.horizontal = false; sr.vertical = true;
+        sr.scrollSensitivity = 25f;
+        sr.movementType = ScrollRect.MovementType.Clamped;
+
+        return content;
+    }
+
+    // Item de lista: ícone à esquerda + nome (negrito) + linha de detalhe.
+    // Devolve o Image de fundo (para restilizar na seleção).
+    Image CriarItemLista(GameObject content, string nome, string detalhe,
+        Sprite icone, bool selecionado, System.Action onClick)
+    {
+        var go = new GameObject("Item");
+        go.transform.SetParent(content.transform, false);
+        go.AddComponent<RectTransform>();
+        var le = go.AddComponent<LayoutElement>();
+        le.minHeight = 46f; le.preferredHeight = 46f;
+
+        var bg = go.AddComponent<Image>();
+        AplicarSpriteBotao(bg, selecionado ? corAcento : corOpcaoOff);
+        var hov = go.AddComponent<LobbyBotaoHover>();
+        hov.alvo = bg; hov.Definir(CorBotao(selecionado ? corAcento : corOpcaoOff));
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = bg; btn.transition = Selectable.Transition.None;
+        btn.onClick.AddListener(() => onClick());
+
+        // ícone
+        var icoGO = new GameObject("Icone");
+        icoGO.transform.SetParent(go.transform, false);
+        var icoRT = icoGO.AddComponent<RectTransform>();
+        icoRT.anchorMin = new Vector2(0f, 0.5f); icoRT.anchorMax = new Vector2(0f, 0.5f);
+        icoRT.pivot = new Vector2(0f, 0.5f);
+        icoRT.anchoredPosition = new Vector2(8f, 0f); icoRT.sizeDelta = new Vector2(34f, 34f);
+        var icoImg = icoGO.AddComponent<Image>();
+        icoImg.raycastTarget = false; icoImg.preserveAspect = true;
+        if (icone != null) { icoImg.sprite = icone; icoImg.color = Color.white; }
+        else                icoImg.color = new Color(1f, 1f, 1f, 0.06f);
+
+        // nome
+        var nm = TextoPN(go, "Nome", Vector2.zero, Vector2.one,
+            nome, 11f, FontStyles.Bold, new Color(1f, 0.96f, 0.86f));
+        nm.alignment = TextAlignmentOptions.BottomLeft;
+        var nmRT = nm.GetComponent<RectTransform>();
+        nmRT.anchorMin = new Vector2(0f, 0.45f); nmRT.anchorMax = Vector2.one;
+        nmRT.offsetMin = new Vector2(50f, 0f); nmRT.offsetMax = new Vector2(-6f, -2f);
+
+        // detalhe
+        var dt = TextoPN(go, "Det", Vector2.zero, Vector2.one,
+            detalhe, 8.5f, FontStyles.Normal, new Color(0.78f, 0.70f, 0.55f));
+        dt.alignment = TextAlignmentOptions.TopLeft;
+        dt.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+        var dtRT = dt.GetComponent<RectTransform>();
+        dtRT.anchorMin = Vector2.zero; dtRT.anchorMax = new Vector2(1f, 0.45f);
+        dtRT.offsetMin = new Vector2(50f, 2f); dtRT.offsetMax = new Vector2(-6f, 0f);
+
+        return bg;
+    }
+
+    void EstiloItemLista(Image bg, bool sel)
+    {
+        var hov = bg.GetComponent<LobbyBotaoHover>();
+        Color baseCor = CorBotao(sel ? corAcento : corOpcaoOff);
+        if (hov != null) hov.Definir(baseCor);
+        else bg.color = baseCor;
     }
 
     string GetElementEfeitoLobby(PlayerStats.Element element)
@@ -602,7 +1013,8 @@ public class LobbyUI : MonoBehaviour
         rp.anchorMin = new Vector2(0.30f, 0.02f); rp.anchorMax = new Vector2(0.60f, 0.10f);
         rp.offsetMin = rp.offsetMax = Vector2.zero;
         imgBtnPronto = goPronto.AddComponent<Image>();
-        imgBtnPronto.color = corVerde;
+        AplicarSpriteBotao(imgBtnPronto, corVerde);
+        hovPronto = goPronto.AddComponent<LobbyBotaoHover>(); hovPronto.alvo = imgBtnPronto; hovPronto.Definir(CorBotao(corVerde));
         var bPronto = goPronto.AddComponent<Button>();
         bPronto.targetGraphic = imgBtnPronto; bPronto.transition = Selectable.Transition.None;
         bPronto.onClick.AddListener(TogglePronto);
@@ -620,7 +1032,8 @@ public class LobbyUI : MonoBehaviour
         ri.anchorMin = new Vector2(0.65f, 0.02f); ri.anchorMax = new Vector2(0.96f, 0.10f);
         ri.offsetMin = ri.offsetMax = Vector2.zero;
         var imgInic = goInic.AddComponent<Image>();
-        imgInic.color = souHost ? corAcento : corCinza;
+        AplicarSpriteBotao(imgInic, souHost ? corAcento : corCinza);
+        if (souHost) { var hi = goInic.AddComponent<LobbyBotaoHover>(); hi.alvo = imgInic; hi.Definir(CorBotao(corAcento)); }
         var bInic = goInic.AddComponent<Button>();
         bInic.targetGraphic = imgInic; bInic.transition = Selectable.Transition.None;
         bInic.interactable = souHost;
@@ -646,12 +1059,12 @@ public class LobbyUI : MonoBehaviour
 
         if (estouPronto)
         {
-            imgBtnPronto.color = corCinza;
+            if (hovPronto != null) hovPronto.Definir(CorBotao(corCinza)); else imgBtnPronto.color = CorBotao(corCinza);
             txtBtnPronto.text  = Loc.T("lobby.cancel");
         }
         else
         {
-            imgBtnPronto.color = corVerde;
+            if (hovPronto != null) hovPronto.Definir(CorBotao(corVerde)); else imgBtnPronto.color = CorBotao(corVerde);
             txtBtnPronto.text  = Loc.T("lobby.ready");
         }
 
@@ -660,17 +1073,23 @@ public class LobbyUI : MonoBehaviour
 
     void IniciarJogo()
     {
-        // verifica se a cena existe antes de tentar carregar
-        if (Application.CanStreamedLevelBeLoaded(cenaJogo))
+        // mapa escolhido no lobby define a cena de destino (pula "escolher terreno")
+        string cena = (mapaIdx >= 0 && mapaIdx < mapaCenas.Length) ? mapaCenas[mapaIdx] : cenaJogo;
+        int dif = (mapaIdx >= 0 && mapaIdx < mapaDificuldade.Length) ? mapaDificuldade[mapaIdx] : 1;
+
+        if (Application.CanStreamedLevelBeLoaded(cena))
         {
-            PlayerPrefs.SetString("ProximaCena", cenaJogo);
+            PlayerPrefs.SetString("ProximaCena", cena);
+            PlayerPrefs.SetInt("Dificuldade", dif);
+            PlayerPrefs.SetInt("VeioDoLobby", 1);   // permite "Voltar ao Lobby" no jogo
+            PlayerPrefs.Save();
             SceneManager.LoadScene("loading_screen");
         }
         else
         {
-            Debug.LogError($"[Lobby] Cena '{cenaJogo}' nao esta no Build Profiles. Adicione em File > Build Profiles.");
-            // fallback: vai para selecao de personagem que ja deve existir
-            SceneManager.LoadScene("CharacterSelection");
+            Debug.LogError($"[Lobby] Cena '{cena}' nao esta no Build Profiles. Adicione em File > Build Profiles.");
+            // fallback: vai para selecao de terreno que ja deve existir
+            SceneManager.LoadScene(cenaJogo);
         }
     }
 
@@ -678,10 +1097,10 @@ public class LobbyUI : MonoBehaviour
     {
         int presentes = 0;
         Color[] cores = {
-            corAcento,
-            new Color(0.10f,0.55f,0.85f),
-            new Color(0.85f,0.45f,0.10f),
-            new Color(0.20f,0.70f,0.30f),
+            corAcento,                       // P1 âmbar-brasa
+            new Color(0.72f,0.16f,0.14f),    // P2 vermelho
+            new Color(0.90f,0.62f,0.20f),    // P3 dourado
+            new Color(0.60f,0.30f,0.10f),    // P4 bronze
         };
 
         for (int i = 0; i < MAX_JOGADORES; i++)
@@ -689,7 +1108,8 @@ public class LobbyUI : MonoBehaviour
             bool ocup = jogadores[i].presente;
             if (ocup) presentes++;
 
-            slotBG[i].color = ocup ? corSlotOcup : corSlotVazio;
+            slotBG[i].color = !ocup ? corSlotVazio
+                            : (jogadores[i].isHost && i == 0 ? corSlotHost : corSlotOcup);
             slotIndicador[i].color = ocup ? cores[i] : corCinza;
 
             if (slotNome[i] == null) continue;
@@ -749,7 +1169,7 @@ public class LobbyUI : MonoBehaviour
     {
         for (int i = 0; i < 3; i++)
         {
-            slotBG[idx].color = corAcento;
+            slotBG[idx].color = new Color(corAcento.r, corAcento.g, corAcento.b, 0.55f);
             yield return new WaitForSeconds(0.12f);
             slotBG[idx].color = corSlotOcup;
             yield return new WaitForSeconds(0.12f);
@@ -758,27 +1178,36 @@ public class LobbyUI : MonoBehaviour
 
     IEnumerator FlashCopiar(Image img)
     {
-        img.color = corVerde;
+        img.color = CorBotao(corVerde);
         yield return new WaitForSeconds(0.5f);
-        img.color = new Color(corAcento.r, corAcento.g, corAcento.b, 0.60f);
+        img.color = CorBotao(corAcento);
     }
 
     // ── Helpers de construção ─────────────────────────────────────────
+    // onSelect: chamado com o índice ao selecionar (e uma vez na seleção inicial).
+    // bloqueado: opções desabilitadas (ex.: mapas travados) — não selecionáveis.
     void CriarOpcaoConf(GameObject pai, string label,
-        float yMin, float yMax, string[] opcoes)
+        float yMin, float yMax, string[] opcoes,
+        System.Action<int> onSelect = null, bool[] bloqueado = null)
     {
         var lbl = Texto($"Lbl_{label}", Vector2.zero, Vector2.one,
             label, 13f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f));
         lbl.transform.SetParent(pai.transform, false);
-        AjustarAnchors(lbl, new Vector2(0.05f, yMax - 0.05f), new Vector2(0.95f, yMax + 0.04f));
+        AjustarAnchors(lbl, new Vector2(0.08f, yMax - 0.05f), new Vector2(0.92f, yMax + 0.04f));
         lbl.alignment = TextAlignmentOptions.Left;
 
-        float largura = 0.88f / opcoes.Length;
+        // primeira opção não bloqueada = selecionada inicialmente
+        int selInicial = 0;
+        for (int i = 0; i < opcoes.Length; i++)
+            if (!Trancada(bloqueado, i)) { selInicial = i; break; }
+
+        float largura = 0.84f / opcoes.Length;
         for (int i = 0; i < opcoes.Length; i++)
         {
             int idx   = i;
-            float xMin = 0.05f + i * largura + 0.005f;
-            float xMax = 0.05f + (i+1) * largura - 0.005f;
+            bool trancada = Trancada(bloqueado, i);
+            float xMin = 0.08f + i * largura + 0.005f;
+            float xMax = 0.08f + (i+1) * largura - 0.005f;
 
             var go = new GameObject($"Opt_{label}_{i}");
             go.transform.SetParent(pai.transform, false);
@@ -786,34 +1215,71 @@ public class LobbyUI : MonoBehaviour
             r.anchorMin = new Vector2(xMin, yMin); r.anchorMax = new Vector2(xMax, yMax - 0.06f);
             r.offsetMin = r.offsetMax = Vector2.zero;
             var img = go.AddComponent<Image>();
-            img.color = i == 0 ? corAcento : new Color(0.18f, 0.10f, 0.10f);
+            if (botaoSprite != null) { img.sprite = botaoSprite; img.type = Image.Type.Sliced; }
+            var hov = go.AddComponent<LobbyBotaoHover>(); hov.alvo = img;
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img; btn.transition = Selectable.Transition.None;
-            btn.onClick.AddListener(() =>
-            {
-                // recolore o grupo
-                for (int j = 0; j < go.transform.parent.childCount; j++)
-                {
-                    var ch = go.transform.parent.GetChild(j);
-                    if (ch.name.StartsWith($"Opt_{label}_"))
-                    {
-                        var ci = ch.GetComponent<Image>();
-                        if (ci != null) ci.color = new Color(0.18f, 0.10f, 0.10f);
-                    }
-                }
-                img.color = corAcento;
-            });
+            btn.interactable = !trancada;
 
             var t = Texto($"T{i}", Vector2.zero, Vector2.one,
                 opcoes[i], 11f, FontStyles.Bold, Color.white);
             t.transform.SetParent(go.transform, false);
             AjustarAnchors(t, Vector2.zero, Vector2.one);
             t.alignment = TextAlignmentOptions.Center;
+
+            if (trancada) EstiloOpcaoBloqueada(go);
+            else          EstiloOpcao(go, i == selInicial);
+
+            if (!trancada)
+                btn.onClick.AddListener(() =>
+                {
+                    for (int j = 0; j < go.transform.parent.childCount; j++)
+                    {
+                        var ch = go.transform.parent.GetChild(j);
+                        var chBtn = ch.GetComponent<Button>();
+                        if (ch.name.StartsWith($"Opt_{label}_") && chBtn != null && chBtn.interactable)
+                            EstiloOpcao(ch.gameObject, ch == go.transform);
+                    }
+                    if (onSelect != null) onSelect(idx);
+                });
         }
+
+        if (onSelect != null) onSelect(selInicial);
+    }
+
+    static bool Trancada(bool[] bloqueado, int i)
+        => bloqueado != null && i < bloqueado.Length && bloqueado[i];
+
+    // cor lógica de opção NÃO selecionada (pedra escura)
+    static readonly Color corOpcaoOff = new Color(0.09f, 0.05f, 0.05f);
+
+    // Visual de opção: selecionada = âmbar aceso + texto claro; senão = pedra escura + texto apagado.
+    // Atualiza a cor-base do hover para o brilho do mouse ficar coerente.
+    void EstiloOpcao(GameObject opt, bool sel)
+    {
+        Color baseCor = CorBotao(sel ? corAcento : corOpcaoOff);
+        var hov = opt.GetComponent<LobbyBotaoHover>();
+        if (hov != null) hov.Definir(baseCor);
+        else { var im = opt.GetComponent<Image>(); if (im != null) im.color = baseCor; }
+
+        var t = opt.GetComponentInChildren<TextMeshProUGUI>();
+        if (t != null) t.color = sel ? new Color(1f, 0.97f, 0.88f) : new Color(0.60f, 0.53f, 0.50f);
+    }
+
+    // Visual de opção bloqueada (mapa travado): pedra apagada + texto cinza.
+    void EstiloOpcaoBloqueada(GameObject opt)
+    {
+        Color baseCor = CorBotao(new Color(0.06f, 0.04f, 0.04f));
+        var hov = opt.GetComponent<LobbyBotaoHover>();
+        if (hov != null) hov.Definir(baseCor);
+        else { var im = opt.GetComponent<Image>(); if (im != null) im.color = baseCor; }
+
+        var t = opt.GetComponentInChildren<TextMeshProUGUI>();
+        if (t != null) t.color = new Color(0.45f, 0.38f, 0.36f);
     }
 
     void CriarBotaoToggle(GameObject pai, string key, string displayText,
-        Vector2 mn, Vector2 mx, bool ativo)
+        Vector2 mn, Vector2 mx, bool ativo, System.Action onSelecionar = null)
     {
         var go  = new GameObject($"BtnT_{key}");
         go.transform.SetParent(pai.transform, false);
@@ -821,21 +1287,81 @@ public class LobbyUI : MonoBehaviour
         r.anchorMin = mn; r.anchorMax = mx;
         r.offsetMin = r.offsetMax = Vector2.zero;
         var img = go.AddComponent<Image>();
-        img.color = ativo ? corAcento : new Color(0.18f, 0.10f, 0.10f);
+        if (botaoSprite != null) { img.sprite = botaoSprite; img.type = Image.Type.Sliced; }
+        var hov = go.AddComponent<LobbyBotaoHover>(); hov.alvo = img;
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img; btn.transition = Selectable.Transition.None;
-        btn.onClick.AddListener(() =>
-        {
-            img.color = corAcento;
-            var irmao = go.transform.parent.Find(key == "public" ? "BtnT_private" : "BtnT_public");
-            if (irmao != null) irmao.GetComponent<Image>().color = new Color(0.18f, 0.10f, 0.10f);
-        });
+
         var t = Texto("T", Vector2.zero, Vector2.one,
             displayText, 12f, FontStyles.Bold, Color.white);
         t.transform.SetParent(go.transform, false);
         AjustarAnchors(t, Vector2.zero, Vector2.one);
         t.alignment = TextAlignmentOptions.Center;
+
+        EstiloOpcao(go, ativo);
+
+        btn.onClick.AddListener(() =>
+        {
+            EstiloOpcao(go, true);
+            var irmao = go.transform.parent.Find(key == "public" ? "BtnT_private" : "BtnT_public");
+            if (irmao != null) EstiloOpcao(irmao.gameObject, false);
+            if (onSelecionar != null) onSelecionar();
+        });
     }
+
+    // Cor exibida no botão: com sprite de pedra, clareia (+0.45) p/ a textura aparecer (igual à seleção).
+    Color CorBotao(Color cor) => botaoSprite != null
+        ? new Color(Mathf.Clamp01(cor.r + 0.45f), Mathf.Clamp01(cor.g + 0.45f), Mathf.Clamp01(cor.b + 0.45f))
+        : cor;
+
+    // Aplica o sprite de pedra (9-slice) + cor no Image de um botão.
+    void AplicarSpriteBotao(Image img, Color cor)
+    {
+        if (botaoSprite != null)
+        {
+            img.sprite = botaoSprite;
+            img.type   = Image.Type.Sliced;
+        }
+        img.color = CorBotao(cor);
+    }
+
+    // Painel de pedra (panel_stone), 9-slice, tom branco (igual à seleção de personagem).
+    void AplicarPainel(Image img, Color cor)
+    {
+        if (painelSprite != null)
+        {
+            img.sprite = painelSprite;
+            img.type   = Image.Type.Sliced;
+            img.color  = Color.white;
+        }
+        else img.color = cor;
+    }
+
+    // Painel grande (testecaractere04), esticado (Simple), tom branco.
+    void AplicarPainelGrande(Image img, Color cor)
+    {
+        if (painelGrandeSprite != null)
+        {
+            img.sprite = painelGrandeSprite;
+            img.type   = Image.Type.Simple;
+            img.color  = Color.white;
+            img.preserveAspect = false;
+        }
+        else AplicarPainel(img, cor);
+    }
+
+    // Barra horizontal (bar_charselect), 9-slice, tom branco.
+    void AplicarBarra(Image img, Color cor)
+    {
+        if (barraSprite != null)
+        {
+            img.sprite = barraSprite;
+            img.type   = Image.Type.Sliced;
+            img.color  = Color.white;
+        }
+        else AplicarPainel(img, cor);
+    }
+
 
     Button CriarBotao(string label, Vector2 mn, Vector2 mx, Color cor, System.Action acao)
     {
@@ -844,7 +1370,8 @@ public class LobbyUI : MonoBehaviour
         var r   = go.AddComponent<RectTransform>();
         r.anchorMin = mn; r.anchorMax = mx;
         r.offsetMin = r.offsetMax = Vector2.zero;
-        var img = go.AddComponent<Image>(); img.color = cor;
+        var img = go.AddComponent<Image>(); AplicarSpriteBotao(img, cor);
+        var hov = go.AddComponent<LobbyBotaoHover>(); hov.alvo = img; hov.Definir(CorBotao(cor));
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img; btn.transition = Selectable.Transition.None;
         btn.onClick.AddListener(() => acao());
@@ -935,5 +1462,51 @@ public class LobbyUI : MonoBehaviour
         var r = go.GetComponent<RectTransform>();
         r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one;
         r.offsetMin = r.offsetMax = Vector2.zero;
+    }
+}
+
+// Brilho de botão ao passar o mouse: guarda a cor-base e clareia no hover, restaurando ao sair.
+// Use Definir() para trocar a cor-base (ex.: quando o botão muda de estado selecionado).
+public class LobbyBotaoHover : MonoBehaviour,
+    UnityEngine.EventSystems.IPointerEnterHandler,
+    UnityEngine.EventSystems.IPointerExitHandler
+{
+    public Image alvo;
+    public float clarear = 0.16f;     // brilho mais vivo no hover
+    public float escala  = 1.05f;     // leve aumento ao passar o mouse
+    Color baseCor = Color.white;
+    Vector3 escalaBase = Vector3.one;
+    bool capturouEscala;
+
+    void Awake()
+    {
+        if (alvo == null) alvo = GetComponent<Image>();
+        escalaBase = transform.localScale;
+        capturouEscala = true;
+    }
+
+    public void Definir(Color c)
+    {
+        baseCor = c;
+        if (alvo == null) alvo = GetComponent<Image>();
+        if (alvo != null) alvo.color = c;
+    }
+
+    public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData e)
+    {
+        if (alvo != null)
+            alvo.color = new Color(
+                Mathf.Min(baseCor.r + clarear, 1f),
+                Mathf.Min(baseCor.g + clarear, 1f),
+                Mathf.Min(baseCor.b + clarear, 1f),
+                baseCor.a);
+        if (!capturouEscala) { escalaBase = transform.localScale; capturouEscala = true; }
+        transform.localScale = escalaBase * escala;
+    }
+
+    public void OnPointerExit(UnityEngine.EventSystems.PointerEventData e)
+    {
+        if (alvo != null) alvo.color = baseCor;
+        transform.localScale = escalaBase;
     }
 }

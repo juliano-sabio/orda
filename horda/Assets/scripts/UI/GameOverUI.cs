@@ -17,8 +17,8 @@ public class GameOverUI : MonoBehaviour
     private Image overlayImg;
     private Texture2D bgSnapshot;
 
-    private readonly GameObject[] botoes = new GameObject[4];
-    private readonly CanvasGroup[] botoesGroups = new CanvasGroup[4];
+    private readonly GameObject[] botoes = new GameObject[5];
+    private readonly CanvasGroup[] botoesGroups = new CanvasGroup[5];
 
     public static void Mostrar(Texture2D snapshot = null)
     {
@@ -262,25 +262,38 @@ public class GameOverUI : MonoBehaviour
 
         Color corpoBtn = new Color(0.11f, 0.07f, 0.07f, 1f); // quase preto (tema vermelho/preto/branco)
 
-        botoes[0] = CriarBotao(painelPrincipal.transform, Loc.T("ui.restart"),
-            new Vector2(0f, 55f), new Vector2(380f, 60f),
-            corpoBtn, Recomecar);
-        botoesGroups[0] = botoes[0].AddComponent<CanvasGroup>();
+        bool veioDoLobby = PlayerPrefs.GetInt("VeioDoLobby", 0) == 1;
 
-        botoes[1] = CriarBotao(painelPrincipal.transform, "CONFIGURAÇÕES",
-            new Vector2(0f, -23f), new Vector2(380f, 60f),
-            corpoBtn, AbrirConfiguracoesMenu);
-        botoesGroups[1] = botoes[1].AddComponent<CanvasGroup>();
+        // monta a lista de botões (insere "Voltar ao Lobby" só quando veio do lobby)
+        var defs = new System.Collections.Generic.List<(string label, UnityEngine.Events.UnityAction acao)>();
+        defs.Add((Loc.T("ui.restart"), Recomecar));
+        if (veioDoLobby) defs.Add(("VOLTAR AO LOBBY", VoltarAoLobby));
+        defs.Add(("CONFIGURAÇÕES", AbrirConfiguracoesMenu));
+        defs.Add(("SELEÇÃO", IrParaSelecao));
+        defs.Add((Loc.T("ui.quit"), Sair));
 
-        botoes[2] = CriarBotao(painelPrincipal.transform, "SELEÇÃO",
-            new Vector2(0f, -101f), new Vector2(380f, 60f),
-            corpoBtn, IrParaSelecao);
-        botoesGroups[2] = botoes[2].AddComponent<CanvasGroup>();
+        int   n      = defs.Count;
+        float centro = -62f;                       // mesmo centro do layout original (4 botões)
+        float espac  = n <= 4 ? 78f : 68f;
+        float altura = n <= 4 ? 60f : 54f;
+        float yTopo  = centro + (n - 1) * espac / 2f;
 
-        botoes[3] = CriarBotao(painelPrincipal.transform, Loc.T("ui.quit"),
-            new Vector2(0f, -179f), new Vector2(380f, 60f),
-            corpoBtn, Sair);
-        botoesGroups[3] = botoes[3].AddComponent<CanvasGroup>();
+        for (int i = 0; i < n; i++)
+        {
+            float y = yTopo - i * espac;
+            botoes[i] = CriarBotao(painelPrincipal.transform, defs[i].label,
+                new Vector2(0f, y), new Vector2(380f, altura),
+                corpoBtn, defs[i].acao);
+            botoesGroups[i] = botoes[i].AddComponent<CanvasGroup>();
+        }
+    }
+
+    private void VoltarAoLobby()
+    {
+        Time.timeScale = 1f;
+        if (bgSnapshot != null) Destroy(bgSnapshot);
+        LimparManagersPersistentes();
+        SceneManager.LoadScene("lobby");
     }
 
     private void CriarConteudoOpcoes()

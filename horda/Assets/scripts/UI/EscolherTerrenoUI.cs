@@ -236,6 +236,7 @@ public class EscolherTerrenoUI : MonoBehaviour
                 Time.timeScale = 1f;
                 PlayerPrefs.SetString("ProximaCena", cena);
                 PlayerPrefs.SetInt("Dificuldade", dif);
+                PlayerPrefs.SetInt("VeioDoLobby", 0);   // não veio do lobby
                 SceneManager.LoadScene("loading_screen");
             });
 
