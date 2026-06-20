@@ -74,6 +74,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2605273054779499284, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}
       insertIndex: -1
       addedObject: {fileID: -286809307923764534}
+    - targetCorrespondingSourceObject: {fileID: 2605273054779499284, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1357563918013843453}
   m_SourcePrefab: {fileID: 100100000, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}
 --- !u!95 &6334577537279430082 stripped
 Animator:
@@ -225,3 +228,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ReviveBarUI
   altura: 1.2
   largura: 1
+--- !u!114 &1357563918013843453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7472943407355398173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 436689f7f2cf6bd46b216be727cc2d6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillFxNet
+  ShowTopMostFoldoutHeaderGroup: 1
+  prefabsCosmeticos:
+  - {fileID: 7800008629741502241, guid: 9b611ab392c4d9b4ba29c94fa42b22f0, type: 3}
+  - {fileID: 6549936436456707093, guid: b50684e84b8fdf54ba3533d2e54ee621, type: 3}
+  - {fileID: 4978191380080517333, guid: 0971045b04b09a04ba11ca2e36374e4d, type: 3}

@@ -20,6 +20,12 @@ public class ProjectileController2D : MonoBehaviour
     public float orbitalDamageInterval = 0.3f; // 🆕 Intervalo entre danos no mesmo inimigo
     public float orbitalDamageRadius = 1.5f; // 🆕 Raio de detecção durante órbita
 
+    [Header("Co-op")]
+    // Fantasma visual no cliente do COLEGA: persegue o mesmo inimigo (sincronizado) pro
+    // caminho ser idêntico, mas NÃO causa dano (o dano é do projétil real do dono, já
+    // roteado pro host). Setado pelo SkillFxNet ao spawnar a cópia.
+    public bool cosmetico = false;
+
     [Header("Efeitos Visuais")]
     public GameObject hitEffect;
     public TrailRenderer trailRenderer;
@@ -208,6 +214,7 @@ public class ProjectileController2D : MonoBehaviour
     // 🆕 MÉTODO PARA APLICAR DANO ORBITAL COM INTERVALO
     private void TryApplyOrbitalDamage(GameObject enemy)
     {
+        if (cosmetico) return; // fantasma do colega: sem dano
         if (enemy == null) return;
 
         // Verificar intervalo de dano
@@ -348,6 +355,7 @@ public class ProjectileController2D : MonoBehaviour
     // 🆕 MÉTODO UNIFICADO PARA APLICAR DANO
     private void ApplyDamageToEnemy(GameObject enemy, string damageType)
     {
+        if (cosmetico) return; // fantasma do colega: sem dano
         InimigoController inimigo = enemy.GetComponent<InimigoController>();
         if (inimigo != null)
         {

@@ -322,6 +322,30 @@ public class PassiveProjectileSkill2D : SkillBehavior
                 if (evoMgr.EvolucaoAtiva(SkillEvolutionType.HomingEterno) && nome.Contains("homing"))
                     projectile.AddComponent<HomingEternoFX>().Iniciar(this, pc);
             }
+
+            // Co-op: transmite uma cópia COSMÉTICA pro cliente do colega — mesmo prefab,
+            // perseguindo o MESMO inimigo (sincronizado), trajetória idêntica, sem dano.
+            if (NetSpawn.EmRede && SkillFxNet.Local != null)
+            {
+                int idx = SkillFxNet.Local.IndiceDe(projectilePrefab);
+                if (idx >= 0)
+                {
+                    ulong alvoNetId = 0;
+                    if (target != null)
+                    {
+                        var no = target.GetComponentInParent<Unity.Netcode.NetworkObject>();
+                        if (no != null) alvoNetId = no.NetworkObjectId;
+                    }
+                    SkillFxNet.Local.Replicar(
+                        idx,
+                        projectile.transform.position,
+                        alvoNetId,
+                        skillData?.projectileSpeed ?? 7f,
+                        skillData?.projectileLifeTime ?? 4f,
+                        (int)(skillData?.element ?? PlayerStats.Element.None),
+                        pc.infusedColorOverride);
+                }
+            }
         }
         else
         {
