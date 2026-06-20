@@ -11,10 +11,14 @@ public static class SkillFxCosmetico
         new Dictionary<SpecificSkillType, System.Type>
     {
         { SpecificSkillType.CristaisGelo, typeof(CristaisGeloSkillBehavior) },
+        { SpecificSkillType.LancaLuz,     typeof(LancaLuzSkillBehavior) },
         // TODO co-op: adicionar os demais conforme gatear o dano em cada behavior.
     };
 
     public static bool EhSuportado(SpecificSkillType t) => Suportados.ContainsKey(t);
+
+    // Lista dos tipos suportados (pro botão de debug listar automaticamente).
+    public static IEnumerable<SpecificSkillType> Tipos => Suportados.Keys;
 
     public static void Adicionar(PlayerStats alvo, SkillData skill)
     {

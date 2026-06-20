@@ -84,6 +84,7 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
             go.transform.position = origem;
             var lp = go.AddComponent<LancaLuzProjetil>();
             lp.skillDataRef = skillData;
+            lp.cosmetico = cosmetico;
             lp.Iniciar(dirFinal, velocidade, DanoAtual, alcance);
         }
     }
@@ -129,6 +130,7 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
 public class LancaLuzProjetil : MonoBehaviour
 {
     public SkillData skillDataRef;
+    public bool      cosmetico; // co-op: fantasma do colega — só visual, sem dano
     Vector2 dir, origem;
     float   vel, dano, alcance;
     bool    atingiu;
@@ -190,10 +192,13 @@ public class LancaLuzProjetil : MonoBehaviour
         if (atingiu) return;
         var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
-        ic.ReceberDano(dano, false);
-        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva))
-            EvolutionFX.SpawnExplosao(transform.position, 2.5f, dano * 0.6f, new Color(1f, 0.9f, 0.3f), this);
+        if (!cosmetico) // co-op: cópia cosmética não aplica dano (só visual)
+        {
+            ic.ReceberDano(dano, false);
+            SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva))
+                EvolutionFX.SpawnExplosao(transform.position, 2.5f, dano * 0.6f, new Color(1f, 0.9f, 0.3f), this);
+        }
         bool perfura = SkillEvolutionManager.Tem(SkillEvolutionType.LancaPerfurante);
         if (!perfura) atingiu = true;
         SpawnImpacto();
