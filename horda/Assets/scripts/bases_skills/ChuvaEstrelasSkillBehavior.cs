@@ -93,6 +93,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
 
     void AplicarDanoArea(Vector2 pos)
     {
+        if (cosmetico) return; // co-op: cópia cosmética não aplica dano (só o visual da estrela)
         var cols = Physics2D.OverlapCircleAll(pos, raioImpacto);
         foreach (var col in cols)
         {

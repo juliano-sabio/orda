@@ -135,9 +135,12 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
                 int id = ic.gameObject.GetInstanceID();
                 if (atingidos.Contains(id)) continue;
                 atingidos.Add(id);
-                ic.ReceberDano(DanoAtual, false);
-                SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
-                if (SkillEvolutionManager.Tem(SkillEvolutionType.ChicoteEletrico)) EvolutionFX.AplicarLentidao(ic, 1f, 0.4f);
+                if (!cosmetico) // co-op: cópia cosmética só faz o visual
+                {
+                    ic.ReceberDano(DanoAtual, false);
+                    SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
+                    if (SkillEvolutionManager.Tem(SkillEvolutionType.ChicoteEletrico)) EvolutionFX.AplicarLentidao(ic, 1f, 0.4f);
+                }
                 StartCoroutine(FlashInimigo(ic));
                 SpawnImpactoInimigo(ic.transform.position);
             }

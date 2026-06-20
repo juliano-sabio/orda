@@ -86,6 +86,7 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
         {
             var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
             if (ic == null || ic.estaMorrendo) continue;
+            if (cosmetico) continue; // co-op: cópia cosmética não aplica dano
             ic.ReceberDano(DanoAtual, false);
             SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFlamejante))

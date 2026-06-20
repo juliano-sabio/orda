@@ -194,8 +194,11 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
                 int id = ic.gameObject.GetInstanceID();
                 if (hashset.Contains(id)) continue;
                 hashset.Add(id);
-                ic.ReceberDano(DanoAtual, false);
-                SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
+                if (!cosmetico)
+                {
+                    ic.ReceberDano(DanoAtual, false);
+                    SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
+                }
             }
 
             yield return null;

@@ -63,6 +63,7 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
             go.transform.position = origem + new Vector2(Mathf.Cos(angSpiral), Mathf.Sin(angSpiral)) * 0.5f;
             var mp = go.AddComponent<MissilProjetil>();
             mp.skillDataRef = skillData;
+            mp.cosmetico = cosmetico;
             mp.Iniciar(alvo, velocidade, DanoAtual);
             yield return new WaitForSeconds(0.12f);
         }
@@ -109,6 +110,8 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
 
 public class MissilProjetil : MonoBehaviour
 {
+    public bool cosmetico; // co-op: fantasma do colega — só visual, sem dano
+
     public SkillData skillDataRef;
     InimigoController alvo;
     Vector2 dir;
@@ -176,10 +179,13 @@ public class MissilProjetil : MonoBehaviour
         var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
         atingiu = true;
-        ic.ReceberDano(dano, false);
-        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisExplosivos))
-            EvolutionFX.SpawnExplosao(transform.position, 2f, dano * 0.6f, new Color(1f, 0.5f, 0.1f), this);
+        if (!cosmetico) // co-op: cópia cosmética só faz o visual
+        {
+            ic.ReceberDano(dano, false);
+            SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisExplosivos))
+                EvolutionFX.SpawnExplosao(transform.position, 2f, dano * 0.6f, new Color(1f, 0.5f, 0.1f), this);
+        }
         StartCoroutine(EfeitoImpacto());
     }
 

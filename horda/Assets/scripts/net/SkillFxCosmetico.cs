@@ -10,8 +10,13 @@ public static class SkillFxCosmetico
     static readonly Dictionary<SpecificSkillType, System.Type> Suportados =
         new Dictionary<SpecificSkillType, System.Type>
     {
-        { SpecificSkillType.CristaisGelo, typeof(CristaisGeloSkillBehavior) },
-        { SpecificSkillType.LancaLuz,     typeof(LancaLuzSkillBehavior) },
+        { SpecificSkillType.CristaisGelo,       typeof(CristaisGeloSkillBehavior) },
+        { SpecificSkillType.LancaLuz,           typeof(LancaLuzSkillBehavior) },
+        { SpecificSkillType.ChicoteEnergia,     typeof(ChicoteEnergiaSkillBehavior) },
+        { SpecificSkillType.ChuvaEstrelas,      typeof(ChuvaEstrelasSkillBehavior) },
+        { SpecificSkillType.MisseisTeleguiados, typeof(MisseisTeleguiadosSkillBehavior) },
+        { SpecificSkillType.EspadaFantasma,     typeof(EspadaFantasmaSkillBehavior) },
+        { SpecificSkillType.FuriaLaminas,       typeof(FuriaLaminasSkillBehavior) },
         // TODO co-op: adicionar os demais conforme gatear o dano em cada behavior.
     };
 

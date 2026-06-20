@@ -64,6 +64,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
             go.transform.position = origem;
             var lp = go.AddComponent<LaminaProjetil>();
             lp.skillDataRef = skillData;
+            lp.cosmetico = cosmetico;
             lp.Iniciar(dir, velocidade, DanoAtual);
         }
 
@@ -75,6 +76,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
             go.transform.position = origem;
             var lp = go.AddComponent<LaminaProjetil>();
             lp.skillDataRef = skillData;
+            lp.cosmetico = cosmetico;
             lp.Iniciar(dir, velocidade, DanoAtual);
         }
 
@@ -115,6 +117,8 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
 
 public class LaminaProjetil : MonoBehaviour
 {
+    public bool cosmetico; // co-op: fantasma do colega — só visual, sem dano
+
     public SkillData skillDataRef;
     Vector2 dir;
     float   vel;
@@ -182,10 +186,13 @@ public class LaminaProjetil : MonoBehaviour
         var ic = other.GetComponent<InimigoController>()
               ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
-        ic.ReceberDano(dano, false);
-        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas))
-            EvolutionFX.SpawnExplosao(transform.position, 1.5f, dano * 0.5f, new Color(0.85f, 0.92f, 1f), this);
+        if (!cosmetico) // co-op: cópia cosmética só faz o visual
+        {
+            ic.ReceberDano(dano, false);
+            SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas))
+                EvolutionFX.SpawnExplosao(transform.position, 1.5f, dano * 0.5f, new Color(0.85f, 0.92f, 1f), this);
+        }
         atingiu = true;
         StartCoroutine(EfeitoImpacto());
     }
