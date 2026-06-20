@@ -109,6 +109,10 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.Owner)]
     public void OfertarEvolucaoOwnerRpc() { GerenciadorEventos.Instance?.OfertarEvolucaoLocal(); }
 
+    // Co-op: o nível do grupo subiu; este player aplica o level-up (escolha individual).
+    [Rpc(SendTo.Owner)]
+    public void SubirNivelOwnerRpc(int novoNivel) { if (stats != null) stats.AplicarLevelUpLocal(novoNivel); }
+
     void MonitorarHost()
     {
         // Enquanto no lobby: sem monitoramento de fase e rearma os guards pro próximo run

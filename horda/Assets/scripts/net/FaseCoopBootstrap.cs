@@ -1,11 +1,12 @@
 using Unity.Netcode;
 using UnityEngine;
 
-// Na fase co-op (carregada pelo lobby): desliga o estado de lobby, spawna o
-// CoopPauseManager (host) e reposiciona os players spawnados em pontos separados.
+// Na fase co-op (carregada pelo lobby): desliga o estado de lobby, spawna os managers
+// host (pausa coordenada + progressão compartilhada) e reposiciona os players.
 public class FaseCoopBootstrap : MonoBehaviour
 {
     public GameObject coopPauseManagerPrefab;
+    public GameObject coopProgressaoPrefab;
 
     void Start()
     {
@@ -17,6 +18,14 @@ public class FaseCoopBootstrap : MonoBehaviour
         if (coopPauseManagerPrefab != null && CoopPauseManager.Instance == null)
         {
             var go = Instantiate(coopPauseManagerPrefab);
+            var no = go.GetComponent<NetworkObject>();
+            if (no != null) no.Spawn();
+        }
+
+        // Spawna a progressão compartilhada (XP/nível do grupo).
+        if (coopProgressaoPrefab != null && CoopProgressao.Instance == null)
+        {
+            var go = Instantiate(coopProgressaoPrefab);
             var no = go.GetComponent<NetworkObject>();
             if (no != null) no.Spawn();
         }

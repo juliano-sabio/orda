@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using Unity.Netcode;
 
 public class XPOrb : MonoBehaviour
 {
@@ -13,33 +14,50 @@ public class XPOrb : MonoBehaviour
 
     private Transform player;
     private bool isAttracted = false;
+    private bool coletado = false; // evita coleta dupla (MoveToPlayer + OnTrigger no mesmo frame)
     private PlayerStats playerStats;
+
+    // Em co-op o orbe é NetworkObject: roda no host (autoritativo) e é fantoche no cliente
+    // (o NetworkTransform move). A coleta soma no pool de XP COMPARTILHADO (CoopProgressao).
+    bool EhClienteFantoche
+    {
+        get
+        {
+            var nm = NetworkManager.Singleton;
+            return nm != null && nm.IsListening && !nm.IsServer;
+        }
+    }
 
     void Start()
     {
+        // Single-player: alvo fixo achado por tag (em co-op miramos o mais próximo no Update).
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
         if (player != null)
-        {
             playerStats = player.GetComponent<PlayerStats>();
-        }
     }
 
     void Update()
     {
-        // 1. Rotação visual
+        // 1. Rotação visual (em todos)
         transform.Rotate(0, 0, rotationSpeed * Time.deltaTime);
+
+        // Cliente em co-op: fantoche — só o host atrai/coleta.
+        if (EhClienteFantoche) return;
+
+        // Co-op (host): mira o player mais próximo (pode mudar a cada frame).
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position);
+            if (t != null) { player = t; playerStats = t.GetComponent<PlayerStats>(); }
+        }
 
         // 2. Verificar se deve mover
         if (!isAttracted && player != null)
-        {
             CheckDistance();
-        }
 
         // 3. MOVER se atraída
         if (isAttracted && player != null)
-        {
             MoveToPlayer();
-        }
     }
 
     void CheckDistance()
@@ -61,8 +79,6 @@ public class XPOrb : MonoBehaviour
         // MOVIMENTO SIMPLES DIRETO
         Vector3 moveDirection = (player.position - transform.position).normalized;
 
-        // DEBUG: Mostrar direção
-
         // APLICAR MOVIMENTO
         transform.position += moveDirection * moveSpeed * playerStats.orbMoveSpeedMultiplier * Time.deltaTime;
 
@@ -76,6 +92,21 @@ public class XPOrb : MonoBehaviour
 
     void Collect()
     {
+        if (coletado) return;
+        if (EhClienteFantoche) return; // só o host coleta em co-op
+        coletado = true;
+
+        // Co-op: soma no pool de XP compartilhado e despawna em todos.
+        if (NetSpawn.EmRede)
+        {
+            if (CoopProgressao.Instance != null) CoopProgressao.Instance.AdicionarXP(xpValue);
+            if (collectSound != null) AudioSource.PlayClipAtPoint(collectSound, transform.position);
+            if (collectParticles != null) Instantiate(collectParticles, transform.position, Quaternion.identity);
+            NetSpawn.Despawnar(gameObject);
+            return;
+        }
+
+        // Single-player: XP vai pro player que coletou.
         if (playerStats != null)
         {
             playerStats.GainXP(xpValue);
@@ -84,9 +115,7 @@ public class XPOrb : MonoBehaviour
                 AudioSource.PlayClipAtPoint(collectSound, transform.position);
 
             if (collectParticles != null)
-            {
                 Instantiate(collectParticles, transform.position, Quaternion.identity);
-            }
 
             Destroy(gameObject);
         }

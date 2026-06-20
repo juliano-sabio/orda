@@ -559,7 +559,9 @@ public class InimigoController : MonoBehaviour
 
         for (int i = 0; i < quantidadeOrbes; i++)
         {
-            GameObject orbe = Instantiate(xpOrbPrefab, posDrop, Quaternion.identity);
+            // Co-op: host spawna como NetworkObject (os dois veem); cliente não spawna.
+            GameObject orbe = NetSpawn.Spawnar(xpOrbPrefab, posDrop);
+            if (orbe == null) continue;
             XPOrb xpOrb = orbe.GetComponent<XPOrb>();
 
             if (xpOrb != null)

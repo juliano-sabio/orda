@@ -1008,6 +1008,13 @@ public class PlayerStats : MonoBehaviour
 
     public void GainXP(float xpAmount)
     {
+        // Co-op: XP é compartilhado e somado no host (a coleta do orbe é host-autoritativa).
+        if (NetSpawn.EmRede)
+        {
+            if (CoopProgressao.Instance != null) CoopProgressao.Instance.AdicionarXP(xpAmount);
+            return;
+        }
+
         currentXP += xpAmount;
         OnXPColetado?.Invoke(xpAmount);
 
@@ -1021,14 +1028,34 @@ public class PlayerStats : MonoBehaviour
         UpdateUI();
     }
 
-    private void LevelUp()
+    private void LevelUp() // single-player: faz a conta de XP/nível e aplica os efeitos
     {
         level++;
         currentXP -= xpToNextLevel;
         xpToNextLevel = CalculateXPForNextLevel();
+        AplicarEfeitosLevelUp();
+    }
 
+    // Co-op: o nível subiu no grupo (host); aplica os efeitos e a oferta de skill/carta
+    // no player LOCAL — a escolha é individual.
+    public void AplicarLevelUpLocal(int novoNivel)
+    {
+        level = novoNivel;
+        AplicarEfeitosLevelUp();
+    }
+
+    // Co-op: espelha o pool de XP/nível compartilhado na barra local (UI de hoje).
+    public void EspelharProgressoCoop(int novoNivel, float xp, float prox)
+    {
+        level = novoNivel;
+        currentXP = xp;
+        xpToNextLevel = prox;
+        UpdateUI();
+    }
+
+    void AplicarEfeitosLevelUp()
+    {
         GetComponent<LevelUpEffect>()?.Executar(level);
-
 
         // Garante referência atualizada ao SkillManager
         if (skillManager == null) skillManager = SkillManager.Instance;
