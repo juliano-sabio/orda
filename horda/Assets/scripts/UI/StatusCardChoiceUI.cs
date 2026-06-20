@@ -550,14 +550,14 @@ public class StatusCardChoiceUI : MonoBehaviour
     {
         if (!pauseGameDuringChoice) return;
         previousTimeScale = Time.timeScale;
-        Time.timeScale = 0f;
+        CoopPause.ReterEscolha();
         AudioListener.pause = true;
     }
 
     private void ResumeGame()
     {
         if (!pauseGameDuringChoice) return;
-        Time.timeScale = previousTimeScale > 0f ? previousTimeScale : 1f;
+        CoopPause.LiberarEscolha();
         AudioListener.pause = false;
     }
 

@@ -41,7 +41,7 @@ public class SkillEvolutionUI : MonoBehaviour
         var ui = Object.FindFirstObjectByType<SkillChoiceUI>();
         if (ui == null) yield break;
 
-        Time.timeScale = 0f;
+        CoopPause.ReterEscolha();
         AudioListener.pause = true;
         visivel    = true;
         selecionou = false;
@@ -149,7 +149,7 @@ public class SkillEvolutionUI : MonoBehaviour
         LimparTudo();
 
         visivel             = false;
-        Time.timeScale      = 1f;
+        CoopPause.LiberarEscolha();
         AudioListener.pause = false;
 
         callback?.Invoke(opcao);

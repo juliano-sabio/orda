@@ -66,7 +66,7 @@ public class ElementApplicationUI : MonoBehaviour
             skillManager = FindFirstObjectByType<SkillManager>();
         elementoAtual = tipo;
         skillSelecionada = null;
-        Time.timeScale = 0f;
+        CoopPause.ReterEscolha();
         canvas.gameObject.SetActive(true);
         MostrarEtapa1();
     }
@@ -398,7 +398,7 @@ public class ElementApplicationUI : MonoBehaviour
         if (painelEtapa1 != null) { Destroy(painelEtapa1); painelEtapa1 = null; }
         if (painelEtapa2 != null) { Destroy(painelEtapa2); painelEtapa2 = null; }
         canvas.gameObject.SetActive(false);
-        Time.timeScale = 1f;
+        CoopPause.LiberarEscolha();
     }
 
     List<SkillData> ObterSkillsDisponiveis()

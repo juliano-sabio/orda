@@ -779,7 +779,7 @@ public class SkillChoiceUI : MonoBehaviour
         {
             // Guarda 1 se o jogo já estava pausado por outra UI, para não travar ao fechar
             previousTimeScale = Time.timeScale > 0f ? Time.timeScale : 1f;
-            Time.timeScale = 0f;
+            CoopPause.ReterEscolha(); // SP: timeScale=0; co-op: pausa o grupo via host
             AudioListener.pause = true;
         }
     }
@@ -788,7 +788,7 @@ public class SkillChoiceUI : MonoBehaviour
     {
         if (pauseGameDuringChoice)
         {
-            Time.timeScale = previousTimeScale;
+            CoopPause.LiberarEscolha(); // SP: timeScale=1; co-op: libera a pausa do grupo
             AudioListener.pause = false;
         }
     }
