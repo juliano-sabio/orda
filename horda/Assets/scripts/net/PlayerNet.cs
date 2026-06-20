@@ -156,9 +156,14 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         else
         {
             // Cópia remota = fantoche controlado pelo NetworkTransform.
-            // Só um AudioListener deve existir (o do dono local).
+            // Só um AudioListener e uma Câmera devem existir (os do dono local).
             var al = GetComponentInChildren<AudioListener>(true);
             if (al != null) al.enabled = false;
+
+            // O player carrega a própria câmera (filha). Nas cópias remotas ela
+            // é desligada — cada cliente renderiza só a câmera do SEU player.
+            var camRemota = GetComponentInChildren<Camera>(true);
+            if (camRemota != null) camRemota.enabled = false;
 
             // Rigidbody2D Kinematic: impede a física de brigar com o NetworkTransform
             // (sem isso, o corpo retém a última velocidade e arrasta/jittera).
