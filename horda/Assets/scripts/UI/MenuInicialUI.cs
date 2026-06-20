@@ -467,13 +467,12 @@ public class MenuInicialUI : MonoBehaviour
         BotaoSimples(painel,Loc.T("multi.create_room"),new Vector2(0.05f,0.23f),new Vector2(0.47f,0.37f),
             new Color(0.10f,0.35f,0.65f),()=>{
                 PlayerPrefs.SetInt("LobbyHost",1);
-                PlayerPrefs.SetString("LobbyCode","SPIRIT-" + GerarCodigoSala());
-                SceneManager.LoadScene("lobby");
+                SceneManager.LoadScene("lobby_mp"); // co-op: código real vem do Relay no lobby
             });
         BotaoSimples(painel,Loc.T("multi.join_room"),new Vector2(0.53f,0.23f),new Vector2(0.95f,0.37f),
             new Color(0.10f,0.45f,0.25f),()=>{
                 PlayerPrefs.SetInt("LobbyHost",0);
-                SceneManager.LoadScene("lobby");
+                SceneManager.LoadScene("lobby_mp");
             });
 
         CriarTexto(painel,"Aviso",new Vector2(0.05f,0.10f),new Vector2(0.95f,0.22f),
