@@ -88,16 +88,32 @@ public class CoopPauseManager : NetworkBehaviour
 
     GUIStyle estiloOverlay; // cacheado: OnGUI roda várias vezes por frame (sem alocar por frame)
 
-    // Overlay simples (IMGUI, como o lobby) pro player que NÃO abriu o menu.
+    // Overlay IMGUI durante a pausa. Dois casos:
+    //  - menu de pausa: pro player que NÃO abriu, "Fulano pausou o jogo".
+    //  - pausa por escolha: pra quem JÁ terminou (não está escolhendo), "aguardando o outro".
     void OnGUI()
     {
         if (!pausado.Value) return;
+
+        string texto;
         ulong dono = donoMenu.Value;
-        if (dono == SemDono) return;                                   // pausa por escolha: sem overlay
-        if (NetworkManager != null && dono == NetworkManager.LocalClientId) return; // eu mesmo abri
+        if (dono != SemDono)
+        {
+            // Pausa por menu: só mostra pra quem não abriu.
+            if (NetworkManager != null && dono == NetworkManager.LocalClientId) return;
+            texto = NomeDe(dono) + " pausou o jogo";
+        }
+        else
+        {
+            // Pausa por escolha: quem ainda está escolhendo vê a própria UI; só mostra
+            // o aviso pra quem já fechou a escolha e está esperando o outro.
+            if (CoopPause.EuEscolhendo) return;
+            texto = "Aguardando o outro jogador escolher...";
+        }
+
         if (estiloOverlay == null)
             estiloOverlay = new GUIStyle(GUI.skin.box) { fontSize = 22, alignment = TextAnchor.MiddleCenter };
-        GUI.Box(new Rect(Screen.width / 2f - 200f, 40f, 400f, 50f), NomeDe(dono) + " pausou o jogo", estiloOverlay);
+        GUI.Box(new Rect(Screen.width / 2f - 220f, 40f, 440f, 50f), texto, estiloOverlay);
     }
 
     static string NomeDe(ulong clientId)

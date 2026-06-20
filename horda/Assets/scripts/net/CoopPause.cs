@@ -15,17 +15,23 @@ public static class CoopPause
         }
     }
 
+    // true enquanto ESTE cliente está com uma escolha aberta (intenção local). Usado
+    // pelo overlay pra mostrar "aguardando o outro" só pra quem já terminou.
+    public static bool EuEscolhendo { get; private set; }
+
     // Escolha de gameplay (skill/carta/evolução/elemento): segura a pausa enquanto
     // este player estiver escolhendo; libera quando fecha. Pausa fica ativa enquanto
     // QUALQUER player estiver segurando — ou seja, só roda quando todos terminaram.
     public static void ReterEscolha()
     {
+        EuEscolhendo = true;
         if (EmRede) CoopPauseManager.Instance.ReterEscolhaServerRpc();
         else Time.timeScale = 0f;
     }
 
     public static void LiberarEscolha()
     {
+        EuEscolhendo = false;
         if (EmRede) CoopPauseManager.Instance.LiberarEscolhaServerRpc();
         else Time.timeScale = 1f;
     }
