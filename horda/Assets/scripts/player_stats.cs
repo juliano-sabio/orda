@@ -58,6 +58,21 @@ public class PlayerStats : MonoBehaviour
     void OnEnable()  { if (!All.Contains(this)) All.Add(this); }
     void OnDisable() { All.Remove(this); }
 
+    // true quando este player está caído (downed) — co-op.
+    public bool EstaCaido
+    {
+        get { var pn = GetComponent<PlayerNet>(); return pn != null && pn.Caido; }
+    }
+
+    // Revive co-op: restaura uma fração da vida e limpa o estado de dano.
+    public void ReviverCoop(float fracaoVida)
+    {
+        health = Mathf.Clamp(maxHealth * fracaoVida, 1f, maxHealth);
+        timeSinceLastDamage = 0f;
+        isRegenerating = false;
+        UpdateUI();
+    }
+
     [Header("Configuração de Dados (ScriptableObject)")]
     public CharacterData characterData;
 
@@ -706,6 +721,7 @@ public class PlayerStats : MonoBehaviour
         // Cópias remotas (não-dono) são fantoches: NetworkTransform/NetworkAnimator
         // replicam posição e animação. Só a autoridade local roda input/lógica.
         if (!IsLocalAuthority) return;
+        if (EstaCaido) return; // caído não age
 
         HandleMovement();
         HandleHealthRegeneration();
@@ -1072,6 +1088,18 @@ public class PlayerStats : MonoBehaviour
     public void TakeDamage(float damage)
     {
         if (!NetCombat.DanoHabilitado) return; // SP2a: sem dano no contexto de rede
+
+        if (EstaCaido) return; // caído não toma mais dano (sem bleed-out)
+
+        // co-op: dano de inimigo acontece no host; se este player não é meu
+        // (não sou dono), roteia pro dono aplicar.
+        var _pn = GetComponent<PlayerNet>();
+        if (_pn != null && _pn.IsSpawned && !_pn.IsOwner)
+        {
+            _pn.TomarDanoOwnerRpc(damage);
+            return;
+        }
+
         if (invulneravel) return;
 
         // Esquiva Ventosa (infusão defensiva) — chance de evadir totalmente
@@ -1155,7 +1183,15 @@ public class PlayerStats : MonoBehaviour
                 return;
             }
 
-            Die();
+            if (NetSpawn.EmRede)
+            {
+                var pn = GetComponent<PlayerNet>();
+                if (pn != null) pn.Cair(); // downed; host decide revive / game over de grupo
+            }
+            else
+            {
+                Die(); // single-player: morte normal
+            }
         }
     }
 
