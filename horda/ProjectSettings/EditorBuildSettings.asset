@@ -41,6 +41,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/primeira_fase_mp.unity
     guid: e1f7f789b04678c4197a5bd1866167f6
+  - enabled: 1
+    path: Assets/Scenes/lobby_mp.unity
+    guid: 3713735359a3b6940a7e41bdb75bad7c
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
