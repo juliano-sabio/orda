@@ -27,6 +27,7 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [SerializeField] float tempoRevive = 4f;
     [SerializeField] float fracaoRevive = 0.5f;
     bool gameOverDisparado;
+    static bool voltandoAoLobby; // evita múltiplos LoadScene ao game over do grupo
 
     PlayerStats stats;
     Vector3 baseScale;
@@ -106,6 +107,9 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     void MonitorarHost()
     {
+        // Enquanto no lobby: sem monitoramento de fase e rearma a volta ao lobby pro próximo run.
+        if (LobbyState.EmLobby) { voltandoAoLobby = false; return; }
+
         // Revive: se EU estou caído e há companheiro vivo no raio, enche a barra.
         if (downed.Value)
         {
@@ -144,8 +148,25 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
                 var pn = PlayerStats.All[i] != null ? PlayerStats.All[i].GetComponent<PlayerNet>() : null;
                 if (pn == null || !pn.Caido) { todosCaidos = false; break; }
             }
-            if (todosCaidos) { gameOverDisparado = true; GameOverGrupoRpc(); }
+            if (todosCaidos)
+            {
+                gameOverDisparado = true;
+                GameOverGrupoRpc();
+                if (!voltandoAoLobby) { voltandoAoLobby = true; StartCoroutine(VoltarAoLobby()); }
+            }
         }
+    }
+
+    // Game over do grupo em co-op: mostra a tela ~4s (tempo real, pois timeScale=0)
+    // e o host devolve todos ao lobby. Sessão NGO continua viva → o grupo re-escolhe.
+    System.Collections.IEnumerator VoltarAoLobby()
+    {
+        yield return new WaitForSecondsRealtime(4f);
+        Time.timeScale = 1f; // não carregar o lobby congelado
+        LobbyState.EmLobby = true;
+        var nm = NetworkManager.Singleton;
+        if (nm != null && nm.IsServer)
+            nm.SceneManager.LoadScene("lobby_mp", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     void AoMudarDowned(bool _, bool caido)
