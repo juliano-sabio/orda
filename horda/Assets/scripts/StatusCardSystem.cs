@@ -46,7 +46,7 @@ public class StatusCardSystem : MonoBehaviour
 
     void Start()
     {
-        playerStats = FindAnyObjectByType<PlayerStats>();
+        playerStats = PlayerStats.Local;
         choiceUI    = FindAnyObjectByType<StatusCardChoiceUI>(FindObjectsInactive.Include);
     }
 
@@ -153,7 +153,7 @@ public class StatusCardSystem : MonoBehaviour
     string BuildDescription(StatusCardType statType, float bonus)
     {
         if (playerStats == null)
-            playerStats = FindAnyObjectByType<PlayerStats>();
+            playerStats = PlayerStats.Local;
 
         if (playerStats == null)
             return $"{Loc.T($"card.title.{statType.ToString().ToLower()}")}: +{bonus}";
@@ -209,7 +209,7 @@ public class StatusCardSystem : MonoBehaviour
 
     public void ApplyCard(StatusCardInfo card)
     {
-        if (playerStats == null) playerStats = FindAnyObjectByType<PlayerStats>();
+        if (playerStats == null) playerStats = PlayerStats.Local;
         if (playerStats == null) return;
 
         switch (card.statType)
