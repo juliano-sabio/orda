@@ -118,8 +118,11 @@ MonoBehaviour:
   orbitalDamageEnabled: 0
   orbitalDamageInterval: 0.16
   orbitalDamageRadius: 0.93
+  cosmetico: 0
+  fxId: 2
   hitEffect: {fileID: 0}
   trailRenderer: {fileID: 0}
+  infusedColorOverride: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &157630605653537663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,8 +145,11 @@ MonoBehaviour:
   orbitalDamageEnabled: 1
   orbitalDamageInterval: 0.3
   orbitalDamageRadius: 0
+  cosmetico: 0
+  fxId: -1
   hitEffect: {fileID: 0}
   trailRenderer: {fileID: 0}
+  infusedColorOverride: {r: 0, g: 0, b: 0, a: 0}
   rotationSpeed: 360
   orbitRadius: 2
 --- !u!68 &8436153009813774660

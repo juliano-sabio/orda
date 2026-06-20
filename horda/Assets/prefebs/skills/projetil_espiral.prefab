@@ -181,9 +181,11 @@ MonoBehaviour:
   orbitalDamageEnabled: 1
   orbitalDamageInterval: 0.3
   orbitalDamageRadius: 1.5
-  debugDamage: 1
+  cosmetico: 0
+  fxId: 1
   hitEffect: {fileID: 0}
   trailRenderer: {fileID: 1440800779579984482}
+  infusedColorOverride: {r: 0, g: 0, b: 0, a: 0}
 --- !u!96 &1440800779579984482
 TrailRenderer:
   serializedVersion: 4

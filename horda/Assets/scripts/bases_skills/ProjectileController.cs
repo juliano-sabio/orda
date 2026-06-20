@@ -25,6 +25,9 @@ public class ProjectileController2D : MonoBehaviour
     // caminho ser idêntico, mas NÃO causa dano (o dano é do projétil real do dono, já
     // roteado pro host). Setado pelo SkillFxNet ao spawnar a cópia.
     public bool cosmetico = false;
+    // Índice no registro de prefabs do SkillFxNet (-1 = não replica). Opt-in por-prefab:
+    // só projéteis com fxId >= 0 transmitem o fantasma cosmético em co-op.
+    public int fxId = -1;
 
     [Header("Efeitos Visuais")]
     public GameObject hitEffect;
@@ -71,6 +74,21 @@ public class ProjectileController2D : MonoBehaviour
         if (!isOrbiting)
         {
             Destroy(gameObject, lifeTime);
+        }
+
+        // Co-op: o projétil REAL do dono transmite um fantasma cosmético pros OUTROS clientes
+        // (mesmo prefab, mesmo inimigo sincronizado, sem dano). Só projéteis lançados (não
+        // orbitais) e com fxId no registro. O fantasma tem cosmetico=true e não re-transmite.
+        if (!cosmetico && !isOrbiting && fxId >= 0 && NetSpawn.EmRede && SkillFxNet.Local != null)
+        {
+            ulong alvoNetId = 0;
+            if (target != null)
+            {
+                var no = target.GetComponentInParent<Unity.Netcode.NetworkObject>();
+                if (no != null) alvoNetId = no.NetworkObjectId;
+            }
+            SkillFxNet.Local.Replicar(fxId, transform.position, alvoNetId, speed, lifeTime,
+                                      (int)element, infusedColorOverride);
         }
     }
 

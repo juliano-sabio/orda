@@ -132,6 +132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PassiveProjectileSkill2D
   playerStats: {fileID: 0}
+  skillData: {fileID: 0}
   projectilePrefab: {fileID: 0}
   activationInterval: 1
   searchRange: 30
@@ -157,8 +158,11 @@ MonoBehaviour:
   orbitalDamageEnabled: 1
   orbitalDamageInterval: 0.3
   orbitalDamageRadius: 1.5
+  cosmetico: 0
+  fxId: 0
   hitEffect: {fileID: 0}
   trailRenderer: {fileID: 0}
+  infusedColorOverride: {r: 0, g: 0, b: 0, a: 0}
 --- !u!96 &7134715489112898854
 TrailRenderer:
   serializedVersion: 4
