@@ -14,11 +14,21 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     private bool painelEmbutido = false;
     private int ultimateSelecionadaIndex = 0;
     private List<GameObject> botoesUltimate = new List<GameObject>();
+    private List<int> botoesUltimateOrig = new List<int>(); // índice original de cada botão (exibição reordenada)
+    private List<bool> botoesUltimateDisp = new List<bool>(); // se cada botão está disponível
+
+    // só estas ultimates ficam disponíveis; as demais aparecem como indisponíveis
+    static readonly string[] ultimatesLiberadasSel =
+        { "raio certeiro", "domo retardante", "tempestade", "necropole", "drenagem" };
 
     // Painel de seleção de passiva
     [HideInInspector] public GameObject painelPassivas;
     private int passivaSelecionadaIndex = 0;
     private List<GameObject> botoesPassiva = new List<GameObject>();
+    private List<bool> botoesPassivaDisp = new List<bool>();
+
+    // quantas passivas (as primeiras) ficam disponíveis; o resto é bloqueado
+    const int PASSIVAS_LIBERADAS_SEL = 4;
 
     [Header("📊 UI - Info")]
     public TextMeshProUGUI coinsText;
@@ -252,6 +262,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
         foreach (var b in botoesPassiva) if (b) Destroy(b);
         botoesPassiva.Clear();
+        botoesPassivaDisp.Clear();
 
         if (data.passivasDisponiveis == null || data.passivasDisponiveis.Length == 0)
         {
@@ -259,14 +270,29 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             return;
         }
 
+        // garante que a passiva selecionada esteja entre as 4 primeiras (liberadas)
+        if (passivaSelecionadaIndex >= PASSIVAS_LIBERADAS_SEL)
+        {
+            passivaSelecionadaIndex = 0;
+            int ci = PlayerPrefs.GetInt("SelectedCharacter", 0);
+            PlayerPrefs.SetInt($"SelectedPassiva_{ci}", 0);
+        }
+
         for (int i = 0; i < data.passivasDisponiveis.Length; i++)
         {
             PassiveData pd = data.passivasDisponiveis[i];
             if (pd == null) continue;
-            int idx = i;
+            int  idx = i;
+            bool disponivel = (i < PASSIVAS_LIBERADAS_SEL);
             var botao = CriarBotaoPassiva(pd);
-            botao.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => SelectPassiva(idx));
+
+            if (disponivel)
+                botao.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => SelectPassiva(idx));
+            else
+                MarcarBotaoIndisponivel(botao);
+
             botoesPassiva.Add(botao);
+            botoesPassivaDisp.Add(disponivel);
         }
 
         AtualizarDestaqueBotoesPassiva();
@@ -395,6 +421,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         for (int i = 0; i < botoesPassiva.Count; i++)
         {
             if (botoesPassiva[i] == null) continue;
+            if (i < botoesPassivaDisp.Count && !botoesPassivaDisp[i]) continue; // indisponível: mantém apagado
             bool sel = i == passivaSelecionadaIndex;
             var img = botoesPassiva[i].GetComponent<UnityEngine.UI.Image>();
             if (img != null)
@@ -491,6 +518,8 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
         foreach (var b in botoesUltimate) if (b) Destroy(b);
         botoesUltimate.Clear();
+        botoesUltimateOrig.Clear();
+        botoesUltimateDisp.Clear();
 
         if (!data.HasUltimatesDisponiveis())
         {
@@ -502,17 +531,41 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
         int total = data.ultimatesDisponiveis.Length;
 
-        for (int i = 0; i < total; i++)
+        // garante que a ultimate selecionada esteja entre as disponíveis
+        if (!UltimateLiberadaSel(data.ultimatesDisponiveis[Mathf.Clamp(ultimateSelecionadaIndex, 0, total - 1)]))
+        {
+            for (int i = 0; i < total; i++)
+                if (UltimateLiberadaSel(data.ultimatesDisponiveis[i]))
+                {
+                    ultimateSelecionadaIndex = i;
+                    int ci = PlayerPrefs.GetInt("SelectedCharacter", 0);
+                    PlayerPrefs.SetInt($"SelectedUltimate_{ci}", i);
+                    break;
+                }
+        }
+
+        // ordem de exibição fixa pros principais; o índice salvo continua o original.
+        int disp = 0;
+        foreach (int i in OrdenarUltimatesSel(data.ultimatesDisponiveis))
         {
             UltimateData ud = data.ultimatesDisponiveis[i];
             if (ud == null) continue;
 
-            int capturedIndex = i;
+            int  capturedIndex = i;
+            bool disponivel    = UltimateLiberadaSel(ud);
             GameObject botao = painelEmbutido
-                ? CriarBotaoUltimateEmbutido(ud, i, total)
-                : CriarBotaoUltimate(ud, CalcularPosXBotao(i, total));
-            botao.GetComponent<Button>().onClick.AddListener(() => SelectUltimate(capturedIndex));
+                ? CriarBotaoUltimateEmbutido(ud, disp, total)
+                : CriarBotaoUltimate(ud, CalcularPosXBotao(disp, total));
+
+            if (disponivel)
+                botao.GetComponent<Button>().onClick.AddListener(() => SelectUltimate(capturedIndex));
+            else
+                MarcarBotaoIndisponivel(botao);
+
             botoesUltimate.Add(botao);
+            botoesUltimateOrig.Add(capturedIndex);
+            botoesUltimateDisp.Add(disponivel);
+            disp++;
         }
 
         AtualizarDestaqueBotoes();
@@ -720,7 +773,9 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         for (int i = 0; i < botoesUltimate.Count; i++)
         {
             if (botoesUltimate[i] == null) continue;
-            bool sel = i == ultimateSelecionadaIndex;
+            if (i < botoesUltimateDisp.Count && !botoesUltimateDisp[i]) continue; // indisponível: mantém apagado
+            int orig = (i < botoesUltimateOrig.Count) ? botoesUltimateOrig[i] : i;
+            bool sel = orig == ultimateSelecionadaIndex;
 
             Image img = botoesUltimate[i].GetComponent<Image>();
             if (img != null)
@@ -738,5 +793,91 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
                         : new Color(0f, 0f, 0f, 0f);
             }
         }
+    }
+
+    // ultimate liberada se o nome casar com a lista permitida
+    bool UltimateLiberadaSel(UltimateData u)
+    {
+        if (u == null) return false;
+        string nome = NormalizarUlt(u.GetDisplayName() + " " + u.ultimateName + " " + u.name);
+        foreach (var kw in ultimatesLiberadasSel) if (nome.Contains(kw)) return true;
+        return false;
+    }
+
+    // Aplica visual de "indisponível" num botão (apagado + não clicável) + rótulo "INDISPONÍVEL".
+    void MarcarBotaoIndisponivel(GameObject botao)
+    {
+        var btn = botao.GetComponent<Button>();
+        if (btn != null) btn.interactable = false;
+        var img = botao.GetComponent<Image>();
+        if (img != null) img.color = new Color(0.07f, 0.06f, 0.09f, 1f);
+        foreach (var t in botao.GetComponentsInChildren<TextMeshProUGUI>(true))
+            t.color = new Color(0.34f, 0.32f, 0.37f, 1f);
+
+        // overlay escuro + rótulo "INDISPONÍVEL" por cima
+        var ov = new GameObject("OverlayIndisponivel");
+        ov.transform.SetParent(botao.transform, false);
+        var rov = ov.AddComponent<RectTransform>();
+        rov.anchorMin = Vector2.zero; rov.anchorMax = Vector2.one;
+        rov.offsetMin = rov.offsetMax = Vector2.zero;
+        var ovImg = ov.AddComponent<Image>();
+        ovImg.color = new Color(0.03f, 0.02f, 0.04f, 0.62f);
+        ovImg.raycastTarget = false;
+
+        var txtGO = new GameObject("Txt");
+        txtGO.transform.SetParent(ov.transform, false);
+        var rtx = txtGO.AddComponent<RectTransform>();
+        rtx.anchorMin = Vector2.zero; rtx.anchorMax = Vector2.one;
+        rtx.offsetMin = rtx.offsetMax = Vector2.zero;
+        var tmp = txtGO.AddComponent<TextMeshProUGUI>();
+        tmp.text = "INDISPONÍVEL";
+        tmp.fontSize = 15f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = new Color(0.85f, 0.32f, 0.32f, 1f);
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.raycastTarget = false;
+    }
+
+    // Ordem de exibição das ultimates: primeiro a sequência pedida, depois o resto
+    // (pseudo-aleatório estável). Retorna índices ORIGINAIS do array.
+    List<int> OrdenarUltimatesSel(UltimateData[] ults)
+    {
+        string[] pref = ultimatesLiberadasSel;
+
+        var restante = new List<int>();
+        for (int i = 0; i < ults.Length; i++) restante.Add(i);
+
+        var ordem = new List<int>();
+        foreach (var kw in pref)
+        {
+            for (int j = 0; j < restante.Count; j++)
+            {
+                int idx = restante[j];
+                var u = ults[idx];
+                string nome = u != null ? NormalizarUlt(u.GetDisplayName() + " " + u.ultimateName + " " + u.name) : "";
+                if (nome.Contains(kw)) { ordem.Add(idx); restante.RemoveAt(j); break; }
+            }
+        }
+
+        var rng = new System.Random(7321);
+        for (int i = restante.Count - 1; i > 0; i--)
+        {
+            int k = rng.Next(i + 1);
+            int tmp = restante[i]; restante[i] = restante[k]; restante[k] = tmp;
+        }
+        ordem.AddRange(restante);
+        return ordem;
+    }
+
+    static string NormalizarUlt(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        s = s.ToLowerInvariant();
+        var sb = new System.Text.StringBuilder();
+        foreach (char c in s.Normalize(System.Text.NormalizationForm.FormD))
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                != System.Globalization.UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        return sb.ToString();
     }
 }

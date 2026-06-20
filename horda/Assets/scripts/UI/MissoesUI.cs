@@ -442,14 +442,26 @@ public class MissoesUI : MonoBehaviour
         foreach (var p in personagens)
         {
             if (p == null || p.ultimatesDisponiveis == null) continue;
-            foreach (var u in p.ultimatesDisponiveis)
+            var ults = p.ultimatesDisponiveis;
+            foreach (int i in OrdenarUltimatesMis(ults))
             {
+                var u = ults[i];
                 if (u == null) continue;
-                bool desbloqueado = u.isUnlocked && playerLevel >= u.requiredLevel;
-                string status = desbloqueado ? Loc.T("missions.done") : Loc.T("missions.incomplete");
-                CriarCard(u.GetDisplayName(), status,
-                    $"[{p.GetDisplayName()}]  {u.GetDisplayDescription()}",
-                    u.GetElementColor(), desbloqueado, u.ultimateIcon);
+
+                if (UltimateLiberadaMis(u))
+                {
+                    bool desbloqueado = u.isUnlocked && playerLevel >= u.requiredLevel;
+                    string status = desbloqueado ? Loc.T("missions.done") : Loc.T("missions.incomplete");
+                    CriarCard(u.GetDisplayName(), status,
+                        $"[{p.GetDisplayName()}]  {u.GetDisplayDescription()}",
+                        u.GetElementColor(), desbloqueado, u.ultimateIcon);
+                }
+                else
+                {
+                    CriarCard(u.GetDisplayName(), "INDISPONÍVEL",
+                        $"[{p.GetDisplayName()}]  {u.GetDisplayDescription()}",
+                        u.GetElementColor(), false, u.ultimateIcon, apagado: true);
+                }
             }
         }
     }
@@ -462,20 +474,83 @@ public class MissoesUI : MonoBehaviour
         foreach (var p in personagens)
         {
             if (p == null || p.passivasDisponiveis == null) continue;
-            foreach (var passiva in p.passivasDisponiveis)
+            for (int i = 0; i < p.passivasDisponiveis.Length; i++)
             {
+                var passiva = p.passivasDisponiveis[i];
                 if (passiva == null) continue;
                 alguma = true;
-                bool desbloqueado = passiva.isUnlocked && playerLevel >= passiva.requiredLevel;
-                string status = desbloqueado ? Loc.T("missions.done") : Loc.T("missions.incomplete");
                 string bonus  = passiva.GetBonusDescription();
                 string desc   = string.IsNullOrEmpty(bonus) ? passiva.GetDisplayDescription() : bonus;
-                CriarCard(passiva.GetDisplayName(), status, $"[{p.GetDisplayName()}]  {desc}",
-                    CharacterData.GetElementColor(p.baseElement), desbloqueado, passiva.passiveIcon);
+
+                if (i < PASSIVAS_LIBERADAS_MIS)
+                {
+                    bool desbloqueado = passiva.isUnlocked && playerLevel >= passiva.requiredLevel;
+                    string status = desbloqueado ? Loc.T("missions.done") : Loc.T("missions.incomplete");
+                    CriarCard(passiva.GetDisplayName(), status, $"[{p.GetDisplayName()}]  {desc}",
+                        CharacterData.GetElementColor(p.baseElement), desbloqueado, passiva.passiveIcon);
+                }
+                else
+                {
+                    CriarCard(passiva.GetDisplayName(), "INDISPONÍVEL", $"[{p.GetDisplayName()}]  {desc}",
+                        CharacterData.GetElementColor(p.baseElement), false, passiva.passiveIcon, apagado: true);
+                }
             }
         }
         if (!alguma)
             CriarCardInfo(Loc.T("missions.tab.passives"), Loc.T("ui.no_passives"));
+    }
+
+    // ── Regras de liberação (iguais ao lobby/seleção) ─────────────────
+    static readonly string[] ultimatesLiberadasMis =
+        { "raio certeiro", "domo retardante", "tempestade", "necropole", "drenagem" };
+    const int PASSIVAS_LIBERADAS_MIS = 4;
+
+    bool UltimateLiberadaMis(UltimateData u)
+    {
+        if (u == null) return false;
+        string nome = NormalizarMis(u.GetDisplayName() + " " + u.ultimateName + " " + u.name);
+        foreach (var kw in ultimatesLiberadasMis) if (nome.Contains(kw)) return true;
+        return false;
+    }
+
+    // ordem: liberadas primeiro (sequência fixa), depois o resto (pseudo-aleatório estável)
+    System.Collections.Generic.List<int> OrdenarUltimatesMis(UltimateData[] ults)
+    {
+        var restante = new System.Collections.Generic.List<int>();
+        for (int i = 0; i < ults.Length; i++) restante.Add(i);
+
+        var ordem = new System.Collections.Generic.List<int>();
+        foreach (var kw in ultimatesLiberadasMis)
+        {
+            for (int j = 0; j < restante.Count; j++)
+            {
+                int idx = restante[j];
+                var u = ults[idx];
+                string nome = u != null ? NormalizarMis(u.GetDisplayName() + " " + u.ultimateName + " " + u.name) : "";
+                if (nome.Contains(kw)) { ordem.Add(idx); restante.RemoveAt(j); break; }
+            }
+        }
+
+        var rng = new System.Random(7321);
+        for (int i = restante.Count - 1; i > 0; i--)
+        {
+            int k = rng.Next(i + 1);
+            int tmp = restante[i]; restante[i] = restante[k]; restante[k] = tmp;
+        }
+        ordem.AddRange(restante);
+        return ordem;
+    }
+
+    static string NormalizarMis(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        s = s.ToLowerInvariant();
+        var sb = new System.Text.StringBuilder();
+        foreach (char c in s.Normalize(System.Text.NormalizationForm.FormD))
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                != System.Globalization.UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        return sb.ToString();
     }
 
     void CriarCard(string nome, string status, string descricao, Color corAccento, bool desbloqueado, Sprite icone = null, bool brilhando = false, bool apagado = false, System.Action onClick = null)

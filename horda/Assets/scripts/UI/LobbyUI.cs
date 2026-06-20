@@ -98,7 +98,16 @@ public class LobbyUI : MonoBehaviour
     // Listas selecionáveis (ULTIMATE / PASSIVAS) com ícones
     GameObject ultiListContent, passListContent;
     Image[]    ultiItemBG = new Image[0];
+    bool[]     ultiDisponivel = new bool[0];
     Image[]    passItemBG = new Image[0];
+    bool[]     passDisponivel = new bool[0];
+
+    // só estas ultimates ficam disponíveis; as demais aparecem como "Indisponível"
+    static readonly string[] ultimatesLiberadas =
+        { "raio certeiro", "domo retardante", "tempestade", "necropole", "drenagem" };
+
+    // quantas passivas (as primeiras) ficam disponíveis; o resto é bloqueado
+    const int PASSIVAS_LIBERADAS = 4;
     int        ultimateIdx = 0;
     int        passivaIdx  = 0;
 
@@ -777,20 +786,88 @@ public class LobbyUI : MonoBehaviour
             ? data.ultimatesDisponiveis
             : (data.ultimateSkill != null ? new[] { data.ultimateSkill } : new UltimateData[0]);
 
-        if (ults.Length == 0) { ultiItemBG = new Image[0]; return; }
-        ultimateIdx = Mathf.Clamp(ultimateIdx, 0, ults.Length - 1);
+        if (ults.Length == 0) { ultiItemBG = new Image[0]; ultiDisponivel = new bool[0]; return; }
         ultiItemBG = new Image[ults.Length];
+        ultiDisponivel = new bool[ults.Length];
+        for (int i = 0; i < ults.Length; i++) ultiDisponivel[i] = UltimateLiberada(ults[i]);
 
-        for (int i = 0; i < ults.Length; i++)
+        // garante que a seleção atual seja uma ultimate disponível
+        ultimateIdx = Mathf.Clamp(ultimateIdx, 0, ults.Length - 1);
+        if (!ultiDisponivel[ultimateIdx])
         {
-            int   ii = i;
-            var   u  = ults[i];
+            int primeira = System.Array.FindIndex(ultiDisponivel, d => d);
+            if (primeira >= 0)
+            {
+                ultimateIdx = primeira;
+                PlayerPrefs.SetInt($"SelectedUltimate_{charIdx}", ultimateIdx);
+            }
+        }
+
+        // ordem de exibição fixa pros principais; o índice salvo continua sendo o original.
+        foreach (int oi in OrdenarUltimates(ults))
+        {
+            int   idx = oi;
+            var   u   = ults[idx];
             string nome    = u != null ? u.GetDisplayName() : "?";
             string detalhe = u != null ? $"CD {u.cooldown:0}s · DMG {u.baseDamage:0} · {u.areaOfEffect:0}m" : "";
             Sprite ico     = u != null ? u.ultimateIcon : null;
-            ultiItemBG[i]  = CriarItemLista(ultiListContent, nome, detalhe, ico,
-                i == ultimateIdx, () => SelecionarUltimateLobby(ii));
+            ultiItemBG[idx] = CriarItemLista(ultiListContent, nome, detalhe, ico,
+                idx == ultimateIdx, () => SelecionarUltimateLobby(idx), ultiDisponivel[idx]);
         }
+    }
+
+    // ultimate liberada se o nome casar com a lista permitida
+    bool UltimateLiberada(UltimateData u)
+    {
+        if (u == null) return false;
+        string nome = Normalizar(u.GetDisplayName() + " " + u.ultimateName + " " + u.name);
+        foreach (var kw in ultimatesLiberadas) if (nome.Contains(kw)) return true;
+        return false;
+    }
+
+    // Ordem de exibição das ultimates: primeiro a sequência pedida, depois o resto
+    // (pseudo-aleatório estável). Retorna índices ORIGINAIS do array.
+    System.Collections.Generic.List<int> OrdenarUltimates(UltimateData[] ults)
+    {
+        string[] pref = ultimatesLiberadas;
+
+        var restante = new System.Collections.Generic.List<int>();
+        for (int i = 0; i < ults.Length; i++) restante.Add(i);
+
+        var ordem = new System.Collections.Generic.List<int>();
+        foreach (var kw in pref)
+        {
+            for (int j = 0; j < restante.Count; j++)
+            {
+                int idx = restante[j];
+                var u = ults[idx];
+                string nome = u != null ? Normalizar(u.GetDisplayName() + " " + u.ultimateName + " " + u.name) : "";
+                if (nome.Contains(kw)) { ordem.Add(idx); restante.RemoveAt(j); break; }
+            }
+        }
+
+        // resto embaralhado com semente fixa (parece aleatório, mas estável entre aberturas)
+        var rng = new System.Random(7321);
+        for (int i = restante.Count - 1; i > 0; i--)
+        {
+            int k = rng.Next(i + 1);
+            int tmp = restante[i]; restante[i] = restante[k]; restante[k] = tmp;
+        }
+        ordem.AddRange(restante);
+        return ordem;
+    }
+
+    // minúsculas + sem acentos, pra casar nomes ("Tempestade Elétrica" → "tempestade eletrica")
+    static string Normalizar(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        s = s.ToLowerInvariant();
+        var sb = new System.Text.StringBuilder();
+        foreach (char c in s.Normalize(System.Text.NormalizationForm.FormD))
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                != System.Globalization.UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        return sb.ToString();
     }
 
     void ConstruirListaPassivas(CharacterData data)
@@ -800,9 +877,22 @@ public class LobbyUI : MonoBehaviour
             Destroy(passListContent.transform.GetChild(i).gameObject);
 
         PassiveData[] pass = data.passivasDisponiveis ?? new PassiveData[0];
-        if (pass.Length == 0) { passItemBG = new Image[0]; return; }
-        passivaIdx = Mathf.Clamp(passivaIdx, 0, pass.Length - 1);
+        if (pass.Length == 0) { passItemBG = new Image[0]; passDisponivel = new bool[0]; return; }
         passItemBG = new Image[pass.Length];
+        passDisponivel = new bool[pass.Length];
+        for (int i = 0; i < pass.Length; i++) passDisponivel[i] = (i < PASSIVAS_LIBERADAS);
+
+        // garante que a passiva selecionada esteja disponível
+        passivaIdx = Mathf.Clamp(passivaIdx, 0, pass.Length - 1);
+        if (!passDisponivel[passivaIdx])
+        {
+            int primeira = System.Array.FindIndex(passDisponivel, d => d);
+            if (primeira >= 0)
+            {
+                passivaIdx = primeira;
+                PlayerPrefs.SetInt($"SelectedPassiva_{charIdx}", passivaIdx);
+            }
+        }
 
         for (int i = 0; i < pass.Length; i++)
         {
@@ -812,26 +902,36 @@ public class LobbyUI : MonoBehaviour
             string detalhe = p != null ? UmaLinha(p.GetBonusDescription()) : "";
             Sprite ico     = p != null ? p.passiveIcon : null;
             passItemBG[i]  = CriarItemLista(passListContent, nome, detalhe, ico,
-                i == passivaIdx, () => SelecionarPassivaLobby(ii));
+                i == passivaIdx, () => SelecionarPassivaLobby(ii), passDisponivel[i]);
         }
     }
 
     void SelecionarUltimateLobby(int i)
     {
+        if (i < ultiDisponivel.Length && !ultiDisponivel[i]) return; // indisponível: ignora
         ultimateIdx = i;
         PlayerPrefs.SetInt($"SelectedUltimate_{charIdx}", i);
         PlayerPrefs.Save();
         for (int k = 0; k < ultiItemBG.Length; k++)
-            if (ultiItemBG[k] != null) EstiloItemLista(ultiItemBG[k], k == i);
+        {
+            if (ultiItemBG[k] == null) continue;
+            if (k < ultiDisponivel.Length && !ultiDisponivel[k]) continue; // mantém estilo "indisponível"
+            EstiloItemLista(ultiItemBG[k], k == i);
+        }
     }
 
     void SelecionarPassivaLobby(int i)
     {
+        if (i < passDisponivel.Length && !passDisponivel[i]) return; // indisponível: ignora
         passivaIdx = i;
         PlayerPrefs.SetInt($"SelectedPassiva_{charIdx}", i);
         PlayerPrefs.Save();
         for (int k = 0; k < passItemBG.Length; k++)
-            if (passItemBG[k] != null) EstiloItemLista(passItemBG[k], k == i);
+        {
+            if (passItemBG[k] == null) continue;
+            if (k < passDisponivel.Length && !passDisponivel[k]) continue; // mantém estilo "indisponível"
+            EstiloItemLista(passItemBG[k], k == i);
+        }
     }
 
     // remove tags e quebras de linha, deixando uma linha curta de bônus
@@ -927,7 +1027,7 @@ public class LobbyUI : MonoBehaviour
     // Item de lista: ícone à esquerda + nome (negrito) + linha de detalhe.
     // Devolve o Image de fundo (para restilizar na seleção).
     Image CriarItemLista(GameObject content, string nome, string detalhe,
-        Sprite icone, bool selecionado, System.Action onClick)
+        Sprite icone, bool selecionado, System.Action onClick, bool disponivel = true)
     {
         var go = new GameObject("Item");
         go.transform.SetParent(content.transform, false);
@@ -935,13 +1035,17 @@ public class LobbyUI : MonoBehaviour
         var le = go.AddComponent<LayoutElement>();
         le.minHeight = 46f; le.preferredHeight = 46f;
 
+        Color baseCor = !disponivel ? new Color(0.06f, 0.04f, 0.04f)
+                                    : (selecionado ? corAcento : corOpcaoOff);
         var bg = go.AddComponent<Image>();
-        AplicarSpriteBotao(bg, selecionado ? corAcento : corOpcaoOff);
+        AplicarSpriteBotao(bg, baseCor);
         var hov = go.AddComponent<LobbyBotaoHover>();
-        hov.alvo = bg; hov.Definir(CorBotao(selecionado ? corAcento : corOpcaoOff));
+        hov.alvo = bg; hov.Definir(CorBotao(baseCor));
+        hov.enabled = disponivel;     // sem brilho de hover se indisponível
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = bg; btn.transition = Selectable.Transition.None;
-        btn.onClick.AddListener(() => onClick());
+        btn.interactable = disponivel;
+        if (disponivel) btn.onClick.AddListener(() => onClick());
 
         // ícone
         var icoGO = new GameObject("Icone");
@@ -952,12 +1056,13 @@ public class LobbyUI : MonoBehaviour
         icoRT.anchoredPosition = new Vector2(8f, 0f); icoRT.sizeDelta = new Vector2(34f, 34f);
         var icoImg = icoGO.AddComponent<Image>();
         icoImg.raycastTarget = false; icoImg.preserveAspect = true;
-        if (icone != null) { icoImg.sprite = icone; icoImg.color = Color.white; }
+        if (icone != null) { icoImg.sprite = icone; icoImg.color = disponivel ? Color.white : new Color(1f, 1f, 1f, 0.22f); }
         else                icoImg.color = new Color(1f, 1f, 1f, 0.06f);
 
         // nome
         var nm = TextoPN(go, "Nome", Vector2.zero, Vector2.one,
-            nome, 11f, FontStyles.Bold, new Color(1f, 0.96f, 0.86f));
+            nome, 11f, FontStyles.Bold,
+            disponivel ? new Color(1f, 0.96f, 0.86f) : new Color(0.45f, 0.38f, 0.36f));
         nm.alignment = TextAlignmentOptions.BottomLeft;
         var nmRT = nm.GetComponent<RectTransform>();
         nmRT.anchorMin = new Vector2(0f, 0.45f); nmRT.anchorMax = Vector2.one;
@@ -965,12 +1070,31 @@ public class LobbyUI : MonoBehaviour
 
         // detalhe
         var dt = TextoPN(go, "Det", Vector2.zero, Vector2.one,
-            detalhe, 8.5f, FontStyles.Normal, new Color(0.78f, 0.70f, 0.55f));
+            detalhe, 8.5f, FontStyles.Normal,
+            disponivel ? new Color(0.78f, 0.70f, 0.55f) : new Color(0.40f, 0.33f, 0.31f));
         dt.alignment = TextAlignmentOptions.TopLeft;
         dt.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         var dtRT = dt.GetComponent<RectTransform>();
         dtRT.anchorMin = Vector2.zero; dtRT.anchorMax = new Vector2(1f, 0.45f);
         dtRT.offsetMin = new Vector2(50f, 2f); dtRT.offsetMax = new Vector2(-6f, 0f);
+
+        // overlay "INDISPONÍVEL" por cima do item bloqueado
+        if (!disponivel)
+        {
+            var ov = new GameObject("OverlayIndisponivel");
+            ov.transform.SetParent(go.transform, false);
+            var rov = ov.AddComponent<RectTransform>();
+            rov.anchorMin = Vector2.zero; rov.anchorMax = Vector2.one;
+            rov.offsetMin = rov.offsetMax = Vector2.zero;
+            var ovImg = ov.AddComponent<Image>();
+            ovImg.color = new Color(0.03f, 0.02f, 0.04f, 0.62f);
+            ovImg.raycastTarget = false;
+
+            var tx = TextoPN(ov, "Txt", Vector2.zero, Vector2.one,
+                "INDISPONÍVEL", 12f, FontStyles.Bold, new Color(0.85f, 0.32f, 0.32f));
+            tx.alignment = TextAlignmentOptions.Center;
+            tx.raycastTarget = false;
+        }
 
         return bg;
     }
