@@ -722,6 +722,7 @@ public class PlayerStats : MonoBehaviour
         // replicam posição e animação. Só a autoridade local roda input/lógica.
         if (!IsLocalAuthority) return;
         if (EstaCaido) return; // caído não age
+        if (LobbyState.EmLobby) return; // congelado no lobby
 
         HandleMovement();
         HandleHealthRegeneration();
@@ -1088,6 +1089,7 @@ public class PlayerStats : MonoBehaviour
     public void TakeDamage(float damage)
     {
         if (!NetCombat.DanoHabilitado) return; // SP2a: sem dano no contexto de rede
+        if (LobbyState.EmLobby) return; // sem dano no lobby
 
         if (EstaCaido) return; // caído não toma mais dano (sem bleed-out)
 

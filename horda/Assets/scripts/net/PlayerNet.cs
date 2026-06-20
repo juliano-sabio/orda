@@ -31,10 +31,23 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     PlayerStats stats;
     Vector3 baseScale;
 
+    // SP-lobby — estado de lobby.
+    readonly NetworkVariable<bool> ready = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    readonly NetworkVariable<Unity.Collections.FixedString32Bytes> playerName =
+        new NetworkVariable<Unity.Collections.FixedString32Bytes>(
+            default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     public bool IsNetworked => IsSpawned;
     public bool IsLocalOwner => IsOwner;
     public bool Caido => downed.Value;
     public float ReviveProgresso => reviveProgresso.Value;
+    public bool Pronto => ready.Value;
+    public string Nome => playerName.Value.ToString();
+    public int CharIndexLobby => charIndex.Value;
+
+    public void SetPronto(bool v) { if (IsOwner) ready.Value = v; }
+    public void SetChar(int idx) { if (IsOwner) charIndex.Value = idx; }
 
     void Awake()
     {
@@ -147,6 +160,7 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         {
             PlayerStats.SetLocal(stats);
             charIndex.Value = PlayerPrefs.GetInt("SelectedCharacter", 0);
+            playerName.Value = new Unity.Collections.FixedString32Bytes("Jogador " + (OwnerClientId + 1));
 
             // Separa os players por cliente pra não nascerem sobrepostos.
             // Owner-authoritative: setar a posição aqui replica pros demais.
