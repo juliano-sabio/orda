@@ -21,6 +21,8 @@ public static class SkillFxCosmetico
         { SpecificSkillType.CampoEspinhos,      typeof(CampoEspinhosSkillBehavior) },
         { SpecificSkillType.PulsoRitmico,       typeof(PulsoRitmicoSkillBehavior) },
         { SpecificSkillType.CorrenteSombria,    typeof(CorrenteSombriaSkillBehavior) },
+        { SpecificSkillType.SombrasCruz,        typeof(SombrasCruzSkillBehavior) },
+        { SpecificSkillType.CorteFantasma,      typeof(CorteFantasmaSkillBehavior) },
         // TODO co-op: adicionar os demais conforme gatear o dano em cada behavior.
     };
 

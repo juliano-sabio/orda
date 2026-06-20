@@ -113,6 +113,7 @@ public class CorteFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga
         go.transform.position = origem;
         var proj = go.AddComponent<CorteFantasmaProjetil>();
         proj.skillDataRef = skillData;
+        proj.cosmetico = cosmetico;
         proj.Iniciar(alvo, velocidade, DanoAtual, this);
     }
 
@@ -135,6 +136,8 @@ public class CorteFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga
 
 public class CorteFantasmaProjetil : MonoBehaviour
 {
+    public bool cosmetico; // co-op: fantasma do colega — só visual, sem dano
+
     public SkillData           skillDataRef;
     InimigoController          alvo;
     CorteFantasmaSkillBehavior skillBehavior;
@@ -240,18 +243,18 @@ public class CorteFantasmaProjetil : MonoBehaviour
         if (ic == null) return;
 
         atingiu = true;
-        ic.ReceberDano(dano, false);
-        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-
-        // CorteLetal: golpe duplo no MESMO inimigo (2 hits) + atordoamento de 1s.
-        // Antes dependia de 2 cortes distintos acertarem o mesmo alvo, o que quase
-        // nunca acontecia (cada corte mira um inimigo diferente) — então o corte
-        // letal nunca disparava. Agora cada corte letal entrega os 2 hits direto.
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorteLetal))
+        if (!cosmetico) // co-op: cópia cosmética só faz o visual
         {
-            ic.ReceberDano(dano, false); // 2º hit no mesmo inimigo
+            ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            EvolutionFX.AplicarLentidao(ic, 1f, 0f); // velocidade 0 = atordoamento
+
+            // CorteLetal: golpe duplo no MESMO inimigo (2 hits) + atordoamento de 1s.
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.CorteLetal))
+            {
+                ic.ReceberDano(dano, false); // 2º hit no mesmo inimigo
+                SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+                EvolutionFX.AplicarLentidao(ic, 1f, 0f); // velocidade 0 = atordoamento
+            }
         }
 
         StartCoroutine(EfeitoImpacto(transform.position, transform.rotation));
