@@ -141,7 +141,7 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        playerStats = FindAnyObjectByType<PlayerStats>();
+        playerStats = PlayerStats.Local;
         skillManager = FindAnyObjectByType<SkillManager>();
         cardSystem = FindAnyObjectByType<StatusCardSystem>();
 
@@ -176,7 +176,7 @@ public class UIManager : MonoBehaviour
     IEnumerator AtualizarIconesComDelay()
     {
         yield return null; // aguarda 1 frame para PlayerStats.Start() terminar
-        if (playerStats == null) playerStats = FindAnyObjectByType<PlayerStats>();
+        if (playerStats == null) playerStats = PlayerStats.Local;
         UpdateSkillIcons();
     }
 
