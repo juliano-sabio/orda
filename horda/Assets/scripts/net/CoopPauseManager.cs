@@ -65,6 +65,7 @@ public class CoopPauseManager : NetworkBehaviour
         Recomputar();
     }
 
+    // Sem RpcParams de propósito: qualquer player pode fechar a pausa do menu (não só quem abriu).
     [Rpc(SendTo.Server)]
     public void FecharMenuServerRpc()
     {
@@ -85,6 +86,8 @@ public class CoopPauseManager : NetworkBehaviour
         pausado.Value = retentoresEscolha.Count > 0 || menuAberto;
     }
 
+    GUIStyle estiloOverlay; // cacheado: OnGUI roda várias vezes por frame (sem alocar por frame)
+
     // Overlay simples (IMGUI, como o lobby) pro player que NÃO abriu o menu.
     void OnGUI()
     {
@@ -92,8 +95,9 @@ public class CoopPauseManager : NetworkBehaviour
         ulong dono = donoMenu.Value;
         if (dono == SemDono) return;                                   // pausa por escolha: sem overlay
         if (NetworkManager != null && dono == NetworkManager.LocalClientId) return; // eu mesmo abri
-        var style = new GUIStyle(GUI.skin.box) { fontSize = 22, alignment = TextAnchor.MiddleCenter };
-        GUI.Box(new Rect(Screen.width / 2f - 200f, 40f, 400f, 50f), NomeDe(dono) + " pausou o jogo", style);
+        if (estiloOverlay == null)
+            estiloOverlay = new GUIStyle(GUI.skin.box) { fontSize = 22, alignment = TextAnchor.MiddleCenter };
+        GUI.Box(new Rect(Screen.width / 2f - 200f, 40f, 400f, 50f), NomeDe(dono) + " pausou o jogo", estiloOverlay);
     }
 
     static string NomeDe(ulong clientId)
