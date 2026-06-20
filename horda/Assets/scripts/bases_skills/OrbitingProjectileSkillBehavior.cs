@@ -188,6 +188,20 @@ public class OrbitingProjectileSkillBehavior : SkillBehavior
         orbital.target = FindTargetForOrbital();
         activeOrbitals.Add(orbital);
 
+        // Co-op: transmite um fantasma orbital pro cliente do colega — orbita o MESMO player
+        // sincronizado, mesmo ângulo/raio/velocidade/voltas, sem dano.
+        if (NetSpawn.EmRede && SkillFxNet.Local != null && currentSkillData != null)
+        {
+            int idx = SkillFxNet.Local.IndiceSkill(currentSkillData);
+            if (idx >= 0)
+            {
+                ulong donoNetId = 0;
+                var no = playerTransform.GetComponentInParent<Unity.Netcode.NetworkObject>();
+                if (no != null) donoNetId = no.NetworkObjectId;
+                SkillFxNet.Local.ReplicarOrbital(idx, spawnPosition, donoNetId, startAngle,
+                    orbitRadius, orbitSpeed, numberOfOrbits, (int)projectileElement);
+            }
+        }
     }
 
     // 🆕 MÉTODO PARA ENCONTRAR TARGET BASEADO NO MODO CONFIGURADO

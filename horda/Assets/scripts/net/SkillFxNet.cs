@@ -109,6 +109,43 @@ public class SkillFxNet : NetworkBehaviour
                       (PlayerStats.Element)element, false, 0f, donoStats);
     }
 
+    // ── Orbital (orbita o player; stateful) ──────────────────────────────────────
+    public void ReplicarOrbital(int skillIdx, Vector3 pos, ulong donoNetId, float startAngle,
+                                float orbitRadius, float orbitSpeed, int numberOfOrbits, int element)
+    {
+        if (skillIdx < 0 || !IsSpawned) return;
+        ReplicarOrbitalServerRpc(skillIdx, pos, donoNetId, startAngle, orbitRadius, orbitSpeed, numberOfOrbits, element);
+    }
+
+    [Rpc(SendTo.Server)]
+    void ReplicarOrbitalServerRpc(int skillIdx, Vector3 pos, ulong donoNetId, float startAngle,
+                                  float orbitRadius, float orbitSpeed, int numberOfOrbits, int element)
+    {
+        SpawnOrbitalRpc(skillIdx, pos, donoNetId, startAngle, orbitRadius, orbitSpeed, numberOfOrbits, element);
+    }
+
+    [Rpc(SendTo.NotOwner)]
+    void SpawnOrbitalRpc(int skillIdx, Vector3 pos, ulong donoNetId, float startAngle,
+                         float orbitRadius, float orbitSpeed, int numberOfOrbits, int element)
+    {
+        if (skillsRegistro == null || skillIdx < 0 || skillIdx >= skillsRegistro.Length) return;
+        var sd = skillsRegistro[skillIdx];
+        if (sd == null || sd.projectilePrefab2D == null) return;
+
+        var dono = ObterAlvo(donoNetId);
+        if (dono == null) return;
+
+        var go = Instantiate(sd.projectilePrefab2D, pos, Quaternion.identity);
+        var pc = go.GetComponent<ProjectileController2D>();
+        if (pc != null)
+        {
+            pc.cosmetico = true;          // sem dano orbital
+            pc.SetAsOrbiting();
+            pc.Initialize(null, 0f, 0f, 999f, (PlayerStats.Element)element); // só visual (não move)
+        }
+        go.AddComponent<OrbitalGhost>().Init(dono, startAngle, orbitRadius, orbitSpeed, numberOfOrbits);
+    }
+
     static Transform ObterAlvo(ulong netId)
     {
         if (netId == 0) return null;
