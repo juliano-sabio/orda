@@ -113,6 +113,22 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.Owner)]
     public void SubirNivelOwnerRpc(int novoNivel) { if (stats != null) stats.AplicarLevelUpLocal(novoNivel); }
 
+    // Co-op: pickups coletados no host são aplicados no DONO do player que pegou
+    // (vida/dash/boosts são owner-autoritativos).
+    [Rpc(SendTo.Owner)]
+    public void CurarOwnerRpc(float quantia) { if (stats != null) stats.Heal(quantia); }
+
+    [Rpc(SendTo.Owner)]
+    public void DashChargeOwnerRpc() { if (stats != null) stats.AddDashCharge(); }
+
+    [Rpc(SendTo.Owner)]
+    public void BoostColetaOwnerRpc(float raio, float mult, float dur)
+    {
+        if (stats == null) return;
+        stats.BoostCollectionRadius(raio, dur);
+        stats.BoostOrbSpeed(mult, dur);
+    }
+
     void MonitorarHost()
     {
         // Enquanto no lobby: sem monitoramento de fase e rearma os guards pro próximo run

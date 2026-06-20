@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Netcode;
 
 public class PocaoCura : MonoBehaviour
 {
@@ -18,8 +19,15 @@ public class PocaoCura : MonoBehaviour
 
     private Transform player;
     private bool atraindo = false;
+    private bool coletada = false;
     private float velocidadeAtual = 0f;
     private Vector3 posicaoBase;
+
+    // Em co-op é NetworkObject: host atrai/coleta (autoritativo), cliente é fantoche.
+    bool EhClienteFantoche
+    {
+        get { var nm = NetworkManager.Singleton; return nm != null && nm.IsListening && !nm.IsServer; }
+    }
 
     void Start()
     {
@@ -31,6 +39,13 @@ public class PocaoCura : MonoBehaviour
 
     void Update()
     {
+        if (EhClienteFantoche) return; // cliente: NetworkTransform move
+
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position);
+            if (t != null) player = t;
+        }
         if (player == null) return;
 
         float distancia = Vector2.Distance(transform.position, player.position);
@@ -54,14 +69,28 @@ public class PocaoCura : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (coletada) return;
+        if (EhClienteFantoche) return; // só o host coleta em co-op
         if (!other.CompareTag("Player")) return;
 
         PlayerStats stats = other.GetComponent<PlayerStats>();
         if (stats == null) return;
+        coletada = true;
 
         float cura = curaEmPorcentagem > 0f
             ? stats.maxHealth * curaEmPorcentagem
             : quantidadeCura;
+
+        // Co-op: cura vai pro DONO do player que encostou.
+        if (NetSpawn.EmRede)
+        {
+            var pn = stats.GetComponent<PlayerNet>();
+            if (pn != null) pn.CurarOwnerRpc(cura);
+            else stats.Heal(cura);
+            SpawnEfeitoColeta(other.transform.position);
+            NetSpawn.Despawnar(gameObject);
+            return;
+        }
 
         stats.Heal(cura);
         SpawnEfeitoColeta(other.transform.position);

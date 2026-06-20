@@ -586,11 +586,13 @@ public class InimigoController : MonoBehaviour
     {
         Vector3 posDrop = AjustarPosicaoForaDeObstaculo(transform.position);
 
+        // Co-op: host spawna (drops com NetworkObject replicam; sem NetworkObject ficam locais
+        // no host como antes); cliente não spawna. Em SP é Instantiate normal.
         foreach (var drop in drops)
         {
             if (drop.prefab == null) continue;
             if (UnityEngine.Random.value <= drop.chance)
-                Instantiate(drop.prefab, posDrop, Quaternion.identity);
+                NetSpawn.Spawnar(drop.prefab, posDrop);
         }
 
         if (dadosInimigo != null && dadosInimigo.dropsPossiveis != null)
@@ -599,7 +601,7 @@ public class InimigoController : MonoBehaviour
             {
                 if (drop.prefab == null) continue;
                 if (UnityEngine.Random.value <= drop.chance)
-                    Instantiate(drop.prefab, posDrop, Quaternion.identity);
+                    NetSpawn.Spawnar(drop.prefab, posDrop);
             }
         }
 
@@ -610,7 +612,7 @@ public class InimigoController : MonoBehaviour
             {
                 if (drop.prefab == null) continue;
                 if (UnityEngine.Random.value <= drop.chance)
-                    Instantiate(drop.prefab, posDrop, Quaternion.identity);
+                    NetSpawn.Spawnar(drop.prefab, posDrop);
             }
         }
     }

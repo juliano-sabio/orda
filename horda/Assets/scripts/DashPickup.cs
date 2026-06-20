@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Netcode;
 
 public class DashPickup : MonoBehaviour
 {
@@ -20,6 +21,12 @@ public class DashPickup : MonoBehaviour
     private bool collected = false;
     private Vector3 startPosition;
 
+    // Em co-op é NetworkObject: host atrai/coleta (autoritativo), cliente é fantoche.
+    bool EhClienteFantoche
+    {
+        get { var nm = NetworkManager.Singleton; return nm != null && nm.IsListening && !nm.IsServer; }
+    }
+
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -31,6 +38,14 @@ public class DashPickup : MonoBehaviour
 
     void Update()
     {
+        if (EhClienteFantoche) return; // cliente: NetworkTransform move
+
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position);
+            if (t != null) { player = t; playerStats = t.GetComponent<PlayerStats>(); }
+        }
+
         if (playerStats != null && col != null)
             col.enabled = playerStats.dashCharges < playerStats.maxDashCharges;
 
@@ -78,20 +93,35 @@ public class DashPickup : MonoBehaviour
 
     void Collect()
     {
-        if (collected || playerStats == null) return;
+        if (collected) return;
+        if (EhClienteFantoche) return; // só o host coleta em co-op
+        if (playerStats == null) return;
         if (playerStats.dashCharges >= playerStats.maxDashCharges) return;
 
         collected = true;
 
-        playerStats.AddDashCharge();
+        // Co-op: carga de dash vai pro DONO do player que coletou.
+        if (NetSpawn.EmRede)
+        {
+            var pn = playerStats.GetComponent<PlayerNet>();
+            if (pn != null) pn.DashChargeOwnerRpc();
+            else playerStats.AddDashCharge();
+            Efeitos();
+            NetSpawn.Despawnar(gameObject);
+            return;
+        }
 
+        playerStats.AddDashCharge();
+        Efeitos();
+        Destroy(gameObject);
+    }
+
+    void Efeitos()
+    {
         if (collectSound != null)
             AudioSource.PlayClipAtPoint(collectSound, transform.position);
-
         if (collectParticles != null)
             Instantiate(collectParticles, transform.position, Quaternion.identity);
-
-        Destroy(gameObject);
     }
 
     void OnTriggerEnter2D(Collider2D other)

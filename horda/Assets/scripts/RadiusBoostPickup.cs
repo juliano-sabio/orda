@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using Unity.Netcode;
 
 public class RadiusBoostPickup : MonoBehaviour
 {
@@ -24,9 +25,16 @@ public class RadiusBoostPickup : MonoBehaviour
     private Transform player;
     private PlayerStats playerStats;
     private bool isAttracted = false;
+    private bool collected = false;
     private Vector3 startPosition;
     private Light2D luz;
     private GameObject luzGO;
+
+    // Em co-op é NetworkObject: host atrai/coleta (autoritativo), cliente é fantoche.
+    bool EhClienteFantoche
+    {
+        get { var nm = NetworkManager.Singleton; return nm != null && nm.IsListening && !nm.IsServer; }
+    }
 
     void Awake()
     {
@@ -62,6 +70,14 @@ public class RadiusBoostPickup : MonoBehaviour
         float sin = Mathf.Sin(Time.time * floatSpeed);
         if (luz != null)
             luz.intensity = Mathf.Lerp(1.0f, 1.8f, (sin + 1f) * 0.5f);
+
+        if (EhClienteFantoche) return; // cliente: NetworkTransform move
+
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position);
+            if (t != null) { player = t; playerStats = t.GetComponent<PlayerStats>(); }
+        }
 
         if (!isAttracted)
         {
@@ -99,19 +115,34 @@ public class RadiusBoostPickup : MonoBehaviour
 
     void Collect()
     {
+        if (collected) return;
+        if (EhClienteFantoche) return; // só o host coleta em co-op
         if (playerStats == null) return;
+        collected = true;
+
+        // Co-op: o boost vai pro DONO do player que coletou.
+        if (NetSpawn.EmRede)
+        {
+            var pn = playerStats.GetComponent<PlayerNet>();
+            if (pn != null) pn.BoostColetaOwnerRpc(radiusBoostAmount, orbSpeedMultiplier, boostDuration);
+            else { playerStats.BoostCollectionRadius(radiusBoostAmount, boostDuration); playerStats.BoostOrbSpeed(orbSpeedMultiplier, boostDuration); }
+            Efeitos();
+            NetSpawn.Despawnar(gameObject);
+            return;
+        }
 
         playerStats.BoostCollectionRadius(radiusBoostAmount, boostDuration);
         playerStats.BoostOrbSpeed(orbSpeedMultiplier, boostDuration);
+        Efeitos();
+        Destroy(gameObject);
+    }
 
-
+    void Efeitos()
+    {
         if (collectSound != null)
             AudioSource.PlayClipAtPoint(collectSound, transform.position);
-
         if (collectParticles != null)
             Instantiate(collectParticles, transform.position, Quaternion.identity);
-
-        Destroy(gameObject);
     }
 
     void OnTriggerEnter2D(Collider2D other)
