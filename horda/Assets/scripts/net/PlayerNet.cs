@@ -56,6 +56,8 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         baseScale = transform.localScale;
     }
 
+    bool ultReadyAnterior;
+
     void Update()
     {
         if (!IsSpawned) return;
@@ -63,6 +65,11 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         {
             // o moviment_player2 já virou o localScale.x; só publicamos o lado.
             facingLeft.Value = transform.localScale.x < 0f;
+
+            // Detecta o cast do ultimate (ready true→false) e transmite pro colega ver o visual.
+            bool r = stats != null && stats.ultimateReady;
+            if (ultReadyAnterior && !r) UltimateCastServerRpc();
+            ultReadyAnterior = r;
         }
         else
         {
@@ -112,6 +119,17 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     // Co-op: o nível do grupo subiu; este player aplica o level-up (escolha individual).
     [Rpc(SendTo.Owner)]
     public void SubirNivelOwnerRpc(int novoNivel) { if (stats != null) stats.AplicarLevelUpLocal(novoNivel); }
+
+    // Co-op: o dono usou o ultimate; o fantoche do colega roda SÓ o visual (sem dano).
+    [Rpc(SendTo.Server)]
+    void UltimateCastServerRpc() { UltimateCastRpc(); }
+
+    [Rpc(SendTo.NotOwner)]
+    void UltimateCastRpc()
+    {
+        var u = GetComponent<IUltimateCosmetico>();
+        if (u != null) u.ExecutarCosmetico();
+    }
 
     // Co-op: pickups coletados no host são aplicados no DONO do player que pegou
     // (vida/dash/boosts são owner-autoritativos).

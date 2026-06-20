@@ -2,8 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RaioCerteiroUltimate : MonoBehaviour
+public class RaioCerteiroUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    // Co-op: fantasma no cliente do colega roda só o visual (sem dano).
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CadeiaDeRaios()); }
+
     [Header("Configurações")]
     public int   maxRicochetes     = 5;
     public float danoPorRaio       = 60f;
@@ -40,7 +44,9 @@ public class RaioCerteiroUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        // Só o dono local dispara por input (o fantoche do colega roda via ExecutarCosmetico).
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CadeiaDeRaios());
         SincronizarUI();
     }
@@ -86,7 +92,7 @@ public class RaioCerteiroUltimate : MonoBehaviour
             StartCoroutine(EfeitoImpacto(destino, i));
 
             // RaioOvercarga: dano em área de 2u em cada bounce
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.RaioOvercarga))
+            if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.RaioOvercarga))
             {
                 foreach (var c in Physics2D.OverlapCircleAll(destino, 2f))
                 {
@@ -106,10 +112,12 @@ public class RaioCerteiroUltimate : MonoBehaviour
         }
 
         ativo = false;
+        cosmetico = false;
     }
 
     void AplicarDano(GameObject alvo, float dano)
     {
+        if (cosmetico) return; // fantasma do colega: sem dano
         var ic = alvo.GetComponent<InimigoController>() ?? alvo.GetComponentInChildren<InimigoController>();
         ic?.ReceberDano(dano, false);
     }
