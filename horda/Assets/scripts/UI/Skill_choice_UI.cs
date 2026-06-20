@@ -42,7 +42,6 @@ public class SkillChoiceUI : MonoBehaviour
     public List<SkillData> currentChoices;
     private System.Action<SkillData> onSkillChosen;
     private List<GameObject> currentButtons = new List<GameObject>();
-    private float previousTimeScale;
     private Coroutine contadorCoroutine;
     private int skillCardIndex = 0;
     private GameObject overlayEscuro;
@@ -777,8 +776,6 @@ public class SkillChoiceUI : MonoBehaviour
     {
         if (pauseGameDuringChoice)
         {
-            // Guarda 1 se o jogo já estava pausado por outra UI, para não travar ao fechar
-            previousTimeScale = Time.timeScale > 0f ? Time.timeScale : 1f;
             CoopPause.ReterEscolha(); // SP: timeScale=0; co-op: pausa o grupo via host
             AudioListener.pause = true;
         }

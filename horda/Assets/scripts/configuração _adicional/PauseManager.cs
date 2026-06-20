@@ -35,7 +35,6 @@ public class PauseManager : MonoBehaviour
     public string mainMenuSceneName = "MainMenu";
 
     private bool isPaused = false;
-    private float previousTimeScale;
     private bool canPause = true;
 
     void Awake()
@@ -432,7 +431,6 @@ public class PauseManager : MonoBehaviour
         }
 
         isPaused = true;
-        previousTimeScale = Time.timeScale;
         CoopPause.AbrirMenu(); // SP: timeScale=0; co-op: pausa o grupo (qualquer um retoma)
 
         // 🎵 SOM DE PAUSE

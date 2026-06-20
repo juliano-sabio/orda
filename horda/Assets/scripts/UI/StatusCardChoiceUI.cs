@@ -30,7 +30,6 @@ public class StatusCardChoiceUI : MonoBehaviour
     private List<GameObject>    spawnedCards  = new List<GameObject>();
     private List<StatusCardInfo> cartasAtuais = new List<StatusCardInfo>();
     private int   cardIndex        = 0;
-    private float previousTimeScale;
     private Coroutine contadorCoroutine;
     private GameObject overlayEscuro;
     private Vector2 _scaledCardSize;  // não usado diretamente — mantido para compatibilidade
@@ -549,7 +548,6 @@ public class StatusCardChoiceUI : MonoBehaviour
     private void PauseGame()
     {
         if (!pauseGameDuringChoice) return;
-        previousTimeScale = Time.timeScale;
         CoopPause.ReterEscolha();
         AudioListener.pause = true;
     }
