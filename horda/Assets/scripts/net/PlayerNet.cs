@@ -105,6 +105,10 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.Everyone)]
     public void GameOverGrupoRpc() { GameOverUI.Mostrar(); }
 
+    // Co-op: o host manda este player (no cliente dono) ofertar a própria evolução.
+    [Rpc(SendTo.Owner)]
+    public void OfertarEvolucaoOwnerRpc() { GerenciadorEventos.Instance?.OfertarEvolucaoLocal(); }
+
     void MonitorarHost()
     {
         // Enquanto no lobby: sem monitoramento de fase e rearma os guards pro próximo run

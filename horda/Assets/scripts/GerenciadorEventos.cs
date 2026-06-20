@@ -492,7 +492,22 @@ void TentarIniciarEvento()
         }
 
         StartCoroutine(MostrarResultado(sucesso));
-        if (sucesso) StartCoroutine(OfertarEvolucaoAposEvento());
+        if (sucesso)
+        {
+            if (NetSpawn.EmRede)
+            {
+                // Co-op: o host manda cada player ofertar a PRÓPRIA evolução (no cliente dono),
+                // pra build ser individual. FinalizarEvento já roda só no host.
+                var nm = Unity.Netcode.NetworkManager.Singleton;
+                if (nm != null && nm.IsServer)
+                    foreach (var ps in PlayerStats.All)
+                    {
+                        var pn = ps != null ? ps.GetComponent<PlayerNet>() : null;
+                        if (pn != null) pn.OfertarEvolucaoOwnerRpc();
+                    }
+            }
+            else StartCoroutine(OfertarEvolucaoAposEvento()); // single-player como hoje
+        }
         AgendarProximoEvento();
     }
 
@@ -1645,6 +1660,9 @@ void LimparSlimePercurso()
     [Header("Evolução de Skills")]
     public List<SkillEvolutionData> todasEvolucoes = new List<SkillEvolutionData>();
 
+    // Chamado pelo PlayerNet (SendTo.Owner) em co-op: cada cliente oferta a própria evolução.
+    public void OfertarEvolucaoLocal() => StartCoroutine(OfertarEvolucaoAposEvento());
+
     IEnumerator OfertarEvolucaoAposEvento()
     {
         // Aguarda o resultado do evento ser exibido
@@ -1686,8 +1704,8 @@ void LimparSlimePercurso()
             if (temSkill && !jaTemEstaEvo) disponiveis.Add(evo);
         }
 
-        // Verifica ultimates ativas do player
-        var playerStats = FindFirstObjectByType<PlayerStats>();
+        // Verifica ultimates ativas do player LOCAL (em co-op cada cliente oferta pro seu)
+        var playerStats = PlayerStats.Local;
         if (playerStats != null)
         {
             // Mapeia component de ultimate para o SpecificSkillType correspondente

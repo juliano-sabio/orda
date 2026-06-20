@@ -48,7 +48,7 @@ public class SkillEvolutionManager : MonoBehaviour
         Debug.Log($"[Evolução] +{data.tipoEvolucao} (total: {evolucoesAtivas.Count})");
         OnEvolucoesChanged?.Invoke();
 
-        var player = FindFirstObjectByType<PlayerStats>();
+        var player = PlayerStats.Local; // co-op: aplica no player local (build individual)
         if (player == null) return;
 
         // Notifica behaviors com interface IEvoluivel
