@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BencaoAnciaoUltimate : MonoBehaviour
+public class BencaoAnciaoUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float cooldown        = 27f;
     public float duracao         = 6f;
@@ -34,7 +37,8 @@ public class BencaoAnciaoUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }

@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CasuloCristalUltimate : MonoBehaviour
+public class CasuloCristalUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float cooldown       = 32f;
     public float duracaoCasulo  = 2.5f;
@@ -33,7 +36,8 @@ public class CasuloCristalUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -102,7 +106,7 @@ public class CasuloCristalUltimate : MonoBehaviour
             if (col.GetComponentInParent<ProjetilHomingPrincesa>(true)   != null) continue;
             if (col.GetComponentInParent<ProjetilEspecialPrincesa>(true) != null) continue;
             var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
-            if (ic != null) ic.ReceberDano(danoEfetivo);
+            if (ic != null && !cosmetico) ic.ReceberDano(danoEfetivo);
         }
     }
 

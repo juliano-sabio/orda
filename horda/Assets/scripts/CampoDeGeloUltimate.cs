@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CampoDeGeloUltimate : MonoBehaviour
+public class CampoDeGeloUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio          = 6f;
     public float duracao       = 4f;    // tempo de viagem
@@ -47,7 +50,8 @@ public class CampoDeGeloUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -110,7 +114,7 @@ public class CampoDeGeloUltimate : MonoBehaviour
                 {
                     if (e.go == null) continue;
                     var ic = e.go.GetComponent<InimigoController>();
-                    if (ic != null) ic.ReceberDano(12f * Time.deltaTime, false, false);
+                    if (ic != null && !cosmetico) ic.ReceberDano(12f * Time.deltaTime, false, false);
                 }
             }
 

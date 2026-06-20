@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DespertarAnciaoUltimate : MonoBehaviour
+public class DespertarAnciaoUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio           = 14f;
     public float duracao        = 8f;
@@ -47,7 +50,8 @@ public class DespertarAnciaoUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -129,7 +133,7 @@ public class DespertarAnciaoUltimate : MonoBehaviour
         foreach (var c in Physics2D.OverlapCircleAll(centro, raioEfetivo))
         {
             var ic = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
-            if (ic != null) ic.ReceberDano(danoEfetivo, Random.value < 0.2f);
+            if (ic != null && !cosmetico) ic.ReceberDano(danoEfetivo, Random.value < 0.2f);
         }
     }
 

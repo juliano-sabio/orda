@@ -1,8 +1,12 @@
 using System.Collections;
 using UnityEngine;
 
-public class ChuvaMeteorosUltimate : MonoBehaviour
+public class ChuvaMeteorosUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    // Co-op: roda só o visual no fantoche do colega (sem dano).
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio             = 14f;
     public float duracao          = 8f;
@@ -39,7 +43,8 @@ public class ChuvaMeteorosUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -114,7 +119,7 @@ public class ChuvaMeteorosUltimate : MonoBehaviour
         foreach (var c in Physics2D.OverlapCircleAll(centro, raioEfetivo))
         {
             var ic = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
-            if (ic != null)
+            if (ic != null && !cosmetico) // co-op: cópia cosmética só faz o visual
             {
                 ic.ReceberDano(danoEfetivo, false);
                 if (SkillEvolutionManager.Tem(SkillEvolutionType.MeteorosDuploImpacto))
