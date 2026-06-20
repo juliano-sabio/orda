@@ -433,7 +433,7 @@ public class PauseManager : MonoBehaviour
 
         isPaused = true;
         previousTimeScale = Time.timeScale;
-        Time.timeScale = 0f;
+        CoopPause.AbrirMenu(); // SP: timeScale=0; co-op: pausa o grupo (qualquer um retoma)
 
         // 🎵 SOM DE PAUSE
         if (pauseSound != null)
@@ -449,7 +449,7 @@ public class PauseManager : MonoBehaviour
         if (!isPaused) return;
 
         isPaused = false;
-        Time.timeScale = previousTimeScale;
+        CoopPause.FecharMenu(); // SP: timeScale=1; co-op: libera a pausa do grupo
 
         // 🎵 SOM DE DESPAUSE
         if (unpauseSound != null)
