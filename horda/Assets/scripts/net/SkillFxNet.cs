@@ -11,6 +11,11 @@ public class SkillFxNet : NetworkBehaviour
     // Registro de prefabs replicáveis (igual em todos, pois é do prefab do player).
     public GameObject[] prefabsCosmeticos;
 
+    // Registro GERAL de SkillData (todos), pra reconstruir o visual de qualquer skill no
+    // cliente do colega por índice — sem depender de prefab limpo registrável. Atribuído
+    // no prefab do player (igual em todos), então a referência fica carregada nos dois.
+    public SkillData[] skillsRegistro;
+
     public static SkillFxNet Local { get; private set; }
 
     public override void OnNetworkSpawn() { if (IsOwner) Local = this; }
@@ -57,6 +62,51 @@ public class SkillFxNet : NetworkBehaviour
         if (cor.a > 0f) pc.infusedColorOverride = cor;
         Transform alvo = ObterAlvo(alvoNetId);
         pc.Initialize(alvo, 0f, speed, lifeTime, (PlayerStats.Element)element);
+    }
+
+    // ── Boomerang (controller próprio, retorna ao player) ─────────────────────────
+    public int IndiceSkill(SkillData sd)
+    {
+        if (sd == null || skillsRegistro == null) return -1;
+        for (int i = 0; i < skillsRegistro.Length; i++)
+            if (skillsRegistro[i] == sd) return i;
+        return -1;
+    }
+
+    public void ReplicarBoomerang(int skillIdx, Vector3 pos, Vector2 dir, ulong donoNetId,
+                                  float throwSpeed, float returnSpeed, float maxRange, int maxTargets, int element)
+    {
+        if (skillIdx < 0 || !IsSpawned) return;
+        ReplicarBoomerangServerRpc(skillIdx, pos, dir, donoNetId, throwSpeed, returnSpeed, maxRange, maxTargets, element);
+    }
+
+    [Rpc(SendTo.Server)]
+    void ReplicarBoomerangServerRpc(int skillIdx, Vector3 pos, Vector2 dir, ulong donoNetId,
+                                    float throwSpeed, float returnSpeed, float maxRange, int maxTargets, int element)
+    {
+        SpawnBoomerangRpc(skillIdx, pos, dir, donoNetId, throwSpeed, returnSpeed, maxRange, maxTargets, element);
+    }
+
+    [Rpc(SendTo.NotOwner)]
+    void SpawnBoomerangRpc(int skillIdx, Vector3 pos, Vector2 dir, ulong donoNetId,
+                           float throwSpeed, float returnSpeed, float maxRange, int maxTargets, int element)
+    {
+        if (skillsRegistro == null || skillIdx < 0 || skillIdx >= skillsRegistro.Length) return;
+        var sd = skillsRegistro[skillIdx];
+        if (sd == null || sd.projectilePrefab2D == null) return;
+
+        var dono = ObterAlvo(donoNetId); // player que disparou (objeto sincronizado nos dois)
+        if (dono == null) return;
+        var donoStats = dono.GetComponent<PlayerStats>();
+        if (donoStats == null) return;
+
+        var go = Instantiate(sd.projectilePrefab2D, pos, Quaternion.identity);
+        var bc = go.GetComponent<BoomerangController>();
+        if (bc == null) bc = go.AddComponent<BoomerangController>();
+        bc.cosmetico = true;
+        bc.skillData = sd;
+        bc.Initialize(dono, dir, throwSpeed, returnSpeed, maxRange, 1f, maxTargets,
+                      (PlayerStats.Element)element, false, 0f, donoStats);
     }
 
     static Transform ObterAlvo(ulong netId)

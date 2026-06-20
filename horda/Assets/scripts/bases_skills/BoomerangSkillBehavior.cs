@@ -265,6 +265,20 @@ public class BoomerangSkillBehavior : SkillBehavior
                 activeBoomerangs.Remove(boomerangObj);
             };
 
+            // Co-op: transmite um fantasma do boomerang pro cliente do colega (mesma
+            // trajetória, retorna ao mesmo player sincronizado, sem dano).
+            if (NetSpawn.EmRede && SkillFxNet.Local != null && skillData != null)
+            {
+                int idx = SkillFxNet.Local.IndiceSkill(skillData);
+                if (idx >= 0)
+                {
+                    ulong donoNetId = 0;
+                    var no = playerTransform.GetComponentInParent<Unity.Netcode.NetworkObject>();
+                    if (no != null) donoNetId = no.NetworkObjectId;
+                    SkillFxNet.Local.ReplicarBoomerang(idx, boomerangObj.transform.position, direction,
+                        donoNetId, throwSpeed, returnSpeed, throwRange, maxTargets, (int)element);
+                }
+            }
         }
         else
         {

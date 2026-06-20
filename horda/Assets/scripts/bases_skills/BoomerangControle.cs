@@ -29,6 +29,10 @@ public class BoomerangController : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator; // ✅ Referência ao Animator
 
+    // Co-op: fantasma visual no cliente do colega (mesma trajetória, retorna ao mesmo
+    // player sincronizado, conta hits pro timing bater, mas NÃO causa dano nem cura).
+    [HideInInspector] public bool cosmetico = false;
+
     [Header("🌀 Estado")]
     public BoomerangState currentState = BoomerangState.Throwing;
     private List<GameObject> hitEnemies = new List<GameObject>();
@@ -336,6 +340,7 @@ public class BoomerangController : MonoBehaviour
 
     private void ApplyDamage(GameObject enemy)
     {
+        if (cosmetico) return; // fantasma do colega: sem dano
         if (enemy == null) return;
 
         InimigoController inimigo = enemy.GetComponent<InimigoController>();
@@ -378,7 +383,7 @@ public class BoomerangController : MonoBehaviour
     private void OnReturnToPlayer()
     {
         // Cura ao retornar
-        if (healOnReturn && hasHitEnemy && playerStats != null && currentTargets > 0)
+        if (!cosmetico && healOnReturn && hasHitEnemy && playerStats != null && currentTargets > 0)
         {
             float healAmount = damage * healPercent * currentTargets;
             playerStats.health = Mathf.Min(playerStats.health + healAmount, playerStats.maxHealth);
