@@ -17,6 +17,10 @@ public static class SkillFxCosmetico
         { SpecificSkillType.MisseisTeleguiados, typeof(MisseisTeleguiadosSkillBehavior) },
         { SpecificSkillType.EspadaFantasma,     typeof(EspadaFantasmaSkillBehavior) },
         { SpecificSkillType.FuriaLaminas,       typeof(FuriaLaminasSkillBehavior) },
+        { SpecificSkillType.GarrasAbismo,       typeof(GarrasAbismoSkillBehavior) },
+        { SpecificSkillType.CampoEspinhos,      typeof(CampoEspinhosSkillBehavior) },
+        { SpecificSkillType.PulsoRitmico,       typeof(PulsoRitmicoSkillBehavior) },
+        { SpecificSkillType.CorrenteSombria,    typeof(CorrenteSombriaSkillBehavior) },
         // TODO co-op: adicionar os demais conforme gatear o dano em cada behavior.
     };
 

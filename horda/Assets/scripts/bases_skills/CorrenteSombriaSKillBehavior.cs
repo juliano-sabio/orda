@@ -146,8 +146,11 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
                 foreach (var ic in alvos)
                     if (ic != null && !ic.estaMorrendo && ic.gameObject != null)
                     {
-                        ic.ReceberDano(DanoAtual * danoMult, false);
-                        SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual * danoMult, this);
+                        if (!cosmetico) // co-op: cópia cosmética não aplica dano
+                        {
+                            ic.ReceberDano(DanoAtual * danoMult, false);
+                            SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual * danoMult, this);
+                        }
                         StartCoroutine(FlashAlvo(ic.transform));
                         if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante))
                         {

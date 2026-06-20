@@ -45,22 +45,25 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
     void Pulsar()
     {
         Vector2 centro = playerStats.transform.position;
-        float danoReal = SkillEvolutionManager.Tem(SkillEvolutionType.PulsoIntenso) ? DanoAtual * 2f : DanoAtual;
-
-        var hits = Physics2D.OverlapCircleAll(centro, raio);
-        var atingidos = new System.Collections.Generic.List<InimigoController>();
-        foreach (var col in hits)
+        if (!cosmetico) // co-op: cópia cosmética só faz o visual do pulso
         {
-            var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
-            if (ic == null || ic.estaMorrendo) continue;
-            ic.ReceberDano(danoReal, false);
-            SkillElementEffect.Aplicar(skillData, ic.gameObject, danoReal, this);
-            atingidos.Add(ic);
+            float danoReal = SkillEvolutionManager.Tem(SkillEvolutionType.PulsoIntenso) ? DanoAtual * 2f : DanoAtual;
+
+            var hits = Physics2D.OverlapCircleAll(centro, raio);
+            var atingidos = new System.Collections.Generic.List<InimigoController>();
+            foreach (var col in hits)
+            {
+                var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
+                if (ic == null || ic.estaMorrendo) continue;
+                ic.ReceberDano(danoReal, false);
+                SkillElementEffect.Aplicar(skillData, ic.gameObject, danoReal, this);
+                atingidos.Add(ic);
+            }
+            // Pulso em Cadeia: propaga 50% para vizinhos
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.PulsoCadeia))
+                foreach (var ic in atingidos)
+                    EvolutionFX.SpawnShockwave(ic.transform.position, 2f, danoReal * 0.5f, this);
         }
-        // Pulso em Cadeia: propaga 50% para vizinhos
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.PulsoCadeia))
-            foreach (var ic in atingidos)
-                EvolutionFX.SpawnShockwave(ic.transform.position, 2f, danoReal * 0.5f, this);
 
         StartCoroutine(VisualPulso(centro));
     }

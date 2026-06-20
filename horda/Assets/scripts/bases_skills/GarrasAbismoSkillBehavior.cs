@@ -95,7 +95,8 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
         // Dano e prende
         bool execucao = SkillEvolutionManager.Tem(SkillEvolutionType.Execucao) &&
                         ic.vidaAtual / Mathf.Max(1f, ic.vidaMaxima) < 0.25f;
-        if (execucao) { ic.ReceberDano(ic.vidaAtual + 1f, false); SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this); }
+        if (cosmetico) { } // co-op: cópia cosmética não aplica dano (só o visual da garra)
+        else if (execucao) { ic.ReceberDano(ic.vidaAtual + 1f, false); SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this); }
         else
         {
             ic.ReceberDano(DanoAtual, false);

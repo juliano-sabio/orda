@@ -113,6 +113,7 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
             var ic = col.GetComponent<InimigoController>()
                   ?? col.GetComponentInParent<InimigoController>();
             if (ic == null) continue;
+            if (cosmetico) continue; // co-op: cópia cosmética não aplica dano (só o visual do campo)
             ic.ReceberDano(danoReal, false);
             SkillElementEffect.Aplicar(skillData, ic.gameObject, danoReal, this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosVenenosos))
