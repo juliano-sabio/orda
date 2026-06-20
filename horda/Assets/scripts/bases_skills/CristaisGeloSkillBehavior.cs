@@ -108,6 +108,7 @@ public class CristaisGeloSkillBehavior : SkillBehavior, ISkillComRecarga
         go.transform.position = origem;
         var pg = go.AddComponent<ProjetilGelo>();
         pg.skillDataRef = skillData;
+        pg.cosmetico = cosmetico;
         pg.Iniciar(alvo, velocProjetil, DanoAtual,
             SkillEvolutionManager.Tem(SkillEvolutionType.CristaisExplosivos));
     }
@@ -254,6 +255,7 @@ public class CristalOrbital : MonoBehaviour
 public class ProjetilGelo : MonoBehaviour
 {
     public SkillData  skillDataRef;
+    public bool       cosmetico; // co-op: fantasma do colega — só visual, sem dano
     InimigoController alvo;
     Vector2           dir;
     float             vel, dano;
@@ -306,27 +308,34 @@ public class ProjetilGelo : MonoBehaviour
         var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
         atingiu = true;
-        ic.ReceberDano(dano, false);
-        SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
 
-        // Lentidão mecânica + visual de partículas
-        EvolutionFX.AplicarLentidao(ic, 2f, 0.45f);
-        GeloLentidaoFX.AplicarAo(ic.gameObject, 2f);
+        // Co-op: a cópia cosmética NÃO aplica dano/lentidão (só visual). O dano é do projétil
+        // real do dono, já roteado pro host.
+        if (!cosmetico)
+        {
+            ic.ReceberDano(dano, false);
+            SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+            EvolutionFX.AplicarLentidao(ic, 2f, 0.45f);
+            GeloLentidaoFX.AplicarAo(ic.gameObject, 2f);
+        }
 
         if (explosivo)
         {
-            // dano em área
-            var hits = Physics2D.OverlapCircleAll(transform.position, 2f);
-            foreach (var col in hits)
+            if (!cosmetico)
             {
-                var alvoArea = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
-                if (alvoArea != null && !alvoArea.estaMorrendo && alvoArea != ic)
+                // dano em área
+                var hits = Physics2D.OverlapCircleAll(transform.position, 2f);
+                foreach (var col in hits)
                 {
-                    alvoArea.ReceberDano(dano * 0.5f, false);
-                    EvolutionFX.AplicarLentidao(alvoArea, 2f, 0.45f);
+                    var alvoArea = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
+                    if (alvoArea != null && !alvoArea.estaMorrendo && alvoArea != ic)
+                    {
+                        alvoArea.ReceberDano(dano * 0.5f, false);
+                        EvolutionFX.AplicarLentidao(alvoArea, 2f, 0.45f);
+                    }
                 }
             }
-            // visual de explosão de gelo
+            // visual de explosão de gelo (sempre, é só visual)
             var fxGO = new GameObject("ExplosaoGelo");
             fxGO.transform.position = transform.position;
             fxGO.AddComponent<ExplosaoGeloFX>().Iniciar(transform.position, 2f);

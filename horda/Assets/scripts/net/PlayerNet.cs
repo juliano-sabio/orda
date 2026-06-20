@@ -120,6 +120,24 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.Owner)]
     public void SubirNivelOwnerRpc(int novoNivel) { if (stats != null) stats.AplicarLevelUpLocal(novoNivel); }
 
+    // Co-op: o dono adquiriu uma skill (suportada) → o fantoche do colega passa a rodar
+    // a versão COSMÉTICA dela (gera o visual, sem dano). idx = índice no skillsRegistro.
+    public void SincronizarSkillCosmetica(int idx)
+    {
+        if (IsOwner && IsSpawned) AdicionarSkillCosmeticaServerRpc(idx);
+    }
+
+    [Rpc(SendTo.Server)]
+    void AdicionarSkillCosmeticaServerRpc(int idx) { AdicionarSkillCosmeticaRpc(idx); }
+
+    [Rpc(SendTo.NotOwner)]
+    void AdicionarSkillCosmeticaRpc(int idx)
+    {
+        var fx = GetComponent<SkillFxNet>();
+        if (fx == null || fx.skillsRegistro == null || idx < 0 || idx >= fx.skillsRegistro.Length) return;
+        SkillFxCosmetico.Adicionar(stats, fx.skillsRegistro[idx]);
+    }
+
     // Co-op: o dono usou o ultimate; o fantoche do colega roda SÓ o visual (sem dano).
     [Rpc(SendTo.Server)]
     void UltimateCastServerRpc() { UltimateCastRpc(); }

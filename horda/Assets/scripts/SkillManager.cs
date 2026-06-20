@@ -434,6 +434,19 @@ public class SkillManager : MonoBehaviour
             {
                 playerStats.ApplyAcquiredSkill(skill);
                 ConfigureSkillBehavior(skill); // ✅ ADICIONADO: Configurar comportamento após aplicar skill
+
+                // Co-op: avisa o fantoche do colega pra rodar a versão COSMÉTICA desta skill
+                // (gera o visual, sem dano). Só tipos suportados (dano já gateado).
+                if (NetSpawn.EmRede && SkillFxCosmetico.EhSuportado(skill.specificType))
+                {
+                    var fx = playerStats.GetComponent<SkillFxNet>();
+                    var pn = playerStats.GetComponent<PlayerNet>();
+                    if (fx != null && pn != null)
+                    {
+                        int idx = fx.IndiceSkill(skill);
+                        if (idx >= 0) pn.SincronizarSkillCosmetica(idx);
+                    }
+                }
             }
             else
             {
