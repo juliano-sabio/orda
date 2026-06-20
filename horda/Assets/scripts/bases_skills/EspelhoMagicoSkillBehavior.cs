@@ -69,13 +69,16 @@ public class EspelhoMagicoSkillBehavior : SkillBehavior, ISkillComRecarga
         }
         // EspelhoAmplificado — 150%, padrão — 100%
         float mult = SkillEvolutionManager.Tem(SkillEvolutionType.EspelhoAmplificado) ? 1.5f : 1.0f;
-        if (alvo != null) { alvo.ReceberDano(dano * mult, false); SkillElementEffect.Aplicar(skillData, alvo.gameObject, dano * mult, this); }
-        if (alvo != null) SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtingido, alvo.gameObject, this);
+        if (!cosmetico) // co-op: cópia cosmética não reflete dano (só o visual do espelho)
+        {
+            if (alvo != null) { alvo.ReceberDano(dano * mult, false); SkillElementEffect.Aplicar(skillData, alvo.gameObject, dano * mult, this); }
+            if (alvo != null) SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtingido, alvo.gameObject, this);
 
-        // EspelhoExplosivo — explosão em área no alvo
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.EspelhoExplosivo) && alvo != null)
-            EvolutionFX.SpawnExplosao(alvo.transform.position, 2.5f, dano * 0.8f,
-                new Color(0.6f, 0.9f, 1f), this);
+            // EspelhoExplosivo — explosão em área no alvo
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.EspelhoExplosivo) && alvo != null)
+                EvolutionFX.SpawnExplosao(alvo.transform.position, 2.5f, dano * 0.8f,
+                    new Color(0.6f, 0.9f, 1f), this);
+        }
 
         StartCoroutine(EfeitoReflexao(posPlayer));
         return true;

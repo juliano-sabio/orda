@@ -28,11 +28,14 @@ public class EscudoEspinhoPeca : MonoBehaviour
 
         if (inimigo == null || inimigo.estaMorrendo) return;
 
-        inimigo.ReceberDano(controlador.GetDano());
+        if (!controlador.cosmetico) // co-op: cópia cosmética não aplica dano (só o visual)
+        {
+            inimigo.ReceberDano(controlador.GetDano());
 
-        // EspinhosVenenosos2 — aplica veneno ao acertar
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosVenenosos2))
-            EvolutionFX.AplicarVeneno(inimigo, 2f, 5f);
+            // EspinhosVenenosos2 — aplica veneno ao acertar
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosVenenosos2))
+                EvolutionFX.AplicarVeneno(inimigo, 2f, 5f);
+        }
 
         hitsRestantes--;
         if (hitsRestantes <= 0)

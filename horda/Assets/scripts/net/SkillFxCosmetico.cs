@@ -23,6 +23,11 @@ public static class SkillFxCosmetico
         { SpecificSkillType.CorrenteSombria,    typeof(CorrenteSombriaSkillBehavior) },
         { SpecificSkillType.SombrasCruz,        typeof(SombrasCruzSkillBehavior) },
         { SpecificSkillType.CorteFantasma,      typeof(CorteFantasmaSkillBehavior) },
+        { SpecificSkillType.EscudoEspinhoso,    typeof(EscudoEspinhosoSkillBehavior) },
+        { SpecificSkillType.EscudoKarma,        typeof(EscudoKarmaSkillBehavior) },
+        { SpecificSkillType.EspelhoMagico,      typeof(EspelhoMagicoSkillBehavior) },
+        { SpecificSkillType.BarreiraEnergia,    typeof(BarreiraEnergiaSkillBehavior) },
+        { SpecificSkillType.BarreiraReflexiva,  typeof(BarreiraReflexivaSkillBehavior) },
         // TODO co-op: adicionar os demais conforme gatear o dano em cada behavior.
     };
 

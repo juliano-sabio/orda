@@ -105,7 +105,7 @@ public class EscudoKarmaSkillBehavior : SkillBehavior, ISkillComRecarga
                 float d = Vector2.Distance(ic.transform.position, pos);
                 if (d < menorDist) { menorDist = d; alvo = ic; }
             }
-            if (alvo != null) { alvo.ReceberDano(danoAbsorvido * 2f, false); SkillElementEffect.Aplicar(skillData, alvo.gameObject, danoAbsorvido * 2f, this); }
+            if (alvo != null && !cosmetico) { alvo.ReceberDano(danoAbsorvido * 2f, false); SkillElementEffect.Aplicar(skillData, alvo.gameObject, danoAbsorvido * 2f, this); }
         }
 
         if (hitsRestantes <= 0)

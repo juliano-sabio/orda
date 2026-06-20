@@ -109,6 +109,7 @@ public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
                 continue;
             ultimoFrameAcerto[id] = Time.frameCount;
 
+            if (cosmetico) continue; // co-op: cópia cosmética não aplica dano (só o visual do escudo)
             ic.ReceberDano(dano, false);
             SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtingido, ic.gameObject, this);
 

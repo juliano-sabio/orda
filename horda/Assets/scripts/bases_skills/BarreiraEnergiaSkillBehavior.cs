@@ -241,8 +241,8 @@ public class BarreiraEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga
 
     IEnumerator EfeitoQuebrando()
     {
-        // BarreiraExplosiva — dano em área ao quebrar
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.BarreiraExplosiva) && playerStats != null)
+        // BarreiraExplosiva — dano em área ao quebrar (gateado em co-op: cópia cosmética sem dano)
+        if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.BarreiraExplosiva) && playerStats != null)
         {
             float danoExp = escudoMax * 0.5f;
             foreach (var col in Physics2D.OverlapCircleAll(playerStats.transform.position, 4f))

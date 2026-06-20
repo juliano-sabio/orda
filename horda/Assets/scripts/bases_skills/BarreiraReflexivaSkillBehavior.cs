@@ -111,11 +111,14 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
 
         if (atacante != null)
         {
-            atacante.ReceberDano(danoRef, false);
-            SkillElementEffect.Aplicar(skillData, atacante.gameObject, danoRef, this);
-            SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtingido, atacante.gameObject, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.BarreiraCongelante))
-                EvolutionFX.AplicarLentidao(atacante, 2f, 0.3f);
+            if (!cosmetico) // co-op: cópia cosmética não reflete dano (só o visual)
+            {
+                atacante.ReceberDano(danoRef, false);
+                SkillElementEffect.Aplicar(skillData, atacante.gameObject, danoRef, this);
+                SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtingido, atacante.gameObject, this);
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.BarreiraCongelante))
+                    EvolutionFX.AplicarLentidao(atacante, 2f, 0.3f);
+            }
             StartCoroutine(FlashReflexao(atacante.transform.position));
         }
 
@@ -140,8 +143,8 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
                 rb.AddForce(dir * forcaEmpurrao * (1f - dist / raio) * Time.deltaTime * 40f, ForceMode2D.Force);
             }
 
-            // Dano de contato com a barreira
-            ic.ReceberDano(5f * Time.deltaTime, false, false);
+            // Dano de contato com a barreira (gateado em co-op)
+            if (!cosmetico) ic.ReceberDano(5f * Time.deltaTime, false, false);
 
             // BarreiraCongelante — lentidão ao tocar
             if (SkillEvolutionManager.Tem(SkillEvolutionType.BarreiraCongelante) && Random.value < 0.02f)
