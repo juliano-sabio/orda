@@ -104,6 +104,13 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss
         }
     }
 
+    // Co-op: re-mira o player mais próximo periodicamente (em SP = o único player).
+    void AtualizarAlvoCoop()
+    {
+        var t = PlayerStats.MaisProximoTransform(transform.position);
+        if (t != null) player = t;
+    }
+
     void Start()
     {
         danoProjetil *= EnemyScaling.BossDanoMult(); // escala de dano do boss no spawn
@@ -113,7 +120,8 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss
         rb.constraints            = RigidbodyConstraints2D.FreezeRotation;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        AtualizarAlvoCoop();
+        InvokeRepeating(nameof(AtualizarAlvoCoop), 0.5f, 0.5f);
 
         timerDash      = 3f;
         timerArea      = 7f;

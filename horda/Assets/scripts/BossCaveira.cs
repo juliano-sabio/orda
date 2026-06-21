@@ -168,6 +168,13 @@ public class BossCaveira : MonoBehaviour, IBoss
     // LIFECYCLE
     // ──────────────────────────────────────────────────────────────
 
+    // Co-op: re-mira o player mais próximo periodicamente (em SP = o único player).
+    void AtualizarAlvoCoop()
+    {
+        var t = PlayerStats.MaisProximoTransform(transform.position);
+        if (t != null) player = t;
+    }
+
     void Start()
     {
         controller    = GetComponent<InimigoController>();
@@ -181,7 +188,8 @@ public class BossCaveira : MonoBehaviour, IBoss
         danoGarras            *= md;
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator      = GetComponent<Animator>();
-        player        = GameObject.FindGameObjectWithTag("Player")?.transform;
+        AtualizarAlvoCoop();
+        InvokeRepeating(nameof(AtualizarAlvoCoop), 0.5f, 0.5f);
 
         projeteis = projeteisFase1;
         posBase   = transform.position;

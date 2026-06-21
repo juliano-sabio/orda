@@ -121,13 +121,22 @@ public class BossController : MonoBehaviour, IBoss
     // LIFECYCLE
     // ──────────────────────────────────────────────────────────────
 
+    // Co-op: re-mira o player mais próximo periodicamente (em SP = o único player).
+    void AtualizarAlvoCoop()
+    {
+        var t = PlayerStats.MaisProximoTransform(transform.position);
+        if (t == null) return;
+        player = t;
+        playerStats = t.GetComponent<PlayerStats>();
+    }
+
     void Start()
     {
         controller    = GetComponent<InimigoController>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator      = GetComponent<Animator>();
-        player        = GameObject.FindGameObjectWithTag("Player")?.transform;
-        playerStats   = player != null ? player.GetComponent<PlayerStats>() : null;
+        AtualizarAlvoCoop();
+        InvokeRepeating(nameof(AtualizarAlvoCoop), 0.5f, 0.5f);
 
         // Escala de dano do boss por tempo (aplicada uma vez no spawn)
         float multDanoBoss = EnemyScaling.BossDanoMult();

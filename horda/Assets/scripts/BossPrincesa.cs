@@ -90,6 +90,15 @@ public class BossPrincesa : MonoBehaviour, IBoss
     // LIFECYCLE
     // ──────────────────────────────────────────────
 
+    // Co-op: re-mira o player mais próximo periodicamente (em SP = o único player).
+    void AtualizarAlvoCoop()
+    {
+        var t = PlayerStats.MaisProximoTransform(transform.position);
+        if (t == null) return;
+        player = t;
+        playerStats = t.GetComponent<PlayerStats>();
+    }
+
     void Start()
     {
         controller     = GetComponent<InimigoController>();
@@ -99,12 +108,8 @@ public class BossPrincesa : MonoBehaviour, IBoss
         rb             = GetComponent<Rigidbody2D>();
         hitbox         = GetComponent<BoxCollider2D>();
 
-        var pGO = GameObject.FindGameObjectWithTag("Player");
-        if (pGO != null)
-        {
-            player      = pGO.transform;
-            playerStats = pGO.GetComponent<PlayerStats>();
-        }
+        AtualizarAlvoCoop();
+        InvokeRepeating(nameof(AtualizarAlvoCoop), 0.5f, 0.5f);
 
         // Desabilita movimento padrão do inimigo
         foreach (var m in GetComponents<MonoBehaviour>())
