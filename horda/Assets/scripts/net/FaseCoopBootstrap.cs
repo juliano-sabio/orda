@@ -11,6 +11,7 @@ public class FaseCoopBootstrap : MonoBehaviour
     void Start()
     {
         LobbyState.EmLobby = false;
+
         var nm = NetworkManager.Singleton;
         if (nm == null || !nm.IsServer) return; // só o host
 
