@@ -585,7 +585,8 @@ public class BossPrincesa : MonoBehaviour, IBoss
             float rad = ang * Mathf.Deg2Rad;
             Vector3 pos = transform.position + new Vector3(Mathf.Cos(rad), Mathf.Sin(rad)) * raioOrbita;
 
-            GameObject go = Instantiate(prefabProjetil, pos, Quaternion.identity);
+            GameObject go = NetSpawn.Spawnar(prefabProjetil, pos);
+            if (go == null) continue;
             go.transform.localScale = Vector3.zero; // começa invisível para o scale-in
 
             var rb2 = go.GetComponent<Rigidbody2D>();
@@ -664,10 +665,16 @@ public class BossPrincesa : MonoBehaviour, IBoss
         {
             Vector2 dir = Quaternion.Euler(0f, 0f, offset) * dirBase;
 
-            GameObject go = Instantiate(prefab, transform.position, Quaternion.identity);
+            GameObject go = NetSpawn.Spawnar(prefab, transform.position);
+            if (go == null) continue;
 
+            // desliga o comportamento base do projétil, mas preserva a rede (senão o
+            // NetworkTransform/EnemyNet param e o projétil não replica pros clientes).
             foreach (var mb in go.GetComponents<MonoBehaviour>())
+            {
+                if (mb is Unity.Netcode.NetworkBehaviour || mb is Unity.Netcode.NetworkObject) continue;
                 mb.enabled = false;
+            }
 
             var col = go.GetComponent<Collider2D>();
             if (col != null) col.isTrigger = true;
@@ -1096,10 +1103,15 @@ public class BossPrincesa : MonoBehaviour, IBoss
             float ang = (passo * i + offsetAngulo) * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
 
-            var go = Instantiate(prefabProjetil, transform.position, Quaternion.identity);
+            var go = NetSpawn.Spawnar(prefabProjetil, transform.position);
+            if (go == null) continue;
 
+            // preserva a rede ao desligar o comportamento base (senão não replica).
             foreach (var mb in go.GetComponents<MonoBehaviour>())
+            {
+                if (mb is Unity.Netcode.NetworkBehaviour || mb is Unity.Netcode.NetworkObject) continue;
                 mb.enabled = false;
+            }
 
             var homing = go.GetComponent<ProjetilHomingPrincesa>();
             if (homing != null)
@@ -1116,8 +1128,7 @@ public class BossPrincesa : MonoBehaviour, IBoss
                 rb2.simulated      = true;
                 rb2.linearVelocity = dir * velocidadeProjetil;
             }
-
-            Destroy(go, duracaoProjetil);
+            // o próprio ProjetilHomingPrincesa despawna pelo timerVida (NetSpawn.Despawnar).
         }
     }
 

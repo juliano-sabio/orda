@@ -55,7 +55,7 @@ public class ProjetilHomingPrincesa : MonoBehaviour
 
         if (timerVida <= 0f)
         {
-            Destroy(gameObject);
+            NetSpawn.Despawnar(gameObject);
             return;
         }
 
@@ -76,14 +76,14 @@ public class ProjetilHomingPrincesa : MonoBehaviour
         if (redirecionado)
         {
             var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
-            if (ic != null) { ic.ReceberDano(dano); Destroy(gameObject); }
-            else if (other.gameObject.tag == "Chao" || other.gameObject.tag == "Obstacles") Destroy(gameObject);
+            if (ic != null) { ic.ReceberDano(dano); NetSpawn.Despawnar(gameObject); }
+            else if (other.gameObject.tag == "Chao" || other.gameObject.tag == "Obstacles") NetSpawn.Despawnar(gameObject);
             return;
         }
 
         if (!other.CompareTag("Player")) return;
         var ps = other.GetComponent<PlayerStats>();
         if (ps != null) ps.TakeDamage(dano);
-        Destroy(gameObject);
+        NetSpawn.Despawnar(gameObject);
     }
 }

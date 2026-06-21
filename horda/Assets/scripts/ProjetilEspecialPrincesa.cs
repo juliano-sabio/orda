@@ -20,7 +20,7 @@ public class ProjetilEspecialPrincesa : MonoBehaviour
         EfeitoRunner.Criar().StartCoroutine(Queimar(ps, dano * 0.4f, 3f));
         EfeitoRunner.Criar().StartCoroutine(EfeitoQueima(other.gameObject, 3f));
 
-        Destroy(gameObject);
+        NetSpawn.Despawnar(gameObject);
     }
 
     static IEnumerator Queimar(PlayerStats ps, float danoPorSegundo, float duracao)

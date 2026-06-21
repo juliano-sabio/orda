@@ -34,9 +34,15 @@ public class ProjetilEspecialBoss : MonoBehaviour
     {
         if (TryGetComponent<Light2D>(out var l))
             l.color = new Color(0.7f, 0f, 1f);
-        Destroy(gameObject, tempoMaximoVida);
+        StartCoroutine(AutoDespawn(tempoMaximoVida));
         if (podeDividir && tempoDivisao > 0f)
             StartCoroutine(Dividir());
+    }
+
+    IEnumerator AutoDespawn(float t)
+    {
+        yield return new WaitForSeconds(t);
+        NetSpawn.Despawnar(gameObject);
     }
 
     public void SetDirecao(Vector2 dir)
@@ -83,11 +89,11 @@ public class ProjetilEspecialBoss : MonoBehaviour
             PlayerStats stats = other.GetComponent<PlayerStats>();
             if (stats != null) stats.TakeDamage(dano);
             AplicarVisaoReduzida(duracaoVisao, raioVisaoTela);
-            Destroy(gameObject);
+            NetSpawn.Despawnar(gameObject);
         }
         else if (other.gameObject.tag == "Chao" || other.gameObject.tag == "Obstacles")
         {
-            Destroy(gameObject);
+            NetSpawn.Despawnar(gameObject);
         }
     }
 
