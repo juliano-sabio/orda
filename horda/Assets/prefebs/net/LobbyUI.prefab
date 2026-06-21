@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &887319807801851584
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1751207895847907086}
+  - component: {fileID: 10669044131192266}
+  m_Layer: 0
+  m_Name: LobbyUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1751207895847907086
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 887319807801851584}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 355.55106, y: 240.34409, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &10669044131192266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 887319807801851584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cd4d7fa8b4c90048a098a6dae8e1940, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LobbyUI
+  botaoSprite: {fileID: 21300000, guid: 9497a68472eb93f44b1f3aa5e853d789, type: 3}
+  painelSprite: {fileID: 21300000, guid: 8f543b1945a01784099d8dbabfe6be04, type: 3}
+  fundoSprite: {fileID: 21300000, guid: 28e8bfafe339dde44b1b0993a3f80072, type: 3}
+  barraSprite: {fileID: 21300000, guid: a9828c33fe034a148b745b16c93bac38, type: 3}
+  painelGrandeSprite: {fileID: -2385830792812910004, guid: e69d6e63e7d6a7e4d8a7e763eb49d9ee, type: 3}
+  characters:
+  - {fileID: 11400000, guid: 3f72eee4c22cb074fa6d797a22524ea5, type: 2}
