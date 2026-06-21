@@ -148,8 +148,8 @@ public class CartaSelecaoEfeito : MonoBehaviour
 
         // ── Fase 4: explodir em bolinhas de energia ──────────────────────
         Vector2 playerCanvasPos = Vector2.zero;
-        var playerGO = GameObject.FindWithTag("Player")
-                    ?? FindAnyObjectByType<PlayerStats>()?.gameObject;
+        var playerGO = (PlayerStats.Local != null ? PlayerStats.Local.gameObject : null) // co-op: carta vai pro player local
+                    ?? GameObject.FindWithTag("Player");
         if (playerGO != null && Camera.main != null && canvasRT != null)
         {
             Vector3 ps = Camera.main.WorldToScreenPoint(playerGO.transform.position);

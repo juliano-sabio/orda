@@ -33,7 +33,7 @@ public class SkillCooldownDisplay : MonoBehaviour
     {
         if (ui     == null) ui     = GetComponent<UIManager>();
         if (sm     == null) sm     = FindFirstObjectByType<SkillManager>();
-        if (player == null) player = FindFirstObjectByType<PlayerStats>();
+        if (player == null) player = PlayerStats.Local ?? FindFirstObjectByType<PlayerStats>(); // co-op: HUD do player local
 
         if (ui == null || sm == null || player == null) return;
         if (ui.attackSkill1Icon == null && ui.defenseSkill1Icon == null) return;

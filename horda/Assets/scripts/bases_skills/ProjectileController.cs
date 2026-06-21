@@ -398,7 +398,7 @@ public class ProjectileController2D : MonoBehaviour
     {
         if (enemy == null) return;
 
-        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
+        PlayerStats playerStats = PlayerStats.Local ?? FindAnyObjectByType<PlayerStats>(); // co-op: elemento do atirador (player local)
         if (playerStats != null)
         {
             playerStats.GetElementSystem().ApplyElementalEffect(element, enemy);
