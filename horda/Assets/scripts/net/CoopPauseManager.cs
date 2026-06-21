@@ -81,6 +81,14 @@ public class CoopPauseManager : NetworkBehaviour
         Recomputar();
     }
 
+    // Co-op: o host (onde a lógica de boss/evento roda) propaga o tremor de câmera pros
+    // clientes. SendTo.NotServer = só clientes (o host já tremeu localmente).
+    [Rpc(SendTo.NotServer)]
+    public void TremerClientRpc(float intensidade, float duracao)
+    {
+        CameraShaker.TremerLocal(intensidade, duracao);
+    }
+
     void Recomputar()
     {
         pausado.Value = retentoresEscolha.Count > 0 || menuAberto;

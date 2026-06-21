@@ -8,8 +8,19 @@ public class CameraShaker : MonoBehaviour
     private float duracao;
     private float tempoRestante;
 
-    // Dispara o shake na Camera.main (adiciona o componente automaticamente se necessário)
+    // Dispara o shake na Camera.main. Em co-op, a maioria das chamadas vem da lógica
+    // host-only (bosses/eventos) → o host propaga o tremor pros clientes.
     public static void Tremer(float intensidade, float duracao)
+    {
+        TremerLocal(intensidade, duracao);
+
+        var nm = Unity.Netcode.NetworkManager.Singleton;
+        if (nm != null && nm.IsListening && nm.IsServer && CoopPauseManager.Instance != null)
+            CoopPauseManager.Instance.TremerClientRpc(intensidade, duracao);
+    }
+
+    // Aplica o shake só na câmera local (sem propagar). Usado pelo broadcast co-op.
+    public static void TremerLocal(float intensidade, float duracao)
     {
         if (Camera.main == null) return;
         CameraShaker s = Camera.main.GetComponent<CameraShaker>();
