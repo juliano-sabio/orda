@@ -19,6 +19,11 @@ public static class CoopPause
     // pelo overlay pra mostrar "aguardando o outro" só pra quem já terminou.
     public static bool EuEscolhendo { get; private set; }
 
+    // true quando ESTE player tem uma escolha PENDENTE (subiu de nível, painel ainda vai
+    // abrir). Suprime o overlay de "aguardando" prematuro entre o level-up e o painel abrir.
+    public static bool EscolhaPendente { get; private set; }
+    public static void MarcarEscolhaPendente() => EscolhaPendente = true;
+
     // Escolha de gameplay (skill/carta/evolução/elemento): segura a pausa enquanto
     // este player estiver escolhendo; libera quando fecha. Pausa fica ativa enquanto
     // QUALQUER player estiver segurando — ou seja, só roda quando todos terminaram.
@@ -32,6 +37,7 @@ public static class CoopPause
     public static void LiberarEscolha()
     {
         EuEscolhendo = false;
+        EscolhaPendente = false;
         if (EmRede) CoopPauseManager.Instance.LiberarEscolhaServerRpc();
         else Time.timeScale = 1f;
     }

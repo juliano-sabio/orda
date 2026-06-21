@@ -1060,6 +1060,11 @@ public class PlayerStats : MonoBehaviour
         // Garante referência atualizada ao SkillManager
         if (skillManager == null) skillManager = SkillManager.Instance;
         if (skillManager == null) skillManager = FindFirstObjectByType<SkillManager>();
+        // Idem pro StatusCardSystem: em co-op o cliente pode não ter resolvido a
+        // referência no init (Instance ainda nula), e sem isso a carta NUNCA abre —
+        // o player ficava preso só no overlay "aguardando o outro escolher".
+        if (cardSystem == null) cardSystem = StatusCardSystem.Instance;
+        if (cardSystem == null) cardSystem = FindFirstObjectByType<StatusCardSystem>();
 
         // Milestones fixos de skill (1, 3, 6, 10)
         bool isMilestone  = level == 1 || level == 3 || level == 6 || level == 10;
@@ -1069,10 +1074,14 @@ public class PlayerStats : MonoBehaviour
         if (isSkillLevel && skillManager != null)
         {
             if (!escolhaSkillEmAndamento)
+            {
+                if (NetSpawn.EmRede) CoopPause.MarcarEscolhaPendente();
                 StartCoroutine(AbrirEscolhaSkill());
+            }
         }
         else if (cardSystem != null)
         {
+            if (NetSpawn.EmRede) CoopPause.MarcarEscolhaPendente();
             cardSystem.OnPlayerLevelUp(level);
         }
 

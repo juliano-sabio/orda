@@ -105,9 +105,10 @@ public class CoopPauseManager : NetworkBehaviour
         }
         else
         {
-            // Pausa por escolha: quem ainda está escolhendo vê a própria UI; só mostra
-            // o aviso pra quem já fechou a escolha e está esperando o outro.
-            if (CoopPause.EuEscolhendo) return;
+            // Pausa por escolha: quem ainda está escolhendo (ou tem escolha pendente, i.e.
+            // subiu de nível e o painel ainda vai abrir) vê a própria UI; só mostra o aviso
+            // pra quem já fechou a escolha e está de fato esperando o outro.
+            if (CoopPause.EuEscolhendo || CoopPause.EscolhaPendente) return;
             texto = "Aguardando o outro jogador escolher...";
         }
 
