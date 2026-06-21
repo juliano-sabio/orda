@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 // Coloque este componente em um GameObject vazio na cena (ex: "FlowField").
 // Ele calcula automaticamente o melhor caminho até o player para toda a grade.
@@ -43,37 +44,36 @@ public class FlowField : MonoBehaviour
     void Start()
     {
         playerTransform = (PlayerStats.All.Count > 0 ? PlayerStats.All[0].transform : null);
-        ConstruirGrid();
+        ConstruirGridMapa();
         if (playerTransform != null) Recalcular();
         InvokeRepeating(nameof(Tick), intervaloAtualizacao, intervaloAtualizacao);
     }
 
-    void ConstruirGrid()
+    // Grid cobre o MAPA TODO (bounds dos tilemaps + padding), estático. Antes era do
+    // tamanho da câmera e seguia o player — inimigos fora dele caíam na mira direta
+    // (sem desvio de parede) e bugavam ao não achar rota. Cobrindo o mapa todo, todo
+    // inimigo sempre tem pathfinding.
+    void ConstruirGridMapa()
     {
-        Vector2 centro = Camera.main != null ? (Vector2)Camera.main.transform.position : Vector2.zero;
-        ConstruirGridEmTorno(centro);
-    }
+        Bounds b = CalcularBoundsMapa();
+        Vector2 min = (Vector2)b.min - Vector2.one * padding;
+        Vector2 max = (Vector2)b.max + Vector2.one * padding;
+        float w = Mathf.Max(1f, max.x - min.x);
+        float h = Mathf.Max(1f, max.y - min.y);
 
-    void ConstruirGridEmTorno(Vector2 centro)
-    {
-        float h = 100f, w = 100f;
-        if (Camera.main != null)
-        {
-            Camera cam = Camera.main;
-            h = cam.orthographicSize * 2f + padding * 2f;
-            w = h * cam.aspect + padding * 2f;
-        }
+        // cap de células pra perf: se o mapa for enorme, engrossa a célula efetiva.
+        const int MAX_DIM = 320;
+        float cel = Mathf.Max(tamanhoCelula, w / MAX_DIM, h / MAX_DIM);
+        tamanhoCelula = cel;
 
-        gridOrigem = centro - new Vector2(w / 2f, h / 2f);
-        gridCentroAtual = centro;
-        gridTamanho = new Vector2Int(
-            Mathf.CeilToInt(w / tamanhoCelula),
-            Mathf.CeilToInt(h / tamanhoCelula));
+        gridOrigem = min;
+        gridCentroAtual = b.center;
+        gridTamanho = new Vector2Int(Mathf.CeilToInt(w / cel), Mathf.CeilToInt(h / cel));
 
         vetores    = new Vector2[gridTamanho.x, gridTamanho.y];
         caminhavel = new bool[gridTamanho.x, gridTamanho.y];
 
-        Vector2 metadeCelula = Vector2.one * (tamanhoCelula * 0.85f);
+        Vector2 metadeCelula = Vector2.one * (cel * 0.85f);
         for (int x = 0; x < gridTamanho.x; x++)
             for (int y = 0; y < gridTamanho.y; y++)
             {
@@ -82,22 +82,35 @@ public class FlowField : MonoBehaviour
             }
     }
 
+    // Bounds do mapa = encapsula todos os tilemaps ativos (fallback 60x40).
+    Bounds CalcularBoundsMapa()
+    {
+        var tilemaps = FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
+        if (tilemaps == null || tilemaps.Length == 0)
+            return new Bounds(Vector3.zero, new Vector3(60f, 40f, 0f));
+
+        bool primeiro = true;
+        Bounds bounds = new Bounds();
+        foreach (var tm in tilemaps)
+        {
+            if (tm == null || !tm.gameObject.activeInHierarchy) continue;
+            tm.CompressBounds();
+            Bounds bb = new Bounds();
+            bb.SetMinMax(
+                tm.transform.TransformPoint(tm.localBounds.min),
+                tm.transform.TransformPoint(tm.localBounds.max));
+            if (primeiro) { bounds = bb; primeiro = false; }
+            else bounds.Encapsulate(bb);
+        }
+        if (primeiro) return new Bounds(Vector3.zero, new Vector3(60f, 40f, 0f));
+        return bounds;
+    }
+
     void Tick()
     {
-        if (playerTransform == null)
-            playerTransform = (PlayerStats.All.Count > 0 ? PlayerStats.All[0].transform : null);
-
-        Transform alvo = AlvoOverride != null ? AlvoOverride : playerTransform;
-        if (alvo == null) return;
-
-        if (caminhavel == null
-            || (!Valido(MundoParaCelula(alvo.position))
-                && Time.time - tempoUltimaReconstrucao >= intervaloReconstrucao))
-        {
-            ConstruirGridEmTorno(alvo.position);
-            tempoUltimaReconstrucao = Time.time;
-        }
-
+        if (caminhavel == null) ConstruirGridMapa();
+        if (playerTransform == null && PlayerStats.All.Count > 0)
+            playerTransform = PlayerStats.All[0].transform;
         Recalcular();
     }
 
