@@ -104,20 +104,41 @@ public class FlowField : MonoBehaviour
     void Recalcular()
     {
         if (caminhavel == null) return;
-        Transform alvo = AlvoOverride != null ? AlvoOverride : playerTransform;
-        if (alvo == null) return;
-        Vector2Int dest = MundoParaCelula(alvo.position);
-        if (!Valido(dest)) return;
 
-        // BFS a partir do player — propaga custo para toda a grade
+        // Origens do BFS: com AlvoOverride (eventos), um alvo só; senão TODOS os players
+        // (BFS multi-origem → cada célula aponta pro player mais próximo em distância de
+        // caminho, fazendo cada inimigo caçar o player mais perto — co-op).
+        var origens = new List<Vector2Int>();
+        if (AlvoOverride != null)
+        {
+            Vector2Int c = MundoParaCelula(AlvoOverride.position);
+            if (Valido(c)) origens.Add(c);
+        }
+        else
+        {
+            for (int i = 0; i < PlayerStats.All.Count; i++)
+            {
+                var p = PlayerStats.All[i];
+                if (p == null) continue;
+                Vector2Int c = MundoParaCelula(p.transform.position);
+                if (Valido(c)) origens.Add(c);
+            }
+        }
+        if (origens.Count == 0) return;
+
+        // BFS a partir dos players — propaga custo para toda a grade
         int[,] custo = new int[gridTamanho.x, gridTamanho.y];
         for (int x = 0; x < gridTamanho.x; x++)
             for (int y = 0; y < gridTamanho.y; y++)
                 custo[x, y] = int.MaxValue;
 
-        custo[dest.x, dest.y] = 0;
         var fila = new Queue<Vector2Int>();
-        fila.Enqueue(dest);
+        foreach (var o in origens)
+        {
+            if (custo[o.x, o.y] == 0) continue;
+            custo[o.x, o.y] = 0;
+            fila.Enqueue(o);
+        }
 
         while (fila.Count > 0)
         {
@@ -169,10 +190,14 @@ public class FlowField : MonoBehaviour
             }
     }
 
-    // Retorna a direção ótima para o alvo atual (AlvoOverride ou player) a partir de uma posição do mundo
+    // Retorna a direção ótima para o alvo atual a partir de uma posição do mundo.
+    // Fora do grid (ou célula sem fluxo), cai pra mira direta no player MAIS PRÓXIMO
+    // desta posição (co-op: inimigos longe do host ainda caçam o player mais perto).
     public Vector2 ObterDirecao(Vector2 pos)
     {
-        Transform alvoFallback = AlvoOverride != null ? AlvoOverride : playerTransform;
+        Transform alvoFallback = AlvoOverride != null
+            ? AlvoOverride
+            : (PlayerStats.MaisProximoTransform(pos) ?? playerTransform);
 
         Vector2Int c = MundoParaCelula(pos);
         if (!Valido(c))
