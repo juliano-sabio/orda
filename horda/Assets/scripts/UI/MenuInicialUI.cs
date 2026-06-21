@@ -461,26 +461,8 @@ public class MenuInicialUI : MonoBehaviour
         // emblema (losango/gema) no lugar do emoji 🌐 que a fonte pixel não renderiza
         CriarEmblemaMulti(painel);
 
-        CriarTexto(painel, "LblCodigo", new Vector2(0.05f,0.50f), new Vector2(0.95f,0.60f),
-            Loc.T("multi.room_code"), 13f, FontStyles.Bold, new Color(0.92f,0.74f,0.40f));
-
-        // moldura do campo (atrás)
-        var campoBorda = new GameObject("CampoBorda");
-        campoBorda.transform.SetParent(painel.transform, false);
-        var rcb = campoBorda.AddComponent<RectTransform>();
-        rcb.anchorMin = new Vector2(0.05f,0.39f); rcb.anchorMax = new Vector2(0.95f,0.50f);
-        rcb.offsetMin = new Vector2(-2f,-2f); rcb.offsetMax = new Vector2(2f,2f);
-        campoBorda.AddComponent<Image>().color = new Color(dfCorBorda.r,dfCorBorda.g,dfCorBorda.b,0.70f);
-
-        var campo = new GameObject("Campo");
-        campo.transform.SetParent(painel.transform, false);
-        var rca = campo.AddComponent<RectTransform>();
-        rca.anchorMin = new Vector2(0.05f,0.39f); rca.anchorMax = new Vector2(0.95f,0.50f);
-        rca.offsetMin = rca.offsetMax = Vector2.zero;
-        campo.AddComponent<Image>().color = new Color(0.10f,0.06f,0.055f);
-        var ph = CriarTexto(campo,"PH",new Vector2(0.03f,0f),new Vector2(0.97f,1f),
-            "Ex: SPIRIT-1234",14f,FontStyles.Italic,new Color(0.5f,0.42f,0.40f));
-        ph.alignment = TextAlignmentOptions.Left;
+        // Sem campo de código aqui: o host gera/copia o código no lobby e o cliente
+        // digita no lobby (painel "Entrar"). O código real vem do Relay, não do menu.
 
         // Criar = laranja-brasa (ação primária); Entrar = vermelho (ação secundária)
         BotaoSimples(painel,Loc.T("multi.create_room"),new Vector2(0.05f,0.23f),new Vector2(0.47f,0.37f),
