@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(InimigoController))]
-public class BossPrincesa : MonoBehaviour, IBoss
+public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 {
     // ──────────────────────────────────────────────
     // IDENTIDADE
@@ -899,7 +899,7 @@ public class BossPrincesa : MonoBehaviour, IBoss
     // UI
     // ──────────────────────────────────────────────
 
-    void CriarBossUI()
+    public void CriarBossUI()
     {
         bossCanvasGO = new GameObject("BossPrincesaCanvas");
         var canvas = bossCanvasGO.AddComponent<Canvas>();
@@ -1030,6 +1030,8 @@ public class BossPrincesa : MonoBehaviour, IBoss
         hpText.alignment = TextAlignmentOptions.Center;
         hpText.color     = new Color(1f, 1f, 1f, 0.80f);
     }
+
+    public void AtualizarBarraUI() => AtualizarUI();   // IBossHud (cliente dirige com vida sincronizada)
 
     void AtualizarUI()
     {

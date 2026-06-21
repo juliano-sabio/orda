@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController))]
-public class BossController : MonoBehaviour, IBoss
+public class BossController : MonoBehaviour, IBoss, IBossHud
 {
     // ──────────────────────────────────────────────
     // IDENTIDADE
@@ -1155,7 +1155,7 @@ public class BossController : MonoBehaviour, IBoss
     // BOSS HEALTH BAR UI
     // ──────────────────────────────────────────────────────────────
 
-    void CriarBossUI()
+    public void CriarBossUI()
     {
         bossCanvasGO = new GameObject("BossCanvas");
         Canvas cv = bossCanvasGO.AddComponent<Canvas>();
@@ -1273,6 +1273,8 @@ public class BossController : MonoBehaviour, IBoss
         while (t < 1f) { t += Time.deltaTime * 1.5f; cg.alpha = Mathf.Lerp(0f, 1f, t); yield return null; }
         cg.alpha = 1f;
     }
+
+    public void AtualizarBarraUI() => AtualizarUI();   // IBossHud (cliente dirige com vida sincronizada)
 
     void AtualizarUI()
     {

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 
 [RequireComponent(typeof(InimigoController), typeof(Rigidbody2D))]
-public class BossSlimeGuardaElite : MonoBehaviour, IBoss
+public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
 {
     // ── IDENTIDADE ───────────────────────────────────────────────────────────────
     [Header("Identidade")]
@@ -742,7 +742,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss
 
     // ── BOSS UI ──────────────────────────────────────────────────────────────────
 
-    void CriarBossUI()
+    public void CriarBossUI()
     {
         bossCanvasGO = new GameObject("BossEliteCanvas");
         var cv = bossCanvasGO.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 50;
@@ -812,6 +812,8 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss
         for (float t = 0f; t < 1f; t += Time.deltaTime * 1.5f) { cg.alpha = t; yield return null; }
         cg.alpha = 1f;
     }
+
+    public void AtualizarBarraUI() => AtualizarUI();   // IBossHud (cliente dirige com vida sincronizada)
 
     void AtualizarUI()
     {
