@@ -744,6 +744,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
 
     public void CriarBossUI()
     {
+        if (controller == null) controller = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
         bossCanvasGO = new GameObject("BossEliteCanvas");
         var cv = bossCanvasGO.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 50;
         var cs = bossCanvasGO.AddComponent<CanvasScaler>();

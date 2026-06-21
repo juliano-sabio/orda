@@ -1061,6 +1061,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
     public void CriarBossUI()
     {
+        if (controller == null) controller = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
         bossCanvasGO = new GameObject("BossCaveiraCanvas");
         Canvas cv = bossCanvasGO.AddComponent<Canvas>();
         cv.renderMode   = RenderMode.ScreenSpaceOverlay;
