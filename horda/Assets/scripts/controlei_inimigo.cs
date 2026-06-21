@@ -155,7 +155,11 @@ public class InimigoController : MonoBehaviour
 
         vidaAtual -= dano;
 
-        if (mostrarNumero && mostrarDanoFlutuante) MostrarDanoFlutuante(dano, isCrit);
+        if (mostrarNumero && mostrarDanoFlutuante)
+        {
+            MostrarDanoFlutuante(dano, isCrit);
+            ReplicarNumeroDanoCoop(dano, isCrit);   // co-op: mostra o número nos clientes também
+        }
         if (_flashDanoCoroutine != null) StopCoroutine(_flashDanoCoroutine);
         _flashDanoCoroutine = StartCoroutine(EfeitoVisualDano());
 
@@ -164,9 +168,16 @@ public class InimigoController : MonoBehaviour
             vidaAtual = 0;
             estaMorrendo = true;
 
-            if (mostrarNumero) MostrarDanoFatal(dano, isCrit);
+            if (mostrarNumero) { MostrarDanoFatal(dano, isCrit); ReplicarNumeroDanoCoop(dano, isCrit); }
             Morrer();
         }
+    }
+
+    // Co-op: replica o número de dano (pós-mitigação) pros clientes via EnemyNet.
+    void ReplicarNumeroDanoCoop(float dano, bool isCrit)
+    {
+        var en = GetComponent<EnemyNet>();
+        if (en != null) en.ReplicarNumeroDano(dano, isCrit);
     }
 
     public void ReceberCura(float quantidadeCura, bool mostrarEfeito = true)

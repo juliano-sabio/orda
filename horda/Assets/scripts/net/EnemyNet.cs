@@ -30,4 +30,20 @@ public class EnemyNet : NetworkBehaviour
         var ic = GetComponent<InimigoController>();
         if (ic != null) ic.ReceberDano(dano, isCrit); // roda no host -> aplica
     }
+
+    // Co-op: o host mostra o número de dano (pós-mitigação) também nos clientes. Sem isto,
+    // o cliente que bate via ServerRpc nunca vê o próprio número (o controller está
+    // desligado no cliente, e o dano é processado só no host).
+    public void ReplicarNumeroDano(float dano, bool isCrit)
+    {
+        if (IsServer && IsSpawned) MostrarNumeroDanoClientRpc(dano, isCrit);
+    }
+
+    [ClientRpc]
+    void MostrarNumeroDanoClientRpc(float dano, bool isCrit)
+    {
+        if (IsServer) return; // o host já mostrou localmente
+        if (DamageNumberManager.Instance != null)
+            DamageNumberManager.Instance.ShowDamage(transform, dano, isCrit);
+    }
 }

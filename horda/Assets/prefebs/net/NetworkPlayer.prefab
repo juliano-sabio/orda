@@ -70,9 +70,6 @@ PrefabInstance:
       addedObject: {fileID: 5699583090152939960}
     - targetCorrespondingSourceObject: {fileID: 2605273054779499284, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5806120114441561531}
-    - targetCorrespondingSourceObject: {fileID: 2605273054779499284, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}
-      insertIndex: -1
       addedObject: {fileID: -286809307923764534}
     - targetCorrespondingSourceObject: {fileID: 2605273054779499284, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}
       insertIndex: -1
@@ -199,21 +196,6 @@ MonoBehaviour:
   reviveRaio: 2.5
   tempoRevive: 4
   fracaoRevive: 0.5
---- !u!114 &5806120114441561531
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7472943407355398173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab8544a28941f4842a2ab47e76ab0f50, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DebugAtaque
-  intervalo: 0.4
-  raio: 6
-  dano: 10
 --- !u!114 &-286809307923764534
 MonoBehaviour:
   m_ObjectHideFlags: 0
