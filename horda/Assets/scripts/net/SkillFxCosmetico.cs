@@ -28,7 +28,9 @@ public static class SkillFxCosmetico
         { SpecificSkillType.EspelhoMagico,      typeof(EspelhoMagicoSkillBehavior) },
         { SpecificSkillType.BarreiraEnergia,    typeof(BarreiraEnergiaSkillBehavior) },
         { SpecificSkillType.BarreiraReflexiva,  typeof(BarreiraReflexivaSkillBehavior) },
-        // TODO co-op: adicionar os demais conforme gatear o dano em cada behavior.
+        { SpecificSkillType.Aureola,            typeof(AureolaSkillBehavior) },
+        // TODO co-op: Teia/Shield/Fuga/SegundaChance/Instinto precisam de trigger-broadcast
+        // (disparam em evento de player) ou de prefab (ShieldAura) — fazer com mecanismo próprio.
     };
 
     public static bool EhSuportado(SpecificSkillType t) => Suportados.ContainsKey(t);

@@ -53,6 +53,7 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
 
     void OnDano()
     {
+        if (cosmetico) return; // co-op: fantoche mostra só a aura persistente (sem o boost por dano)
         if (timerRecarga <= 0f && !ativo) Ativar();
     }
 
@@ -94,7 +95,7 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
             regenAcum += regenReal * Time.deltaTime;
             if (regenAcum >= 1f)
             {
-                playerStats.Heal(Mathf.Floor(regenAcum));
+                if (!cosmetico) playerStats.Heal(Mathf.Floor(regenAcum));
                 regenAcum -= Mathf.Floor(regenAcum);
             }
         }
