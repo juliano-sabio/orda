@@ -247,6 +247,19 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.Owner)]
     public void CurarOwnerRpc(float quantia) { if (stats != null) stats.Heal(quantia); }
 
+    // Co-op: efeitos de status aplicados pelo host vão pro DONO (gameplay + visual na tela dele).
+    [Rpc(SendTo.Owner)]
+    public void AplicarSlowOwnerRpc(float reducao, float duracao) { if (stats != null) stats.AplicarSlow(reducao, duracao); }
+
+    [Rpc(SendTo.Owner)]
+    public void AplicarVenenoOwnerRpc(float danoPorTick, float intervalo, float duracao) { if (stats != null) stats.AplicarVenenoPlayer(danoPorTick, intervalo, duracao); }
+
+    [Rpc(SendTo.Owner)]
+    public void AplicarQueimaduraOwnerRpc(float danoPorTick, float intervalo, float duracao) { if (stats != null) stats.AplicarQueimaduraPlayer(danoPorTick, intervalo, duracao); }
+
+    [Rpc(SendTo.Owner)]
+    public void AplicarParalisiaOwnerRpc(float duracao) { if (stats != null) stats.AplicarParalisiaPlayer(duracao); }
+
     [Rpc(SendTo.Owner)]
     public void DashChargeOwnerRpc() { if (stats != null) stats.AddDashCharge(); }
 

@@ -1235,6 +1235,7 @@ public class PlayerStats : MonoBehaviour
 
     public void Heal(float healAmount)
     {
+        if (RotearEfeitoSeNaoDono(pn => pn.CurarOwnerRpc(healAmount))) return;
         health = Mathf.Min(maxHealth, health + healAmount);
         UpdateUI();
     }
@@ -1982,8 +1983,18 @@ public class PlayerStats : MonoBehaviour
 
         return 0f;
     }
+    // co-op: efeitos de status são aplicados pelo host. Se este player não é meu (fantoche),
+    // roteia pro DONO aplicar na máquina dele (gameplay + visual idênticos pros dois).
+    bool RotearEfeitoSeNaoDono(System.Action<PlayerNet> rpc)
+    {
+        var pn = GetComponent<PlayerNet>();
+        if (pn != null && pn.IsSpawned && !pn.IsOwner) { rpc(pn); return true; }
+        return false;
+    }
+
     public void AplicarSlow(float reducao, float duracao)
     {
+        if (RotearEfeitoSeNaoDono(pn => pn.AplicarSlowOwnerRpc(reducao, duracao))) return;
         if (!estaSlowado)
         {
             speedOriginalAntesSlow = speed;
@@ -2014,6 +2025,7 @@ public class PlayerStats : MonoBehaviour
 
     public void AplicarVenenoPlayer(float danoPorTick, float intervalo, float duracao)
     {
+        if (RotearEfeitoSeNaoDono(pn => pn.AplicarVenenoOwnerRpc(danoPorTick, intervalo, duracao))) return;
         if (estaEnvenenado)
         {
             // Renova a duração sem reiniciar o tick — evita reset constante pelo OnTriggerStay2D
@@ -2052,6 +2064,7 @@ public class PlayerStats : MonoBehaviour
 
     public void AplicarQueimaduraPlayer(float danoPorTick, float intervalo, float duracao)
     {
+        if (RotearEfeitoSeNaoDono(pn => pn.AplicarQueimaduraOwnerRpc(danoPorTick, intervalo, duracao))) return;
         if (estaQueimando)
         {
             // Renova a duração sem reiniciar o tick — evita reset constante pelo OnTriggerStay2D
@@ -2090,6 +2103,7 @@ public class PlayerStats : MonoBehaviour
 
     public void AplicarParalisiaPlayer(float duracao)
     {
+        if (RotearEfeitoSeNaoDono(pn => pn.AplicarParalisiaOwnerRpc(duracao))) return;
         // Fundação Firme (infusão defensiva) — imune a paralisia/controle enquanto ativa
         if (GetComponent<FundacaoFirmeMarker>() != null) return;
         if (corotinaParalisia != null) StopCoroutine(corotinaParalisia);
