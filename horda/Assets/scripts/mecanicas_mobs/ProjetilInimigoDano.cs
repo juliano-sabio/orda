@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -46,7 +47,14 @@ public class ProjetilInimigoDano : MonoBehaviour
         if (luz2D != null)
             luz2D.color = corLuz;
 
-        Destroy(gameObject, tempoMaximoVida);
+        // Co-op: despawn em rede (host despawna em todos). SP: Destroy.
+        StartCoroutine(AutoDespawn(tempoMaximoVida));
+    }
+
+    IEnumerator AutoDespawn(float t)
+    {
+        yield return new WaitForSeconds(t);
+        NetSpawn.Despawnar(gameObject);
     }
 
     public void SetDirecao(Vector2 novaDirecao)
@@ -81,10 +89,10 @@ public class ProjetilInimigoDano : MonoBehaviour
             {
                 jaAcertou = true;
                 ic.ReceberDano(dano);
-                Destroy(gameObject);
+                NetSpawn.Despawnar(gameObject);
             }
             else if (other.CompareTag("chao") || other.CompareTag("obstacles"))
-                Destroy(gameObject);
+                NetSpawn.Despawnar(gameObject);
             return;
         }
 
@@ -93,11 +101,11 @@ public class ProjetilInimigoDano : MonoBehaviour
             jaAcertou = true;
             PlayerStats stats = other.GetComponent<PlayerStats>();
             if (stats != null) stats.TakeDamage(dano);
-            Destroy(gameObject);
+            NetSpawn.Despawnar(gameObject);
         }
         else if (other.gameObject.tag == "chao" || other.gameObject.tag == "obstacles")
         {
-            Destroy(gameObject);
+            NetSpawn.Despawnar(gameObject);
         }
     }
 }

@@ -351,7 +351,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss
 
             StartCoroutine(VisualSpawnMinion(pos));
             yield return new WaitForSeconds(0.35f);
-            Instantiate(prefab, new Vector3(pos.x, pos.y, 0f), Quaternion.identity);
+            NetSpawn.Spawnar(prefab, new Vector3(pos.x, pos.y, 0f)); // co-op: minion replica
         }
 
         CameraShaker.Tremer(0.06f, 0.5f);

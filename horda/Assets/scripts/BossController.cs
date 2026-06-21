@@ -498,7 +498,8 @@ public class BossController : MonoBehaviour, IBoss
             float ang    = (anguloBase + offset) * Mathf.Deg2Rad;
             Vector2 dir  = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
 
-            GameObject proj = Instantiate(prefabProjetil, spawnPos, Quaternion.identity);
+            GameObject proj = NetSpawn.Spawnar(prefabProjetil, spawnPos);
+            if (proj == null) continue;
 
             // Tenta ProjetilInimigoDano primeiro, depois projetil_inimigo como fallback
             ProjetilInimigoDano pid = proj.GetComponent<ProjetilInimigoDano>();

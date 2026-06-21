@@ -936,7 +936,8 @@ public class BossCaveira : MonoBehaviour, IBoss
             float ang    = (anguloBase + offset) * Mathf.Deg2Rad;
             Vector2 dir  = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
 
-            GameObject proj = Instantiate(prefabProjetil, spawnPos, Quaternion.identity);
+            GameObject proj = NetSpawn.Spawnar(prefabProjetil, spawnPos);
+            if (proj == null) continue;
             ProjetilInimigoDano pid = proj.GetComponent<ProjetilInimigoDano>();
             if (pid != null)
             {
@@ -967,7 +968,8 @@ public class BossCaveira : MonoBehaviour, IBoss
             float ang    = (anguloBase + offset) * Mathf.Deg2Rad;
             Vector2 dir  = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
 
-            GameObject proj = Instantiate(prefabProjetil, spawnPos, Quaternion.identity);
+            GameObject proj = NetSpawn.Spawnar(prefabProjetil, spawnPos);
+            if (proj == null) continue;
             ProjetilInimigoDano pid = proj.GetComponent<ProjetilInimigoDano>();
             if (pid != null)
             {
