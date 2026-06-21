@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VorticeUltimate : MonoBehaviour
+public class VorticeUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio         = 7f;
     public float duracao      = 5f;
@@ -44,7 +47,8 @@ public class VorticeUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -134,7 +138,7 @@ public class VorticeUltimate : MonoBehaviour
                     {
                         if (e.go == null) continue;
                         var ic = e.go.GetComponent<InimigoController>();
-                        if (ic != null) ic.ReceberDano(danoAplicar, false, false);
+                        if (ic != null && !cosmetico) ic.ReceberDano(danoAplicar, false, false);
                     }
                 }
             }

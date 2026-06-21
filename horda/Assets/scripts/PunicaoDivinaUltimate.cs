@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PunicaoDivinaUltimate : MonoBehaviour
+public class PunicaoDivinaUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raioDeteccao   = 25f;
     public float danoImpacto    = 80f;
@@ -39,7 +42,8 @@ public class PunicaoDivinaUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -155,7 +159,7 @@ public class PunicaoDivinaUltimate : MonoBehaviour
             if (ic != null)
             {
                 bool crit = podeCrit && Random.value < 0.3f;
-                ic.ReceberDano(crit ? dano * 1.5f : dano, crit);
+                if (!cosmetico) ic.ReceberDano(crit ? dano * 1.5f : dano, crit);
             }
         }
     }

@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PulsoMagneticoUltimate : MonoBehaviour
+public class PulsoMagneticoUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio              = 8f;
     public float duracao           = 5f;
@@ -49,7 +52,8 @@ public class PulsoMagneticoUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -194,7 +198,7 @@ public class PulsoMagneticoUltimate : MonoBehaviour
                     danoEfetivo *= 1.5f;
 
                 bool crit = Random.value < 0.25f;
-                inimigo.ReceberDano(crit ? danoEfetivo * 1.5f : danoEfetivo, crit);
+                if (!cosmetico) inimigo.ReceberDano(crit ? danoEfetivo * 1.5f : danoEfetivo, crit);
             }
         }
     }

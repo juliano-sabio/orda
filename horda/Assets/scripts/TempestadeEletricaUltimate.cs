@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TempestadeEletricaUltimate : MonoBehaviour
+public class TempestadeEletricaUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio          = 10f;
     public float duracao       = 5f;
@@ -34,7 +37,8 @@ public class TempestadeEletricaUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -118,7 +122,7 @@ public class TempestadeEletricaUltimate : MonoBehaviour
         StartCoroutine(AnimarRaio(alvoGO.transform.position));
 
         var ic = alvoGO.GetComponent<InimigoController>();
-        if (ic != null) ic.ReceberDano(danoPorBolt, false);
+        if (ic != null && !cosmetico) ic.ReceberDano(danoPorBolt, false);
     }
 
     static GameObject ResolverInimigo(GameObject go)
