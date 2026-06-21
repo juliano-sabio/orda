@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -41,6 +42,20 @@ public class LobbyUI : MonoBehaviour
     bool souHost   = false;
     bool estouPronto = false;
     string codigoSala = "SPIRIT-????";
+
+    // ── Co-op (rede NGO) ──────────────────────────────────────────────
+    // Quando rodando na cena de co-op (lobby_mp), o lobby deixa de ser simulado
+    // e passa a refletir a sessão real (Relay + PlayerNet + LobbyManager). Na cena
+    // single-player ("lobby") nada disso liga e o comportamento local é o de antes.
+    bool emCoop = false;
+    string statusCoop = "";
+    TextMeshProUGUI txtCodigoSala;          // label do código (host mostra o real do Relay)
+    float proxRefreshCoop = 0f;             // throttle do refresh do roster
+    GameObject painelJoinCliente;           // overlay de digitar código (cliente)
+    TMP_InputField campoCodigoInput;        // input do código (cliente)
+    TextMeshProUGUI txtStatusCoop;          // status da conexão (cliente)
+    // mapas do visual → cena co-op equivalente (só os com versão de rede entram)
+    static readonly string[] mapaCoop = { "primeira_fase_mp", null, null, null };
 
     // ── Configuração da sala (selecionada nos botões) ─────────────────
     // Mapas na mesma ordem das opções de "Mapa" (terrain.p1/p2/p3/surv).
@@ -136,6 +151,15 @@ public class LobbyUI : MonoBehaviour
         codigoSala  = PlayerPrefs.GetString("LobbyCode", GerarCodigo());
         PlayerPrefs.SetString("LobbyCode", codigoSala);
 
+        // co-op: detecta pela cena (lobby_mp = sessão real). Definido ANTES de montar
+        // a UI porque a restrição de mapa do painel direito depende disso.
+        emCoop = SceneManager.GetActiveScene().name == "lobby_mp";
+        if (emCoop)
+        {
+            souHost = PlayerPrefs.GetInt("LobbyHost", 1) == 1;
+            codigoSala = souHost ? "..." : "";   // host preenche com o código real do Relay
+        }
+
         // popula jogadores simulados
         jogadores[0] = new Jogador { nome = "Você", pronto = false, presente = true, isHost = souHost };
         jogadores[1] = new Jogador { nome = "", pronto = false, presente = false };
@@ -154,8 +178,18 @@ public class LobbyUI : MonoBehaviour
         // animação de entrada (painéis deslizam das laterais + fade), estilo seleção de personagem
         StartCoroutine(EntradaLobby());
 
-        // simula jogador entrando após 3s (para demo)
-        StartCoroutine(SimularEntrada());
+        if (emCoop)
+        {
+            // sessão real: conecta via Relay e popula o roster pelo PlayerNet.
+            LobbyState.EmLobby = true;
+            if (!souHost) CriarPainelJoinCliente();   // cliente precisa digitar o código
+            ConectarCoop();
+        }
+        else
+        {
+            // single-player: simula jogador entrando após 3s (demo visual).
+            StartCoroutine(SimularEntrada());
+        }
     }
 
     // Entrada do lobby: fade geral + painéis esquerdo/direito deslizando das bordas.
@@ -226,6 +260,8 @@ public class LobbyUI : MonoBehaviour
             }
             rb.anchoredPosition = p;
         }
+
+        if (emCoop) AtualizarCoop();
     }
 
     // ── Canvas ────────────────────────────────────────────────────────
@@ -321,6 +357,7 @@ public class LobbyUI : MonoBehaviour
             new Color(0.94f, 0.88f, 0.75f));
         txtCod.transform.SetParent(painelCodigo.transform, false);
         txtCod.alignment = TextAlignmentOptions.Left;
+        txtCodigoSala = txtCod;   // co-op: atualizado com o código real do Relay
 
         // botão copiar
         var btnCop = new GameObject("BtnCopiar");
@@ -565,9 +602,13 @@ public class LobbyUI : MonoBehaviour
     {
         // Sem a seção Dificuldade (definida pela fase em EscolherTerrenoUI).
         // Três seções distribuídas uniformemente: Mapa, Máx. Jogadores, Visibilidade.
+        // co-op: só mapas com cena de rede ficam liberados (hoje, só o primeiro).
+        bool[] bloqMapa = emCoop
+            ? new bool[]{ mapaCoop[0] == null, mapaCoop[1] == null, mapaCoop[2] == null, mapaCoop[3] == null }
+            : mapaBloqueado;
         CriarOpcaoConf(pai, Loc.T("lobby.map"), 0.70f, 0.87f,
             new[]{ Loc.T("terrain.p1.name"), Loc.T("terrain.p2.name"), Loc.T("terrain.p3.name"), Loc.T("terrain.surv.name") },
-            idx => mapaIdx = idx, mapaBloqueado);
+            idx => mapaIdx = idx, bloqMapa);
         CriarOpcaoConf(pai, Loc.T("lobby.max_players"), 0.46f, 0.63f,
             new[]{ "2", "3", "4" },
             idx => maxJogadoresSel = idx + 2);
@@ -773,6 +814,13 @@ public class LobbyUI : MonoBehaviour
         passivaIdx  = PlayerPrefs.GetInt($"SelectedPassiva_{idx}", 0);
         ConstruirListaUltimates(data);
         ConstruirListaPassivas(data);
+
+        // co-op: propaga o personagem escolhido pro roster (aparece no slot do colega).
+        if (emCoop)
+        {
+            var m = MeuNet();
+            if (m != null) m.SetChar(idx);
+        }
     }
 
     // ── Listas selecionáveis (ULTIMATE / PASSIVAS) ─────────────────────
@@ -1128,7 +1176,7 @@ public class LobbyUI : MonoBehaviour
         CriarBotao(Loc.T("lobby.exit"),
             new Vector2(0.04f, 0.02f), new Vector2(0.25f, 0.10f),
             new Color(0.35f, 0.06f, 0.06f),
-            () => SceneManager.LoadScene(cenaMenu));
+            SairLobby);
 
         // botão PRONTO / NÃO PRONTO
         var goPronto = new GameObject("BtnPronto");
@@ -1178,6 +1226,14 @@ public class LobbyUI : MonoBehaviour
     // ── Lógica ────────────────────────────────────────────────────────
     void TogglePronto()
     {
+        if (emCoop)
+        {
+            // rede: alterna meu ready; o visual do botão e dos slots vem do roster.
+            var m = MeuNet();
+            if (m != null) m.SetPronto(!m.Pronto);
+            return;
+        }
+
         estouPronto = !estouPronto;
         jogadores[0].pronto = estouPronto;
 
@@ -1197,6 +1253,16 @@ public class LobbyUI : MonoBehaviour
 
     void IniciarJogo()
     {
+        if (emCoop)
+        {
+            // rede: só o host inicia, e só quando todos estão prontos. O NGO faz o
+            // scene-load sincronizado pra todos (LobbyManager.IniciarServerRpc).
+            if (!souHost || LobbyManager.Instance == null) return;
+            if (!LobbyManager.Instance.TodosProntos()) return;
+            LobbyManager.Instance.IniciarServerRpc();
+            return;
+        }
+
         // mapa escolhido no lobby define a cena de destino (pula "escolher terreno")
         string cena = (mapaIdx >= 0 && mapaIdx < mapaCenas.Length) ? mapaCenas[mapaIdx] : cenaJogo;
         int dif = (mapaIdx >= 0 && mapaIdx < mapaDificuldade.Length) ? mapaDificuldade[mapaIdx] : 1;
@@ -1305,6 +1371,220 @@ public class LobbyUI : MonoBehaviour
         img.color = CorBotao(corVerde);
         yield return new WaitForSeconds(0.5f);
         img.color = CorBotao(corAcento);
+    }
+
+    // ══ Co-op (rede NGO) ══════════════════════════════════════════════
+    // Toda a lógica de rede vive aqui; o resto do LobbyUI continua sendo o visual
+    // do single-player. Só roda quando emCoop (cena lobby_mp).
+
+    PlayerNet MeuNet()
+    {
+        var l = PlayerStats.Local;
+        return l != null ? l.GetComponent<PlayerNet>() : null;
+    }
+
+    async void ConectarCoop()
+    {
+        statusCoop = "Conectando...";
+        AtualizarStatusCoop();
+        try
+        {
+            await NetBootstrap.InitAsync();
+            if (souHost)
+            {
+                codigoSala = await RelayConnector.HostAsync(MAX_JOGADORES);
+                PlayerPrefs.SetString("LobbyCode", codigoSala);
+                statusCoop = "Sala criada.";
+                if (txtCodigoSala != null) txtCodigoSala.text = codigoSala;
+            }
+            else
+            {
+                statusCoop = "Digite o código e clique Entrar.";
+            }
+        }
+        catch (System.Exception e) { statusCoop = "Falha: " + e.Message; }
+        AtualizarStatusCoop();
+    }
+
+    async void EntrarCoop()
+    {
+        string code = campoCodigoInput != null ? campoCodigoInput.text.Trim() : "";
+        if (string.IsNullOrEmpty(code)) { statusCoop = "Informe o código."; AtualizarStatusCoop(); return; }
+        statusCoop = "Entrando...";
+        AtualizarStatusCoop();
+        try
+        {
+            await RelayConnector.JoinAsync(code);
+            codigoSala = code;
+            PlayerPrefs.SetString("LobbyCode", code);
+            statusCoop = "Conectado.";
+            if (txtCodigoSala != null) txtCodigoSala.text = code;
+            if (painelJoinCliente != null) painelJoinCliente.SetActive(false);
+        }
+        catch (System.Exception e) { statusCoop = "Falha ao entrar: " + e.Message; }
+        AtualizarStatusCoop();
+    }
+
+    void AtualizarStatusCoop()
+    {
+        if (txtStatusCoop != null) txtStatusCoop.text = statusCoop;
+    }
+
+    // Overlay simples (cliente): campo de código + botão Entrar, no topo do lobby.
+    void CriarPainelJoinCliente()
+    {
+        var go = new GameObject("PainelJoinCliente");
+        go.transform.SetParent(canvasGO.transform, false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.30f, 0.40f); rt.anchorMax = new Vector2(0.70f, 0.60f);
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+        AplicarPainelGrande(go.AddComponent<Image>(), corPainel);
+        painelJoinCliente = go;
+
+        TextoPN(go, "Lbl", new Vector2(0.05f, 0.74f), new Vector2(0.95f, 0.96f),
+            Loc.T("multi.room_code"), 15f, FontStyles.Bold, corClaro)
+            .alignment = TextAlignmentOptions.Center;
+
+        // campo de input
+        var campo = new GameObject("Campo");
+        campo.transform.SetParent(go.transform, false);
+        var rc = campo.AddComponent<RectTransform>();
+        rc.anchorMin = new Vector2(0.08f, 0.42f); rc.anchorMax = new Vector2(0.92f, 0.66f);
+        rc.offsetMin = rc.offsetMax = Vector2.zero;
+        var campoImg = campo.AddComponent<Image>();
+        AplicarBarra(campoImg, new Color(0.10f, 0.06f, 0.055f));
+
+        var area = new GameObject("Text Area");
+        area.transform.SetParent(campo.transform, false);
+        var ra = area.AddComponent<RectTransform>();
+        ra.anchorMin = Vector2.zero; ra.anchorMax = Vector2.one;
+        ra.offsetMin = new Vector2(10f, 4f); ra.offsetMax = new Vector2(-10f, -4f);
+        area.AddComponent<RectMask2D>();
+
+        var ph = TextoPN(area, "Placeholder", Vector2.zero, Vector2.one,
+            "SPIRIT-1234", 16f, FontStyles.Italic, new Color(0.5f, 0.42f, 0.40f));
+        ph.alignment = TextAlignmentOptions.Left;
+        var txt = TextoPN(area, "Text", Vector2.zero, Vector2.one,
+            "", 16f, FontStyles.Bold, corClaro);
+        txt.alignment = TextAlignmentOptions.Left;
+
+        campoCodigoInput = campo.AddComponent<TMP_InputField>();
+        campoCodigoInput.targetGraphic = campoImg;
+        campoCodigoInput.textViewport = ra;
+        campoCodigoInput.textComponent = txt;
+        campoCodigoInput.placeholder = ph;
+        campoCodigoInput.text = PlayerPrefs.GetString("LobbyCode", "");
+
+        // botão Entrar
+        var btnGO = new GameObject("BtnEntrar");
+        btnGO.transform.SetParent(go.transform, false);
+        var rb = btnGO.AddComponent<RectTransform>();
+        rb.anchorMin = new Vector2(0.30f, 0.10f); rb.anchorMax = new Vector2(0.70f, 0.36f);
+        rb.offsetMin = rb.offsetMax = Vector2.zero;
+        var bimg = btnGO.AddComponent<Image>();
+        AplicarSpriteBotao(bimg, corVerde);
+        var hv = btnGO.AddComponent<LobbyBotaoHover>(); hv.alvo = bimg; hv.Definir(CorBotao(corVerde));
+        var btn = btnGO.AddComponent<Button>();
+        btn.targetGraphic = bimg; btn.transition = Selectable.Transition.None;
+        btn.onClick.AddListener(EntrarCoop);
+        TextoPN(btnGO, "T", Vector2.zero, Vector2.one,
+            Loc.T("multi.join_room"), 14f, FontStyles.Bold, Color.white)
+            .alignment = TextAlignmentOptions.Center;
+
+        // status abaixo
+        txtStatusCoop = TextoPN(go, "Status", new Vector2(0.05f, -0.02f), new Vector2(0.95f, 0.10f),
+            statusCoop, 11f, FontStyles.Italic, new Color(0.85f, 0.66f, 0.30f));
+        txtStatusCoop.alignment = TextAlignmentOptions.Center;
+    }
+
+    // Reflete o roster real (PlayerNet) nos slots e nos botões.
+    void AtualizarCoop()
+    {
+        if (Time.unscaledTime < proxRefreshCoop) return;
+        proxRefreshCoop = Time.unscaledTime + 0.25f;
+
+        // código do host pode chegar depois da 1a montagem
+        if (txtCodigoSala != null && souHost && !string.IsNullOrEmpty(codigoSala) && codigoSala != "...")
+            txtCodigoSala.text = codigoSala;
+
+        // limpa
+        for (int i = 0; i < MAX_JOGADORES; i++)
+        {
+            jogadores[i].presente = false;
+            jogadores[i].nome = "";
+            jogadores[i].pronto = false;
+            jogadores[i].isHost = false;
+        }
+
+        // monta o roster com o jogador local primeiro (slot 0 = "Você")
+        var ordenados = new System.Collections.Generic.List<PlayerNet>();
+        PlayerNet meu = MeuNet();
+        if (meu != null) ordenados.Add(meu);
+        for (int i = 0; i < PlayerStats.All.Count; i++)
+        {
+            var pn = PlayerStats.All[i] != null ? PlayerStats.All[i].GetComponent<PlayerNet>() : null;
+            if (pn == null || pn == meu) continue;
+            ordenados.Add(pn);
+        }
+
+        for (int s = 0; s < ordenados.Count && s < MAX_JOGADORES; s++)
+        {
+            var pn = ordenados[s];
+            bool ehHost = pn.OwnerClientId == 0;
+            string nome = pn.Nome;
+            if (string.IsNullOrEmpty(nome)) nome = (pn == meu ? "Você" : ("Jogador" + (s + 1)));
+            jogadores[s].presente = true;
+            jogadores[s].nome = nome;
+            jogadores[s].pronto = pn.Pronto;
+            jogadores[s].isHost = ehHost;
+        }
+
+        AtualizarSlots();
+
+        // avatar de cada slot ocupado = ícone do personagem escolhido
+        for (int s = 0; s < ordenados.Count && s < MAX_JOGADORES; s++)
+        {
+            if (slotAvatarIcon == null || s >= slotAvatarIcon.Length || slotAvatarIcon[s] == null) continue;
+            var pn = ordenados[s];
+            CharacterData cd = (characters != null && pn.CharIndexLobby >= 0 && pn.CharIndexLobby < characters.Length)
+                ? characters[pn.CharIndexLobby] : null;
+            if (cd != null && cd.icon != null)
+            {
+                slotAvatarIcon[s].sprite = cd.icon;
+                slotAvatarIcon[s].enabled = true;
+                if (slotAvatarQ != null && s < slotAvatarQ.Length && slotAvatarQ[s] != null) slotAvatarQ[s].gameObject.SetActive(false);
+            }
+        }
+
+        // botão PRONTO reflete meu estado
+        if (txtBtnPronto != null && meu != null)
+        {
+            if (meu.Pronto)
+            {
+                if (hovPronto != null) hovPronto.Definir(CorBotao(corCinza)); else if (imgBtnPronto != null) imgBtnPronto.color = CorBotao(corCinza);
+                txtBtnPronto.text = Loc.T("lobby.cancel");
+            }
+            else
+            {
+                if (hovPronto != null) hovPronto.Definir(CorBotao(corVerde)); else if (imgBtnPronto != null) imgBtnPronto.color = CorBotao(corVerde);
+                txtBtnPronto.text = Loc.T("lobby.ready");
+            }
+        }
+
+        // botão INICIAR (host) só habilita quando todos prontos
+        if (souHost && btnIniciar != null)
+            btnIniciar.interactable = LobbyManager.Instance != null && LobbyManager.Instance.TodosProntos();
+    }
+
+    void SairLobby()
+    {
+        if (emCoop)
+        {
+            var nm = NetworkManager.Singleton;
+            if (nm != null) nm.Shutdown();
+            LobbyState.EmLobby = false;
+        }
+        SceneManager.LoadScene(cenaMenu);
     }
 
     // ── Helpers de construção ─────────────────────────────────────────
