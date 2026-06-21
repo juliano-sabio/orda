@@ -38,22 +38,30 @@ public static class SkillFxCosmetico
     // Lista dos tipos suportados (pro botão de debug listar automaticamente).
     public static IEnumerable<SpecificSkillType> Tipos => Suportados.Keys;
 
-    public static void Adicionar(PlayerStats alvo, SkillData skill)
+    // Adiciona a versão cosmética da skill no fantoche. `elemento` = appliedElement do DONO
+    // (a infusão). Usa um CLONE do SkillData pra a cor não vir do asset compartilhado (que
+    // reflete a infusão do COLEGA). Retorna a behavior criada (pro PlayerNet rastrear e
+    // atualizar a cor quando o dono infundir depois).
+    public static SkillBehavior Adicionar(PlayerStats alvo, SkillData skill, int elemento)
     {
-        if (alvo == null || skill == null) return;
+        if (alvo == null || skill == null) return null;
         System.Type tipo;
-        if (!Suportados.TryGetValue(skill.specificType, out tipo)) return;
+        if (!Suportados.TryGetValue(skill.specificType, out tipo)) return null;
+
+        var clone = Object.Instantiate(skill); // cópia runtime, independente do asset
+        clone.appliedElement = (ElementType)elemento;
 
         var comp = alvo.gameObject.AddComponent(tipo) as SkillBehavior;
-        if (comp == null) return;
+        if (comp == null) return null;
 
         comp.cosmetico = true;
-        comp.skillData = skill;
+        comp.skillData = clone;
 
         // Config opcional: muitas behaviors têm ConfigurarDeSkillData(SkillData).
         var m = tipo.GetMethod("ConfigurarDeSkillData");
-        if (m != null) m.Invoke(comp, new object[] { skill });
+        if (m != null) m.Invoke(comp, new object[] { clone });
 
         comp.Initialize(alvo);
+        return comp;
     }
 }

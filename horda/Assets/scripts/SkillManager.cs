@@ -444,7 +444,7 @@ public class SkillManager : MonoBehaviour
                     if (fx != null && pn != null)
                     {
                         int idx = fx.IndiceSkill(skill);
-                        if (idx >= 0) pn.SincronizarSkillCosmetica(idx);
+                        if (idx >= 0) pn.SincronizarSkillCosmetica(idx, (int)skill.appliedElement);
                     }
                 }
             }

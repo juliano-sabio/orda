@@ -120,22 +120,44 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.Owner)]
     public void SubirNivelOwnerRpc(int novoNivel) { if (stats != null) stats.AplicarLevelUpLocal(novoNivel); }
 
+    // Instâncias cosméticas do fantoche, por índice de skill (pra recolorir na infusão).
+    readonly System.Collections.Generic.Dictionary<int, SkillBehavior> cosmeticasPorIdx =
+        new System.Collections.Generic.Dictionary<int, SkillBehavior>();
+
     // Co-op: o dono adquiriu uma skill (suportada) → o fantoche do colega passa a rodar
-    // a versão COSMÉTICA dela (gera o visual, sem dano). idx = índice no skillsRegistro.
-    public void SincronizarSkillCosmetica(int idx)
+    // a versão COSMÉTICA dela. idx = índice no skillsRegistro; elemento = appliedElement do dono.
+    public void SincronizarSkillCosmetica(int idx, int elemento)
     {
-        if (IsOwner && IsSpawned) AdicionarSkillCosmeticaServerRpc(idx);
+        if (IsOwner && IsSpawned) AdicionarSkillCosmeticaServerRpc(idx, elemento);
     }
 
     [Rpc(SendTo.Server)]
-    void AdicionarSkillCosmeticaServerRpc(int idx) { AdicionarSkillCosmeticaRpc(idx); }
+    void AdicionarSkillCosmeticaServerRpc(int idx, int elemento) { AdicionarSkillCosmeticaRpc(idx, elemento); }
 
     [Rpc(SendTo.NotOwner)]
-    void AdicionarSkillCosmeticaRpc(int idx)
+    void AdicionarSkillCosmeticaRpc(int idx, int elemento)
     {
         var fx = GetComponent<SkillFxNet>();
         if (fx == null || fx.skillsRegistro == null || idx < 0 || idx >= fx.skillsRegistro.Length) return;
-        SkillFxCosmetico.Adicionar(stats, fx.skillsRegistro[idx]);
+        var b = SkillFxCosmetico.Adicionar(stats, fx.skillsRegistro[idx], elemento);
+        if (b != null) cosmeticasPorIdx[idx] = b;
+    }
+
+    // Co-op: o dono infundiu uma skill → recolorir a cópia cosmética no fantoche.
+    public void SincronizarInfusao(int idx, int elemento)
+    {
+        if (IsOwner && IsSpawned) InfundirSkillCosmeticaServerRpc(idx, elemento);
+    }
+
+    [Rpc(SendTo.Server)]
+    void InfundirSkillCosmeticaServerRpc(int idx, int elemento) { InfundirSkillCosmeticaRpc(idx, elemento); }
+
+    [Rpc(SendTo.NotOwner)]
+    void InfundirSkillCosmeticaRpc(int idx, int elemento)
+    {
+        SkillBehavior b;
+        if (cosmeticasPorIdx.TryGetValue(idx, out b) && b != null && b.skillData != null)
+            b.skillData.appliedElement = (ElementType)elemento;
     }
 
     // Co-op: o dono usou o ultimate; o fantoche do colega roda SÓ o visual (sem dano).

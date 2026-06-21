@@ -385,6 +385,19 @@ public class ElementApplicationUI : MonoBehaviour
         if (def != null) skillSelecionada.elementColor = def.cor;
         SkillIconsHUD.Instance?.AtualizarBadgeElemento(skillSelecionada);
 
+        // Co-op: avisa o fantoche do colega pra recolorir a cópia cosmética desta skill.
+        if (NetSpawn.EmRede)
+        {
+            var pl = PlayerStats.Local;
+            var fx = pl != null ? pl.GetComponent<SkillFxNet>() : null;
+            var pn = pl != null ? pl.GetComponent<PlayerNet>() : null;
+            if (fx != null && pn != null)
+            {
+                int idxSkill = fx.IndiceSkill(skillSelecionada);
+                if (idxSkill >= 0) pn.SincronizarInfusao(idxSkill, (int)elementoAtual);
+            }
+        }
+
         // Atualiza o UIManager principal (HUD de skills)
         var uiManager = FindFirstObjectByType<UIManager>();
         if (uiManager != null) uiManager.AtualizarElementoAplicado();
