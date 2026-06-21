@@ -22,14 +22,40 @@ são aplicados via:
 
 ## Inventário (por categoria + prioridade)
 
-### A. Singletons compartilhados que deveriam ser por-player — **CRÍTICO** (vaza entre players)
+### A. **[CORREÇÃO da 1ª versão]** Singletons NÃO são o problema
 
-- **`SkillEvolutionManager`** — `DontDestroyOnLoad` singleton; `evolucoesAtivas` é **compartilhada** →
-  evolução do player 2 afeta as skills do player 1 (`SkillEvolutionManager.Tem(...)` checado nos dois).
-  **Padrão P2.** Fix: um `SkillEvolutionManager` POR player (componente no player), e `Tem(tipo)` /
-  `AplicarEvolucao` operam no manager do `PlayerStats.Local`. As skills já rodam no dono → leem o manager do dono.
-  ⚠️ É o bug "se o player 2 evolui o efeito aparece no player 1".
-- Verificar: `StatusCardSystem` (cartas) — já lê `PlayerStats.Local`, mas confirmar se o estado é por-player.
+Reverificado: no **MPPM cada virtual player é um PROCESSO separado** → singletons (`SkillEvolutionManager`,
+`SkillManager`, `StatusCardSystem`, `UIManager`…) são **por-processo**, NÃO compartilhados entre players.
+E a evolução **já é roteada certo**: `OfertarEvolucaoOwnerRpc` é `SendTo.Owner`, o host oferta pra cada
+player no processo dele, `AplicarEvolucao` roda no dono. **Não há vazamento via singleton.** A "categoria A"
+da 1ª versão estava errada.
+
+> O que o usuário viu como "evolução do player 2 no player 1" é, na verdade, a **categoria A-bis abaixo**
+> (efeito de status aplicado no host indo pro player 1) ou a oferta de evolução compartilhada pós-evento
+> (os dois players evoluem após um evento do mundo — comportamento correto).
+
+### A-bis. **CRÍTICO — Efeitos no player aplicados host-side NÃO roteiam pro dono**
+
+`PlayerStats.TakeDamage` roteia pro dono (`if (!IsOwner) TomarDanoOwnerRpc; return`), mas os DEMAIS métodos
+de efeito **não**:
+
+| Método | Roteia? | Quem aplica (host-side) |
+|---|---|---|
+| `TakeDamage` | ✅ sim | inimigos/bosses/projéteis |
+| `AplicarSlow` | ❌ não | FantasmaGelo, ZonaGelo, projetil_inimigo |
+| `AplicarVenenoPlayer` | ❌ não | FantasmaVeneno(+Atirador), SlimeVenenosa, BossCaveira |
+| `AplicarQueimaduraPlayer` | ❌ não | (queima de boss/skill) |
+| `AplicarParalisiaPlayer` | ❌ não | (paralisia) |
+| `Heal` | ❌ não (mas pickups vão via `CurarOwnerRpc`) | zonas de cura host-side |
+| `AplicarVisaoReduzida` (escuridão) | ✅ **FEITO** | ProjetilEspecialBoss |
+
+**Consequência:** quando o host aplica esses efeitos no FANTOCHE do player 2, eles afetam só o fantoche no
+host (sem efeito real no player 2 → **player 2 fica imune a slow/veneno/queimadura/paralisia de inimigo**) e
+os visuais aparecem no player 1. **Esse é o verdadeiro acoplamento sistêmico**, não os singletons.
+
+**Fix (P1, centralizado):** dar a cada método de efeito o mesmo guarda do `TakeDamage` — `if (!IsOwner) {
+…OwnerRpc(args); return; }` — com os RPCs correspondentes no `PlayerNet` (SendTo.Owner). Centraliza o
+roteamento num lugar e cobre TODOS os callers (inimigos/bosses/eventos) de uma vez.
 
 ### B. Efeitos por-player aplicados no host (rotear pro dono) — **P1**
 
@@ -64,13 +90,18 @@ Mesmo tratamento da categoria C (P3 ou Local conforme o contexto).
 
 `BordaSangueEvento`, `EventoColapso`, `EventoEclipseTorre`, `TempestadeEletricaEvento`, `Fase2LuzManager`.
 
-## Plano em lotes (ordem sugerida)
+## Plano em lotes (ordem sugerida) — CORRIGIDO
 
-1. **Lote A — Singletons por-player (CRÍTICO):** `SkillEvolutionManager` → por-player. Fecha o vazamento de evolução. (+ auditar outros singletons de estado.)
-2. **Lote B — Efeitos por-player roteados:** queima, vinhetas/flashes de dano/morte → rotear pro dono (P1). Varrer categorias C/D pra usar Local/MaisProximo certo.
-3. **Lote C — Boss completo:** replicar `IBossHud` nos 3 bosses restantes + fase + banner + partículas de morte (broadcast).
+1. **Lote A — Roteamento de efeitos no player (CRÍTICO):** dar a `AplicarSlow`/`AplicarVenenoPlayer`/
+   `AplicarQueimaduraPlayer`/`AplicarParalisiaPlayer`/`Heal` (host-side) o mesmo guarda de roteamento do
+   `TakeDamage` (+ RPCs no `PlayerNet`). Fecha "player 2 imune a status + visual no player 1". (~5 métodos + RPCs.)
+2. **Lote B — Find/Local em contexto host:** varrer categorias C/D (FindTag / FindFirst<PlayerStats>) pra usar
+   `MaisProximo` (mira host) ou `Local` (tela do cliente). Inclui a queima visual (`EfeitoQueima`).
+3. **Lote C — Boss completo:** replicar `IBossHud` nos 3 bosses restantes + fase + banner + partículas de morte.
 4. **Lote D — Eventos:** UI + mecânicas no cliente (o maior; um evento por vez).
 5. **Lote E — Timer/run-cycle + missões** sincronizados.
+
+> Nota: singletons NÃO entram (são por-processo no MPPM). Evolução já está correta.
 
 ## Mecanismo central reutilizável
 
