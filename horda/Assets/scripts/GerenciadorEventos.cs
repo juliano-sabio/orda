@@ -370,7 +370,7 @@ if (timerContagem <= 0f)
     float TempoDecorrido()
     {
         if (timerManager != null)
-            return timerManager.levelDuration - timerManager.currentTime;
+            return timerManager.currentTime; // currentTime agora ja e o tempo decorrido (crescente)
         return Time.timeSinceLevelLoad;
     }
 

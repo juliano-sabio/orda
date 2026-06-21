@@ -58,7 +58,7 @@ public class TimerManager : MonoBehaviour
 
     void InitializeTimer()
     {
-        currentTime = levelDuration;
+        currentTime = 0f; // cronometro CRESCENTE: comeca em 0 e sobe (sem fim)
         UpdateTimeBar();
         isRunning = true;
 
@@ -84,36 +84,26 @@ public class TimerManager : MonoBehaviour
             return;
         }
 
-        currentTime -= Time.deltaTime;
+        currentTime += Time.deltaTime; // sobe indefinidamente — sem "tempo para acabar"
         UpdateTimeBar();
         CheckEvents();
         CheckBossEvents();
-
-        if (currentTime <= 0) InvocarBossFinal();
     }
 
     bool HaBossVivo() => bossAtivo != null;
 
     void UpdateTimeBar()
     {
-        float timeRatio = currentTime / levelDuration;
-        if (timeBar != null) timeBar.value = timeRatio;
+        // Cronometro crescente sem fim: o badge mostra apenas o tempo decorrido.
         if (timeText != null) timeText.text = FormatTime(currentTime);
-
-        if (timeBarFill != null)
-        {
-            timeBarFill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01(timeRatio), 1f);
-            if (timeRatio <= criticalThreshold) timeBarFill.color = criticalColor;
-            else if (timeRatio <= warningThreshold) timeBarFill.color = warningColor;
-            else timeBarFill.color = normalColor;
-        }
     }
 
-    // Reconstrói o cronômetro com visual do tema (moldura vermelha, trilha escura, tempo branco),
-    // reaproveitando a MESMA posição/canvas do cronômetro antigo.
+    // Reconstrói o cronômetro como um BADGE/pílula (moldura âmbar, fundo escuro, tempo branco
+    // com brilho e sombra), reaproveitando a MESMA posição/canvas do cronômetro antigo.
+    // Não há mais barra de progresso: o tempo é crescente e sem fim.
     void CriarTimerUINovo()
     {
-        // paleta do tema (brasa/forja): âmbar → laranja → vermelho (substitui o verde/amarelo)
+        // paleta do tema (brasa/forja)
         normalColor   = new Color(0.86f, 0.60f, 0.18f);
         warningColor  = new Color(0.90f, 0.42f, 0.12f);
         criticalColor = new Color(0.82f, 0.16f, 0.14f);
@@ -129,24 +119,31 @@ public class TimerManager : MonoBehaviour
         if (timeBar     != null) timeBar.gameObject.SetActive(false);
         if (timeBarFill != null) timeBarFill.gameObject.SetActive(false);
 
-        var cont = new GameObject("TimerBar", typeof(RectTransform), typeof(Image));
+        // fallback: algumas cenas (ex.: segunda_fase) têm o cronômetro antigo solto
+        // na UI sem estar referenciado nos campos acima — esconde por nome também.
+        // ("timeText" é filho de "timeBar", então esconder a barra cobre os dois.)
+        foreach (var nome in new[] { "timeBar", "timeText", "timeBarFill" })
+        {
+            var antigo = GameObject.Find(nome);
+            if (antigo != null) antigo.SetActive(false);
+        }
+
+        // container transparente ocupando o MESMO slot do cronômetro antigo
+        var cont = new GameObject("TimerBadge", typeof(RectTransform), typeof(Image));
         var rc = cont.GetComponent<RectTransform>();
+
+        // posiciona SEMPRE no canto superior esquerdo (com uma margem), do tamanho do badge
+        Vector2 cantoMargem = new Vector2(16f, -16f);
+        Vector2 badgeSize   = new Vector2(220f, 54f);
 
         if (refRT != null && refRT.parent != null)
         {
-            // mesmo lugar do antigo
             cont.transform.SetParent(refRT.parent, false);
-            rc.anchorMin        = refRT.anchorMin;
-            rc.anchorMax        = refRT.anchorMax;
-            rc.pivot            = refRT.pivot;
-            rc.anchoredPosition = refRT.anchoredPosition;
-            rc.sizeDelta        = refRT.sizeDelta;
-            rc.localScale       = Vector3.one;
             cont.transform.SetSiblingIndex(refRT.GetSiblingIndex());
         }
         else
         {
-            // fallback: canvas próprio no topo-centro
+            // fallback: canvas próprio
             var canvasGO = new GameObject("TimerCanvas");
             var canvas = canvasGO.AddComponent<Canvas>();
             canvas.renderMode  = RenderMode.ScreenSpaceOverlay;
@@ -157,55 +154,81 @@ public class TimerManager : MonoBehaviour
             cs.matchWidthOrHeight  = 0.5f;
             canvasGO.AddComponent<GraphicRaycaster>();
             cont.transform.SetParent(canvasGO.transform, false);
-            rc.anchorMin = new Vector2(0.5f, 1f); rc.anchorMax = new Vector2(0.5f, 1f);
-            rc.pivot = new Vector2(0.5f, 1f);
-            rc.anchoredPosition = new Vector2(0f, -20f);
-            rc.sizeDelta = new Vector2(520f, 38f);
         }
-        cont.GetComponent<Image>().color = new Color(0.62f, 0.11f, 0.11f, 1f);
+        // ancora no topo-esquerda
+        rc.anchorMin = new Vector2(0f, 1f); rc.anchorMax = new Vector2(0f, 1f);
+        rc.pivot = new Vector2(0f, 1f);
+        rc.anchoredPosition = cantoMargem;
+        rc.sizeDelta = badgeSize;
+        rc.localScale = Vector3.one;
+        cont.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f); // transparente
 
-        // trilha escura (dentro da moldura)
-        var trk = new GameObject("Track", typeof(RectTransform), typeof(Image));
-        trk.transform.SetParent(cont.transform, false);
-        var rtk = trk.GetComponent<RectTransform>();
-        rtk.anchorMin = Vector2.zero; rtk.anchorMax = Vector2.one;
-        rtk.offsetMin = new Vector2(3f, 3f); rtk.offsetMax = new Vector2(-3f, -3f);
-        trk.GetComponent<Image>().color = new Color(0.09f, 0.05f, 0.05f, 1f);
+        // ── PÍLULA centralizada dentro do slot ───────────────────────────────
+        // borda externa escura (contorno)
+        var pill = new GameObject("Pill", typeof(RectTransform), typeof(Image));
+        pill.transform.SetParent(cont.transform, false);
+        var rpi = pill.GetComponent<RectTransform>();
+        rpi.anchorMin = new Vector2(0.5f, 0.5f); rpi.anchorMax = new Vector2(0.5f, 0.5f);
+        rpi.pivot = new Vector2(0.5f, 0.5f); rpi.anchoredPosition = Vector2.zero;
+        rpi.sizeDelta = new Vector2(220f, 54f);
+        pill.GetComponent<Image>().color = new Color(0.16f, 0.04f, 0.04f, 1f);
 
-        // preenchimento (esvazia da esquerda; largura controlada por anchorMax.x)
-        var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
-        fillGO.transform.SetParent(trk.transform, false);
-        var rfi = fillGO.GetComponent<RectTransform>();
-        rfi.anchorMin = Vector2.zero; rfi.anchorMax = Vector2.one;
-        rfi.offsetMin = Vector2.zero; rfi.offsetMax = Vector2.zero;
-        var fillImg = fillGO.GetComponent<Image>();
-        fillImg.color = normalColor;
+        // moldura âmbar
+        var frame = new GameObject("Frame", typeof(RectTransform), typeof(Image));
+        frame.transform.SetParent(pill.transform, false);
+        var rfr = frame.GetComponent<RectTransform>();
+        rfr.anchorMin = Vector2.zero; rfr.anchorMax = Vector2.one;
+        rfr.offsetMin = new Vector2(3f, 3f); rfr.offsetMax = new Vector2(-3f, -3f);
+        frame.GetComponent<Image>().color = normalColor;
 
-        // brilho no topo do preenchimento (acompanha a largura)
-        var hi = new GameObject("FillHi", typeof(RectTransform), typeof(Image));
-        hi.transform.SetParent(fillGO.transform, false);
-        var rhi = hi.GetComponent<RectTransform>();
-        rhi.anchorMin = new Vector2(0f, 1f); rhi.anchorMax = new Vector2(1f, 1f);
-        rhi.offsetMin = new Vector2(0f, -2f); rhi.offsetMax = Vector2.zero;
-        hi.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.22f);
+        // fundo escuro interno
+        var bg = new GameObject("BG", typeof(RectTransform), typeof(Image));
+        bg.transform.SetParent(frame.transform, false);
+        var rbg = bg.GetComponent<RectTransform>();
+        rbg.anchorMin = Vector2.zero; rbg.anchorMax = Vector2.one;
+        rbg.offsetMin = new Vector2(3f, 3f); rbg.offsetMax = new Vector2(-3f, -3f);
+        bg.GetComponent<Image>().color = new Color(0.10f, 0.06f, 0.05f, 1f);
 
-        // texto do tempo, centralizado e branco
+        // brilho superior (gloss)
+        var gloss = new GameObject("Gloss", typeof(RectTransform), typeof(Image));
+        gloss.transform.SetParent(bg.transform, false);
+        var rgl = gloss.GetComponent<RectTransform>();
+        rgl.anchorMin = new Vector2(0f, 0.55f); rgl.anchorMax = new Vector2(1f, 1f);
+        rgl.offsetMin = Vector2.zero; rgl.offsetMax = Vector2.zero;
+        gloss.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.05f);
+
+        // sombra do texto (leve deslocamento pra baixo)
+        var shGO = new GameObject("TimerTextShadow", typeof(RectTransform));
+        shGO.transform.SetParent(bg.transform, false);
+        var rsh = shGO.GetComponent<RectTransform>();
+        rsh.anchorMin = Vector2.zero; rsh.anchorMax = Vector2.one;
+        rsh.offsetMin = new Vector2(0f, -2f); rsh.offsetMax = new Vector2(0f, -2f);
+        var sh = shGO.AddComponent<TextMeshProUGUI>();
+        sh.text = "00:00";
+        sh.enableAutoSizing = true; sh.fontSizeMin = 12f; sh.fontSizeMax = 28f;
+        sh.fontStyle = FontStyles.Bold;
+        sh.alignment = TextAlignmentOptions.Center;
+        sh.characterSpacing = 4f;
+        sh.color = new Color(0f, 0f, 0f, 0.55f);
+
+        // texto do tempo (branco quente, negrito)
         var txtGO = new GameObject("TimerText", typeof(RectTransform));
-        txtGO.transform.SetParent(cont.transform, false);
+        txtGO.transform.SetParent(bg.transform, false);
         var rt = txtGO.GetComponent<RectTransform>();
         rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
         var tmp = txtGO.AddComponent<TextMeshProUGUI>();
         tmp.text = "00:00";
         tmp.enableAutoSizing = true;
-        tmp.fontSizeMin = 10f;
-        tmp.fontSizeMax = 24f;
+        tmp.fontSizeMin = 12f;
+        tmp.fontSizeMax = 28f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        tmp.characterSpacing = 4f;
+        tmp.color = new Color(1f, 0.97f, 0.90f, 1f);
 
-        // reaponta as referências para o novo cronômetro
+        // reaponta as referências para o novo cronômetro (sem barra)
         timeBar     = null;
-        timeBarFill = fillImg;
+        timeBarFill = null;
         timeText    = tmp;
     }
 
@@ -219,7 +242,9 @@ public class TimerManager : MonoBehaviour
     void CheckEvents()
     {
         if (currentEventIndex >= timedEvents.Length) return;
-        if ((currentTime / levelDuration) <= timedEvents[currentEventIndex].triggerTime)
+        // triggerTime continua sendo a "fracao restante" de referencia (compatibilidade);
+        // como agora contamos pra cima, comparamos pela fracao restante = 1 - decorrido/levelDuration.
+        if ((1f - currentTime / levelDuration) <= timedEvents[currentEventIndex].triggerTime)
         {
             TriggerEvent(timedEvents[currentEventIndex]);
             currentEventIndex++;
@@ -234,7 +259,7 @@ public class TimerManager : MonoBehaviour
         // O boss final nao e disparado por triggerTime; ele aparece quando o tempo zera.
         if (be.ehFinal) { currentBossIndex++; return; }
 
-        if ((currentTime / levelDuration) <= be.triggerTime)
+        if ((1f - currentTime / levelDuration) <= be.triggerTime)
         {
             bossAtivo = TriggerBossEvent(be);
             currentBossIndex++;
@@ -302,7 +327,7 @@ public class TimerManager : MonoBehaviour
         bossAtivo = null;
         bossFinalAtivo = null;
         aguardandoBossFinal = false;
-        currentTime = levelDuration;
+        currentTime = 0f; // recomeca a contagem crescente
         isRunning = true;
         UpdateTimeBar();
     }
@@ -314,7 +339,8 @@ public class TimerManager : MonoBehaviour
         ReiniciarCiclo();
     }
 
-    public float GetTimeRatio() => currentTime / levelDuration;
+    // currentTime agora e o tempo DECORRIDO; devolve a fracao "restante" so por compatibilidade.
+    public float GetTimeRatio() => Mathf.Clamp01(1f - currentTime / levelDuration);
 }
 
 // AS CLASSES ABAIXO DEVEM FICAR FORA DA CLASSE TIMERMANAGER, MAS NO MESMO ARQUIVO

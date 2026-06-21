@@ -99,14 +99,13 @@ public class ContadorMortes : MonoBehaviour
         go.transform.SetParent(canvasGO.transform, false);
 
         var rt = go.AddComponent<RectTransform>();
-        // Espelha o anchor do timeBar (stretch no topo) para ficar alinhado com ele.
-        // O timeBar tem: anchorMin=(0,1) anchorMax=(1,1), anchoredPos=(-753.56, -55.44),
-        // sizeDelta=(-1567.45, 43.16) → efetivamente x:30~383, bottom em y≈-77 do topo.
+        // Fica logo ABAIXO do badge do cronômetro (topo-esquerda).
+        // Badge: anchor topo-esq, pivot (0,1), pos (16,-16), size (220,54) → bottom ≈ -70.
         rt.anchorMin        = new Vector2(0f, 1f);
-        rt.anchorMax        = new Vector2(1f, 1f);
-        rt.pivot            = new Vector2(0.5f, 1f);
-        rt.sizeDelta        = new Vector2(-1567f, 30f);
-        rt.anchoredPosition = new Vector2(-753.5f, -82f); // 5px abaixo do bottom do timeBar (~-77)
+        rt.anchorMax        = new Vector2(0f, 1f);
+        rt.pivot            = new Vector2(0f, 1f);
+        rt.sizeDelta        = new Vector2(220f, 28f);
+        rt.anchoredPosition = new Vector2(16f, -74f); // ~4px abaixo do badge, alinhado à esquerda
 
         textoContador = go.AddComponent<TextMeshProUGUI>();
         textoContador.fontSize           = 20;

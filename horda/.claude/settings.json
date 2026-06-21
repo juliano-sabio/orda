@@ -15,7 +15,20 @@
       "mcp__unity__refresh_unity",
       "Bash(grep -aoE \"m_Script: \\\\{fileID: [0-9]+, guid: [a-f0-9]+\" Assets/prefebs/perssonagens/player.prefab)",
       "mcp__unity__manage_prefabs",
-      "mcp__unity__manage_texture"
+      "mcp__unity__manage_texture",
+      "Bash(python3 -)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"HTTP %{http_code} em %{time_total}s\\\\n\" http://127.0.0.1:8080/mcp)",
+      "Bash(cd \"c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/Screenshots\" && rm -f screenshot-20260619-2235*.png screenshot-20260619-2235*.png.meta screenshot-20260619-2238*.png screenshot-20260619-2238*.png.meta screenshot-20260619-2239*.png screenshot-20260619-2239*.png.meta screenshot-20260619-2241*.png screenshot-20260619-2241*.png.meta screenshot-20260619-2243*.png screenshot-20260619-2243*.png.meta && ls)",
+      "Bash(cd \"c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/Screenshots\" && rm -f screenshot-20260620-0900*.png screenshot-20260620-0900*.png.meta && echo \"removido\")",
+      "Bash(cd \"c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/Screenshots\" && rm -f screenshot-20260620-0905*.png screenshot-20260620-0905*.png.meta && echo ok)",
+      "Bash(cd \"c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/Screenshots\" && rm -f screenshot-20260620-0907*.png screenshot-20260620-0907*.png.meta && echo ok)",
+      "Bash(cd \"c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/Screenshots\" && rm -f screenshot-20260620-0908*.png screenshot-20260620-0908*.png.meta && echo ok)",
+      "Bash(cd \"c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/Screenshots\" && rm -f screenshot-20260620-0910*.png screenshot-20260620-0910*.png.meta && echo ok)",
+      "Bash(cd \"c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/Screenshots\" && rm -f screenshot-20260620-0912*.png screenshot-20260620-0912*.png.meta && echo ok)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda\\horda",
+      "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda\\horda"
     ]
   }
 }
