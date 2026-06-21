@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 6631065835970962029}
   - component: {fileID: 7311003024434260887}
   - component: {fileID: 136373494680805603}
+  - component: {fileID: 1866898304420367664}
   m_Layer: 0
   m_Name: bossslimeguardaelite
   m_TagString: Enemy
@@ -348,4 +349,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea00134515262b848a631803a312625a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyNet
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &1866898304420367664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3409203229970640920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f61347275be1a154fa42186c6ac233ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHudNet
   ShowTopMostFoldoutHeaderGroup: 1

@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 48258201810947251}
   - component: {fileID: 1129259502507856278}
   - component: {fileID: 708163101558613579}
+  - component: {fileID: 940743607332370264}
   m_Layer: 0
   m_Name: bosscaveira
   m_TagString: Enemy
@@ -373,4 +374,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea00134515262b848a631803a312625a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyNet
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &940743607332370264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5323307897340778581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f61347275be1a154fa42186c6ac233ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHudNet
   ShowTopMostFoldoutHeaderGroup: 1
