@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class SegundaChanceSkillBehavior : SkillBehavior, ISkillComRecarga
+public class SegundaChanceSkillBehavior : SkillBehavior, ISkillComRecarga, IDefensivaCosmetico
 {
     float porcentagemCura = 0.3f;
     float recarga         = 360f;
@@ -53,8 +53,34 @@ public class SegundaChanceSkillBehavior : SkillBehavior, ISkillComRecarga
             pct = 0.60f;
 
         playerStats.health = playerStats.maxHealth * pct;
+        // co-op: avisa os fantoches pra reproduzirem o efeito de ressurreição.
+        if (NetSpawn.EmRede)
+        {
+            var pn = playerStats.GetComponent<PlayerNet>();
+            if (pn != null) pn.SincronizarDefensiva((int)SpecificSkillType.SegundaChance);
+        }
         StartCoroutine(EfeitoRessurreicao());
         return true;
+    }
+
+    // Co-op: no fantoche reproduz o anel + o flash do sprite (sem flash/texto de tela
+    // nem invulnerabilidade, que são do jogador dono).
+    public void ExecutarCosmetico()
+    {
+        cosmetico = true;
+        StartCoroutine(EfeitoRessurreicaoCosmetico());
+    }
+
+    IEnumerator EfeitoRessurreicaoCosmetico()
+    {
+        var sr = playerStats != null ? playerStats.GetComponent<SpriteRenderer>() : null;
+        StartCoroutine(AnelExpansivo());
+        for (int i = 0; i < 6; i++)
+        {
+            if (sr != null) sr.color = i % 2 == 0 ? new Color(1f, 0.9f, 0.1f) : Color.white;
+            yield return new WaitForSecondsRealtime(0.12f);
+        }
+        if (sr != null) sr.color = Color.white;
     }
 
     IEnumerator EfeitoRessurreicao()

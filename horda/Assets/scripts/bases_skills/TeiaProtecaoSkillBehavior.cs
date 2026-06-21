@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga
+public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga, IDefensivaCosmetico
 {
     float recarga   = 180f;
     float duracao   = 4f;
@@ -40,20 +40,34 @@ public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga
 
     void OnDano()
     {
+        if (cosmetico) return;   // fantoche não auto-dispara: espera o broadcast do dono
         if (timerRecarga <= 0f && !ativa) Ativar();
     }
 
     void Update()
     {
         if (timerRecarga > 0f) timerRecarga -= Time.deltaTime;
-        if (ativa && playerStats != null) EmpurrarInimigos();
+        if (ativa && playerStats != null && !cosmetico) EmpurrarInimigos();
     }
 
     void Ativar()
     {
         if (ativa) return;
         timerRecarga = recarga;
+        // co-op: avisa os fantoches pra reproduzirem o visual no jogador do dono.
+        if (NetSpawn.EmRede && !cosmetico)
+        {
+            var pn = playerStats != null ? playerStats.GetComponent<PlayerNet>() : null;
+            if (pn != null) pn.SincronizarDefensiva((int)SpecificSkillType.TeiaProtecao);
+        }
         StartCoroutine(CorotinaAtiva());
+    }
+
+    // Co-op: chamado no fantoche quando o dono ativa a teia (só visual, sem empurrão).
+    public void ExecutarCosmetico()
+    {
+        cosmetico = true;
+        if (!ativa) StartCoroutine(CorotinaAtiva());
     }
 
     void EmpurrarInimigos()
@@ -80,7 +94,8 @@ public class TeiaProtecaoSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator CorotinaAtiva()
     {
         ativa = true;
-        SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
+        if (!cosmetico)
+            SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
         float duracaoReal = duracao * (SkillEvolutionManager.Tem(SkillEvolutionType.TeiaPermanente) ? 2f : 1f);
         var visual = CriarVisual();
         visualAtivo = visual;

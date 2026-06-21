@@ -171,6 +171,31 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         if (u != null) u.ExecutarCosmetico();
     }
 
+    // Co-op: o dono disparou uma defensiva (teia/fuga/instinto/segunda chance) → o fantoche
+    // do colega reproduz SÓ o visual. tipo = (int)SpecificSkillType. Shield tem caminho próprio.
+    public void SincronizarDefensiva(int tipo)
+    {
+        if (IsOwner && IsSpawned) DefensivaServerRpc(tipo);
+    }
+
+    [Rpc(SendTo.Server)]
+    void DefensivaServerRpc(int tipo) { DefensivaRpc(tipo); }
+
+    [Rpc(SendTo.NotOwner)]
+    void DefensivaRpc(int tipo)
+    {
+        if (stats == null) return;
+        var t = (SpecificSkillType)tipo;
+        var behaviors = stats.GetComponents<SkillBehavior>();
+        foreach (var b in behaviors)
+        {
+            if (b == null || !b.cosmetico || b.skillData == null) continue;
+            if (b.skillData.specificType != t) continue;
+            var dc = b as IDefensivaCosmetico;
+            if (dc != null) { dc.ExecutarCosmetico(); break; }
+        }
+    }
+
     // Co-op: pickups coletados no host são aplicados no DONO do player que pegou
     // (vida/dash/boosts são owner-autoritativos).
     [Rpc(SendTo.Owner)]

@@ -29,8 +29,14 @@ public static class SkillFxCosmetico
         { SpecificSkillType.BarreiraEnergia,    typeof(BarreiraEnergiaSkillBehavior) },
         { SpecificSkillType.BarreiraReflexiva,  typeof(BarreiraReflexivaSkillBehavior) },
         { SpecificSkillType.Aureola,            typeof(AureolaSkillBehavior) },
-        // TODO co-op: Teia/Shield/Fuga/SegundaChance/Instinto precisam de trigger-broadcast
-        // (disparam em evento de player) ou de prefab (ShieldAura) — fazer com mecanismo próprio.
+        // Defensivas com gatilho por evento: a behavior cosmética é adicionada no equip,
+        // mas NÃO auto-dispara (guarda por `cosmetico`). O visual roda via broadcast do dono
+        // (PlayerNet.SincronizarDefensiva → IDefensivaCosmetico.ExecutarCosmetico).
+        { SpecificSkillType.TeiaProtecao,          typeof(TeiaProtecaoSkillBehavior) },
+        { SpecificSkillType.FugaSombras,           typeof(FugaSombrasSkillBehavior) },
+        { SpecificSkillType.InstintoSobrevivencia, typeof(InstintoSobrevivenciaSkillBehavior) },
+        { SpecificSkillType.SegundaChance,         typeof(SegundaChanceSkillBehavior) },
+        // Shield (ShieldAura) é prefab-based — replicado por caminho próprio no PlayerNet.
     };
 
     public static bool EhSuportado(SpecificSkillType t) => Suportados.ContainsKey(t);

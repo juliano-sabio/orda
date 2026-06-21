@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class FugaSombrasSkillBehavior : SkillBehavior, ISkillComRecarga
+public class FugaSombrasSkillBehavior : SkillBehavior, ISkillComRecarga, IDefensivaCosmetico
 {
     float limiarHP   = 0.50f;
     float recarga    = 360f;
@@ -38,11 +38,37 @@ public class FugaSombrasSkillBehavior : SkillBehavior, ISkillComRecarga
 
     void OnDanoRecebido()
     {
+        if (cosmetico) return;   // fantoche não auto-dispara: espera o broadcast do dono
         if (playerStats == null || timerRecarga > 0f) return;
         float pct = playerStats.health / Mathf.Max(1f, playerStats.maxHealth);
         if (pct > limiarHP) return;
         timerRecarga = recarga;
+        // co-op: avisa os fantoches pra reproduzirem o efeito de fuga.
+        if (NetSpawn.EmRede)
+        {
+            var pn = playerStats.GetComponent<PlayerNet>();
+            if (pn != null) pn.SincronizarDefensiva((int)SpecificSkillType.FugaSombras);
+        }
         StartCoroutine(Teleportar());
+    }
+
+    // Co-op: no fantoche, reproduz só os efeitos de saída/chegada. O teleporte em si do
+    // jogador é replicado pelo NetworkTransform, então depois de 0.15s a posição já é a nova.
+    public void ExecutarCosmetico()
+    {
+        cosmetico = true;
+        StartCoroutine(TeleportarCosmetico());
+    }
+
+    IEnumerator TeleportarCosmetico()
+    {
+        if (playerStats == null) yield break;
+        Vector2 origem = playerStats.transform.position;
+        StartCoroutine(EfeitoSaida(origem));
+        yield return new WaitForSeconds(0.15f);
+        if (playerStats == null) yield break;
+        Vector2 nova = playerStats.transform.position;   // já movido via NetworkTransform
+        StartCoroutine(EfeitoChegada(nova));
     }
 
     IEnumerator Teleportar()

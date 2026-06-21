@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class InstintoSobrevivenciaSkillBehavior : SkillBehavior, ISkillComRecarga
+public class InstintoSobrevivenciaSkillBehavior : SkillBehavior, ISkillComRecarga, IDefensivaCosmetico
 {
     float recarga      = 180f;
     float duracao      = 8f;
@@ -40,6 +40,7 @@ public class InstintoSobrevivenciaSkillBehavior : SkillBehavior, ISkillComRecarg
 
     void Update()
     {
+        if (cosmetico) return;   // fantoche não auto-dispara: espera o broadcast do dono
         if (timerRecarga > 0f) timerRecarga -= Time.deltaTime;
         if (playerStats == null || ativo) return;
 
@@ -48,10 +49,32 @@ public class InstintoSobrevivenciaSkillBehavior : SkillBehavior, ISkillComRecarg
             StartCoroutine(Ativar());
     }
 
+    // Co-op: no fantoche reproduz só a aura + partículas (sem buffs nem texto de HUD).
+    public void ExecutarCosmetico()
+    {
+        cosmetico = true;
+        if (!ativo) StartCoroutine(AtivarCosmetico());
+    }
+
+    IEnumerator AtivarCosmetico()
+    {
+        ativo = true;
+        var aura = CriarAura();
+        yield return new WaitForSeconds(duracao);
+        ativo = false;
+        if (aura != null) StartCoroutine(FadeDestruir(aura, 0.4f));
+    }
+
     IEnumerator Ativar()
     {
         ativo        = true;
         timerRecarga = recarga;
+        // co-op: avisa os fantoches pra reproduzirem a aura no jogador do dono.
+        if (NetSpawn.EmRede)
+        {
+            var pn = playerStats != null ? playerStats.GetComponent<PlayerNet>() : null;
+            if (pn != null) pn.SincronizarDefensiva((int)SpecificSkillType.InstintoSobrevivencia);
+        }
         SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.OnAtivar, null, this);
 
         // Aplica buffs
