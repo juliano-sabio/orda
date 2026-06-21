@@ -88,7 +88,7 @@ public class ProjetilEspecialBoss : MonoBehaviour
             jaAcertou = true;
             PlayerStats stats = other.GetComponent<PlayerStats>();
             if (stats != null) stats.TakeDamage(dano);
-            AplicarVisaoReduzida(duracaoVisao, raioVisaoTela);
+            AplicarVisaoReduzidaNoPlayer(stats, duracaoVisao, raioVisaoTela);
             NetSpawn.Despawnar(gameObject);
         }
         else if (other.gameObject.tag == "Chao" || other.gameObject.tag == "Obstacles")
@@ -97,7 +97,16 @@ public class ProjetilEspecialBoss : MonoBehaviour
         }
     }
 
-    static void AplicarVisaoReduzida(float duracao, float raioTela)
+    // co-op: roteia o efeito de escuridão pro player ATINGIDO (na tela dele), em vez de
+    // criar localmente no host (que apareceria no player 1). SP/host-local cai no Aplicar direto.
+    static void AplicarVisaoReduzidaNoPlayer(PlayerStats alvo, float duracao, float raioTela)
+    {
+        var pn = alvo != null ? alvo.GetComponent<PlayerNet>() : null;
+        if (pn != null) pn.EscuridaoOwnerRpc(duracao, raioTela);
+        else AplicarVisaoReduzida(duracao, raioTela);
+    }
+
+    public static void AplicarVisaoReduzida(float duracao, float raioTela)
     {
         GameObject go = new GameObject("VisaoRunner");
         go.AddComponent<VisaoEscuridaoRunner>().Iniciar(duracao, raioTela);
@@ -149,7 +158,7 @@ public class VisaoEscuridaoRunner : MonoBehaviour
         float lado = Mathf.Max(sz * escala * 2.5f, diagonal * 2f);
         rt.sizeDelta = new Vector2(lado, lado);
 
-        Transform player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        Transform player = PlayerStats.Local != null ? PlayerStats.Local.transform : null;
 
         // ── Fade in ───────────────────────────────────────────────────
         CanvasGroup cg = cvGO.AddComponent<CanvasGroup>();

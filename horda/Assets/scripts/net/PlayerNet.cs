@@ -237,6 +237,13 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     // Co-op: pickups coletados no host são aplicados no DONO do player que pegou
     // (vida/dash/boosts são owner-autoritativos).
+    // Co-op: efeito de escuridão (projétil do boss) na tela do player ATINGIDO, não no host.
+    [Rpc(SendTo.Owner)]
+    public void EscuridaoOwnerRpc(float duracao, float raioTela)
+    {
+        ProjetilEspecialBoss.AplicarVisaoReduzida(duracao, raioTela);
+    }
+
     [Rpc(SendTo.Owner)]
     public void CurarOwnerRpc(float quantia) { if (stats != null) stats.Heal(quantia); }
 
