@@ -369,10 +369,12 @@ public class LobbyUI : MonoBehaviour
         AplicarSpriteBotao(imgCop, corAcento);
         var bCop = btnCop.AddComponent<Button>();
         bCop.targetGraphic = imgCop; bCop.transition = Selectable.Transition.None;
-        string codCap = codigoSala;
         bCop.onClick.AddListener(() =>
         {
-            GUIUtility.systemCopyBuffer = codCap;
+            // Copia o código ATUAL (em co-op o código real do Relay chega async depois
+            // da UI ser montada; capturar na montagem copiava o placeholder "...").
+            if (string.IsNullOrEmpty(codigoSala) || codigoSala == "...") return;
+            GUIUtility.systemCopyBuffer = codigoSala;
             StartCoroutine(FlashCopiar(imgCop));
         });
         var tCop = Texto("T", Vector2.zero, Vector2.one,
