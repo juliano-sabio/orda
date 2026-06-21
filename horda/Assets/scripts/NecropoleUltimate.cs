@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NecropoleUltimate : MonoBehaviour
+public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio               = 12f;
     public float duracao            = 10f;
@@ -42,7 +45,8 @@ public class NecropoleUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -106,7 +110,7 @@ public class NecropoleUltimate : MonoBehaviour
             foreach (var c in Physics2D.OverlapCircleAll(pos, 3f))
             {
                 var icViz = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
-                if (icViz != null) icViz.ReceberDano(8f * Time.deltaTime, false, false);
+                if (icViz != null && !cosmetico) icViz.ReceberDano(8f * Time.deltaTime, false, false);
             }
             yield return null;
         }
@@ -461,7 +465,7 @@ public class NecropoleUltimate : MonoBehaviour
                 if (timerAtaque <= 0f && Vector2.Distance(go.transform.position, alvo.transform.position) < 1.2f)
                 {
                     timerAtaque = intervaloAtaque;
-                    alvo.ReceberDano(danoFantasma, Random.value < 0.15f);
+                    if (!cosmetico) alvo.ReceberDano(danoFantasma, Random.value < 0.15f);
                     StartCoroutine(AtaqueFantasmaFX(sr, (Vector2)alvo.transform.position));
                 }
             }

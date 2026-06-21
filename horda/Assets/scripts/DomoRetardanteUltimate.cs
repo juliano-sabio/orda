@@ -9,8 +9,11 @@ using UnityEngine.Rendering.Universal;
 /// inimigos dentro do raio por <duracao> segundos.
 /// Projéteis voltam à velocidade original ao sair.
 /// </summary>
-public class DomoRetardanteUltimate : MonoBehaviour
+public class DomoRetardanteUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio            = 5f;
     public float duracao         = 5f;
@@ -64,7 +67,8 @@ public class DomoRetardanteUltimate : MonoBehaviour
 
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
 
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
 
         SincronizarUI();

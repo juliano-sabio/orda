@@ -7,8 +7,11 @@ using UnityEngine;
 /// Pressionar R cria uma maré ao redor do jogador por <duracao> segundos.
 /// Inimigos dentro da área ficam lentos e sofrem dano de afogamento periodicamente.
 /// </summary>
-public class MareImplacavelUltimate : MonoBehaviour
+public class MareImplacavelUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio            = 5.5f;
     public float duracao         = 5f;
@@ -44,7 +47,8 @@ public class MareImplacavelUltimate : MonoBehaviour
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
 
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
 
         SincronizarUI();
@@ -104,7 +108,7 @@ public class MareImplacavelUltimate : MonoBehaviour
                 foreach (var col in Physics2D.OverlapCircleAll(transform.position, raioEfetivo))
                 {
                     var ic = ResolverInimigo(col.gameObject);
-                    if (ic != null) ic.ReceberDano(danoEfetivo, false, true);
+                    if (ic != null && !cosmetico) ic.ReceberDano(danoEfetivo, false, true);
                 }
             }
 

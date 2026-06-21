@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DrenagemDeVidaUltimate : MonoBehaviour
+public class DrenagemDeVidaUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio            = 10f;
     public float duracao         = 7f;
@@ -43,7 +46,8 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -153,7 +157,7 @@ public class DrenagemDeVidaUltimate : MonoBehaviour
             var ic = e.go.GetComponent<InimigoController>();
             if (ic == null) continue;
             float dano = danoPorSegundo * Time.deltaTime;
-            ic.ReceberDano(dano, false, false);
+            if (!cosmetico) ic.ReceberDano(dano, false, false);
             totalDano += dano;
         }
 

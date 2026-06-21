@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CorrentesInfernoUltimate : MonoBehaviour
+public class CorrentesInfernoUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio           = 10f;
     public float duracao        = 6f;
@@ -53,7 +56,8 @@ public class CorrentesInfernoUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -189,7 +193,7 @@ public class CorrentesInfernoUltimate : MonoBehaviour
         foreach (var e in acorrentados)
         {
             if (e.ic == null || e.go == null) { mortos.Add(e); continue; }
-            e.ic.ReceberDano(danoTick, false, true);
+            if (!cosmetico) e.ic.ReceberDano(danoTick, false, true);
 
             if (SkillEvolutionManager.Tem(SkillEvolutionType.InfernoPropagado))
             {
@@ -197,7 +201,7 @@ public class CorrentesInfernoUltimate : MonoBehaviour
                 {
                     var icViz = c.GetComponent<InimigoController>() ?? c.GetComponentInParent<InimigoController>();
                     if (icViz != null && icViz != e.ic)
-                        icViz.ReceberDano(danoTick * 0.35f, false, false);
+                        if (!cosmetico) icViz.ReceberDano(danoTick * 0.35f, false, false);
                 }
             }
         }

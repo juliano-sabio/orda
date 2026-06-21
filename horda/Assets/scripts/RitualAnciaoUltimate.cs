@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RitualAnciaoUltimate : MonoBehaviour
+public class RitualAnciaoUltimate : MonoBehaviour, IUltimateCosmetico
 {
+    bool cosmetico;
+    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+
     [Header("Configurações")]
     public float raio          = 8f;
     public float duracao       = 9f;
@@ -46,7 +49,8 @@ public class RitualAnciaoUltimate : MonoBehaviour
     void Update()
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
-        if (InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+        if (playerStats != null && playerStats.IsLocalAuthority &&
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }
@@ -128,7 +132,7 @@ public class RitualAnciaoUltimate : MonoBehaviour
             {
                 float t    = Mathf.Clamp01(temposDentro[ic] / tempoRampa);
                 float dano = Mathf.Lerp(danoInicial, danoFinal, t) * 0.5f;
-                ic.ReceberDano(dano, false);
+                if (!cosmetico) ic.ReceberDano(dano, false);
             }
 
             // Tentáculo visual ao alvo
@@ -157,12 +161,12 @@ public class RitualAnciaoUltimate : MonoBehaviour
             if (temposDentro.TryGetValue(ic, out float tempo))
             {
                 float t = Mathf.Clamp01(tempo / tempoRampa);
-                ic.ReceberDano(Mathf.Lerp(danoInicial, danoFinal, t) * 2f * multExplosivo, true);
+                if (!cosmetico) ic.ReceberDano(Mathf.Lerp(danoInicial, danoFinal, t) * 2f * multExplosivo, true);
             }
             else if (multExplosivo > 1f)
             {
                 // Inimigos na área expandida recebem dano base
-                ic.ReceberDano(danoFinal * multExplosivo, true);
+                if (!cosmetico) ic.ReceberDano(danoFinal * multExplosivo, true);
             }
         }
 
