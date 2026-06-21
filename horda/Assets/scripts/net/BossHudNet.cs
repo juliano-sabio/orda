@@ -5,8 +5,9 @@ using UnityEngine.UI;
 using TMPro;
 
 // Co-op: a UI/lógica do boss roda só no host (EnemyNet desliga os scripts no cliente).
-// Este NetworkBehaviour (que o EnemyNet preserva) sincroniza nome + fração de vida do
-// boss e mostra uma barra no topo da tela PRO CLIENTE (o host mantém a UI própria dele).
+// Este NetworkBehaviour (que o EnemyNet preserva) sincroniza nome + fração de vida do boss
+// e renderiza a barra do boss PRO CLIENTE (o host mantém a UI própria dele). A barra é
+// estilo painel no topo (parecida com a do host), com fill por âncora (não depende de sprite).
 public class BossHudNet : NetworkBehaviour
 {
     readonly NetworkVariable<float> vidaFrac = new NetworkVariable<float>(
@@ -16,7 +17,8 @@ public class BossHudNet : NetworkBehaviour
 
     InimigoController ic;
     GameObject hud;
-    Image fill;
+    RectTransform fillRT;   // fill por âncora: anchorMax.x = fração de vida
+    TextMeshProUGUI nomeTxt;
 
     public override void OnNetworkSpawn()
     {
@@ -29,7 +31,6 @@ public class BossHudNet : NetworkBehaviour
         else
         {
             CriarHud();
-            vidaFrac.OnValueChanged += (_, v) => { if (fill != null) fill.fillAmount = Mathf.Clamp01(v); };
         }
     }
 
@@ -40,9 +41,23 @@ public class BossHudNet : NetworkBehaviour
 
     void Update()
     {
-        // host: empurra a vida do boss pra NetVar (a UI própria dele continua na lógica do boss).
-        if (IsServer && ic != null)
-            vidaFrac.Value = ic.GetPorcentagemVida();
+        if (IsServer)
+        {
+            if (ic != null) vidaFrac.Value = ic.GetPorcentagemVida();
+            return;
+        }
+
+        // cliente: reflete a vida sincronizada na barra
+        if (fillRT != null)
+        {
+            float f = Mathf.Clamp01(vidaFrac.Value);
+            fillRT.anchorMax = new Vector2(f, 1f);
+        }
+        if (nomeTxt != null)
+        {
+            string n = nomeBoss.Value.ToString();
+            if (!string.IsNullOrEmpty(n) && nomeTxt.text != n) nomeTxt.text = n;
+        }
     }
 
     static FixedString64Bytes LimparNome(string n)
@@ -52,48 +67,55 @@ public class BossHudNet : NetworkBehaviour
         return new FixedString64Bytes(n.Length > 60 ? n.Substring(0, 60) : n);
     }
 
-    // Barra de boss simples no topo da tela (só no cliente; o host tem a UI própria).
     void CriarHud()
     {
         hud = new GameObject("BossHudCoop");
         var cv = hud.AddComponent<Canvas>();
         cv.renderMode = RenderMode.ScreenSpaceOverlay;
-        cv.sortingOrder = 90;
+        cv.sortingOrder = 60;
         var scaler = hud.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.matchWidthOrHeight = 0.5f;
 
-        // moldura
-        var bgGO = new GameObject("BG");
-        bgGO.transform.SetParent(hud.transform, false);
-        var bgRT = bgGO.AddComponent<RectTransform>();
-        bgRT.anchorMin = new Vector2(0.25f, 0.90f); bgRT.anchorMax = new Vector2(0.75f, 0.935f);
-        bgRT.offsetMin = bgRT.offsetMax = Vector2.zero;
-        bgGO.AddComponent<Image>().color = new Color(0.08f, 0.02f, 0.02f, 0.85f);
-
-        // preenchimento (vida)
-        var fillGO = new GameObject("Fill");
-        fillGO.transform.SetParent(bgGO.transform, false);
-        var fillRT = fillGO.AddComponent<RectTransform>();
-        fillRT.anchorMin = new Vector2(0f, 0f); fillRT.anchorMax = new Vector2(1f, 1f);
-        fillRT.offsetMin = new Vector2(2f, 2f); fillRT.offsetMax = new Vector2(-2f, -2f);
-        fill = fillGO.AddComponent<Image>();
-        fill.color = new Color(0.72f, 0.12f, 0.12f, 0.95f);
-        fill.type = Image.Type.Filled;
-        fill.fillMethod = Image.FillMethod.Horizontal;
-        fill.fillOrigin = (int)Image.OriginHorizontal.Left;
-        fill.fillAmount = Mathf.Clamp01(vidaFrac.Value);
+        // painel
+        var painel = NovoUI("Painel", hud.transform);
+        Ancorar(painel, new Vector2(0.2f, 0.825f), new Vector2(0.8f, 0.935f));
+        painel.gameObject.AddComponent<Image>().color = new Color(0.06f, 0.03f, 0.04f, 0.9f);
 
         // nome
-        var txtGO = new GameObject("Nome");
-        txtGO.transform.SetParent(bgGO.transform, false);
-        var txtRT = txtGO.AddComponent<RectTransform>();
-        txtRT.anchorMin = new Vector2(0f, 1f); txtRT.anchorMax = new Vector2(1f, 1f);
-        txtRT.offsetMin = new Vector2(0f, 2f); txtRT.offsetMax = new Vector2(0f, 28f);
-        var txt = txtGO.AddComponent<TextMeshProUGUI>();
-        txt.text = nomeBoss.Value.ToString();
-        txt.fontSize = 20; txt.fontStyle = FontStyles.Bold;
-        txt.alignment = TextAlignmentOptions.Center;
-        txt.color = new Color(0.94f, 0.88f, 0.75f);
+        var nomeGO = NovoUI("Nome", painel);
+        Ancorar(nomeGO, new Vector2(0.01f, 0.55f), new Vector2(0.99f, 0.95f));
+        nomeTxt = nomeGO.gameObject.AddComponent<TextMeshProUGUI>();
+        nomeTxt.text = nomeBoss.Value.ToString();
+        nomeTxt.fontSize = 20; nomeTxt.fontStyle = FontStyles.Bold;
+        nomeTxt.alignment = TextAlignmentOptions.Center;
+        nomeTxt.color = new Color(0.94f, 0.82f, 0.55f);
+
+        // fundo da barra
+        var barBG = NovoUI("BarBG", painel);
+        Ancorar(barBG, new Vector2(0.02f, 0.10f), new Vector2(0.98f, 0.50f));
+        barBG.gameObject.AddComponent<Image>().color = new Color(0.15f, 0.05f, 0.05f, 1f);
+
+        // fill (filho do BarBG): largura = fração de vida via anchorMax.x
+        var fillGO = NovoUI("Fill", barBG);
+        fillRT = fillGO;
+        fillRT.anchorMin = new Vector2(0f, 0f);
+        fillRT.anchorMax = new Vector2(Mathf.Clamp01(vidaFrac.Value), 1f);
+        fillRT.offsetMin = fillRT.offsetMax = Vector2.zero;
+        fillGO.gameObject.AddComponent<Image>().color = new Color(0.78f, 0.13f, 0.13f, 1f);
+    }
+
+    static RectTransform NovoUI(string nome, Transform pai)
+    {
+        var go = new GameObject(nome);
+        go.transform.SetParent(pai, false);
+        return go.AddComponent<RectTransform>();
+    }
+
+    static void Ancorar(RectTransform rt, Vector2 min, Vector2 max)
+    {
+        rt.anchorMin = min; rt.anchorMax = max;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
     }
 }
