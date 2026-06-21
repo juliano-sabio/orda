@@ -1002,6 +1002,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator MostrarAvisoBoss()
     {
+        GetComponent<BossHudNet>()?.BroadcastMensagem(Loc.T("boss.appeared") + "\n<size=60%>" + nomeBoss.ToUpper() + "</size>", new Color(0.94f, 0.82f, 0.55f), 2f); // co-op
         GameObject warnGO = new GameObject("BossWarning");
         Canvas cv = warnGO.AddComponent<Canvas>();
         cv.renderMode    = RenderMode.ScreenSpaceOverlay;
@@ -1207,6 +1208,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator MostrarTextoTela(string mensagem, Color cor, float duracao)
     {
+        GetComponent<BossHudNet>()?.BroadcastMensagem(mensagem, cor, duracao); // co-op: mesmo banner nos clientes
         if (bossMsgGO != null) Destroy(bossMsgGO);
         GameObject go = new GameObject("BossCaveiraMsg");
         bossMsgGO = go;

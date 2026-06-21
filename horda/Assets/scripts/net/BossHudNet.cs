@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using Unity.Collections;
 using UnityEngine;
@@ -51,6 +52,47 @@ public class BossHudNet : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         if (hud != null) Destroy(hud);
+    }
+
+    // Co-op: o boss anuncia algo (ex.: "MODO FÚRIA!") via MostrarTextoTela no host. Isto
+    // propaga o mesmo banner pros clientes (que não rodam o script do boss).
+    public void BroadcastMensagem(string msg, Color cor, float duracao)
+    {
+        if (!IsServer || !IsSpawned || string.IsNullOrEmpty(msg)) return;
+        var fs = new FixedString128Bytes(msg.Length > 120 ? msg.Substring(0, 120) : msg);
+        MostrarMensagemClientRpc(fs, cor.r, cor.g, cor.b, duracao);
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void MostrarMensagemClientRpc(FixedString128Bytes msg, float r, float g, float b, float duracao)
+    {
+        StartCoroutine(Banner(msg.ToString(), new Color(r, g, b), duracao));
+    }
+
+    IEnumerator Banner(string msg, Color cor, float duracao)
+    {
+        var go = new GameObject("BossMsgCoop");
+        var cv = go.AddComponent<Canvas>();
+        cv.renderMode = RenderMode.ScreenSpaceOverlay;
+        cv.sortingOrder = 200;
+        var scaler = go.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        var tGO = new GameObject("T");
+        tGO.transform.SetParent(go.transform, false);
+        var rt = tGO.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.1f, 0.62f); rt.anchorMax = new Vector2(0.9f, 0.78f);
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+        var txt = tGO.AddComponent<TextMeshProUGUI>();
+        txt.text = msg; txt.fontSize = 46; txt.fontStyle = FontStyles.Bold;
+        txt.alignment = TextAlignmentOptions.Center;
+
+        for (float t = 0f; t < 0.3f; t += Time.unscaledDeltaTime) { txt.color = new Color(cor.r, cor.g, cor.b, t / 0.3f); yield return null; }
+        txt.color = cor;
+        yield return new WaitForSecondsRealtime(Mathf.Max(0.5f, duracao));
+        for (float t = 0f; t < 0.4f; t += Time.unscaledDeltaTime) { txt.color = new Color(cor.r, cor.g, cor.b, 1f - t / 0.4f); yield return null; }
+        Destroy(go);
     }
 
     void Update()
