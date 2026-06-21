@@ -1002,7 +1002,6 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator MostrarAvisoBoss()
     {
-        GetComponent<BossHudNet>()?.BroadcastMensagem(Loc.T("boss.appeared") + "\n<size=60%>" + nomeBoss.ToUpper() + "</size>", new Color(0.94f, 0.82f, 0.55f), 2f); // co-op
         GameObject warnGO = new GameObject("BossWarning");
         Canvas cv = warnGO.AddComponent<Canvas>();
         cv.renderMode    = RenderMode.ScreenSpaceOverlay;

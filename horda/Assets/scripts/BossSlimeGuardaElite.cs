@@ -673,7 +673,6 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator MostrarAvisoBoss()
     {
-        GetComponent<BossHudNet>()?.BroadcastMensagem(Loc.T("boss.appeared") + "\n<size=60%>" + nomeBoss.ToUpper() + "</size>", new Color(0.94f, 0.82f, 0.55f), 2f); // co-op
         var warnGO = new GameObject("BossWarning");
         var cv = warnGO.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200;
         warnGO.AddComponent<CanvasScaler>();

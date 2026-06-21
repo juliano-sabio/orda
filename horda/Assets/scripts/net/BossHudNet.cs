@@ -42,6 +42,7 @@ public class BossHudNet : NetworkBehaviour
             // cliente: monta a UI própria do boss (mesma do host). O boss é destruído pelo
             // NetworkObject no despawn → o OnDestroy dele limpa o canvas.
             bossHud.CriarBossUI();
+            StartCoroutine(AvisoAparecer()); // banner "boss apareceu" client-side (confiável, sem race de spawn)
         }
         else
         {
@@ -52,6 +53,15 @@ public class BossHudNet : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         if (hud != null) Destroy(hud);
+    }
+
+    IEnumerator AvisoAparecer()
+    {
+        yield return new WaitForSeconds(0.4f); // espera o nomeBoss sincronizar
+        string nome = nomeBoss.Value.ToString();
+        if (string.IsNullOrEmpty(nome)) nome = "BOSS";
+        yield return Banner(Loc.T("boss.appeared") + "\n<size=60%>" + nome.ToUpper() + "</size>",
+            new Color(0.94f, 0.82f, 0.55f), 2f);
     }
 
     // Co-op: o boss anuncia algo (ex.: "MODO FÚRIA!") via MostrarTextoTela no host. Isto
