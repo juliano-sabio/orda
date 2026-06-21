@@ -1033,6 +1033,12 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 
     public void AtualizarBarraUI() => AtualizarUI();   // IBossHud (cliente dirige com vida sincronizada)
 
+    public int FaseUI
+    {
+        get => fase2Ativada ? 1 : 0;
+        set { fase2Ativada = value >= 1; if (faseText != null) faseText.text = Loc.T(value >= 1 ? "boss.phase2" : "boss.phase1"); }
+    }
+
     void AtualizarUI()
     {
         if (hpFill == null || controller == null) return;

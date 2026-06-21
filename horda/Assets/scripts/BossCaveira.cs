@@ -1176,6 +1176,12 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
     // IBossHud: o BossHudNet (cliente) chama isto com a vida sincronizada no controller.
     public void AtualizarBarraUI() => AtualizarUI();
 
+    public int FaseUI
+    {
+        get => fase2Ativada ? 1 : 0;
+        set { fase2Ativada = value >= 1; if (faseText != null) faseText.text = Loc.T(value >= 1 ? "boss.phase2" : "boss.phase1"); }
+    }
+
     void AtualizarUI()
     {
         if (hpFill == null || controller == null) return;

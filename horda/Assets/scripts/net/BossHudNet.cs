@@ -16,6 +16,8 @@ public class BossHudNet : NetworkBehaviour
         1f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     readonly NetworkVariable<FixedString64Bytes> nomeBoss = new NetworkVariable<FixedString64Bytes>(
         default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    readonly NetworkVariable<int> faseUINet = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     InimigoController ic;
     IBossHud bossHud;
@@ -60,6 +62,7 @@ public class BossHudNet : NetworkBehaviour
                 vidaAtualNet.Value = ic.vidaAtual;
                 vidaMaxNet.Value   = ic.vidaMaxima;
             }
+            if (bossHud != null) faseUINet.Value = bossHud.FaseUI;
             return;
         }
 
@@ -70,6 +73,7 @@ public class BossHudNet : NetworkBehaviour
             // pra a UI própria do boss renderizar idêntica à do host.
             ic.vidaAtual  = vidaAtualNet.Value;
             ic.vidaMaxima = vidaMaxNet.Value;
+            bossHud.FaseUI = faseUINet.Value;   // reflete a fase sincronizada (cor/texto)
             bossHud.AtualizarBarraUI();
         }
         else if (fillRT != null)

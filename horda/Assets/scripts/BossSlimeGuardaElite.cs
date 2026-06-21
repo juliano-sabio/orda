@@ -815,6 +815,8 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
 
     public void AtualizarBarraUI() => AtualizarUI();   // IBossHud (cliente dirige com vida sincronizada)
 
+    public int FaseUI { get => fase; set => fase = value; }
+
     void AtualizarUI()
     {
         if (hpFill == null || controller == null) return;
