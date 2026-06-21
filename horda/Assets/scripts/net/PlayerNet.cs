@@ -186,6 +186,15 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     {
         if (stats == null) return;
         var t = (SpecificSkillType)tipo;
+
+        // Shield: a aura cosmética é filha do fantoche; quebra reproduz a animação.
+        if (t == SpecificSkillType.Shield)
+        {
+            var sh = stats.GetComponentInChildren<ShieldAuraBehavior>();
+            if (sh != null) sh.QuebrarCosmetico();
+            return;
+        }
+
         var behaviors = stats.GetComponents<SkillBehavior>();
         foreach (var b in behaviors)
         {
@@ -194,6 +203,36 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             var dc = b as IDefensivaCosmetico;
             if (dc != null) { dc.ExecutarCosmetico(); break; }
         }
+    }
+
+    // Co-op: o dono equipou o Shield → o fantoche instancia a aura sustentada (prefab),
+    // em modo cosmético (não bloqueia dano). idx = índice no skillsRegistro.
+    public void SincronizarShieldEquip(int idx)
+    {
+        if (IsOwner && IsSpawned) ShieldEquipServerRpc(idx);
+    }
+
+    [Rpc(SendTo.Server)]
+    void ShieldEquipServerRpc(int idx) { ShieldEquipRpc(idx); }
+
+    [Rpc(SendTo.NotOwner)]
+    void ShieldEquipRpc(int idx)
+    {
+        if (stats == null) return;
+        var fx = GetComponent<SkillFxNet>();
+        if (fx == null || fx.skillsRegistro == null || idx < 0 || idx >= fx.skillsRegistro.Length) return;
+        var skill = fx.skillsRegistro[idx];
+        if (skill == null || skill.visualEffect == null) return;
+        if (stats.GetComponentInChildren<ShieldAuraBehavior>() != null) return; // já tem
+
+        // Espelha PlayerStats.AddShieldAuraBehavior (mesma instância/offset), porém cosmético.
+        var auraObj = Instantiate(skill.visualEffect);
+        auraObj.transform.SetParent(stats.transform, false);
+        auraObj.transform.localPosition = new Vector3(1.5f, 1.2f, 1.8f);
+        auraObj.transform.localRotation = Quaternion.identity;
+        auraObj.transform.localScale = Vector3.one;
+        var beh = auraObj.GetComponent<ShieldAuraBehavior>();
+        if (beh != null) { beh.cosmetico = true; beh.Initialize(stats); }
     }
 
     // Co-op: pickups coletados no host são aplicados no DONO do player que pegou

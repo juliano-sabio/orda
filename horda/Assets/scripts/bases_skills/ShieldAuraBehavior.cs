@@ -62,10 +62,24 @@ public class ShieldAuraBehavior : SkillBehavior
         return false;
     }
 
+    // Co-op: no fantoche, quebra a aura cosmética (mesma animação), sem afetar gameplay.
+    public void QuebrarCosmetico()
+    {
+        cosmetico = true;
+        if (isShieldActive && !isOnCooldown) BreakShield();
+    }
+
     private void BreakShield()
     {
         isShieldActive = false;
         isOnCooldown = true;
+
+        // co-op: o dono avisa os fantoches pra quebrarem a aura junto (cosmetico já é guarda).
+        if (!cosmetico && NetSpawn.EmRede && playerStats != null)
+        {
+            var pn = playerStats.GetComponent<PlayerNet>();
+            if (pn != null) pn.SincronizarDefensiva((int)SpecificSkillType.Shield);
+        }
 
         if (visualAuraSustentada != null) visualAuraSustentada.SetActive(false);
         if (somQuebra != null) AudioSource.PlayClipAtPoint(somQuebra, transform.position);

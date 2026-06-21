@@ -447,6 +447,19 @@ public class SkillManager : MonoBehaviour
                         if (idx >= 0) pn.SincronizarSkillCosmetica(idx, (int)skill.appliedElement);
                     }
                 }
+
+                // Shield é prefab-based (não entra no SkillFxCosmetico): o fantoche instancia
+                // a aura sustentada por caminho próprio.
+                if (NetSpawn.EmRede && skill.specificType == SpecificSkillType.Shield)
+                {
+                    var fx = playerStats.GetComponent<SkillFxNet>();
+                    var pn = playerStats.GetComponent<PlayerNet>();
+                    if (fx != null && pn != null)
+                    {
+                        int idx = fx.IndiceSkill(skill);
+                        if (idx >= 0) pn.SincronizarShieldEquip(idx);
+                    }
+                }
             }
             else
             {
