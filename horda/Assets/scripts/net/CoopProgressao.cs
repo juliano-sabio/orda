@@ -16,6 +16,14 @@ public class CoopProgressao : NetworkBehaviour
     public readonly NetworkVariable<float> xpProxNivel = new NetworkVariable<float>(
         100f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    // Co-op: estado do evento atual (host-autoritativo) → o cliente reconstrói a UI de evento.
+    public readonly NetworkVariable<bool>  evtAtivo   = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public readonly NetworkVariable<int>   evtTipo    = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public readonly NetworkVariable<int>   evtProg    = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public readonly NetworkVariable<int>   evtQtd     = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public readonly NetworkVariable<float> evtTimer   = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public readonly NetworkVariable<float> evtDuracao = new NetworkVariable<float>(1f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     public override void OnNetworkSpawn()
     {
         Instance = this;
@@ -31,6 +39,32 @@ public class CoopProgressao : NetworkBehaviour
         nivel.OnValueChanged       -= AoMudarNivel;
         xpProxNivel.OnValueChanged -= AoMudarProx;
         if (Instance == this) Instance = null;
+    }
+
+    // Co-op: sincroniza o estado do evento. Host publica o que o GerenciadorEventos calcula;
+    // cliente (que não roda a lógica de evento) reconstrói o painel a partir disso.
+    void Update()
+    {
+        var ge = GerenciadorEventos.Instance;
+        if (ge == null) return;
+
+        if (IsServer)
+        {
+            bool a = ge.EvtAtivoCoop;
+            if (evtAtivo.Value != a) evtAtivo.Value = a;
+            if (a)
+            {
+                if (evtTipo.Value != ge.EvtTipoCoop) evtTipo.Value = ge.EvtTipoCoop;
+                if (evtProg.Value != ge.EvtProgCoop) evtProg.Value = ge.EvtProgCoop;
+                if (evtQtd.Value  != ge.EvtQtdCoop)  evtQtd.Value  = ge.EvtQtdCoop;
+                if (Mathf.Abs(evtTimer.Value   - ge.EvtTimerCoop)   > 0.1f)  evtTimer.Value   = ge.EvtTimerCoop;
+                if (Mathf.Abs(evtDuracao.Value - ge.EvtDuracaoCoop) > 0.01f) evtDuracao.Value = ge.EvtDuracaoCoop;
+            }
+        }
+        else
+        {
+            ge.AplicarEstadoCoop(evtAtivo.Value, evtTipo.Value, evtProg.Value, evtQtd.Value, evtTimer.Value, evtDuracao.Value);
+        }
     }
 
     void AoMudarXP(float _, float __)   => EspelharUI();

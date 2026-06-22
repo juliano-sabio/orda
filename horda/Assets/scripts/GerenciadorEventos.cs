@@ -595,16 +595,65 @@ void TentarIniciarEvento()
     bool EventoMostraProgresso()
     {
         if (eventoAtual == null || eventoAtual.quantidade <= 0) return false;
-        return eventoAtual.tipo == TipoEvento.MatarInimigos
-            || eventoAtual.tipo == TipoEvento.Colapso
-            || eventoAtual.tipo == TipoEvento.CristaisEnergia
-            || eventoAtual.tipo == TipoEvento.VorticeDevorador
-            || eventoAtual.tipo == TipoEvento.ZonaEliminacao
-            || eventoAtual.tipo == TipoEvento.ColetarXP
-            || eventoAtual.tipo == TipoEvento.UsarUltimate
-            || eventoAtual.tipo == TipoEvento.ColetarEspirito
-            || eventoAtual.tipo == TipoEvento.Ceifador
-            || eventoAtual.tipo == TipoEvento.Portal;
+        return EventoMostraProgressoTipo(eventoAtual.tipo);
+    }
+
+    static bool EventoMostraProgressoTipo(TipoEvento tipo)
+    {
+        return tipo == TipoEvento.MatarInimigos
+            || tipo == TipoEvento.Colapso
+            || tipo == TipoEvento.CristaisEnergia
+            || tipo == TipoEvento.VorticeDevorador
+            || tipo == TipoEvento.ZonaEliminacao
+            || tipo == TipoEvento.ColetarXP
+            || tipo == TipoEvento.UsarUltimate
+            || tipo == TipoEvento.ColetarEspirito
+            || tipo == TipoEvento.Ceifador
+            || tipo == TipoEvento.Portal;
+    }
+
+    // ── Co-op: o host expõe o estado do evento; o cliente reconstrói o MESMO painel ──
+    public bool  EvtAtivoCoop   => eventoAtivo && eventoAtual != null;
+    public int   EvtTipoCoop    => eventoAtual != null ? (int)eventoAtual.tipo : 0;
+    public int   EvtProgCoop    => progresso;
+    public int   EvtQtdCoop     => eventoAtual != null ? eventoAtual.quantidade : 0;
+    public float EvtTimerCoop   => timerContagem;
+    public float EvtDuracaoCoop => eventoAtual != null ? eventoAtual.duracao : 1f;
+
+    bool coopPainelMostrado;
+
+    // Cliente co-op: aplica o estado do evento vindo do host (não roda a lógica de evento).
+    public void AplicarEstadoCoop(bool ativo, int tipoInt, int prog, int qtd, float timer, float duracao)
+    {
+        if (painelEvento == null) CriarPainelUI();
+        var tipo = (TipoEvento)tipoInt;
+
+        if (ativo)
+        {
+            if (textoNome != null) { textoNome.text = Loc.T(EventoNomeKey(tipo)); textoNome.color = Color.yellow; }
+            if (textoDesc != null) textoDesc.text = TextUtils.SemAcento(Loc.T(EventoDescKey(tipo)));
+            if (barraFill != null) barraFill.anchorMax = new Vector2(duracao > 0f ? Mathf.Clamp01(timer / duracao) : 0f, 1f);
+            if (barraFillImg != null) barraFillImg.color = corBarraAtiva;
+            if (textoTimer != null)
+            {
+                string ts = Mathf.CeilToInt(timer) + "s";
+                bool mostraProg = qtd > 0 && EventoMostraProgressoTipo(tipo);
+                textoTimer.text  = mostraProg ? $"{prog}/{qtd}  •  {ts}" : ts;
+                textoTimer.color = timer <= 5f ? new Color(1f, 0.3f, 0.3f) : Color.white;
+            }
+            if (!coopPainelMostrado)
+            {
+                coopPainelMostrado = true;
+                StopCoroutine("AnimarSaida");
+                StartCoroutine("AnimarEntrada");
+            }
+        }
+        else if (coopPainelMostrado)
+        {
+            coopPainelMostrado = false;
+            StopCoroutine("AnimarEntrada");
+            StartCoroutine("AnimarSaida");
+        }
     }
 
     void AtualizarUI()

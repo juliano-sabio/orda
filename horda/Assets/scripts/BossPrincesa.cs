@@ -682,6 +682,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
             var especial = go.AddComponent<ProjetilEspecialPrincesa>();
             especial.tipo = ProjetilEspecialPrincesa.Tipo.Queima;
             especial.dano = danoProjetil;
+            especial.vida = duracaoProjetil; // despawna via rede (sem Destroy local que deixa cópia no cliente)
 
             var sr = go.GetComponent<SpriteRenderer>();
             if (sr != null)
@@ -698,8 +699,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
                 rb2.simulated      = true;
                 rb2.linearVelocity = dir * velocidadeProjetil;
             }
-
-            Destroy(go, duracaoProjetil);
+            // despawn: o ProjetilEspecialPrincesa.vida cuida disso via NetSpawn.Despawnar (não acumula no cliente).
         }
     }
 
@@ -1435,9 +1435,9 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
     {
         if (bossCanvasGO != null) Destroy(bossCanvasGO);
 
-        // Destrói projéteis em órbita se ainda existirem
+        // Despawna projéteis em órbita restantes (via rede, pra não deixar cópia no cliente)
         foreach (var go in projeteisCanalizando)
-            if (go != null) Destroy(go);
+            if (go != null) NetSpawn.Despawnar(go);
 
         // Fallback: garante que o buff seja removido mesmo se IniciarEfeitoMorte não foi chamado
         RemoverBuffInimigos();

@@ -7,8 +7,15 @@ public class ProjetilEspecialPrincesa : MonoBehaviour
 
     public Tipo  tipo;
     public float dano = 20f;
+    public float vida = 5f; // co-op: despawna por tempo via REDE (host-autoritativo), não Destroy local
 
     bool atingiu;
+
+    void Update()
+    {
+        vida -= Time.deltaTime;
+        if (vida <= 0f) NetSpawn.Despawnar(gameObject); // remove em todos os clientes (sem acúmulo)
+    }
 
     void OnTriggerEnter2D(Collider2D other)
     {
