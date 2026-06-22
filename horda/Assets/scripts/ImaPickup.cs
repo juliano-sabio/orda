@@ -37,14 +37,27 @@ public class ImaPickup : MonoBehaviour
     {
         luz.color = new Color(0.3f, 0.7f, 1f);
 
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (player != null)
-            playerStats = player.GetComponent<PlayerStats>();
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position); // co-op: player mais próximo, não arbitrário
+            player = t; playerStats = t != null ? t.GetComponent<PlayerStats>() : null;
+        }
+        else
+        {
+            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if (player != null) playerStats = player.GetComponent<PlayerStats>();
+        }
         startPosition = transform.position;
     }
 
     void Update()
     {
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position);
+            if (t != null) { player = t; playerStats = t.GetComponent<PlayerStats>(); }
+        }
+
         if (!isAttracted)
         {
             float sin = Mathf.Sin(Time.time * floatSpeed);
@@ -88,7 +101,17 @@ public class ImaPickup : MonoBehaviour
         if (collected || playerStats == null) return;
         collected = true;
 
-        playerStats.xpCollectionRadius += xpRadiusBonus;
+        // Co-op: o bônus de raio vai pro DONO do player que coletou.
+        if (NetSpawn.EmRede)
+        {
+            var pn = playerStats.GetComponent<PlayerNet>();
+            if (pn != null) pn.AumentarRaioXpOwnerRpc(xpRadiusBonus);
+            else playerStats.xpCollectionRadius += xpRadiusBonus;
+        }
+        else
+        {
+            playerStats.xpCollectionRadius += xpRadiusBonus;
+        }
 
         if (collectSound != null)
             AudioSource.PlayClipAtPoint(collectSound, transform.position);

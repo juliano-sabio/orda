@@ -77,7 +77,7 @@ public class SkillChoiceUI : MonoBehaviour
 
     private IEnumerator InitializeWithDelay()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSecondsRealtime(0.5f); // realtime: não congelar se o outro player pausar (co-op)
         SetupHorizontalLayout();
 
         // 🎯 CARREGAR SKILLS DO SKILLMANAGER

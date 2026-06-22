@@ -190,6 +190,9 @@ public class PlayerStats : MonoBehaviour
     [Header("Segunda Fase: Barra de Luz")]
     public float luzMaxima      = 100f;
     public float luzAtual       = 100f;
+    // % de brilho REALMENTE ATIVO da luz (0 fora da segunda fase). É isto que se sincroniza
+    // pro fantoche — não o GetLuzPercentual (que é 1.0 mesmo na fase 1, sem brilho).
+    [HideInInspector] public float luzGlowPct = 0f;
     public float taxaDrenagemLuz = 100f / 180f; // unidades por segundo; esvazia em 180s (3 min)
 
     bool        semLuzDebuffAtivo;
@@ -724,7 +727,9 @@ public class PlayerStats : MonoBehaviour
         if (EstaCaido) return; // caído não age
         if (LobbyState.EmLobby) return; // congelado no lobby
 
-        HandleMovement();
+        // HandleMovement() REMOVIDO: o movimento (e o dash) é do moviment_player2. Este HandleMovement
+        // era legado e bugado (velocity *= deltaTime → minúsculo) e brigava com o moviment_player2
+        // escrevendo rb.linearVelocity no Update, dampeando o dash em co-op ("pequeno e lerdo").
         HandleHealthRegeneration();
         UpdateSkillCooldowns();
         HandlePassiveSkills();
@@ -763,6 +768,8 @@ public class PlayerStats : MonoBehaviour
 
         float pct = GetLuzPercentual();
         Fase2LuzManager.SincronizarUI(pct);
+
+        luzGlowPct = pct; // co-op: só aqui (segunda fase) o brilho fica ativo → sincroniza pro fantoche
 
         var luz = GetComponent<PlayerCollectLight>();
         if (luz != null) luz.AtualizarPorPercentual(pct);
@@ -1071,6 +1078,8 @@ public class PlayerStats : MonoBehaviour
         bool maxSkills    = skillManager != null && skillManager.activeSkills.Count >= 4;
         bool isSkillLevel = isMilestone && !maxSkills;
 
+        Debug.Log($"[CoopChoice] level={level} localAuth={IsLocalAuthority} isSkillLevel={isSkillLevel} skillMgr={(skillManager!=null)} cardSys={(cardSystem!=null)} -> abrindo={(isSkillLevel?"SKILL":"CARTA")}");
+
         if (isSkillLevel && skillManager != null)
         {
             if (!escolhaSkillEmAndamento)
@@ -1261,6 +1270,7 @@ public class PlayerStats : MonoBehaviour
 
     public void ActivateUltimate()
     {
+        if (EstaCaido) return; // caído não usa ultimate (input vem de Behaviors próprios, fora do Update gateado)
         if (!ultimateReady || !ultimateSkill.isActive || ultimateBloqueada) return;
 
         OnUltimateAtivada?.Invoke();

@@ -707,7 +707,20 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
 
     // ── MORTE ────────────────────────────────────────────────────────────────────
 
-    public void IniciarEfeitoMorte() => StartCoroutine(EfeitoMorte());
+    bool morteCosmetica = false;
+
+    public void IniciarEfeitoMorte()
+    {
+        GetComponent<BossHudNet>()?.BroadcastMorte($"{nomeBoss.ToUpper()} DERROTADO!", new Color(1f, 0.8f, 0.2f)); // co-op
+        StartCoroutine(EfeitoMorte());
+    }
+
+    // Cliente co-op: mesmo efeito de morte sem destruir o NetworkObject (host despawna).
+    public void MorteCosmetica()
+    {
+        morteCosmetica = true;
+        StartCoroutine(EfeitoMorte());
+    }
 
     IEnumerator EfeitoMorte()
     {
@@ -729,9 +742,9 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
             yield return null;
         }
 
-        BossMorteUI.Exibir($"{nomeBoss.ToUpper()} DERROTADO!", new Color(1f, 0.8f, 0.2f));
+        if (!morteCosmetica) BossMorteUI.Exibir($"{nomeBoss.ToUpper()} DERROTADO!", new Color(1f, 0.8f, 0.2f)); // cliente recebe via RPC
         if (bossCanvasGO != null) Destroy(bossCanvasGO);
-        Destroy(gameObject);
+        if (!morteCosmetica) Destroy(gameObject); // cliente não destrói NetworkObject (host despawna)
     }
 
     void OnDestroy()
@@ -745,6 +758,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
     public void CriarBossUI()
     {
         if (controller == null) controller = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
+        if (sr == null)         sr         = GetComponent<SpriteRenderer>();    // efeito de morte (flash) no cliente
         bossCanvasGO = new GameObject("BossEliteCanvas");
         var cv = bossCanvasGO.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 50;
         var cs = bossCanvasGO.AddComponent<CanvasScaler>();
@@ -816,7 +830,23 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
 
     public void AtualizarBarraUI() => AtualizarUI();   // IBossHud (cliente dirige com vida sincronizada)
 
-    public int FaseUI { get => fase; set => fase = value; }
+    public int FaseUI
+    {
+        get => fase;
+        set
+        {
+            fase = value;
+            // Cliente co-op: reflete a fase na UI (texto/cor) igual ao host (o banner já vem por broadcast).
+            if (faseText != null && fase >= 2)
+            {
+                Color cor = fase == 2 ? new Color(1f, 0.7f, 0.1f)
+                          : fase == 3 ? new Color(1f, 0.3f, 0.1f)
+                          : new Color(0.8f, 0.1f, 1f);
+                faseText.text  = fase == 2 ? "AGRESSIVO" : fase == 3 ? "FURIA" : "DESESPERO";
+                faseText.color = cor;
+            }
+        }
+    }
 
     void AtualizarUI()
     {

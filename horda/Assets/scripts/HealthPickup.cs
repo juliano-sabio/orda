@@ -19,13 +19,26 @@ public class HealthPickup : MonoBehaviour
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (player != null)
-            playerStats = player.GetComponent<PlayerStats>();
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position); // co-op: player mais próximo, não arbitrário
+            player = t; playerStats = t != null ? t.GetComponent<PlayerStats>() : null;
+        }
+        else
+        {
+            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if (player != null) playerStats = player.GetComponent<PlayerStats>();
+        }
     }
 
     void Update()
     {
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position);
+            if (t != null) { player = t; playerStats = t.GetComponent<PlayerStats>(); }
+        }
+
         if (!isAttracted)
             CheckDistance();
         else

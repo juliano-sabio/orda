@@ -17,6 +17,11 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     readonly NetworkVariable<bool> facingLeft = new NetworkVariable<bool>(
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    // Co-op: % da barra de luz (segunda fase) do dono → o brilho do PlayerCollectLight
+    // aparece no fantoche na tela do colega (sem isto, só o dono via a própria luz).
+    readonly NetworkVariable<float> luzPct = new NetworkVariable<float>(
+        0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     // SP2c — downed/revive.
     readonly NetworkVariable<bool> downed = new NetworkVariable<bool>(
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
@@ -70,6 +75,13 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             bool r = stats != null && stats.ultimateReady;
             if (ultReadyAnterior && !r) UltimateCastServerRpc();
             ultReadyAnterior = r;
+
+            // Publica o brilho ATIVO da luz (0 fora da segunda fase) pro fantoche brilhar igual.
+            if (stats != null)
+            {
+                float p = stats.luzGlowPct;
+                if (Mathf.Abs(p - luzPct.Value) > 0.01f) luzPct.Value = p;
+            }
         }
         else
         {
@@ -78,6 +90,10 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             var s = transform.localScale;
             s.x = facingLeft.Value ? -mag : mag;
             transform.localScale = s;
+
+            // cópia remota: reflete a luz do dono (brilho da segunda fase).
+            var pcl = GetComponent<PlayerCollectLight>();
+            if (pcl != null) pcl.AtualizarPorPercentual(luzPct.Value);
         }
 
         if (IsServer) MonitorarHost();
@@ -104,8 +120,10 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.Everyone)]
     public void ReviveVfxRpc()
     {
+        // Antes: SendMessage("Executar") batia no LevelUpEffect.Executar(int) (erro) e nem rodava
+        // a corrotina. Agora chama o VFX direto (raio azul + luz), sem bloquear movimento.
         var ef = GetComponent<PlayerSpawnEffect>();
-        if (ef != null) ef.SendMessage("Executar", SendMessageOptions.DontRequireReceiver);
+        if (ef != null) ef.Reproduzir();
     }
 
     // Game over de grupo em todos.
@@ -262,6 +280,27 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     [Rpc(SendTo.Owner)]
     public void DashChargeOwnerRpc() { if (stats != null) stats.AddDashCharge(); }
+
+    // Co-op: espírito de luz (drop host-local) recarrega a barra de luz do DONO que coletou.
+    [Rpc(SendTo.Owner)]
+    public void AdicionarLuzOwnerRpc(float qtd) { if (stats != null) stats.AdicionarLuz(qtd); }
+
+    // Co-op: LightPickup ativa o modo "coleta de luz" no DONO que coletou.
+    [Rpc(SendTo.Owner)]
+    public void ColetaLuzOwnerRpc(float dur) { if (stats != null) stats.GetComponent<PlayerCollectLight>()?.Ativar(dur); }
+
+    // Co-op: ImaPickup aumenta o raio de coleta de XP do DONO que coletou.
+    [Rpc(SendTo.Owner)]
+    public void AumentarRaioXpOwnerRpc(float bonus) { if (stats != null) stats.xpCollectionRadius += bonus; }
+
+    // Co-op: o token de elemento existe só no host; ele roteia a infusão pro DONO do player
+    // que tocou, pra a escolha abrir na tela certa (não na do host/player 1).
+    [Rpc(SendTo.Owner)]
+    public void AbrirInfusaoOwnerRpc(int elemento)
+    {
+        var ui = ElementApplicationUI.Instance;
+        if (ui != null) ui.Abrir((ElementType)elemento);
+    }
 
     [Rpc(SendTo.Owner)]
     public void BoostColetaOwnerRpc(float raio, float mult, float dur)

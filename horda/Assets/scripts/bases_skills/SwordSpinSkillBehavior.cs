@@ -26,7 +26,10 @@ public class SwordOrbitalController : ProjectileController2D
         }
 
         // 3. VINCULAÇÃO AO PLAYER
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        // Co-op: vincula ao player LOCAL (dono). Sem isto, FindGameObjectWithTag pegaria
+        // um dos dois players arbitrariamente e a espada giraria no player 1.
+        GameObject player = PlayerStats.Local != null ? PlayerStats.Local.gameObject
+                                                      : GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
             playerTransform = player.transform;

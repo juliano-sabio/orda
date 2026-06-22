@@ -28,6 +28,20 @@ public class ElementDropToken : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
+        // Co-op: infusão é escolha do GRUPO (igual à escolha de skill) — os DOIS recebem o painel,
+        // e quem escolher primeiro espera o outro. O token existe só no host (não é NetworkObject),
+        // então aqui (no host) avisa cada player pra abrir a infusão no SEU cliente.
+        if (NetSpawn.EmRede)
+        {
+            for (int i = 0; i < PlayerStats.All.Count; i++)
+            {
+                var pn = PlayerStats.All[i] != null ? PlayerStats.All[i].GetComponent<PlayerNet>() : null;
+                if (pn != null) pn.AbrirInfusaoOwnerRpc((int)elementType);
+            }
+            Destroy(gameObject);
+            return;
+        }
+
         var ui = ElementApplicationUI.Instance;
         if (ui == null)
         {

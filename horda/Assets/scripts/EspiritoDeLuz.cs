@@ -37,13 +37,29 @@ public class EspiritoDeLuz : MonoBehaviour
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (player != null)
-            playerStats = player.GetComponent<PlayerStats>();
+        if (NetSpawn.EmRede)
+        {
+            // Co-op: drop host-local. Sem rede, FindGameObjectWithTag pegaria um player
+            // arbitrário (frequentemente o player 1) → luz ia pro errado. Usa o mais próximo.
+            var t = PlayerStats.MaisProximoTransform(transform.position);
+            player = t; playerStats = t != null ? t.GetComponent<PlayerStats>() : null;
+        }
+        else
+        {
+            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if (player != null) playerStats = player.GetComponent<PlayerStats>();
+        }
     }
 
     void Update()
     {
+        // Co-op: segue o player mais próximo (pode mudar enquanto se move).
+        if (NetSpawn.EmRede)
+        {
+            var t = PlayerStats.MaisProximoTransform(transform.position);
+            if (t != null) { player = t; playerStats = t.GetComponent<PlayerStats>(); }
+        }
+
         if (!isAttracted)
             CheckDistance();
         else
@@ -78,7 +94,17 @@ public class EspiritoDeLuz : MonoBehaviour
         if (collected || playerStats == null) return;
         collected = true;
 
-        playerStats.AdicionarLuz(quantidadeLuz);
+        // Co-op: a luz vai pro DONO do player que coletou (não pra cópia local/fantoche).
+        if (NetSpawn.EmRede)
+        {
+            var pn = playerStats.GetComponent<PlayerNet>();
+            if (pn != null) pn.AdicionarLuzOwnerRpc(quantidadeLuz);
+            else playerStats.AdicionarLuz(quantidadeLuz);
+        }
+        else
+        {
+            playerStats.AdicionarLuz(quantidadeLuz);
+        }
 
         Destroy(gameObject);
     }

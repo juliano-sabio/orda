@@ -1061,7 +1061,8 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
     public void CriarBossUI()
     {
-        if (controller == null) controller = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
+        if (controller == null)     controller     = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();    // efeitos cosméticos (flash/aura/morte)
         bossCanvasGO = new GameObject("BossCaveiraCanvas");
         Canvas cv = bossCanvasGO.AddComponent<Canvas>();
         cv.renderMode   = RenderMode.ScreenSpaceOverlay;
@@ -1180,7 +1181,25 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
     public int FaseUI
     {
         get => fase2Ativada ? 1 : 0;
-        set { fase2Ativada = value >= 1; if (faseText != null) faseText.text = Loc.T(value >= 1 ? "boss.phase2" : "boss.phase1"); }
+        set
+        {
+            bool era = fase2Ativada;
+            fase2Ativada = value >= 1;
+            if (faseText != null)
+            {
+                faseText.text = Loc.T(value >= 1 ? "boss.phase2" : "boss.phase1");
+                if (value >= 1) faseText.color = new Color(0.6f, 0.3f, 1f);
+            }
+            // Cliente co-op: reproduz a APARÊNCIA de fase 2 (no host vem de TransicaoFase2).
+            // Corrotinas rodam mesmo com o script desligado (GameObject ativo).
+            if (value >= 1 && !era)
+            {
+                if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+                if (controller == null)     controller     = GetComponent<InimigoController>();
+                StartCoroutine(FlashFase2());
+                StartCoroutine(LoopAuraFase2());
+            }
+        }
     }
 
     void AtualizarUI()
@@ -1254,7 +1273,20 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
     // EFEITO DE MORTE
     // ──────────────────────────────────────────────────────────────
 
-    public void IniciarEfeitoMorte() => StartCoroutine(EfeitoMorte());
+    bool morteCosmetica = false;
+
+    public void IniciarEfeitoMorte()
+    {
+        GetComponent<BossHudNet>()?.BroadcastMorte("CRIATURA DERROTADA!", new Color(0.8f, 0.5f, 1f)); // co-op
+        StartCoroutine(EfeitoMorte());
+    }
+
+    // Cliente co-op: mesmo efeito de morte sem destruir o NetworkObject (host despawna).
+    public void MorteCosmetica()
+    {
+        morteCosmetica = true;
+        StartCoroutine(EfeitoMorte());
+    }
 
     IEnumerator EfeitoMorte()
     {
@@ -1284,8 +1316,8 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
             yield return null;
         }
 
-        BossMorteUI.Exibir("CRIATURA DERROTADA!", new Color(0.8f, 0.5f, 1f));
-        Destroy(gameObject);
+        if (!morteCosmetica) BossMorteUI.Exibir("CRIATURA DERROTADA!", new Color(0.8f, 0.5f, 1f)); // cliente recebe via RPC
+        if (!morteCosmetica) Destroy(gameObject); // cliente não destrói NetworkObject (host despawna)
     }
 
     // ──────────────────────────────────────────────────────────────

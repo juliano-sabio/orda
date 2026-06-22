@@ -22,6 +22,7 @@ public class BossHudNet : NetworkBehaviour
 
     InimigoController ic;
     IBossHud bossHud;
+    int faseLog = -2; // [debug] rastreia mudança de fase pros logs de diagnóstico
 
     // fallback genérico (bosses sem IBossHud)
     GameObject hud;
@@ -32,6 +33,7 @@ public class BossHudNet : NetworkBehaviour
     {
         ic = GetComponent<InimigoController>();
         bossHud = GetComponent<IBossHud>();
+        Debug.Log($"[CoopBoss] OnNetworkSpawn {gameObject.name} IsServer={IsServer} bossHud={(bossHud != null)} ic={(ic != null)}");
 
         if (IsServer)
         {
@@ -69,6 +71,7 @@ public class BossHudNet : NetworkBehaviour
     public void BroadcastMensagem(string msg, Color cor, float duracao)
     {
         if (!IsServer || !IsSpawned || string.IsNullOrEmpty(msg)) return;
+        Debug.Log($"[CoopBoss-HOST] broadcast banner: '{msg.Replace("\n", " ")}'");
         var fs = new FixedString128Bytes(msg.Length > 120 ? msg.Substring(0, 120) : msg);
         MostrarMensagemClientRpc(fs, cor.r, cor.g, cor.b, duracao);
     }
@@ -76,7 +79,50 @@ public class BossHudNet : NetworkBehaviour
     [Rpc(SendTo.NotServer)]
     void MostrarMensagemClientRpc(FixedString128Bytes msg, float r, float g, float b, float duracao)
     {
+        Debug.Log($"[CoopBoss-CLIENT] banner recebido: '{msg.ToString().Replace("\n", " ")}'");
         StartCoroutine(Banner(msg.ToString(), new Color(r, g, b), duracao));
+    }
+
+    // ── Raio do Maga: o host dispara o MESMO raio cosmético nos clientes (mesmo alvo) ──
+    public void BroadcastRaio(Transform alvo)
+    {
+        if (!IsServer || !IsSpawned) return;
+        ulong id = 0; bool tem = false;
+        if (alvo != null)
+        {
+            var no = alvo.GetComponent<NetworkObject>();
+            if (no != null) { id = no.NetworkObjectId; tem = true; }
+        }
+        Debug.Log($"[CoopBoss-HOST] broadcast raio alvo={(tem ? id.ToString() : "nenhum")}");
+        RaioClientRpc(id, tem);
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void RaioClientRpc(ulong alvoId, bool tem)
+    {
+        Transform alvo = null;
+        if (tem && NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(alvoId, out var no))
+            alvo = no.transform;
+        if (alvo == null && PlayerStats.Local != null) alvo = PlayerStats.Local.transform;
+        Debug.Log($"[CoopBoss-CLIENT] raio recebido alvo={(alvo != null ? alvo.name : "NULL")}");
+        GetComponent<BossController>()?.RaioCosmetico(alvo);
+    }
+
+    // ── Morte do boss: o host roda o efeito de morte + mensagem nos clientes ──
+    public void BroadcastMorte(string msg, Color cor)
+    {
+        if (!IsServer || !IsSpawned) return;
+        Debug.Log($"[CoopBoss-HOST] broadcast morte: '{msg}'");
+        var fs = new FixedString64Bytes(msg.Length > 60 ? msg.Substring(0, 60) : msg);
+        MorteClientRpc(fs, cor.r, cor.g, cor.b);
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void MorteClientRpc(FixedString64Bytes msg, float r, float g, float b)
+    {
+        Debug.Log($"[CoopBoss-CLIENT] morte recebida: '{msg}'");
+        BossMorteUI.Exibir(msg.ToString(), new Color(r, g, b)); // mensagem garantida (independe do timing)
+        bossHud?.MorteCosmetica();
     }
 
     IEnumerator Banner(string msg, Color cor, float duracao)
@@ -84,7 +130,7 @@ public class BossHudNet : NetworkBehaviour
         var go = new GameObject("BossMsgCoop");
         var cv = go.AddComponent<Canvas>();
         cv.renderMode = RenderMode.ScreenSpaceOverlay;
-        cv.sortingOrder = 200;
+        cv.sortingOrder = 32000; // acima de qualquer UI (ex.: tela de escolha de elemento) pra nunca ficar escondido
         var scaler = go.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
@@ -97,12 +143,30 @@ public class BossHudNet : NetworkBehaviour
         var txt = tGO.AddComponent<TextMeshProUGUI>();
         txt.text = msg; txt.fontSize = 46; txt.fontStyle = FontStyles.Bold;
         txt.alignment = TextAlignmentOptions.Center;
+        Debug.Log($"[CoopBoss-CLIENT] Banner GO criado msg='{msg}' canvas.enabled={cv.enabled} font={(txt.font != null ? txt.font.name : "NULL")} ativo={go.activeInHierarchy}");
 
         for (float t = 0f; t < 0.3f; t += Time.unscaledDeltaTime) { txt.color = new Color(cor.r, cor.g, cor.b, t / 0.3f); yield return null; }
         txt.color = cor;
         yield return new WaitForSecondsRealtime(Mathf.Max(0.5f, duracao));
         for (float t = 0f; t < 0.4f; t += Time.unscaledDeltaTime) { txt.color = new Color(cor.r, cor.g, cor.b, 1f - t / 0.4f); yield return null; }
         Destroy(go);
+    }
+
+    // Cliente co-op: flash de transição de fase sobre o sprite do boss (o host roda em FlashFase2).
+    // Roda aqui (NetworkBehaviour ligado) porque o script do boss está desligado no cliente.
+    System.Collections.IEnumerator FlashFaseCliente()
+    {
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr == null) yield break;
+        Color orig = sr.color;
+        for (int i = 0; i < 8; i++)
+        {
+            sr.color = Color.white;
+            yield return new WaitForSecondsRealtime(0.07f);
+            sr.color = new Color(1f, 0.3f, 0f);
+            yield return new WaitForSecondsRealtime(0.07f);
+        }
+        sr.color = orig;
     }
 
     void Update()
@@ -114,7 +178,11 @@ public class BossHudNet : NetworkBehaviour
                 vidaAtualNet.Value = ic.vidaAtual;
                 vidaMaxNet.Value   = ic.vidaMaxima;
             }
-            if (bossHud != null) faseUINet.Value = bossHud.FaseUI;
+            if (bossHud != null)
+            {
+                faseUINet.Value = bossHud.FaseUI;
+                if (bossHud.FaseUI != faseLog) { faseLog = bossHud.FaseUI; Debug.Log($"[CoopBoss-HOST] {gameObject.name} fase={faseLog} (escreveu faseUINet)"); }
+            }
             return;
         }
 
@@ -125,7 +193,14 @@ public class BossHudNet : NetworkBehaviour
             // pra a UI própria do boss renderizar idêntica à do host.
             ic.vidaAtual  = vidaAtualNet.Value;
             ic.vidaMaxima = vidaMaxNet.Value;
-            bossHud.FaseUI = faseUINet.Value;   // reflete a fase sincronizada (cor/texto)
+            if (faseUINet.Value != faseLog)
+            {
+                int anterior = faseLog;
+                faseLog = faseUINet.Value;
+                Debug.Log($"[CoopBoss-CLIENT] {gameObject.name} recebeu fase={faseLog} vida={vidaAtualNet.Value:0}/{vidaMaxNet.Value:0}");
+                if (faseUINet.Value >= 1 && anterior < 1) StartCoroutine(FlashFaseCliente()); // flash de transição (host roda em FlashFase2)
+            }
+            bossHud.FaseUI = faseUINet.Value;   // reflete a fase sincronizada (cor/texto/aparência)
             bossHud.AtualizarBarraUI();
         }
         else if (fillRT != null)

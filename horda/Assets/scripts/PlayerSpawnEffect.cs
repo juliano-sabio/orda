@@ -32,6 +32,26 @@ public class PlayerSpawnEffect : MonoBehaviour
         StartCoroutine(Executar());
     }
 
+    // Co-op: revive reusa o VFX (raio + luz) na posição ATUAL, SEM bloquear movimento nem
+    // mexer no Rigidbody (isto roda em todas as cópias, inclusive fantoches remotos).
+    public void Reproduzir()
+    {
+        if (sr == null) sr = GetComponent<SpriteRenderer>();
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        posicaoFinal = transform.position;
+        StartCoroutine(VfxSemBloquear());
+    }
+
+    IEnumerator VfxSemBloquear()
+    {
+        Camera cam = Camera.main;
+        float topoTela = cam != null
+            ? cam.ViewportToWorldPoint(new Vector3(0f, 1f, 0f)).y
+            : posicaoFinal.y + 10f;
+        yield return StartCoroutine(AnimarRaio(topoTela));
+        StartCoroutine(LuzImpacto());
+    }
+
     IEnumerator Executar()
     {
         Camera cam     = Camera.main;

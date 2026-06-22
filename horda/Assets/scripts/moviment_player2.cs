@@ -73,6 +73,8 @@ public class moviment_player2 : MonoBehaviour
         else if (horizontal < 0)
             transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
 
+        if (InputBindings.DashDown())
+            Debug.Log($"[CoopDash] DashDown pressionado: isDashing={isDashing} charges={playerStats.dashCharges} localAuth={playerStats.IsLocalAuthority} caido={playerStats.EstaCaido}");
         if (InputBindings.DashDown() && !isDashing && playerStats.HasDashCharge())
         {
             dashDirection = moveInput != Vector2.zero ? moveInput : new Vector2(transform.localScale.x > 0 ? 1f : -1f, 0f);
@@ -95,7 +97,10 @@ public class moviment_player2 : MonoBehaviour
         }
 
         if (isDashing)
+        {
             rb.linearVelocity = dashDirection * dashSpeed;
+            Debug.Log($"[CoopDash] DASHING vel={rb.linearVelocity.magnitude:0.0} dashSpeed={dashSpeed} bodyType={rb.bodyType} pos={(Vector2)transform.position}");
+        }
         else
             rb.linearVelocity = moveInput * playerStats.GetSpeed();
     }

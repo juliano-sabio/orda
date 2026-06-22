@@ -12,6 +12,9 @@ public class FaseCoopBootstrap : MonoBehaviour
     {
         LobbyState.EmLobby = false;
 
+        // [debug temp] botão de invocar boss pra testar bosses em co-op (em todos os clientes; só o host spawna).
+        if (GetComponent<DebugChamarBoss>() == null) gameObject.AddComponent<DebugChamarBoss>();
+
         var nm = NetworkManager.Singleton;
         if (nm == null || !nm.IsServer) return; // só o host
 

@@ -94,7 +94,7 @@ public class SkillManager : MonoBehaviour
 
     private IEnumerator DelayedInitialCheck()
     {
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSecondsRealtime(1.0f); // realtime: não congelar se o outro player pausar (co-op)
 
         if (playerStats == null)
         {
@@ -136,13 +136,18 @@ public class SkillManager : MonoBehaviour
         if (deveOferecerEscolha)
         {
             initialChoiceOffered = true;
+            // Co-op: marca escolha pendente já agora, pra o overlay "aguardando" não piscar
+            // no cliente enquanto o painel dele ainda vai abrir (o outro player pode ter pausado).
+            if (NetSpawn.EmRede) CoopPause.MarcarEscolhaPendente();
             StartCoroutine(DelayedInitialChoice());
         }
     }
 
     private IEnumerator DelayedInitialChoice()
     {
-        yield return new WaitForSeconds(1.5f);
+        // Realtime: em co-op o painel do outro player pausa o jogo (timeScale=0); com WaitForSeconds
+        // normal este timer congelaria e a escolha NUNCA abriria (cliente ficava preso no "aguardando").
+        yield return new WaitForSecondsRealtime(1.5f);
         AplicarFiltroSlot();
         OfferSkillChoice();
     }

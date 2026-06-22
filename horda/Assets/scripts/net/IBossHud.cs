@@ -7,4 +7,5 @@ public interface IBossHud
     void CriarBossUI();      // monta o canvas/barra/nome/fase custom do boss
     void AtualizarBarraUI(); // atualiza fill/HP/fase a partir do controller (vida sincronizada no cliente)
     int  FaseUI { get; set; } // fase atual (host expõe; cliente recebe a sincronizada e reflete na UI)
+    void MorteCosmetica();   // cliente: roda o efeito de morte do boss sem destruir o NetworkObject (host despawna)
 }

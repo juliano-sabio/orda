@@ -546,9 +546,21 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         }
     }
 
+    // No cliente co-op o raio é só cosmético (sem dano). Setado pelo BossHudNet ao disparar via broadcast.
+    bool raioSemDano = false;
+
+    // Host: dispara o raio cosmético idêntico nos clientes (mesmo alvo).
+    public void RaioCosmetico(Transform alvo)
+    {
+        raioSemDano = true;
+        player = alvo;
+        StartCoroutine(AtaqueRaio());
+    }
+
     IEnumerator AtaqueRaio()
     {
         if (player == null) yield break;
+        if (!raioSemDano) GetComponent<BossHudNet>()?.BroadcastRaio(player); // host avisa os clientes
 
         Color corNucleo = new Color(1f, 0.95f, 1f);
         Color corGlow   = new Color(0.7f, 0.25f, 1f);
@@ -652,12 +664,12 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
                 StartCoroutine(FaiscaRaio(origemAtual, dirAtual, alcanceRaio, corNucleo));
             }
 
-            // Dano
+            // Dano (no cliente co-op o raio é só cosmético — o host aplica o dano de verdade)
             proxTick -= Time.deltaTime;
             if (proxTick <= 0f)
             {
                 proxTick = intervaloDanoRaio;
-                if (player != null && playerStats != null)
+                if (!raioSemDano && player != null && playerStats != null)
                 {
                     float dist = DistanciaPontoSegmentoRaio(player.position, origemAtual, pontaFeixe);
                     if (dist <= larguraRaio * 0.5f)
@@ -1157,7 +1169,11 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
 
     public void CriarBossUI()
     {
-        if (controller == null) controller = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
+        // co-op: no cliente o Start não roda, então inicializa aqui os campos que os efeitos
+        // cosméticos (laser/morte/flash) precisam — sem spriteRenderer o sorting nasce em 0 (atrás de tudo).
+        if (controller == null)     controller     = GetComponent<InimigoController>();
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (animator == null)       animator       = GetComponent<Animator>();
         bossCanvasGO = new GameObject("BossCanvas");
         Canvas cv = bossCanvasGO.AddComponent<Canvas>();
         cv.renderMode   = RenderMode.ScreenSpaceOverlay;
@@ -1280,7 +1296,23 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
     public int FaseUI
     {
         get => fase2Ativada ? 1 : 0;
-        set { fase2Ativada = value >= 1; if (faseText != null) faseText.text = Loc.T(value >= 1 ? "boss.phase2" : "boss.phase1"); }
+        set
+        {
+            bool era = fase2Ativada;
+            fase2Ativada = value >= 1;
+            if (faseText != null)
+            {
+                faseText.text  = Loc.T(value >= 1 ? "boss.phase2" : "boss.phase1");
+                if (value >= 1) faseText.color = new Color(1f, 0.4f, 0.1f);
+            }
+            // Cliente co-op: reproduz a APARÊNCIA de fase 2 (no host isso vem de TransicaoFase2).
+            // Roda uma vez na transição 0->1; o setter só é chamado no cliente (host usa o getter).
+            if (value >= 1 && !era)
+            {
+                if (animator == null) animator = GetComponent<Animator>();
+                if (animator != null) animator.Play("Fase2");
+            }
+        }
     }
 
     void AtualizarUI()
@@ -1360,7 +1392,20 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
     // EFEITO DE MORTE
     // ──────────────────────────────────────────────────────────────
 
-    public void IniciarEfeitoMorte() => StartCoroutine(EfeitoMorte());
+    bool morteCosmetica = false;
+
+    public void IniciarEfeitoMorte()
+    {
+        GetComponent<BossHudNet>()?.BroadcastMorte("BOSS DERROTADO!", new Color(1f, 0.9f, 0.2f)); // host avisa clientes
+        StartCoroutine(EfeitoMorte());
+    }
+
+    // Cliente co-op: roda o MESMO efeito de morte (sem destruir o objeto — o host despawna).
+    public void MorteCosmetica()
+    {
+        morteCosmetica = true;
+        StartCoroutine(EfeitoMorte());
+    }
 
     IEnumerator EfeitoMorte()
     {
@@ -1396,8 +1441,9 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
             yield return null;
         }
 
-        BossMorteUI.Exibir("BOSS DERROTADO!", new Color(1f, 0.9f, 0.2f));
-        Destroy(gameObject);
+        // No cliente a mensagem vem pelo RPC (garantida); o host mostra aqui.
+        if (!morteCosmetica) BossMorteUI.Exibir("BOSS DERROTADO!", new Color(1f, 0.9f, 0.2f));
+        if (!morteCosmetica) Destroy(gameObject); // cliente não destrói NetworkObject (host despawna)
     }
 
     void CriarAneisMorte(int qtd, int sortL, int sortO)
