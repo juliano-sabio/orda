@@ -362,6 +362,7 @@ public class SkillChoiceUI : MonoBehaviour
             if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
             {
                 text.text = $"<b>{skill.GetDisplayName()}</b>";
+                AjustarTextoParaCaber(text, 8f);
             }
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {
@@ -628,6 +629,7 @@ public class SkillChoiceUI : MonoBehaviour
             if (text.name.Contains("Name") || text.name.Contains("Nome") || text.name.Contains("Title"))
             {
                 text.text = $"<b>{skill.GetDisplayName()}</b>";
+                AjustarTextoParaCaber(text, 8f);
             }
             else if (text.name.Contains("Desc") || text.name.Contains("Description") || text.name.Contains("Detail"))
             {

@@ -82,9 +82,14 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
     private GameObject      bossCanvasGO;
     private Image           hpFill;
     private Image           hpFillGhost;
+    private Image           hpFlash;      // overlay de flash ao tomar dano
     private Image           _bordaImg;
     private TextMeshProUGUI faseText;
     private TextMeshProUGUI hpText;
+    private float           hpUltimoPct = 1f;
+    private Coroutine       flashCo;
+    private float           hpGhostDisplay = 1f;
+    private float           damageTimer;
 
     // ──────────────────────────────────────────────
     // LIFECYCLE
@@ -899,6 +904,21 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
     // UI
     // ──────────────────────────────────────────────
 
+    // Um Image do tipo Filled SEM sprite ignora o fillAmount (renderiza quad cheio),
+    // então a barra nunca desce. Garante um sprite branco como fallback.
+    static Sprite s_spriteBranco;
+    static Sprite SpriteBranco()
+    {
+        if (s_spriteBranco == null)
+        {
+            var t = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            var px = new Color[4]; for (int i = 0; i < 4; i++) px[i] = Color.white;
+            t.SetPixels(px); t.Apply();
+            s_spriteBranco = Sprite.Create(t, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f), 2f);
+        }
+        return s_spriteBranco;
+    }
+
     public void CriarBossUI()
     {
         if (controller == null)     controller     = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
@@ -986,11 +1006,13 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         ghostRT.offsetMin = new Vector2(8f, 0f);
         ghostRT.offsetMax = new Vector2(-8f, 0f);
         hpFillGhost = ghostGO.AddComponent<Image>();
-        hpFillGhost.color      = new Color(1f, 0.85f, 0.2f, 0.88f);
+        hpFillGhost.sprite     = SpriteBranco();
+        hpFillGhost.color      = new Color(1f, 0.95f, 0.45f, 0.95f); // trilha do dano (amarelo claro)
         hpFillGhost.type       = Image.Type.Filled;
-        hpFillGhost.fillMethod = Image.FillMethod.Vertical;
-        hpFillGhost.fillOrigin = 0;
+        hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
+        hpFillGhost.fillOrigin = 0; // esquerda
         hpFillGhost.fillAmount = 1f;
+        hpFillGhost.raycastTarget = false;
 
         // Barra de HP principal (rosa → vermelho na fase 2)
         var barraGO = new GameObject("HP_Fill");
@@ -1001,11 +1023,30 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         barraRT.offsetMin = new Vector2(8f, 0f);
         barraRT.offsetMax = new Vector2(-8f, 0f);
         hpFill = barraGO.AddComponent<Image>();
+        hpFill.sprite     = SpriteBranco();
         hpFill.color      = new Color(0.92f, 0.28f, 0.86f);
         hpFill.type       = Image.Type.Filled;
-        hpFill.fillMethod = Image.FillMethod.Vertical;
-        hpFill.fillOrigin = 0;
+        hpFill.fillMethod = Image.FillMethod.Horizontal;
+        hpFill.fillOrigin = 0; // esquerda
         hpFill.fillAmount = 1f;
+        hpFill.raycastTarget = false;
+
+        // Overlay de flash branco ao tomar dano (acompanha a parte preenchida)
+        var flashGO = new GameObject("HP_Flash");
+        flashGO.transform.SetParent(painelGO.transform, false);
+        var flashRT = flashGO.AddComponent<RectTransform>();
+        flashRT.anchorMin = new Vector2(0f, 0.07f);
+        flashRT.anchorMax = new Vector2(1f, 0.46f);
+        flashRT.offsetMin = new Vector2(8f, 0f);
+        flashRT.offsetMax = new Vector2(-8f, 0f);
+        hpFlash = flashGO.AddComponent<Image>();
+        hpFlash.sprite     = SpriteBranco();
+        hpFlash.type       = Image.Type.Filled;
+        hpFlash.fillMethod = Image.FillMethod.Horizontal;
+        hpFlash.fillOrigin = 0;
+        hpFlash.fillAmount = 1f;
+        hpFlash.color      = new Color(1f, 1f, 1f, 0f);
+        hpFlash.raycastTarget = false;
 
         // Faixa de brilho lateral esquerda (efeito de vidro em barra vertical)
         var shineGO = new GameObject("HP_Shine");
@@ -1058,10 +1099,25 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 
         float pct = controller.vidaAtual / controller.vidaMaxima;
 
-        hpFill.fillAmount = Mathf.Lerp(hpFill.fillAmount, pct, Time.deltaTime * 8f);
+        // Detecta dano (vida caiu) → dispara flash.
+        if (pct < hpUltimoPct - 0.0005f)
+        {
+            if (gameObject.activeInHierarchy)
+            {
+                if (flashCo != null) StopCoroutine(flashCo);
+                flashCo = StartCoroutine(FlashDano());
+            }
+        }
+        hpUltimoPct = pct;
 
-        if (hpFillGhost != null)
-            hpFillGhost.fillAmount = Mathf.MoveTowards(hpFillGhost.fillAmount, pct, Time.deltaTime * 0.35f);
+        hpFill.fillAmount = pct;
+
+        if (pct < hpGhostDisplay - 0.005f) damageTimer = 0.6f;
+        if (damageTimer > 0f) damageTimer -= Time.deltaTime;
+        else hpGhostDisplay = Mathf.Lerp(hpGhostDisplay, pct, Time.deltaTime * 2f);
+        if (hpFillGhost != null) hpFillGhost.fillAmount = hpGhostDisplay;
+
+        if (hpFlash != null) hpFlash.fillAmount = hpGhostDisplay;
 
         hpFill.color = fase2Ativada
             ? new Color(1f, 0.18f, 0.12f)
@@ -1074,6 +1130,21 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 
         if (hpText != null)
             hpText.text = Mathf.CeilToInt(pct * 100f) + "%";
+    }
+
+    // Flash branco rápido na barra ao tomar dano (feedback visível de hit).
+    IEnumerator FlashDano()
+    {
+        if (hpFlash == null) yield break;
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 6f;
+            hpFlash.color = new Color(1f, 1f, 1f, Mathf.Lerp(0.55f, 0f, t));
+            yield return null;
+        }
+        hpFlash.color = new Color(1f, 1f, 1f, 0f);
+        flashCo = null;
     }
 
     // ──────────────────────────────────────────────

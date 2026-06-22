@@ -163,6 +163,8 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
     private Image hpFillGhost;
     private TextMeshProUGUI faseText;
     private TextMeshProUGUI hpText;
+    private float hpGhostDisplay = 1f;
+    private float damageTimer;
 
     // ──────────────────────────────────────────────────────────────
     // LIFECYCLE
@@ -1059,6 +1061,21 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
     // BOSS HEALTH BAR UI
     // ──────────────────────────────────────────────────────────────
 
+    // Um Image do tipo Filled SEM sprite ignora o fillAmount (renderiza quad cheio),
+    // então a barra nunca desce. Garante um sprite branco como fallback.
+    static Sprite s_spriteBranco;
+    static Sprite SpriteBranco()
+    {
+        if (s_spriteBranco == null)
+        {
+            var t = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            var px = new Color[4]; for (int i = 0; i < 4; i++) px[i] = Color.white;
+            t.SetPixels(px); t.Apply();
+            s_spriteBranco = Sprite.Create(t, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f), 2f);
+        }
+        return s_spriteBranco;
+    }
+
     public void CriarBossUI()
     {
         if (controller == null)     controller     = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
@@ -1076,8 +1093,8 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
         GameObject painel = CriarUIGO("BossPanel", bossCanvasGO.transform);
         RectTransform pr = painel.GetComponent<RectTransform>();
-        pr.anchorMin = new Vector2(0.2f, 0.825f);
-        pr.anchorMax = new Vector2(0.8f, 0.935f);
+        pr.anchorMin = new Vector2(0.28f, 0.845f);
+        pr.anchorMax = new Vector2(0.72f, 0.978f);
         pr.offsetMin = pr.offsetMax = Vector2.zero;
         Image painelImg = painel.AddComponent<Image>();
         painelImg.color = new Color(0.04f, 0.03f, 0.06f, 0.9f);
@@ -1129,7 +1146,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
         GameObject ghostGO = CriarUIGO("HPGhost", barBG.transform);
         ExpandirRect(ghostGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
         hpFillGhost            = ghostGO.AddComponent<Image>();
-        if (sprHpFill != null) hpFillGhost.sprite = sprHpFill;
+        hpFillGhost.sprite     = sprHpFill != null ? sprHpFill : SpriteBranco();
         hpFillGhost.type       = Image.Type.Filled;
         hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
         hpFillGhost.fillAmount = 1f;
@@ -1138,7 +1155,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
         GameObject fillGO = CriarUIGO("HPFill", barBG.transform);
         ExpandirRect(fillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
         hpFill            = fillGO.AddComponent<Image>();
-        if (sprHpFill != null) hpFill.sprite = sprHpFill;
+        hpFill.sprite     = sprHpFill != null ? sprHpFill : SpriteBranco();
         hpFill.type       = Image.Type.Filled;
         hpFill.fillMethod = Image.FillMethod.Horizontal;
         hpFill.fillAmount = 1f;
@@ -1208,13 +1225,16 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
         float pct = controller.GetPorcentagemVida();
 
-        hpFill.fillAmount = Mathf.Lerp(hpFill.fillAmount, pct, Time.deltaTime * 2.5f);
+        hpFill.fillAmount = pct;
 
         hpFill.color = fase2Ativada
             ? new Color(0.6f, 0.2f, 1f)
             : (sprHpFill != null ? Color.white : new Color(0.45f, 0.15f, 0.7f));
 
-        hpFillGhost.fillAmount = Mathf.MoveTowards(hpFillGhost.fillAmount, pct, Time.deltaTime * 0.35f);
+        if (pct < hpGhostDisplay - 0.005f) damageTimer = 0.6f;
+        if (damageTimer > 0f) damageTimer -= Time.deltaTime;
+        else hpGhostDisplay = Mathf.Lerp(hpGhostDisplay, pct, Time.deltaTime * 2f);
+        hpFillGhost.fillAmount = hpGhostDisplay;
 
         if (hpText != null)
             hpText.text = $"{Mathf.RoundToInt(controller.vidaAtual)} / {Mathf.RoundToInt(controller.vidaMaxima)}";

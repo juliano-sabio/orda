@@ -86,6 +86,8 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
     Image           hpFill, hpGhost;
     TextMeshProUGUI hpText, faseText;
     GameObject      escudoVisualGO;
+    float hpGhostDisplay = 1f;
+    float damageTimer;
 
     // ── LIFECYCLE ────────────────────────────────────────────────────────────────
 
@@ -755,6 +757,21 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
 
     // ── BOSS UI ──────────────────────────────────────────────────────────────────
 
+    // Um Image do tipo Filled SEM sprite ignora o fillAmount (renderiza quad cheio),
+    // então a barra nunca desce. Garante um sprite branco como fallback.
+    static Sprite s_spriteBranco;
+    static Sprite SpriteBranco()
+    {
+        if (s_spriteBranco == null)
+        {
+            var t = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            var px = new Color[4]; for (int i = 0; i < 4; i++) px[i] = Color.white;
+            t.SetPixels(px); t.Apply();
+            s_spriteBranco = Sprite.Create(t, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f), 2f);
+        }
+        return s_spriteBranco;
+    }
+
     public void CriarBossUI()
     {
         if (controller == null) controller = GetComponent<InimigoController>(); // co-op: no cliente o Start não roda
@@ -768,7 +785,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
 
         var painel = CriarUIGO("BossPanel", bossCanvasGO.transform);
         var pr = painel.GetComponent<RectTransform>();
-        pr.anchorMin = new Vector2(0.2f, 0.825f); pr.anchorMax = new Vector2(0.8f, 0.935f);
+        pr.anchorMin = new Vector2(0.28f, 0.845f); pr.anchorMax = new Vector2(0.72f, 0.978f);
         pr.offsetMin = pr.offsetMax = Vector2.zero;
         painel.AddComponent<Image>().color = new Color(0.03f, 0.03f, 0.06f, 0.92f);
 
@@ -803,12 +820,14 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
         var ghostGO = CriarUIGO("HPGhost", barBG.transform);
         ExpandirRect(ghostGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
         hpGhost = ghostGO.AddComponent<Image>();
+        hpGhost.sprite = SpriteBranco();
         hpGhost.type = Image.Type.Filled; hpGhost.fillMethod = Image.FillMethod.Horizontal;
         hpGhost.fillAmount = 1f; hpGhost.color = new Color(1f, 0.88f, 0.25f, 0.9f);
 
         var fillGO = CriarUIGO("HPFill", barBG.transform);
         ExpandirRect(fillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
         hpFill = fillGO.AddComponent<Image>();
+        hpFill.sprite = SpriteBranco();
         hpFill.color = new Color(0.9f, 0.55f, 0.1f);
         hpFill.type = Image.Type.Filled; hpFill.fillMethod = Image.FillMethod.Horizontal; hpFill.fillAmount = 1f;
 
@@ -852,8 +871,12 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
     {
         if (hpFill == null || controller == null) return;
         float pct = controller.GetPorcentagemVida();
-        hpFill.fillAmount  = Mathf.Lerp(hpFill.fillAmount, pct, Time.deltaTime * 3f);
-        hpGhost.fillAmount = Mathf.MoveTowards(hpGhost.fillAmount, pct, Time.deltaTime * 0.3f);
+        hpFill.fillAmount = pct;
+
+        if (pct < hpGhostDisplay - 0.005f) damageTimer = 0.6f;
+        if (damageTimer > 0f) damageTimer -= Time.deltaTime;
+        else hpGhostDisplay = Mathf.Lerp(hpGhostDisplay, pct, Time.deltaTime * 2f);
+        hpGhost.fillAmount = hpGhostDisplay;
         hpFill.color = escudoAtivo ? new Color(0.3f, 0.7f, 1f)
                      : fase >= 4   ? new Color(0.8f, 0.1f, 1f)
                      : fase >= 3   ? new Color(1f, 0.3f, 0.1f)
