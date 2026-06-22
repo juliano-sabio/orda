@@ -803,10 +803,12 @@ public class PauseManager : MonoBehaviour
         GameObject eventoCanvas = GameObject.Find("EventoCanvas");
         if (eventoCanvas != null) Destroy(eventoCanvas);
 
-        if (GerenciadorEventos.Instance != null) Destroy(GerenciadorEventos.Instance.gameObject);
-        if (UIManager.Instance          != null) Destroy(UIManager.Instance.gameObject);
-        if (SkillManager.Instance       != null) Destroy(SkillManager.Instance.gameObject);
-        if (StatusCardSystem.Instance   != null) Destroy(StatusCardSystem.Instance.gameObject);
+        if (GerenciadorEventos.Instance     != null) Destroy(GerenciadorEventos.Instance.gameObject);
+        if (UIManager.Instance              != null) Destroy(UIManager.Instance.gameObject);
+        if (SkillManager.Instance           != null) Destroy(SkillManager.Instance.gameObject);
+        if (StatusCardSystem.Instance       != null) Destroy(StatusCardSystem.Instance.gameObject);
+        if (SkillEvolutionManager.Instance  != null) Destroy(SkillEvolutionManager.Instance.gameObject);
+        if (SkillEvolutionUI.Instance       != null) Destroy(SkillEvolutionUI.Instance.gameObject);
 
         // Destrói o próprio PauseManager por último
         Instance = null;

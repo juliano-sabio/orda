@@ -105,7 +105,6 @@ public class BossController : MonoBehaviour, IBoss
     // ──────────────────────────────────────────────
     [Header("Sprites Pixel Art (arrastar no Inspector)")]
     public Sprite sprHpFrame;  // boss_hp_frame.png
-    public Sprite sprHpFill;   // boss_hp_fill.png
     public Sprite sprHpBg;     // boss_hp_bg.png
 
     // ──────────────────────────────────────────────
@@ -113,9 +112,15 @@ public class BossController : MonoBehaviour, IBoss
     // ──────────────────────────────────────────────
     private GameObject bossCanvasGO;
     private Image hpFill;
-    private Image hpFillGhost; // barra "fantasma" que atrasa
+    private Image hpFillGhost; // barra "fantasma" (trilha do dano) que atrasa
+    private Image hpFlash;     // overlay de flash ao tomar dano
+    private Image _bordaImg;   // aura roxa pulsante ao redor do painel (tema arcano)
     private TextMeshProUGUI faseText;
     private TextMeshProUGUI hpText;
+    private float hpUltimoPct = 1f;     // pct anterior (detecta dano)
+    private Coroutine flashCo;
+    private float hpGhostDisplay = 1f;
+    private float damageTimer;
 
     // ──────────────────────────────────────────────────────────────
     // LIFECYCLE
@@ -1144,6 +1149,22 @@ public class BossController : MonoBehaviour, IBoss
     // BOSS HEALTH BAR UI
     // ──────────────────────────────────────────────────────────────
 
+    // Sprite branco 1px em cache. Um Image do tipo Filled SEM sprite cai no
+    // base.OnPopulateMesh (quad cheio) e IGNORA o fillAmount — a barra nunca desce.
+    // Com um sprite qualquer atribuído, o fillMethod/fillAmount volta a funcionar.
+    static Sprite s_spriteBranco;
+    static Sprite SpriteBranco()
+    {
+        if (s_spriteBranco == null)
+        {
+            var t = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            var px = new Color[4]; for (int i = 0; i < 4; i++) px[i] = Color.white;
+            t.SetPixels(px); t.Apply();
+            s_spriteBranco = Sprite.Create(t, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f), 2f);
+        }
+        return s_spriteBranco;
+    }
+
     void CriarBossUI()
     {
         bossCanvasGO = new GameObject("BossCanvas");
@@ -1160,11 +1181,23 @@ public class BossController : MonoBehaviour, IBoss
         // Painel de fundo — parte superior da tela (centralizado)
         GameObject painel = CriarUIGO("BossPanel", bossCanvasGO.transform);
         RectTransform pr = painel.GetComponent<RectTransform>();
-        pr.anchorMin = new Vector2(0.2f, 0.825f);
-        pr.anchorMax = new Vector2(0.8f, 0.935f);
+        pr.anchorMin = new Vector2(0.28f, 0.845f);
+        pr.anchorMax = new Vector2(0.72f, 0.978f);
         pr.offsetMin = pr.offsetMax = Vector2.zero;
         Image painelImg = painel.AddComponent<Image>();
         painelImg.color = new Color(0.04f, 0.04f, 0.06f, 0.9f);
+
+        // Aura roxa pulsante ao redor do painel (combina com a moldura arcana da barra)
+        GameObject bordaGO = CriarUIGO("Borda", bossCanvasGO.transform);
+        RectTransform bordaRT = bordaGO.GetComponent<RectTransform>();
+        bordaRT.anchorMin = pr.anchorMin;
+        bordaRT.anchorMax = pr.anchorMax;
+        bordaRT.offsetMin = new Vector2(-3f, -3f);
+        bordaRT.offsetMax = new Vector2(3f, 3f);
+        _bordaImg = bordaGO.AddComponent<Image>();
+        _bordaImg.color = new Color(0.55f, 0.25f, 0.95f, 0.6f);
+        _bordaImg.raycastTarget = false;
+        bordaGO.transform.SetSiblingIndex(0); // atrás do painel
 
         // Linha decorativa no topo do painel
         GameObject linha = CriarUIGO("Linha", painel.transform);
@@ -1173,7 +1206,7 @@ public class BossController : MonoBehaviour, IBoss
         lr.anchorMax = new Vector2(1f, 1f);
         lr.offsetMin = lr.offsetMax = Vector2.zero;
         Image linhaImg = linha.AddComponent<Image>();
-        linhaImg.color = new Color(0.8f, 0.2f, 0.2f, 1f);
+        linhaImg.color = new Color(0.65f, 0.3f, 0.95f, 1f);
 
         // Nome do boss
         GameObject nomeGO = CriarUIGO("NomeBoss", painel.transform);
@@ -1185,7 +1218,7 @@ public class BossController : MonoBehaviour, IBoss
         nomeTxt.text      = nomeBoss.ToUpper();
         nomeTxt.fontSize  = 20;
         nomeTxt.fontStyle = FontStyles.Bold;
-        nomeTxt.color     = new Color(1f, 0.85f, 0.2f);
+        nomeTxt.color     = new Color(0.85f, 0.65f, 1f);
         nomeTxt.alignment = TextAlignmentOptions.Center;
 
         // Indicador de fase
@@ -1197,8 +1230,16 @@ public class BossController : MonoBehaviour, IBoss
         faseText           = faseGO.AddComponent<TextMeshProUGUI>();
         faseText.text      = Loc.T("boss.phase1");
         faseText.fontSize  = 14;
-        faseText.color     = new Color(0.75f, 0.75f, 0.75f);
+        faseText.color     = new Color(0.75f, 0.6f, 0.85f);
         faseText.alignment = TextAlignmentOptions.MidlineRight;
+
+        // Linha separadora entre header e barra
+        GameObject sepGO = CriarUIGO("Separador", painel.transform);
+        RectTransform sepRT = sepGO.GetComponent<RectTransform>();
+        sepRT.anchorMin = new Vector2(0.02f, 0.555f);
+        sepRT.anchorMax = new Vector2(0.98f, 0.575f);
+        sepRT.offsetMin = sepRT.offsetMax = Vector2.zero;
+        sepGO.AddComponent<Image>().color = new Color(0.6f, 0.3f, 0.9f, 0.4f);
 
         // Fundo da barra HP
         GameObject barBG = CriarUIGO("HPBarBG", painel.transform);
@@ -1210,25 +1251,29 @@ public class BossController : MonoBehaviour, IBoss
         if (sprHpBg != null) { bgImg.sprite = sprHpBg; bgImg.type = Image.Type.Tiled; bgImg.color = Color.white; }
         else bgImg.color = new Color(0.1f, 0.1f, 0.12f);
 
-        // Barra fantasma (amarela, desce devagar)
+        // Barra fantasma / trilha do dano (cor sólida contrastante, desce devagar).
+        // Sem sprite: fica um bloco limpo que "queima" mostrando o quanto caiu.
         GameObject ghostGO = CriarUIGO("HPGhost", barBG.transform);
         ExpandirRect(ghostGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
         hpFillGhost            = ghostGO.AddComponent<Image>();
-        if (sprHpFill != null) hpFillGhost.sprite = sprHpFill;
+        hpFillGhost.sprite     = SpriteBranco();
         hpFillGhost.type       = Image.Type.Filled;
         hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
         hpFillGhost.fillAmount = 1f;
-        hpFillGhost.color      = new Color(1f, 0.88f, 0.25f, 0.9f);
+        hpFillGhost.color      = new Color(1f, 0.95f, 0.45f, 0.95f); // amarelo claro (trilha)
+        hpFillGhost.raycastTarget = false;
 
-        // Barra HP principal (pixel art, animada)
+        // Barra HP principal — cor sólida (a textura de fill original é um tile de 8x12
+        // esticado pra largura inteira da barra, o que borra/pixela feio; cor sólida
+        // fica limpa e o brilho lateral + moldura já dão o acabamento pixel art).
         GameObject fillGO = CriarUIGO("HPFill", barBG.transform);
         ExpandirRect(fillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
         hpFill            = fillGO.AddComponent<Image>();
-        if (sprHpFill != null) hpFill.sprite = sprHpFill;
+        hpFill.sprite     = SpriteBranco();
         hpFill.type       = Image.Type.Filled;
         hpFill.fillMethod = Image.FillMethod.Horizontal;
         hpFill.fillAmount = 1f;
-        hpFill.color      = sprHpFill != null ? Color.white : new Color(0.1f, 0.85f, 0.2f);
+        hpFill.color      = new Color(0.25f, 0.9f, 0.35f);
 
         // Texto HP (ex: 450 / 500)
         GameObject hpTextGO = CriarUIGO("HPText", barBG.transform);
@@ -1238,6 +1283,27 @@ public class BossController : MonoBehaviour, IBoss
         hpText.color     = Color.white;
         hpText.fontStyle = FontStyles.Bold;
         hpText.alignment = TextAlignmentOptions.Center;
+
+        // Overlay de flash branco ao tomar dano (cobre a barra, normalmente invisível)
+        GameObject flashGO = CriarUIGO("HPFlash", barBG.transform);
+        ExpandirRect(flashGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        hpFlash = flashGO.AddComponent<Image>();
+        hpFlash.sprite     = SpriteBranco();
+        hpFlash.type       = Image.Type.Filled;
+        hpFlash.fillMethod = Image.FillMethod.Horizontal;
+        hpFlash.fillAmount = 1f;
+        hpFlash.color = new Color(1f, 1f, 1f, 0f);
+        hpFlash.raycastTarget = false;
+
+        // Brilho lateral esquerdo (efeito de vidro/glow na barra)
+        GameObject shineGO = CriarUIGO("HPShine", barBG.transform);
+        RectTransform shineRT = shineGO.GetComponent<RectTransform>();
+        shineRT.anchorMin = new Vector2(0f, 0f);
+        shineRT.anchorMax = new Vector2(0.06f, 1f);
+        shineRT.offsetMin = shineRT.offsetMax = Vector2.zero;
+        Image shineImg = shineGO.AddComponent<Image>();
+        shineImg.color = new Color(1f, 1f, 1f, 0.14f);
+        shineImg.raycastTarget = false;
 
         // Moldura pixel art por cima (centro transparente, borda opaca)
         if (sprHpFrame != null)
@@ -1269,20 +1335,58 @@ public class BossController : MonoBehaviour, IBoss
 
         float pct = controller.GetPorcentagemVida();
 
-        // Barra principal consome visivelmente de forma suave
-        hpFill.fillAmount = Mathf.Lerp(hpFill.fillAmount, pct, Time.deltaTime * 2.5f);
+        // Detecta dano (vida caiu) → dispara flash.
+        if (pct < hpUltimoPct - 0.0005f)
+        {
+            if (gameObject.activeInHierarchy)
+            {
+                if (flashCo != null) StopCoroutine(flashCo);
+                flashCo = StartCoroutine(FlashDano());
+            }
+        }
+        hpUltimoPct = pct;
 
-        // Fase 1: branco (pixel art verde mostra natural); Fase 2: tint vermelho sobre pixel art
+        hpFill.fillAmount = pct;
+
+        // Fase 1: verde slime; Fase 2: tint vermelho/crítico
         hpFill.color = fase2Ativada
             ? new Color(1f, 0.18f, 0.12f)
-            : (sprHpFill != null ? Color.white : new Color(0.1f, 0.85f, 0.2f));
+            : new Color(0.25f, 0.9f, 0.35f);
 
-        // Barra fantasma atrasa para dar efeito de "queima" da vida
-        hpFillGhost.fillAmount = Mathf.MoveTowards(hpFillGhost.fillAmount, pct, Time.deltaTime * 0.35f);
+        if (pct < hpGhostDisplay - 0.005f) damageTimer = 0.6f;
+        if (damageTimer > 0f) damageTimer -= Time.deltaTime;
+        else hpGhostDisplay = Mathf.Lerp(hpGhostDisplay, pct, Time.deltaTime * 2f);
+        hpFillGhost.fillAmount = hpGhostDisplay;
+
+        // Flash acompanha a parte preenchida (HP + trilha), não a barra vazia.
+        if (hpFlash != null) hpFlash.fillAmount = hpFillGhost.fillAmount;
 
         // Texto numérico de HP
         if (hpText != null)
             hpText.text = $"{Mathf.RoundToInt(controller.vidaAtual)} / {Mathf.RoundToInt(controller.vidaMaxima)}";
+
+        // Aura do painel: pulso roxo arcano na fase 1, intensifica pra magenta/vermelho na fase 2
+        if (_bordaImg != null)
+            _bordaImg.color = fase2Ativada
+                ? new Color(0.95f, 0.15f, 0.35f, 0.55f + 0.25f * Mathf.Sin(Time.time * 4f))
+                : new Color(0.55f, 0.25f, 0.95f, 0.5f + 0.15f * Mathf.Sin(Time.time * 2f));
+    }
+
+    // Flash branco rápido na barra ao tomar dano (feedback visível de hit).
+    IEnumerator FlashDano()
+    {
+        if (hpFlash == null) yield break;
+        // sobe rápido, some suave
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 6f;
+            float a = Mathf.Lerp(0.55f, 0f, t);
+            hpFlash.color = new Color(1f, 1f, 1f, a);
+            yield return null;
+        }
+        hpFlash.color = new Color(1f, 1f, 1f, 0f);
+        flashCo = null;
     }
 
     // ──────────────────────────────────────────────────────────────
