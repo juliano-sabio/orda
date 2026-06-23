@@ -24,6 +24,22 @@ public class PlayerCollectLight : MonoBehaviour
         luz.enabled = true;
     }
 
+    // Co-op: intensidade atual normalizada (0..1) — qualquer fonte de brilho (barra de luz
+    // OU pickup) reflete aqui. O PlayerNet publica isto pro fantoche brilhar igual.
+    public float IntensidadeNorm => (luz != null && intensidadeAtiva > 0.001f)
+        ? Mathf.Clamp01(luz.intensity / intensidadeAtiva) : 0f;
+
+    // Co-op: aplica a intensidade vinda do dono no fantoche (sem rodar coroutine/lógica local).
+    public void AplicarNorm(float n)
+    {
+        if (luz == null) return;
+        n = Mathf.Clamp01(n);
+        if (ativaCoroutine != null) { StopCoroutine(ativaCoroutine); ativaCoroutine = null; }
+        luz.color                 = corLuz;
+        luz.intensity             = intensidadeAtiva * n;
+        luz.pointLightOuterRadius = Mathf.Lerp(0.5f, raioAtivo, n);
+    }
+
     public void AtualizarPorPercentual(float pct)
     {
         pct = Mathf.Clamp01(pct);

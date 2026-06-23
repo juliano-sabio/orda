@@ -15,6 +15,9 @@ public class LobbyCoopUI : MonoBehaviour
 
     void Start()
     {
+        // Co-op: registra a lista de personagens pra a fase de rede resolver o CharacterData pelo índice.
+        if (characters != null && characters.Length > 0) PlayerStats.RegistroPersonagens = characters;
+
         LobbyState.EmLobby = true;
         souHost = PlayerPrefs.GetInt("LobbyHost", 1) == 1;
         charSel = PlayerPrefs.GetInt("SelectedCharacter", 0);
