@@ -139,6 +139,10 @@ public class LobbyUI : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────
     void Start()
     {
+        // Co-op: registra a lista de personagens pra a fase de rede resolver o CharacterData
+        // pelo índice (sem CharacterSelectionManager). Corrige o ícone de ultimate branco em jogo.
+        if (characters != null && characters.Length > 0) PlayerStats.RegistroPersonagens = characters;
+
         if (FindAnyObjectByType<EventSystem>() == null)
         {
             var es = new GameObject("EventSystem");

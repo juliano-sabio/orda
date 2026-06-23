@@ -43,15 +43,21 @@ public class CoopProgressao : NetworkBehaviour
 
     // Co-op: sincroniza o estado do evento. Host publica o que o GerenciadorEventos calcula;
     // cliente (que não roda a lógica de evento) reconstrói o painel a partir disso.
+    bool geNullLogado, evtLogCli; // [debug temp]
+
     void Update()
     {
         var ge = GerenciadorEventos.Instance;
-        if (ge == null) return;
+        if (ge == null)
+        {
+            if (!geNullLogado) { geNullLogado = true; Debug.Log($"[CoopEvt] GerenciadorEventos.Instance NULL (IsServer={IsServer})"); }
+            return;
+        }
 
         if (IsServer)
         {
             bool a = ge.EvtAtivoCoop;
-            if (evtAtivo.Value != a) evtAtivo.Value = a;
+            if (evtAtivo.Value != a) { evtAtivo.Value = a; Debug.Log($"[CoopEvt-HOST] evtAtivo={a} tipo={ge.EvtTipoCoop}"); }
             if (a)
             {
                 if (evtTipo.Value != ge.EvtTipoCoop) evtTipo.Value = ge.EvtTipoCoop;
@@ -63,6 +69,7 @@ public class CoopProgressao : NetworkBehaviour
         }
         else
         {
+            if (evtAtivo.Value != evtLogCli) { evtLogCli = evtAtivo.Value; Debug.Log($"[CoopEvt-CLIENT] recebeu ativo={evtAtivo.Value} tipo={evtTipo.Value} (vai montar painel)"); }
             ge.AplicarEstadoCoop(evtAtivo.Value, evtTipo.Value, evtProg.Value, evtQtd.Value, evtTimer.Value, evtDuracao.Value);
         }
     }

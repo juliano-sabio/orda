@@ -11,6 +11,7 @@ public class ElementDropToken : MonoBehaviour
     public float bobFrequency = 2.2f;
 
     Vector3 startPos;
+    bool coletado; // trava: o trigger pode disparar 2x (player do host + fantoche do P2) antes do Destroy
 
     void Start()
     {
@@ -26,18 +27,15 @@ public class ElementDropToken : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (coletado || !other.CompareTag("Player")) return;
+        coletado = true;
 
-        // Co-op: infusão é escolha do GRUPO (igual à escolha de skill) — os DOIS recebem o painel,
-        // e quem escolher primeiro espera o outro. O token existe só no host (não é NetworkObject),
-        // então aqui (no host) avisa cada player pra abrir a infusão no SEU cliente.
+        // Co-op: um token = UMA infusão, só pro DONO do player que pegou (não pros dois).
+        // O token existe só no host; roteia pro dono daquele player abrir a infusão na tela dele.
         if (NetSpawn.EmRede)
         {
-            for (int i = 0; i < PlayerStats.All.Count; i++)
-            {
-                var pn = PlayerStats.All[i] != null ? PlayerStats.All[i].GetComponent<PlayerNet>() : null;
-                if (pn != null) pn.AbrirInfusaoOwnerRpc((int)elementType);
-            }
+            var pn = other.GetComponentInParent<PlayerNet>();
+            if (pn != null) pn.AbrirInfusaoOwnerRpc((int)elementType);
             Destroy(gameObject);
             return;
         }

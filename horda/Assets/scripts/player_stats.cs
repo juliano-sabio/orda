@@ -218,8 +218,18 @@ public class PlayerStats : MonoBehaviour
 
     // Overload por índice explícito: usado no co-op para aplicar o personagem
     // do dono (índice sincronizado) também nas cópias remotas.
+    // Co-op: o lobby preenche este registro (índice -> CharacterData) pra a fase de rede
+    // resolver o personagem sem o CharacterSelectionManager (que não existe no co-op).
+    public static CharacterData[] RegistroPersonagens;
+
     public void ApplyCharacterData(int selectedCharacter)
     {
+        // Co-op: sem CharacterSelectionManager, resolve o characterData pelo índice sincronizado
+        // (senão a ultimate cai no fallback sem ícone → ícone branco em jogo).
+        if (characterData == null && RegistroPersonagens != null &&
+            selectedCharacter >= 0 && selectedCharacter < RegistroPersonagens.Length)
+            characterData = RegistroPersonagens[selectedCharacter];
+
         if (characterData == null) return;
 
         // --- Espíritos de Evolução (upgrades permanentes por personagem) ---

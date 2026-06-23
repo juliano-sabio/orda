@@ -76,11 +76,12 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             if (ultReadyAnterior && !r) UltimateCastServerRpc();
             ultReadyAnterior = r;
 
-            // Publica o brilho ATIVO da luz (0 fora da segunda fase) pro fantoche brilhar igual.
-            if (stats != null)
+            // Publica a intensidade REAL do brilho (barra de luz OU pickup) pro fantoche brilhar igual.
+            var pclDono = GetComponent<PlayerCollectLight>();
+            if (pclDono != null)
             {
-                float p = stats.luzGlowPct;
-                if (Mathf.Abs(p - luzPct.Value) > 0.01f) luzPct.Value = p;
+                float p = pclDono.IntensidadeNorm;
+                if (Mathf.Abs(p - luzPct.Value) > 0.02f) luzPct.Value = p;
             }
         }
         else
@@ -91,9 +92,9 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             s.x = facingLeft.Value ? -mag : mag;
             transform.localScale = s;
 
-            // cópia remota: reflete a luz do dono (brilho da segunda fase).
+            // cópia remota: reflete o brilho do dono (barra de luz OU pickup).
             var pcl = GetComponent<PlayerCollectLight>();
-            if (pcl != null) pcl.AtualizarPorPercentual(luzPct.Value);
+            if (pcl != null) pcl.AplicarNorm(luzPct.Value);
         }
 
         if (IsServer) MonitorarHost();
@@ -280,6 +281,32 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     [Rpc(SendTo.Owner)]
     public void DashChargeOwnerRpc() { if (stats != null) stats.AddDashCharge(); }
+
+    // Co-op: replica o EFEITO visual do dash (rastro/partículas) no fantoche do colega —
+    // o movimento já vem pelo NetworkTransform, mas o DashEffect é local; sem isto o dash
+    // do outro player aparece "sem efeito" na sua tela.
+    public void BroadcastDash(Vector2 dir)
+    {
+        if (IsOwner && IsSpawned) DashFxServerRpc(dir);
+    }
+
+    [Rpc(SendTo.Server)]
+    void DashFxServerRpc(Vector2 dir) { DashFxClientRpc(dir); }
+
+    [Rpc(SendTo.NotOwner)]
+    void DashFxClientRpc(Vector2 dir)
+    {
+        var fx = GetComponent<DashEffect>();
+        if (fx == null) return;
+        fx.IniciarEfeito(dir);
+        StartCoroutine(PararDashFx(fx));
+    }
+
+    System.Collections.IEnumerator PararDashFx(DashEffect fx)
+    {
+        yield return new WaitForSeconds(0.15f); // ~dashDuration
+        if (fx != null) fx.PararEfeito();
+    }
 
     // Co-op: espírito de luz (drop host-local) recarrega a barra de luz do DONO que coletou.
     [Rpc(SendTo.Owner)]
