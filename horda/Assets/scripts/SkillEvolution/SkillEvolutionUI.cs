@@ -242,6 +242,23 @@ public class SkillEvolutionUI : MonoBehaviour
             rm.InitializeRuntime(tempSkill);
             Destroy(tempSkill);
 
+            // A carta de evolução usa uma moldura mais estreita (cartaevolução) que a carta
+            // de skill. Aperta a descrição pra dentro da moldura (margem lateral + truncate)
+            // pra o texto não ultrapassar a linha marrom da borda.
+            foreach (var t in card.GetComponentsInChildren<TextMeshProUGUI>(true))
+            {
+                string nd = t.name.ToLower();
+                if (nd.Contains("desc") || nd.Contains("detail"))
+                {
+                    t.margin           = new Vector4(16f, t.margin.y, 16f, t.margin.w);
+                    t.textWrappingMode = TMPro.TextWrappingModes.Normal;
+                    t.overflowMode     = TMPro.TextOverflowModes.Truncate;
+                    t.enableAutoSizing = true;
+                    t.fontSizeMin      = 6f;
+                    t.fontSizeMax      = Mathf.Min(t.fontSizeMax > 0f ? t.fontSizeMax : t.fontSize, 11f);
+                }
+            }
+
             // o RuntimeManager esconde a raridade (ajuste das skill cards); aqui re-exibimos nas de evolução
             foreach (var t in card.GetComponentsInChildren<TextMeshProUGUI>(true))
             {

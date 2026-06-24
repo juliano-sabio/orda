@@ -56,10 +56,10 @@ public class TempestadeEletricaEvento : MonoBehaviour
             yield return new WaitForSeconds(IntervaloAtual());
             if (gameObject == null) yield break;
 
-            // Quantidade de raios simultâneos escala agressivamente com o tempo
+            // Quantidade de raios simultâneos escala com o tempo (pico mais brando no final)
             float t   = Mathf.Pow(Mathf.Clamp01(elapsed / duracao), 1.6f);
-            int   qtd = Mathf.RoundToInt(Mathf.Lerp(1f, 14f, t));
-            qtd += Random.Range(0, 3); // variação extra
+            int   qtd = Mathf.RoundToInt(Mathf.Lerp(1f, 6f, t));
+            qtd += Random.Range(0, 2); // variação extra
             qtd  = Mathf.Max(1, qtd);
             for (int i = 0; i < qtd; i++)
             {

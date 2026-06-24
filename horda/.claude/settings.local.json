@@ -3,7 +3,10 @@
     "allow": [
       "mcp__unity-mcp__execute_code",
       "Bash(cd \"c:/Users/rafin/OneDrive/Documentos/GitHub/projeto-rpg/orda/horda/Assets/Screenshots\" && rm -f screenshot-20260620-1237*.png screenshot-20260620-1237*.png.meta screenshot-20260620-1306*.png screenshot-20260620-1306*.png.meta && echo ok)",
-      "PowerShell(Add-Type -AssemblyName System.Drawing; foreach \\($f in 'boss_hp_fill.png','boss_hp_bg.png','boss_hp_frame.png'\\) { $p = Resolve-Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\boss\\\\bossmaga\\\\$f\"; $img = [System.Drawing.Image]::FromFile\\($p\\); Write-Output \"$f : $\\($img.Width\\)x$\\($img.Height\\)\"; $img.Dispose\\(\\) })"
+      "PowerShell(Add-Type -AssemblyName System.Drawing; foreach \\($f in 'boss_hp_fill.png','boss_hp_bg.png','boss_hp_frame.png'\\) { $p = Resolve-Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\boss\\\\bossmaga\\\\$f\"; $img = [System.Drawing.Image]::FromFile\\($p\\); Write-Output \"$f : $\\($img.Width\\)x$\\($img.Height\\)\"; $img.Dispose\\(\\) })",
+      "Bash(grep -n \"timeScale\\\\|sortingOrder\" UI/GameOverUI.cs)",
+      "Bash(grep -n \"timeScale\\\\|sortingOrder\" UI/Skill_choice_UI.cs)",
+      "Bash(grep -n \"timeScale\\\\|sortingOrder\" SkillEvolution/SkillEvolutionUI.cs)"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda\\horda"

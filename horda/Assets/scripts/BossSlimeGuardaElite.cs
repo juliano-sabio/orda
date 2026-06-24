@@ -782,6 +782,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
         cs.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         cs.referenceResolution = new Vector2(1920, 1080); cs.matchWidthOrHeight = 0.5f;
         bossCanvasGO.AddComponent<GraphicRaycaster>();
+        bossCanvasGO.AddComponent<OcultarCanvasNoPause>(); // some no pause/game over/cartas
 
         var painel = CriarUIGO("BossPanel", bossCanvasGO.transform);
         var pr = painel.GetComponent<RectTransform>();
@@ -822,7 +823,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
         hpGhost = ghostGO.AddComponent<Image>();
         hpGhost.sprite = SpriteBranco();
         hpGhost.type = Image.Type.Filled; hpGhost.fillMethod = Image.FillMethod.Horizontal;
-        hpGhost.fillAmount = 1f; hpGhost.color = new Color(1f, 0.88f, 0.25f, 0.9f);
+        hpGhost.fillAmount = 1f; hpGhost.color = new Color(0f, 0f, 0f, 0.9f); // preto (trilha do dano)
 
         var fillGO = CriarUIGO("HPFill", barBG.transform);
         ExpandirRect(fillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);

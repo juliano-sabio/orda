@@ -196,7 +196,9 @@ public class LancaLuzProjetil : MonoBehaviour
         {
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva))
+            bool explosiva = SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva);
+            Debug.Log($"[LancaLuz] acertou {ic.name} | LancaExplosiva ativa? {explosiva}");
+            if (explosiva)
                 EvolutionFX.SpawnExplosao(transform.position, 2.5f, dano * 0.6f, new Color(1f, 0.9f, 0.3f), this);
         }
         bool perfura = SkillEvolutionManager.Tem(SkillEvolutionType.LancaPerfurante);

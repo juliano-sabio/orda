@@ -1205,6 +1205,7 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         cs.referenceResolution    = new Vector2(1920, 1080);
         cs.matchWidthOrHeight     = 0.5f;
         bossCanvasGO.AddComponent<GraphicRaycaster>();
+        bossCanvasGO.AddComponent<OcultarCanvasNoPause>(); // some no pause/game over/cartas
 
         // Painel de fundo — parte superior da tela (centralizado)
         GameObject painel = CriarUIGO("BossPanel", bossCanvasGO.transform);
@@ -1288,7 +1289,7 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         hpFillGhost.type       = Image.Type.Filled;
         hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
         hpFillGhost.fillAmount = 1f;
-        hpFillGhost.color      = new Color(1f, 0.95f, 0.45f, 0.95f); // amarelo claro (trilha)
+        hpFillGhost.color      = new Color(0f, 0f, 0f, 0.95f); // preto (trilha do dano)
         hpFillGhost.raycastTarget = false;
 
         // Barra HP principal — cor sólida (a textura de fill original é um tile de 8x12
@@ -1432,12 +1433,13 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         float t = 0f;
         while (t < 1f)
         {
+            if (hpFlash == null) { flashCo = null; yield break; }
             t += Time.deltaTime * 6f;
             float a = Mathf.Lerp(0.55f, 0f, t);
             hpFlash.color = new Color(1f, 1f, 1f, a);
             yield return null;
         }
-        hpFlash.color = new Color(1f, 1f, 1f, 0f);
+        if (hpFlash != null) hpFlash.color = new Color(1f, 1f, 1f, 0f);
         flashCo = null;
     }
 

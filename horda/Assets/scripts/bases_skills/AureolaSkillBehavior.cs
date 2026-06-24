@@ -62,7 +62,6 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
         yield return null; // aguarda Initialize() do SkillManager
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
         CriarVisualPersistente();
-        StartCoroutine(ParticulasDouradas());
     }
 
     void OnDestroy()
@@ -78,10 +77,7 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
 
         // Cria visual se ainda não existe (fallback para timing issues)
         if (rootVisual == null && playerStats != null)
-        {
             CriarVisualPersistente();
-            StartCoroutine(ParticulasDouradas());
-        }
 
         AtualizarVisual();
 
@@ -138,6 +134,7 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
     void CriarVisualPersistente()
     {
         if (playerStats == null) return;
+        if (rootVisual != null) return; // já criado — evita anéis órfãos (rasto) por dupla criação
 
         float raioReal = SkillEvolutionManager.Tem(SkillEvolutionType.AureolaExpansiva)
             ? raioAura * 1.6f : raioAura;
@@ -181,6 +178,8 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
         srGlow.color = new Color(COR_DOURADO.r, COR_DOURADO.g, COR_DOURADO.b, 0.04f);
         srGlow.sortingOrder = 9;
         goGlow.transform.localScale = Vector3.one * (raioReal * 2f);
+
+        StartCoroutine(ParticulasDouradas()); // inicia uma única vez, junto com o visual
     }
 
     LineRenderer CriarAnel(GameObject go, int segs, float raio, float larg, int order)
@@ -202,13 +201,17 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
     {
         if (rootVisual == null || playerStats == null) return;
 
+        bool emRecarga = timerRecarga > 0f && !ativo;
+
+        // Em recarga: aura some completamente do player; volta a aparecer quando recarregar.
+        rootVisual.SetActive(!emRecarga);
+        if (emRecarga) return;
+
         COR_DOURADO = CorElemento(); // reflete elemento infundido em tempo real
         rootVisual.transform.position = playerStats.transform.position;
 
         float pulso  = Mathf.Sin(elapsed * 3f) * 0.5f + 0.5f;
         float pulso2 = Mathf.Sin(elapsed * 5f + 1.2f) * 0.5f + 0.5f;
-
-        bool emRecarga = timerRecarga > 0f && !ativo;
 
         // Halo externo gira no sentido horário devagar
         rootVisual.transform.GetChild(0).localRotation = Quaternion.Euler(0f, 0f, angRot);
@@ -260,6 +263,9 @@ public class AureolaSkillBehavior : SkillBehavior, ISkillComRecarga
         while (rootVisual != null && playerStats != null)
         {
             if (Time.timeScale == 0f) { yield return null; continue; }
+
+            // Em recarga a aura some — sem partículas também.
+            if (timerRecarga > 0f && !ativo) { yield return null; continue; }
 
             // Partículas mais frequentes quando ativo, ocasionais no idle
             int frameInterval = ativo ? 8 : 20;

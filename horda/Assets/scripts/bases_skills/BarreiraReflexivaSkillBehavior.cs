@@ -4,7 +4,7 @@ using UnityEngine;
 public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     [Header("Configurações")]
-    public float recarga       = 120f;
+    public float recarga       = 60f;
     public float duracao       = 4f;
     public float raio          = 3f;
     public float danoReflexao  = 0.8f;   // % do dano recebido que é refletido
@@ -84,6 +84,7 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
         AtualizarVisual();
 
         if (ativo && playerStats != null) EmpurrarERefletir();
+        if (ativo && playerStats != null && !cosmetico) RefletirProjeteis();
         if (ativo && playerStats != null && Time.frameCount % 30 == 0)
             SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.AuraContinua, null, this);
     }
@@ -149,6 +150,44 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
             // BarreiraCongelante — lentidão ao tocar
             if (SkillEvolutionManager.Tem(SkillEvolutionType.BarreiraCongelante) && Random.value < 0.02f)
                 EvolutionFX.AplicarLentidao(ic, 1.5f, 0.4f);
+        }
+    }
+
+    // Reflete projéteis inimigos que entram na barreira: inverte a direção e,
+    // quando possível, faz o projétil passar a ferir os inimigos.
+    void RefletirProjeteis()
+    {
+        Vector2 centro = playerStats.transform.position;
+        var hits = Physics2D.OverlapCircleAll(centro, raio);
+        foreach (var col in hits)
+        {
+            // ProjetilInimigoDano: tem o flag 'redirecionado' → volta ferindo inimigos.
+            var pid = col.GetComponent<ProjetilInimigoDano>() ?? col.GetComponentInParent<ProjetilInimigoDano>();
+            if (pid != null)
+            {
+                if (pid.redirecionado) continue; // já refletido
+                var rbp = pid.GetComponent<Rigidbody2D>();
+                if (rbp != null) rbp.linearVelocity = -rbp.linearVelocity;
+                pid.redirecionado = true;
+                StartCoroutine(FlashReflexao(pid.transform.position));
+                continue;
+            }
+
+            // projetil_inimigo (lentidão/vinhas): não fere inimigos, mas é mandado de
+            // volta — vira inofensivo ao player. Só reflete se ainda vier na direção dele.
+            var pi = col.GetComponent<projetil_inimigo>() ?? col.GetComponentInParent<projetil_inimigo>();
+            if (pi != null)
+            {
+                var rbp = pi.GetComponent<Rigidbody2D>();
+                if (rbp == null || rbp.linearVelocity.sqrMagnitude < 0.01f) continue;
+                Vector2 paraFora = (Vector2)pi.transform.position - centro;
+                if (Vector2.Dot(rbp.linearVelocity, paraFora) < 0f) // vindo na direção do player
+                {
+                    rbp.linearVelocity = -rbp.linearVelocity;
+                    pi.SetDirecao(rbp.linearVelocity.normalized);
+                    StartCoroutine(FlashReflexao(pi.transform.position));
+                }
+            }
         }
     }
 
@@ -227,11 +266,15 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
     {
         if (rootVisual == null || playerStats == null) return;
 
+        bool emRecarga = timerRecarga > 0f && !ativo;
+
+        // Em recarga: barreira some completamente do player; volta quando recarregar.
+        rootVisual.SetActive(!emRecarga);
+        if (emRecarga) return;
+
         COR_CIANO = CorElemento(); // reflete elemento infundido em tempo real
         float pulso  = Mathf.Sin(elapsed * 4f) * 0.5f + 0.5f;
         float pulso2 = Mathf.Sin(elapsed * 6f + 0.8f) * 0.5f + 0.5f;
-
-        bool emRecarga = timerRecarga > 0f && !ativo;
 
         // Hexágono externo gira no sentido anti-horário
         rootVisual.transform.GetChild(0).localRotation = Quaternion.Euler(0f, 0f, -angRot);
@@ -265,6 +308,9 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
     {
         while (rootVisual != null && playerStats != null)
         {
+            // Em recarga a barreira some — sem faíscas também.
+            if (timerRecarga > 0f && !ativo) { yield return null; continue; }
+
             // Faíscas mais frequentes quando ativo
             int frameInterval = ativo ? 6 : 18;
             if (Time.frameCount % frameInterval == 0)
@@ -302,15 +348,62 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
 
     IEnumerator FlashReflexao(Vector2 pos)
     {
+        Color cor = COR_CIANO;
+
+        // Flash central brilhante
         var go = new GameObject("FlashRef");
         go.transform.position = pos;
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = GerarDisco(16);
-        sr.color = new Color(0.4f, 0.9f, 1f, 1f); sr.sortingOrder = 16;
+        sr.color = new Color(0.6f, 0.95f, 1f, 1f); sr.sortingOrder = 16;
         go.transform.localScale = Vector3.one * 0.6f;
         go.AddComponent<AutoDestroyFade>().Iniciar(0.2f);
         Destroy(go, 0.4f);
-        yield return null;
+
+        // Faíscas radiais saindo do inimigo (sensação de impacto)
+        int qtd = Random.Range(6, 9);
+        for (int i = 0; i < qtd; i++)
+        {
+            float ang = (i / (float)qtd) * Mathf.PI * 2f + Random.Range(-0.2f, 0.2f);
+            Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+
+            var fp = new GameObject("FaisRefImpacto");
+            fp.transform.position = pos + dir * 0.15f;
+            var fsr = fp.AddComponent<SpriteRenderer>();
+            fsr.sprite = GerarDisco(6);
+            fsr.color = new Color(cor.r, cor.g, cor.b, Random.Range(0.7f, 1f));
+            fsr.sortingOrder = 17;
+            fp.transform.localScale = Vector3.one * Random.Range(0.06f, 0.13f);
+            fp.AddComponent<AutoDestroyFadeMove>().Iniciar(dir * Random.Range(1.5f, 3.5f), 0.25f);
+            Destroy(fp, 0.45f);
+        }
+
+        // Anel de choque expandindo
+        const int S = 20;
+        var anel = new GameObject("AnelRefl");
+        anel.transform.position = pos;
+        var lr = anel.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true; lr.loop = true; lr.positionCount = S;
+        lr.material = new Material(Shader.Find("Sprites/Default"));
+        lr.sortingOrder = 16; lr.numCapVertices = 2;
+        Destroy(anel, 0.4f); // failsafe
+
+        float dur = 0.28f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            if (anel == null) yield break;
+            float p = t / dur;
+            float r = Mathf.Lerp(0.15f, 1.1f, p);
+            lr.startWidth = lr.endWidth = Mathf.Lerp(0.12f, 0.01f, p);
+            lr.startColor = lr.endColor = new Color(cor.r, cor.g, cor.b, Mathf.Lerp(0.9f, 0f, p));
+            for (int i = 0; i < S; i++)
+            {
+                float a = 360f / S * i * Mathf.Deg2Rad;
+                lr.SetPosition(i, pos + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r);
+            }
+            yield return null;
+        }
+        if (anel != null) Destroy(anel);
     }
 
     static Sprite GerarDisco(int sz)
