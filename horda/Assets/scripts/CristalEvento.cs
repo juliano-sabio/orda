@@ -8,6 +8,10 @@ public class CristalEvento : MonoBehaviour
     [HideInInspector] public float vidaBase = 500f;
     [HideInInspector] public Color corBase  = new Color(0.25f, 0.75f, 1f);
 
+    // Co-op: no cliente é só visual (sem física/InimigoController/HP); o host roda o gameplay.
+    [HideInInspector] public bool cosmetico;
+    int objEvtId;
+
     public event Action OnDestruido;
     public bool EstaDestruido { get; private set; }
 
@@ -37,9 +41,28 @@ public class CristalEvento : MonoBehaviour
         InimigoController.OnPreMorte += OnPreMorteHandler;
         StartCoroutine(PulsoLoop());
         StartCoroutine(ParticulasLoop());
+
+        // co-op: host registra p/ o cliente reconstruir a cópia visual.
+        if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
+            objEvtId = CoopProgressao.Instance.RegistrarObjEvento(7, transform.position, 0f, 0f, corBase);
     }
 
-    void OnDestroy() => InimigoController.OnPreMorte -= OnPreMorteHandler;
+    // Cliente co-op: só o visual (sem física/HP/morte — o host é autoritativo).
+    void Start()
+    {
+        if (!cosmetico) return;
+        ConstruirVisual();
+        StartCoroutine(PulsoLoop());
+        StartCoroutine(ParticulasLoop());
+        IndicadorSlime.Criar(transform, corBase, "Cristal!");
+    }
+
+    void OnDestroy()
+    {
+        InimigoController.OnPreMorte -= OnPreMorteHandler;
+        if (objEvtId != 0 && CoopProgressao.Instance != null)
+            CoopProgressao.Instance.RemoverObjEvento(objEvtId);
+    }
 
     // ── Física ───────────────────────────────────────────────────────────────
 

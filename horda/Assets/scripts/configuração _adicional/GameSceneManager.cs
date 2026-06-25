@@ -49,7 +49,7 @@ public class GameSceneManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);
 
-        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
+        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>(); // coop-local-ok: fluxo SP de init de cena (co-op usa FaseCoopBootstrap+PlayerNet)
 
         if (playerStats != null)
         {
@@ -167,7 +167,7 @@ public class GameSceneManager : MonoBehaviour
         }
 
         // 🆕 CORREÇÃO: Usa CharacterSelectionManagerIntegrated
-        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>();
+        PlayerStats playerStats = FindAnyObjectByType<PlayerStats>(); // coop-local-ok: fluxo SP de init de cena (co-op usa FaseCoopBootstrap+PlayerNet)
         CharacterSelectionManagerIntegrated manager = FindAnyObjectByType<CharacterSelectionManagerIntegrated>();
         SkillManager skillManager = SkillManager.Instance;
 

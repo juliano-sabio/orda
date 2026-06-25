@@ -17,16 +17,39 @@ public class TempestadeEletricaEvento : MonoBehaviour
     float duracao;
     float elapsed;
 
+    // Co-op: ambiente por-player (cada instância roda no SEU player local; dano vai pro
+    // próprio via TakeDamage). Dano a inimigo é host-only.
+    [HideInInspector] public bool cosmetico;
+    int objEvtId;
+
     CanvasGroup bordaCG;
     float tempoOscilacao;
     bool  flashAtivo;
 
     public void Iniciar(PlayerStats ps, float dur)
     {
-        player  = ps;
+        player  = PlayerStats.Local ?? ps; // co-op: cada instância cuida do SEU player local
         duracao = dur;
         CriarBordaEletrica();
         StartCoroutine(CicloRaios());
+        if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
+            objEvtId = CoopProgressao.Instance.RegistrarObjEvento(4, Vector2.zero, dur, 0f);
+    }
+
+    // Cliente co-op: mesma tempestade ambiente, no SEU player local.
+    public void IniciarCosmetico(float dur)
+    {
+        cosmetico = true;
+        player    = PlayerStats.Local;
+        duracao   = dur;
+        CriarBordaEletrica();
+        StartCoroutine(CicloRaios());
+    }
+
+    void OnDestroy()
+    {
+        if (objEvtId != 0 && CoopProgressao.Instance != null)
+            CoopProgressao.Instance.RemoverObjEvento(objEvtId);
     }
 
     void Update()
@@ -72,6 +95,7 @@ public class TempestadeEletricaEvento : MonoBehaviour
 
     Vector2? EscolherPosicao()
     {
+        if (player == null) player = PlayerStats.Local;
         var ge       = GerenciadorEventos.Instance;
         Vector2 centro = player != null ? (Vector2)player.transform.position : Vector2.zero;
 
@@ -121,6 +145,8 @@ public class TempestadeEletricaEvento : MonoBehaviour
     {
         if (player != null && Vector2.Distance(player.transform.position, pos) <= raioImpacto)
             player.TakeDamage(danoJogador);
+
+        if (cosmetico) return; // dano a inimigo é host-autoritativo
 
         foreach (var c in Physics2D.OverlapCircleAll(pos, raioImpacto))
         {

@@ -8,12 +8,6 @@ public class DanoInimigo : MonoBehaviour
     public bool danoContinuo = false;
 
     private float proximoAtaque = 0f;
-    private PlayerStats playerStats;
-
-    void Start()
-    {
-        playerStats = FindAnyObjectByType<PlayerStats>();
-    }
 
     void OnTriggerEnter2D(Collider2D other)
     {

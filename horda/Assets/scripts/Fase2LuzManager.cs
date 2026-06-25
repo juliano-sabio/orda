@@ -65,7 +65,7 @@ public class Fase2LuzManager : MonoBehaviour
         AnimandoEntrada = true;
         if (canvasGO != null) canvasGO.SetActive(true);
 
-        var player    = PlayerStats.Local ?? FindFirstObjectByType<PlayerStats>(); // co-op: luz do player local
+        var player    = PlayerStats.Local ?? FindFirstObjectByType<PlayerStats>(); // coop-local-ok: luz do player local (fallback SP)
         var luzPlayer = player != null ? player.GetComponent<PlayerCollectLight>() : null;
         float targetPct = player != null ? player.GetLuzPercentual() : 1f;
 

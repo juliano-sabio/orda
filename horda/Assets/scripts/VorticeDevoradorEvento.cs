@@ -11,6 +11,10 @@ public class VorticeDevoradorEvento : MonoBehaviour
     public float danoPorSegundo = 12f;
     public Color corVortice     = new Color(0.5f, 0.1f, 0.7f);
 
+    // Co-op: no cliente é só visual (sem atração/dano); o host roda o gameplay.
+    [HideInInspector] public bool cosmetico;
+    int objEvtId;
+
     public event Action<int, int> OnProgresso;
     public event Action           OnConcluido;
 
@@ -32,6 +36,23 @@ public class VorticeDevoradorEvento : MonoBehaviour
         quantidadeNecessaria = quantidade;
         ConstruirVisual();
         StartCoroutine(ParticulasLoop());
+        if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
+            objEvtId = CoopProgressao.Instance.RegistrarObjEvento(6, transform.position, raioAtracao, raioDevorar, corVortice);
+    }
+
+    // Cliente co-op: só o visual.
+    void Start()
+    {
+        if (!cosmetico) return;
+        ConstruirVisual();
+        StartCoroutine(ParticulasLoop());
+        IndicadorSlime.Criar(transform, corVortice, "Vórtice!");
+    }
+
+    void OnDestroy()
+    {
+        if (objEvtId != 0 && CoopProgressao.Instance != null)
+            CoopProgressao.Instance.RemoverObjEvento(objEvtId);
     }
 
     // ── Visual ───────────────────────────────────────────────────────────────
@@ -76,6 +97,8 @@ public class VorticeDevoradorEvento : MonoBehaviour
         srSwirlB.transform.Rotate(0f, 0f, -50f * Time.deltaTime);
         float pulso = Mathf.Sin(Time.time * 3f) * 0.5f + 0.5f;
         srCore.transform.localScale = Vector3.one * (raioDevorar * 2.2f) * (0.9f + pulso * 0.15f);
+
+        if (cosmetico) return; // cliente: sem atração/dano (visual já rodou acima)
 
         var processados = new HashSet<InimigoController>();
         var hits = Physics2D.OverlapCircleAll(transform.position, raioAtracao);

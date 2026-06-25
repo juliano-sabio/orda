@@ -29,7 +29,7 @@ public class SwordOrbitalController : ProjectileController2D
         // Co-op: vincula ao player LOCAL (dono). Sem isto, FindGameObjectWithTag pegaria
         // um dos dois players arbitrariamente e a espada giraria no player 1.
         GameObject player = PlayerStats.Local != null ? PlayerStats.Local.gameObject
-                                                      : GameObject.FindGameObjectWithTag("Player");
+                                                      : GameObject.FindGameObjectWithTag("Player"); // coop-local-ok: skill vincula ao player local (fallback SP)
         if (player != null)
         {
             playerTransform = player.transform;

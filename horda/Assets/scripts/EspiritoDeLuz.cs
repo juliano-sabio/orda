@@ -46,7 +46,7 @@ public class EspiritoDeLuz : MonoBehaviour
         }
         else
         {
-            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            player = GameObject.FindGameObjectWithTag("Player")?.transform; // coop-local-ok: caminho SP (co-op usa MaisProximo)
             if (player != null) playerStats = player.GetComponent<PlayerStats>();
         }
     }

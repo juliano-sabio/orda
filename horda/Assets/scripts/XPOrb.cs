@@ -31,7 +31,7 @@ public class XPOrb : MonoBehaviour
     void Start()
     {
         // Single-player: alvo fixo achado por tag (em co-op miramos o mais próximo no Update).
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        player = GameObject.FindGameObjectWithTag("Player")?.transform; // coop-local-ok: caminho SP (co-op usa MaisProximo no Update)
         if (player != null)
             playerStats = player.GetComponent<PlayerStats>();
     }

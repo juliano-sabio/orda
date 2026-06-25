@@ -11,6 +11,10 @@ public class ZonaEliminacaoEvento : MonoBehaviour
     [HideInInspector] public float intervaloSpawn    = 3.5f;
     [HideInInspector] public int   maxSimultaneos    = 6;
 
+    // Co-op: no cliente é só visual (sem kill-tracking nem spawn); o host roda o gameplay.
+    [HideInInspector] public bool cosmetico;
+    int objEvtId;
+
     public event Action<int, int> OnProgresso;  // (atual, total)
     public event Action           OnConcluido;
 
@@ -24,15 +28,28 @@ public class ZonaEliminacaoEvento : MonoBehaviour
     void Start()
     {
         CriarVisual();
-        InimigoController.OnPreMorte += OnPreMorteHandler;
-        StartCoroutine(SpawnLoop());
         StartCoroutine(AnimarAnel());
         StartCoroutine(ParticulasBorda());
+
+        if (cosmetico)
+        {
+            IndicadorSlime.Criar(transform, new Color(0.25f, 0.85f, 1f), "Zona!");
+            return; // cliente: só visual + indicador
+        }
+
+        InimigoController.OnPreMorte += OnPreMorteHandler;
+        StartCoroutine(SpawnLoop());
+
+        // co-op: host registra p/ o cliente reconstruir a cópia visual.
+        if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
+            objEvtId = CoopProgressao.Instance.RegistrarObjEvento(1, transform.position, raio, 0f);
     }
 
     void OnDestroy()
     {
         InimigoController.OnPreMorte -= OnPreMorteHandler;
+        if (objEvtId != 0 && CoopProgressao.Instance != null)
+            CoopProgressao.Instance.RemoverObjEvento(objEvtId);
     }
 
     // ── Kill tracking ────────────────────────────────────────────────────────
@@ -174,8 +191,8 @@ public class ZonaEliminacaoEvento : MonoBehaviour
 
             var prefab = prefabsInimigos[UnityEngine.Random.Range(0, prefabsInimigos.Length)];
             if (prefab == null) continue;
-            var go = Instantiate(prefab, new Vector3(pos.x, pos.y, 0f), Quaternion.identity);
-            inimigosAtivos.Add(go);
+            var go = NetSpawn.Spawnar(prefab, new Vector3(pos.x, pos.y, 0f)); // host spawna+replica
+            if (go != null) inimigosAtivos.Add(go);
             return;
         }
     }

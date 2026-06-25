@@ -794,7 +794,7 @@ public class SkillChoiceUI : MonoBehaviour
 
     private void UpdateTitleText()
     {
-        string title = "Cartas de Skill";
+        string title = Loc.T("ui.skill_choice_title");
 
         if (titleTextTMP != null)
         {

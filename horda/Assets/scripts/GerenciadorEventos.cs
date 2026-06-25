@@ -134,6 +134,7 @@ public class GerenciadorEventos : MonoBehaviour
     private IndicadorSlime indicadorSlime;
     private readonly List<GameObject> ceifadoresMapa = new List<GameObject>();
     private BordaSangueEvento bordaSangue;
+    private int bordaSangueObjId; // co-op: id do rebuild cosmético da borda
 
     private ZonaEliminacaoEvento    zonaEliminacao;
     private SlimePercursoEvento     slimePercurso;
@@ -249,13 +250,14 @@ public class GerenciadorEventos : MonoBehaviour
     void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
     {
         ReconectarReferencias();
+        tilemapsObstaculo = null; // cache de tilemaps da cena anterior (destruídos) → re-cacheia na próxima checagem
         proximoEventoTempo = scene.name == "segunda_fase" ? delayCristal : delayInicial;
         eventoAtivo = false;
     }
 
     void ReconectarReferencias()
     {
-        playerStats  = FindAnyObjectByType<PlayerStats>();
+        playerStats  = FindAnyObjectByType<PlayerStats>(); // coop-local-ok: host-only (eventos gateados); ref p/ posicionamento aproximado
         uiManager    = FindAnyObjectByType<UIManager>();
         timerManager = FindAnyObjectByType<TimerManager>();
     }
@@ -288,8 +290,7 @@ public class GerenciadorEventos : MonoBehaviour
 
         if (eventoAtual.tipo == TipoEvento.EliminarSlimeColorida
             && slimeColoridaAtiva != null
-            && indicadorSlime == null
-            && (eventoAtual.duracao - timerContagem) >= 180f)
+            && indicadorSlime == null)
         {
             var go = new GameObject("IndicadorSlime");
             indicadorSlime = go.AddComponent<IndicadorSlime>();
@@ -298,8 +299,7 @@ public class GerenciadorEventos : MonoBehaviour
 
         if (eventoAtual.tipo == TipoEvento.SlimePercurso
             && slimePercurso != null
-            && indicadorSlime == null
-            && (eventoAtual.duracao - timerContagem) >= 15f)
+            && indicadorSlime == null)
         {
             var go = new GameObject("IndicadorSlimePercurso");
             indicadorSlime = go.AddComponent<IndicadorSlime>();
@@ -309,8 +309,7 @@ public class GerenciadorEventos : MonoBehaviour
 
         if (eventoAtual.tipo == TipoEvento.ZonaEliminacao
             && zonaEliminacao != null
-            && indicadorSlime == null
-            && (eventoAtual.duracao - timerContagem) >= 120f)
+            && indicadorSlime == null)
         {
             var go = new GameObject("IndicadorZona");
             indicadorSlime = go.AddComponent<IndicadorSlime>();
@@ -318,15 +317,14 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.corSeta = new Color(0.25f, 0.85f, 1f);
         }
 
-        if (eventoAtual.tipo == TipoEvento.Ceifador && portalAtivo != null && timerContagem <= 180f)
+        if (eventoAtual.tipo == TipoEvento.Ceifador && portalAtivo != null)
             portalAtivo.MostrarIndicadores();
 
         if (eventoAtual.tipo == TipoEvento.Portal && portalAtivo != null)
             portalAtivo.MostrarIndicadores();
 
         if (eventoAtual.tipo == TipoEvento.CristaisEnergia
-            && indicadoresCristais.Count == 0
-            && (eventoAtual.duracao - timerContagem) >= 8f)
+            && indicadoresCristais.Count == 0)
         {
             foreach (var cristal in cristaisAtivos)
             {
@@ -376,6 +374,29 @@ if (timerContagem <= 0f)
 
     // ──────────────────────────────────────────────────────────
     // Lógica do evento
+
+    // [debug temp] Força um evento específico (host). Encerra o atual se houver.
+    public void ForcarEvento(TipoEvento tipo)
+    {
+        if (!NetSpawn.PodeSpawnar) return;          // só o host dispara
+        if (eventos == null || eventos.Count == 0) return;
+        if (eventoAtivo) EncerrarEvento(false);
+        int idx = eventos.FindIndex(e => e.tipo == tipo);
+        if (idx < 0) { Debug.LogWarning($"[debug] sem evento do tipo {tipo} em 'eventos'"); return; }
+        debugForcarEvento = idx;
+        TentarIniciarEvento();
+        debugForcarEvento = -1;
+    }
+
+    // [debug temp] Tipos de evento que existem na lista desta fase.
+    public List<TipoEvento> TiposDisponiveis()
+    {
+        var r = new List<TipoEvento>();
+        if (eventos == null) return r;
+        foreach (var e in eventos)
+            if (e != null && !r.Contains(e.tipo)) r.Add(e.tipo);
+        return r;
+    }
 
 void TentarIniciarEvento()
 {
@@ -466,7 +487,7 @@ void TentarIniciarEvento()
 
         if (slimeColoridaAtiva != null)
         {
-            Destroy(slimeColoridaAtiva);
+            NetSpawn.Despawnar(slimeColoridaAtiva);
             slimeColoridaAtiva = null;
         }
         if (indicadorSlime != null)
@@ -492,6 +513,9 @@ void TentarIniciarEvento()
         }
 
         StartCoroutine(MostrarResultado(sucesso));
+        // co-op: replica o card de resultado no cliente.
+        if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
+            CoopProgressao.Instance.BroadcastResultadoEvento(sucesso, (int)eventoAtual.tipo);
         if (sucesso)
         {
             if (NetSpawn.EmRede)
@@ -621,10 +645,12 @@ void TentarIniciarEvento()
     public float EvtDuracaoCoop => eventoAtual != null ? eventoAtual.duracao : 1f;
 
     bool coopPainelMostrado;
+    bool mostrandoResultadoCoop; // cliente: enquanto exibe o resultado (3s), ignora o estado normal
 
     // Cliente co-op: aplica o estado do evento vindo do host (não roda a lógica de evento).
     public void AplicarEstadoCoop(bool ativo, int tipoInt, int prog, int qtd, float timer, float duracao)
     {
+        if (mostrandoResultadoCoop) return; // o resultado tem prioridade sobre o slide-out
         if (painelEvento == null) CriarPainelUI();
         var tipo = (TipoEvento)tipoInt;
 
@@ -644,6 +670,8 @@ void TentarIniciarEvento()
             if (!coopPainelMostrado)
             {
                 coopPainelMostrado = true;
+                var cv = painelEvento != null ? painelEvento.GetComponentInParent<Canvas>() : null;
+                Debug.Log($"[CoopEvt-PANEL] montar: painel={(painelEvento != null)} ativo={(painelEvento != null && painelEvento.activeInHierarchy)} canvasAtivo={(cv != null && cv.isActiveAndEnabled)} rt={(painelRT != null)} cg={(painelCG != null)} pos={(painelRT != null ? painelRT.anchoredPosition.ToString() : "null")}");
                 StopCoroutine("AnimarSaida");
                 StartCoroutine("AnimarEntrada");
             }
@@ -654,6 +682,37 @@ void TentarIniciarEvento()
             StopCoroutine("AnimarEntrada");
             StartCoroutine("AnimarSaida");
         }
+    }
+
+    // Cliente co-op: mostra o card de RESULTADO (sucesso/falha + recompensa) por 3s, igual ao host.
+    public void AplicarResultadoCoop(bool sucesso, int tipoInt)
+    {
+        if (painelEvento == null) CriarPainelUI();
+        var tipo = (TipoEvento)tipoInt;
+
+        coopPainelMostrado = true;
+        StopCoroutine("AnimarSaida");
+        StartCoroutine("AnimarEntrada");
+
+        if (textoNome != null) { textoNome.text = sucesso ? Loc.T("event.success") : Loc.T("event.failure"); textoNome.color = sucesso ? new Color(0.2f, 1f, 0.3f) : new Color(1f, 0.3f, 0.3f); }
+        if (textoDesc != null) textoDesc.text = sucesso ? Loc.T(EventoRecompensaKey(tipo)) : Loc.T("event.not_completed");
+        if (textoTimer != null) { textoTimer.text = ""; textoTimer.color = Color.white; }
+        if (textoProgresso != null) textoProgresso.text = "";
+        if (barraFill != null) barraFill.anchorMax = new Vector2(sucesso ? 1f : 0f, 1f);
+        if (barraFillImg != null) barraFillImg.color = sucesso ? corBarraSucesso : corBarraFalha;
+
+        StopCoroutine("EsconderResultadoCoop");
+        StartCoroutine("EsconderResultadoCoop");
+    }
+
+    IEnumerator EsconderResultadoCoop()
+    {
+        mostrandoResultadoCoop = true;
+        yield return new WaitForSecondsRealtime(3f);
+        mostrandoResultadoCoop = false;
+        coopPainelMostrado = false;
+        StopCoroutine("AnimarEntrada");
+        StartCoroutine("AnimarSaida");
     }
 
     void AtualizarUI()
@@ -696,12 +755,15 @@ void TentarIniciarEvento()
 
     void OnDanoRecebido()
     {
+        // co-op: ação do player local. No cliente (P2) roteia pro host contar/encerrar.
+        if (NetSpawn.EmRede && !NetSpawn.PodeSpawnar) { CoopProgressao.Instance?.RegistrarDanoEventoServerRpc(); return; }
         if (!eventoAtivo || eventoAtual.tipo != TipoEvento.NaoLevarDano) return;
         EncerrarEvento(false);
     }
 
     void OnXPColetado(float quantidade)
     {
+        if (NetSpawn.EmRede && !NetSpawn.PodeSpawnar) { CoopProgressao.Instance?.RegistrarXPEventoServerRpc(quantidade); return; }
         if (!eventoAtivo || eventoAtual.tipo != TipoEvento.ColetarXP) return;
         xpAcumulada += quantidade;
         progresso = Mathf.FloorToInt(xpAcumulada);
@@ -711,11 +773,17 @@ void TentarIniciarEvento()
 
     void OnUltimateAtivada()
     {
+        if (NetSpawn.EmRede && !NetSpawn.PodeSpawnar) { CoopProgressao.Instance?.RegistrarUltimateEventoServerRpc(); return; }
         if (!eventoAtivo || eventoAtual.tipo != TipoEvento.UsarUltimate) return;
         progresso++;
         if (progresso >= eventoAtual.quantidade)
             EncerrarEvento(true);
     }
+
+    // Co-op: o host recebe as ações do player remoto (via CoopProgressao) e conta no evento.
+    public void XPColetadoCoop(float qtd) => OnXPColetado(qtd);
+    public void UltimateCoop()            => OnUltimateAtivada();
+    public void DanoRecebidoCoop()        => OnDanoRecebido();
 
 
     // ──────────────────────────────────────────────────────────
@@ -764,6 +832,7 @@ void TentarIniciarEvento()
         // Margem de 2 células ao redor para cobrir bordas visuais
         foreach (var tm in tilemapsObstaculo)
         {
+            if (tm == null) { tilemapsObstaculo = null; continue; } // tilemap destruído (troca de cena) → re-cacheia depois
             Vector3Int celula = tm.WorldToCell(pos);
             for (int dx = -2; dx <= 2; dx++)
                 for (int dy = -2; dy <= 2; dy++)
@@ -835,8 +904,8 @@ void TentarIniciarEvento()
                 if (!longe) continue;
 
                 posicoes.Add(candidato);
-                var e = Instantiate(espiritoEventoPrefab, new Vector3(candidato.x, candidato.y, 0f), Quaternion.identity);
-                espiritosMapa.Add(e);
+                var e = NetSpawn.Spawnar(espiritoEventoPrefab, new Vector3(candidato.x, candidato.y, 0f)); // host spawna+replica
+                if (e != null) espiritosMapa.Add(e);
                 encontrou = true;
                 break;
             }
@@ -955,19 +1024,27 @@ void SpawnCeifadores(int quantidade)
         var go = new GameObject("BordaSangue");
         bordaSangue = go.AddComponent<BordaSangueEvento>();
         bordaSangue.Mostrar();
+        // co-op: cliente reconstrói o overlay de borda (tipo 8).
+        if (CoopProgressao.Instance != null)
+            bordaSangueObjId = CoopProgressao.Instance.RegistrarObjEvento(8, Vector2.zero, 0f, 0f);
     }
 }
 
 void LimparCeifadores()
 {
     foreach (var c in ceifadoresMapa)
-        if (c != null) Destroy(c);
+        if (c != null) NetSpawn.Despawnar(c);
     ceifadoresMapa.Clear();
 
     if (bordaSangue != null)
     {
         bordaSangue.Esconder();
         bordaSangue = null;
+        if (bordaSangueObjId != 0 && CoopProgressao.Instance != null)
+        {
+            CoopProgressao.Instance.RemoverObjEvento(bordaSangueObjId);
+            bordaSangueObjId = 0;
+        }
     }
 }
 
@@ -1206,7 +1283,7 @@ void LimparSlimePercurso()
     void LimparEspiritos()
     {
         foreach (var esp in espiritosMapa)
-            if (esp != null) Destroy(esp);
+            if (esp != null) NetSpawn.Despawnar(esp);
         espiritosMapa.Clear();
     }
 

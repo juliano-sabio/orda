@@ -262,7 +262,12 @@ public class PlayerStats : MonoBehaviour
 
         // --- Ultimate ---
         int charIndex = selectedCharacter;
-        int ultimateIndex = PlayerPrefs.GetInt($"SelectedUltimate_{charIndex}", 0);
+        // Co-op: usa o índice POR JOGADOR (sincronizado pelo lobby via PlayerNet); senão PlayerPrefs (solo).
+        var _pnSel   = GetComponent<PlayerNet>();
+        bool _coopSel = _pnSel != null && _pnSel.IsSpawned;
+        int ultimateIndex = (_coopSel && _pnSel.UltimateIdx >= 0)
+            ? _pnSel.UltimateIdx
+            : PlayerPrefs.GetInt($"SelectedUltimate_{charIndex}", 0);
         UltimateData ultimateData = characterData.GetUltimate(ultimateIndex);
 
         if (ultimateData != null)
@@ -284,7 +289,9 @@ public class PlayerStats : MonoBehaviour
         // Aplica passiva selecionada
         if (characterData.passivasDisponiveis != null && characterData.passivasDisponiveis.Length > 0)
         {
-            int passivaIndex = PlayerPrefs.GetInt($"SelectedPassiva_{charIndex}", 0);
+            int passivaIndex = (_coopSel && _pnSel.PassivaIdx >= 0)
+                ? _pnSel.PassivaIdx
+                : PlayerPrefs.GetInt($"SelectedPassiva_{charIndex}", 0);
             passivaIndex = Mathf.Clamp(passivaIndex, 0, characterData.passivasDisponiveis.Length - 1);
             PassiveData passiva = characterData.passivasDisponiveis[passivaIndex];
             if (passiva != null) AplicarPassiva(passiva);

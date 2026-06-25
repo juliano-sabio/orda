@@ -19,6 +19,9 @@ public class PortalEvento : MonoBehaviour
     float       elapsed;
     bool        indicadoresCriados;
 
+    // Co-op: no cliente cada portal é um objeto cosmético próprio (só visual + indicador).
+    [HideInInspector] public bool cosmetico;
+
     static readonly Color[] PALETA = {
         new Color(0.55f, 0.1f,  1f,    0.95f), // roxo
         new Color(1f,    0.45f, 0.05f, 0.95f), // laranja
@@ -49,11 +52,29 @@ public class PortalEvento : MonoBehaviour
             StartCoroutine(ParticulasLoop(p));
             StartCoroutine(TendrilLoop(p));
             StartCoroutine(PulsoLoop(p));
+
+            // co-op: registra cada portal p/ o cliente reconstruir a cópia cosmética + indicador.
+            if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
+                p.objEvtId = CoopProgressao.Instance.RegistrarObjEvento(3, posicoes[i], 0f, 0f, cor);
         }
+    }
+
+    // Cliente co-op: um portal cosmético (só visual + indicador, sem fechamento/spawn).
+    public void IniciarCosmeticoUmPortal(Vector2 pos, Color cor)
+    {
+        cosmetico = true;
+        player    = PlayerStats.Local;
+        var p = CriarPortal(pos, cor);
+        portais.Add(p);
+        StartCoroutine(ParticulasLoop(p));
+        StartCoroutine(TendrilLoop(p));
+        StartCoroutine(PulsoLoop(p));
+        CriarIndicador(p, "Portal");
     }
 
     void Update()
     {
+        if (player == null) player = PlayerStats.Local;
         if (player == null) return;
         elapsed += Time.deltaTime;
 
@@ -73,10 +94,25 @@ public class PortalEvento : MonoBehaviour
     void OnDestroy()
     {
         foreach (var p in portais)
+        {
+            if (p != null && p.objEvtId != 0 && CoopProgressao.Instance != null)
+                CoopProgressao.Instance.RemoverObjEvento(p.objEvtId);
             p?.DestruirTudo();
+        }
     }
 
     // ── Lógica ───────────────────────────────────────────────────────────────────
+
+    // Co-op: true se QUALQUER player está dentro do raio de fechamento do portal.
+    bool AlgumPlayerPerto(Vector2 pos)
+    {
+        for (int i = 0; i < PlayerStats.All.Count; i++)
+        {
+            var ps = PlayerStats.All[i];
+            if (ps != null && Vector2.Distance(ps.transform.position, pos) <= raioFechar) return true;
+        }
+        return false;
+    }
 
     void AtualizarPortal(PortalData p, Vector2 posPlayer)
     {
@@ -88,7 +124,7 @@ public class PortalEvento : MonoBehaviour
         if (p.rootB != null) p.rootB.transform.rotation = Quaternion.Euler(0f, 0f, -a * 0.55f);
         if (p.rootC != null) p.rootC.transform.rotation = Quaternion.Euler(0f, 0f,  a * 1.6f);
 
-        bool  perto = Vector2.Distance(posPlayer, p.posicao) <= raioFechar;
+        bool  perto = AlgumPlayerPerto(p.posicao); // co-op: QUALQUER player perto carrega o portal
         p.progresso = Mathf.Clamp01(p.progresso + (perto ? 1f : -1f) * Time.deltaTime / tempoFechar);
 
         float pulso      = Mathf.Sin(elapsed * 3.5f) * 0.5f + 0.5f;
@@ -124,12 +160,18 @@ public class PortalEvento : MonoBehaviour
 
         AtualizarArco(p);
 
-        if (p.progresso >= 1f) FecharPortal(p);
+        if (!cosmetico && p.progresso >= 1f) FecharPortal(p); // fechamento é host-autoritativo
     }
 
     void FecharPortal(PortalData p)
     {
         p.fechado = true;
+        // co-op: remove a cópia cosmética desse portal no cliente (senão ela fica pra sempre).
+        if (p.objEvtId != 0 && CoopProgressao.Instance != null)
+        {
+            CoopProgressao.Instance.RemoverObjEvento(p.objEvtId);
+            p.objEvtId = 0;
+        }
         if (p.indicador != null) { Destroy(p.indicador.gameObject); p.indicador = null; }
         fechados++;
         OnProgresso?.Invoke(fechados, portais.Count);
@@ -323,7 +365,7 @@ public class PortalEvento : MonoBehaviour
             var prefab = prefabsInimigos[UnityEngine.Random.Range(0, prefabsInimigos.Length)];
             if (prefab == null) continue;
             StartCoroutine(FlashPortal(p));
-            Instantiate(prefab, new Vector3(p.posicao.x, p.posicao.y, 0f), Quaternion.identity);
+            NetSpawn.Spawnar(prefab, new Vector3(p.posicao.x, p.posicao.y, 0f)); // host spawna+replica
         }
     }
 
@@ -481,6 +523,7 @@ class PortalData
 {
     public Vector2        posicao;
     public bool           fechado;
+    public int            objEvtId; // co-op: id do rebuild cosmético
     public float          progresso;
     public Color          cor;
     public GameObject     rootA, rootB, rootC;

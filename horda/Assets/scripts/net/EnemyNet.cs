@@ -21,6 +21,11 @@ public class EnemyNet : NetworkBehaviour
             if (c is NetworkBehaviour) continue;
             c.enabled = false;
         }
+
+        // Co-op: inimigos que criam efeitos visuais por script (luzes/partículas) ficariam
+        // "pelados" no cliente (o script foi desligado acima). Deixa cada um montar só o visual.
+        var cosm = GetComponent<IEnemyCosmetic>();
+        if (cosm != null) cosm.SetupVisualCosmetico();
     }
 
     // Qualquer cliente pode requisitar dano a qualquer inimigo (co-op de amigos).
@@ -47,3 +52,7 @@ public class EnemyNet : NetworkBehaviour
             DamageNumberManager.Instance.ShowDamage(transform, dano, isCrit);
     }
 }
+
+// Inimigos que criam efeitos visuais por script (luzes, partículas, glows) implementam isto.
+// No cliente co-op o EnemyNet desliga o gameplay e chama este método pra montar SÓ os visuais.
+public interface IEnemyCosmetic { void SetupVisualCosmetico(); }

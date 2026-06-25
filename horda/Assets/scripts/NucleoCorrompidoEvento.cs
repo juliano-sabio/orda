@@ -9,6 +9,10 @@ public class NucleoCorrompidoEvento : MonoBehaviour
     [HideInInspector] public float        danoLaser      = 45f;
     [HideInInspector] public GameObject[] prefabsInimigos;
 
+    // Co-op: no cliente é só visual (núcleo/anéis/pulso); lasers/spawn/dano são do host.
+    [HideInInspector] public bool cosmetico;
+    int objEvtId;
+
     public event Action OnDestruido;
 
     public float VidaPct => vidaMaxima > 0f ? vidaAtual / vidaMaxima : 0f;
@@ -38,6 +42,19 @@ public class NucleoCorrompidoEvento : MonoBehaviour
         StartCoroutine(LaserLoop());
 
         FlowField.AlvoOverride = transform;
+
+        if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
+            objEvtId = CoopProgressao.Instance.RegistrarObjEvento(5, transform.position, 0f, 0f);
+    }
+
+    // Cliente co-op: só o visual (núcleo + anéis + shards + pulso).
+    void Start()
+    {
+        if (!cosmetico) return;
+        vidaMaxima = vidaAtual = 1f; // arco de HP cheio (vida real não sincronizada)
+        ConstruirVisual();
+        StartCoroutine(PulsoLoop());
+        IndicadorSlime.Criar(transform, new Color(0.1f, 1f, 0.5f), "Núcleo!");
     }
 
     void OnDestroy()
@@ -47,6 +64,8 @@ public class NucleoCorrompidoEvento : MonoBehaviour
         foreach (var b in _beamsAtivos)
             if (b != null) Destroy(b);
         _beamsAtivos.Clear();
+        if (objEvtId != 0 && CoopProgressao.Instance != null)
+            CoopProgressao.Instance.RemoverObjEvento(objEvtId);
     }
 
     void Update() => elapsed += Time.deltaTime;

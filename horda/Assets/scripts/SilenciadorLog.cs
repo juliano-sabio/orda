@@ -44,6 +44,13 @@ public class SilenciadorLog : MonoBehaviour
             if (exception?.StackTrace?.Contains("ConvertMeshInfoToUIRVertex") == true) return;
             if (exception is MissingReferenceException &&
                 exception.StackTrace?.Contains("PunicaoDivinaUltimate") == true) return;
+            // NGO: NREs internas no SHUTDOWN (NetworkManager/NetworkObject OnDestroy/Dispose ao parar o
+            // play/fechar o app) — teardown do pacote netcode, não afeta gameplay. Só ruído de console.
+            if (exception is NullReferenceException &&
+                exception.StackTrace?.Contains("com.unity.netcode.gameobjects") == true &&
+                (exception.StackTrace.Contains(".OnDestroy") ||
+                 exception.StackTrace.Contains("ShutdownInternal") ||
+                 exception.StackTrace.Contains(".Dispose"))) return;
             inner.LogException(exception, context);
         }
     }

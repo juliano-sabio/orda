@@ -11,6 +11,13 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     readonly NetworkVariable<int> charIndex = new NetworkVariable<int>(
         0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    // Co-op: ultimate/passiva POR JOGADOR (o lobby usava PlayerPrefs, que é compartilhado
+    // na mesma máquina/MPPM → os dois ficavam com a mesma). -1 = usar PlayerPrefs (solo).
+    readonly NetworkVariable<int> ultimateIdx = new NetworkVariable<int>(
+        -1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    readonly NetworkVariable<int> passivaIdx = new NetworkVariable<int>(
+        -1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     // Lado que o player olha (facing). Sincronizado à parte porque o sprite
     // vira invertendo localScale.x — se isso fosse pelo NetworkTransform com
     // interpolação, a escala passaria por 0 (sprite encolhe/some ao virar).
@@ -54,6 +61,12 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     public void SetPronto(bool v) { if (IsOwner) ready.Value = v; }
     public void SetChar(int idx) { if (IsOwner) charIndex.Value = idx; }
+
+    // Co-op: índice de ultimate/passiva por jogador (-1 = usar PlayerPrefs no solo).
+    public int UltimateIdx => ultimateIdx.Value;
+    public int PassivaIdx  => passivaIdx.Value;
+    public void SetUltimate(int idx) { if (IsOwner) ultimateIdx.Value = idx; }
+    public void SetPassiva(int idx)  { if (IsOwner) passivaIdx.Value = idx; }
 
     void Awake()
     {
@@ -105,6 +118,10 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     // Dano de inimigo (no host) aplicado no dono.
     [Rpc(SendTo.Owner)]
     public void TomarDanoOwnerRpc(float dano) { stats.TakeDamage(dano); }
+
+    // [debug temp] Host força invulnerabilidade no dono (botão de debug do P2). Remover no release.
+    [Rpc(SendTo.Owner)]
+    public void DebugInvulneravelOwnerRpc(bool v) { if (stats != null) stats.invulneravel = v; }
 
     // Chamado pelo dono ao cair (health <= 0 em co-op).
     public void Cair() { if (IsOwner) downed.Value = true; }
@@ -408,12 +425,17 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         if (sr != null) sr.color = caido ? new Color(0.5f, 0.25f, 0.25f, 0.9f) : Color.white;
     }
 
+    IndicadorSlime indicadorAliado; // co-op: seta apontando pro player remoto
+
     public override void OnNetworkSpawn()
     {
         if (IsOwner)
         {
             PlayerStats.SetLocal(stats);
             charIndex.Value = PlayerPrefs.GetInt("SelectedCharacter", 0);
+            // valor inicial do PlayerPrefs; o lobby sobrescreve POR JOGADOR via SetUltimate/SetPassiva.
+            ultimateIdx.Value = PlayerPrefs.GetInt($"SelectedUltimate_{charIndex.Value}", 0);
+            passivaIdx.Value  = PlayerPrefs.GetInt($"SelectedPassiva_{charIndex.Value}", 0);
             playerName.Value = new Unity.Collections.FixedString32Bytes("Jogador " + (OwnerClientId + 1));
 
             // Separa os players por cliente pra não nascerem sobrepostos.
@@ -437,6 +459,9 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             // (sem isso, o corpo retém a última velocidade e arrasta/jittera).
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null) rb.bodyType = RigidbodyType2D.Kinematic;
+
+            // Indicador (seta) apontando pro player remoto — some quando ele está visível na tela.
+            indicadorAliado = IndicadorSlime.Criar(transform, new Color(0.3f, 1f, 0.55f), "Aliado", true);
         }
 
         // Aplica o personagem correto em TODAS as cópias (dono e remotas).
@@ -444,6 +469,9 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
         // Reaplica se o valor chegar/mudar depois (ordem de sincronização).
         charIndex.OnValueChanged += AoMudarPersonagem;
+        // Reaplica quando a ultimate/passiva mudar (seleção no lobby).
+        ultimateIdx.OnValueChanged += AoMudarBuild;
+        passivaIdx.OnValueChanged  += AoMudarBuild;
 
         // Tint visual ao cair/voltar.
         downed.OnValueChanged += AoMudarDowned;
@@ -453,12 +481,21 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     public override void OnNetworkDespawn()
     {
         charIndex.OnValueChanged -= AoMudarPersonagem;
+        ultimateIdx.OnValueChanged -= AoMudarBuild;
+        passivaIdx.OnValueChanged  -= AoMudarBuild;
         downed.OnValueChanged -= AoMudarDowned;
+        if (indicadorAliado != null) Destroy(indicadorAliado.gameObject);
         PlayerStats.ClearLocal(stats);
     }
 
     void AoMudarPersonagem(int anterior, int novo)
     {
         stats.ApplyCharacterData(novo);
+    }
+
+    // Co-op: ultimate/passiva mudou (seleção no lobby) → reaplica o personagem com a nova build.
+    void AoMudarBuild(int anterior, int novo)
+    {
+        stats.ApplyCharacterData(charIndex.Value);
     }
 }

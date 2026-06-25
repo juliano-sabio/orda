@@ -33,7 +33,7 @@ public class PocaoCura : MonoBehaviour
     {
         posicaoBase = transform.position;
 
-        GameObject go = GameObject.FindGameObjectWithTag("Player");
+        GameObject go = GameObject.FindGameObjectWithTag("Player"); // coop-local-ok: caminho SP (co-op usa MaisProximo no Update)
         if (go != null) player = go.transform;
     }
 

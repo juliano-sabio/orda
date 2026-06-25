@@ -83,7 +83,7 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
     void Start()
     {
-        if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform; // coop-local-ok: spawner host-only (Update gateado por NetSpawn.PodeSpawnar); ref p/ posicionamento
 
         if (usarWaves && waves.Count > 0) IniciarWave(0);
         StartCoroutine(LimpezaAutomatica());

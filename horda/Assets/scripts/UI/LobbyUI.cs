@@ -821,11 +821,16 @@ public class LobbyUI : MonoBehaviour
         ConstruirListaUltimates(data);
         ConstruirListaPassivas(data);
 
-        // co-op: propaga o personagem escolhido pro roster (aparece no slot do colega).
+        // co-op: propaga o personagem + ultimate/passiva POR JOGADOR (sincronizado).
         if (emCoop)
         {
             var m = MeuNet();
-            if (m != null) m.SetChar(idx);
+            if (m != null)
+            {
+                m.SetChar(idx);
+                m.SetUltimate(ultimateIdx);
+                m.SetPassiva(passivaIdx);
+            }
         }
     }
 
@@ -966,6 +971,7 @@ public class LobbyUI : MonoBehaviour
         ultimateIdx = i;
         PlayerPrefs.SetInt($"SelectedUltimate_{charIdx}", i);
         PlayerPrefs.Save();
+        MeuNet()?.SetUltimate(i); // co-op: sincroniza POR JOGADOR (senão PlayerPrefs compartilhado deixa os dois iguais)
         for (int k = 0; k < ultiItemBG.Length; k++)
         {
             if (ultiItemBG[k] == null) continue;
@@ -980,6 +986,7 @@ public class LobbyUI : MonoBehaviour
         passivaIdx = i;
         PlayerPrefs.SetInt($"SelectedPassiva_{charIdx}", i);
         PlayerPrefs.Save();
+        MeuNet()?.SetPassiva(i); // co-op: sincroniza POR JOGADOR
         for (int k = 0; k < passItemBG.Length; k++)
         {
             if (passItemBG[k] == null) continue;

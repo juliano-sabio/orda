@@ -29,7 +29,7 @@ public class DashPickup : MonoBehaviour
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        player = GameObject.FindGameObjectWithTag("Player")?.transform; // coop-local-ok: caminho SP (co-op usa MaisProximo no Update)
         if (player != null)
             playerStats = player.GetComponent<PlayerStats>();
         col = GetComponent<Collider2D>();

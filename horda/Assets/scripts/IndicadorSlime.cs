@@ -7,6 +7,7 @@ public class IndicadorSlime : MonoBehaviour
     public Transform alvo;
     public Color     corSeta = new Color(1f, 0.25f, 0.9f);
     public string    label   = "Slime!";
+    public bool      soForaDaTela; // se true, some quando o alvo está visível na tela (usado p/ aliado)
 
     private Canvas      canvas;
     private RectTransform seta;
@@ -16,6 +17,18 @@ public class IndicadorSlime : MonoBehaviour
     private Camera      cam;
 
     const float MARGIN = 80f;
+
+    // Co-op: cria um indicador apontando pra um alvo (usado pelos objetos de evento cosméticos no cliente).
+    public static IndicadorSlime Criar(Transform alvo, Color cor, string label, bool soForaDaTela = false)
+    {
+        var go  = new GameObject("IndicadorCosmetico");
+        var ind = go.AddComponent<IndicadorSlime>();
+        ind.alvo         = alvo;
+        ind.corSeta      = cor;
+        ind.label        = label;
+        ind.soForaDaTela = soForaDaTela;
+        return ind;
+    }
 
     void Start()
     {
@@ -72,6 +85,7 @@ public class IndicadorSlime : MonoBehaviour
     void Update()
     {
         if (alvo == null) { Destroy(gameObject); return; }
+        if (soForaDaTela && LobbyState.EmLobby) { if (cg != null) cg.alpha = 0f; return; } // aliado: não no lobby
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
 
@@ -86,6 +100,9 @@ public class IndicadorSlime : MonoBehaviour
         Vector3 vp = cam.WorldToViewportPoint(alvo.position);
         bool nasTela = vp.z > 0 && vp.x >= 0.05f && vp.x <= 0.95f
                                  && vp.y >= 0.05f && vp.y <= 0.95f;
+
+        // Aliado: só mostra a seta quando ele está FORA da tela (perto/visível não precisa).
+        if (soForaDaTela && nasTela) { if (cg != null) cg.alpha = 0f; return; }
 
         Vector2 canvasPos;
 

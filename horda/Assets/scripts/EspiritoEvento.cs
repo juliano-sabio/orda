@@ -17,9 +17,12 @@ public class EspiritoEvento : MonoBehaviour
     public float offsetSombra = 0.35f;
 
     private Transform player;
-    private PlayerStats playerStats;
     private bool atraido;
     private bool coletado;
+
+    // Host roda a lógica (atração/coleta) e move o transform; o NetworkTransform
+    // replica a posição pro cliente, que só renderiza o visual (sombra/brilho).
+    bool Host => NetSpawn.PodeSpawnar;
 
     private Vector2 posBase;
     private Vector2 driftDir;
@@ -33,11 +36,18 @@ public class EspiritoEvento : MonoBehaviour
     void Start()
     {
         posBase = transform.position;
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        playerStats = player?.GetComponent<PlayerStats>();
         MudarDrift();
         CriarSombra();
         CriarBrilho();
+    }
+
+    // Player mais próximo deste espírito (co-op: atrai p/ quem estiver perto).
+    Transform AlvoMaisProximo()
+    {
+        var t = PlayerStats.MaisProximoTransform(transform.position);
+        if (t != null) return t;
+        var go = GameObject.FindGameObjectWithTag("Player"); // coop-local-ok: fallback (MaisProximo já tentado acima)
+        return go != null ? go.transform : null;
     }
 
     void Update()
@@ -45,14 +55,18 @@ public class EspiritoEvento : MonoBehaviour
         if (coletado) return;
         tempoVida += Time.deltaTime;
 
-        if (!atraido)
+        // Gameplay (movimento/coleta) só no host; o cliente recebe a posição pelo NetworkTransform.
+        if (Host)
         {
-            Flutuar();
-            VerificarAtracao();
-        }
-        else
-        {
-            Atrair();
+            if (!atraido)
+            {
+                Flutuar();
+                VerificarAtracao();
+            }
+            else
+            {
+                Atrair();
+            }
         }
 
         AtualizarSombra();
@@ -79,6 +93,7 @@ public class EspiritoEvento : MonoBehaviour
 
     void VerificarAtracao()
     {
+        player = AlvoMaisProximo();
         if (player == null) return;
         if (Vector2.Distance(transform.position, player.position) <= raioAtracao)
             atraido = true;
@@ -86,6 +101,8 @@ public class EspiritoEvento : MonoBehaviour
 
     void Atrair()
     {
+        var maisPerto = AlvoMaisProximo();
+        if (maisPerto != null) player = maisPerto;
         if (player == null) return;
         Vector3 dir = (player.position - transform.position).normalized;
         transform.position += dir * velocidadeAtracao * Time.deltaTime;
@@ -132,7 +149,9 @@ public class EspiritoEvento : MonoBehaviour
     {
         if (sombraTransform == null) return;
 
-        float baseY = atraido ? transform.position.y : posBase.y;
+        // Base no chão: remove o "bob" da posição (sincronizada no client via NetworkTransform).
+        float bobOff = Mathf.Sin(tempoVida * frequenciaBob * Mathf.PI * 2f) * amplitudeBob;
+        float baseY  = atraido ? transform.position.y : transform.position.y - bobOff;
         sombraTransform.position = new Vector3(transform.position.x, baseY - offsetSombra, transform.position.z + 0.01f);
 
         float bob  = Mathf.Sin(tempoVida * frequenciaBob * Mathf.PI * 2f);
@@ -164,11 +183,12 @@ public class EspiritoEvento : MonoBehaviour
 
     void Coletar()
     {
+        if (!Host) return;          // só o host coleta (autoridade)
         if (coletado) return;
         coletado = true;
         if (sombraTransform != null) Destroy(sombraTransform.gameObject);
         GerenciadorEventos.Instance?.RegistrarEspiritoColetado();
-        Destroy(gameObject);
+        NetSpawn.Despawnar(gameObject); // remove em todos os clientes
     }
 
     void OnDestroy()
@@ -178,6 +198,7 @@ public class EspiritoEvento : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (!Host) return;          // a coleta por contato é decidida no host
         if (other.CompareTag("Player"))
             Coletar();
     }

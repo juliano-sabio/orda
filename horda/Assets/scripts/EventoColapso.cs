@@ -10,6 +10,11 @@ public class EventoColapso : MonoBehaviour
     public float raioFinal      = 3.5f;
     public float danoForaDaZona = 20f;
 
+    // Co-op: cada instância (host real + cliente cosmético) cuida do SEU player local;
+    // o dano roteia pro dono via TakeDamage → cada um leva o próprio dano de colapso.
+    [HideInInspector] public bool cosmetico;
+    int objEvtId;
+
     PlayerStats  player;
     float        duracao;
     float        elapsed;
@@ -30,7 +35,7 @@ public class EventoColapso : MonoBehaviour
 
     public void Iniciar(PlayerStats ps, Vector2 centro, float dur, Bounds bounds)
     {
-        player    = ps;
+        player    = PlayerStats.Local ?? ps; // co-op: cada instância cuida do SEU player local
         duracao   = dur;
         transform.position = new Vector3(centro.x, centro.y, 0f);
 
@@ -38,6 +43,27 @@ public class EventoColapso : MonoBehaviour
         raioInicial = bounds.extents.magnitude * 1.1f;
         raioAtual   = raioInicial;
 
+        MontarVisualEAneis();
+
+        if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
+            objEvtId = CoopProgressao.Instance.RegistrarObjEvento(2, centro, raioInicial, dur);
+    }
+
+    // Cliente co-op: mesma animação de fechamento, mirando o SEU player local
+    // (o dano fora da zona vai pro próprio jogador via TakeDamage).
+    public void IniciarCosmetico(Vector2 centro, float raioIni, float dur)
+    {
+        cosmetico = true;
+        player    = PlayerStats.Local;
+        duracao   = dur;
+        transform.position = new Vector3(centro.x, centro.y, 0f);
+        raioInicial = raioIni;
+        raioAtual   = raioInicial;
+        MontarVisualEAneis();
+    }
+
+    void MontarVisualEAneis()
+    {
         CriarAneis();
         CriarTextoPerigo();
         StartCoroutine(SpawnPerigosExteriores());
@@ -45,8 +71,15 @@ public class EventoColapso : MonoBehaviour
         StartCoroutine(FaiscasBorda());
     }
 
+    void OnDestroy()
+    {
+        if (objEvtId != 0 && CoopProgressao.Instance != null)
+            CoopProgressao.Instance.RemoverObjEvento(objEvtId);
+    }
+
     void Update()
     {
+        if (player == null) player = PlayerStats.Local;
         if (player == null) return;
 
         elapsed += Time.deltaTime;

@@ -58,7 +58,7 @@ public class RadiusBoostPickup : MonoBehaviour
         if (sr != null && sr.sprite != null)
             luzGO.transform.localPosition = sr.sprite.bounds.center;
 
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        player = GameObject.FindGameObjectWithTag("Player")?.transform; // coop-local-ok: caminho SP (co-op usa MaisProximo no Update)
         if (player != null)
             playerStats = player.GetComponent<PlayerStats>();
 

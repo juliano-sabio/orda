@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CeifadorEvento : MonoBehaviour
+public class CeifadorEvento : MonoBehaviour, IEnemyCosmetic
 {
     [Header("Movimento")]
     public float velocidadeWander = 1.8f;
@@ -44,6 +44,19 @@ public class CeifadorEvento : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
     }
 
+    // Co-op (cliente): o EnemyNet desligou o gameplay; aqui montamos só os visuais
+    // (controller de animação + luz vermelha + efeito de spawn), sem IA/dano.
+    public void SetupVisualCosmetico()
+    {
+        if (controllerCeifador != null)
+        {
+            var anim = GetComponent<Animator>();
+            if (anim != null) anim.runtimeAnimatorController = controllerCeifador;
+        }
+        AdicionarBrilhoVermelho();
+        StartCoroutine(EfeitoSpawn());
+    }
+
 void Start()
 {
     if (controllerCeifador != null)
@@ -52,8 +65,10 @@ void Start()
         if (anim != null) anim.runtimeAnimatorController = controllerCeifador;
     }
 
-    var ps = FindFirstObjectByType<PlayerStats>();
-    if (ps != null) player = ps.transform;
+    // co-op: mira o player mais próximo no spawn (inimigo host-autoritativo), não "o primeiro".
+    var psAlvo = PlayerStats.MaisProximo(transform.position);
+    if (psAlvo == null) psAlvo = FindFirstObjectByType<PlayerStats>(); // coop-local-ok: fallback p/ SP cedo
+    if (psAlvo != null) player = psAlvo.transform;
 
     AdicionarBrilhoVermelho();
     EscolherNovaDirecao();
@@ -216,13 +231,17 @@ void AdicionarBrilhoVermelho()
 
     void IgnorarColisaoPlayer()
     {
-        var ps = FindFirstObjectByType<PlayerStats>();
-        if (ps == null) return;
-        var myCols     = GetComponents<Collider2D>();
-        var playerCols = ps.GetComponents<Collider2D>();
-        foreach (var mc in myCols)
-        foreach (var pc in playerCols)
-            Physics2D.IgnoreCollision(mc, pc, true);
+        var myCols = GetComponents<Collider2D>();
+        // co-op: ignora colisão com TODOS os players, não só o primeiro.
+        for (int i = 0; i < PlayerStats.All.Count; i++)
+        {
+            var ps = PlayerStats.All[i];
+            if (ps == null) continue;
+            var playerCols = ps.GetComponents<Collider2D>();
+            foreach (var mc in myCols)
+            foreach (var pc in playerCols)
+                Physics2D.IgnoreCollision(mc, pc, true);
+        }
     }
 
     void Update()
