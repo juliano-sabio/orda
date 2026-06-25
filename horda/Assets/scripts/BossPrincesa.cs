@@ -931,6 +931,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         scaler.uiScaleMode        = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
         bossCanvasGO.AddComponent<GraphicRaycaster>();
+        bossCanvasGO.AddComponent<OcultarCanvasNoPause>(); // some no pause/game over/cartas
 
         // Painel central no topo — 70% de largura, altura dobrada
         var painelGO = new GameObject("PainelHP");
@@ -1007,7 +1008,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         ghostRT.offsetMax = new Vector2(-8f, 0f);
         hpFillGhost = ghostGO.AddComponent<Image>();
         hpFillGhost.sprite     = SpriteBranco();
-        hpFillGhost.color      = new Color(1f, 0.95f, 0.45f, 0.95f); // trilha do dano (amarelo claro)
+        hpFillGhost.color      = new Color(0f, 0f, 0f, 0.95f); // trilha do dano (preto)
         hpFillGhost.type       = Image.Type.Filled;
         hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
         hpFillGhost.fillOrigin = 0; // esquerda
@@ -1139,11 +1140,12 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         float t = 0f;
         while (t < 1f)
         {
+            if (hpFlash == null) { flashCo = null; yield break; }
             t += Time.deltaTime * 6f;
             hpFlash.color = new Color(1f, 1f, 1f, Mathf.Lerp(0.55f, 0f, t));
             yield return null;
         }
-        hpFlash.color = new Color(1f, 1f, 1f, 0f);
+        if (hpFlash != null) hpFlash.color = new Color(1f, 1f, 1f, 0f);
         flashCo = null;
     }
 

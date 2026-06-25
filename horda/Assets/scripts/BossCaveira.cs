@@ -1090,6 +1090,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
         cs.referenceResolution = new Vector2(1920, 1080);
         cs.matchWidthOrHeight  = 0.5f;
         bossCanvasGO.AddComponent<GraphicRaycaster>();
+        bossCanvasGO.AddComponent<OcultarCanvasNoPause>(); // some no pause/game over/cartas
 
         GameObject painel = CriarUIGO("BossPanel", bossCanvasGO.transform);
         RectTransform pr = painel.GetComponent<RectTransform>();
@@ -1150,7 +1151,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
         hpFillGhost.type       = Image.Type.Filled;
         hpFillGhost.fillMethod = Image.FillMethod.Horizontal;
         hpFillGhost.fillAmount = 1f;
-        hpFillGhost.color      = new Color(0.85f, 0.55f, 1f, 0.9f);
+        hpFillGhost.color      = new Color(0f, 0f, 0f, 0.9f); // preto (trilha do dano)
 
         GameObject fillGO = CriarUIGO("HPFill", barBG.transform);
         ExpandirRect(fillGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);

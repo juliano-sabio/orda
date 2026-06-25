@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
 {
     public float dano    = 20f;
-    public float cooldown = 3f;
+    public float cooldown = 25f;
     public int   maxHits  = 3;
 
     int   hitsRestantes;
@@ -195,9 +195,12 @@ public class EscudoEspinhosoSkillBehavior : SkillBehavior, ISkillComRecarga
     void AtualizarVisualAtivo(bool on)
     {
         if (rootVisual == null) return;
+        // Em recarga o escudo some completamente do player; reaparece ao reativar.
+        rootVisual.SetActive(on);
+        if (!on) return;
         foreach (var lr in rootVisual.GetComponentsInChildren<LineRenderer>())
         {
-            Color c = lr.startColor; c.a = on ? 0.85f : 0.18f;
+            Color c = lr.startColor; c.a = 0.85f;
             lr.startColor = lr.endColor = c;
         }
     }

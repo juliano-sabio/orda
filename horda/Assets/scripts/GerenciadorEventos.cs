@@ -208,12 +208,13 @@ public class GerenciadorEventos : MonoBehaviour
         ReconectarReferencias();
 
 #if UNITY_EDITOR
-        if (spritePainelEvento == null)
+        // Carrega o painel novo se estiver vazio OU se ainda apontar pro sprite antigo (painel_evento).
+        if (spritePainelEvento == null || spritePainelEvento.name == "painel_evento")
         {
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
-                "Assets/assets/UI/evento/painel_evento.ase"))
+                "Assets/assets/UI/evento/painel_evento02.ase"))
             {
-                if (a is Sprite s && a.name == "painel_evento")
+                if (a is Sprite s && a.name == "painel_evento02")
                 {
                     spritePainelEvento = s;
                     break;
@@ -1339,19 +1340,6 @@ void LimparSlimePercurso()
             ceifadorEvt.recompensaDescricao = "+15% de vida recuperada!";
         }
 
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "segunda_fase")
-        {
-            AdicionarSeAusente(new EventoAleatorio
-            {
-                nome = "Slime Percurso",
-                descricao = "Impeça a slime de atravessar o mapa!",
-                tipo = TipoEvento.SlimePercurso,
-                duracao = 60f,
-                quantidade = 0,
-                recompensaDescricao = "+40% de vida recuperada!"
-            });
-        }
-
         AdicionarSeAusente(new EventoAleatorio
         {
             nome = "Zona de Eliminação",
@@ -1408,6 +1396,8 @@ void LimparSlimePercurso()
             recompensaDescricao = "+15% de vida recuperada!"
         });
 
+        // Slime Percurso removida do pool de eventos (garante remoção mesmo se serializada no Inspector)
+        eventos.RemoveAll(e => e.tipo == TipoEvento.SlimePercurso);
     }
 
     void AdicionarSeAusente(EventoAleatorio evento, bool primeiro = false)
@@ -1939,7 +1929,9 @@ void LimparSlimePercurso()
         painelRT.anchorMax = new Vector2(1f, 1f);
         painelRT.pivot     = new Vector2(1f, 1f);
         painelRT.anchoredPosition = POS_ESCONDIDO;
-        painelRT.sizeDelta = tamanhoDoPanel;
+        // Piso de tamanho para o painel ficar legível mesmo se a instância na cena
+        // tiver um valor pequeno serializado no Inspector.
+        painelRT.sizeDelta = Vector2.Max(tamanhoDoPanel, new Vector2(385f, 148f));
 
         painelCG = painelEvento.AddComponent<CanvasGroup>();
         painelCG.alpha = 0f;
@@ -1950,7 +1942,7 @@ void LimparSlimePercurso()
         {
             fundo.sprite = spritePainelEvento;
             fundo.type   = Image.Type.Simple;
-            fundo.color  = Color.white;
+            fundo.color  = new Color(1f, 1f, 1f, 0.72f); // frame mais sutil (translúcido); texto fica por cima
         }
         else
         {
@@ -1993,8 +1985,8 @@ void LimparSlimePercurso()
         textoNome = CriarTMP(painelEvento, "NomeEvento",
             anchorMin: new Vector2(0f, 0.70f), anchorMax: new Vector2(1f, 1f),
             pivot: new Vector2(0.5f, 1f),
-            anchoredPos: new Vector2(0f, -32f), size: new Vector2(0f, 0f),
-            fontSize: tamanhoFonteNome, style: FontStyles.Bold,
+            anchoredPos: new Vector2(0f, -22f), size: new Vector2(0f, 0f),
+            fontSize: Mathf.Max(tamanhoFonteNome, 22f), style: FontStyles.Bold,
             color: corNome, align: TextAlignmentOptions.Center);
         textoNome.outlineWidth = 0.22f;
         textoNome.outlineColor = new Color32(0, 0, 0, 210);
@@ -2004,15 +1996,19 @@ void LimparSlimePercurso()
             anchorMin: new Vector2(0.04f, 0.28f), anchorMax: new Vector2(0.96f, 0.70f),
             pivot: new Vector2(0.5f, 0.5f),
             anchoredPos: new Vector2(0f, 0f), size: new Vector2(0f, 0f),
-            fontSize: tamanhoFonteDesc, style: FontStyles.Normal,
+            fontSize: Mathf.Max(tamanhoFonteDesc, 16f), style: FontStyles.Normal,
             color: corDesc, align: TextAlignmentOptions.Center);
+        // Auto-size: descrições curtas ficam grandes; só encolhe se o texto for longo demais.
+        textoDesc.enableAutoSizing = true;
+        textoDesc.fontSizeMax = Mathf.Max(tamanhoFonteDesc, 16f);
+        textoDesc.fontSizeMin = 12f;
 
         // Timer — rodapé (7–28%), centralizado
         textoTimer = CriarTMP(painelEvento, "TimerEvento",
             anchorMin: new Vector2(0f, 0.14f), anchorMax: new Vector2(1f, 0.35f),
             pivot: new Vector2(0.5f, 0.5f),
             anchoredPos: new Vector2(0f, 0f), size: new Vector2(0f, 0f),
-            fontSize: tamanhoFonteTimer, style: FontStyles.Bold,
+            fontSize: Mathf.Max(tamanhoFonteTimer, 18f), style: FontStyles.Bold,
             color: Color.white, align: TextAlignmentOptions.Center);
 
         // Progresso — oculto (integrado no textoTimer)

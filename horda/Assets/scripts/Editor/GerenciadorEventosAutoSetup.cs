@@ -40,7 +40,7 @@ public static class GerenciadorEventosAutoSetup
                 recompensaDescricao = "+15% de vida recuperada!"
             });
 
-            // Eliminar Slime Colorida, Ceifador e Slime Percurso ficam de fora da segunda_fase
+            // Eliminar Slime Colorida e Ceifador ficam de fora da segunda_fase
             if (!segundaFase)
             {
                 alterou |= Adicionar(ge, new EventoAleatorio
@@ -61,15 +61,11 @@ public static class GerenciadorEventosAutoSetup
                     recompensaDescricao = "+15% de vida recuperada!"
                 });
 
-                alterou |= Adicionar(ge, new EventoAleatorio
-                {
-                    nome = "Slime Percurso",
-                    descricao = "Impeça a slime de atravessar o mapa!",
-                    tipo = TipoEvento.SlimePercurso,
-                    duracao = 300f, quantidade = 0,
-                    recompensaDescricao = "+40% de vida recuperada!"
-                });
             }
+
+            // Slime Percurso removida do jogo: limpa qualquer instância já serializada.
+            if (ge.eventos.RemoveAll(e => e.tipo == TipoEvento.SlimePercurso) > 0)
+                alterou = true;
 
             alterou |= Adicionar(ge, new EventoAleatorio
             {
