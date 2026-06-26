@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class SlimeColorida : MonoBehaviour
+public class SlimeColorida : MonoBehaviour, IEnemyCosmetic
 {
     [Header("Status")]
     public float vidaInicial  = 80f;
@@ -46,6 +46,18 @@ public class SlimeColorida : MonoBehaviour
         }
         InimigoController.OnPreMorte += OnPreMorte;
         EscolherNovaDirecao();
+    }
+
+    // Co-op (cliente): o EnemyNet desligou o gameplay; monta só o visual — controller
+    // de animação colorido + indicador (seta) apontando pra ela.
+    public void SetupVisualCosmetico()
+    {
+        if (controllerColorida != null)
+        {
+            var anim = GetComponent<Animator>();
+            if (anim != null) anim.runtimeAnimatorController = controllerColorida;
+        }
+        IndicadorSlime.Criar(transform, new Color(1f, 0.25f, 0.9f), "Slime!");
     }
 
     void OnDestroy()

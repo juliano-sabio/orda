@@ -29,9 +29,11 @@ public static class SkillElementEffect
 
     static void AplicarCaracteristica(ElementCharacteristic car, GameObject alvo, float danoBase, MonoBehaviour caller)
     {
-        // Visual no inimigo (tint + partículas) pela duração do efeito
+        // Visual no inimigo (tint + partículas) pela duração do efeito.
+        // Co-op: roteado pelo host (CoopProgressao) pra TODOS verem o mesmo inimigo afetado;
+        // em SP cai direto no EnemyStatusVisual.Aplicar.
         float durVisual = ObterDuracaoVisual(car);
-        if (durVisual > 0f) EnemyStatusVisual.Aplicar(alvo, car.tipo, durVisual, caller);
+        if (durVisual > 0f) CoopProgressao.AplicarStatusVisual(alvo, car.tipo, durVisual, caller);
 
         var ic = alvo.GetComponent<InimigoController>();
 

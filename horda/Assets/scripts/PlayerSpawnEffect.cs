@@ -27,6 +27,16 @@ public class PlayerSpawnEffect : MonoBehaviour
         rb           = GetComponent<Rigidbody2D>();
         posicaoFinal = transform.position;
 
+        // Co-op: no fantoche remoto NÃO bloqueia movimento nem mexe no Rigidbody — ele fica
+        // Kinematic porque o NetworkTransform é quem manda (OnNetworkSpawn já setou isso).
+        // Voltar pra Dynamic aqui causava jitter/arrasto. Só toca o VFX (raio+luz) pra paridade.
+        var pn = GetComponent<PlayerNet>();
+        if (pn != null && pn.IsSpawned && !pn.IsOwner)
+        {
+            Reproduzir();
+            return;
+        }
+
         sr.color = new Color(1, 1, 1, 0);
         BloquearMovimento(true);
         StartCoroutine(Executar());

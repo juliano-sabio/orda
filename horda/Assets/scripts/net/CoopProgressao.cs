@@ -80,6 +80,35 @@ public class CoopProgressao : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RegistrarDanoEventoServerRpc() { GerenciadorEventos.Instance?.DanoRecebidoCoop(); }
 
+    // Co-op: VISUAL de status elemental no inimigo (tint + partículas de queimadura/gelo/
+    // veneno/etc). O gameplay (DoT/CC) é host-autoritativo, mas o VISUAL roda onde a skill
+    // REAL executa — host p/ skills do P1, cliente p/ as do P2 → assimétrico (cada lado só
+    // via o próprio). Aqui roteamos sempre pelo host pra TODAS as máquinas mostrarem o MESMO
+    // inimigo afetado. Em SP/sem-rede aplica direto (sem custo de rede).
+    public static void AplicarStatusVisual(GameObject alvo, CharacteristicType tipo, float duracao, MonoBehaviour caller)
+    {
+        if (duracao <= 0f || alvo == null) return;
+        if (!NetSpawn.EmRede || Instance == null) { EnemyStatusVisual.Aplicar(alvo, tipo, duracao, caller); return; }
+
+        var no = alvo.GetComponent<NetworkObject>();
+        if (no == null) { EnemyStatusVisual.Aplicar(alvo, tipo, duracao, caller); return; } // inimigo não-networkizado: fallback local
+
+        if (NetSpawn.PodeSpawnar) Instance.StatusVisualTodosRpc(no.NetworkObjectId, (byte)tipo, duracao); // host: replica a todos
+        else                      Instance.StatusVisualServerRpc(no.NetworkObjectId, (byte)tipo, duracao); // cliente: pede pro host rebroadcast
+    }
+
+    [Rpc(SendTo.Server)]
+    void StatusVisualServerRpc(ulong alvoId, byte tipo, float duracao) => StatusVisualTodosRpc(alvoId, tipo, duracao);
+
+    // SendTo.Everyone inclui o host → cada máquina aplica o visual UMA vez no inimigo certo.
+    [Rpc(SendTo.Everyone)]
+    void StatusVisualTodosRpc(ulong alvoId, byte tipo, float duracao)
+    {
+        if (NetworkManager.Singleton != null &&
+            NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(alvoId, out var no) && no != null)
+            EnemyStatusVisual.Aplicar(no.gameObject, (CharacteristicType)tipo, duracao, this);
+    }
+
     // Co-op: host replica o card de RESULTADO do evento (sucesso/falha) no cliente.
     public void BroadcastResultadoEvento(bool sucesso, int tipo) { if (IsServer) MostrarResultadoEventoRpc(sucesso, tipo); }
 
