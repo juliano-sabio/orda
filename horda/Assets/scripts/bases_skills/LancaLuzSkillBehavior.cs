@@ -73,6 +73,7 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
 
         // Anel de disparo na origem
         StartCoroutine(AnelDisparo(origem));
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.LancaDisparoDark, origem, 0.55f);
 
         foreach (float angOffset in angulos)
         {
@@ -196,10 +197,13 @@ public class LancaLuzProjetil : MonoBehaviour
         {
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            bool explosiva = SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva);
-            Debug.Log($"[LancaLuz] acertou {ic.name} | LancaExplosiva ativa? {explosiva}");
-            if (explosiva)
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva))
+            {
                 EvolutionFX.SpawnExplosao(transform.position, 2.5f, dano * 0.6f, new Color(1f, 0.9f, 0.3f), this);
+                SomSkill.Tocar(SomSkill.Tipo.MissilExplosaoDark, transform.position, 0.55f);
+            }
+            else
+                SomSkill.Tocar(SomSkill.Tipo.LancaImpactoDark, transform.position, 0.5f);
         }
         bool perfura = SkillEvolutionManager.Tem(SkillEvolutionType.LancaPerfurante);
         if (!perfura) atingiu = true;

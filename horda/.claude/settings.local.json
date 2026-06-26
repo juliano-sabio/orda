@@ -6,7 +6,10 @@
       "PowerShell(Add-Type -AssemblyName System.Drawing; foreach \\($f in 'boss_hp_fill.png','boss_hp_bg.png','boss_hp_frame.png'\\) { $p = Resolve-Path \"c:\\\\Users\\\\rafin\\\\OneDrive\\\\Documentos\\\\GitHub\\\\projeto-rpg\\\\orda\\\\horda\\\\Assets\\\\prefebs\\\\boss\\\\bossmaga\\\\$f\"; $img = [System.Drawing.Image]::FromFile\\($p\\); Write-Output \"$f : $\\($img.Width\\)x$\\($img.Height\\)\"; $img.Dispose\\(\\) })",
       "Bash(grep -n \"timeScale\\\\|sortingOrder\" UI/GameOverUI.cs)",
       "Bash(grep -n \"timeScale\\\\|sortingOrder\" UI/Skill_choice_UI.cs)",
-      "Bash(grep -n \"timeScale\\\\|sortingOrder\" SkillEvolution/SkillEvolutionUI.cs)"
+      "Bash(grep -n \"timeScale\\\\|sortingOrder\" SkillEvolution/SkillEvolutionUI.cs)",
+      "mcp__unity__refresh_unity",
+      "mcp__unity__read_console",
+      "mcp__unity__execute_menu_item"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda\\horda"

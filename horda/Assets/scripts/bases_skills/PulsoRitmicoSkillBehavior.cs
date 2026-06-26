@@ -45,6 +45,7 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
     void Pulsar()
     {
         Vector2 centro = playerStats.transform.position;
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.PulsoDark, centro, 0.45f);
         if (!cosmetico) // co-op: cópia cosmética só faz o visual do pulso
         {
             float danoReal = SkillEvolutionManager.Tem(SkillEvolutionType.PulsoIntenso) ? DanoAtual * 2f : DanoAtual;

@@ -113,6 +113,7 @@ public class SegundaChanceSkillBehavior : SkillBehavior, ISkillComRecarga, IDefe
         var go = new GameObject("FlashSC"); DontDestroyOnLoad(go);
         var cv = go.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200;
         go.AddComponent<CanvasScaler>();
+        go.AddComponent<OcultarCanvasNoPause>();
         var imgGO = new GameObject("F"); imgGO.transform.SetParent(go.transform, false);
         var rt = imgGO.AddComponent<RectTransform>(); rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
         var img = imgGO.AddComponent<Image>(); img.color = new Color(1f, 0.9f, 0.1f, 0f); img.raycastTarget = false;
@@ -144,7 +145,7 @@ public class SegundaChanceSkillBehavior : SkillBehavior, ISkillComRecarga, IDefe
     IEnumerator MostrarTexto(string msg, Color cor)
     {
         var go = new GameObject("TextoSC"); DontDestroyOnLoad(go);
-        var cv = go.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 201; go.AddComponent<CanvasScaler>();
+        var cv = go.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 201; go.AddComponent<CanvasScaler>(); go.AddComponent<OcultarCanvasNoPause>();
         var tGO = new GameObject("T"); tGO.transform.SetParent(go.transform, false);
         var rt = tGO.AddComponent<RectTransform>(); rt.anchorMin = new Vector2(0.1f, 0.5f); rt.anchorMax = new Vector2(0.9f, 0.7f); rt.offsetMin = rt.offsetMax = Vector2.zero;
         var txt = tGO.AddComponent<TextMeshProUGUI>(); txt.text = msg; txt.fontSize = 52; txt.fontStyle = FontStyles.Bold; txt.alignment = TextAlignmentOptions.Center; txt.color = new Color(cor.r, cor.g, cor.b, 0f);

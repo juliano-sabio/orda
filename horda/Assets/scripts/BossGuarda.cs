@@ -355,6 +355,7 @@ public class BossGuarda : MonoBehaviour, IBoss
         cv.renderMode   = RenderMode.ScreenSpaceOverlay;
         cv.sortingOrder = 200;
         warnGO.AddComponent<CanvasScaler>();
+        warnGO.AddComponent<OcultarCanvasNoPause>();
 
         GameObject bgGO = CriarUIGO("BG", warnGO.transform);
         ExpandirRect(bgGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
@@ -579,6 +580,7 @@ public class BossGuarda : MonoBehaviour, IBoss
         cv.renderMode   = RenderMode.ScreenSpaceOverlay;
         cv.sortingOrder = 150;
         go.AddComponent<CanvasScaler>();
+        go.AddComponent<OcultarCanvasNoPause>();
 
         GameObject txtGO = CriarUIGO("Msg", go.transform);
         RectTransform tr = txtGO.GetComponent<RectTransform>();

@@ -1115,6 +1115,7 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         cv.renderMode    = RenderMode.ScreenSpaceOverlay;
         cv.sortingOrder  = 200;
         warnGO.AddComponent<CanvasScaler>();
+        warnGO.AddComponent<OcultarCanvasNoPause>();
 
         // Fundo escuro
         GameObject bgGO = CriarUIGO("BG", warnGO.transform);
@@ -1457,6 +1458,7 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         cv.renderMode   = RenderMode.ScreenSpaceOverlay;
         cv.sortingOrder = 150;
         go.AddComponent<CanvasScaler>();
+        go.AddComponent<OcultarCanvasNoPause>();
 
         GameObject txtGO = CriarUIGO("Msg", go.transform);
         RectTransform tr = txtGO.GetComponent<RectTransform>();
@@ -1715,6 +1717,7 @@ public class BossMorteUI : MonoBehaviour
         cv.renderMode  = RenderMode.ScreenSpaceOverlay;
         cv.sortingOrder = 200;
         cvGO.AddComponent<CanvasScaler>();
+        cvGO.AddComponent<OcultarCanvasNoPause>(); // some no pause/game over/cartas
 
         GameObject txtGO = new GameObject("MorteTxt");
         txtGO.transform.SetParent(cvGO.transform, false);

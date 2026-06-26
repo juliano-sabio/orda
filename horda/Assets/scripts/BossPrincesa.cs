@@ -256,6 +256,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         cv.renderMode   = RenderMode.ScreenSpaceOverlay;
         cv.sortingOrder = 200;
         warnGO.AddComponent<CanvasScaler>();
+        warnGO.AddComponent<OcultarCanvasNoPause>();
 
         // Fundo escuro
         GameObject bgGO = new GameObject("BG");

@@ -59,6 +59,9 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
         Vector2 centro = playerStats.transform.position;
         float   dur    = 0.5f;
         var atingidos  = new HashSet<int>();
+        bool somImpacto = false;
+
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.ChicoteEstaloDark, centro, 0.55f);
 
         // ── Beam principal ───────────────────────────────────────────────────
         var go = new GameObject("ChicoteBeam");
@@ -140,6 +143,7 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
                     ic.ReceberDano(DanoAtual, false);
                     SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
                     if (SkillEvolutionManager.Tem(SkillEvolutionType.ChicoteEletrico)) EvolutionFX.AplicarLentidao(ic, 1f, 0.4f);
+                    if (!somImpacto) { somImpacto = true; SomSkill.Tocar(SomSkill.Tipo.ChicoteImpactoDark, ic.transform.position, 0.3f); }
                 }
                 StartCoroutine(FlashInimigo(ic));
                 SpawnImpactoInimigo(ic.transform.position);

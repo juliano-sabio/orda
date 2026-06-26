@@ -60,7 +60,6 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
         yield return null; // aguarda Initialize() do SkillManager
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
         CriarVisualPersistente();
-        StartCoroutine(FaiscasNasBordas());
     }
 
     void OnDestroy()
@@ -76,10 +75,7 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
 
         // Cria visual se ainda não existe
         if (rootVisual == null && playerStats != null)
-        {
             CriarVisualPersistente();
-            StartCoroutine(FaiscasNasBordas());
-        }
 
         AtualizarVisual();
 
@@ -211,6 +207,7 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
     void CriarVisualPersistente()
     {
         if (playerStats == null) return;
+        if (rootVisual != null) return; // já criado — evita anel duplicado por dupla criação
 
         rootVisual = new GameObject("BarreiraReflexivaVisual");
         // Parentar ao player e neutralizar a escala não-uniforme (ex: 3,3,1)
@@ -245,6 +242,8 @@ public class BarreiraReflexivaSkillBehavior : SkillBehavior, ISkillComRecarga
         srGlow.color = new Color(COR_CIANO.r, COR_CIANO.g, COR_CIANO.b, 0.04f);
         srGlow.sortingOrder = 9;
         goGlow.transform.localScale = Vector3.one * (raio * 2f);
+
+        StartCoroutine(FaiscasNasBordas()); // inicia uma única vez, junto com o visual
     }
 
     LineRenderer CriarHexagono(GameObject go, float r, float larg, int order)
