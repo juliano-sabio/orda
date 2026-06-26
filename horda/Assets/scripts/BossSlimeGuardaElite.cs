@@ -678,6 +678,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
         var warnGO = new GameObject("BossWarning");
         var cv = warnGO.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200;
         warnGO.AddComponent<CanvasScaler>();
+        warnGO.AddComponent<OcultarCanvasNoPause>();
 
         var bgGO = CriarUIGO("BG", warnGO.transform);
         ExpandirRect(bgGO.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
@@ -894,6 +895,7 @@ public class BossSlimeGuardaElite : MonoBehaviour, IBoss, IBossHud
         var go = new GameObject("BossEliteMsg");
         var cv = go.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 150;
         go.AddComponent<CanvasScaler>();
+        go.AddComponent<OcultarCanvasNoPause>();
         var txtGO = CriarUIGO("Msg", go.transform);
         var tr = txtGO.GetComponent<RectTransform>();
         tr.anchorMin = new Vector2(0.1f, 0.55f); tr.anchorMax = new Vector2(0.9f, 0.75f);

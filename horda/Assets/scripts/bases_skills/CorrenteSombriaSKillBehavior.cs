@@ -75,6 +75,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
 
         // ── Disparo das correntes ─────────────────────────────────────────────
         CameraShaker.Tremer(0.1f, 0.2f);
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.CorrenteDescargaDark, playerStats.transform.position, 0.6f);
         StartCoroutine(BurstLancamento());
 
         var linhas = new List<LineRenderer>();
@@ -143,6 +144,8 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
             if (proxDano <= 0f)
             {
                 proxDano = 0.5f;
+                if (!cosmetico && playerStats != null)
+                    SomSkill.Tocar(SomSkill.Tipo.CorrenteTickDark, playerStats.transform.position, 0.25f);
                 foreach (var ic in alvos)
                     if (ic != null && !ic.estaMorrendo && ic.gameObject != null)
                     {
@@ -219,6 +222,9 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
     {
         float dur = 0.6f;
         var sr = playerStats?.GetComponent<SpriteRenderer>();
+
+        if (!cosmetico && playerStats != null)
+            SomSkill.Tocar(SomSkill.Tipo.CorrenteCanalDark, playerStats.transform.position, 0.5f);
 
         for (float t = 0f; t < dur; t += Time.deltaTime)
         {

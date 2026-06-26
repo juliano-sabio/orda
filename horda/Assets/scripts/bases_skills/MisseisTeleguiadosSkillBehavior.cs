@@ -50,6 +50,8 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
         var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.MissilDisparoDark, origem, 0.6f);
+
         // Efeito de carregamento antes de disparar
         StartCoroutine(EfeitoCarga(origem, qtdReal));
         yield return new WaitForSeconds(0.2f);
@@ -184,7 +186,12 @@ public class MissilProjetil : MonoBehaviour
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisExplosivos))
+            {
                 EvolutionFX.SpawnExplosao(transform.position, 2f, dano * 0.6f, new Color(1f, 0.5f, 0.1f), this);
+                SomSkill.Tocar(SomSkill.Tipo.MissilExplosaoDark, transform.position, 0.6f);
+            }
+            else
+                SomSkill.Tocar(SomSkill.Tipo.MissilImpactoDark, transform.position, 0.5f);
         }
         StartCoroutine(EfeitoImpacto());
     }

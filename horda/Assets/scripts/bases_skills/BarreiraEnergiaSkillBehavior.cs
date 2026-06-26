@@ -226,7 +226,7 @@ public class BarreiraEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga
                 Color cor = emRecarga ? COR_RECARGA : Color.Lerp(COR_FRACO, COR_CHEIO, pct);
                 var sr2 = particulas[i].GetComponent<SpriteRenderer>();
                 if (sr2 != null)
-                    sr2.color = new Color(cor.r, cor.g, cor.b, emRecarga ? 0.1f : (0.5f + Mathf.Sin(elapsed * 5f + i * 1.5f) * 0.3f) * pct);
+                    sr2.color = new Color(cor.r, cor.g, cor.b, emRecarga ? 0f : (0.5f + Mathf.Sin(elapsed * 5f + i * 1.5f) * 0.3f) * pct);
             }
             yield return null;
         }
@@ -328,7 +328,7 @@ public class BarreiraEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator FlashTela(Color cor, float dur)
     {
         var go = new GameObject("FlashBarreira");
-        var cv = go.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200; go.AddComponent<CanvasScaler>();
+        var cv = go.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200; go.AddComponent<CanvasScaler>(); go.AddComponent<OcultarCanvasNoPause>();
         var imgGO = new GameObject("F"); imgGO.transform.SetParent(go.transform, false);
         var rt = imgGO.AddComponent<RectTransform>(); rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
         var img = imgGO.AddComponent<UnityEngine.UI.Image>(); img.color = new Color(cor.r, cor.g, cor.b, 0f); img.raycastTarget = false;
