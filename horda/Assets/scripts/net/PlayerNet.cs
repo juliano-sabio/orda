@@ -479,7 +479,7 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             if (rb != null) rb.bodyType = RigidbodyType2D.Kinematic;
 
             // Indicador (seta) apontando pro player remoto — some quando ele está visível na tela.
-            indicadorAliado = IndicadorSlime.Criar(transform, new Color(0.3f, 1f, 0.55f), "Aliado", true);
+            indicadorAliado = IndicadorSlime.Criar(transform, new Color(0.3f, 1f, 0.55f), "Aliado", true, true);
         }
 
         // Aplica o personagem correto em TODAS as cópias (dono e remotas).

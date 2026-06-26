@@ -8,6 +8,7 @@ public class IndicadorSlime : MonoBehaviour
     public Color     corSeta = new Color(1f, 0.25f, 0.9f);
     public string    label   = "Slime!";
     public bool      soForaDaTela; // se true, some quando o alvo está visível na tela (usado p/ aliado)
+    public bool      persistente; // se true, sobrevive a troca de cena (aliado persiste lobby→fase)
 
     private Canvas      canvas;
     private RectTransform seta;
@@ -19,7 +20,7 @@ public class IndicadorSlime : MonoBehaviour
     const float MARGIN = 80f;
 
     // Co-op: cria um indicador apontando pra um alvo (usado pelos objetos de evento cosméticos no cliente).
-    public static IndicadorSlime Criar(Transform alvo, Color cor, string label, bool soForaDaTela = false)
+    public static IndicadorSlime Criar(Transform alvo, Color cor, string label, bool soForaDaTela = false, bool persistente = false)
     {
         var go  = new GameObject("IndicadorCosmetico");
         var ind = go.AddComponent<IndicadorSlime>();
@@ -27,6 +28,8 @@ public class IndicadorSlime : MonoBehaviour
         ind.corSeta      = cor;
         ind.label        = label;
         ind.soForaDaTela = soForaDaTela;
+        ind.persistente  = persistente;
+        if (persistente) DontDestroyOnLoad(go); // aliado: não morre na troca lobby→fase
         return ind;
     }
 
