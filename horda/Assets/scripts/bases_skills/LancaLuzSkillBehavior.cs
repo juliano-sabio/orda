@@ -73,7 +73,7 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
 
         // Anel de disparo na origem
         StartCoroutine(AnelDisparo(origem));
-        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.LancaDisparoDark, origem, 0.55f);
+        SomSkill.Tocar(SomSkill.Tipo.LancaDisparoDark, origem, 0.55f); // co-op: toca tb na cópia cosmética (outro player ouve)
 
         foreach (float angOffset in angulos)
         {

@@ -152,6 +152,15 @@ public class SkillChoiceUI : MonoBehaviour
         // Remove entradas nulas antes de filtrar
         allAvailableSkills.RemoveAll(s => s == null);
 
+        // Não reofertar skills que o player JÁ possui (corrige duplicata na 2ª seleção).
+        // GetAvailableSkills devolve TODAS; só ShowRandomSkillChoice é que precisava filtrar.
+        var smFiltro = SkillManager.Instance != null ? SkillManager.Instance : FindFirstObjectByType<SkillManager>();
+        if (smFiltro != null)
+        {
+            var naoPossuidas = allAvailableSkills.FindAll(s => !smFiltro.HasSkill(s));
+            if (naoPossuidas.Count > 0) allAvailableSkills = naoPossuidas;
+        }
+
         if (somenteSkillsDeAtaque)
         {
             var filtradas = allAvailableSkills.FindAll(s => s != null && s.EhSkillDeAtaque());

@@ -229,6 +229,7 @@ public class GerenciadorEventos : MonoBehaviour
         proximoEventoTempo = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "segunda_fase"
             ? delayCristal
             : delayInicial;
+        cenaDeJogo = EhCenaDeJogo(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 
         PopularEventosPadrao();
 
@@ -254,6 +255,7 @@ public class GerenciadorEventos : MonoBehaviour
         tilemapsObstaculo = null; // cache de tilemaps da cena anterior (destruídos) → re-cacheia na próxima checagem
         proximoEventoTempo = scene.name == "segunda_fase" ? delayCristal : delayInicial;
         eventoAtivo = false;
+        cenaDeJogo = EhCenaDeJogo(scene.name);
     }
 
     void ReconectarReferencias()
@@ -271,8 +273,17 @@ public class GerenciadorEventos : MonoBehaviour
         PlayerStats.OnUltimateAtivada -= OnUltimateAtivada;
     }
 
+    // Cena de jogo (fase) vs lobby/menu. O manager é DontDestroyOnLoad e persiste no
+    // lobby após game-over → sem este guard ele dispararia eventos fora da fase.
+    public static bool EhCenaDeJogo(string n) =>
+        !string.IsNullOrEmpty(n) && (n.Contains("fase") || n == "Modo_sobrevivencia");
+    bool cenaDeJogo;
+
     void Update()
     {
+        // Não roda eventos fora da fase (ex.: após morrer → lobby continuava gerando evento/som).
+        if (!cenaDeJogo) return;
+
         // Co-op: eventos são host-autoritativos. Clientes não rodam a lógica de
         // evento; os inimigos de evento (NetworkObject) spawnados no host replicam.
         if (!NetSpawn.PodeSpawnar) return;

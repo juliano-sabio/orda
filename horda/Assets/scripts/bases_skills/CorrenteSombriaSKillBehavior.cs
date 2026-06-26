@@ -75,7 +75,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
 
         // ── Disparo das correntes ─────────────────────────────────────────────
         CameraShaker.Tremer(0.1f, 0.2f);
-        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.CorrenteDescargaDark, playerStats.transform.position, 0.6f);
+        SomSkill.Tocar(SomSkill.Tipo.CorrenteDescargaDark, playerStats.transform.position, 0.6f); // co-op: toca tb na cópia cosmética (outro player ouve)
         StartCoroutine(BurstLancamento());
 
         var linhas = new List<LineRenderer>();

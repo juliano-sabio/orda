@@ -76,9 +76,17 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     bool ultReadyAnterior;
 
+    bool acoesBloqueadas;
+
     void Update()
     {
         if (!IsSpawned) return;
+
+        // Bloqueia skills (auto-fire) e ultimates quando CAÍDO ou no LOBBY — senão continuam
+        // disparando (e tocando som) no lobby/após morte. Roda em todas as cópias (puppet idem).
+        bool bloquear = downed.Value || LobbyState.EmLobby;
+        if (bloquear != acoesBloqueadas) { acoesBloqueadas = bloquear; BloquearAcoesCaido(bloquear); }
+
         if (IsOwner)
         {
             // o moviment_player2 já virou o localScale.x; só publicamos o lado.
@@ -423,6 +431,16 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     {
         var sr = GetComponentInChildren<SpriteRenderer>();
         if (sr != null) sr.color = caido ? new Color(0.5f, 0.25f, 0.25f, 0.9f) : Color.white;
+        // O bloqueio de skills/ultimates (caído OU lobby) é gerenciado central no Update.
+    }
+
+    // Desliga skills (auto-fire) e ultimates; usado p/ caído E lobby. Religa ao voltar.
+    void BloquearAcoesCaido(bool caido)
+    {
+        foreach (var sb in GetComponentsInChildren<SkillBehavior>(true))
+            sb.enabled = !caido;
+        foreach (var mb in GetComponentsInChildren<MonoBehaviour>(true))
+            if (mb is IUltimateCosmetico) mb.enabled = !caido;
     }
 
     IndicadorSlime indicadorAliado; // co-op: seta apontando pro player remoto

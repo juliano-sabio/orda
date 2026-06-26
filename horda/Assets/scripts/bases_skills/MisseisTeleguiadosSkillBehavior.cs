@@ -50,7 +50,7 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
         var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
-        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.MissilDisparoDark, origem, 0.6f);
+        SomSkill.Tocar(SomSkill.Tipo.MissilDisparoDark, origem, 0.6f); // co-op: toca tb na cópia cosmética (outro player ouve)
 
         // Efeito de carregamento antes de disparar
         StartCoroutine(EfeitoCarga(origem, qtdReal));

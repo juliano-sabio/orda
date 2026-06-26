@@ -61,7 +61,7 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
         var atingidos  = new HashSet<int>();
         bool somImpacto = false;
 
-        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.ChicoteEstaloDark, centro, 0.55f);
+        SomSkill.Tocar(SomSkill.Tipo.ChicoteEstaloDark, centro, 0.55f); // co-op: toca tb na cópia cosmética (outro player ouve)
 
         // ── Beam principal ───────────────────────────────────────────────────
         var go = new GameObject("ChicoteBeam");
