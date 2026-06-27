@@ -86,6 +86,9 @@ public class CristaisGeloSkillBehavior : SkillBehavior, ISkillComRecarga
         var alvo = EncontrarMaisProximo();
         if (alvo == null) return;
 
+        if (!cosmetico && playerStats != null)
+            SomSkill.Tocar(SomSkill.Tipo.GeloDisparoDark, playerStats.transform.position, 0.4f);
+
         int qtdDisparos = SkillEvolutionManager.Tem(SkillEvolutionType.CristaisDuplos)
             ? cristais.Count : Mathf.Min(1, cristais.Count);
 
@@ -317,6 +320,7 @@ public class ProjetilGelo : MonoBehaviour
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
             EvolutionFX.AplicarLentidao(ic, 2f, 0.45f);
             GeloLentidaoFX.AplicarAo(ic.gameObject, 2f);
+            SomSkill.Tocar(SomSkill.Tipo.GeloImpactoDark, transform.position, explosivo ? 0.5f : 0.4f);
         }
 
         if (explosivo)

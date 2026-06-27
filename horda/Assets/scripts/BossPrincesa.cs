@@ -507,9 +507,13 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         yield return new WaitForSeconds(0.6f);
     }
 
+    AudioSource canalSrc; // som da canalização (loop até o lançamento)
+
     IEnumerator FaseCanalização()
     {
         if (animator != null) animator.SetTrigger("canalizar");
+        if (canalSrc != null) Destroy(canalSrc.gameObject);
+        canalSrc = SomSkill.TocarLoop(SomSkill.Tipo.PrincesaCanalizar, transform, 0.55f);
 
         int qtdProjeteis = sequenciaProjeteis[Mathf.Min(ataqueCicloIdx, sequenciaProjeteis.Length - 1)];
         ataqueCicloIdx   = Mathf.Min(ataqueCicloIdx + 1, sequenciaProjeteis.Length - 1);
@@ -626,6 +630,8 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 
     void LancarProjeteis(Vector2 centro)
     {
+        if (canalSrc != null) { Destroy(canalSrc.gameObject); canalSrc = null; } // fim da canalização
+        SomSkill.Tocar(SomSkill.Tipo.PrincesaDisparo, transform.position, 0.6f);
         foreach (var go in projeteisCanalizando)
         {
             if (go == null) continue;
@@ -1184,6 +1190,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator EntradaFase2()
     {
+        SomSkill.Tocar(SomSkill.Tipo.PrincesaFase2, transform.position, 0.85f);
         yield return StartCoroutine(ExplosaoBulletHell());
         loopCoroutine = StartCoroutine(LoopComportamento());
     }
@@ -1373,6 +1380,8 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator EfeitoMortePrincesa()
     {
+        if (canalSrc != null) { Destroy(canalSrc.gameObject); canalSrc = null; } // corta canalização se morreu canalizando
+        SomSkill.Tocar(SomSkill.Tipo.PrincesaMorte, transform.position, 0.85f);
         if (loopCoroutine != null) { StopCoroutine(loopCoroutine); loopCoroutine = null; }
         estaDashando = false;
 

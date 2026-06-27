@@ -68,11 +68,15 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
         InimigoController.OnPreMorte += OnInimigoDentroZona;
 
         // Cena de invocação antes de criar a zona
+        SomSkill.Tocar(SomSkill.Tipo.NecropoleInicio, transform.position, 0.65f);
         yield return StartCoroutine(CenaInvocacao());
 
         var zonaGO = CriarZona();
         StartCoroutine(ParticulasContínuas(zonaGO));
         yield return StartCoroutine(AnimarEntrada(zonaGO));
+
+        // Ambiente de cripta durante a duração (parentado à zona, que segue o player)
+        var necSrc = SomSkill.TocarLoop(SomSkill.Tipo.NecropoleLoop, zonaGO.transform, 0.35f);
 
         float elapsed = 0f;
         while (elapsed < duracao)
@@ -85,12 +89,20 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
 
         InimigoController.OnPreMorte -= OnInimigoDentroZona;
         ativo = false;
+        if (necSrc != null) Destroy(necSrc.gameObject); // para o ambiente
         StartCoroutine(FadeOutDestruir(zonaGO, 0.5f));
+    }
+
+    // Rede de segurança: se for destruído antes do fim da duração (troca de cena/game over),
+    // garante a desinscrição pra a callback não rodar num objeto já destruído.
+    void OnDestroy()
+    {
+        InimigoController.OnPreMorte -= OnInimigoDentroZona;
     }
 
     void OnInimigoDentroZona(InimigoController ic)
     {
-        if (ic == null || ic.gameObject == null) return;
+        if (this == null || ic == null || ic.gameObject == null) return;
         float dist = Vector2.Distance(transform.position, ic.transform.position);
         if (dist > raio) return;
 
@@ -399,6 +411,7 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
 
     IEnumerator SpawnarFantasma(Vector2 pos)
     {
+        SomSkill.Tocar(SomSkill.Tipo.NecropoleFantasma, pos, 0.4f);
         var go = new GameObject("FantasmaAliado");
         go.transform.position = pos;
 

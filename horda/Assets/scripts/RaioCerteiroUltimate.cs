@@ -65,9 +65,11 @@ public class RaioCerteiroUltimate : MonoBehaviour, IUltimateCosmetico
         ativo            = true;
         cooldownRestante = cooldown;
 
+        SomSkill.Tocar(SomSkill.Tipo.RaioCarga, transform.position, 0.5f);
         yield return StartCoroutine(EfeitoCarga());
 
         CameraShaker.Tremer(0.25f, 0.3f);
+        SomSkill.Tocar(SomSkill.Tipo.RaioDisparo, transform.position, 0.75f);
         StartCoroutine(FlashTela());
 
         var    atingidos = new HashSet<GameObject>();
@@ -88,6 +90,7 @@ public class RaioCerteiroUltimate : MonoBehaviour, IUltimateCosmetico
             AplicarDano(alvo, dano);
 
             Vector2 destino = alvo.transform.position;
+            SomSkill.Tocar(SomSkill.Tipo.RaioBounce, destino, 0.4f);
             StartCoroutine(AnimarRaio(origem, destino, i));
             StartCoroutine(EfeitoImpacto(destino, i));
 

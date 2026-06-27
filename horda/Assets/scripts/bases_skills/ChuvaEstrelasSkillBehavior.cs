@@ -84,10 +84,12 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
 
         // Projétil caindo
         Vector2 origem = alvo + Vector2.up * alturaQueda;
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.EstrelaQuedaDark, alvo, 0.4f);
         StartCoroutine(AnimarEstrela(origem, alvo));
 
         // Impacto
         AplicarDanoArea(alvo);
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.EstrelaImpactoDark, alvo, 0.45f);
         StartCoroutine(EfeitoImpacto(alvo));
     }
 

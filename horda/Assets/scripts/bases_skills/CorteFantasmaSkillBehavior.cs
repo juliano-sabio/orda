@@ -55,6 +55,7 @@ public class CorteFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga
         var alvos = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.CorteLancamentoDark, origem, 0.45f);
         StartCoroutine(EfeitoLancamento(origem));
 
         for (int i = 0; i < alvos.Count; i++)
@@ -245,6 +246,7 @@ public class CorteFantasmaProjetil : MonoBehaviour
         atingiu = true;
         if (!cosmetico) // co-op: cópia cosmética só faz o visual
         {
+            SomSkill.Tocar(SomSkill.Tipo.CorteImpactoDark, transform.position, 0.4f);
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
 

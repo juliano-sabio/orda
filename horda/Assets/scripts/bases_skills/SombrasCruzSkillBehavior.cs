@@ -45,8 +45,14 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
 
     public override void ApplyEffect() => Disparar();
 
+    bool somImpactoTocado; // limita 1 som de impacto por disparo (evita spam dos 4-8 feixes)
+
     void Disparar()
     {
+        somImpactoTocado = false;
+        if (!cosmetico && playerStats != null)
+            SomSkill.Tocar(SomSkill.Tipo.SombraCruzDisparoDark, playerStats.transform.position, 0.5f);
+
         Vector2[] direcoes = SkillEvolutionManager.Tem(SkillEvolutionType.CruzDupla)
             ? new[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right,
                       new Vector2(1,1).normalized, new Vector2(-1,1).normalized,
@@ -198,6 +204,7 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
                 {
                     ic.ReceberDano(DanoAtual, false);
                     SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
+                    if (!somImpactoTocado) { somImpactoTocado = true; SomSkill.Tocar(SomSkill.Tipo.SombraCruzImpactoDark, ic.transform.position, 0.35f); }
                 }
             }
 

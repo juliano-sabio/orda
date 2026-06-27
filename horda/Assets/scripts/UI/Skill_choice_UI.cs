@@ -702,7 +702,10 @@ public class SkillChoiceUI : MonoBehaviour
     private void OnSkillSelected(SkillData selectedSkill)
     {
         if (selectedSkill != null)
+        {
+            SomSkill.TocarUI(SomSkill.Tipo.CartaSelecaoDark, 0.6f);
             StartCoroutine(SelectionConfirmationEffect(selectedSkill));
+        }
         else
             ClosePanel();
     }

@@ -91,7 +91,9 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
         if (timer <= 0f)
         {
             timer = intervalo;
-            DanificarInimigos();
+            bool acertou = DanificarInimigos();
+            if (acertou && !cosmetico)
+                SomSkill.Tocar(SomSkill.Tipo.EspinhoPulsoDark, playerStats.transform.position, 0.4f);
             SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.AuraContinua, null, this);
             StartCoroutine(FlashEspinhos());
         }
@@ -101,12 +103,13 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
 
     // ── Dano ──────────────────────────────────────────────────────────────────
 
-    void DanificarInimigos()
+    bool DanificarInimigos()
     {
-        if (playerStats == null) return;
+        if (playerStats == null) return false;
         float raioReal = SkillEvolutionManager.Tem(SkillEvolutionType.CampoAmpliado) ? raio * 1.5f : raio;
         float danoReal = SkillEvolutionManager.Tem(SkillEvolutionType.CampoAmpliado) ? DanoAtual * 1.3f : DanoAtual;
 
+        bool acertou = false;
         var cols = Physics2D.OverlapCircleAll(playerStats.transform.position, raioReal);
         foreach (var col in cols)
         {
@@ -118,7 +121,9 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
             SkillElementEffect.Aplicar(skillData, ic.gameObject, danoReal, this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosVenenosos))
                 EvolutionFX.AplicarVeneno(ic, danoReal * 0.3f, 2f);
+            acertou = true;
         }
+        return acertou;
     }
 
     // ── Visual ────────────────────────────────────────────────────────────────
