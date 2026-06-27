@@ -52,9 +52,15 @@ public class SlimeColorida : MonoBehaviour, IEnemyCosmetic
     // de animação colorido + indicador (seta) apontando pra ela.
     public void SetupVisualCosmetico()
     {
+        var anim = GetComponent<Animator>();
+        var srLocal = GetComponent<SpriteRenderer>();
+        // [diag temp] quando o usuário testar, isto revela por que a slime sai "sem cor" no P2.
+        Debug.Log($"[SlimeCorDiag] {name}: controllerColorida={(controllerColorida != null ? controllerColorida.name : "NULL")} " +
+                  $"animator={(anim != null ? "ok" : "NULL")} animEnabled={(anim != null && anim.enabled)} " +
+                  $"controllerAtual={(anim != null && anim.runtimeAnimatorController != null ? anim.runtimeAnimatorController.name : "NULL")} " +
+                  $"sr={(srLocal != null ? "ok" : "NULL")} srCor={(srLocal != null ? srLocal.color.ToString() : "-")} srSprite={(srLocal != null && srLocal.sprite != null ? srLocal.sprite.name : "NULL")}");
         if (controllerColorida != null)
         {
-            var anim = GetComponent<Animator>();
             if (anim != null) anim.runtimeAnimatorController = controllerColorida;
         }
         // soForaDaTela=true: só uma seta quando a slime sai da tela (na tela mostrava

@@ -514,6 +514,9 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     // Co-op: ultimate/passiva mudou (seleção no lobby) → reaplica o personagem com a nova build.
     void AoMudarBuild(int anterior, int novo)
     {
+        // [diag temp] revela se cada player tem ultimate/passiva DISTINTAS (NetVar por-player)
+        // ou iguais (artefato do MPPM = PlayerPrefs compartilhados). Remover no release.
+        Debug.Log($"[BuildDiag] clientId={OwnerClientId} IsOwner={IsOwner} ultimateIdx={ultimateIdx.Value} passivaIdx={passivaIdx.Value} char={charIndex.Value}");
         stats.ApplyCharacterData(charIndex.Value);
     }
 }
