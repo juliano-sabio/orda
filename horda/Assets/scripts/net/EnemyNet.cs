@@ -15,14 +15,10 @@ public class EnemyNet : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (IsServer)
-        {
-            // Abs: movi_inimigo inverte o SINAL de localScale.x pra virar o inimigo (facing).
-            // Sem Abs, se o host estivesse virado p/ esquerda no spawn, o fantoche recebia
-            // escala negativa → espelhado/distorcido (parecia "tamanho errado").
-            escalaNet.Value = Mathf.Abs(transform.localScale.x);
-            return;
-        }
+        // Host: a escala é publicada no Update (não aqui). InimigoController.InicializarComData
+        // seta a escala no Start, que roda DEPOIS do OnNetworkSpawn → capturar aqui pegava a
+        // escala default do prefab. No Update (Abs) o NGO só sincroniza quando o valor muda.
+        if (IsServer) return;
 
         // cliente: aplica a escala REAL do host (corrige tamanho do fantoche)
         escalaNet.OnValueChanged += AoMudarEscala;
@@ -44,6 +40,14 @@ public class EnemyNet : NetworkBehaviour
         // "pelados" no cliente (o script foi desligado acima). Deixa cada um montar só o visual.
         var cosm = GetComponent<IEnemyCosmetic>();
         if (cosm != null) cosm.SetupVisualCosmetico();
+    }
+
+    void Update()
+    {
+        // Host publica a escala REAL (Abs = magnitude; movi_inimigo inverte só o sinal p/ facing).
+        // O NGO só envia quando o valor muda → barato; cobre a escala setada no Start do
+        // InimigoController (que roda depois do OnNetworkSpawn) e qualquer mudança em runtime.
+        if (IsServer) escalaNet.Value = Mathf.Abs(transform.localScale.x);
     }
 
     void AoMudarEscala(float _, float v) => AplicarEscala(v);
