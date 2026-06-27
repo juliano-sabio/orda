@@ -54,6 +54,8 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
         var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.LaminaFuriaDark, origem, 0.5f);
+
         for (int i = 0; i < alvos.Count; i++)
         {
             Vector2 dir = alvos[i] != null
@@ -192,6 +194,7 @@ public class LaminaProjetil : MonoBehaviour
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas))
                 EvolutionFX.SpawnExplosao(transform.position, 1.5f, dano * 0.5f, new Color(0.85f, 0.92f, 1f), this);
+            if (Random.value < 0.35f) SomSkill.Tocar(SomSkill.Tipo.LaminaImpactoDark, transform.position, 0.3f);
         }
         atingiu = true;
         StartCoroutine(EfeitoImpacto());

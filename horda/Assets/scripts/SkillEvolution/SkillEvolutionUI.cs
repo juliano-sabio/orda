@@ -125,6 +125,7 @@ public class SkillEvolutionUI : MonoBehaviour
     {
         if (selecionou) return;
         selecionou = true;
+        SomSkill.TocarUI(SomSkill.Tipo.EvolucaoSelecaoDark, 0.7f);
         if (contadorCoroutine != null) { StopCoroutine(contadorCoroutine); contadorCoroutine = null; }
 
         foreach (var c in cartasCriadas)

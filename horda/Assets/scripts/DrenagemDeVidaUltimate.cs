@@ -72,7 +72,11 @@ public class DrenagemDeVidaUltimate : MonoBehaviour, IUltimateCosmetico
             raio *= 1.5f;
 
         var auraGO = CriarAura();
+        SomSkill.Tocar(SomSkill.Tipo.DrenagemInicio, transform.position, 0.6f);
         yield return StartCoroutine(AnimarEntrada(auraGO));
+
+        // Zumbido contínuo do dreno durante a duração (parentado à aura, que segue o player)
+        var drenSrc = SomSkill.TocarLoop(SomSkill.Tipo.DrenagemLoop, auraGO.transform, 0.4f);
 
         float elapsed = 0f;
         while (elapsed < duracao)
@@ -91,6 +95,8 @@ public class DrenagemDeVidaUltimate : MonoBehaviour, IUltimateCosmetico
         LimparDrenados();
         raio = raioOriginal; // restaura raio base
         ativo = false;
+        if (drenSrc != null) Destroy(drenSrc.gameObject); // para o zumbido do dreno
+        SomSkill.Tocar(SomSkill.Tipo.DrenagemFim, transform.position, 0.5f);
         StartCoroutine(FadeOutDestruir(auraGO, 0.35f));
     }
 

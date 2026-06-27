@@ -249,7 +249,11 @@ public class DomoRetardanteUltimate : MonoBehaviour, IUltimateCosmetico
         var lr = domoGO.GetComponentInChildren<LineRenderer>();
         var sr = domoGO.GetComponentInChildren<SpriteRenderer>();
 
+        SomSkill.Tocar(SomSkill.Tipo.DomoInicio, transform.position, 0.6f);
         yield return StartCoroutine(AnimarEntrada(domoGO, lr));
+
+        // Zumbido de "tempo lento" durante a duração (parentado ao domo, que segue o player)
+        var domoSrc = SomSkill.TocarLoop(SomSkill.Tipo.DomoLoop, domoGO.transform, 0.4f);
 
         float elapsed = 0f;
         while (elapsed < duracaoEfetiva)
@@ -292,6 +296,8 @@ public class DomoRetardanteUltimate : MonoBehaviour, IUltimateCosmetico
 
         velocidadeLenta = velocidadeLentaBase; // restaura valor original do campo
         ativo = false;
+        if (domoSrc != null) Destroy(domoSrc.gameObject); // para o zumbido
+        SomSkill.Tocar(SomSkill.Tipo.DomoFim, transform.position, 0.5f);
         StartCoroutine(FadeOutDomo(domoGO));
     }
 

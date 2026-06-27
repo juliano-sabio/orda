@@ -74,9 +74,13 @@ public class TempestadeEletricaUltimate : MonoBehaviour, IUltimateCosmetico
         raio = raioEfetivo;
 
         GameObject ringGO = CriarAnelEletrico(posicaoCampo);
+        SomSkill.Tocar(SomSkill.Tipo.TempestadeInicio, posicaoCampo, 0.7f);
         yield return StartCoroutine(AnimarEntrada(ringGO));
 
         raio = raioOriginal;
+
+        // Ronco ambiente da tempestade durante toda a duração (parentado ao anel = no centro do campo)
+        var stormSrc = SomSkill.TocarLoop(SomSkill.Tipo.TempestadeLoop, ringGO.transform, 0.4f);
 
         float elapsed = 0f;
         float proximo = 0f;
@@ -98,6 +102,7 @@ public class TempestadeEletricaUltimate : MonoBehaviour, IUltimateCosmetico
         }
 
         ativo = false;
+        if (stormSrc != null) Destroy(stormSrc.gameObject); // para o ronco ao fim da tempestade
         StartCoroutine(FadeOutDestruir(ringGO, 0.35f));
     }
 
@@ -119,6 +124,7 @@ public class TempestadeEletricaUltimate : MonoBehaviour, IUltimateCosmetico
         if (candidatos.Count == 0) return;
 
         GameObject alvoGO = candidatos[Random.Range(0, candidatos.Count)];
+        SomSkill.Tocar(SomSkill.Tipo.TempestadeRaio, alvoGO.transform.position, 0.45f);
         StartCoroutine(AnimarRaio(alvoGO.transform.position));
 
         var ic = alvoGO.GetComponent<InimigoController>();
