@@ -57,7 +57,9 @@ public class SlimeColorida : MonoBehaviour, IEnemyCosmetic
             var anim = GetComponent<Animator>();
             if (anim != null) anim.runtimeAnimatorController = controllerColorida;
         }
-        IndicadorSlime.Criar(transform, new Color(1f, 0.25f, 0.9f), "Slime!");
+        // soForaDaTela=true: só uma seta quando a slime sai da tela (na tela mostrava
+        // "Slime! 0m" em cima de cada uma → poluía com vários "0" quando estavam perto).
+        IndicadorSlime.Criar(transform, new Color(1f, 0.25f, 0.9f), "Slime!", true);
     }
 
     void OnDestroy()
