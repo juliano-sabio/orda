@@ -582,32 +582,24 @@ public class StatusCardChoiceUI : MonoBehaviour
         if (bold) txt.fontStyle = FontStyles.Bold;
     }
 
+    // Nome localizado do stat (antes era hardcoded em PT → tradução errada em outros idiomas).
+    private static string NomeStat(StatusCardType t) => t switch
+    {
+        StatusCardType.Health         => Loc.T("stat.hp"),
+        StatusCardType.Attack         => Loc.T("stat.atk"),
+        StatusCardType.Defense        => Loc.T("stat.def"),
+        StatusCardType.Speed          => Loc.T("stat.spd"),
+        StatusCardType.Regen          => Loc.T("stat.regen"),
+        StatusCardType.CriticalChance => Loc.T("stat.crit"),
+        StatusCardType.AttackSpeed    => Loc.T("stat.atkspd"),
+        _                             => t.ToString()
+    };
+
     private string FormatarBonus(StatusCardInfo card)
     {
-        string statNome = card.statType switch
-        {
-            StatusCardType.Health         => "Vida",
-            StatusCardType.Attack         => "Ataque",
-            StatusCardType.Defense        => "Defesa",
-            StatusCardType.Speed          => "Velocidade",
-            StatusCardType.Regen          => "Regeneracao",
-            StatusCardType.CriticalChance => "Critico",
-            StatusCardType.AttackSpeed    => "Vel. Ataque",
-            _                             => card.statType.ToString()
-        };
-        string txt = $"+{card.bonus:F0} {statNome}";
+        string txt = $"+{card.bonus:F0} {NomeStat(card.statType)}";
         if (card.HasPenalty)
-        {
-            string penNome = card.penaltyStatType switch
-            {
-                StatusCardType.Health  => "Vida",
-                StatusCardType.Attack  => "Ataque",
-                StatusCardType.Defense => "Defesa",
-                StatusCardType.Speed   => "Velocidade",
-                _                      => card.penaltyStatType.ToString()
-            };
-            txt += $"\n-{card.penalty:F0} {penNome}";
-        }
+            txt += $"\n-{card.penalty:F0} {NomeStat(card.penaltyStatType)}";
         return txt;
     }
 
