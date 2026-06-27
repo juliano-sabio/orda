@@ -719,7 +719,7 @@ public class LobbyUI : MonoBehaviour
 
     void CriarSubAbasLobby(GameObject pai)
     {
-        string[] nomes = { "INFO", "ULTIMATE", "PASSIVAS" };
+        string[] nomes = { Loc.T("char.tab.info"), Loc.T("missions.tab.ultimates"), Loc.T("missions.tab.passives") };
         Color corAtiva   = new Color(0.35f, 0.20f, 0.08f);
         Color corInativa = new Color(0.10f, 0.05f, 0.05f);
 
