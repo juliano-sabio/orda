@@ -79,6 +79,18 @@ public class EnemyNet : NetworkBehaviour
         if (DamageNumberManager.Instance != null)
             DamageNumberManager.Instance.ShowDamage(transform, dano, isCrit);
     }
+
+    // Co-op: o host replica o pop de morte (kill juice) nos clientes — o Morrer roda só no host.
+    public void BroadcastMorteVFX(Vector2 pos, Color cor, float escala)
+    {
+        if (IsServer && IsSpawned) MorteVFXClientRpc(pos, cor.r, cor.g, cor.b, escala);
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void MorteVFXClientRpc(Vector2 pos, float r, float g, float b, float escala)
+    {
+        KillPopVFX.Tocar(pos, new Color(r, g, b), escala);
+    }
 }
 
 // Inimigos que criam efeitos visuais por script (luzes, partículas, glows) implementam isto.
