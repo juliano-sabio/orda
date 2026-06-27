@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -78,6 +79,33 @@ public class EnemyNet : NetworkBehaviour
         if (IsServer) return; // o host já mostrou localmente
         if (DamageNumberManager.Instance != null)
             DamageNumberManager.Instance.ShowDamage(transform, dano, isCrit);
+        FlashAcertoCliente(); // hit feedback: pisca o fantoche igual ao host (P2 vê o inimigo reagir)
+    }
+
+    // Co-op: o flash de acerto (EfeitoVisualDano = vermelho ~0.1s) roda no host, dentro do
+    // ReceberDano → o cliente não via os inimigos piscarem. Aqui o EnemyNet (preservado, ao
+    // contrário do InimigoController que é desligado no cliente) pisca o fantoche pelo MESMO
+    // RPC do número de dano — sem tráfego novo.
+    SpriteRenderer _srHit;
+    Color _corBaseHit;
+    Coroutine _hitCo;
+
+    void FlashAcertoCliente()
+    {
+        if (_srHit == null) _srHit = GetComponent<SpriteRenderer>();
+        if (_srHit == null) return;
+        if (_hitCo == null) _corBaseHit = _srHit.color; // captura a base só quando não está piscando
+        else StopCoroutine(_hitCo);
+        _hitCo = StartCoroutine(FlashAcertoRotina());
+    }
+
+    IEnumerator FlashAcertoRotina()
+    {
+        float a = _srHit.color.a;
+        _srHit.color = new Color(1f, 0f, 0f, a); // vermelho, igual ao host
+        yield return new WaitForSeconds(0.1f);
+        if (_srHit != null) { Color c = _corBaseHit; c.a = _srHit.color.a; _srHit.color = c; }
+        _hitCo = null;
     }
 
     // Co-op: o host replica o pop de morte (kill juice) nos clientes — o Morrer roda só no host.
