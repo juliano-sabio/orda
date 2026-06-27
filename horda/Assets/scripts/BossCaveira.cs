@@ -655,6 +655,8 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
         nuvem.transform.position = pos;
         nuvem.AddComponent<NuvemVenenoCaveira>()
              .Inicializar(danoNuvemVeneno, intervaloTickVeneno, duracaoNuvemVeneno, raioNuvemVeneno);
+        // co-op: replica a nuvem (só visual) no cliente — senão o P2 toma veneno de nuvem invisível.
+        GetComponent<BossHudNet>()?.BroadcastNuvemVeneno(pos, raioNuvemVeneno, duracaoNuvemVeneno);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -1368,6 +1370,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 // ──────────────────────────────────────────────────────────────
 public class NuvemVenenoCaveira : MonoBehaviour
 {
+    public bool cosmetico; // co-op: cópia no cliente = só visual, sem dano (o host aplica)
     private float dano;
     private float intervaloTick;
     private float duracao;
@@ -1424,7 +1427,7 @@ public class NuvemVenenoCaveira : MonoBehaviour
         timerVida += Time.deltaTime;
         timerTick += Time.deltaTime;
 
-        if (timerTick >= intervaloTick)
+        if (!cosmetico && timerTick >= intervaloTick)
         {
             timerTick = 0f;
 

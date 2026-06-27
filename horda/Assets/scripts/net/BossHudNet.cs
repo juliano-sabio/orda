@@ -108,6 +108,23 @@ public class BossHudNet : NetworkBehaviour
         GetComponent<BossController>()?.RaioCosmetico(alvo);
     }
 
+    // ── Caveira: o host replica a nuvem de veneno da investida (só visual) nos clientes ──
+    public void BroadcastNuvemVeneno(Vector2 pos, float raio, float duracao)
+    {
+        if (!IsServer || !IsSpawned) return;
+        NuvemVenenoClientRpc(pos, raio, duracao);
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void NuvemVenenoClientRpc(Vector2 pos, float raio, float duracao)
+    {
+        var go = new GameObject("NuvemVenenoCaveira");
+        go.transform.position = new Vector3(pos.x, pos.y, 0f);
+        var n = go.AddComponent<NuvemVenenoCaveira>();
+        n.cosmetico = true; // só visual; o dano é do host
+        n.Inicializar(0f, 1f, duracao, raio);
+    }
+
     // ── Morte do boss: o host roda o efeito de morte + mensagem nos clientes ──
     public void BroadcastMorte(string msg, Color cor)
     {
