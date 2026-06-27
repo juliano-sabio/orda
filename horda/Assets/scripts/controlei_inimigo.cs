@@ -529,7 +529,15 @@ public class InimigoController : MonoBehaviour
             else if (guarda  != null) guarda.IniciarEfeitoMorte();
             else if (elite   != null) elite.IniciarEfeitoMorte();
             else if (caveira != null) caveira.IniciarEfeitoMorte();
-            else                      NetSpawn.Despawnar(gameObject); // host-autoritativo em rede
+            else
+            {
+                // Kill juice: pop satisfatório na morte (SP toca local; co-op host toca + replica no P2).
+                Color corMorte = spriteRenderer != null ? spriteRenderer.color : Color.white;
+                float escMorte = Mathf.Abs(transform.localScale.x);
+                KillPopVFX.Tocar(transform.position, corMorte, escMorte);
+                GetComponent<EnemyNet>()?.BroadcastMorteVFX(transform.position, corMorte, escMorte);
+                NetSpawn.Despawnar(gameObject); // host-autoritativo em rede
+            }
         }
         else
         {
