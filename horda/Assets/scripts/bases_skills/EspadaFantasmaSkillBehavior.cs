@@ -70,6 +70,9 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
     {
         float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.EspadaCorteDark, origem, 0.4f);
+        bool somHit = false;
+
         // Sprite de espada
         var go = new GameObject("EspadaCorte");
         go.transform.position = origem + dir * (alcanceCorte * 0.5f);
@@ -91,6 +94,7 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
             SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFlamejante))
                 EvolutionFX.AplicarChamas(ic, this, DanoAtual * 0.3f, 3f);
+            if (!somHit) { somHit = true; SomSkill.Tocar(SomSkill.Tipo.EspadaImpactoDark, ic.transform.position, 0.35f); }
         }
 
         // Fade

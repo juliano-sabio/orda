@@ -13,7 +13,11 @@ public static class SomSkill
         CorrenteCanalDark, CorrenteDescargaDark, CorrenteTickDark,
         ChicoteEstaloDark, ChicoteImpactoDark,
         PulsoDark,
-        LancaDisparoDark, LancaImpactoDark
+        LancaDisparoDark, LancaImpactoDark,
+        EspadaCorteDark, EspadaImpactoDark,
+        EstrelaQuedaDark, EstrelaImpactoDark,
+        CorteLancamentoDark, CorteImpactoDark,
+        GarraErupcaoDark, GarraDissiparDark
     }
 
     static AudioClip _impacto, _disparo, _explosao;
@@ -22,6 +26,10 @@ public static class SomSkill
     static AudioClip _chicEstalo, _chicImp;
     static AudioClip _pulso;
     static AudioClip _lancaDisp, _lancaImp;
+    static AudioClip _espCorte, _espImp;
+    static AudioClip _estQueda, _estImp;
+    static AudioClip _corteLanc, _corteImp;
+    static AudioClip _garraErup, _garraDiss;
 
     static AudioClip Carregar(string nome)
     {
@@ -44,6 +52,14 @@ public static class SomSkill
     static AudioClip Pulso      => _pulso      ??= Carregar("pulso_dark");
     static AudioClip LancaDisp  => _lancaDisp  ??= Carregar("lanca_disparo_dark");
     static AudioClip LancaImp   => _lancaImp   ??= Carregar("lanca_impacto_dark");
+    static AudioClip EspCorte   => _espCorte   ??= Carregar("espada_corte_dark");
+    static AudioClip EspImp     => _espImp     ??= Carregar("espada_impacto_dark");
+    static AudioClip EstQueda   => _estQueda   ??= Carregar("estrela_queda_dark");
+    static AudioClip EstImp     => _estImp     ??= Carregar("estrela_impacto_dark");
+    static AudioClip CorteLanc  => _corteLanc  ??= Carregar("corte_lancamento_dark");
+    static AudioClip CorteImp   => _corteImp   ??= Carregar("corte_impacto_dark");
+    static AudioClip GarraErup  => _garraErup  ??= Carregar("garra_erupcao_dark");
+    static AudioClip GarraDiss  => _garraDiss  ??= Carregar("garra_dissipar_dark");
 
     public static void Tocar(Tipo tipo, Vector2 posicao, float volume = 0.7f)
     {
@@ -63,6 +79,14 @@ public static class SomSkill
             Tipo.PulsoDark => Pulso,
             Tipo.LancaDisparoDark => LancaDisp,
             Tipo.LancaImpactoDark => LancaImp,
+            Tipo.EspadaCorteDark   => EspCorte,
+            Tipo.EspadaImpactoDark => EspImp,
+            Tipo.EstrelaQuedaDark   => EstQueda,
+            Tipo.EstrelaImpactoDark => EstImp,
+            Tipo.CorteLancamentoDark => CorteLanc,
+            Tipo.CorteImpactoDark    => CorteImp,
+            Tipo.GarraErupcaoDark  => GarraErup,
+            Tipo.GarraDissiparDark => GarraDiss,
             _             => null
         };
         if (clip != null)

@@ -88,9 +88,16 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
         StartCoroutine(FadeOutDestruir(zonaGO, 0.5f));
     }
 
+    // Rede de segurança: se for destruído antes do fim da duração (troca de cena/game over),
+    // garante a desinscrição pra a callback não rodar num objeto já destruído.
+    void OnDestroy()
+    {
+        InimigoController.OnPreMorte -= OnInimigoDentroZona;
+    }
+
     void OnInimigoDentroZona(InimigoController ic)
     {
-        if (ic == null || ic.gameObject == null) return;
+        if (this == null || ic == null || ic.gameObject == null) return;
         float dist = Vector2.Distance(transform.position, ic.transform.position);
         if (dist > raio) return;
 

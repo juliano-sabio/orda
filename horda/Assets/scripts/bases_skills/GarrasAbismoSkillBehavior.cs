@@ -142,6 +142,8 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
         var garrasGO = new GameObject("GarrasAbismo");
         garrasGO.transform.position = centro;
 
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.GarraErupcaoDark, centro, 0.55f);
+
         Color cel = CorElemento();
         Color corGarras = new Color(cel.r, cel.g, cel.b, 0.95f);
 
@@ -203,6 +205,7 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
         }
 
         // Fase 3: retrair + fade
+        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.GarraDissiparDark, centro, 0.3f);
         float durRetir = 0.25f;
         for (float t = 0f; t < durRetir; t += Time.deltaTime)
         {
