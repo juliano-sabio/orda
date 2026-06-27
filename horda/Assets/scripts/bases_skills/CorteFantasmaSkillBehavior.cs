@@ -55,7 +55,7 @@ public class CorteFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga
         var alvos = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
-        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.CorteLancamentoDark, origem, 0.45f);
+        SomSkill.Tocar(SomSkill.Tipo.CorteLancamentoDark, origem, 0.45f); // co-op: toca tb na cópia cosmética (outro player ouve)
         StartCoroutine(EfeitoLancamento(origem));
 
         for (int i = 0; i < alvos.Count; i++)

@@ -54,7 +54,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
         var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
-        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.LaminaFuriaDark, origem, 0.5f);
+        SomSkill.Tocar(SomSkill.Tipo.LaminaFuriaDark, origem, 0.5f); // co-op: toca tb na cópia cosmética (outro player ouve)
 
         for (int i = 0; i < alvos.Count; i++)
         {

@@ -70,7 +70,7 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
     {
         float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
-        if (!cosmetico) SomSkill.Tocar(SomSkill.Tipo.EspadaCorteDark, origem, 0.4f);
+        SomSkill.Tocar(SomSkill.Tipo.EspadaCorteDark, origem, 0.4f); // co-op: toca tb na cópia cosmética (outro player ouve)
         bool somHit = false;
 
         // Sprite de espada
