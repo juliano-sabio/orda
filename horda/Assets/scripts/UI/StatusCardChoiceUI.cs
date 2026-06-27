@@ -82,7 +82,7 @@ public class StatusCardChoiceUI : MonoBehaviour
 
         if (titleText != null)
         {
-            titleText.text = "Carta de Status";
+            titleText.text = Loc.T("ui.status_cards"); // antes hardcoded "Carta de Status" (não traduzia)
             titleText.color = new Color(1.00f, 0.80f, 0.35f); // dourado limpo (igual ao de skill)
         }
 

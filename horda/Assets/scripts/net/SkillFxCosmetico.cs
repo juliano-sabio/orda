@@ -63,11 +63,16 @@ public static class SkillFxCosmetico
         comp.cosmetico = true;
         comp.skillData = clone;
 
+        // Initialize ANTES de ConfigurarDeSkillData: várias behaviors criam o visual dentro
+        // de ConfigurarDeSkillData e dependem de playerStats já setado (ex.: CampoEspinhos /
+        // Thorn Field, cujo CriarVisual faz `if (playerStats == null) return;` → sem isto o
+        // campo nunca era criado no fantoche e a skill do colega ficava invisível).
+        comp.Initialize(alvo);
+
         // Config opcional: muitas behaviors têm ConfigurarDeSkillData(SkillData).
         var m = tipo.GetMethod("ConfigurarDeSkillData");
         if (m != null) m.Invoke(comp, new object[] { clone });
 
-        comp.Initialize(alvo);
         return comp;
     }
 }

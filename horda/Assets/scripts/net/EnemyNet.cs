@@ -6,9 +6,24 @@ using UnityEngine;
 // gameplay desligados (a IA roda só no host). No HOST, não mexe em nada.
 public class EnemyNet : NetworkBehaviour
 {
+    // Escala do inimigo sincronizada do host. O NetworkTransform dos inimigos não sincroniza
+    // scale, e a escala é setada no Awake (controlei_inimigo: dadosInimigo.tamanho) — que no
+    // cliente pode divergir (ex.: SlimeColorida tem dadosInimigo==null → fica no default do
+    // prefab). Sem isto o fantoche aparecia com "tamanho errado".
+    readonly NetworkVariable<float> escalaNet = new NetworkVariable<float>(
+        0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     public override void OnNetworkSpawn()
     {
-        if (IsServer) return; // host roda a lógica normalmente
+        if (IsServer)
+        {
+            escalaNet.Value = transform.localScale.x; // Awake já rodou → escala final real
+            return;
+        }
+
+        // cliente: aplica a escala REAL do host (corrige tamanho do fantoche)
+        escalaNet.OnValueChanged += AoMudarEscala;
+        AplicarEscala(escalaNet.Value);
 
         var rb = GetComponent<Rigidbody2D>();
         if (rb != null) rb.bodyType = RigidbodyType2D.Kinematic;
@@ -26,6 +41,12 @@ public class EnemyNet : NetworkBehaviour
         // "pelados" no cliente (o script foi desligado acima). Deixa cada um montar só o visual.
         var cosm = GetComponent<IEnemyCosmetic>();
         if (cosm != null) cosm.SetupVisualCosmetico();
+    }
+
+    void AoMudarEscala(float _, float v) => AplicarEscala(v);
+    void AplicarEscala(float s)
+    {
+        if (s > 0f) transform.localScale = new Vector3(s, s, transform.localScale.z);
     }
 
     // Qualquer cliente pode requisitar dano a qualquer inimigo (co-op de amigos).
