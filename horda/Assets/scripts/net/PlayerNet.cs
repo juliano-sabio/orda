@@ -519,4 +519,25 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         Debug.Log($"[BuildDiag] clientId={OwnerClientId} IsOwner={IsOwner} ultimateIdx={ultimateIdx.Value} passivaIdx={passivaIdx.Value} char={charIndex.Value}");
         stats.ApplyCharacterData(charIndex.Value);
     }
+
+    // Co-op: reseta este player pra uma RUN NOVA. Chamado pelo FaseCoopBootstrap no load da fase,
+    // em CADA máquina, pra TODOS os players. SkillManager/StatusCard/Evolution são DontDestroyOnLoad
+    // e os players persistem (NGO) → sem isto as skills/stats/cartas da run anterior carregavam.
+    public void ResetarParaNovaRun()
+    {
+        if (IsOwner)
+        {
+            SkillManager.Instance?.ClearAllSkills();           // skills reais + behaviors + bônus de stat
+            SkillEvolutionManager.Instance?.Resetar();         // evoluções
+            if (stats != null) stats.ApplyCharacterData(charIndex.Value); // stats/health base (zera cartas) + reaplica build
+        }
+        else
+        {
+            // fantoche do colega (objeto local nesta máquina): remove as cópias COSMÉTICAS
+            // das skills da run anterior (senão acumulam/ficam stale na run nova).
+            foreach (var b in GetComponents<SkillBehavior>())
+                if (b != null && b.cosmetico) Destroy(b);
+            cosmeticasPorIdx.Clear();
+        }
+    }
 }

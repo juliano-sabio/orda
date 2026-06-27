@@ -12,6 +12,15 @@ public class FaseCoopBootstrap : MonoBehaviour
     {
         LobbyState.EmLobby = false;
 
+        // Co-op: a run nova começa LIMPA. Roda em cada máquina, pra todos os players (o dono
+        // reseta as próprias skills/stats; nos fantoches limpa as cópias cosméticas). Sem isto,
+        // as skills da run anterior carregavam (managers DontDestroyOnLoad + players persistem).
+        foreach (var ps in PlayerStats.All)
+        {
+            var pn = ps != null ? ps.GetComponent<PlayerNet>() : null;
+            if (pn != null) pn.ResetarParaNovaRun();
+        }
+
         // [debug temp] botões de invocar boss / forçar evento pra testar em co-op (só o host dispara).
         if (GetComponent<DebugChamarBoss>() == null) gameObject.AddComponent<DebugChamarBoss>();
         if (GetComponent<DebugChamarEvento>() == null) gameObject.AddComponent<DebugChamarEvento>();
