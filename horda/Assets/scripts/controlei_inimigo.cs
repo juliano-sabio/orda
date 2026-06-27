@@ -132,7 +132,9 @@ public class InimigoController : MonoBehaviour
         var _en = GetComponent<EnemyNet>();
         if (_en != null && _en.IsSpawned && !_en.IsServer)
         {
-            _en.ReceberDanoServerRpc(dano, isCrit);
+            // mostrarNumero propagado: senão dano "silencioso" (ex.: tick do vampirismo,
+            // ~0.3/frame) virava "0" replicado a cada frame em vários inimigos = chuva de 0.
+            _en.ReceberDanoServerRpc(dano, isCrit, mostrarNumero);
             return;
         }
 

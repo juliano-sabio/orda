@@ -17,7 +17,10 @@ public class EnemyNet : NetworkBehaviour
     {
         if (IsServer)
         {
-            escalaNet.Value = transform.localScale.x; // Awake já rodou → escala final real
+            // Abs: movi_inimigo inverte o SINAL de localScale.x pra virar o inimigo (facing).
+            // Sem Abs, se o host estivesse virado p/ esquerda no spawn, o fantoche recebia
+            // escala negativa → espelhado/distorcido (parecia "tamanho errado").
+            escalaNet.Value = Mathf.Abs(transform.localScale.x);
             return;
         }
 
@@ -51,10 +54,10 @@ public class EnemyNet : NetworkBehaviour
 
     // Qualquer cliente pode requisitar dano a qualquer inimigo (co-op de amigos).
     [ServerRpc(RequireOwnership = false)]
-    public void ReceberDanoServerRpc(float dano, bool isCrit)
+    public void ReceberDanoServerRpc(float dano, bool isCrit, bool mostrarNumero = true)
     {
         var ic = GetComponent<InimigoController>();
-        if (ic != null) ic.ReceberDano(dano, isCrit); // roda no host -> aplica
+        if (ic != null) ic.ReceberDano(dano, isCrit, mostrarNumero); // roda no host -> aplica
     }
 
     // Co-op: o host mostra o número de dano (pós-mitigação) também nos clientes. Sem isto,
