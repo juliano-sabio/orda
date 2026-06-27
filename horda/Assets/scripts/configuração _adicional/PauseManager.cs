@@ -774,6 +774,14 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = 1f;
         if (pausePanel != null) pausePanel.SetActive(false);
 
+        // Co-op: "Seleção" leva o GRUPO de volta ao lobby (no MP o lobby É a seleção),
+        // host-autoritativo via NGO — não usa o LoadScene local da seleção SP.
+        if (NetSpawn.EmRede && CoopPauseManager.Instance != null)
+        {
+            CoopPauseManager.Instance.VoltarAoLobbyServerRpc();
+            return;
+        }
+
         // Destrói todos os singletons persistentes antes de carregar o menu,
         // para que a UI do gameplay não vaze para outras cenas.
         LimparManagersPersistentes();

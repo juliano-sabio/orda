@@ -89,6 +89,19 @@ public class CoopPauseManager : NetworkBehaviour
         CameraShaker.TremerLocal(intensidade, duracao);
     }
 
+    // Co-op: qualquer player (pelo botão "Seleção" do pause) leva o GRUPO de volta ao lobby.
+    // Host-autoritativo via NGO (todos vão juntos), igual ao game-over (PlayerNet.VoltarAoLobby).
+    [Rpc(SendTo.Server)]
+    public void VoltarAoLobbyServerRpc()
+    {
+        menuAberto = false; donoMenu.Value = SemDono; retentoresEscolha.Clear();
+        Recomputar();
+        Time.timeScale = 1f;
+        LobbyState.EmLobby = true;
+        if (NetworkManager != null && NetworkManager.SceneManager != null)
+            NetworkManager.SceneManager.LoadScene("lobby_mp", UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+
     void Recomputar()
     {
         pausado.Value = retentoresEscolha.Count > 0 || menuAberto;
