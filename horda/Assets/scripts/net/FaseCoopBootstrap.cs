@@ -21,10 +21,6 @@ public class FaseCoopBootstrap : MonoBehaviour
             if (pn != null) pn.ResetarParaNovaRun();
         }
 
-        // [debug temp] botões de invocar boss / forçar evento pra testar em co-op (só o host dispara).
-        if (GetComponent<DebugChamarBoss>() == null) gameObject.AddComponent<DebugChamarBoss>();
-        if (GetComponent<DebugChamarEvento>() == null) gameObject.AddComponent<DebugChamarEvento>();
-
         var nm = NetworkManager.Singleton;
         if (nm == null || !nm.IsServer) return; // só o host
 
