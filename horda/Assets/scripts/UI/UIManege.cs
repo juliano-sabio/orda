@@ -777,8 +777,9 @@ public class UIManager : MonoBehaviour
                 }
                 else
                 {
-                    elementIcon.color = GetElementColor(skill.element);
-                    elementIcon.gameObject.SetActive(skill.element != PlayerStats.Element.None);
+                    // Sem infusão → sem quadradinho (antes mostrava a cor do elemento-base,
+                    // virando um quadrado branco quando a skill estava "sem elemento").
+                    elementIcon.gameObject.SetActive(false);
                 }
             }
         }
