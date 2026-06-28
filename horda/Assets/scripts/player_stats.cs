@@ -1079,7 +1079,11 @@ public class PlayerStats : MonoBehaviour
 
     void AplicarEfeitosLevelUp()
     {
-        GetComponent<LevelUpEffect>()?.Executar(level);
+        // Garante o efeito de level-up mesmo em co-op (o NetworkPlayer não tinha o componente
+        // no prefab → antes era no-op silencioso e o player 2 não via nada ao subir de nível).
+        var lvfx = GetComponent<LevelUpEffect>();
+        if (lvfx == null) lvfx = gameObject.AddComponent<LevelUpEffect>();
+        lvfx.Executar(level);
 
         // Garante referência atualizada ao SkillManager
         if (skillManager == null) skillManager = SkillManager.Instance;

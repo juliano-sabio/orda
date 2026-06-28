@@ -14,11 +14,11 @@ public static class Impacto
     static float ultimoHitStop = -10f;
     const float COOLDOWN_HITSTOP = 0.10f; // teto ~10 freezes/seg → sem stutter
 
-    // Acerto crítico do player: freeze curtinho (SP) + tremor bem sutil (local, nos dois lados).
+    // Acerto crítico do player: freeze curto (SP) + tremor perceptível (local, nos dois lados).
     public static void Critico()
     {
-        HitStop(0.035f);
-        CameraShaker.TremerLocal(0.06f, 0.09f);
+        HitStop(0.06f);
+        CameraShaker.TremerLocal(0.14f, 0.18f);
     }
 
     // Morte de boss/elite: freeze maior (SP). O tremor de câmera é disparado por quem chama

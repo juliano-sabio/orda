@@ -15,21 +15,39 @@ public class XpColetaVFX : MonoBehaviour
     void Iniciar(Color cor)
     {
         StartCoroutine(Disco(cor));
-        for (int i = 0; i < 3; i++) StartCoroutine(Faisca(cor, i));
-        Destroy(gameObject, 0.35f);
+        StartCoroutine(Flash());                                  // núcleo branco rápido = "pop"
+        for (int i = 0; i < 6; i++) StartCoroutine(Faisca(cor, i));
+        Destroy(gameObject, 0.5f);
     }
 
-    IEnumerator Disco(Color cor)
+    // Núcleo branco que estoura e some bem rápido — dá o "estalo" da coleta.
+    IEnumerator Flash()
     {
-        var go = NovoDisco(cor, 60);
-        const float dur = 0.16f;
+        var go = NovoDisco(Color.white, 62);
+        const float dur = 0.12f;
         float t = 0f;
         while (t < dur)
         {
             t += Time.deltaTime;
             float p = t / dur;
-            go.transform.localScale = Vector3.one * Mathf.Lerp(0.15f, 0.5f, Mathf.SmoothStep(0f, 1f, p));
-            SetA(go, Mathf.Lerp(0.9f, 0f, p));
+            go.transform.localScale = Vector3.one * Mathf.Lerp(0.25f, 0.85f, Mathf.SmoothStep(0f, 1f, p));
+            SetA(go, Mathf.Lerp(1f, 0f, p));
+            yield return null;
+        }
+        Destroy(go);
+    }
+
+    IEnumerator Disco(Color cor)
+    {
+        var go = NovoDisco(cor, 60);
+        const float dur = 0.26f;
+        float t = 0f;
+        while (t < dur)
+        {
+            t += Time.deltaTime;
+            float p = t / dur;
+            go.transform.localScale = Vector3.one * Mathf.Lerp(0.3f, 1.3f, Mathf.SmoothStep(0f, 1f, p));
+            SetA(go, Mathf.Lerp(1f, 0f, p));
             yield return null;
         }
         Destroy(go);
@@ -38,11 +56,11 @@ public class XpColetaVFX : MonoBehaviour
     IEnumerator Faisca(Color cor, int i)
     {
         var go = NovoDisco(cor, 61);
-        float ang = 120f * i + Random.Range(-30f, 30f);
-        Vector2 vel = new Vector2(Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) * Random.Range(1.5f, 2.5f);
-        float tam = Random.Range(0.05f, 0.09f);
+        float ang = 60f * i + Random.Range(-25f, 25f);
+        Vector2 vel = new Vector2(Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) * Random.Range(2.5f, 4f);
+        float tam = Random.Range(0.1f, 0.18f);
         go.transform.localScale = Vector3.one * tam;
-        const float dur = 0.3f;
+        const float dur = 0.4f;
         float t = 0f;
         while (t < dur)
         {
