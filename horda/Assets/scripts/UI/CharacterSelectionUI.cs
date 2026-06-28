@@ -339,17 +339,46 @@ public class CharacterSelectionUI : MonoBehaviour
         iconUI.elementBackground.color = new Color(1f,1f,1f,0f);
         Anchors(elemBg, Vector2.zero, Vector2.one);
 
-        // indicador selecionado (borda colorida)
+        // camada vermelha de "indisponível" — fica nos slots SEM personagem (vazios/bloqueados).
+        // Ativa por padrão; o CharacterIconUI.UpdateUnlockStatus a esconde quando o slot tem um
+        // personagem DESBLOQUEADO. Antes esse vermelho aparecia no slot com personagem (era o Sel).
+        var locked = new GameObject("LockedOverlay");
+        locked.transform.SetParent(go.transform, false);
+        var lkRT = locked.AddComponent<RectTransform>();
+        lkRT.anchorMin = Vector2.zero; lkRT.anchorMax = Vector2.one;
+        lkRT.offsetMin = lkRT.offsetMax = Vector2.zero;
+        var lkImg = locked.AddComponent<Image>();
+        lkImg.color = new Color(corAcento.r, corAcento.g, corAcento.b, 0.55f);
+        lkImg.raycastTarget = false;
+        iconUI.lockedOverlay = locked;
+
+        // indicador de SELECIONADO = borda (não cobre mais o personagem com vermelho)
         var sel = new GameObject("Sel");
         sel.transform.SetParent(go.transform, false);
         var rs = sel.AddComponent<RectTransform>();
         rs.anchorMin = Vector2.zero; rs.anchorMax = Vector2.one;
-        rs.offsetMin = new Vector2(-3f,-3f); rs.offsetMax = new Vector2(3f,3f);
-        sel.AddComponent<Image>().color = new Color(corAcento.r, corAcento.g, corAcento.b, 0.75f);
+        rs.offsetMin = new Vector2(-2f,-2f); rs.offsetMax = new Vector2(2f,2f);
+        BordaSel(sel, new Color(1f, 0.9f, 0.4f, 0.95f), 3f); // borda dourada
         sel.SetActive(false);
         iconUI.selectedIndicator = sel;
 
         return iconUI;
+    }
+
+    // Borda de seleção em 4 tiras (não cobre o miolo, diferente do retângulo cheio antigo).
+    static void BordaSel(GameObject pai, Color cor, float esp)
+    {
+        void Tira(Vector2 aMin, Vector2 aMax, Vector2 oMin, Vector2 oMax)
+        {
+            var t = new GameObject("B"); t.transform.SetParent(pai.transform, false);
+            var rt = t.AddComponent<RectTransform>();
+            rt.anchorMin = aMin; rt.anchorMax = aMax; rt.offsetMin = oMin; rt.offsetMax = oMax;
+            var im = t.AddComponent<Image>(); im.color = cor; im.raycastTarget = false;
+        }
+        Tira(new Vector2(0,1), new Vector2(1,1), new Vector2(0,-esp), Vector2.zero); // topo
+        Tira(new Vector2(0,0), new Vector2(1,0), Vector2.zero, new Vector2(0,esp));  // base
+        Tira(new Vector2(0,0), new Vector2(0,1), Vector2.zero, new Vector2(esp,0));  // esquerda
+        Tira(new Vector2(1,0), new Vector2(1,1), new Vector2(-esp,0), Vector2.zero); // direita
     }
 
     // ── Área central: preview + info + status ──────────────────────────
