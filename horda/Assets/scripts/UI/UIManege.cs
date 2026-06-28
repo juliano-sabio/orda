@@ -824,18 +824,10 @@ public class UIManager : MonoBehaviour
                 ultimateSkillIcon.color = Color.white;
                 ultimateSkillIcon.gameObject.SetActive(true);
 
+                // Ultimate não é infundível (a infusão só atua em skills de ataque/defesa via
+                // appliedElement) → nunca mostra o quadradinho de elemento (era o elemento-base).
                 if (ultimateSkillElementIcon != null)
-                {
-                    if (ultimateSkill.element != PlayerStats.Element.None)
-                    {
-                        ultimateSkillElementIcon.color = GetElementColor(ultimateSkill.element);
-                        ultimateSkillElementIcon.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        ultimateSkillElementIcon.gameObject.SetActive(false);
-                    }
-                }
+                    ultimateSkillElementIcon.gameObject.SetActive(false);
             }
             else
             {
@@ -1626,10 +1618,9 @@ public class UIManager : MonoBehaviour
         if (defenseSkills.Count > 0) UpdateSkillElementIcon(defenseSkill1ElementIcon, defenseSkills[0]);
         if (defenseSkills.Count > 1) UpdateSkillElementIcon(defenseSkill2ElementIcon, defenseSkills[1]);
 
-        if (playerStats.HasUltimate())
-        {
-            UpdateSkillElementIcon(ultimateSkillElementIcon, playerStats.GetUltimateSkill());
-        }
+        // Ultimate não é infundível → sem quadradinho de elemento.
+        if (ultimateSkillElementIcon != null)
+            ultimateSkillElementIcon.gameObject.SetActive(false);
 
         if (elementIcon != null)
         {
