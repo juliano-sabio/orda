@@ -43,6 +43,9 @@ public class moviment_player2 : MonoBehaviour
             rb.gravityScale = 0;
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         }
+
+        // Poeira de corrida (juice). Observa o transform → roda no dono e no fantoche (co-op).
+        if (GetComponent<MovementDust>() == null) gameObject.AddComponent<MovementDust>();
     }
 
     private void Update()
