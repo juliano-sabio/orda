@@ -21,7 +21,8 @@ public static class UISons
 
     public static void Click()
     {
-        Tocar(_click ??= GerarBlip(520f, 0.08f, 45f, 0.25f), 0.42f);
+        // Mais suave/quente que o "beep" anterior: grave, pouco ruído, decay um pouco mais longo.
+        Tocar(_click ??= GerarBlip(380f, 0.09f, 38f, 0.05f), 0.32f);
     }
 
     static void Tocar(AudioClip clip, float vol)

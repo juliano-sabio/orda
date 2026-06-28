@@ -196,11 +196,11 @@ public class ElementApplicationUI : MonoBehaviour
     {
         if (rt == null || cg == null) yield break;
         Vector3 alvo = rt.localScale;
-        const float dur = 0.18f;
+        const float dur = 0.24f;
         for (float t = 0f; t < dur; t += Time.unscaledDeltaTime)
         {
             float e = 1f - Mathf.Pow(1f - t / dur, 3f); // ease-out cubic
-            rt.localScale = alvo * Mathf.Lerp(0.92f, 1f, e);
+            rt.localScale = alvo * Mathf.Lerp(0.85f, 1f, e);
             cg.alpha = e;
             yield return null;
         }
@@ -353,15 +353,19 @@ public class ElementApplicationUI : MonoBehaviour
         var corpoRT = corpo.AddComponent<RectTransform>();
         corpoRT.anchorMin = Vector2.zero; corpoRT.anchorMax = Vector2.one; corpoRT.offsetMin = corpoRT.offsetMax = Vector2.zero;
         Image corpoImg = corpo.AddComponent<Image>();
+        corpoImg.color = corFundo; // fundo escuro SÓLIDO sempre (à prova de moldura vazada)
+
+        // moldura por cima do fundo escuro (carta_frame em Simple, igual às outras telas de escolha)
         var frameSprite = CartaFrame();
-        bool temFrame = frameSprite != null;
-        if (temFrame)
+        if (frameSprite != null)
         {
-            corpoImg.sprite = frameSprite;
-            corpoImg.type   = Image.Type.Sliced;
-            corpoImg.color  = Color.white;
+            var fr = new GameObject("Frame"); fr.transform.SetParent(go.transform, false);
+            var frRT = fr.AddComponent<RectTransform>();
+            frRT.anchorMin = Vector2.zero; frRT.anchorMax = Vector2.one; frRT.offsetMin = frRT.offsetMax = Vector2.zero;
+            var frImg = fr.AddComponent<Image>();
+            frImg.sprite = frameSprite; frImg.type = Image.Type.Simple; frImg.color = Color.white;
+            frImg.raycastTarget = false;
         }
-        else corpoImg.color = corFundo;
 
         // irmão 2: faixa topo na cor do elemento (header visual)
         var topBar = new GameObject("TopBar"); topBar.transform.SetParent(go.transform, false);
@@ -435,25 +439,13 @@ public class ElementApplicationUI : MonoBehaviour
         // Button no root — targetGraphic = corpoImg
         var btn = go.AddComponent<Button>(); btn.targetGraphic = corpoImg;
         btn.transition = Selectable.Transition.ColorTint;
-        if (temFrame)
-        {
-            // moldura é sprite branco → tint claro pra hover/press não escurecer a arte
-            btn.colors = new ColorBlock{
-                normalColor=Color.white, highlightedColor=new Color(1f,0.96f,0.85f),
-                pressedColor=new Color(0.80f,0.78f,0.72f), selectedColor=new Color(1f,0.96f,0.85f),
-                disabledColor=new Color(1f,1f,1f,0.5f), colorMultiplier=1f, fadeDuration=0.1f
-            };
-        }
-        else
-        {
-            Color hov = new Color(corFundo.r+0.08f, corFundo.g+0.06f, corFundo.b+0.14f, 1f);
-            btn.colors = new ColorBlock{
-                normalColor=corFundo, highlightedColor=hov,
-                pressedColor=new Color(0.03f,0.02f,0.05f,1f),
-                selectedColor=hov, disabledColor=new Color(corFundo.r,corFundo.g,corFundo.b,0.5f),
-                colorMultiplier=1f, fadeDuration=0.1f
-            };
-        }
+        Color hov = new Color(corFundo.r+0.10f, corFundo.g+0.08f, corFundo.b+0.18f, 1f);
+        btn.colors = new ColorBlock{
+            normalColor=corFundo, highlightedColor=hov,
+            pressedColor=new Color(0.03f,0.02f,0.05f,1f),
+            selectedColor=hov, disabledColor=new Color(corFundo.r,corFundo.g,corFundo.b,0.5f),
+            colorMultiplier=1f, fadeDuration=0.1f
+        };
         int capture = idx;
         btn.onClick.AddListener(() => ConfirmarEscolha(capture));
     }
