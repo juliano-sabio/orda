@@ -43,20 +43,25 @@ public class ElementDropToken : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (coletado || !other.CompareTag("Player")) return;
-        // Co-op: coleta host-autoritativa (cada token = 1 coleta). O cliente não coleta; o host
-        // detecta (player real ou fantoche) e despawna em todos.
-        if (NetSpawn.EmRede && !NetSpawn.PodeSpawnar) return;
-        coletado = true;
 
-        // Co-op: um token = UMA infusão, só pro DONO do player que pegou (não pros dois).
+        // Co-op: cada máquina detecta o SEU player local sobre o token e PEDE a coleta ao host.
+        // (Antes era host-autoritativo via detecção do fantoche do outro no host — não confiável,
+        // então o token não sumia pro P2.)
         if (NetSpawn.EmRede)
         {
-            var pn = other.GetComponentInParent<PlayerNet>();
-            if (pn != null) pn.AbrirInfusaoOwnerRpc((int)elementType);
-            NetSpawn.Despawnar(gameObject); // remove em todos
-            return;
+            var ps = other.GetComponentInParent<PlayerStats>();
+            if (ps == null || ps != PlayerStats.Local) return; // só o player local desta máquina
+            var net = GetComponent<ElementTokenNet>();
+            if (net != null)
+            {
+                coletado = true;        // trava local
+                net.SolicitarColeta();  // host abre a infusão pro dono certo + despawna em todos
+                return;
+            }
+            // sem ElementTokenNet → cai pro fluxo local abaixo
         }
 
+        coletado = true;
         var ui = ElementApplicationUI.Instance;
         if (ui == null)
         {

@@ -11,6 +11,34 @@ public class ElementTokenNet : NetworkBehaviour
 
     public void DefinirElemento(int e) { if (IsServer) elementoNet.Value = e; }
 
+    bool jaColetado; // guard server-side (evita dupla coleta se os dois encostarem ao mesmo tempo)
+
+    // Pedido de coleta vindo da máquina do player que encostou. O host concede ao dono certo.
+    public void SolicitarColeta()
+    {
+        if (IsServer) ConcederColeta(NetworkManager.LocalClientId);
+        else SolicitarColetaServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void SolicitarColetaServerRpc(ServerRpcParams p = default)
+    {
+        ConcederColeta(p.Receive.SenderClientId);
+    }
+
+    void ConcederColeta(ulong clientId)
+    {
+        if (!IsServer || jaColetado) return;
+        jaColetado = true;
+        int elem = elementoNet.Value >= 0
+            ? elementoNet.Value
+            : (int)(GetComponent<ElementDropToken>()?.elementType ?? ElementType.None);
+        // abre a infusão SÓ pro player desse cliente (dono que pegou)
+        foreach (var pn in FindObjectsByType<PlayerNet>(FindObjectsSortMode.None))
+            if (pn.OwnerClientId == clientId) { pn.AbrirInfusaoOwnerRpc(elem); break; }
+        if (NetworkObject != null && NetworkObject.IsSpawned) NetworkObject.Despawn(); // some em todos
+    }
+
     public override void OnNetworkSpawn()
     {
         elementoNet.OnValueChanged += AoMudar;

@@ -14,11 +14,16 @@ public class moviment_player2 : MonoBehaviour
     public float dashSpeed = 20f;
     public float dashDuration = 0.15f;
 
+    [Header("Velocidade")]
+    public float velocidadeMultiplicador = 0.5f; // metade da velocidade (pedido)
+    public float aceleracao = 35f;               // suaviza partida/parada
+
     private bool isDashing = false;
     private Vector2 dashDirection;
     private DashEffect dashEffect;
 
     private float tempoImobilizado = 0f;
+    public bool Imobilizado => tempoImobilizado > 0f; // teleporte/paralisia → sem poeira de corrida
 
     public void Imobilizar(float duracao)
     {
@@ -100,7 +105,11 @@ public class moviment_player2 : MonoBehaviour
         if (isDashing)
             rb.linearVelocity = dashDirection * dashSpeed;
         else
-            rb.linearVelocity = moveInput * playerStats.GetSpeed();
+        {
+            // metade da velocidade + aceleração suave (em vez de set instantâneo)
+            Vector2 alvo = moveInput * (playerStats.GetSpeed() * velocidadeMultiplicador);
+            rb.linearVelocity = Vector2.MoveTowards(rb.linearVelocity, alvo, aceleracao * Time.fixedDeltaTime);
+        }
     }
 
     private IEnumerator DashCoroutine()

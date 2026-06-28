@@ -21,6 +21,7 @@ public class MovementDust : MonoBehaviour
     public float offsetY = -0.32f;          // nos "pés", abaixo do centro
 
     SpriteRenderer srPlayer;
+    moviment_player2 mov;
     Vector3 ultimaPos;
     float distAcumulada;
     static Sprite spritePuff;
@@ -28,6 +29,7 @@ public class MovementDust : MonoBehaviour
     void Awake()
     {
         srPlayer = GetComponent<SpriteRenderer>();
+        mov = GetComponent<moviment_player2>();
         ultimaPos = transform.position;
         if (spritePuff == null) spritePuff = CriarPuff();
     }
@@ -38,6 +40,10 @@ public class MovementDust : MonoBehaviour
         float d = Vector2.Distance(pos, ultimaPos);
         float vel = Time.deltaTime > 0f ? d / Time.deltaTime : 0f;
         ultimaPos = pos;
+
+        // Sem poeira quando imobilizado (teleporte de portal, paralisia) — senão o movimento
+        // forçado deixa um rastro de poeira atravessando a tela.
+        if (mov != null && mov.Imobilizado) { distAcumulada = 0f; return; }
 
         if (vel < velocidadeMinima || vel > velocidadeMaxima)
         {
