@@ -121,6 +121,14 @@ public class XPOrb : MonoBehaviour
         }
     }
 
+    void OnDestroy()
+    {
+        // Pop de coleta nos dois lados (host e cliente despawnam o orbe ao ser coletado).
+        // scene.isLoaded evita disparar em troca de cena (teardown).
+        if (!gameObject.scene.isLoaded) return;
+        XpColetaVFX.Tocar(transform.position, new Color(0.41f, 0.95f, 0.96f));
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
