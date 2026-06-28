@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -23,6 +24,8 @@ public class GravadorClipe : MonoBehaviour
     float tInicio, proxFrame;
     RenderTexture rtFull, rtOut;
     int larg, alt;
+    Coroutine loopCo;
+    readonly List<Task> tarefas = new List<Task>(); // escritas de PNG pendentes
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
@@ -81,8 +84,9 @@ public class GravadorClipe : MonoBehaviour
         frame = 0;
         tInicio = Time.unscaledTime;
         proxFrame = 0f;
+        lock (tarefas) tarefas.Clear();
         gravando = true;
-        StartCoroutine(Loop());
+        loopCo = StartCoroutine(Loop());
         Debug.Log($"[GravadorClipe] ● Gravando ({larg}x{alt} @ {FPS}fps) → {pasta}");
     }
 
@@ -90,12 +94,13 @@ public class GravadorClipe : MonoBehaviour
     {
         if (!gravando) return;
         gravando = false;
-        StopCoroutine(Loop());
+        if (loopCo != null) { StopCoroutine(loopCo); loopCo = null; }
+        AsyncGPUReadback.WaitAllRequests(); // garante que todos os readbacks viraram tasks de escrita
         if (rtFull != null) { rtFull.Release(); rtFull = null; }
         if (rtOut  != null) { rtOut.Release();  rtOut  = null; }
         EscreverScriptFfmpeg();
-        Debug.Log($"[GravadorClipe] ■ Parado. {frame} frames em {pasta}\n" +
-                  $"Rode o montar.bat (precisa do ffmpeg no PATH) pra gerar o clip.mp4.");
+        Debug.Log($"[GravadorClipe] ■ Parado. {frame} frames. Encodando MP4...");
+        FinalizarEEncodar(pasta);
     }
 
     IEnumerator Loop()
@@ -119,7 +124,7 @@ public class GravadorClipe : MonoBehaviour
             {
                 if (req.hasError) return;
                 var bytes = req.GetData<byte>().ToArray(); // cópia fora do buffer nativo
-                Task.Run(() =>
+                var tarefa = Task.Run(() =>
                 {
                     try
                     {
@@ -129,6 +134,7 @@ public class GravadorClipe : MonoBehaviour
                     }
                     catch (Exception e) { Debug.LogWarning("[GravadorClipe] encode falhou: " + e.Message); }
                 });
+                lock (tarefas) tarefas.Add(tarefa);
             });
         }
     }
@@ -152,5 +158,73 @@ public class GravadorClipe : MonoBehaviour
                 $"ffmpeg -y -framerate {FPS} -i f_%05d.png -c:v libx264 -pix_fmt yuv420p -crf 18 clip.mp4\n");
         }
         catch (Exception e) { Debug.LogWarning("[GravadorClipe] script ffmpeg falhou: " + e.Message); }
+    }
+
+    // Espera os PNGs terminarem de gravar e roda o ffmpeg → clip.mp4 (tudo em background).
+    void FinalizarEEncodar(string pastaClipe)
+    {
+        Task[] pendentes;
+        lock (tarefas) { pendentes = tarefas.ToArray(); tarefas.Clear(); }
+        string ff = AcharFfmpeg();
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                await Task.WhenAll(pendentes); // garante todos os frames no disco
+                if (string.IsNullOrEmpty(ff))
+                {
+                    Debug.LogWarning("[GravadorClipe] ffmpeg não encontrado — rode o montar.bat manualmente.");
+                    return;
+                }
+                var psi = new System.Diagnostics.ProcessStartInfo(ff,
+                    $"-y -framerate {FPS} -i f_%05d.png -c:v libx264 -pix_fmt yuv420p -crf 18 clip.mp4")
+                {
+                    WorkingDirectory = pastaClipe,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true
+                };
+                using (var p = System.Diagnostics.Process.Start(psi))
+                {
+                    string err = p.StandardError.ReadToEnd();
+                    p.WaitForExit();
+                    if (p.ExitCode == 0)
+                        Debug.Log("[GravadorClipe] ✅ MP4 pronto: " + Path.Combine(pastaClipe, "clip.mp4"));
+                    else
+                        Debug.LogWarning("[GravadorClipe] ffmpeg saiu " + p.ExitCode + ":\n" + err);
+                }
+            }
+            catch (Exception e) { Debug.LogWarning("[GravadorClipe] encode MP4 falhou: " + e.Message); }
+        });
+    }
+
+    // Acha o ffmpeg: PATH → WinGet Packages (Gyan.FFmpeg) → alias WindowsApps. Cacheado.
+    static string _ff; static bool _ffBuscado;
+    static string AcharFfmpeg()
+    {
+        if (_ffBuscado) return _ff;
+        _ffBuscado = true;
+        try
+        {
+            string path = Environment.GetEnvironmentVariable("PATH") ?? "";
+            foreach (var dir in path.Split(';'))
+            {
+                if (string.IsNullOrWhiteSpace(dir)) continue;
+                try { string c = Path.Combine(dir.Trim(), "ffmpeg.exe"); if (File.Exists(c)) { _ff = c; return _ff; } }
+                catch { }
+            }
+            string lad = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string wg = Path.Combine(lad, "Microsoft", "WinGet", "Packages");
+            if (Directory.Exists(wg))
+            {
+                var achados = Directory.GetFiles(wg, "ffmpeg.exe", SearchOption.AllDirectories);
+                if (achados.Length > 0) { _ff = achados[0]; return _ff; }
+            }
+            string alias = Path.Combine(lad, "Microsoft", "WindowsApps", "ffmpeg.exe");
+            if (File.Exists(alias)) { _ff = alias; return _ff; }
+        }
+        catch { }
+        return _ff;
     }
 }
