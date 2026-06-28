@@ -73,12 +73,19 @@ public class FlowField : MonoBehaviour
         vetores    = new Vector2[gridTamanho.x, gridTamanho.y];
         caminhavel = new bool[gridTamanho.x, gridTamanho.y];
 
+        // Inclui a layer "Water" (rios) na detecção, além de "obstacles". O OverlapBox só acusa
+        // onde há collider — então água decorativa SEM collider não vira obstáculo. Sem isto o
+        // flow field mandava o inimigo reto contra o rio (que bloqueia físico) → acúmulo.
+        int mascaraObst = camadaObstaculos.value;
+        int water = LayerMask.NameToLayer("Water");
+        if (water >= 0) mascaraObst |= (1 << water);
+
         Vector2 metadeCelula = Vector2.one * (cel * 0.85f);
         for (int x = 0; x < gridTamanho.x; x++)
             for (int y = 0; y < gridTamanho.y; y++)
             {
                 Vector2 pos = CelulaPosicao(x, y);
-                caminhavel[x, y] = !Physics2D.OverlapBox(pos, metadeCelula, 0f, camadaObstaculos);
+                caminhavel[x, y] = !Physics2D.OverlapBox(pos, metadeCelula, 0f, mascaraObst);
             }
     }
 
