@@ -1229,7 +1229,11 @@ public class PlayerStats : MonoBehaviour
 
         health -= remaining;
         if (remaining > 0f)
+        {
             OnDanoRecebido?.Invoke();
+            // Vinheta de dano: só na tela do player local (co-op-safe). Intensidade = fração do dano.
+            if (this == Local) HurtVignette.Flash(remaining / Mathf.Max(maxHealth, 1f));
+        }
         timeSinceLastDamage = 0f;
         isRegenerating = false;
 
