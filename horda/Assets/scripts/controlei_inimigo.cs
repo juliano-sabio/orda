@@ -524,6 +524,12 @@ public class InimigoController : MonoBehaviour
             BossSlimeGuardaElite  elite   = GetComponent<BossSlimeGuardaElite>();
             BossCaveira           caveira = GetComponent<BossCaveira>();
 
+            // Boss drop: token(s) de elemento ALEATÓRIO. SP = 1; MP = 2 (um pra cada player pegar).
+            // Só o host/SP dropa (NetSpawn host-autoritativo) → replica pros clientes.
+            bool ehBossDrop = boss != null || princesa != null || guarda != null || elite != null || caveira != null;
+            if (ehBossDrop && NetSpawn.PodeSpawnar)
+                ElementRegistry.Instance?.DroparTokenElemento(transform.position, NetSpawn.EmRede ? 2 : 1);
+
             if      (boss    != null) boss.IniciarEfeitoMorte();
             else if (princesa != null) princesa.IniciarEfeitoMorte();
             else if (guarda  != null) guarda.IniciarEfeitoMorte();

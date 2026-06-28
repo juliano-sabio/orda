@@ -303,3 +303,4 @@ MonoBehaviour:
       gatilho: 1
       valor1: 3.5
       valor2: 8
+  tokenPrefab: {fileID: 1343865064885933552, guid: 5b37b1a14a2608b4fa675aad81a3db7a, type: 3}
