@@ -145,6 +145,13 @@ public class RadiusBoostPickup : MonoBehaviour
             Instantiate(collectParticles, transform.position, Quaternion.identity);
     }
 
+    void OnDestroy()
+    {
+        // Pop de coleta (roxo/ímã), nos dois lados em co-op (host e cliente despawnam o pickup).
+        if (!gameObject.scene.isLoaded) return;
+        XpColetaVFX.Tocar(transform.position, new Color(0.8f, 0.4f, 1f));
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
