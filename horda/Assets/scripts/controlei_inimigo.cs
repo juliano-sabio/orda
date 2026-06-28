@@ -64,7 +64,7 @@ public class InimigoController : MonoBehaviour
     private Rigidbody2D rb;
     private DanoInimigo danoInimigoComponent;
     private float proximoContato = 0f;
-    private const float INTERVALO_CONTATO = 1f;
+    private const float INTERVALO_CONTATO = 0.5f; // contato mais responsivo (era 1s)
 
     void Start()
     {

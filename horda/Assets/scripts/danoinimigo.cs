@@ -7,6 +7,11 @@ public class DanoInimigo : MonoBehaviour
     public float intervaloAtaque = 2.5f;
     public bool danoContinuo = false;
 
+    // Cooldown do dano de CONTATO enquanto o player fica encostado. Separado (e mais curto) do
+    // intervaloAtaque pra o contato ser responsivo: ficar dentro do mob machuca com frequência.
+    private const float INTERVALO_CONTATO = 0.5f;
+    private float ProxIntervalo => Mathf.Min(intervaloAtaque, INTERVALO_CONTATO);
+
     private float proximoAtaque = 0f;
 
     void OnTriggerEnter2D(Collider2D other)
@@ -14,7 +19,7 @@ public class DanoInimigo : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             AplicarDano(other.GetComponent<PlayerStats>());
-            proximoAtaque = Time.time + intervaloAtaque;
+            proximoAtaque = Time.time + ProxIntervalo;
         }
     }
 
@@ -23,7 +28,7 @@ public class DanoInimigo : MonoBehaviour
         if (other.CompareTag("Player") && Time.time >= proximoAtaque)
         {
             AplicarDano(other.GetComponent<PlayerStats>());
-            proximoAtaque = Time.time + intervaloAtaque;
+            proximoAtaque = Time.time + ProxIntervalo;
         }
     }
 
@@ -32,7 +37,7 @@ public class DanoInimigo : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             AplicarDano(collision.gameObject.GetComponent<PlayerStats>());
-            proximoAtaque = Time.time + intervaloAtaque;
+            proximoAtaque = Time.time + ProxIntervalo;
         }
     }
 
@@ -41,7 +46,7 @@ public class DanoInimigo : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && Time.time >= proximoAtaque)
         {
             AplicarDano(collision.gameObject.GetComponent<PlayerStats>());
-            proximoAtaque = Time.time + intervaloAtaque;
+            proximoAtaque = Time.time + ProxIntervalo;
         }
     }
 
