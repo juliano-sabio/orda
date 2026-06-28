@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class GarrasAbismoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
 {
-    float baseDano      = 12f;
-    float multiplicador = 0.7f;
+    float baseDano      = 32f;
+    float multiplicador = 1.0f;  // buff: era 0.7 — a garra dispara só a cada 4s, então cada hit pesa mais
     float intervalo     = 8f;
     int   qtdAlvos      = 2;
     float duracaoPresa  = 1.2f;

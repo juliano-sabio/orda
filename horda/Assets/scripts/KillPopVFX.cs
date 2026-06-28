@@ -12,7 +12,7 @@ public class KillPopVFX : MonoBehaviour
     const float DUR_ANEL    = 0.25f;
     const float DUR_FLASH   = 0.08f;
     const float RAIO_ANEL   = 0.9f;
-    const float MULT_ESCALA = 1.0f;
+    const float MULT_ESCALA = 0.34f; // ~1/3 (reduzido 2/3 a pedido — estava grande demais)
     const float VEL_CACO    = 3.5f;
     const int   SORT_BASE   = 50;
 
