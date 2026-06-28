@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 
 public class ElementApplicationUI : MonoBehaviour
@@ -119,6 +120,8 @@ public class ElementApplicationUI : MonoBehaviour
                 new Color(0.4f, 0.1f, 0.1f), Fechar);
             Ancora(btnF, new Vector2(0.2f, 0.01f), new Vector2(0.8f, 0.07f));
         }
+
+        AnimarEntrada(painelEtapa1);
     }
 
     void CriarLinhaSkill(GameObject pai, SkillData skill, bool disponivel, Color corElem)
@@ -182,6 +185,28 @@ public class ElementApplicationUI : MonoBehaviour
 
     void SelecionarSkill(SkillData skill) { skillSelecionada = skill; MostrarEtapa2(); }
 
+    // Entrada do painel: fade + leve scale-up (unscaled, pois a escolha pausa o jogo).
+    void AnimarEntrada(GameObject painel)
+    {
+        if (painel == null) return;
+        var cg = painel.GetComponent<CanvasGroup>() ?? painel.AddComponent<CanvasGroup>();
+        StartCoroutine(RotinaEntrada(painel.transform as RectTransform, cg));
+    }
+    IEnumerator RotinaEntrada(RectTransform rt, CanvasGroup cg)
+    {
+        if (rt == null || cg == null) yield break;
+        Vector3 alvo = rt.localScale;
+        const float dur = 0.18f;
+        for (float t = 0f; t < dur; t += Time.unscaledDeltaTime)
+        {
+            float e = 1f - Mathf.Pow(1f - t / dur, 3f); // ease-out cubic
+            rt.localScale = alvo * Mathf.Lerp(0.92f, 1f, e);
+            cg.alpha = e;
+            yield return null;
+        }
+        rt.localScale = alvo; cg.alpha = 1f;
+    }
+
     void MostrarEtapa2()
     {
         if (painelEtapa1 != null) Destroy(painelEtapa1);
@@ -243,7 +268,40 @@ public class ElementApplicationUI : MonoBehaviour
 
         var btnV = CriarBotao(painelEtapa2, "BtnVoltar", "< " + Loc.T("ui.back"), new Color(0.18f,0.12f,0.28f), MostrarEtapa1);
         Ancora(btnV, new Vector2(0.30f,0.01f), new Vector2(0.70f,0.08f));
+
+        AnimarEntrada(painelEtapa2);
     }
+
+    // Molduras de card iguais às das outras UIs de escolha (skill/status/evolução). Build-safe:
+    // tenta Resources primeiro; no editor cai pro AssetDatabase. Cacheado.
+    static bool _framesCarregados;
+    static Sprite _cartaFrame, _slotFrame;
+    static void CarregarFrames()
+    {
+        if (_framesCarregados) return;
+        _framesCarregados = true;
+        var res = Resources.LoadAll<Sprite>("UI/skill_card/cartaskill");
+        if (res != null)
+            foreach (var s in res)
+            {
+                if (s.name == "carta_frame") _cartaFrame = s;
+                else if (s.name == "slot_frame") _slotFrame = s;
+            }
+#if UNITY_EDITOR
+        if (_cartaFrame == null || _slotFrame == null)
+        {
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/assets/UI/skill_card/cartaskill.png");
+            foreach (var a in all)
+                if (a is Sprite s)
+                {
+                    if (s.name == "carta_frame" && _cartaFrame == null) _cartaFrame = s;
+                    else if (s.name == "slot_frame" && _slotFrame == null) _slotFrame = s;
+                }
+        }
+#endif
+    }
+    static Sprite CartaFrame() { CarregarFrames(); return _cartaFrame; }
+    static Sprite SlotFrame()  { CarregarFrames(); return _slotFrame;  }
 
     static Sprite[] _caricIcons;
     static Sprite GetCaracteristicaIcone(CharacteristicType tipo)
@@ -294,7 +352,16 @@ public class ElementApplicationUI : MonoBehaviour
         var corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
         var corpoRT = corpo.AddComponent<RectTransform>();
         corpoRT.anchorMin = Vector2.zero; corpoRT.anchorMax = Vector2.one; corpoRT.offsetMin = corpoRT.offsetMax = Vector2.zero;
-        Image corpoImg = corpo.AddComponent<Image>(); corpoImg.color = corFundo;
+        Image corpoImg = corpo.AddComponent<Image>();
+        var frameSprite = CartaFrame();
+        bool temFrame = frameSprite != null;
+        if (temFrame)
+        {
+            corpoImg.sprite = frameSprite;
+            corpoImg.type   = Image.Type.Sliced;
+            corpoImg.color  = Color.white;
+        }
+        else corpoImg.color = corFundo;
 
         // irmão 2: faixa topo na cor do elemento (header visual)
         var topBar = new GameObject("TopBar"); topBar.transform.SetParent(go.transform, false);
@@ -309,7 +376,10 @@ public class ElementApplicationUI : MonoBehaviour
         badgeRT.anchorMin = new Vector2(0.5f,1f); badgeRT.anchorMax = new Vector2(0.5f,1f);
         badgeRT.pivot = new Vector2(0.5f,1f);
         badgeRT.anchoredPosition = Vector2.zero; badgeRT.sizeDelta = new Vector2(44f,36f);
-        badge.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.30f);
+        var badgeImg = badge.AddComponent<Image>();
+        var slotSp = SlotFrame();
+        if (slotSp != null) { badgeImg.sprite = slotSp; badgeImg.type = Image.Type.Sliced; badgeImg.fillCenter = false; badgeImg.color = Color.white; }
+        else badgeImg.color = new Color(corElem.r,corElem.g,corElem.b,0.30f);
         if (icone != null)
         {
             var ic = new GameObject("Icon"); ic.transform.SetParent(badge.transform, false);
@@ -365,13 +435,25 @@ public class ElementApplicationUI : MonoBehaviour
         // Button no root — targetGraphic = corpoImg
         var btn = go.AddComponent<Button>(); btn.targetGraphic = corpoImg;
         btn.transition = Selectable.Transition.ColorTint;
-        Color hov = new Color(corFundo.r+0.08f, corFundo.g+0.06f, corFundo.b+0.14f, 1f);
-        btn.colors = new ColorBlock{
-            normalColor=corFundo, highlightedColor=hov,
-            pressedColor=new Color(0.03f,0.02f,0.05f,1f),
-            selectedColor=hov, disabledColor=new Color(corFundo.r,corFundo.g,corFundo.b,0.5f),
-            colorMultiplier=1f, fadeDuration=0.1f
-        };
+        if (temFrame)
+        {
+            // moldura é sprite branco → tint claro pra hover/press não escurecer a arte
+            btn.colors = new ColorBlock{
+                normalColor=Color.white, highlightedColor=new Color(1f,0.96f,0.85f),
+                pressedColor=new Color(0.80f,0.78f,0.72f), selectedColor=new Color(1f,0.96f,0.85f),
+                disabledColor=new Color(1f,1f,1f,0.5f), colorMultiplier=1f, fadeDuration=0.1f
+            };
+        }
+        else
+        {
+            Color hov = new Color(corFundo.r+0.08f, corFundo.g+0.06f, corFundo.b+0.14f, 1f);
+            btn.colors = new ColorBlock{
+                normalColor=corFundo, highlightedColor=hov,
+                pressedColor=new Color(0.03f,0.02f,0.05f,1f),
+                selectedColor=hov, disabledColor=new Color(corFundo.r,corFundo.g,corFundo.b,0.5f),
+                colorMultiplier=1f, fadeDuration=0.1f
+            };
+        }
         int capture = idx;
         btn.onClick.AddListener(() => ConfirmarEscolha(capture));
     }
