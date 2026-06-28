@@ -42,7 +42,20 @@ public class GravadorClipe : MonoBehaviour
 
     void OnGUI()
     {
-        if (gravando) return; // sem overlay durante a gravação (clipe limpo)
+        if (gravando)
+        {
+            // indicador discreto e pulsante no canto (captura é tela cheia → fica pequeno no clipe).
+            float pulso = 0.55f + 0.45f * Mathf.Sin(Time.unscaledTime * 4f);
+            var st = new GUIStyle(GUI.skin.label) { fontSize = 13, fontStyle = FontStyle.Bold };
+            float t = Time.unscaledTime - tInicio;
+            var cor = GUI.color;
+            GUI.color = new Color(1f, 0.2f, 0.2f, pulso);
+            GUI.Label(new Rect(12, 8, 30, 22), "●", st);
+            GUI.color = new Color(1f, 1f, 1f, 0.85f);
+            GUI.Label(new Rect(30, 8, 140, 22), $"REC  {t:00.0}s", st);
+            GUI.color = cor;
+            return;
+        }
         var estilo = new GUIStyle(GUI.skin.button) { fontSize = 13, fontStyle = FontStyle.Bold };
         var r = new Rect(Screen.width - 150, 10, 140, 30);
         if (GUI.Button(r, "● Gravar (F9)", estilo)) Alternar();
