@@ -407,6 +407,8 @@ public class InimigoController : MonoBehaviour
             DamageNumberManager.Instance.ShowDamage(this.transform, dano, isCrit);
         else
             CriarTextoFlutuante(dano, cor, "", isCrit ? 32 : 24);
+
+        if (isCrit) Impacto.Critico(); // game-feel: hit-stop (SP) + micro shake no crítico
     }
 
     private void MostrarDanoFatal(float danoFinal, bool isCrit)
@@ -529,6 +531,14 @@ public class InimigoController : MonoBehaviour
             bool ehBossDrop = boss != null || princesa != null || guarda != null || elite != null || caveira != null;
             if (ehBossDrop && NetSpawn.PodeSpawnar)
                 ElementRegistry.Instance?.DroparTokenElemento(transform.position, NetSpawn.EmRede ? 2 : 1);
+
+            if (ehBossDrop)
+            {
+                // Game-feel: morte de boss/elite é um momento — tremor (Tremer propaga em co-op)
+                // + hit-stop maior (só SP). Mob comum NÃO entra aqui (horda viraria stutter).
+                CameraShaker.Tremer(0.18f, 0.4f);
+                Impacto.MorteBoss();
+            }
 
             if      (boss    != null) boss.IniciarEfeitoMorte();
             else if (princesa != null) princesa.IniciarEfeitoMorte();

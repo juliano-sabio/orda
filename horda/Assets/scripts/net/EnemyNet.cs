@@ -80,6 +80,7 @@ public class EnemyNet : NetworkBehaviour
         if (DamageNumberManager.Instance != null)
             DamageNumberManager.Instance.ShowDamage(transform, dano, isCrit);
         FlashAcertoCliente(); // hit feedback: pisca o fantoche igual ao host (P2 vê o inimigo reagir)
+        if (isCrit) Impacto.Critico(); // micro shake do crit também na tela do cliente (hit-stop se auto-desliga em rede)
     }
 
     // Co-op: o flash de acerto (EfeitoVisualDano = vermelho ~0.1s) roda no host, dentro do
