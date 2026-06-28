@@ -483,11 +483,22 @@ public class UIManager : MonoBehaviour
             targetSlot.color = Color.white;
             targetSlot.gameObject.SetActive(true);
 
-            // 🎨 ATUALIZAR COR DO ELEMENTO
+            // 🎨 ATUALIZAR COR DO ELEMENTO — só mostra o quadradinho quando há infusão
+            // (antes forçava SetActive(true) com cor do elemento-base → quadrado branco sem infusão).
             if (targetElementSlot != null)
             {
-                targetElementSlot.color = GetElementColor(equippedSkill.element);
-                targetElementSlot.gameObject.SetActive(true);
+                if (equippedSkill.appliedElement != ElementType.None)
+                {
+                    Color cor = ElementRegistry.Instance?.GetCor(equippedSkill.appliedElement) ?? Color.white;
+                    targetElementSlot.color = cor;
+                    var def = ElementRegistry.Instance?.Get(equippedSkill.appliedElement);
+                    if (def?.icone != null) targetElementSlot.sprite = def.icone;
+                    targetElementSlot.gameObject.SetActive(true);
+                }
+                else
+                {
+                    targetElementSlot.gameObject.SetActive(false);
+                }
             }
 
             // ⚡ EFEITO VISUAL DE DESTAQUE
