@@ -88,9 +88,9 @@ public class ElementApplicationUI : MonoBehaviour
         rt.anchorMax = new Vector2(0.75f, 0.92f);
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
-        var titulo = CriarTexto(painelEtapa1, "Titulo",
-            string.Format(Loc.T("ui.elem_collected_fmt"), nomeElem.ToUpper()), corElem, 22f, FontStyles.Bold);
-        Ancora(titulo, new Vector2(0f, 0.88f), new Vector2(1f, 1f), new Vector2(10f, 0f), new Vector2(-10f, 0f));
+        TituloBanner(painelEtapa1,
+            string.Format(Loc.T("ui.elem_collected_fmt"), nomeElem.ToUpper()),
+            new Vector2(0.08f, 0.88f), new Vector2(0.92f, 0.99f));
 
         var sub = CriarTexto(painelEtapa1, "Sub",
             Loc.T("ui.choose_skill_infuse"), corTexto, 13f);
@@ -223,9 +223,9 @@ public class ElementApplicationUI : MonoBehaviour
         rt.anchorMax = new Vector2(0.90f, 0.90f);
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
-        var titulo = CriarTexto(painelEtapa2, "Titulo",
-            $"{skillSelecionada.GetDisplayName()} + {nomeElem}", corElem, 22f, FontStyles.Bold);
-        Ancora(titulo, new Vector2(0f,0.88f), new Vector2(1f,1f), new Vector2(12f,0f), new Vector2(-12f,0f));
+        TituloBanner(painelEtapa2,
+            $"{skillSelecionada.GetDisplayName()} + {nomeElem}",
+            new Vector2(0.10f, 0.88f), new Vector2(0.90f, 0.99f));
 
         var sub = CriarTexto(painelEtapa2, "Sub", Loc.T("ui.choose_elem_power"), corTexto, 13f);
         Ancora(sub, new Vector2(0f,0.81f), new Vector2(1f,0.89f), new Vector2(12f,0f), new Vector2(-12f,0f));
@@ -546,11 +546,45 @@ public class ElementApplicationUI : MonoBehaviour
         canvas.gameObject.SetActive(false);
     }
 
+    // Fundo de painel (cena de masmorra) + banner de título — build-safe (Resources).
+    static Sprite _fundoSp, _bannerSp; static bool _fundosCarregados;
+    static void CarregarFundos()
+    {
+        if (_fundosCarregados) return;
+        _fundosCarregados = true;
+        _fundoSp  = Resources.Load<Sprite>("ui/fundo_painel");
+        _bannerSp = Resources.Load<Sprite>("ui/banner_titulo");
+    }
+
+    // Título com banner crimson atrás (dark-fantasy), no tema do jogo.
+    void TituloBanner(GameObject painel, string texto, Vector2 aMin, Vector2 aMax)
+    {
+        if (_bannerSp != null)
+        {
+            var bn = new GameObject("Banner"); bn.transform.SetParent(painel.transform, false);
+            var bnRT = bn.AddComponent<RectTransform>();
+            bnRT.anchorMin = aMin; bnRT.anchorMax = aMax;
+            bnRT.offsetMin = new Vector2(-6f, -8f); bnRT.offsetMax = new Vector2(6f, 8f);
+            var bnImg = bn.AddComponent<Image>(); bnImg.sprite = _bannerSp; bnImg.type = Image.Type.Simple; bnImg.raycastTarget = false;
+        }
+        var titulo = CriarTexto(painel, "Titulo", texto, corTitulo, 22f, FontStyles.Bold);
+        Ancora(titulo, aMin, aMax, new Vector2(10f, 0f), new Vector2(-10f, 0f));
+    }
+
     GameObject CriarPainel(string nome)
     {
+        CarregarFundos();
         var go = new GameObject(nome); go.transform.SetParent(canvas.transform, false);
         go.AddComponent<RectTransform>();
-        go.AddComponent<Image>().color = corFundo;
+        var bgImg = go.AddComponent<Image>();
+        if (_fundoSp != null) { bgImg.sprite = _fundoSp; bgImg.type = Image.Type.Simple; bgImg.color = Color.white; }
+        else bgImg.color = corFundo;
+
+        // escurece a cena de fundo pra o conteúdo ficar legível
+        var esc = new GameObject("Escurecer"); esc.transform.SetParent(go.transform, false);
+        var escRT = esc.AddComponent<RectTransform>();
+        escRT.anchorMin = Vector2.zero; escRT.anchorMax = Vector2.one; escRT.offsetMin = escRT.offsetMax = Vector2.zero;
+        var escImg = esc.AddComponent<Image>(); escImg.color = new Color(0.04f, 0.02f, 0.06f, 0.5f); escImg.raycastTarget = false;
         foreach (var (mn, mx, oMin, oMax) in new[]{
             (new Vector2(0,1), new Vector2(1,1), new Vector2(0,-2), new Vector2(0,0)),
             (new Vector2(0,0), new Vector2(1,0), new Vector2(0,0),  new Vector2(0,2)),
