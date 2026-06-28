@@ -67,7 +67,7 @@ public class SplashScreen : MonoBehaviour
         maskGO.GetComponent<Mask>().showMaskGraphic = true;
 
         // logo dentro do círculo
-        var logo = Resources.Load<Sprite>("UI/axulote_logo");
+        var logo = Resources.Load<Sprite>("ui/axulote_logo");
         if (logo != null)
         {
             var lg = NovaImagem(maskGO.transform, "Logo", Color.white);

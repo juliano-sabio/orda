@@ -341,110 +341,65 @@ public class ElementApplicationUI : MonoBehaviour
         var le = go.AddComponent<LayoutElement>();
         le.flexibleWidth = 1f; le.flexibleHeight = 1f;
 
-        // irmão 0: borda da cor do elemento (2px)
-        var brd = new GameObject("Brd"); brd.transform.SetParent(go.transform, false);
-        var brdRT = brd.AddComponent<RectTransform>();
-        brdRT.anchorMin = Vector2.zero; brdRT.anchorMax = Vector2.one;
-        brdRT.offsetMin = new Vector2(-2f,-2f); brdRT.offsetMax = new Vector2(2f,2f);
-        brd.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.75f);
-
-        // irmão 1: corpo escuro
-        var corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
-        var corpoRT = corpo.AddComponent<RectTransform>();
-        corpoRT.anchorMin = Vector2.zero; corpoRT.anchorMax = Vector2.one; corpoRT.offsetMin = corpoRT.offsetMax = Vector2.zero;
-        Image corpoImg = corpo.AddComponent<Image>();
-        corpoImg.color = corFundo; // fundo escuro SÓLIDO sempre (à prova de moldura vazada)
-
-        // moldura por cima do fundo escuro (carta_frame em Simple, igual às outras telas de escolha)
+        // Fundo = carta_frame (Simple), MESMA construção do card de skill; fallback escuro.
+        Image bg = go.AddComponent<Image>();
         var frameSprite = CartaFrame();
-        if (frameSprite != null)
-        {
-            var fr = new GameObject("Frame"); fr.transform.SetParent(go.transform, false);
-            var frRT = fr.AddComponent<RectTransform>();
-            frRT.anchorMin = Vector2.zero; frRT.anchorMax = Vector2.one; frRT.offsetMin = frRT.offsetMax = Vector2.zero;
-            var frImg = fr.AddComponent<Image>();
-            frImg.sprite = frameSprite; frImg.type = Image.Type.Simple; frImg.color = Color.white;
-            frImg.raycastTarget = false;
-        }
+        bool comFrame = frameSprite != null;
+        if (comFrame) { bg.sprite = frameSprite; bg.type = Image.Type.Simple; bg.color = Color.white; }
+        else bg.color = corFundo;
 
-        // irmão 2: faixa topo na cor do elemento (header visual)
-        var topBar = new GameObject("TopBar"); topBar.transform.SetParent(go.transform, false);
-        var topRT = topBar.AddComponent<RectTransform>();
-        topRT.anchorMin = new Vector2(0f,1f); topRT.anchorMax = new Vector2(1f,1f);
-        topRT.offsetMin = new Vector2(0f,-36f); topRT.offsetMax = Vector2.zero;
-        topBar.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.18f);
+        // Área do ícone (topo), com o slot 9-slice (slot_frame) — igual ao card de skill.
+        var iconArea = new GameObject("IconArea"); iconArea.transform.SetParent(go.transform, false);
+        var iaRT = iconArea.AddComponent<RectTransform>();
+        iaRT.anchorMin = new Vector2(0f, 0.66f); iaRT.anchorMax = new Vector2(1f, 0.96f);
+        iaRT.offsetMin = iaRT.offsetMax = Vector2.zero;
 
-        // irmão 3: badge letra (A/B) centralizado na faixa topo
-        var badge = new GameObject("Badge"); badge.transform.SetParent(go.transform, false);
-        var badgeRT = badge.AddComponent<RectTransform>();
-        badgeRT.anchorMin = new Vector2(0.5f,1f); badgeRT.anchorMax = new Vector2(0.5f,1f);
-        badgeRT.pivot = new Vector2(0.5f,1f);
-        badgeRT.anchoredPosition = Vector2.zero; badgeRT.sizeDelta = new Vector2(44f,36f);
-        var badgeImg = badge.AddComponent<Image>();
+        var slotGO = new GameObject("Slot"); slotGO.transform.SetParent(iconArea.transform, false);
+        var slotRT = slotGO.AddComponent<RectTransform>();
+        slotRT.anchorMin = new Vector2(0.32f, 0.05f); slotRT.anchorMax = new Vector2(0.68f, 0.95f);
+        slotRT.offsetMin = slotRT.offsetMax = Vector2.zero;
+        var slotImg = slotGO.AddComponent<Image>();
         var slotSp = SlotFrame();
-        if (slotSp != null) { badgeImg.sprite = slotSp; badgeImg.type = Image.Type.Sliced; badgeImg.fillCenter = false; badgeImg.color = Color.white; }
-        else badgeImg.color = new Color(corElem.r,corElem.g,corElem.b,0.30f);
+        if (slotSp != null) { slotImg.sprite = slotSp; slotImg.type = Image.Type.Sliced; slotImg.fillCenter = false; slotImg.color = Color.white; }
+        else slotImg.color = new Color(corElem.r, corElem.g, corElem.b, 0.25f);
+        slotImg.raycastTarget = false;
+
         if (icone != null)
         {
-            var ic = new GameObject("Icon"); ic.transform.SetParent(badge.transform, false);
-            var icRT = ic.AddComponent<RectTransform>();
-            icRT.anchorMin = new Vector2(0.5f,0.5f); icRT.anchorMax = new Vector2(0.5f,0.5f);
-            icRT.pivot = new Vector2(0.5f,0.5f);
-            icRT.anchoredPosition = new Vector2(0f,2f); icRT.sizeDelta = new Vector2(24f,24f);
-            var icImg = ic.AddComponent<Image>(); icImg.sprite = icone; icImg.preserveAspect = true;
-            var letSmall = CriarTexto(badge, "Letra", idx == 0 ? "A" : "B", new Color(corElem.r,corElem.g,corElem.b,0.70f), 8f, FontStyles.Bold);
-            var letRT = letSmall.GetComponent<RectTransform>();
-            letRT.anchorMin = new Vector2(1f,0f); letRT.anchorMax = new Vector2(1f,0f);
-            letRT.pivot = new Vector2(1f,0f);
-            letRT.anchoredPosition = new Vector2(-2f,2f); letRT.sizeDelta = new Vector2(14f,14f);
+            var inner = new GameObject("IconInner"); inner.transform.SetParent(slotGO.transform, false);
+            var inRT = inner.AddComponent<RectTransform>();
+            inRT.anchorMin = new Vector2(0.16f, 0.16f); inRT.anchorMax = new Vector2(0.84f, 0.84f);
+            inRT.offsetMin = inRT.offsetMax = Vector2.zero;
+            var inImg = inner.AddComponent<Image>(); inImg.sprite = icone; inImg.preserveAspect = true; inImg.raycastTarget = false;
         }
         else
         {
-            var letraGO = CriarTexto(badge, "Letra", idx == 0 ? "A" : "B", corElem, 26f, FontStyles.Bold);
-            Ancora(letraGO, Vector2.zero, Vector2.one);
+            var letra = CriarTexto(slotGO, "Letra", idx == 0 ? "A" : "B", corElem, 26f, FontStyles.Bold);
+            Ancora(letra, Vector2.zero, Vector2.one);
         }
 
-        // separador abaixo do header
-        var sep = new GameObject("Sep"); sep.transform.SetParent(go.transform, false);
-        var sepRT = sep.AddComponent<RectTransform>();
-        sepRT.anchorMin = new Vector2(0.04f,1f); sepRT.anchorMax = new Vector2(0.96f,1f);
-        sepRT.offsetMin = new Vector2(0f,-37f); sepRT.offsetMax = new Vector2(0f,-35f);
-        sep.AddComponent<Image>().color = new Color(corElem.r,corElem.g,corElem.b,0.50f);
-
-        // nome do poder
-        var nomeGO = CriarTexto(go, "Nome", nomeStr, corTexto, 15f, FontStyles.Bold);
-        Ancora(nomeGO, new Vector2(0.04f,0.62f), new Vector2(0.96f,0.87f));
+        // Nome
+        var nomeGO = CriarTexto(go, "Nome", nomeStr, new Color(0.95f, 0.82f, 0.40f), 15f, FontStyles.Bold);
+        Ancora(nomeGO, new Vector2(0.06f, 0.52f), new Vector2(0.94f, 0.66f));
         nomeGO.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
 
-        // linha divisória meio
-        var mid = new GameObject("Mid"); mid.transform.SetParent(go.transform, false);
-        var midRT = mid.AddComponent<RectTransform>();
-        midRT.anchorMin = new Vector2(0.06f,0.60f); midRT.anchorMax = new Vector2(0.94f,0.60f);
-        midRT.offsetMin = new Vector2(0f,-1f); midRT.offsetMax = new Vector2(0f,1f);
-        mid.AddComponent<Image>().color = new Color(corBorda.r,corBorda.g,corBorda.b,0.25f);
-
-        // descrição
-        var descGO = CriarTexto(go, "Desc", descStr, new Color(0.80f,0.74f,0.64f), 11f);
-        Ancora(descGO, new Vector2(0.05f,0.12f), new Vector2(0.95f,0.60f), new Vector2(0f,4f), Vector2.zero);
+        // Descrição
+        var descGO = CriarTexto(go, "Desc", descStr, new Color(0.90f, 0.82f, 0.65f), 11f);
+        Ancora(descGO, new Vector2(0.10f, 0.10f), new Vector2(0.90f, 0.50f));
         var dTxt = descGO.GetComponent<TextMeshProUGUI>();
         dTxt.textWrappingMode = TextWrappingModes.Normal;
         dTxt.alignment = TextAlignmentOptions.Top;
 
-        // hint clique
-        var hint = CriarTexto(go, "Hint", Loc.T("ui.click_to_choose"),
-            new Color(corElem.r,corElem.g,corElem.b,0.55f), 9f);
-        Ancora(hint, new Vector2(0f,0f), new Vector2(1f,0.12f));
-        hint.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-
-        // Button no root — targetGraphic = corpoImg
-        var btn = go.AddComponent<Button>(); btn.targetGraphic = corpoImg;
+        // Button no root
+        var btn = go.AddComponent<Button>(); btn.targetGraphic = bg;
         btn.transition = Selectable.Transition.ColorTint;
-        Color hov = new Color(corFundo.r+0.10f, corFundo.g+0.08f, corFundo.b+0.18f, 1f);
         btn.colors = new ColorBlock{
-            normalColor=corFundo, highlightedColor=hov,
-            pressedColor=new Color(0.03f,0.02f,0.05f,1f),
-            selectedColor=hov, disabledColor=new Color(corFundo.r,corFundo.g,corFundo.b,0.5f),
-            colorMultiplier=1f, fadeDuration=0.1f
+            normalColor      = comFrame ? Color.white : corFundo,
+            highlightedColor = comFrame ? new Color(1f,0.96f,0.85f) : new Color(corFundo.r+0.10f,corFundo.g+0.08f,corFundo.b+0.18f,1f),
+            pressedColor     = comFrame ? new Color(0.85f,0.83f,0.78f) : new Color(0.03f,0.02f,0.05f,1f),
+            selectedColor    = comFrame ? new Color(1f,0.96f,0.85f) : corFundo,
+            disabledColor    = new Color(1f,1f,1f,0.5f),
+            colorMultiplier  = 1f, fadeDuration = 0.1f
         };
         int capture = idx;
         btn.onClick.AddListener(() => ConfirmarEscolha(capture));
