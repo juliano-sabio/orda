@@ -334,6 +334,76 @@ public class ElementApplicationUI : MonoBehaviour
 
     void CriarCardGenerico(GameObject container, string nomeStr, string descStr, int idx, Color corElem, Sprite icone)
     {
+        // Copia o card dos OUTROS choices: instancia o MESMO prefab de card de skill e inicializa
+        // via SkillCardRuntimeManager com um SkillData temporário (mesma técnica do SkillEvolutionUI)
+        // → fica idêntico. Sem prefab disponível, cai no fallback procedural.
+        GameObject prefab = ObterCardPrefab();
+        if (prefab == null) { CriarCardFallback(container, nomeStr, descStr, idx, corElem, icone); return; }
+
+        var card = Instantiate(prefab, container.transform);
+        card.name = $"CardInfusao_{idx}";
+        card.SetActive(true);
+
+        var le = card.GetComponent<LayoutElement>();
+        if (le == null) le = card.AddComponent<LayoutElement>();
+        le.flexibleWidth = 1f; le.flexibleHeight = 1f;
+
+        var rm = card.GetComponent<SkillCardRuntimeManager>();
+        if (rm != null)
+        {
+            var temp = ScriptableObject.CreateInstance<SkillData>();
+            temp.skillName   = nomeStr;
+            temp.description = descStr;
+            temp.icon        = icone;
+            temp.element     = PlayerStats.Element.None;
+            rm.InitializeRuntime(temp);
+            Destroy(temp);
+        }
+        else
+        {
+            foreach (var t in card.GetComponentsInChildren<TextMeshProUGUI>(true))
+            {
+                string n = t.name.ToLower();
+                if (n.Contains("name") || n.Contains("nome") || n.Contains("title")) t.text = nomeStr;
+                else if (n.Contains("desc") || n.Contains("detail")) t.text = descStr;
+            }
+            var inner = card.transform.Find("IconArea/IconImageSlot/IconInner")?.GetComponent<Image>();
+            if (inner != null && icone != null) { inner.sprite = icone; inner.preserveAspect = true; }
+        }
+
+        // característica não tem raridade nem stats → esconde esses campos herdados do card de skill
+        foreach (var t in card.GetComponentsInChildren<TextMeshProUGUI>(true))
+        {
+            string n = t.name.ToLower();
+            if (n.Contains("rarit") || n.Contains("rarid") || n.Contains("stat") || n.Contains("bonus") || n.Contains("status"))
+                t.gameObject.SetActive(false);
+        }
+        foreach (var img in card.GetComponentsInChildren<Image>(true))
+            if (img.name.Contains("RarityBorder") || img.name.Contains("RarityArea")) img.gameObject.SetActive(false);
+
+        var btn = card.GetComponent<Button>();
+        if (btn == null) btn = card.GetComponentInChildren<Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            int capture = idx;
+            btn.onClick.AddListener(() => ConfirmarEscolha(capture));
+            btn.interactable = true;
+        }
+    }
+
+    // Prefab de card: o da skill sendo infundida → qualquer skill ativa → Resources.
+    GameObject ObterCardPrefab()
+    {
+        if (skillSelecionada != null && skillSelecionada.cardPrefab != null) return skillSelecionada.cardPrefab;
+        if (skillManager != null && skillManager.activeSkills != null)
+            foreach (var s in skillManager.activeSkills)
+                if (s != null && s.cardPrefab != null) return s.cardPrefab;
+        return Resources.Load<GameObject>("Cards/SkillCard_Auto");
+    }
+
+    void CriarCardFallback(GameObject container, string nomeStr, string descStr, int idx, Color corElem, Sprite icone)
+    {
         // root sem Image — sibling pattern
         var go = new GameObject($"Card_{idx}");
         go.transform.SetParent(container.transform, false);

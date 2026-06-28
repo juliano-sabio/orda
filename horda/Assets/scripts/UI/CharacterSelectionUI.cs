@@ -554,6 +554,8 @@ public class CharacterSelectionUI : MonoBehaviour
             glowsEspirito[i] = CriarGlowBotao(btnUp, statCores[i]);
         }
 
+        status.AddComponent<SemSomUI>(); // sem som de hover nos botões de upar status (+)
+
         manager.statusTexts = statusTexts;
 
         // espíritos disponíveis (acima do painel de status)
