@@ -61,13 +61,46 @@ public static class UISons
     }
 }
 
-// Por-botão: toca hover ao entrar e click ao apertar. Botões não-interativos (disabled) não
-// recebem eventos de ponteiro → sem som, como esperado.
+// Marca um container (e seus filhos) pra NÃO tocar o som de hover. Ex.: panels de passiva/ultimate.
+public class SemSomUI : MonoBehaviour { }
+
+// Por-botão: som de hover + efeito de "subir/crescer" ao passar o mouse. (Sem som de click —
+// removido a pedido.) Botões dentro de um SemSomUI não tocam o hover (mas ainda têm o efeito).
 [DisallowMultipleComponent]
-public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler
+public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public void OnPointerEnter(PointerEventData _) => UISons.Hover();
-    public void OnPointerClick(PointerEventData _)  => UISons.Click();
+    const float ALTURA = 8f;     // sobe X px no hover
+    const float ESCALA = 1.05f;  // cresce um tico
+    const float VEL    = 12f;    // suavidade do lerp
+
+    RectTransform rt;
+    Vector2 posBase;
+    Vector3 escBase;
+    bool baseOk, hover, semSom, semCalc;
+
+    void Awake() => rt = transform as RectTransform;
+
+    public void OnPointerEnter(PointerEventData _)
+    {
+        if (!semCalc) { semSom = GetComponentInParent<SemSomUI>() != null; semCalc = true; }
+        if (!baseOk && rt != null) { posBase = rt.anchoredPosition; escBase = rt.localScale; baseOk = true; }
+        hover = true;
+        if (!semSom) UISons.Hover();
+    }
+
+    public void OnPointerExit(PointerEventData _) => hover = false;
+
+    void Update()
+    {
+        if (!baseOk || rt == null) return;
+        Vector2 ap = hover ? posBase + Vector2.up * ALTURA : posBase;
+        Vector3 ae = hover ? escBase * ESCALA : escBase;
+        // já assentado e sem hover → não fica lerpando à toa
+        if (!hover && (rt.anchoredPosition - posBase).sqrMagnitude < 0.01f
+                   && (rt.localScale - escBase).sqrMagnitude < 0.0001f) return;
+        rt.anchoredPosition = Vector2.Lerp(rt.anchoredPosition, ap, Time.unscaledDeltaTime * VEL);
+        rt.localScale       = Vector3.Lerp(rt.localScale,       ae, Time.unscaledDeltaTime * VEL);
+    }
 }
 
 // Bootstrap persistente: a cada meio segundo varre os Button e pluga o UISomBotao onde faltar

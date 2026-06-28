@@ -721,6 +721,7 @@ public class CharacterSelectionUI : MonoBehaviour
         sr.movementType     = ScrollRect.MovementType.Clamped;
 
         painelSeleçaoUltimate = content;
+        content.AddComponent<SemSomUI>(); // sem som de hover na seleção de ultimate
 
         // ── Painel PASSIVAS ──────────────────────────────────────────
         painelAbaInfo[2] = new GameObject("ConteudoPassivas");
@@ -769,6 +770,7 @@ public class CharacterSelectionUI : MonoBehaviour
         srP.movementType     = ScrollRect.MovementType.Clamped;
 
         painelSeleçaoPassiva = contentPassiva;
+        contentPassiva.AddComponent<SemSomUI>(); // sem som de hover na seleção de passiva
 
         // txtPassivasInfo mantido para compatibilidade (não visível mas ainda referenciado)
         txtPassivasInfo = TMP(painelAbaInfo[2], "PassInfo",
