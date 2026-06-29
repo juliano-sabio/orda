@@ -703,7 +703,7 @@ public class SkillChoiceUI : MonoBehaviour
     {
         if (selectedSkill != null)
         {
-            SomSkill.TocarUI(SomSkill.Tipo.CartaSelecaoDark, 0.6f);
+            // som de seleção removido — o click discreto da UI (UISomBotao) já toca no botão da carta
             StartCoroutine(SelectionConfirmationEffect(selectedSkill));
         }
         else

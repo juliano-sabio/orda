@@ -125,7 +125,7 @@ public class SkillEvolutionUI : MonoBehaviour
     {
         if (selecionou) return;
         selecionou = true;
-        SomSkill.TocarUI(SomSkill.Tipo.EvolucaoSelecaoDark, 0.7f);
+        // som de seleção removido — o click discreto da UI (UISomBotao) já toca no botão da carta
         if (contadorCoroutine != null) { StopCoroutine(contadorCoroutine); contadorCoroutine = null; }
 
         foreach (var c in cartasCriadas)
