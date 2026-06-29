@@ -1894,6 +1894,7 @@ public class PlayerStats : MonoBehaviour
 
     private void Die()
     {
+        GetComponent<MascaraCaido>()?.Cair(false); // animação de morte (SP): corpo some + máscara cai e some
         OnPlayerMorreu?.Invoke();
         GetComponent<PlayerDeathEffect>()?.Executar();
         StartCoroutine(MorteComEfeito());

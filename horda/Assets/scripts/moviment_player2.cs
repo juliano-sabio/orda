@@ -51,6 +51,9 @@ public class moviment_player2 : MonoBehaviour
 
         // Poeira de corrida (juice). Observa o transform → roda no dono e no fantoche (co-op).
         if (GetComponent<MovementDust>() == null) gameObject.AddComponent<MovementDust>();
+
+        // Animação de máscara ao cair/morrer (cosmética; dirigida pelo estado caído).
+        if (GetComponent<MascaraCaido>() == null) gameObject.AddComponent<MascaraCaido>();
     }
 
     private void Update()

@@ -429,8 +429,11 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     void AoMudarDowned(bool _, bool caido)
     {
-        var sr = GetComponentInChildren<SpriteRenderer>();
-        if (sr != null) sr.color = caido ? new Color(0.5f, 0.25f, 0.25f, 0.9f) : Color.white;
+        // Animação: o corpo some e a máscara cai no chão (persiste como marcador de revive em co-op).
+        var mc = GetComponent<MascaraCaido>();
+        if (mc == null) mc = gameObject.AddComponent<MascaraCaido>();
+        if (caido) mc.Cair(true);
+        else        mc.Levantar();
         // O bloqueio de skills/ultimates (caído OU lobby) é gerenciado central no Update.
     }
 
@@ -491,9 +494,9 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         ultimateIdx.OnValueChanged += AoMudarBuild;
         passivaIdx.OnValueChanged  += AoMudarBuild;
 
-        // Tint visual ao cair/voltar.
+        // Máscara ao cair/voltar.
         downed.OnValueChanged += AoMudarDowned;
-        AoMudarDowned(false, downed.Value);
+        if (downed.Value) AoMudarDowned(false, true); // só age se já estiver caído ao spawnar (raro)
     }
 
     public override void OnNetworkDespawn()
