@@ -28,15 +28,16 @@ public static class UISons
     {
         if (_click == null)
             _click = Mixar("uiclick",
-                Ruido(0.018f, 120f, 9, 0.18f),     // estalo curto e bem abafado (madeira, sem brilho)
-                Tom(300f, 235f, 0.1f, 40f, 0.46f)); // "bok" de madeira redondo: glide leve p/ baixo = confirm satisfatório
-        Tocar(_click, 0.5f);
+                Ruido(0.012f, 150f, 10, 0.12f),    // estalinho bem leve
+                Tom(285f, 240f, 0.06f, 55f, 0.30f)); // "bok" de madeira curto e baixo (discreto)
+        Tocar(_click, 0.38f);
     }
 
     static void Tocar(AudioClip clip, float vol)
     {
         if (clip == null) return;
         var go = new GameObject("SomUI");
+        Object.DontDestroyOnLoad(go);   // sobrevive à troca de cena → o som não corta/buga
         var src = go.AddComponent<AudioSource>();
         src.clip = clip;
         src.volume = vol;
