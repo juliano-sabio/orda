@@ -16,13 +16,14 @@ public static class UISons
     {
         if (Time.unscaledTime - _ultimoHover < 0.04f) return;
         _ultimoHover = Time.unscaledTime;
-        Tocar(_hover ??= GerarBlip(900f, 0.05f, 70f, 0f), 0.22f);
+        // "pop" macio com leve queda de tom (estilo UI de survivor moderno), não um beep seco.
+        Tocar(_hover ??= GerarBlip(820f, 600f, 0.055f, 55f, 0f), 0.18f);
     }
 
     public static void Click()
     {
-        // Mais suave/quente que o "beep" anterior: grave, pouco ruído, decay um pouco mais longo.
-        Tocar(_click ??= GerarBlip(380f, 0.09f, 38f, 0.05f), 0.32f);
+        // Confirma macio/quente: tom grave com glide pra baixo + pouco ruído de corpo.
+        Tocar(_click ??= GerarBlip(460f, 320f, 0.10f, 32f, 0.04f), 0.30f);
     }
 
     static void Tocar(AudioClip clip, float vol)
@@ -38,20 +39,25 @@ public static class UISons
         Object.Destroy(go, clip.length + 0.05f);
     }
 
-    // Blip curto: seno + harmônico, envelope com ataque de 2ms (sem "pop") e decay exponencial.
-    // 'ruido' > 0 adiciona um ataque ruidoso curtinho (dá a sensação de "click").
-    static AudioClip GerarBlip(float freq, float dur, float decay, float ruido)
+    // Blip curto com GLIDE de tom (freqIni → freqFim) pra dar sensação de "pop" suave em vez de
+    // beep. Seno + harmônico fraco, ataque ~4ms (macio) e decay exponencial. Fase acumulada pra
+    // o glide não estalar. 'ruido' > 0 = ataque ruidoso curto (corpo do "click").
+    static AudioClip GerarBlip(float freqIni, float freqFim, float dur, float decay, float ruido)
     {
         const int sr = 44100;
         int n = Mathf.Max(1, (int)(sr * dur));
         var data = new float[n];
+        float fase = 0f, fase2 = 0f;
         for (int i = 0; i < n; i++)
         {
             float t = i / (float)sr;
+            float p = t / dur;
+            float freq = Mathf.Lerp(freqIni, freqFim, p);
+            fase  += 2f * Mathf.PI * freq        / sr;
+            fase2 += 2f * Mathf.PI * freq * 2f   / sr;
             float env = Mathf.Exp(-t * decay);
-            float atk = Mathf.Clamp01(t / 0.002f);
-            float w = Mathf.Sin(2f * Mathf.PI * freq * t)
-                    + 0.3f * Mathf.Sin(2f * Mathf.PI * freq * 2f * t);
+            float atk = Mathf.Clamp01(t / 0.004f);   // ataque mais macio (4ms)
+            float w = Mathf.Sin(fase) + 0.18f * Mathf.Sin(fase2);
             if (ruido > 0f) w += ruido * (Random.value * 2f - 1f) * Mathf.Exp(-t * 200f);
             data[i] = w * env * atk * 0.5f;
         }
