@@ -4,26 +4,34 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-// Sons de UI (hover/click) gerados PROCEDURALMENTE — sem arquivo .wav, sem depender dos assets
-// de áudio do parceiro. Tocam em 2D ignorando o pause (menus pausam o jogo). Auto-plugados em
-// todos os Button via UISomRunner (re-scan leve, pega também os criados dinamicamente).
+// Sons de UI gerados PROCEDURALMENTE, mirando a vibe do The Spell Brigade (Austin Wintory): NÃO
+// é beep eletrônico — mistura RUÍDO de madeira/pergaminho (crackle/swish) com CHIME/sino mágico
+// (parciais inharmônicos). Hover = "flick/swish + estalo de papel"; click = "clack + blip mágico".
+// Toca em 2D ignorando o pause. (Aproximação procedural; pra ficar idêntico precisaria de um .wav.)
 public static class UISons
 {
+    const int SR = 44100;
     static AudioClip _hover, _click;
-    static float _ultimoHover; // anti-spam: ao varrer botões o mouse dispara vários PointerEnter
+    static float _ultimoHover; // anti-spam (varredura de botões dispara vários PointerEnter)
 
     public static void Hover()
     {
         if (Time.unscaledTime - _ultimoHover < 0.04f) return;
         _ultimoHover = Time.unscaledTime;
-        // "pop" macio com leve queda de tom (estilo UI de survivor moderno), não um beep seco.
-        Tocar(_hover ??= GerarBlip(820f, 600f, 0.055f, 55f, 0f), 0.18f);
+        if (_hover == null)
+            _hover = Mixar("uihover",
+                Ruido(0.055f, 55f, 10, 0.22f),     // "shh/flick" abafado (papel/vento)
+                Sino(1500f, 0.045f, 55f, 0.05f));  // brilho agudo bem leve
+        Tocar(_hover, 0.5f);
     }
 
     public static void Click()
     {
-        // Confirma macio/quente: tom grave com glide pra baixo + pouco ruído de corpo.
-        Tocar(_click ??= GerarBlip(460f, 320f, 0.10f, 32f, 0.04f), 0.30f);
+        if (_click == null)
+            _click = Mixar("uiclick",
+                Ruido(0.025f, 160f, 3, 0.45f),     // estalo curto e brilhante = "clack" de madeira
+                Sino(540f, 0.13f, 26f, 0.45f));    // sino/blip mágico encorpado
+        Tocar(_click, 0.55f);
     }
 
     static void Tocar(AudioClip clip, float vol)
@@ -39,41 +47,66 @@ public static class UISons
         Object.Destroy(go, clip.length + 0.05f);
     }
 
-    // Blip curto com GLIDE de tom (freqIni → freqFim) pra dar sensação de "pop" suave em vez de
-    // beep. Seno + harmônico fraco, ataque ~4ms (macio) e decay exponencial. Fase acumulada pra
-    // o glide não estalar. 'ruido' > 0 = ataque ruidoso curto (corpo do "click").
-    static AudioClip GerarBlip(float freqIni, float freqFim, float dur, float decay, float ruido)
+    // ── Síntese ────────────────────────────────────────────────────────────────
+
+    // Ruído com envelope + passa-baixa (média móvel de 'suav' amostras p/ lado). suav maior =
+    // mais abafado/grave (madeira/pergaminho); menor = mais brilhante (estalo).
+    static float[] Ruido(float dur, float decay, int suav, float ganho)
     {
-        const int sr = 44100;
-        int n = Mathf.Max(1, (int)(sr * dur));
+        int n = Mathf.Max(1, (int)(SR * dur));
+        var raw = new float[n];
+        for (int i = 0; i < n; i++) raw[i] = Random.value * 2f - 1f;
         var data = new float[n];
-        float fase = 0f, fase2 = 0f;
         for (int i = 0; i < n; i++)
         {
-            float t = i / (float)sr;
-            float p = t / dur;
-            float freq = Mathf.Lerp(freqIni, freqFim, p);
-            fase  += 2f * Mathf.PI * freq        / sr;
-            fase2 += 2f * Mathf.PI * freq * 2f   / sr;
-            float env = Mathf.Exp(-t * decay);
-            float atk = Mathf.Clamp01(t / 0.004f);   // ataque mais macio (4ms)
-            float w = Mathf.Sin(fase) + 0.18f * Mathf.Sin(fase2);
-            if (ruido > 0f) w += ruido * (Random.value * 2f - 1f) * Mathf.Exp(-t * 200f);
-            data[i] = w * env * atk * 0.5f;
+            float acc = 0f; int cnt = 0;
+            for (int k = -suav; k <= suav; k++) { int j = i + k; if (j >= 0 && j < n) { acc += raw[j]; cnt++; } }
+            float t = i / (float)SR;
+            float env = Mathf.Exp(-t * decay) * Mathf.Clamp01(t / 0.003f);
+            data[i] = (cnt > 0 ? acc / cnt : 0f) * env * ganho;
         }
-        var clip = AudioClip.Create("uiblip", n, 1, sr, false);
+        return data;
+    }
+
+    // Sino/chime: soma de parciais INHARMÔNICOS (razões de sino) com decay → toque "mágico".
+    static readonly float[] _ratios = { 1f, 2.76f, 5.40f };
+    static readonly float[] _amps   = { 1f, 0.5f,  0.25f };
+    static float[] Sino(float freq, float dur, float decay, float ganho)
+    {
+        int n = Mathf.Max(1, (int)(SR * dur));
+        var data = new float[n];
+        for (int i = 0; i < n; i++)
+        {
+            float t = i / (float)SR;
+            float env = Mathf.Exp(-t * decay) * Mathf.Clamp01(t / 0.002f);
+            float w = 0f;
+            for (int p = 0; p < _ratios.Length; p++)
+                w += _amps[p] * Mathf.Sin(2f * Mathf.PI * freq * _ratios[p] * t);
+            data[i] = w * env * ganho;
+        }
+        return data;
+    }
+
+    // Soma as camadas (comprimentos podem diferir) + clamp; cria o AudioClip.
+    static AudioClip Mixar(string nome, params float[][] camadas)
+    {
+        int n = 0; foreach (var c in camadas) n = Mathf.Max(n, c.Length);
+        var data = new float[n];
+        foreach (var c in camadas) for (int i = 0; i < c.Length; i++) data[i] += c[i];
+        for (int i = 0; i < n; i++) data[i] = Mathf.Clamp(data[i], -1f, 1f);
+        var clip = AudioClip.Create(nome, n, 1, SR, false);
         clip.SetData(data, 0);
         return clip;
     }
 }
 
-// Marca um container (e seus filhos) pra NÃO tocar o som de hover. Ex.: panels de passiva/ultimate.
+// Marca um container (e seus filhos) pra NÃO tocar os sons de UI. Ex.: panels de passiva/ultimate/status.
 public class SemSomUI : MonoBehaviour { }
 
-// Por-botão: som de hover + efeito de "subir/crescer" ao passar o mouse. (Sem som de click —
-// removido a pedido.) Botões dentro de um SemSomUI não tocam o hover (mas ainda têm o efeito).
+// Por-botão: som de hover + click + efeito de "subir/crescer" ao passar o mouse. Botões dentro
+// de um SemSomUI não tocam som (mas mantêm o efeito visual).
 [DisallowMultipleComponent]
-public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     const float ALTURA = 8f;     // sobe X px no hover
     const float ESCALA = 1.05f;  // cresce um tico
@@ -86,9 +119,16 @@ public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     void Awake() => rt = transform as RectTransform;
 
+    void GarantirSemSom()
+    {
+        if (semCalc) return;
+        semSom = GetComponentInParent<SemSomUI>() != null;
+        semCalc = true;
+    }
+
     public void OnPointerEnter(PointerEventData _)
     {
-        if (!semCalc) { semSom = GetComponentInParent<SemSomUI>() != null; semCalc = true; }
+        GarantirSemSom();
         if (!baseOk && rt != null) { posBase = rt.anchoredPosition; escBase = rt.localScale; baseOk = true; }
         hover = true;
         if (!semSom) UISons.Hover();
@@ -96,12 +136,17 @@ public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerExit(PointerEventData _) => hover = false;
 
+    public void OnPointerClick(PointerEventData _)
+    {
+        GarantirSemSom();
+        if (!semSom) UISons.Click();
+    }
+
     void Update()
     {
         if (!baseOk || rt == null) return;
         Vector2 ap = hover ? posBase + Vector2.up * ALTURA : posBase;
         Vector3 ae = hover ? escBase * ESCALA : escBase;
-        // já assentado e sem hover → não fica lerpando à toa
         if (!hover && (rt.anchoredPosition - posBase).sqrMagnitude < 0.01f
                    && (rt.localScale - escBase).sqrMagnitude < 0.0001f) return;
         rt.anchoredPosition = Vector2.Lerp(rt.anchoredPosition, ap, Time.unscaledDeltaTime * VEL);
