@@ -20,18 +20,17 @@ public static class UISons
         _ultimoHover = Time.unscaledTime;
         if (_hover == null)
             _hover = Mixar("uihover",
-                Ruido(0.055f, 55f, 10, 0.22f),     // "shh/flick" abafado (papel/vento)
-                Sino(1500f, 0.045f, 55f, 0.05f));  // brilho agudo bem leve
-        Tocar(_hover, 0.5f);
+                Ruido(0.05f, 50f, 16, 0.18f));     // swish macio e abafado (papel/madeira), sem brilho metálico
+        Tocar(_hover, 0.45f);
     }
 
     public static void Click()
     {
         if (_click == null)
             _click = Mixar("uiclick",
-                Ruido(0.025f, 160f, 3, 0.45f),     // estalo curto e brilhante = "clack" de madeira
-                Sino(540f, 0.13f, 26f, 0.45f));    // sino/blip mágico encorpado
-        Tocar(_click, 0.55f);
+                Ruido(0.02f, 130f, 8, 0.22f),      // estalo curto e abafado (madeira, sem brilho)
+                Tom(260f, 0.085f, 48f, 0.42f));    // "tok" de madeira: harmônicos inteiros, decai rápido (nada de sino)
+        Tocar(_click, 0.5f);
     }
 
     static void Tocar(AudioClip clip, float vol)
@@ -68,10 +67,11 @@ public static class UISons
         return data;
     }
 
-    // Sino/chime: soma de parciais INHARMÔNICOS (razões de sino) com decay → toque "mágico".
-    static readonly float[] _ratios = { 1f, 2.76f, 5.40f };
-    static readonly float[] _amps   = { 1f, 0.5f,  0.25f };
-    static float[] Sino(float freq, float dur, float decay, float ganho)
+    // Batida de MADEIRA: harmônicos INTEIROS (1,2,3 → soa "de madeira", não metálico) com decay
+    // rápido = um "tok" curto, não um sino que ressoa.
+    static readonly float[] _ratios = { 1f, 2f, 3f };
+    static readonly float[] _amps   = { 1f, 0.4f, 0.15f };
+    static float[] Tom(float freq, float dur, float decay, float ganho)
     {
         int n = Mathf.Max(1, (int)(SR * dur));
         var data = new float[n];
