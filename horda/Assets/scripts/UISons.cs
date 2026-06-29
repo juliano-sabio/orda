@@ -28,9 +28,9 @@ public static class UISons
     {
         if (_click == null)
             _click = Mixar("uiclick",
-                Ruido(0.012f, 150f, 10, 0.12f),    // estalinho bem leve
-                Tom(285f, 240f, 0.06f, 55f, 0.30f)); // "bok" de madeira curto e baixo (discreto)
-        Tocar(_click, 0.38f);
+                Ruido(0.009f, 150f, 12, 0.08f),    // estalinho quase imperceptível
+                Tom(210f, 175f, 0.05f, 62f, 0.26f)); // "tup" de madeira grave, curto e bem baixo (discreto)
+        Tocar(_click, 0.3f);
     }
 
     static void Tocar(AudioClip clip, float vol)
