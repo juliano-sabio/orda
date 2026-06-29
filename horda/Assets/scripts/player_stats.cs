@@ -41,7 +41,7 @@ public class PlayerStats : MonoBehaviour
         for (int i = 0; i < All.Count; i++)
         {
             var p = All[i];
-            if (p == null) continue;
+            if (p == null || p.EstaCaido) continue; // caído não é alvo (mob não fica em cima da máscara)
             float d = ((Vector2)p.transform.position - pos).sqrMagnitude;
             if (d < menor) { menor = d; melhor = p; }
         }

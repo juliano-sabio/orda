@@ -14,6 +14,14 @@ public class MascaraChao : MonoBehaviour
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = sp;
         if (refCorpo != null) { sr.sortingLayerID = refCorpo.sortingLayerID; sr.sortingOrder = refCorpo.sortingOrder; }
+
+        // Escala: o sprite recortado é pequeno (e o PPU difere do player), então ficava minúsculo.
+        // Deixa a máscara ~55% da altura RENDERIZADA do player.
+        if (refCorpo != null && refCorpo.sprite != null && sp.bounds.size.y > 0.001f)
+        {
+            float alturaPlayer = refCorpo.sprite.bounds.size.y * Mathf.Abs(refCorpo.transform.lossyScale.y);
+            go.transform.localScale = Vector3.one * (alturaPlayer * 0.55f / sp.bounds.size.y);
+        }
         go.AddComponent<MascaraChao>().StartCoroutine_Queda(posPlayer, persistente);
         return go;
     }

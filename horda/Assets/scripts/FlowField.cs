@@ -139,7 +139,7 @@ public class FlowField : MonoBehaviour
             for (int i = 0; i < PlayerStats.All.Count; i++)
             {
                 var p = PlayerStats.All[i];
-                if (p == null) continue;
+                if (p == null || p.EstaCaido) continue; // caído não atrai a horda (mob ignora a máscara)
                 Vector2Int c = MundoParaCelula(p.transform.position);
                 if (Valido(c)) origens.Add(c);
             }

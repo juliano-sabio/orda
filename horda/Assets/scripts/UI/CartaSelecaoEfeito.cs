@@ -148,8 +148,18 @@ public class CartaSelecaoEfeito : MonoBehaviour
 
         // ── Fase 4: explodir em bolinhas de energia ──────────────────────
         Vector2 playerCanvasPos = Vector2.zero;
-        var playerGO = (PlayerStats.Local != null ? PlayerStats.Local.gameObject : null) // co-op: carta vai pro player local
-                    ?? GameObject.FindWithTag("Player");
+        // co-op: a carta vai pro player DONO desta tela (IsOwner) — não o primeiro "Player" da cena,
+        // que podia ser o P2 (era o que fazia a animação ir na direção do outro player).
+        PlayerStats donoPs = null;
+        for (int i = 0; i < PlayerStats.All.Count; i++)
+        {
+            var p = PlayerStats.All[i];
+            if (p == null) continue;
+            var pn = p.GetComponent<PlayerNet>();
+            if (pn == null || pn.IsOwner) { donoPs = p; break; }
+        }
+        if (donoPs == null) donoPs = PlayerStats.Local;
+        var playerGO = donoPs != null ? donoPs.gameObject : GameObject.FindWithTag("Player");
         if (playerGO != null && Camera.main != null && canvasRT != null)
         {
             Vector3 ps = Camera.main.WorldToScreenPoint(playerGO.transform.position);
