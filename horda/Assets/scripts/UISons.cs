@@ -28,8 +28,8 @@ public static class UISons
     {
         if (_click == null)
             _click = Mixar("uiclick",
-                Ruido(0.02f, 130f, 8, 0.22f),      // estalo curto e abafado (madeira, sem brilho)
-                Tom(260f, 0.085f, 48f, 0.42f));    // "tok" de madeira: harmônicos inteiros, decai rápido (nada de sino)
+                Ruido(0.018f, 120f, 9, 0.18f),     // estalo curto e bem abafado (madeira, sem brilho)
+                Tom(300f, 235f, 0.1f, 40f, 0.46f)); // "bok" de madeira redondo: glide leve p/ baixo = confirm satisfatório
         Tocar(_click, 0.5f);
     }
 
@@ -68,20 +68,27 @@ public static class UISons
     }
 
     // Batida de MADEIRA: harmônicos INTEIROS (1,2,3 → soa "de madeira", não metálico) com decay
-    // rápido = um "tok" curto, não um sino que ressoa.
+    // rápido = um "tok"/"bok" curto, não um sino que ressoa. Glide de tom (freqIni→freqFim, fase
+    // acumulada) dá um arredondamento de "confirm" satisfatório.
     static readonly float[] _ratios = { 1f, 2f, 3f };
     static readonly float[] _amps   = { 1f, 0.4f, 0.15f };
-    static float[] Tom(float freq, float dur, float decay, float ganho)
+    static float[] Tom(float freqIni, float freqFim, float dur, float decay, float ganho)
     {
         int n = Mathf.Max(1, (int)(SR * dur));
         var data = new float[n];
+        var fase = new float[_ratios.Length];
         for (int i = 0; i < n; i++)
         {
             float t = i / (float)SR;
+            float p = t / dur;
+            float freq = Mathf.Lerp(freqIni, freqFim, p);
             float env = Mathf.Exp(-t * decay) * Mathf.Clamp01(t / 0.002f);
             float w = 0f;
-            for (int p = 0; p < _ratios.Length; p++)
-                w += _amps[p] * Mathf.Sin(2f * Mathf.PI * freq * _ratios[p] * t);
+            for (int q = 0; q < _ratios.Length; q++)
+            {
+                fase[q] += 2f * Mathf.PI * freq * _ratios[q] / SR;
+                w += _amps[q] * Mathf.Sin(fase[q]);
+            }
             data[i] = w * env * ganho;
         }
         return data;
