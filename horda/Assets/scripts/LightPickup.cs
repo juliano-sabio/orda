@@ -86,7 +86,7 @@ public class LightPickup : MonoBehaviour
         }
 
         if (collectSound != null)
-            AudioSource.PlayClipAtPoint(collectSound, transform.position);
+            AudioBus.PlaySfx(collectSound, transform.position);
 
         if (collectParticles != null)
             Instantiate(collectParticles, transform.position, Quaternion.identity);

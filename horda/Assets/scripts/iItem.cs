@@ -1,4 +1,4 @@
-﻿
+
 using UnityEngine;
 
 public class Item : MonoBehaviour
@@ -42,7 +42,7 @@ public class Item : MonoBehaviour
             playerStats.ApplyItemEffect(itemName, statToBoost.ToString(), boostValue);
 
             if (collectSound != null)
-                AudioSource.PlayClipAtPoint(collectSound, transform.position);
+                AudioBus.PlaySfx(collectSound, transform.position);
 
             if (collectParticles != null)
                 Instantiate(collectParticles, transform.position, Quaternion.identity);

@@ -66,6 +66,11 @@ public class InimigoController : MonoBehaviour
     private float proximoContato = 0f;
     private const float INTERVALO_CONTATO = 0.5f; // contato mais responsivo (era 1s)
 
+    // Música adaptativa: contagem global de bosses VIVOS. Conta no host E no cliente (o boss é
+    // NetworkObject e existe nos dois lados) → o MusicManager troca pro tema de boss em ambos.
+    public static int BossesVivos { get; private set; }
+    private bool _contadoBoss;
+
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -76,6 +81,13 @@ public class InimigoController : MonoBehaviour
             corOriginal = spriteRenderer.color;
 
         InicializarComData();
+
+        if (EhBoss()) { _contadoBoss = true; BossesVivos++; }
+    }
+
+    void OnDestroy()
+    {
+        if (_contadoBoss) { _contadoBoss = false; BossesVivos = Mathf.Max(0, BossesVivos - 1); }
     }
 
     public void InicializarComData()
