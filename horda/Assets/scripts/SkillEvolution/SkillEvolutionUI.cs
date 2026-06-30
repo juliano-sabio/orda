@@ -85,14 +85,9 @@ public class SkillEvolutionUI : MonoBehaviour
         contRT.sizeDelta = new Vector2(1200f, 500f);
         contRT.anchoredPosition = Vector2.zero;
 
-        var hLayout = containerGO.AddComponent<HorizontalLayoutGroup>();
-        hLayout.spacing             = ui.cardSpacing;
-        hLayout.childAlignment      = TextAnchor.MiddleCenter;
-        hLayout.padding             = new RectOffset(30, 30, 20, 20);
-        hLayout.childControlWidth   = false;
-        hLayout.childControlHeight  = false;
-        hLayout.childForceExpandWidth  = false;
-        hLayout.childForceExpandHeight = false;
+        // Sem LayoutGroup de propósito: as cartas são posicionadas manualmente (abaixo) e a
+        // animação controla anchoredPosition. Um LayoutGroup ficaria resetando as posições
+        // (toda vez que o auto-size do texto suja o layout), bagunçando a entrada/flutuação.
 
         // 1) Cria todas as cartas primeiro (sem animar ainda)
         yield return null;
@@ -103,13 +98,23 @@ public class SkillEvolutionUI : MonoBehaviour
             cartasCriadas.Add(card);
         }
 
-        // 2) Reconstrói o layout — agora as cartas estão nas posições corretas
+        // 2) Posiciona as cartas manualmente, centralizadas e espaçadas (anchor/pivot no centro).
         yield return null;
-        LayoutRebuilder.ForceRebuildLayoutImmediate(contRT);
-        Canvas.ForceUpdateCanvases();
-        yield return null; // mais um frame para o layout aplicar
+        int n      = cartasCriadas.Count;
+        float cw   = ui.cardSize.x;
+        float esp  = ui.cardSpacing;
+        float largTotal = n * cw + Mathf.Max(0, n - 1) * esp;
+        for (int i = 0; i < n; i++)
+        {
+            var crt = cartasCriadas[i].GetComponent<RectTransform>();
+            if (crt == null) continue;
+            crt.anchorMin = crt.anchorMax = new Vector2(0.5f, 0.5f);
+            crt.pivot     = new Vector2(0.5f, 0.5f);
+            crt.anchoredPosition = new Vector2(-largTotal * 0.5f + cw * 0.5f + i * (cw + esp), 0f);
+        }
+        yield return null;
 
-        // 3) Só agora inicia animações — capturam posição já calculada pelo layout
+        // 3) Só agora inicia animações — capturam a posição manual já aplicada
         for (int i = 0; i < cartasCriadas.Count; i++)
         {
             cartasCriadas[i].AddComponent<EvoCardAnimador>();

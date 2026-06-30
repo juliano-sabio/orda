@@ -121,6 +121,10 @@ public class CartaSelecaoEfeito : MonoBehaviour
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvasRT, screenPos, canvas.worldCamera, out Vector2 posInicial);
+        // Centro REAL da tela em coords locais do canvas. Vector2.zero nem sempre é o centro
+        // (depende do pivot/origem do canvas), o que fazia a carta parar um pouco para o lado.
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvasRT, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f), canvas.worldCamera, out Vector2 centroTela);
         carta.anchoredPosition = posInicial;
         carta.localScale = Vector3.one * 1.2f;
 
@@ -129,11 +133,11 @@ public class CartaSelecaoEfeito : MonoBehaviour
         {
             t += Time.unscaledDeltaTime;
             float p = Mathf.SmoothStep(0f, 1f, t / dur);
-            carta.anchoredPosition = Vector2.Lerp(posInicial, Vector2.zero, p);
+            carta.anchoredPosition = Vector2.Lerp(posInicial, centroTela, p);
             carta.localScale = Vector3.one * Mathf.Lerp(1.2f, 1.0f, p);
             yield return null;
         }
-        carta.anchoredPosition = Vector2.zero;
+        carta.anchoredPosition = centroTela;
         carta.localScale = Vector3.one;
 
         // ── Fase 3: pulso de chegada (0.45 s) ───────────────────────────
@@ -183,6 +187,13 @@ public class CartaSelecaoEfeito : MonoBehaviour
             new Color(0.5f,  0.85f, 1f),   // azul suave
         };
 
+        // Posição REAL da carta AGORA (em coords locais do canvas) — os fragmentos nascem
+        // exatamente onde ela está, em vez de um centro recalculado que podia divergir.
+        carta.GetWorldCorners(corners);
+        Vector2 cartaScreen = (corners[0] + corners[2]) / 2f;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvasRT, cartaScreen, canvas.worldCamera, out Vector2 cartaCentro);
+
         // Grade de origem dos fragmentos (onde a carta estava)
         int cols = 5, rows = 7;
         int numFrags = cols * rows;
@@ -215,7 +226,7 @@ public class CartaSelecaoEfeito : MonoBehaviour
                 fRT.anchorMin = fRT.anchorMax = new Vector2(0.5f, 0.5f);
                 fRT.pivot = new Vector2(0.5f, 0.5f);
                 fRT.sizeDelta = Vector2.one * sz;
-                fRT.anchoredPosition = new Vector2(px, py);
+                fRT.anchoredPosition = new Vector2(px, py) + cartaCentro;
 
                 // Aura externa (2.5× o tamanho, muito transparente)
                 var auraGO = new GameObject("Aura");
@@ -248,7 +259,7 @@ public class CartaSelecaoEfeito : MonoBehaviour
                 if (dir.sqrMagnitude < 1f) dir = Random.insideUnitCircle;
                 dir.Normalize();
                 fragVel[idx]  = dir * Random.Range(100f, 260f) + (Vector2)Random.insideUnitCircle * 70f;
-                fragPos0[idx] = new Vector2(px, py);
+                fragPos0[idx] = new Vector2(px, py) + cartaCentro;
 
                 frags[idx]   = fRT;
                 imgCore[idx] = cImg;
