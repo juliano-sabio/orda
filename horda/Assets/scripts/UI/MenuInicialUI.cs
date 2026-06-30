@@ -760,12 +760,12 @@ public class MenuInicialUI : MonoBehaviour
         sv.onValueChanged.AddListener(v=>{AudioListener.volume=v;PlayerPrefs.SetFloat("MasterVolume",v);});
 
         Rotulo(p,Loc.T("settings.music"),0.56f,0.68f);
-        var sm=Slider(p,"SM",new Vector2(0.05f,0.44f),new Vector2(0.95f,0.56f),PlayerPrefs.GetFloat("MusicVolume",0.8f));
-        sm.onValueChanged.AddListener(v=>PlayerPrefs.SetFloat("MusicVolume",v));
+        var sm=Slider(p,"SM",new Vector2(0.05f,0.44f),new Vector2(0.95f,0.56f),PlayerPrefs.GetFloat("MusicVolume",0.6f));
+        sm.onValueChanged.AddListener(v=>MusicManager.DefinirVolume(v));   // música ao vivo (salva o pref)
 
         Rotulo(p,Loc.T("settings.sfx"),0.32f,0.44f);
-        var ss=Slider(p,"SS",new Vector2(0.05f,0.20f),new Vector2(0.95f,0.32f),PlayerPrefs.GetFloat("SFXVolume",1f));
-        ss.onValueChanged.AddListener(v=>PlayerPrefs.SetFloat("SFXVolume",v));
+        var ss=Slider(p,"SS",new Vector2(0.05f,0.20f),new Vector2(0.95f,0.32f),PlayerPrefs.GetFloat("SFXVolume",0.6f));
+        ss.onValueChanged.AddListener(v=>AudioBus.SetSfxVolume(v));        // SFX ao vivo (salva o pref)
     }
 
     void PopularVideo(GameObject p)

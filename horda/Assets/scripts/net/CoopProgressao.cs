@@ -17,6 +17,10 @@ public class CoopProgressao : NetworkBehaviour
     public readonly NetworkVariable<float> xpProxNivel = new NetworkVariable<float>(
         100f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    // Co-op: total de ABATES da dupla (host soma; clientes só leem) → contador igual nas duas telas.
+    public readonly NetworkVariable<int> abates = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     // Co-op: estado do evento atual (host-autoritativo) → o cliente reconstrói a UI de evento.
     public readonly NetworkVariable<bool>  evtAtivo   = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public readonly NetworkVariable<int>   evtTipo    = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);

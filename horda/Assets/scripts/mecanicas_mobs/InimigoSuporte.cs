@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -159,7 +159,7 @@ public class InimigoSuporte : MonoBehaviour
 
         if (somCura != null && audioSource != null)
         {
-            audioSource.PlayOneShot(somCura);
+            AudioBus.PlayOn(audioSource, somCura);
         }
     }
 

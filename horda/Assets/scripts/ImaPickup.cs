@@ -114,7 +114,7 @@ public class ImaPickup : MonoBehaviour
         }
 
         if (collectSound != null)
-            AudioSource.PlayClipAtPoint(collectSound, transform.position);
+            AudioBus.PlaySfx(collectSound, transform.position);
 
         Destroy(gameObject);
     }

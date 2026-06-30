@@ -174,7 +174,7 @@ public static class SomSkill
     public static void Tocar(Tipo tipo, Vector2 posicao, float volume = 0.7f)
     {
         var clip = ClipDe(tipo);
-        if (clip != null) AudioSource.PlayClipAtPoint(clip, posicao, volume);
+        if (clip != null) AudioBus.PlaySfx(clip, posicao, volume);
     }
 
     // Som de UI/menu: toca em 2D e IGNORA o AudioListener.pause (menus de carta pausam o áudio).
