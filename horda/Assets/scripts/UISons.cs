@@ -40,7 +40,7 @@ public static class UISons
         Object.DontDestroyOnLoad(go);   // sobrevive à troca de cena → o som não corta/buga
         var src = go.AddComponent<AudioSource>();
         src.clip = clip;
-        src.volume = vol;
+        src.volume = vol * AudioBus.SfxVolume;   // respeita o slider de SFX
         src.spatialBlend = 0f;          // 2D
         src.ignoreListenerPause = true; // toca mesmo com o jogo pausado (menus)
         src.Play();

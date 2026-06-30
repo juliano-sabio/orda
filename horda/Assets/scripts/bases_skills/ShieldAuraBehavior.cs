@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class ShieldAuraBehavior : SkillBehavior
@@ -82,7 +82,7 @@ public class ShieldAuraBehavior : SkillBehavior
         }
 
         if (visualAuraSustentada != null) visualAuraSustentada.SetActive(false);
-        if (somQuebra != null) AudioSource.PlayClipAtPoint(somQuebra, transform.position);
+        if (somQuebra != null) AudioBus.PlaySfx(somQuebra, transform.position);
 
         if (objetoAnimaçãoQuebra != null)
             StartCoroutine(GerenciarAnimaçãoQuebra());

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Unity.Netcode;
 
 public class AreaVeneno : MonoBehaviour
 {
@@ -15,6 +16,23 @@ public class AreaVeneno : MonoBehaviour
 
     private Animator anim;
 
+    // Co-op: a poça é NetworkObject. O HOST conduz dano + tempo de vida; o cliente é fantoche
+    // (só mostra o visual; o host despawna em todos os lados).
+    bool EhClienteFantoche
+    {
+        get { var nm = NetworkManager.Singleton; return nm != null && nm.IsListening && !nm.IsServer; }
+    }
+
+    void Start()
+    {
+        // No cliente o Inicializar não roda (só o host) → toca a abertura aqui pro visual aparecer.
+        if (EhClienteFantoche)
+        {
+            var a = GetComponent<Animator>();
+            if (a != null) a.Play("abrir_veneno");
+        }
+    }
+
     public void Inicializar(float _dano, float _intervalo, float _duracao, float _raio, LayerMask _mask)
     {
         dano = _dano;
@@ -30,6 +48,7 @@ public class AreaVeneno : MonoBehaviour
 
     void Update()
     {
+        if (EhClienteFantoche) return;   // cliente: fantoche — host conduz dano + lifetime
         if (estaFinalizando) return; // Para tudo se já estiver fechando
 
         timerVida += Time.deltaTime;
@@ -56,15 +75,17 @@ public class AreaVeneno : MonoBehaviour
         {
             anim.SetTrigger("Finalizar");
 
-            // Descobre o tempo da animação de fechamento para destruir o objeto depois dela
+            // Despawna depois da animação de fechamento. Co-op: host remove em todos. SP: Destroy.
             float tempoFechamento = ObterTempoDaAnimacao("poça-fechamento");
-            Destroy(gameObject, tempoFechamento);
+            Invoke(nameof(DespawnPoca), tempoFechamento);
         }
         else
         {
-            Destroy(gameObject);
+            DespawnPoca();
         }
     }
+
+    void DespawnPoca() => NetSpawn.Despawnar(gameObject);
 
     float ObterTempoDaAnimacao(string nome)
     {

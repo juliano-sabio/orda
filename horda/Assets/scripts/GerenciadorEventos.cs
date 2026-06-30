@@ -152,6 +152,11 @@ public class GerenciadorEventos : MonoBehaviour
     private bool eventoAtivo;
     private bool primeiroEventoDisparado;
     private EventoAleatorio eventoAtual;
+
+    // "Saco embaralhado": sorteia eventos sem repetir até esgotar todos da fase.
+    // Reseta a cada cena de jogo (OnSceneLoaded) → cada run/fase tem sua sequência sem repetição.
+    private readonly List<int> _sacoEventos = new List<int>();
+    private int _ultimoEventoIdx = -1;
     private float proximoEventoTempo;   // tempo absoluto do relógio para o próximo evento
     private float timerContagem;
     private int progresso;
@@ -256,6 +261,8 @@ public class GerenciadorEventos : MonoBehaviour
         proximoEventoTempo = scene.name == "segunda_fase" ? delayCristal : delayInicial;
         eventoAtivo = false;
         cenaDeJogo = EhCenaDeJogo(scene.name);
+        _sacoEventos.Clear();   // nova fase/run → reinicia o sorteio sem repetição
+        _ultimoEventoIdx = -1;
     }
 
     void ReconectarReferencias()
@@ -300,7 +307,12 @@ public class GerenciadorEventos : MonoBehaviour
         timerContagem -= Time.deltaTime;
         AtualizarUI();
 
-        if (eventoAtual.tipo == TipoEvento.EliminarSlimeColorida
+        // Os indicadores (setas que apontam pro objetivo) só aparecem na SEGUNDA METADE do
+        // evento — dá um tempo pro player procurar sozinho antes de a seta ajudar.
+        bool indicadorLiberado = eventoAtual != null && timerContagem <= eventoAtual.duracao * 0.5f;
+
+        if (indicadorLiberado
+            && eventoAtual.tipo == TipoEvento.EliminarSlimeColorida
             && slimeColoridaAtiva != null
             && indicadorSlime == null)
         {
@@ -309,7 +321,8 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.alvo = slimeColoridaAtiva.transform;
         }
 
-        if (eventoAtual.tipo == TipoEvento.SlimePercurso
+        if (indicadorLiberado
+            && eventoAtual.tipo == TipoEvento.SlimePercurso
             && slimePercurso != null
             && indicadorSlime == null)
         {
@@ -319,7 +332,8 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.corSeta  = new Color(0.2f, 1f, 0.45f);
         }
 
-        if (eventoAtual.tipo == TipoEvento.ZonaEliminacao
+        if (indicadorLiberado
+            && eventoAtual.tipo == TipoEvento.ZonaEliminacao
             && zonaEliminacao != null
             && indicadorSlime == null)
         {
@@ -329,13 +343,14 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.corSeta = new Color(0.25f, 0.85f, 1f);
         }
 
-        if (eventoAtual.tipo == TipoEvento.Ceifador && portalAtivo != null)
+        if (indicadorLiberado && eventoAtual.tipo == TipoEvento.Ceifador && portalAtivo != null)
             portalAtivo.MostrarIndicadores();
 
-        if (eventoAtual.tipo == TipoEvento.Portal && portalAtivo != null)
+        if (indicadorLiberado && eventoAtual.tipo == TipoEvento.Portal && portalAtivo != null)
             portalAtivo.MostrarIndicadores();
 
-        if (eventoAtual.tipo == TipoEvento.CristaisEnergia
+        if (indicadorLiberado
+            && eventoAtual.tipo == TipoEvento.CristaisEnergia
             && indicadoresCristais.Count == 0)
         {
             foreach (var cristal in cristaisAtivos)
@@ -350,7 +365,7 @@ public class GerenciadorEventos : MonoBehaviour
             }
         }
 
-        if (eventoAtual.tipo == TipoEvento.VorticeDevorador && vorticeAtivo != null && indicadorSlime == null)
+        if (indicadorLiberado && eventoAtual.tipo == TipoEvento.VorticeDevorador && vorticeAtivo != null && indicadorSlime == null)
         {
             var go = new GameObject("IndicadorVortice");
             indicadorSlime = go.AddComponent<IndicadorSlime>();
@@ -359,7 +374,7 @@ public class GerenciadorEventos : MonoBehaviour
             indicadorSlime.label   = "Vórtice!";
         }
 
-        if (eventoAtual.tipo == TipoEvento.NucleoCorrompido && nucleoAtivo != null && indicadorSlime == null)
+        if (indicadorLiberado && eventoAtual.tipo == TipoEvento.NucleoCorrompido && nucleoAtivo != null && indicadorSlime == null)
         {
             var go = new GameObject("IndicadorNucleo");
             indicadorSlime = go.AddComponent<IndicadorSlime>();
@@ -410,6 +425,34 @@ if (timerContagem <= 0f)
         return r;
     }
 
+// Sorteia o próximo índice de evento sem repetir até o saco esvaziar.
+int ProximoEventoAleatorio()
+{
+    if (_sacoEventos.Count == 0) ReabastecerSaco();
+    if (_sacoEventos.Count == 0) return 0;
+    int pos = UnityEngine.Random.Range(0, _sacoEventos.Count);
+    // na virada do saco, evita cair no mesmo evento que acabou de rodar
+    if (_sacoEventos.Count > 1 && _sacoEventos[pos] == _ultimoEventoIdx)
+        pos = (pos + 1) % _sacoEventos.Count;
+    int idx = _sacoEventos[pos];
+    _sacoEventos.RemoveAt(pos);
+    _ultimoEventoIdx = idx;
+    return idx;
+}
+
+void ReabastecerSaco()
+{
+    _sacoEventos.Clear();
+    for (int i = 0; i < eventos.Count; i++) _sacoEventos.Add(i);
+}
+
+void RemoverDoSaco(int idx)
+{
+    if (_sacoEventos.Count == 0) ReabastecerSaco();
+    _sacoEventos.Remove(idx);
+    _ultimoEventoIdx = idx;
+}
+
 void TentarIniciarEvento()
 {
     if (eventos == null || eventos.Count == 0) return;
@@ -427,9 +470,10 @@ void TentarIniciarEvento()
         else
             idx = eventos.FindIndex(e => e.tipo == TipoEvento.Colapso);
         if (idx < 0) idx = 0;
+        RemoverDoSaco(idx); // o evento forçado também conta como "já usado" na run
     }
     else
-        idx = UnityEngine.Random.Range(0, eventos.Count);
+        idx = ProximoEventoAleatorio();
     primeiroEventoDisparado = true;
     eventoAtual = eventos[idx];
     eventoAtivo = true;
