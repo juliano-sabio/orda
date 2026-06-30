@@ -124,18 +124,7 @@ public class RadiusBoostPickup : MonoBehaviour
         if (NetSpawn.EmRede)
         {
             var pn = playerStats.GetComponent<PlayerNet>();
-            if (pn != null)
-            {
-                pn.BoostColetaOwnerRpc(radiusBoostAmount, orbSpeedMultiplier, boostDuration); // efeito no cliente dono
-                // O HOST é quem atrai/move os orbes (lê o raio host-side). Pro P2 (não-dono visto
-                // do host) o OwnerRpc só aplica no cliente dele → o host não saberia do raio maior
-                // e os orbes não voariam pro P2. Aplica também na cópia host-side do P2.
-                if (!pn.IsOwner)
-                {
-                    playerStats.BoostCollectionRadius(radiusBoostAmount, boostDuration);
-                    playerStats.BoostOrbSpeed(orbSpeedMultiplier, boostDuration);
-                }
-            }
+            if (pn != null) pn.BoostColetaOwnerRpc(radiusBoostAmount, orbSpeedMultiplier, boostDuration);
             else { playerStats.BoostCollectionRadius(radiusBoostAmount, boostDuration); playerStats.BoostOrbSpeed(orbSpeedMultiplier, boostDuration); }
             Efeitos();
             NetSpawn.Despawnar(gameObject);
@@ -151,7 +140,7 @@ public class RadiusBoostPickup : MonoBehaviour
     void Efeitos()
     {
         if (collectSound != null)
-            AudioBus.PlaySfx(collectSound, transform.position);
+            AudioSource.PlayClipAtPoint(collectSound, transform.position);
         if (collectParticles != null)
             Instantiate(collectParticles, transform.position, Quaternion.identity);
     }

@@ -67,38 +67,11 @@ public class ContadorMortes : MonoBehaviour
 
     void OnMorteInimigo()
     {
-        // OnInimigoDerrotado só dispara no host (a morte do inimigo é host-autoritativa).
-        // Co-op: o host soma no NetworkVariable compartilhado; as duas telas leem no Update().
-        if (NetSpawn.EmRede)
-        {
-            var cp = CoopProgressao.Instance;
-            if (cp != null && NetSpawn.PodeSpawnar) cp.abates.Value++;
-            return;
-        }
         mortes++;
         Atualizar();
     }
 
-    // Co-op: espelha o total compartilhado (host e cliente exibem o MESMO número).
-    void Update()
-    {
-        if (!NetSpawn.EmRede) return;
-        var cp = CoopProgressao.Instance;
-        if (cp == null) return;
-        if (mortes != cp.abates.Value)
-        {
-            mortes = cp.abates.Value;
-            Atualizar();
-        }
-    }
-
-    public void ResetarContador()
-    {
-        mortes = 0;
-        if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
-            CoopProgressao.Instance.abates.Value = 0;
-        Atualizar();
-    }
+    public void ResetarContador() { mortes = 0; Atualizar(); }
 
     void Atualizar()
     {

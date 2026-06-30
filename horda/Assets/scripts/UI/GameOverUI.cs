@@ -67,7 +67,7 @@ public class GameOverUI : MonoBehaviour
 
         painelPrincipal = CriarCard(canvasGO.transform);
         cardRT = painelPrincipal.GetComponent<RectTransform>();
-        cardRT.sizeDelta = new Vector2(560f, 610f); // mais alto p/ caber resumo + botões
+        cardRT.sizeDelta = new Vector2(560f, 520f); // mais alto p/ caber 4 botões
         cardGroup = painelPrincipal.AddComponent<CanvasGroup>();
         cardGroup.alpha = 0f;
         cardRT.localScale = Vector3.one * 0.75f;
@@ -251,16 +251,14 @@ public class GameOverUI : MonoBehaviour
     private void CriarConteudoPrincipal()
     {
         GameObject tituloGO = CriarTextoGO(painelPrincipal.transform, "GAME OVER",
-            new Vector2(0f, 215f), new Vector2(500f, 90f),
+            new Vector2(0f, 175f), new Vector2(500f, 90f),
             68, new Color(0.9f, 0.2f, 0.2f, 1f));
         tituloText = tituloGO.GetComponent<TextMeshProUGUI>();
         tituloRT = tituloGO.GetComponent<RectTransform>();
         tituloGroup = tituloGO.AddComponent<CanvasGroup>();
 
-        CriarLinha(painelPrincipal.transform, new Vector2(0f, 155f), 420f,
+        CriarLinha(painelPrincipal.transform, new Vector2(0f, 115f), 420f,
             new Color(0.9f, 0.2f, 0.2f, 0.4f));
-
-        CriarResumoRun(painelPrincipal.transform); // resumo da run: abates / tempo / nível
 
         Color corpoBtn = new Color(0.11f, 0.07f, 0.07f, 1f); // quase preto (tema vermelho/preto/branco)
 
@@ -275,7 +273,7 @@ public class GameOverUI : MonoBehaviour
         defs.Add((Loc.T("ui.quit"), Sair));
 
         int   n      = defs.Count;
-        float centro = -90f;                       // empurra os botões pra baixo do resumo da run
+        float centro = -62f;                       // mesmo centro do layout original (4 botões)
         float espac  = n <= 4 ? 78f : 68f;
         float altura = n <= 4 ? 60f : 54f;
         float yTopo  = centro + (n - 1) * espac / 2f;
@@ -288,28 +286,6 @@ public class GameOverUI : MonoBehaviour
                 corpoBtn, defs[i].acao);
             botoesGroups[i] = botoes[i].AddComponent<CanvasGroup>();
         }
-    }
-
-    // Resumo da run: 3 colunas (abates / tempo / nível) abaixo do título.
-    private void CriarResumoRun(Transform pai)
-    {
-        int   abates = ContadorMortes.Instance != null ? ContadorMortes.Instance.Mortes : 0;
-        float tempo  = TimerManager.Instance   != null ? TimerManager.Instance.currentTime : 0f;
-        int   nivel  = PlayerStats.Local       != null ? PlayerStats.Local.level : 1;
-        int min = Mathf.FloorToInt(tempo / 60f);
-        int seg = Mathf.FloorToInt(tempo % 60f);
-
-        CriarStat(pai, abates.ToString(),    "ABATES", -150f, 100f);
-        CriarStat(pai, $"{min:00}:{seg:00}", "TEMPO",     0f, 100f);
-        CriarStat(pai, nivel.ToString(),     "NÍVEL",   150f, 100f);
-    }
-
-    private void CriarStat(Transform pai, string valor, string label, float x, float y)
-    {
-        CriarTextoGO(pai, valor, new Vector2(x, y), new Vector2(150f, 46f),
-            34, new Color(1f, 0.86f, 0.42f));                       // número grande dourado
-        CriarTextoGO(pai, label, new Vector2(x, y - 30f), new Vector2(150f, 22f),
-            15, new Color(0.72f, 0.72f, 0.78f));                    // rótulo pequeno
     }
 
     private void VoltarAoLobby()
@@ -332,16 +308,19 @@ public class GameOverUI : MonoBehaviour
         CriarTexto(painelOpcoes.transform, Loc.T("settings.music"),
             new Vector2(-115f, 58f), new Vector2(150f, 36f),
             24, new Color(0.78f, 0.78f, 0.9f, 1f));
-        float musicVol = PlayerPrefs.GetFloat("MusicVolume", 0.6f);
+        float musicVol = PlayerPrefs.GetFloat("MusicVolume", AudioListener.volume);
         CriarSlider(painelOpcoes.transform, new Vector2(100f, 58f), new Vector2(240f, 28f),
-            musicVol, val => MusicManager.DefinirVolume(val));   // música ao vivo (salva o pref)
+            musicVol, val => {
+                AudioListener.volume = val;
+                PlayerPrefs.SetFloat("MusicVolume", val);
+            });
 
         CriarTexto(painelOpcoes.transform, Loc.T("settings.sfx"),
             new Vector2(-115f, 8f), new Vector2(150f, 36f),
             24, new Color(0.78f, 0.78f, 0.9f, 1f));
-        float sfxVol = PlayerPrefs.GetFloat("SFXVolume", 0.6f);
+        float sfxVol = PlayerPrefs.GetFloat("SFXVolume", 1f);
         CriarSlider(painelOpcoes.transform, new Vector2(100f, 8f), new Vector2(240f, 28f),
-            sfxVol, val => AudioBus.SetSfxVolume(val));   // SFX ao vivo (salva o pref)
+            sfxVol, val => PlayerPrefs.SetFloat("SFXVolume", val));
 
         bool isFullscreen = PlayerPrefs.GetInt("Fullscreen", Screen.fullScreen ? 1 : 0) == 1;
         GameObject btnFS = CriarBotao(painelOpcoes.transform,

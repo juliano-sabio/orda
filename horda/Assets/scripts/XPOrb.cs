@@ -100,7 +100,7 @@ public class XPOrb : MonoBehaviour
         if (NetSpawn.EmRede)
         {
             if (CoopProgressao.Instance != null) CoopProgressao.Instance.AdicionarXP(xpValue);
-            if (collectSound != null) AudioBus.PlaySfx(collectSound, transform.position);
+            if (collectSound != null) AudioSource.PlayClipAtPoint(collectSound, transform.position);
             if (collectParticles != null) Instantiate(collectParticles, transform.position, Quaternion.identity);
             NetSpawn.Despawnar(gameObject);
             return;
@@ -112,7 +112,7 @@ public class XPOrb : MonoBehaviour
             playerStats.GainXP(xpValue);
 
             if (collectSound != null)
-                AudioBus.PlaySfx(collectSound, transform.position);
+                AudioSource.PlayClipAtPoint(collectSound, transform.position);
 
             if (collectParticles != null)
                 Instantiate(collectParticles, transform.position, Quaternion.identity);

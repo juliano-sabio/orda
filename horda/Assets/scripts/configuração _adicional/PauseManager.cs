@@ -707,15 +707,13 @@ public class PauseManager : MonoBehaviour
     // CONFIGURACOES DE AUDIO/VIDEO - AGORA FUNCIONANDO
     private void SetMusicVolume(float volume)
     {
-        // Controla SÓ a música de fundo (MusicManager), ao vivo. NÃO usa AudioListener.volume,
-        // que é o volume MESTRE — isso afetaria os SFX também, o que o slider "Música" não deve fazer.
-        MusicManager.DefinirVolume(volume);
+        // Implementar seu sistema de audio aqui
+        AudioListener.volume = volume;
     }
 
     private void SetSFXVolume(float volume)
     {
-        // Controla todos os SFX que passam pelo AudioBus — independente da música e do master.
-        AudioBus.SetSfxVolume(volume);
+        // Implementar SFX separado se tiver
     }
 
     private void SetFullscreen(bool isFullscreen)
@@ -729,10 +727,10 @@ public class PauseManager : MonoBehaviour
         try
         {
             if (musicVolumeSlider != null)
-                musicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 0.6f);
+                musicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 0.8f);
 
             if (sfxVolumeSlider != null)
-                sfxVolumeSlider.value = PlayerPrefs.GetFloat("SFXVolume", 0.6f);
+                sfxVolumeSlider.value = PlayerPrefs.GetFloat("SFXVolume", 0.8f);
 
             if (fullscreenToggle != null)
                 fullscreenToggle.isOn = PlayerPrefs.GetInt("Fullscreen", 1) == 1;

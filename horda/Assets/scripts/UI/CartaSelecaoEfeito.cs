@@ -148,18 +148,17 @@ public class CartaSelecaoEfeito : MonoBehaviour
 
         // ── Fase 4: explodir em bolinhas de energia ──────────────────────
         Vector2 playerCanvasPos = Vector2.zero;
-        // co-op: a carta vai pro player DESTA tela (o dono local) — não o primeiro "Player" da
-        // cena, que podia ser o P2. PlayerStats.Local é exatamente o dono local (setado pelo
-        // PlayerNet em co-op; o único player em SP). Loop por IsOwner fica só de fallback.
-        PlayerStats donoPs = PlayerStats.Local;
-        if (donoPs == null)
-            for (int i = 0; i < PlayerStats.All.Count; i++)
-            {
-                var p = PlayerStats.All[i];
-                if (p == null) continue;
-                var pn = p.GetComponent<PlayerNet>();
-                if (pn == null || pn.IsOwner) { donoPs = p; break; }
-            }
+        // co-op: a carta vai pro player DONO desta tela (IsOwner) — não o primeiro "Player" da cena,
+        // que podia ser o P2 (era o que fazia a animação ir na direção do outro player).
+        PlayerStats donoPs = null;
+        for (int i = 0; i < PlayerStats.All.Count; i++)
+        {
+            var p = PlayerStats.All[i];
+            if (p == null) continue;
+            var pn = p.GetComponent<PlayerNet>();
+            if (pn == null || pn.IsOwner) { donoPs = p; break; }
+        }
+        if (donoPs == null) donoPs = PlayerStats.Local;
         var playerGO = donoPs != null ? donoPs.gameObject : GameObject.FindWithTag("Player");
         if (playerGO != null && Camera.main != null && canvasRT != null)
         {

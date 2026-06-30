@@ -134,11 +134,9 @@ public class movi_inimigo_manter_distancia : MonoBehaviour
     void AtirarNoPlayer()
     {
         if (prefabProjetil == null || pontoDisparo == null) return;
-        if (!NetSpawn.PodeSpawnar) return; // co-op: só o host atira; o projétil em rede replica pro P2
 
         Vector2 direcao = ((Vector2)player.position - (Vector2)pontoDisparo.position).normalized;
-        GameObject projetilObj = NetSpawn.Spawnar(prefabProjetil, pontoDisparo.position);
-        if (projetilObj == null) return;
+        GameObject projetilObj = Instantiate(prefabProjetil, pontoDisparo.position, Quaternion.identity);
         projetil_inimigo projetil = projetilObj.GetComponent<projetil_inimigo>();
 
         if (projetil != null)

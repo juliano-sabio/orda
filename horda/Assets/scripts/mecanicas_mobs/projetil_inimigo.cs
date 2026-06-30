@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public class projetil_inimigo : MonoBehaviour
@@ -51,14 +51,8 @@ public class projetil_inimigo : MonoBehaviour
             ConfigurarMovimento();
         }
 
-        // Co-op: despawn em rede (host despawna em todos; cliente no-op). SP: Destroy.
-        StartCoroutine(AutoDespawn(tempoMaximoVida));
-    }
-
-    IEnumerator AutoDespawn(float t)
-    {
-        yield return new WaitForSeconds(t);
-        NetSpawn.Despawnar(gameObject);
+        // Destrói após tempo máximo
+        Destroy(gameObject, tempoMaximoVida);
     }
 
     void ConfigurarMovimento()
@@ -121,12 +115,12 @@ public class projetil_inimigo : MonoBehaviour
             // Toca som de impacto
             TocarSomImpacto();
 
-            // Despawna (em co-op o host remove em todos; cliente que detectou no-op).
-            NetSpawn.Despawnar(gameObject);
+            // Destrói o projétil
+            Destroy(gameObject);
         }
         else if (other.tag != "Player" && other.tag != "Enemy" && other.tag != "enemy")
         {
-            NetSpawn.Despawnar(gameObject);
+            Destroy(gameObject);
         }
     }
 
@@ -184,12 +178,12 @@ public class projetil_inimigo : MonoBehaviour
         {
             if (audioSource != null)
             {
-                AudioBus.PlayOn(audioSource, somImpacto);
+                audioSource.PlayOneShot(somImpacto);
             }
             else
             {
                 // Cria um audio source temporário
-                AudioBus.PlaySfx(somImpacto, transform.position);
+                AudioSource.PlayClipAtPoint(somImpacto, transform.position);
             }
         }
     }

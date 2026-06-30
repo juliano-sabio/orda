@@ -176,20 +176,14 @@ public class EnemySpawnerCompleto : MonoBehaviour
             : player;
         if (refPlayer == null) return null;
 
-        // Raio "fora da tela": gera o ponto já a essa distância do player escolhido e
-        // exige a mesma distância de TODOS os players → fora da visão do P1 E do P2.
-        float raioTela = RaioTela();
-        float distMin  = Mathf.Max(distanciaMinima, raioTela);
-        float distMax  = Mathf.Max(distanciaMaxima, distMin + 2f);
-
         for (int i = 0; i < tentativasMaximas; i++)
         {
             float angulo    = Random.Range(0f, 360f);
             Vector2 direcao = new Vector2(Mathf.Cos(angulo * Mathf.Deg2Rad), Mathf.Sin(angulo * Mathf.Deg2Rad));
-            float distancia = Random.Range(distMin, distMax);
+            float distancia = Random.Range(distanciaMinima, distanciaMaxima);
             Vector2 ponto   = (Vector2)refPlayer.position + direcao * distancia;
 
-            if (!ForaDaVisaoDeTodos(ponto, raioTela)) continue;
+            if (!ForaDaCamera(ponto)) continue;
             if (!EstaSobreTerreno(ponto)) continue;
 
             if (Physics2D.OverlapCircle(ponto, raioDeChecagem, camadasBloqueadas) == null)
@@ -197,32 +191,6 @@ public class EnemySpawnerCompleto : MonoBehaviour
         }
 
         return null;
-    }
-
-    // Meia-diagonal da câmera (em unidades de mundo) — distância a partir do player além da
-    // qual um ponto está garantidamente fora da tela. Usada como raio "fora de visão".
-    float RaioTela()
-    {
-        var cam = Camera.main;
-        if (cam == null || !cam.orthographic) return distanciaMinima;
-        float h = cam.orthographicSize;
-        float w = h * cam.aspect;
-        return Mathf.Sqrt(h * h + w * w) + 1f; // + margem
-    }
-
-    // Em co-op o host não enxerga a câmera do P2, mas sabe a POSIÇÃO dele: um ponto a >= raioTela
-    // de TODOS os players está fora da tela de ambos. SP cai no teste de câmera exato.
-    bool ForaDaVisaoDeTodos(Vector2 ponto, float raioTela)
-    {
-        var todos = PlayerStats.All;
-        if (todos == null || todos.Count == 0) return ForaDaCamera(ponto);
-        for (int i = 0; i < todos.Count; i++)
-        {
-            var p = todos[i];
-            if (p == null) continue;
-            if (Vector2.Distance(ponto, p.transform.position) < raioTela) return false;
-        }
-        return true;
     }
 
     // Garante que o ponto caia sobre um tile real (terreno/ponte), nunca no vazio fora do mapa

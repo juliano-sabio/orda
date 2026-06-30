@@ -16,20 +16,13 @@ public class InimigoVenenoMorte : MonoBehaviour
     void Start()
     {
         controller = GetComponent<InimigoController>();
-        InimigoController.OnPreMorte += AoPreMorte;
     }
 
-    // Roda no host/SP DENTRO do Morrer() (antes do despawn) → timing seguro pra spawnar o
-    // NetworkObject da poça (replica pro P2). No cliente o Morrer não roda → não duplica.
-    void AoPreMorte(InimigoController ic)
-    {
-        if (ic == controller && !jaSpawnou) SpawnarVeneno();
-    }
-
-    // Chamado quando o Inimigo é destruído. Fallback: morreu sem passar pelo Morrer() (raro).
+    // Este método é chamado automaticamente quando o Inimigo é destruído (pelo Morrer())
     private void OnDestroy()
     {
-        InimigoController.OnPreMorte -= AoPreMorte;
+        // Só spawna se o inimigo realmente morreu (vida zero) 
+        // e se não estivermos fechando o jogo (quitting)
         if (controller != null && controller.vidaAtual <= 0 && !jaSpawnou && gameObject.scene.isLoaded)
         {
             SpawnarVeneno();
@@ -46,11 +39,10 @@ public class InimigoVenenoMorte : MonoBehaviour
             return;
         }
 
-        // Co-op: host spawna em rede (a poça é NetworkObject → replica pro P2). SP: Instantiate.
-        GameObject novaPoca = NetSpawn.Spawnar(prefabPoca, transform.position);
-        if (novaPoca == null) return; // cliente não spawna
+        // Cria a poça na posição onde o inimigo morreu
+        GameObject novaPoca = Instantiate(prefabPoca, transform.position, Quaternion.identity);
 
-        // Configura os dados da poça (só no host/SP; no cliente a cópia em rede já aparece)
+        // Configura os dados da poça
         AreaVeneno scriptPoca = novaPoca.GetComponent<AreaVeneno>();
         if (scriptPoca != null)
         {

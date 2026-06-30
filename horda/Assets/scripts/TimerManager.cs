@@ -47,13 +47,8 @@ public class TimerManager : MonoBehaviour
 
     public int CicloAtual => cicloAtual;
 
-    // Referência e estado pra outros sistemas (ex.: MusicManager troca pra música de boss).
-    public static TimerManager Instance { get; private set; }
-    public bool BossEmLuta => bossAtivo != null || bossFinalAtivo != null || aguardandoBossFinal;
-
     void Start()
     {
-        Instance = this;
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == nomeCenaSobrevivencia)
             modoSobrevivencia = true;
 
@@ -89,19 +84,8 @@ public class TimerManager : MonoBehaviour
             return;
         }
 
-        currentTime += Time.deltaTime;
+        currentTime += Time.deltaTime; // sobe indefinidamente — sem "tempo para acabar"
         UpdateTimeBar();
-
-        // 30 min (levelDuration) atingido fora do modo Sobrevivência → entra o BOSS FINAL; ao
-        // matá-lo a run encerra (tela de vitória / escolha pós-vitória). Co-op: só o host dispara
-        // (spawn host-autoritativo; o boss final replica pro P2). O cliente segue contando e vê o
-        // boss em rede. [TODO co-op] a TELA de vitória ainda é local — falta replicar pro P2.
-        if (!modoSobrevivencia && NetSpawn.PodeSpawnar && currentTime >= levelDuration)
-        {
-            InvocarBossFinal();
-            return;
-        }
-
         CheckEvents();
         CheckBossEvents();
     }
