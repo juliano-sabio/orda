@@ -286,7 +286,7 @@ public class CartaSelecaoEfeito : MonoBehaviour
             playerScreenPos = Camera.main.WorldToScreenPoint(playerGO.transform.position);
 
         float durBurst = 0.5f;
-        float durVoo   = 1.0f;
+        float durVoo   = 2.0f;
         float durTotal = durBurst + durVoo;
         t = 0f;
 
@@ -313,10 +313,10 @@ public class CartaSelecaoEfeito : MonoBehaviour
                 else
                 {
                     float pv   = Mathf.SmoothStep(0f, 1f, (t - durBurst) / durVoo);
-                    // Continua se espalhando levemente a partir do centro e some NO LUGAR
-                    // (não voa mais pro player, que fica pro lado da tela).
+                    // Os fragmentos VOAM pro player que escolheu a evolução (efeito NOSSO).
+                    // Mantém a centralização/posicionamento do parceiro nas fases anteriores.
                     Vector2 p0 = fragPos0[i] + fragVel[i];
-                    pos    = p0 + fragVel[i] * 0.25f * pv;
+                    pos    = Vector2.Lerp(p0, playerCanvasPos, pv);
                     alpha  = Mathf.Clamp01(1f - Mathf.Pow(pv, 1.4f));
                     escala = Mathf.Lerp(1f, 0.05f, Mathf.Pow(pv, 2f));
                 }
