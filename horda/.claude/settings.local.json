@@ -9,7 +9,8 @@
       "Bash(grep -n \"timeScale\\\\|sortingOrder\" SkillEvolution/SkillEvolutionUI.cs)",
       "mcp__unity__refresh_unity",
       "mcp__unity__read_console",
-      "mcp__unity__execute_menu_item"
+      "mcp__unity__execute_menu_item",
+      "Bash(py --version)"
     ],
     "additionalDirectories": [
       "c:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda\\horda"
