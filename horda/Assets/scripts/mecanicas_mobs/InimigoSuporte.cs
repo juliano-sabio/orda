@@ -151,6 +151,8 @@ public class InimigoSuporte : MonoBehaviour
             CurarInimigo(alvosParaCurar[i]);
 
         // Onda de cura centrada na própria slime
+        SomSkill.Tocar(SomSkill.Tipo.SlimeCurativaCura, transform.position, 0.45f);
+
         var ondaGO = new GameObject("OndaCura");
         ondaGO.transform.position = transform.position;
         ondaGO.AddComponent<OndaCuraVisual>().Iniciar(raioCura, 0.6f);

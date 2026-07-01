@@ -313,6 +313,8 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator TransicaoFase2()
     {
+        SomSkill.Tocar(SomSkill.Tipo.CaveiraFase2, transform.position, 0.8f);
+
         controller.AplicarBuffDefesa(reducaoDanoFase2, 99999f);
         projeteis = projeteisFase1 * 2;
 
@@ -388,6 +390,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
         yield return StartCoroutine(PiscarOlhos());
 
         // Reaparece
+        SomSkill.Tocar(SomSkill.Tipo.CaveiraEmboscada, transform.position, 0.65f);
         yield return StartCoroutine(FadeAlpha(alphaSombra, 1f, duracaoFade));
         CameraShaker.Tremer(0.05f, 1.5f);
         StartCoroutine(ParticulasSombrias(10));
@@ -622,6 +625,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
         StartCoroutine(ParticulasSombrias(8));
 
         // Atravessa a tela inteira deixando uma trilha de fumaça venenosa
+        SomSkill.Tocar(SomSkill.Tipo.CaveiraInvestida, transform.position, 0.65f);
         if (danoContato != null) danoContato.enabled = true;
         CameraShaker.Tremer(0.08f, 0.4f);
         direcaoVoo = direcao;
@@ -687,6 +691,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
             yield return null;
         }
 
+        SomSkill.Tocar(SomSkill.Tipo.CaveiraGrito, transform.position, 0.75f);
         CameraShaker.Tremer(0.08f, 0.3f);
         StartCoroutine(EfeitoOndaGrito());
 
@@ -797,6 +802,7 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
 
         Destroy(marcador);
 
+        SomSkill.Tocar(SomSkill.Tipo.CaveiraGarras, alvo, 0.7f);
         CameraShaker.Tremer(0.12f, 0.25f);
         StartCoroutine(EfeitoGarrasVisual(alvo));
 
@@ -928,6 +934,8 @@ public class BossCaveira : MonoBehaviour, IBoss, IBossHud
     void Disparar()
     {
         if (prefabProjetil == null || player == null) return;
+
+        SomSkill.Tocar(SomSkill.Tipo.CaveiraDisparo, PosicaoBoca(), 0.55f);
 
         Vector3 spawnPos  = PosicaoBoca();
         Vector2 dirBase   = ((Vector2)player.position - (Vector2)spawnPos).normalized;

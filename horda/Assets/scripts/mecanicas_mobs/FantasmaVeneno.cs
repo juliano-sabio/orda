@@ -125,6 +125,7 @@ public class FantasmaVeneno : MonoBehaviour
         if (proxProjeteisFantasmas <= 0f && dist <= distanciaTiroFantasmas)
         {
             proxProjeteisFantasmas = cooldownProjeteisFantasmas;
+            SomSkill.Tocar(SomSkill.Tipo.FantasmaVeneno, transform.position, 0.45f);
             Vector2 dirParaPlayer = dist > 0.1f
                 ? ((Vector2)player.transform.position - (Vector2)transform.position) / dist
                 : Vector2.up;

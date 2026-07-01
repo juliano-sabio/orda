@@ -79,6 +79,8 @@ public class BolaDeFogoInimigo : MonoBehaviour
     {
         Vector3 pos = transform.position;
 
+        SomSkill.Tocar(SomSkill.Tipo.SlimeMagaExplosao, pos, 0.55f);
+
         // Dano direto ao player se estiver no raio
         var hits = Physics2D.OverlapCircleAll(pos, raioExp);
         foreach (var c in hits)

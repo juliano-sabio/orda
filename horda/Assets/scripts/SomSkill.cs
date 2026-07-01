@@ -29,7 +29,15 @@ public static class SomSkill
         TempestadeInicio, TempestadeLoop, TempestadeRaio,
         DomoInicio, DomoLoop, DomoFim,
         NecropoleInicio, NecropoleLoop, NecropoleFantasma,
-        DrenagemInicio, DrenagemLoop, DrenagemFim
+        DrenagemInicio, DrenagemLoop, DrenagemFim,
+        MagaDisparo, MagaEspecial, MagaRaioCarga, MagaRaioDisparo, MagaFase2,
+        CaveiraDisparo, CaveiraEmboscada, CaveiraInvestida, CaveiraGrito, CaveiraGarras, CaveiraFase2,
+        SlimeMagaCarga, SlimeMagaDisparo, SlimeMagaExplosao,
+        SlimeCurativaCura,
+        FantasmaEletrico, FantasmaFogo, FantasmaGelo, FantasmaVeneno,
+        XpColetar,
+        SlimeElemCarga, SlimeElemGelo, SlimeElemVento, SlimeElemFogo,
+        SlimeProtCarga, SlimeProtEscudo, SlimeProtBuff, SlimeProtProjetil
     }
 
     static AudioClip _impacto, _disparo, _explosao;
@@ -54,6 +62,14 @@ public static class SomSkill
     static AudioClip _domoInicio, _domoLoop, _domoFim;
     static AudioClip _necInicio, _necLoop, _necFant;
     static AudioClip _drenInicio, _drenLoop, _drenFim;
+    static AudioClip _magaDisp, _magaEsp, _magaRaioCarga, _magaRaioDisp, _magaFase2;
+    static AudioClip _cavDisp, _cavEmb, _cavInv, _cavGrito, _cavGarras, _cavFase2;
+    static AudioClip _smCarga, _smDisp, _smExp;
+    static AudioClip _scurCura;
+    static AudioClip _fEletrico, _fFogo, _fGelo, _fVeneno;
+    static AudioClip _xpColeta;
+    static AudioClip _seCarga, _seGelo, _seVento, _seFogo;
+    static AudioClip _spCarga, _spEscudo, _spBuff, _spProjetil;
 
     static AudioClip Carregar(string nome)
     {
@@ -112,6 +128,34 @@ public static class SomSkill
     static AudioClip DrenInicio  => _drenInicio ??= Carregar("drenagem_inicio");
     static AudioClip DrenLoop     => _drenLoop   ??= Carregar("drenagem_loop");
     static AudioClip DrenFim      => _drenFim    ??= Carregar("drenagem_fim");
+    static AudioClip MagaDisp      => _magaDisp      ??= Carregar("maga_disparo");
+    static AudioClip MagaEsp       => _magaEsp       ??= Carregar("maga_especial");
+    static AudioClip MagaRaioCargaC => _magaRaioCarga ??= Carregar("maga_raio_carga");
+    static AudioClip MagaRaioDispC => _magaRaioDisp  ??= Carregar("maga_raio_disparo");
+    static AudioClip MagaFase2C    => _magaFase2     ??= Carregar("maga_fase2");
+    static AudioClip CavDisp    => _cavDisp   ??= Carregar("caveira_disparo");
+    static AudioClip CavEmb     => _cavEmb    ??= Carregar("caveira_emboscada");
+    static AudioClip CavInv     => _cavInv    ??= Carregar("caveira_investida");
+    static AudioClip CavGrito   => _cavGrito  ??= Carregar("caveira_grito");
+    static AudioClip CavGarras  => _cavGarras ??= Carregar("caveira_garras");
+    static AudioClip CavFase2C  => _cavFase2  ??= Carregar("caveira_fase2");
+    static AudioClip SmCarga    => _smCarga  ??= Carregar("slimemaga_carga");
+    static AudioClip SmDisp     => _smDisp   ??= Carregar("slimemaga_disparo");
+    static AudioClip SmExp      => _smExp    ??= Carregar("slimemaga_explosao");
+    static AudioClip ScurCura   => _scurCura ??= Carregar("slimecurativa_cura");
+    static AudioClip FEletrico  => _fEletrico ??= Carregar("fantasma_eletrico");
+    static AudioClip FFogo      => _fFogo     ??= Carregar("fantasma_fogo");
+    static AudioClip FGelo      => _fGelo     ??= Carregar("fantasma_gelo");
+    static AudioClip FVeneno    => _fVeneno   ??= Carregar("fantasma_veneno");
+    static AudioClip XpColeta   => _xpColeta  ??= Carregar("xp_coletar");
+    static AudioClip SeCarga    => _seCarga ??= Carregar("slimeelem_carga");
+    static AudioClip SeGelo     => _seGelo  ??= Carregar("slimeelem_gelo");
+    static AudioClip SeVento    => _seVento ??= Carregar("slimeelem_vento");
+    static AudioClip SeFogo     => _seFogo  ??= Carregar("slimeelem_fogo");
+    static AudioClip SpCarga    => _spCarga   ??= Carregar("slimeprot_carga");
+    static AudioClip SpEscudo   => _spEscudo  ??= Carregar("slimeprot_escudo");
+    static AudioClip SpBuff     => _spBuff    ??= Carregar("slimeprot_buff");
+    static AudioClip SpProjetil => _spProjetil ??= Carregar("slimeprot_projetil");
 
     static AudioClip ClipDe(Tipo tipo)
     {
@@ -167,6 +211,34 @@ public static class SomSkill
             Tipo.DrenagemInicio => DrenInicio,
             Tipo.DrenagemLoop   => DrenLoop,
             Tipo.DrenagemFim    => DrenFim,
+            Tipo.MagaDisparo     => MagaDisp,
+            Tipo.MagaEspecial    => MagaEsp,
+            Tipo.MagaRaioCarga   => MagaRaioCargaC,
+            Tipo.MagaRaioDisparo => MagaRaioDispC,
+            Tipo.MagaFase2       => MagaFase2C,
+            Tipo.CaveiraDisparo   => CavDisp,
+            Tipo.CaveiraEmboscada => CavEmb,
+            Tipo.CaveiraInvestida => CavInv,
+            Tipo.CaveiraGrito     => CavGrito,
+            Tipo.CaveiraGarras    => CavGarras,
+            Tipo.CaveiraFase2     => CavFase2C,
+            Tipo.SlimeMagaCarga    => SmCarga,
+            Tipo.SlimeMagaDisparo  => SmDisp,
+            Tipo.SlimeMagaExplosao => SmExp,
+            Tipo.SlimeCurativaCura => ScurCura,
+            Tipo.FantasmaEletrico => FEletrico,
+            Tipo.FantasmaFogo     => FFogo,
+            Tipo.FantasmaGelo     => FGelo,
+            Tipo.FantasmaVeneno   => FVeneno,
+            Tipo.XpColetar        => XpColeta,
+            Tipo.SlimeElemCarga => SeCarga,
+            Tipo.SlimeElemGelo  => SeGelo,
+            Tipo.SlimeElemVento => SeVento,
+            Tipo.SlimeElemFogo  => SeFogo,
+            Tipo.SlimeProtCarga    => SpCarga,
+            Tipo.SlimeProtEscudo   => SpEscudo,
+            Tipo.SlimeProtBuff     => SpBuff,
+            Tipo.SlimeProtProjetil => SpProjetil,
             _             => null
         };
     }

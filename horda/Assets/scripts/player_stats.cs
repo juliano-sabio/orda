@@ -2162,6 +2162,67 @@ public class PlayerStats : MonoBehaviour
         if (sr != null) sr.color = corOriginalAnteParalisia;
     }
 
+    // ─── Bloqueio de Ultimate (projétil da SlimeProtetora) ──────────
+    // Roteado como os outros efeitos: em co-op o host manda pro cliente DONO, que aplica
+    // localmente (é lá que a ultimate é castada e o X do ícone é desenhado).
+    Coroutine corotinaBloqueioUlti;
+
+    public void BloquearUltimate(float duracao)
+    {
+        if (RotearEfeitoSeNaoDono(pn => pn.BloquearUltimateOwnerRpc(duracao))) return;
+        if (corotinaBloqueioUlti != null) StopCoroutine(corotinaBloqueioUlti);
+        corotinaBloqueioUlti = StartCoroutine(CorotinaBloqueioUltimate(duracao));
+    }
+
+    System.Collections.IEnumerator CorotinaBloqueioUltimate(float duracao)
+    {
+        ultimateReady      = false;
+        ultimateChargeTime = 0f;
+        ultimateBloqueada  = true;
+
+        var aura = CriarAuraBloqueioUlti();
+
+        yield return new WaitForSeconds(duracao);
+
+        ultimateBloqueada    = false;
+        corotinaBloqueioUlti = null;
+        if (aura != null) Destroy(aura);
+    }
+
+    GameObject CriarAuraBloqueioUlti()
+    {
+        var root = new GameObject("AuraBloqueioUlti");
+        const int SEGS = 36;
+        var lr = root.AddComponent<LineRenderer>();
+        lr.useWorldSpace = false;
+        lr.loop          = true;
+        lr.positionCount = SEGS;
+        lr.material      = new Material(Shader.Find("Sprites/Default"));
+        lr.sortingOrder  = 20;
+        lr.startWidth    = lr.endWidth = 0.06f;
+        for (int i = 0; i < SEGS; i++)
+        {
+            float a = (360f / SEGS) * i * Mathf.Deg2Rad;
+            lr.SetPosition(i, new Vector3(Mathf.Cos(a) * 0.8f, Mathf.Sin(a) * 0.8f, 0f));
+        }
+        StartCoroutine(AnimarAuraBloqueioUlti(root, lr));
+        return root;
+    }
+
+    System.Collections.IEnumerator AnimarAuraBloqueioUlti(GameObject root, LineRenderer lr)
+    {
+        float t = 0f;
+        while (root != null)
+        {
+            t += Time.deltaTime;
+            root.transform.position = transform.position;
+            root.transform.Rotate(0f, 0f, Time.deltaTime * -65f);
+            float pulso = Mathf.Sin(t * 4.5f) * 0.5f + 0.5f;
+            if (lr != null) lr.startColor = lr.endColor = new Color(0.5f, 0f, 1f, 0.35f + pulso * 0.45f);
+            yield return null;
+        }
+    }
+
     // ─── Segunda Fase: Barra de Luz ─────────────────────────────────
 
     public float GetLuzPercentual() => luzMaxima > 0f ? Mathf.Clamp01(luzAtual / luzMaxima) : 0f;

@@ -275,6 +275,8 @@ public class SlimeElemental : MonoBehaviour
 
     IEnumerator ZonaGelo(Vector2 centro)
     {
+        SomSkill.Tocar(SomSkill.Tipo.SlimeElemGelo, centro, 0.55f);
+
         var root = new GameObject("ZonaGelo");
         root.transform.position = centro;
         Destroy(root, duracaoGelo + 2f); // failsafe
@@ -428,6 +430,8 @@ public class SlimeElemental : MonoBehaviour
 
     IEnumerator Vortice(Vector2 centro)
     {
+        SomSkill.Tocar(SomSkill.Tipo.SlimeElemVento, centro, 0.55f);
+
         vorticeRoot = new GameObject("Vortice");
         var root = vorticeRoot;
         root.transform.position = centro;
@@ -662,6 +666,8 @@ public class SlimeElemental : MonoBehaviour
 
     IEnumerator ExplosaoFogo(Vector2 pos)
     {
+        SomSkill.Tocar(SomSkill.Tipo.SlimeElemFogo, pos, 0.6f);
+
         // 3 anéis expandindo em velocidades diferentes
         for (int r = 0; r < 3; r++)
         {
@@ -762,6 +768,8 @@ public class SlimeElemental : MonoBehaviour
 
     IEnumerator EfeitoCarga(Color cor, float duracao)
     {
+        SomSkill.Tocar(SomSkill.Tipo.SlimeElemCarga, transform.position, 0.45f);
+
         // Anel pulsante ao redor da slime — raio 2.0 para ficar fora do corpo (escala 6)
         cargaAnelExt = new GameObject("AnelCarga");
         cargaAnelExt.transform.position = transform.position;

@@ -28,6 +28,8 @@ public class SlimeCurativaOnda : MonoBehaviour
 
         Vector2 pos = transform.position;
 
+        SomSkill.Tocar(SomSkill.Tipo.SlimeCurativaCura, pos, 0.5f);
+
         var cols = Physics2D.OverlapCircleAll(pos, raioOnda, camadaInimigos);
         foreach (var c in cols)
         {

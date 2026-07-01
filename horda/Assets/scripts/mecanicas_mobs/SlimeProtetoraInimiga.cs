@@ -210,6 +210,8 @@ public class SlimeProtetoraInimiga : MonoBehaviour
         proxEscudo = cooldownEscudo;
         yield return StartCoroutine(EfeitoCarga(new Color(0.6f, 0.2f, 1f), 0.65f));
 
+        SomSkill.Tocar(SomSkill.Tipo.SlimeProtEscudo, CentroSprite, 0.55f);
+
         // Coleta aliados ordenados por distância
         var cols = Physics2D.OverlapCircleAll(CentroSprite, raioEscudo);
         var candidatos = new List<(InimigoController ic, float dist)>();
@@ -256,6 +258,8 @@ public class SlimeProtetoraInimiga : MonoBehaviour
         proxBuff = cooldownBuff;
         yield return StartCoroutine(EfeitoCarga(new Color(1f, 0.85f, 0.1f), 0.55f));
 
+        SomSkill.Tocar(SomSkill.Tipo.SlimeProtBuff, CentroSprite, 0.55f);
+
         var cols = Physics2D.OverlapCircleAll(CentroSprite, raioBuff);
         InimigoController alvoBuff = null;
         float menorDist = float.MaxValue;
@@ -288,6 +292,8 @@ public class SlimeProtetoraInimiga : MonoBehaviour
         yield return StartCoroutine(EfeitoCarga(new Color(0.25f, 0f, 0.6f), 0.75f));
 
         if (player == null) { atacando = false; yield break; }
+
+        SomSkill.Tocar(SomSkill.Tipo.SlimeProtProjetil, CentroSprite, 0.55f);
 
         Vector2 dir = ((Vector2)player.transform.position - CentroSprite).normalized;
 
@@ -322,6 +328,8 @@ public class SlimeProtetoraInimiga : MonoBehaviour
 
     IEnumerator EfeitoCarga(Color cor, float duracao)
     {
+        SomSkill.Tocar(SomSkill.Tipo.SlimeProtCarga, CentroSprite, 0.45f);
+
         var root = new GameObject("CargaVFX");
         root.transform.SetParent(transform);
         root.transform.position = CentroSprite;
@@ -543,7 +551,9 @@ public class ProjetilAntiUltiComp : MonoBehaviour
         var projCol = GetComponent<CircleCollider2D>();
         if (projCol != null) projCol.enabled = false;
 
-        ps.StartCoroutine(BloquearUlti(ps));
+        // Bloqueio roteado pela rede: em co-op o host manda pro cliente DONO aplicar (é lá
+        // que a ultimate é castada e o X do ícone é desenhado). Em SP roda direto.
+        ps.BloquearUltimate(duracaoBloqueio);
         StartCoroutine(ExplosaoEDesaparecer());
     }
 
@@ -551,57 +561,6 @@ public class ProjetilAntiUltiComp : MonoBehaviour
     {
         yield return StartCoroutine(Explodir());
         Destroy(gameObject);
-    }
-
-    IEnumerator BloquearUlti(PlayerStats ps)
-    {
-        ps.ultimateReady      = false;
-        ps.ultimateChargeTime = 0f;
-        ps.ultimateBloqueada  = true;
-
-        var aura = CriarAuraDebuff(ps.transform);
-
-        yield return new WaitForSeconds(duracaoBloqueio);
-
-        ps.ultimateBloqueada = false;
-        if (aura != null) Destroy(aura);
-    }
-
-    GameObject CriarAuraDebuff(Transform alvo)
-    {
-        var root = new GameObject("AuraDebuffUlti");
-        StartCoroutine(AnimarAura(root, alvo));
-        return root;
-    }
-
-    IEnumerator AnimarAura(GameObject root, Transform alvo)
-    {
-        const int SEGS = 36;
-        var anelGO = new GameObject("AnelDebuff");
-        anelGO.transform.SetParent(root.transform, false);
-        var lr = anelGO.AddComponent<LineRenderer>();
-        lr.useWorldSpace = false;
-        lr.loop          = true;
-        lr.positionCount = SEGS;
-        lr.material      = new Material(Shader.Find("Sprites/Default"));
-        lr.sortingOrder  = 20;
-        lr.startWidth    = lr.endWidth = 0.06f;
-        for (int i = 0; i < SEGS; i++)
-        {
-            float a = (360f / SEGS) * i * Mathf.Deg2Rad;
-            lr.SetPosition(i, new Vector3(Mathf.Cos(a) * 0.8f, Mathf.Sin(a) * 0.8f));
-        }
-
-        float t = 0f;
-        while (root != null && alvo != null)
-        {
-            t += Time.deltaTime;
-            root.transform.position = alvo.position;
-            root.transform.Rotate(0f, 0f, Time.deltaTime * -65f);
-            float pulso = Mathf.Sin(t * 4.5f) * 0.5f + 0.5f;
-            lr.startColor = lr.endColor = new Color(0.5f, 0f, 1f, 0.35f + pulso * 0.45f);
-            yield return null;
-        }
     }
 
     IEnumerator Explodir()
@@ -639,7 +598,7 @@ public class ProjetilAntiUltiComp : MonoBehaviour
         while (this != null && gameObject != null)
         {
             yield return new WaitForSeconds(0.04f);
-            if (gameObject == null) yield break;
+            if (gameObject == null || acertou) yield break; // para o rastro ao acertar
             var go  = new GameObject("T");
             var sr2 = go.AddComponent<SpriteRenderer>();
 

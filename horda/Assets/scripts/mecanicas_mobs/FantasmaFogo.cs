@@ -172,6 +172,8 @@ public class FantasmaFogo : MonoBehaviour
         atacando = true;
         rb.linearVelocity = Vector2.zero;
 
+        SomSkill.Tocar(SomSkill.Tipo.FantasmaFogo, transform.position, 0.5f);
+
         Vector2 destino = player != null ? (Vector2)player.transform.position : (Vector2)transform.position;
 
         yield return StartCoroutine(EfeitoCarregamento(0.8f, destino));
@@ -200,6 +202,8 @@ public class FantasmaFogo : MonoBehaviour
 
     IEnumerator DispararProjeteisFantasmas(Vector2 dirBase)
     {
+        SomSkill.Tocar(SomSkill.Tipo.FantasmaFogo, transform.position, 0.45f);
+
         int qtd = Mathf.Max(1, quantidadeProjeteisFantasmas);
         for (int i = 0; i < qtd; i++)
         {

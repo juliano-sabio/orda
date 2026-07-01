@@ -46,7 +46,7 @@ public class RaioCerteiroUltimate : MonoBehaviour, IUltimateCosmetico
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
         // Só o dono local dispara por input (o fantoche do colega roda via ExecutarCosmetico).
         if (playerStats != null && playerStats.IsLocalAuthority &&
-            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo && (playerStats == null || !playerStats.ultimateBloqueada))
             StartCoroutine(CadeiaDeRaios());
         SincronizarUI();
     }

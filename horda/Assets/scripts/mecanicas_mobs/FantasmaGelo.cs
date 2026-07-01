@@ -116,6 +116,7 @@ public class FantasmaGelo : MonoBehaviour
         if (proxTiro <= 0f && dist <= distanciaTiro)
         {
             proxTiro = cooldownTiro;
+            SomSkill.Tocar(SomSkill.Tipo.FantasmaGelo, transform.position, 0.45f);
             FxRunner.Instance.StartCoroutine(ProjetilGelo(transform.position, dirParaPlayer));
         }
 

@@ -96,6 +96,11 @@ public class XPOrb : MonoBehaviour
         if (EhClienteFantoche) return; // só o host coleta em co-op
         coletado = true;
 
+        // Blip suave de coleta (curto/baixo pra não empastar com vários orbes de uma vez).
+        // Só toca o som procedural se não houver um collectSound atribuído no prefab.
+        if (collectSound == null)
+            SomSkill.Tocar(SomSkill.Tipo.XpColetar, transform.position, 0.3f);
+
         // Co-op: soma no pool de XP compartilhado e despawna em todos.
         if (NetSpawn.EmRede)
         {

@@ -305,6 +305,9 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     public void AplicarParalisiaOwnerRpc(float duracao) { if (stats != null) stats.AplicarParalisiaPlayer(duracao); }
 
     [Rpc(SendTo.Owner)]
+    public void BloquearUltimateOwnerRpc(float duracao) { if (stats != null) stats.BloquearUltimate(duracao); }
+
+    [Rpc(SendTo.Owner)]
     public void DashChargeOwnerRpc() { if (stats != null) stats.AddDashCharge(); }
 
     // Co-op: replica o EFEITO visual do dash (rastro/partículas) no fantoche do colega —

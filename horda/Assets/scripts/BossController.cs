@@ -261,6 +261,8 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator TransicaoFase2()
     {
+        SomSkill.Tocar(SomSkill.Tipo.MagaFase2, transform.position, 0.8f);
+
         // Resistência a dano permanente
         controller.AplicarBuffDefesa(reducaoDanoFase2, 99999f);
 
@@ -397,6 +399,8 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         GameObject prefab = prefabProjetilEspecial != null ? prefabProjetilEspecial : prefabProjetil;
         if (prefab == null || player == null) return;
 
+        SomSkill.Tocar(SomSkill.Tipo.MagaEspecial, PosicaoOlho(), 0.65f);
+
         int qtd = fase2Ativada ? 3 : 1;
         Vector3 spawnPos = PosicaoOlho();
         Vector2 dirBase  = ((Vector2)player.position - (Vector2)spawnPos).normalized;
@@ -493,6 +497,8 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
     {
         if (prefabProjetil == null || player == null) return;
 
+        SomSkill.Tocar(SomSkill.Tipo.MagaDisparo, PosicaoOlho(), 0.55f);
+
         Vector3 spawnPos  = PosicaoOlho();
         Vector2 dirBase   = ((Vector2)player.position - (Vector2)spawnPos).normalized;
         float anguloBase  = Mathf.Atan2(dirBase.y, dirBase.x) * Mathf.Rad2Deg;
@@ -570,6 +576,9 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         Color corNucleo = new Color(1f, 0.95f, 1f);
         Color corGlow   = new Color(0.7f, 0.25f, 1f);
 
+        // Som de carga do raio (telegraph)
+        SomSkill.Tocar(SomSkill.Tipo.MagaRaioCarga, PosicaoOlho(), 0.6f);
+
         // ── Telegraph: feixe fraco acompanhando o jogador + retícula no alvo + orbe carregando ──
         GameObject telegraph = CriarFeixeVisual(corGlow, corNucleo);
         GameObject orbeCarga = CriarOrbeRaio(corGlow);
@@ -619,6 +628,9 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         }
 
         CameraShaker.Tremer(0.05f, duracaoRaio);
+
+        // Som de disparo do feixe
+        SomSkill.Tocar(SomSkill.Tipo.MagaRaioDisparo, PosicaoOlho(), 0.7f);
 
         // ── Trava a mira final ──────────────────────────────────────────
         Vector3 origemFinal = PosicaoOlho();

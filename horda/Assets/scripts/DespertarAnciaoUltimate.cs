@@ -51,7 +51,7 @@ public class DespertarAnciaoUltimate : MonoBehaviour, IUltimateCosmetico
     {
         if (cooldownRestante > 0f) cooldownRestante -= Time.deltaTime;
         if (playerStats != null && playerStats.IsLocalAuthority &&
-            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo)
+            InputBindings.UltimateDown() && cooldownRestante <= 0f && !ativo && (playerStats == null || !playerStats.ultimateBloqueada))
             StartCoroutine(CorotinaAtivacao());
         SincronizarUI();
     }

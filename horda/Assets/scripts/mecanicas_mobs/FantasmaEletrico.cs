@@ -163,6 +163,8 @@ public class FantasmaEletrico : MonoBehaviour
     {
         if (player == null) yield break;
 
+        SomSkill.Tocar(SomSkill.Tipo.FantasmaEletrico, transform.position, 0.5f);
+
         Vector2 origem  = transform.position;
         Vector2 destino = player.transform.position;
 

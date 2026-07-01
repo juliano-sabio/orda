@@ -57,6 +57,8 @@ public class SlimeMagaFireAttack : MonoBehaviour
         carregando = true;
         proxAtaque = Time.time + intervaloCarga;
 
+        SomSkill.Tocar(SomSkill.Tipo.SlimeMagaCarga, pontoDisparo.position, 0.4f);
+
         var sr      = GetComponent<SpriteRenderer>();
         var corOrig = sr != null ? sr.color : Color.white;
 
@@ -146,6 +148,8 @@ public class SlimeMagaFireAttack : MonoBehaviour
 
     void DispararBolaDeFogo()
     {
+        SomSkill.Tocar(SomSkill.Tipo.SlimeMagaDisparo, pontoDisparo.position, 0.5f);
+
         Vector2 dir = ((Vector2)playerTr.position - (Vector2)pontoDisparo.position).normalized;
 
         var go = new GameObject("BolaDeFogoMaga");
