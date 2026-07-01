@@ -253,6 +253,7 @@ public class DrenagemDeVidaUltimate : MonoBehaviour, IUltimateCosmetico
 
     void AnimarAura(GameObject root, float elapsed)
     {
+        if (root == null) return; // pode ter sido destruído (fim da ultimate / troca de cena)
         root.transform.position = transform.position;
         var lr = root.GetComponentInChildren<LineRenderer>();
         if (lr == null) return;
