@@ -49,6 +49,23 @@ public class MusicManager : MonoBehaviour
         _a = CriarSource();
         _b = CriarSource();
         _ativo = _a;
+
+        // Reinicia a música do zero sempre que uma cena (re)carrega — se a fase resetar (morrer/
+        // recomeçar) ou trocar, a faixa recomeça em vez de continuar de onde parou.
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (_fade != null) { StopCoroutine(_fade); _fade = null; }
+        if (_a != null) _a.Stop();
+        if (_b != null) _b.Stop();
+        _faixaAtual = Faixa.Nenhuma;   // força o Update a recomeçar a faixa certa do início
     }
 
     AudioSource CriarSource()

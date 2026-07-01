@@ -46,7 +46,9 @@ public class ProjetilEspecialPrincesa : MonoBehaviour
         if (player == null) yield break;
 
         var sr = player.GetComponent<SpriteRenderer>();
-        Color corOriginal = sr != null ? sr.color : Color.white;
+        // Cor VERDADEIRA do player (capturada 1x). Antes pegava sr.color na hora — se já estava
+        // queimando, capturava o laranja como "original" e restaurava nele → cor permanente.
+        Color corOriginal = sr != null ? CorBasePlayer.Obter(sr) : Color.white;
 
         // Textura de partícula de fogo (4×4 px)
         var texFogo = new Texture2D(4, 4, TextureFormat.RGBA32, false);
@@ -166,4 +168,21 @@ public class EfeitoRunner : MonoBehaviour
     }
 
     public void Run(IEnumerator rotina) => StartCoroutine(rotina);
+}
+
+// Guarda a cor ORIGINAL do player, capturada UMA vez. Efeitos que tingem o sprite (queimadura,
+// etc.) devem restaurar a partir daqui — assim hits sobrepostos não "congelam" a cor tingida.
+public class CorBasePlayer : MonoBehaviour
+{
+    public Color cor = Color.white;
+    bool salva;
+
+    public static Color Obter(SpriteRenderer sr)
+    {
+        if (sr == null) return Color.white;
+        var c = sr.GetComponent<CorBasePlayer>();
+        if (c == null) c = sr.gameObject.AddComponent<CorBasePlayer>();
+        if (!c.salva) { c.cor = sr.color; c.salva = true; }
+        return c.cor;
+    }
 }
