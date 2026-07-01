@@ -150,6 +150,17 @@ public class CartaSelecaoEfeito : MonoBehaviour
         }
         carta.localScale = Vector3.one;
 
+        // ── Fase 3.5: a carta FICA parada no meio por um instante ────────
+        // Garante que ela permaneça centralizada e visível antes de virar partículas.
+        t = 0f; dur = 0.7f;
+        while (t < dur)
+        {
+            t += Time.unscaledDeltaTime;
+            carta.anchoredPosition = centroTela;   // trava no centro (nada de deriva)
+            carta.localScale = Vector3.one;
+            yield return null;
+        }
+
         // ── Fase 4: explodir em bolinhas de energia ──────────────────────
         Vector2 playerCanvasPos = Vector2.zero;
         // co-op: a carta vai pro player DESTA tela (o dono local) — não o primeiro "Player" da
@@ -275,7 +286,7 @@ public class CartaSelecaoEfeito : MonoBehaviour
             playerScreenPos = Camera.main.WorldToScreenPoint(playerGO.transform.position);
 
         float durBurst = 0.5f;
-        float durVoo   = 2.0f;
+        float durVoo   = 1.0f;
         float durTotal = durBurst + durVoo;
         t = 0f;
 
@@ -302,8 +313,10 @@ public class CartaSelecaoEfeito : MonoBehaviour
                 else
                 {
                     float pv   = Mathf.SmoothStep(0f, 1f, (t - durBurst) / durVoo);
+                    // Continua se espalhando levemente a partir do centro e some NO LUGAR
+                    // (não voa mais pro player, que fica pro lado da tela).
                     Vector2 p0 = fragPos0[i] + fragVel[i];
-                    pos    = Vector2.Lerp(p0, playerCanvasPos, pv);
+                    pos    = p0 + fragVel[i] * 0.25f * pv;
                     alpha  = Mathf.Clamp01(1f - Mathf.Pow(pv, 1.4f));
                     escala = Mathf.Lerp(1f, 0.05f, Mathf.Pow(pv, 2f));
                 }
