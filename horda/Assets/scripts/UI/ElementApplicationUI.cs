@@ -304,16 +304,47 @@ public class ElementApplicationUI : MonoBehaviour
     static Sprite SlotFrame()  { CarregarFrames(); return _slotFrame;  }
 
     static Sprite[] _caricIcons;
-    static Sprite GetCaracteristicaIcone(CharacteristicType tipo)
+    static Sprite IconePorNome(string nome)
     {
         if (_caricIcons == null)
             _caricIcons = Resources.LoadAll<Sprite>("UI/caracteristicas_icons");
         if (_caricIcons == null || _caricIcons.Length == 0) return null;
-        string nome = tipo.ToString();
         foreach (var s in _caricIcons)
             if (s.name == nome) return s;
         return null;
     }
+
+    static Sprite GetCaracteristicaIcone(CharacteristicType tipo) => IconePorNome(tipo.ToString());
+
+    // As características DEFENSIVAS não têm sprite próprio em Resources → reusa o ícone ofensivo
+    // temático mais próximo (mesma família de elemento), pra não ficarem sem ícone.
+    static readonly System.Collections.Generic.Dictionary<DefensiveCharacteristicType, string> _defIconMap =
+        new System.Collections.Generic.Dictionary<DefensiveCharacteristicType, string>
+    {
+        { DefensiveCharacteristicType.AuraIgnea,          "Queimadura"   },
+        { DefensiveCharacteristicType.RetaliacaoChamas,   "Explosao"     },
+        { DefensiveCharacteristicType.EsquivaVentosa,     "Rajada"       },
+        { DefensiveCharacteristicType.SoproRepulsor,      "Recuo"        },
+        { DefensiveCharacteristicType.PeleDePedra,        "EscudoPedra"  },
+        { DefensiveCharacteristicType.FundacaoFirme,      "EscudoPedra"  },
+        { DefensiveCharacteristicType.MareRestauradora,   "Cura"         },
+        { DefensiveCharacteristicType.FluxoVital,         "Cura"         },
+        { DefensiveCharacteristicType.DescargaReativa,    "Paralisia"    },
+        { DefensiveCharacteristicType.CorrenteReflexiva,  "Cadeia"       },
+        { DefensiveCharacteristicType.ArmaduraGelida,     "Congelamento" },
+        { DefensiveCharacteristicType.ToqueCongelante,    "Lentidao"     },
+        { DefensiveCharacteristicType.Espinhos,           "Enraizamento" },
+        { DefensiveCharacteristicType.RaizesProtetoras,   "Enraizamento" },
+        { DefensiveCharacteristicType.DrenagemSombria,    "RouboVida"    },
+        { DefensiveCharacteristicType.MantoAmaldicoado,   "Maldicao"     },
+        { DefensiveCharacteristicType.BencaoSagrada,      "Sagrado"      },
+        { DefensiveCharacteristicType.LuzOfuscante,       "Cegamento"    },
+        { DefensiveCharacteristicType.CaosDefensivo,      "Caos"         },
+        { DefensiveCharacteristicType.PragaReativa,       "Infeccao"     },
+    };
+
+    static Sprite GetCaracteristicaDefensivaIcone(DefensiveCharacteristicType tipo)
+        => _defIconMap.TryGetValue(tipo, out var nome) ? IconePorNome(nome) : null;
 
     void CriarCardPoder(GameObject container, ElementCharacteristic car, int idx, Color corElem)
     {
@@ -329,7 +360,7 @@ public class ElementApplicationUI : MonoBehaviour
         CriarCardGenerico(container,
             Loc.T($"defchar.name.{car.tipo.ToString().ToLower()}"),
             Loc.T($"defchar.desc.{car.tipo.ToString().ToLower()}"),
-            idx, corElem, null);
+            idx, corElem, GetCaracteristicaDefensivaIcone(car.tipo));
     }
 
     void CriarCardGenerico(GameObject container, string nomeStr, string descStr, int idx, Color corElem, Sprite icone)

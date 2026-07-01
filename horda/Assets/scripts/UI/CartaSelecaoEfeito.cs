@@ -150,17 +150,6 @@ public class CartaSelecaoEfeito : MonoBehaviour
         }
         carta.localScale = Vector3.one;
 
-        // ── Fase 3.5: a carta FICA parada no meio por um instante ────────
-        // Garante que ela permaneça centralizada e visível antes de virar partículas.
-        t = 0f; dur = 0.7f;
-        while (t < dur)
-        {
-            t += Time.unscaledDeltaTime;
-            carta.anchoredPosition = centroTela;   // trava no centro (nada de deriva)
-            carta.localScale = Vector3.one;
-            yield return null;
-        }
-
         // ── Fase 4: explodir em bolinhas de energia ──────────────────────
         Vector2 playerCanvasPos = Vector2.zero;
         // co-op: a carta vai pro player DESTA tela (o dono local) — não o primeiro "Player" da
