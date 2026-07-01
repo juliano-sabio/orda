@@ -35,7 +35,8 @@ public class ContadorMortes : MonoBehaviour
     {
         CriarTexto();
         InimigoController.OnInimigoDerrotado += OnMorteInimigo;
-        PlayerStats.OnPlayerMorreu           += ResetarContador;
+        // NÃO resetar na morte do player: o resumo de fim de run (GameOverUI) precisa ler o total.
+        // O reset acontece só ao (re)carregar a fase (OnSceneLoaded) — o Recomeçar já recarrega a cena.
         SceneManager.sceneLoaded             += OnSceneLoaded;
         AtualizarVisibilidade(SceneManager.GetActiveScene().name);
         Atualizar();
@@ -44,7 +45,6 @@ public class ContadorMortes : MonoBehaviour
     void OnDestroy()
     {
         InimigoController.OnInimigoDerrotado -= OnMorteInimigo;
-        PlayerStats.OnPlayerMorreu           -= ResetarContador;
         SceneManager.sceneLoaded             -= OnSceneLoaded;
         if (_instance == this) _instance = null;
     }
