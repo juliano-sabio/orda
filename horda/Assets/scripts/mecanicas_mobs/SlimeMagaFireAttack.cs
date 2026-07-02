@@ -52,12 +52,74 @@ public class SlimeMagaFireAttack : MonoBehaviour
             StartCoroutine(SequenciaCarga());
     }
 
+    // Co-op (cliente): recria o visual de carga (halo + faíscas) no fantoche — versão
+    // standalone porque o Start não roda no cliente (pontoDisparo/campos ficam nulos).
+    public void CosmeticoCarga(float duracao)
+    {
+        var ponto = transform.Find("pivo") ?? transform;
+        SomSkill.Tocar(SomSkill.Tipo.SlimeMagaCarga, ponto.position, 0.4f);
+        StartCoroutine(CargaVisualCosmetica(ponto, duracao));
+    }
+
+    IEnumerator CargaVisualCosmetica(Transform ponto, float duracao)
+    {
+        var container = new GameObject("CargaFogo(coop)");
+        container.transform.SetParent(ponto, worldPositionStays: false);
+        container.transform.localPosition = Vector3.zero;
+        Destroy(container, duracao + 0.3f); // failsafe
+
+        var haloGO = new GameObject("Halo");
+        haloGO.transform.SetParent(container.transform, false);
+        var haloSR = haloGO.AddComponent<SpriteRenderer>();
+        haloSR.sprite       = FogoSprites.Anel;
+        haloSR.sortingOrder = 16;
+
+        const int N = 3;
+        var sparks = new SpriteRenderer[N];
+        for (int i = 0; i < N; i++)
+        {
+            var sg = new GameObject($"Spark{i}");
+            sg.transform.SetParent(container.transform, false);
+            var ssr = sg.AddComponent<SpriteRenderer>();
+            ssr.sprite       = FogoSprites.Disco;
+            ssr.sortingOrder = 16;
+            sparks[i] = ssr;
+        }
+
+        float orbitVel = Mathf.PI * 2.8f;
+        for (float t = 0f; t < duracao; t += Time.deltaTime)
+        {
+            if (container == null) yield break;
+            float p = t / duracao;
+
+            float haloEsc = Mathf.Lerp(0.10f, 0.32f, p) * (1f + Mathf.Sin(t * 9f) * 0.07f);
+            haloGO.transform.localScale = Vector3.one * haloEsc;
+            haloSR.color = new Color(1f, Mathf.Lerp(0.75f, 0.25f, p), 0f, Mathf.Lerp(0.25f, 0.60f, p));
+
+            float orbitR   = Mathf.Lerp(0.55f, 0.07f, Mathf.Pow(p, 1.8f));
+            float sparkAlp = Mathf.Clamp01(p * 5f);
+            float sparkEsc = Mathf.Lerp(0.10f, 0.04f, p);
+            for (int i = 0; i < N; i++)
+            {
+                float ang = Time.time * orbitVel + i * (Mathf.PI * 2f / N);
+                sparks[i].transform.localPosition = new Vector3(Mathf.Cos(ang) * orbitR, Mathf.Sin(ang) * orbitR, 0f);
+                sparks[i].transform.localScale    = Vector3.one * sparkEsc;
+                float corP = (Mathf.Sin(t * 7f + i * 1.3f) + 1f) * 0.5f;
+                sparks[i].color = new Color(1f, Mathf.Lerp(0.3f, 0.9f, corP), 0f, sparkAlp * 0.80f);
+            }
+            yield return null;
+        }
+        if (container != null) Destroy(container);
+    }
+
     IEnumerator SequenciaCarga()
     {
         carregando = true;
         proxAtaque = Time.time + intervaloCarga;
 
         SomSkill.Tocar(SomSkill.Tipo.SlimeMagaCarga, pontoDisparo.position, 0.4f);
+        // Co-op: replica o windup (halo + faíscas + som) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.CargaMaga, pontoDisparo.position, duracaoCarga);
 
         var sr      = GetComponent<SpriteRenderer>();
         var corOrig = sr != null ? sr.color : Color.white;

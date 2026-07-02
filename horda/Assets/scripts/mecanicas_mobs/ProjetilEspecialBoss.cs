@@ -28,12 +28,13 @@ public class ProjetilEspecialBoss : MonoBehaviour
         luz.intensity = 2.5f;
         luz.pointLightOuterRadius = 3.5f;
         luz.pointLightInnerRadius = 1f;
+        // Cor no Awake (não no Start): no cliente co-op o script é desligado antes do Start
+        // rodar — o Awake sempre roda, então o fantoche fica com a luz roxa certa.
+        luz.color = new Color(0.7f, 0f, 1f);
     }
 
     void Start()
     {
-        if (TryGetComponent<Light2D>(out var l))
-            l.color = new Color(0.7f, 0f, 1f);
         StartCoroutine(AutoDespawn(tempoMaximoVida));
         if (podeDividir && tempoDivisao > 0f)
             StartCoroutine(Dividir());
@@ -68,6 +69,13 @@ public class ProjetilEspecialBoss : MonoBehaviour
             Vector2 novaDir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
 
             GameObject filho = Instantiate(gameObject, transform.position, Quaternion.identity);
+            // Co-op: sem o Spawn os clones ficavam só no host — o P2 via 1 projétil sumir
+            // e tomava dano de 2 invisíveis. O clone herda o GlobalObjectIdHash do prefab.
+            if (NetSpawn.EmRede)
+            {
+                var no = filho.GetComponent<Unity.Netcode.NetworkObject>();
+                if (no != null) no.Spawn();
+            }
             ProjetilEspecialBoss p = filho.GetComponent<ProjetilEspecialBoss>();
             if (p != null)
             {
@@ -76,7 +84,8 @@ public class ProjetilEspecialBoss : MonoBehaviour
             }
         }
 
-        Destroy(gameObject);
+        // Em rede, Destroy direto num NetworkObject spawnado quebra o NGO — despawna certo.
+        NetSpawn.Despawnar(gameObject);
     }
 
     void OnTriggerEnter2D(Collider2D other)

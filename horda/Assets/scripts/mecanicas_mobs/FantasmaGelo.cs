@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 // orbitando, e dispara projéteis de gelo que causam dano e aplicam lentidão.
 // Periodicamente também cria uma zona de gelo no player. Ao morrer, cria uma
 // zona de gelo maior e explode em cristais.
-public class FantasmaGelo : MonoBehaviour
+public class FantasmaGelo : MonoBehaviour, IEnemyCosmetic
 {
     [Header("Movimento")]
     public float velocidade          = 3.5f;
@@ -81,10 +81,21 @@ public class FantasmaGelo : MonoBehaviour
 
     void OnDestroy() => InimigoController.OnPreMorte -= OnPreMorteHandler;
 
+    // Co-op (cliente): visual ambiente do fantoche (brilho + rastro de cristais).
+    public void SetupVisualCosmetico()
+    {
+        CriarLuz(transform, new Color(0.6f, 0.9f, 1f), 1.3f, 0.2f, 2f);
+        StartCoroutine(RastroGelo());
+    }
+
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
-        FxRunner.Instance.StartCoroutine(ZonaGelo(transform.position, raioGeloMorte, duracaoGeloMorte));
+        // Co-op: replica a zona de gelo e os cristais da morte pro P2.
+        var net = GetComponent<EnemyNet>();
+        net?.BroadcastCosmetico(MobCosmeticos.GeloZona, transform.position, raioGeloMorte, duracaoGeloMorte);
+        net?.BroadcastCosmetico(MobCosmeticos.GeloCristaisMorte, transform.position);
+        FxRunner.Instance.StartCoroutine(ZonaGelo(transform.position, raioGeloMorte, duracaoGeloMorte, comDano: true));
         FxRunner.Instance.StartCoroutine(ExplodirCristais(transform.position));
     }
 
@@ -117,7 +128,10 @@ public class FantasmaGelo : MonoBehaviour
         {
             proxTiro = cooldownTiro;
             SomSkill.Tocar(SomSkill.Tipo.FantasmaGelo, transform.position, 0.45f);
-            FxRunner.Instance.StartCoroutine(ProjetilGelo(transform.position, dirParaPlayer));
+            FxRunner.Instance.StartCoroutine(ProjetilGelo(transform.position, dirParaPlayer, comDano: true));
+            // Co-op: replica o projétil de gelo (com o som) pro P2.
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.GeloProjetil,
+                transform.position, dirParaPlayer.x, dirParaPlayer.y);
         }
 
         // Deformação flutuante de fantasma
@@ -166,7 +180,7 @@ public class FantasmaGelo : MonoBehaviour
         if (!Morto() && sr != null) sr.color = orig;
     }
 
-    IEnumerator ProjetilGelo(Vector2 origem, Vector2 dir)
+    public IEnumerator ProjetilGelo(Vector2 origem, Vector2 dir, bool comDano)
     {
         var go = new GameObject("ProjetilGelo");
         go.transform.position = origem;
@@ -203,7 +217,7 @@ public class FantasmaGelo : MonoBehaviour
                 SpawnParticula(go.transform.position, new Color(0.6f, 0.9f, 1f, 0.5f));
             }
 
-            if (player != null)
+            if (comDano && player != null)
             {
                 Vector2 posJogador = player.transform.position;
                 float distSegmento = DistanciaPontoSegmento(posJogador, posAnterior, go.transform.position);
@@ -211,7 +225,12 @@ public class FantasmaGelo : MonoBehaviour
                 {
                     player.TakeDamage(danoProjetil);
                     player.AplicarSlow(reducaoSlow, duracaoSlow);
-                    FxRunner.Instance.StartCoroutine(ZonaGelo(player.transform.position, raioZonaGelo, duracaoZonaGelo));
+                    FxRunner.Instance.StartCoroutine(ZonaGelo(player.transform.position, raioZonaGelo, duracaoZonaGelo, comDano: true));
+                    // Co-op: replica a zona de gelo criada no impacto pro P2. (Guarda de vida:
+                    // esta corrotina roda no FxRunner e o fantasma pode já ter morrido.)
+                    if (this != null)
+                        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.GeloZona,
+                            player.transform.position, raioZonaGelo, duracaoZonaGelo);
                     FxRunner.Instance.StartCoroutine(FadeOut(go, 0.15f));
                     yield break;
                 }
@@ -231,7 +250,7 @@ public class FantasmaGelo : MonoBehaviour
         return Vector2.Distance(ponto, projecao);
     }
 
-    IEnumerator ZonaGelo(Vector2 pos, float raio, float duracao)
+    public IEnumerator ZonaGelo(Vector2 pos, float raio, float duracao, bool comDano)
     {
         var root = new GameObject("ZonaGelo");
         root.transform.position = pos;
@@ -291,7 +310,7 @@ public class FantasmaGelo : MonoBehaviour
             }
 
             tick += Time.deltaTime;
-            if (tick >= 0.8f && player != null)
+            if (comDano && tick >= 0.8f && player != null)
             {
                 tick = 0f;
                 if (Vector2.Distance(player.transform.position, pos) <= raio)
@@ -310,7 +329,7 @@ public class FantasmaGelo : MonoBehaviour
         if (root != null) Destroy(root);
     }
 
-    IEnumerator ExplodirCristais(Vector2 pos)
+    public IEnumerator ExplodirCristais(Vector2 pos)
     {
         for (int i = 0; i < 12; i++)
         {

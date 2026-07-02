@@ -103,6 +103,9 @@ public class SlimeGuarda : MonoBehaviour
         sr.flipX = dir.x < 0f;
         rb.linearVelocity = Vector2.zero;
 
+        // Co-op: replica o telegraph do dash (flash laranja + tremida) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.CargaGuarda, transform.position, duracaoWindup);
+
         yield return StartCoroutine(TelegrafiarDash());
         if (Morto()) { sequenciaAtiva = false; yield break; }
 
@@ -143,6 +146,33 @@ public class SlimeGuarda : MonoBehaviour
         }
         sr.color         = Color.white;
         transform.localScale = escalaBase;
+    }
+
+    // Co-op (cliente): telegraph standalone — o Start não roda no cliente, então
+    // busca os componentes inline (sr/escala ficam nulos no fantoche).
+    public void CosmeticoTelegrafo(float duracao) => StartCoroutine(TelegrafoCosmetico(duracao));
+
+    IEnumerator TelegrafoCosmetico(float duracao)
+    {
+        var srC = GetComponent<SpriteRenderer>();
+        if (srC == null) yield break;
+        Color   corBase = srC.color;
+        Vector3 escBase = transform.localScale;
+
+        float t = 0f;
+        while (t < duracao)
+        {
+            t += Time.deltaTime;
+            float p     = t / duracao;
+            float flash = (Mathf.Sin(t * Mathf.PI * 2f / 0.18f) + 1f) * 0.5f;
+            srC.color = Color.Lerp(corBase, new Color(1f, 0.35f, 0f), flash * 0.85f);
+
+            float shake = Mathf.Sin(t * 65f) * Mathf.Lerp(0f, 0.12f, p);
+            transform.localScale = escBase * (1f + shake);
+            yield return null;
+        }
+        srC.color            = corBase;
+        transform.localScale = escBase;
     }
 
     // ── Dano de Contato ───────────────────────────────────────────────────────

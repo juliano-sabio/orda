@@ -264,18 +264,31 @@ public class SlimeElemental : MonoBehaviour
     // ATAQUE GELO
     // ═══════════════════════════════════════════════════════════════════════
 
+    // ── Entradas cosméticas (co-op, cliente): mesmo VFX, sem dano ────────────
+    public void CosmeticoCarga(Color cor, float duracao) => StartCoroutine(EfeitoCarga(cor, duracao));
+    public void CosmeticoZonaGelo(Vector2 centro) => StartCoroutine(ZonaGelo(centro, comDano: false));
+    public void CosmeticoVortice(Vector2 centro)  => StartCoroutine(Vortice(centro, comDano: false));
+    public void CosmeticoMeteoro(Vector2 destino) => StartCoroutine(Meteoro(destino, comDano: false));
+
     IEnumerator AtaqueGelo()
     {
         atacando = true;
         rb.linearVelocity = Vector2.zero;
+        BroadcastCarga(new Color(0.45f, 0.8f, 1f), 1.1f);
         yield return StartCoroutine(EfeitoCarga(new Color(0.45f, 0.8f, 1f), 1.1f));
 
         Vector2 pos = player != null ? (Vector2)player.transform.position : (Vector2)transform.position;
-        StartCoroutine(ZonaGelo(pos));
+        StartCoroutine(ZonaGelo(pos, comDano: true));
         atacando = false;
     }
 
-    IEnumerator ZonaGelo(Vector2 centro)
+    void BroadcastCarga(Color cor, float duracao)
+    {
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.CargaElemental,
+            transform.position, cor.r, cor.g, cor.b, duracao);
+    }
+
+    IEnumerator ZonaGelo(Vector2 centro, bool comDano)
     {
         SomSkill.Tocar(SomSkill.Tipo.SlimeElemGelo, centro, 0.55f);
 
@@ -283,12 +296,15 @@ public class SlimeElemental : MonoBehaviour
         root.transform.position = centro;
         Destroy(root, duracaoGelo + 2f); // failsafe
 
-        // Controller on root handles damage & slow independently of this slime's lifetime
-        var ctrl = root.AddComponent<ZonaGeloController>();
-        ctrl.Iniciar(player, centro, raioGelo, duracaoGelo, danoGelo, fatorLentidao);
+        if (comDano)
+        {
+            // Controller on root handles damage & slow independently of this slime's lifetime
+            var ctrl = root.AddComponent<ZonaGeloController>();
+            ctrl.Iniciar(player, centro, raioGelo, duracaoGelo, danoGelo, fatorLentidao);
 
-        // Co-op: marca a zona de gelo (anel + som) pro P2.
-        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.ZonaGeloAoe, centro, raioGelo, duracaoGelo);
+            // Co-op: replica o VFX completo da zona pro P2.
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.ZonaGeloAoe, centro, raioGelo, duracaoGelo);
+        }
 
         var anelExt = CriarAnel(root, raioGelo,         new Color(0.4f, 0.8f, 1f, 0.8f),  0.14f);
         var anelMed = CriarAnel(root, raioGelo * 0.65f, new Color(0.6f, 0.9f, 1f, 0.5f),  0.07f);
@@ -423,22 +439,24 @@ public class SlimeElemental : MonoBehaviour
     {
         atacando = true;
         rb.linearVelocity = Vector2.zero;
+        BroadcastCarga(new Color(0.6f, 1f, 0.55f), 0.9f);
         yield return StartCoroutine(EfeitoCarga(new Color(0.6f, 1f, 0.55f), 0.9f));
 
         Vector2 pos = player != null
             ? Vector2.Lerp(transform.position, player.transform.position, 0.55f)
             : (Vector2)transform.position;
 
-        StartCoroutine(Vortice(pos));
+        StartCoroutine(Vortice(pos, comDano: true));
         atacando = false;
     }
 
-    IEnumerator Vortice(Vector2 centro)
+    IEnumerator Vortice(Vector2 centro, bool comDano)
     {
         SomSkill.Tocar(SomSkill.Tipo.SlimeElemVento, centro, 0.55f);
 
-        // Co-op: marca o vórtice (anel + som) pro P2.
-        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VorticeAoe, centro, raioVento, duracaoVento);
+        // Co-op: replica o VFX completo do vórtice pro P2.
+        if (comDano)
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VorticeAoe, centro, raioVento, duracaoVento);
 
         vorticeRoot = new GameObject("Vortice");
         var root = vorticeRoot;
@@ -484,7 +502,7 @@ public class SlimeElemental : MonoBehaviour
                 detritos[i].transform.rotation      = Quaternion.Euler(0f, 0f, fases[i] * 1.2f);
             }
 
-            if (player != null && playerRb != null)
+            if (comDano && player != null && playerRb != null)
             {
                 float dist = Vector2.Distance(player.transform.position, centro);
                 if (dist <= raioVento * 1.6f && dist > 0.3f)
@@ -558,17 +576,19 @@ public class SlimeElemental : MonoBehaviour
     {
         atacando = true;
         rb.linearVelocity = Vector2.zero;
+        BroadcastCarga(new Color(1f, 0.42f, 0.05f), 1.3f);
         yield return StartCoroutine(EfeitoCarga(new Color(1f, 0.42f, 0.05f), 1.3f));
 
         Vector2 alvo = player != null ? (Vector2)player.transform.position : (Vector2)transform.position;
-        StartCoroutine(Meteoro(alvo));
+        StartCoroutine(Meteoro(alvo, comDano: true));
         atacando = false;
     }
 
-    IEnumerator Meteoro(Vector2 destino)
+    IEnumerator Meteoro(Vector2 destino, bool comDano)
     {
-        // Co-op: marca o alvo do meteoro (anel) pro P2.
-        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.MeteoroAoe, destino, raioExplosao, 1.2f);
+        // Co-op: replica o VFX completo do meteoro (marcador + queda + explosão) pro P2.
+        if (comDano)
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.MeteoroAoe, destino, raioExplosao, 1.2f);
 
         // Marcador de alvo — dois anéis pulsantes
         var marcGO  = new GameObject("MarcadorFogo");
@@ -617,7 +637,7 @@ public class SlimeElemental : MonoBehaviour
         Destroy(goM);
         Destroy(marcGO);
 
-        if (player != null && Vector2.Distance(player.transform.position, destino) <= raioExplosao)
+        if (comDano && player != null && Vector2.Distance(player.transform.position, destino) <= raioExplosao)
             player.TakeDamage(danoFogo);
 
         StartCoroutine(ExplosaoFogo(destino));

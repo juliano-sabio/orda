@@ -133,7 +133,7 @@ public class EnemyNet : NetworkBehaviour
     [Rpc(SendTo.NotServer)]
     void CosmeticoClientRpc(byte tipo, Vector3 pos, float p1, float p2, float p3, float p4, float p5)
     {
-        MobCosmeticos.Criar(tipo, pos, p1, p2, p3, p4, p5);
+        MobCosmeticos.Criar(tipo, pos, p1, p2, p3, p4, p5, this);
     }
 }
 
@@ -156,8 +156,34 @@ public static class MobCosmeticos
     public const byte ZonaGeloAoe    = 8;
     public const byte VorticeAoe     = 9;
     public const byte MeteoroAoe     = 10;
+    // Cargas/windups (o telegraph roda no fantoche, seguindo o NetworkTransform)
+    public const byte CargaElemental  = 11;
+    public const byte CargaMaga       = 12;
+    public const byte CargaGuarda     = 13;
+    public const byte CargaProtetora  = 14;
+    // Protetora: ondas de cast com som embutido
+    public const byte OndaEscudo      = 15;
+    public const byte OndaBuff        = 16;
+    // Projétil de lentidão (slime_de_projetil): som + vinhas no impacto
+    public const byte ImpactoLentidao = 17;
+    // Fantasmas elementais
+    public const byte FogoCarga         = 18;
+    public const byte FogoProjetil      = 19;
+    public const byte FogoExplosaoMorte = 20;
+    public const byte FogoFlashDash     = 21;
+    public const byte EletricoRaio      = 22;
+    public const byte EletricoDescarga  = 23;
+    public const byte EletricoBurst     = 24;
+    public const byte GeloProjetil      = 25;
+    public const byte GeloZona          = 26;
+    public const byte GeloCristaisMorte = 27;
+    public const byte VenenoNuvem       = 28;
+    public const byte VenenoProjetil    = 29;
 
-    public static void Criar(byte tipo, Vector3 pos, float p1, float p2, float p3, float p4, float p5)
+    // 'origem' = EnemyNet do mob que castou (no CLIENTE). Permite reusar as corrotinas visuais
+    // do próprio script do mob (desligado, mas o GameObject está ativo → coroutine roda) em vez
+    // de duplicar VFX. Efeitos de morte rodam no FxRunner (sobrevivem ao despawn do mob).
+    public static void Criar(byte tipo, Vector3 pos, float p1, float p2, float p3, float p4, float p5, EnemyNet origem = null)
     {
         switch (tipo)
         {
@@ -204,24 +230,153 @@ public static class MobCosmeticos
             }
             case ProjetilAntiUlti: // p1,p2 = dir(x,y); p3 = vel — projétil roxo da protetora
             {
-                var go = new GameObject("ProjetilAntiUlti(coop)");
-                go.transform.position = pos;
-                go.AddComponent<MobProjetilCosmetico>().Iniciar(
-                    new Vector2(p1, p2), p3, 1.8f, new Color(0.55f, 0.1f, 1f), 6f);
+                SomSkill.Tocar(SomSkill.Tipo.SlimeProtProjetil, pos, 0.55f);
+                // Versão completa (rastro + explosão perto do player local), sem gameplay.
+                SlimeProtetoraInimiga.CriarProjetilVisual(pos, new Vector2(p1, p2), p3, cosmetico: true);
                 break;
             }
-            // Ataques da Elemental — p1 = raio, p2 = duração. Marcador de zona (anel na AoE) + som.
+            // Ataques da Elemental — p1 = raio, p2 = duração. Recria o VFX REAL (as corrotinas
+            // visuais tocam o próprio som); fallback: anel marcador se o componente sumiu.
             case ZonaGeloAoe:
-                NovoMarcador(pos, p1, new Color(0.45f, 0.8f, 1f), p2);
-                SomSkill.Tocar(SomSkill.Tipo.SlimeElemGelo, pos, 0.55f);
+            {
+                var el = origem != null ? origem.GetComponent<SlimeElemental>() : null;
+                if (el != null) el.CosmeticoZonaGelo(pos);
+                else { NovoMarcador(pos, p1, new Color(0.45f, 0.8f, 1f), p2); SomSkill.Tocar(SomSkill.Tipo.SlimeElemGelo, pos, 0.55f); }
                 break;
+            }
             case VorticeAoe:
-                NovoMarcador(pos, p1, new Color(0.5f, 1f, 0.6f), p2);
-                SomSkill.Tocar(SomSkill.Tipo.SlimeElemVento, pos, 0.55f);
+            {
+                var el = origem != null ? origem.GetComponent<SlimeElemental>() : null;
+                if (el != null) el.CosmeticoVortice(pos);
+                else { NovoMarcador(pos, p1, new Color(0.5f, 1f, 0.6f), p2); SomSkill.Tocar(SomSkill.Tipo.SlimeElemVento, pos, 0.55f); }
                 break;
+            }
             case MeteoroAoe:
-                NovoMarcador(pos, p1, new Color(1f, 0.4f, 0.05f), p2);
+            {
+                var el = origem != null ? origem.GetComponent<SlimeElemental>() : null;
+                if (el != null) el.CosmeticoMeteoro(pos);
+                else NovoMarcador(pos, p1, new Color(1f, 0.4f, 0.05f), p2);
                 break;
+            }
+
+            // ── Cargas/windups ──────────────────────────────────────────────
+            case CargaElemental: // p1..p3 = cor, p4 = duração
+                origem?.GetComponent<SlimeElemental>()?.CosmeticoCarga(new Color(p1, p2, p3), p4);
+                break;
+            case CargaMaga: // p1 = duração
+                origem?.GetComponent<SlimeMagaFireAttack>()?.CosmeticoCarga(p1);
+                break;
+            case CargaGuarda: // p1 = duração
+                origem?.GetComponent<SlimeGuarda>()?.CosmeticoTelegrafo(p1);
+                break;
+            case CargaProtetora: // p1..p3 = cor, p4 = duração
+                origem?.GetComponent<SlimeProtetoraInimiga>()?.CosmeticoCarga(new Color(p1, p2, p3), p4);
+                break;
+
+            // ── Protetora: ondas de cast (visual + som) ─────────────────────
+            case OndaEscudo: // p1 = raio, p2 = duração
+            {
+                SomSkill.Tocar(SomSkill.Tipo.SlimeProtEscudo, pos, 0.55f);
+                var go = new GameObject("OndaEscudo(coop)");
+                go.transform.position = pos;
+                go.AddComponent<OndaCorVisual>().Iniciar(p1, new Color(0.6f, 0.2f, 1f), p2);
+                break;
+            }
+            case OndaBuff: // p1 = raio, p2 = duração
+            {
+                SomSkill.Tocar(SomSkill.Tipo.SlimeProtBuff, pos, 0.55f);
+                var go = new GameObject("OndaBuff(coop)");
+                go.transform.position = pos;
+                go.AddComponent<OndaCorVisual>().Iniciar(p1, new Color(1f, 0.85f, 0.1f), p2);
+                break;
+            }
+
+            case ImpactoLentidao: // som de impacto + vinhas no ponto do hit
+                origem?.GetComponent<projetil_inimigo>()?.ImpactoCosmetico(pos);
+                break;
+
+            // ── Fantasma de Fogo ────────────────────────────────────────────
+            case FogoCarga: // p1 = duração
+                SomSkill.Tocar(SomSkill.Tipo.FantasmaFogo, pos, 0.5f);
+                origem?.GetComponent<FantasmaFogo>()?.CosmeticoCarga(p1);
+                break;
+            case FogoProjetil: // p1,p2 = dir; p3 = 1 → toca o som da rajada
+            {
+                if (p3 > 0.5f) SomSkill.Tocar(SomSkill.Tipo.FantasmaFogo, pos, 0.45f);
+                var ff = origem != null ? origem.GetComponent<FantasmaFogo>() : null;
+                if (ff != null) FxRunner.Instance.StartCoroutine(ff.ProjetilFantasma(pos, new Vector2(p1, p2), comDano: false));
+                break;
+            }
+            case FogoExplosaoMorte: // p1 = raio
+            {
+                var ff = origem != null ? origem.GetComponent<FantasmaFogo>() : null;
+                if (ff != null) FxRunner.Instance.StartCoroutine(ff.ExplosaoMorte(pos, comDano: false));
+                break;
+            }
+            case FogoFlashDash: // p1 = raio do flash
+            {
+                var ff = origem != null ? origem.GetComponent<FantasmaFogo>() : null;
+                if (ff != null) FxRunner.Instance.StartCoroutine(ff.FlashExplosao(pos, p1));
+                break;
+            }
+
+            // ── Fantasma Elétrico ───────────────────────────────────────────
+            case EletricoRaio: // p1,p2 = destino (telegraph + raio, sem dano)
+            {
+                SomSkill.Tocar(SomSkill.Tipo.FantasmaEletrico, pos, 0.5f);
+                var fe = origem != null ? origem.GetComponent<FantasmaEletrico>() : null;
+                if (fe != null) fe.StartCoroutine(fe.RaioSequencia(new Vector2(p1, p2), comDano: false));
+                break;
+            }
+            case EletricoDescarga: // p1 = raio
+                origem?.GetComponent<FantasmaEletrico>()?.DescargaVisual(pos, p1);
+                break;
+            case EletricoBurst:
+            {
+                var fe = origem != null ? origem.GetComponent<FantasmaEletrico>() : null;
+                if (fe != null) fe.StartCoroutine(fe.BurstEletrico(pos));
+                break;
+            }
+
+            // ── Fantasma de Gelo ────────────────────────────────────────────
+            case GeloProjetil: // p1,p2 = dir
+            {
+                SomSkill.Tocar(SomSkill.Tipo.FantasmaGelo, pos, 0.45f);
+                var fg = origem != null ? origem.GetComponent<FantasmaGelo>() : null;
+                if (fg != null) FxRunner.Instance.StartCoroutine(fg.ProjetilGelo(pos, new Vector2(p1, p2), comDano: false));
+                break;
+            }
+            case GeloZona: // p1 = raio, p2 = duração
+            {
+                var fg = origem != null ? origem.GetComponent<FantasmaGelo>() : null;
+                if (fg != null) FxRunner.Instance.StartCoroutine(fg.ZonaGelo(pos, p1, p2, comDano: false));
+                break;
+            }
+            case GeloCristaisMorte:
+            {
+                var fg = origem != null ? origem.GetComponent<FantasmaGelo>() : null;
+                if (fg != null) FxRunner.Instance.StartCoroutine(fg.ExplodirCristais(pos));
+                break;
+            }
+
+            // ── Fantasma de Veneno (comum e atirador) ───────────────────────
+            case VenenoNuvem: // p1 = raio, p2 = duração
+            {
+                var fv = origem != null ? origem.GetComponent<FantasmaVeneno>() : null;
+                if (fv != null) { FxRunner.Instance.StartCoroutine(fv.NuvemDeVeneno(pos, p1, p2, 0f, comDano: false)); break; }
+                var fva = origem != null ? origem.GetComponent<FantasmaVenenoAtirador>() : null;
+                if (fva != null) FxRunner.Instance.StartCoroutine(fva.NuvemDeVeneno(pos, p1, p2, 0f, comDano: false));
+                break;
+            }
+            case VenenoProjetil: // p1,p2 = dir; p3 = 1 → toca o som do disparo
+            {
+                if (p3 > 0.5f) SomSkill.Tocar(SomSkill.Tipo.FantasmaVeneno, pos, 0.45f);
+                var fv = origem != null ? origem.GetComponent<FantasmaVeneno>() : null;
+                if (fv != null) { FxRunner.Instance.StartCoroutine(fv.ProjetilFantasma(pos, new Vector2(p1, p2), comDano: false)); break; }
+                var fva = origem != null ? origem.GetComponent<FantasmaVenenoAtirador>() : null;
+                if (fva != null) FxRunner.Instance.StartCoroutine(fva.ProjetilVeneno(pos, new Vector2(p1, p2), comDano: false));
+                break;
+            }
         }
     }
 

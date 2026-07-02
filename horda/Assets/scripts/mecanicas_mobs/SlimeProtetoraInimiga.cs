@@ -205,9 +205,19 @@ public class SlimeProtetoraInimiga : MonoBehaviour
 
     // ── Ataque 1: Escudo ──────────────────────────────────────────────────────
 
+    // Co-op (cliente): replica a carga (anéis + orbs + som) no fantoche.
+    public void CosmeticoCarga(Color cor, float duracao) => StartCoroutine(EfeitoCarga(cor, duracao));
+
+    void BroadcastCarga(Color cor, float duracao)
+    {
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.CargaProtetora,
+            CentroSprite, cor.r, cor.g, cor.b, duracao);
+    }
+
     IEnumerator AtaqueEscudo()
     {
         proxEscudo = cooldownEscudo;
+        BroadcastCarga(new Color(0.6f, 0.2f, 1f), 0.65f);
         yield return StartCoroutine(EfeitoCarga(new Color(0.6f, 0.2f, 1f), 0.65f));
 
         SomSkill.Tocar(SomSkill.Tipo.SlimeProtEscudo, CentroSprite, 0.55f);
@@ -247,8 +257,8 @@ public class SlimeProtetoraInimiga : MonoBehaviour
         meuEscudo.Ativar(vidaEscudo * 0.5f);
 
         StartCoroutine(OndaCircular(raioEscudo, new Color(0.6f, 0.2f, 1f), 0.6f));
-        // Co-op: replica a onda de cast do escudo pro P2.
-        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaCor, CentroSprite, raioEscudo, 0.6f, 0.2f, 1f, 0.6f);
+        // Co-op: replica a onda de cast do escudo (com o som) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaEscudo, CentroSprite, raioEscudo, 0.6f);
         yield return new WaitForSeconds(0.4f);
         atacando = false;
     }
@@ -258,6 +268,7 @@ public class SlimeProtetoraInimiga : MonoBehaviour
     IEnumerator AtaqueBuff()
     {
         proxBuff = cooldownBuff;
+        BroadcastCarga(new Color(1f, 0.85f, 0.1f), 0.55f);
         yield return StartCoroutine(EfeitoCarga(new Color(1f, 0.85f, 0.1f), 0.55f));
 
         SomSkill.Tocar(SomSkill.Tipo.SlimeProtBuff, CentroSprite, 0.55f);
@@ -282,8 +293,8 @@ public class SlimeProtetoraInimiga : MonoBehaviour
         }
 
         StartCoroutine(OndaCircular(raioBuff, new Color(1f, 0.85f, 0.1f), 0.55f));
-        // Co-op: replica a onda de cast do buff pro P2.
-        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaCor, CentroSprite, raioBuff, 1f, 0.85f, 0.1f, 0.55f);
+        // Co-op: replica a onda de cast do buff (com o som) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaBuff, CentroSprite, raioBuff, 0.55f);
         yield return new WaitForSeconds(0.4f);
         atacando = false;
     }
@@ -293,6 +304,7 @@ public class SlimeProtetoraInimiga : MonoBehaviour
     IEnumerator AtaqueProjetil()
     {
         proxProjetil = cooldownProjetil;
+        BroadcastCarga(new Color(0.25f, 0f, 0.6f), 0.75f);
         yield return StartCoroutine(EfeitoCarga(new Color(0.25f, 0f, 0.6f), 0.75f));
 
         if (player == null) { atacando = false; yield break; }
@@ -301,34 +313,50 @@ public class SlimeProtetoraInimiga : MonoBehaviour
 
         Vector2 dir = ((Vector2)player.transform.position - CentroSprite).normalized;
 
-        var projGO = new GameObject("ProjetilAntiUlti");
-        projGO.transform.position = CentroSprite;
-        projGO.tag   = "Enemy";
-        projGO.layer = LayerMask.NameToLayer("Enemy");
+        var projGO = CriarProjetilVisual(CentroSprite, dir, velocidadeProjetil, cosmetico: false);
+        var comp   = projGO.GetComponent<ProjetilAntiUltiComp>();
+        comp.duracaoBloqueio = duracaoBloqueioUlti;
+        comp.player          = player;
+
+        // Co-op: replica o projétil anti-ulti (visual completo: rastro + explosão) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.ProjetilAntiUlti, CentroSprite, dir.x, dir.y, velocidadeProjetil);
+
+        yield return new WaitForSeconds(0.3f);
+        atacando = false;
+    }
+
+    // Fábrica do projétil anti-ulti. cosmetico=true (co-op cliente): sem collider/gameplay —
+    // viaja, deixa rastro e "explode" visualmente perto do player local (o bloqueio real é
+    // roteado pelo host via BloquearUltimate).
+    public static GameObject CriarProjetilVisual(Vector3 pos, Vector2 dir, float vel, bool cosmetico)
+    {
+        var projGO = new GameObject(cosmetico ? "ProjetilAntiUlti(coop)" : "ProjetilAntiUlti");
+        projGO.transform.position = pos;
 
         var projSR = projGO.AddComponent<SpriteRenderer>();
         projSR.sprite       = GerarDisco(32, new Color(0.55f, 0.1f, 1f));
         projSR.sortingOrder = 13;
         projGO.transform.localScale = Vector3.one * 1.8f;
 
-        var projCol = projGO.AddComponent<CircleCollider2D>();
-        projCol.isTrigger = true;
-        projCol.radius    = 0.5f;
+        if (!cosmetico)
+        {
+            projGO.tag   = "Enemy";
+            projGO.layer = LayerMask.NameToLayer("Enemy");
+            var projCol = projGO.AddComponent<CircleCollider2D>();
+            projCol.isTrigger = true;
+            projCol.radius    = 0.5f;
+        }
 
         var projRb = projGO.AddComponent<Rigidbody2D>();
-        projRb.gravityScale = 0f;
-        projRb.constraints  = RigidbodyConstraints2D.FreezeRotation;
-        projRb.linearVelocity = dir * velocidadeProjetil;
+        projRb.gravityScale   = 0f;
+        projRb.bodyType       = cosmetico ? RigidbodyType2D.Kinematic : RigidbodyType2D.Dynamic;
+        projRb.constraints    = RigidbodyConstraints2D.FreezeRotation;
+        projRb.linearVelocity = dir * vel;
 
         var comp = projGO.AddComponent<ProjetilAntiUltiComp>();
-        comp.duracaoBloqueio = duracaoBloqueioUlti;
-        comp.player          = player;
-
-        // Co-op: replica o projétil anti-ulti (visual) pro P2.
-        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.ProjetilAntiUlti, CentroSprite, dir.x, dir.y, velocidadeProjetil);
-
-        yield return new WaitForSeconds(0.3f);
-        atacando = false;
+        comp.cosmetico = cosmetico;
+        if (cosmetico) comp.player = PlayerStats.Local;
+        return projGO;
     }
 
     // ── Visuais compartilhados ────────────────────────────────────────────────
@@ -521,6 +549,7 @@ public class ProjetilAntiUltiComp : MonoBehaviour
 {
     public float       duracaoBloqueio = 5f;
     public PlayerStats player;
+    public bool        cosmetico; // co-op cliente: só visual (sem bloquear ulti)
 
     bool acertou;
 
@@ -560,7 +589,8 @@ public class ProjetilAntiUltiComp : MonoBehaviour
 
         // Bloqueio roteado pela rede: em co-op o host manda pro cliente DONO aplicar (é lá
         // que a ultimate é castada e o X do ícone é desenhado). Em SP roda direto.
-        ps.BloquearUltimate(duracaoBloqueio);
+        // Cosmético (cliente): só a explosão visual — o bloqueio real vem do host.
+        if (!cosmetico) ps.BloquearUltimate(duracaoBloqueio);
         StartCoroutine(ExplosaoEDesaparecer());
     }
 

@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 // Fantasma elemental de Fogo: orbita o player a média distância e executa um ataque
 // de carga — para, carrega por 0.8s, depois dá um dash veloz em linha reta através do
 // player causando dano de fogo alto. Ao morrer, explode em brasas.
-public class FantasmaFogo : MonoBehaviour
+public class FantasmaFogo : MonoBehaviour, IEnemyCosmetic
 {
     [Header("Movimento")]
     public float velocidade        = 4f;
@@ -90,6 +90,18 @@ public class FantasmaFogo : MonoBehaviour
 
     void OnDestroy() => InimigoController.OnPreMorte -= OnPreMorteHandler;
 
+    // Co-op (cliente): o gameplay é desligado no fantoche — monta só o visual ambiente
+    // (brilho + rastro de brasas). No cliente o Morto() nunca vira true, então o rastro
+    // roda até o fantoche ser destruído pelo despawn — que é o comportamento certo.
+    public void SetupVisualCosmetico()
+    {
+        CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
+        StartCoroutine(RastroFogo());
+    }
+
+    // Co-op (cliente): anel de carregamento do dash no fantoche.
+    public void CosmeticoCarga(float dur) => StartCoroutine(EfeitoCarregamento(dur, transform.position));
+
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
@@ -101,7 +113,9 @@ public class FantasmaFogo : MonoBehaviour
         foreach (var p in projeteisAtivos) if (p != null) Destroy(p);
         projeteisAtivos.Clear();
 
-        FxRunner.Instance.StartCoroutine(ExplosaoMorte(transform.position));
+        // Co-op: replica a explosão de morte (flash + brasas) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.FogoExplosaoMorte, transform.position, raioExplosao);
+        FxRunner.Instance.StartCoroutine(ExplosaoMorte(transform.position, comDano: true));
     }
 
     bool Morto() => inimigoCtrl != null && inimigoCtrl.estaMorrendo;
@@ -173,6 +187,8 @@ public class FantasmaFogo : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
 
         SomSkill.Tocar(SomSkill.Tipo.FantasmaFogo, transform.position, 0.5f);
+        // Co-op: replica o anel de carregamento (com o som) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.FogoCarga, transform.position, 0.8f);
 
         Vector2 destino = player != null ? (Vector2)player.transform.position : (Vector2)transform.position;
 
@@ -191,6 +207,8 @@ public class FantasmaFogo : MonoBehaviour
             {
                 player.TakeDamage(danoCarga);
                 StartCoroutine(FlashExplosao(transform.position, 1.4f));
+                // Co-op: replica o flash do impacto do dash pro P2.
+                GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.FogoFlashDash, transform.position, 1.4f);
                 acertou = true;
             }
             yield return null;
@@ -216,12 +234,15 @@ public class FantasmaFogo : MonoBehaviour
                 dirBase.x * cos - dirBase.y * sen,
                 dirBase.x * sen + dirBase.y * cos);
 
-            FxRunner.Instance.StartCoroutine(ProjetilFantasma(transform.position, dir));
+            FxRunner.Instance.StartCoroutine(ProjetilFantasma(transform.position, dir, comDano: true));
+            // Co-op: replica cada projétil (o primeiro leva o som da rajada) pro P2.
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.FogoProjetil,
+                transform.position, dir.x, dir.y, i == 0 ? 1f : 0f);
             yield return new WaitForSeconds(0.08f);
         }
     }
 
-    IEnumerator ProjetilFantasma(Vector2 origem, Vector2 dir)
+    public IEnumerator ProjetilFantasma(Vector2 origem, Vector2 dir, bool comDano)
     {
         var go = new GameObject("ProjetilFantasma");
         go.transform.position = origem;
@@ -243,18 +264,21 @@ public class FantasmaFogo : MonoBehaviour
             go.transform.position += (Vector3)(dir * velocidadeProjetilFantasma * slow.fatorVelocidade * Time.deltaTime);
             SpawnBrasa(go.transform.position);
 
-            var alvo = Physics2D.OverlapCircle(go.transform.position, raioImpactoProjetilFantasma);
-            if (alvo != null && alvo.CompareTag("Player"))
+            if (comDano)
             {
-                var ps = alvo.GetComponent<PlayerStats>();
-                if (ps != null)
+                var alvo = Physics2D.OverlapCircle(go.transform.position, raioImpactoProjetilFantasma);
+                if (alvo != null && alvo.CompareTag("Player"))
                 {
-                    ps.TakeDamage(danoProjetilFantasma);
-                    ps.AplicarQueimaduraPlayer(danoQueimaduraPorTick, intervaloQueimadura, duracaoQueimadura);
+                    var ps = alvo.GetComponent<PlayerStats>();
+                    if (ps != null)
+                    {
+                        ps.TakeDamage(danoProjetilFantasma);
+                        ps.AplicarQueimaduraPlayer(danoQueimaduraPorTick, intervaloQueimadura, duracaoQueimadura);
+                    }
+                    projeteisAtivos.Remove(go);
+                    FxRunner.Instance.StartCoroutine(FadeOut(go, 0.15f));
+                    yield break;
                 }
-                projeteisAtivos.Remove(go);
-                FxRunner.Instance.StartCoroutine(FadeOut(go, 0.15f));
-                yield break;
             }
             yield return null;
         }
@@ -283,7 +307,7 @@ public class FantasmaFogo : MonoBehaviour
         if (go != null) Destroy(go);
     }
 
-    IEnumerator FlashExplosao(Vector2 pos, float raio)
+    public IEnumerator FlashExplosao(Vector2 pos, float raio)
     {
         var go  = new GameObject("Flash");
         var sr2 = go.AddComponent<SpriteRenderer>();
@@ -302,9 +326,9 @@ public class FantasmaFogo : MonoBehaviour
         Destroy(go);
     }
 
-    IEnumerator ExplosaoMorte(Vector2 pos)
+    public IEnumerator ExplosaoMorte(Vector2 pos, bool comDano)
     {
-        if (player != null && Vector2.Distance(player.transform.position, pos) <= raioExplosao)
+        if (comDano && player != null && Vector2.Distance(player.transform.position, pos) <= raioExplosao)
             player.TakeDamage(danoExplosao);
 
         FxRunner.Instance.StartCoroutine(FlashExplosao(pos, raioExplosao));

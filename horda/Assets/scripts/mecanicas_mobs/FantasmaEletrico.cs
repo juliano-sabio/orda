@@ -5,7 +5,7 @@ using UnityEngine.Rendering.Universal;
 // Fantasma elemental Elétrico: movimento contínuo ondulante com instabilidade elétrica,
 // paralisa o player ao tocar. Periodicamente dispara um raio de cadeia até o player.
 // Ao morrer, descarga elétrica em área ao redor.
-public class FantasmaEletrico : MonoBehaviour
+public class FantasmaEletrico : MonoBehaviour, IEnemyCosmetic
 {
     [Header("Movimento")]
     public float velocidade      = 4f;
@@ -77,9 +77,19 @@ public class FantasmaEletrico : MonoBehaviour
 
     void OnDestroy() => InimigoController.OnPreMorte -= OnPreMorteHandler;
 
+    // Co-op (cliente): visual ambiente do fantoche (brilho + rastro + flashes).
+    public void SetupVisualCosmetico()
+    {
+        CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
+        StartCoroutine(RastroEletrico());
+        StartCoroutine(FlashPeriodicoEletrico());
+    }
+
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
+        // Co-op: replica a descarga de morte (raios em leque) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.EletricoDescarga, transform.position, raioDescarga);
         StartCoroutine(Descarga(transform.position));
     }
 
@@ -135,6 +145,8 @@ public class FantasmaEletrico : MonoBehaviour
             ps.AplicarParalisiaPlayer(duracaoParalisia);
             proxParalisia = cooldownParalisia;
             StartCoroutine(BurstEletrico(transform.position));
+            // Co-op: replica o burst de faíscas da paralisia pro P2.
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.EletricoBurst, transform.position);
         }
     }
 
@@ -165,9 +177,18 @@ public class FantasmaEletrico : MonoBehaviour
 
         SomSkill.Tocar(SomSkill.Tipo.FantasmaEletrico, transform.position, 0.5f);
 
-        Vector2 origem  = transform.position;
         Vector2 destino = player.transform.position;
 
+        // Co-op: replica a sequência inteira (telegraph + impacto + raio, com som) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.EletricoRaio, transform.position, destino.x, destino.y);
+
+        yield return StartCoroutine(RaioSequencia(destino, comDano: true));
+    }
+
+    // Sequência visual do raio (telegraph → impacto → raio). Compartilhada com o cosmético
+    // de co-op (comDano:false no cliente — o dano é host-autoritativo).
+    public IEnumerator RaioSequencia(Vector2 destino, bool comDano)
+    {
         // Telegraph: marca a área que será atingida e dá tempo do player desviar
         var marca  = new GameObject("AvisoRaio");
         marca.transform.position = destino;
@@ -187,13 +208,16 @@ public class FantasmaEletrico : MonoBehaviour
         }
         Destroy(marca);
 
-        // Impacto: aplica dano em área no ponto telegrafado
-        var alvos = Physics2D.OverlapCircleAll(destino, raioImpactoRaio);
-        foreach (var alvo in alvos)
+        // Impacto: aplica dano em área no ponto telegrafado (host/SP apenas)
+        if (comDano)
         {
-            if (!alvo.CompareTag("Player")) continue;
-            var ps = alvo.GetComponent<PlayerStats>();
-            if (ps != null) ps.TakeDamage(danoRaio);
+            var alvos = Physics2D.OverlapCircleAll(destino, raioImpactoRaio);
+            foreach (var alvo in alvos)
+            {
+                if (!alvo.CompareTag("Player")) continue;
+                var ps = alvo.GetComponent<PlayerStats>();
+                if (ps != null) ps.TakeDamage(danoRaio);
+            }
         }
 
         var impacto  = new GameObject("ImpactoRaio");
@@ -204,8 +228,8 @@ public class FantasmaEletrico : MonoBehaviour
         impacto.transform.localScale = Vector3.one * raioImpactoRaio * 2f;
         impacto.AddComponent<EfeitoRunner>().Run(FadeOut(impacto, 0.35f));
 
-        // Atualiza a origem para a posição atual do fantasma (ele se move durante o telegraph)
-        origem = transform.position;
+        // Origem = posição atual do fantasma (ele se move durante o telegraph)
+        Vector2 origem = transform.position;
 
         const int SEGS = 8;
         var go = new GameObject("Raio");
@@ -245,7 +269,7 @@ public class FantasmaEletrico : MonoBehaviour
         Destroy(go);
     }
 
-    IEnumerator BurstEletrico(Vector2 pos)
+    public IEnumerator BurstEletrico(Vector2 pos)
     {
         for (int i = 0; i < 8; i++)
         {
@@ -270,13 +294,20 @@ public class FantasmaEletrico : MonoBehaviour
             player.AplicarParalisiaPlayer(duracaoParalisia * 1.5f);
         }
 
+        DescargaVisual(pos, raioDescarga);
+        yield break;
+    }
+
+    // Parte visual da descarga (raios em leque) — reutilizada pelo cosmético de co-op.
+    // Os raios rodam em EfeitoRunner próprio, então sobrevivem ao despawn do fantasma.
+    public void DescargaVisual(Vector2 pos, float raio)
+    {
         for (int i = 0; i < 8; i++)
         {
             float ang  = i * 45f * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-            RaioSolto(pos, pos + dir * raioDescarga);
+            RaioSolto(pos, pos + dir * raio);
         }
-        yield break;
     }
 
     void RaioSolto(Vector2 origem, Vector2 destino)

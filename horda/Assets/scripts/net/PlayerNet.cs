@@ -304,6 +304,17 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.Owner)]
     public void AplicarParalisiaOwnerRpc(float duracao) { if (stats != null) stats.AplicarParalisiaPlayer(duracao); }
 
+    // Co-op: lentidão do projétil de vinhas (slime_de_projetil) — o EfeitoLentidao mexe em
+    // velocidade/tint locais do player, então precisa rodar na máquina do DONO atingido.
+    [Rpc(SendTo.Owner)]
+    public void LentidaoOwnerRpc(float duracao, float fator, float r, float g, float b)
+    {
+        if (stats == null) return;
+        var efeito = stats.GetComponent<EfeitoLentidao>();
+        if (efeito == null) efeito = stats.gameObject.AddComponent<EfeitoLentidao>();
+        efeito.AplicarLentidao(duracao, fator, new Color(r, g, b));
+    }
+
     [Rpc(SendTo.Owner)]
     public void BloquearUltimateOwnerRpc(float duracao) { if (stats != null) stats.BloquearUltimate(duracao); }
 

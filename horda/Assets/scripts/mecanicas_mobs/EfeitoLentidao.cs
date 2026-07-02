@@ -17,11 +17,15 @@ public class EfeitoLentidao : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Color corOriginal;
 
-    void Start()
+    void Start() => InicializarRefs();
+
+    // O AplicarLentidao pode rodar no MESMO frame do AddComponent (antes do Start) —
+    // sem isto a 1ª aplicação não pegava velocidade/animator/sprite (refs ainda nulas).
+    void InicializarRefs()
     {
-        movimentoPlayer = GetComponent<PlayerStats>();
-        animator = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (movimentoPlayer == null) movimentoPlayer = GetComponent<PlayerStats>();
+        if (animator == null)        animator        = GetComponent<Animator>();
+        if (spriteRenderer == null)  spriteRenderer  = GetComponent<SpriteRenderer>();
     }
 
     void Update()
@@ -38,6 +42,8 @@ public class EfeitoLentidao : MonoBehaviour
 
     public void AplicarLentidao(float duracao, float fator, Color corEfeito)
     {
+        InicializarRefs();
+
         // Se já está lento, reinicia o tempo
         if (ativo)
         {

@@ -5,7 +5,7 @@ using UnityEngine.Rendering.Universal;
 
 // Fantasma elemental de Veneno: atravessa obstáculos, deixa rastro de nuvens tóxicas,
 // aplica envenenamento ao tocar o player. Ao morrer, cria uma grande nuvem de veneno.
-public class FantasmaVeneno : MonoBehaviour
+public class FantasmaVeneno : MonoBehaviour, IEnemyCosmetic
 {
     [Header("Movimento")]
     public float velocidade      = 3f;
@@ -96,6 +96,13 @@ public class FantasmaVeneno : MonoBehaviour
 
     void OnDestroy() => InimigoController.OnPreMorte -= OnPreMorteHandler;
 
+    // Co-op (cliente): visual ambiente do fantoche (brilho + rastro de partículas).
+    public void SetupVisualCosmetico()
+    {
+        CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
+        StartCoroutine(RastroVeneno());
+    }
+
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
@@ -103,7 +110,10 @@ public class FantasmaVeneno : MonoBehaviour
         foreach (var p in projeteisAtivos) if (p != null) Destroy(p);
         projeteisAtivos.Clear();
 
-        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemMorte, duracaoNuvemMorte, danoNuvemMortePorTick));
+        // Co-op: replica a nuvem grande de morte pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VenenoNuvem,
+            transform.position, raioNuvemMorte, duracaoNuvemMorte);
+        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemMorte, duracaoNuvemMorte, danoNuvemMortePorTick, comDano: true));
     }
 
     bool Morto() => inimigoCtrl != null && inimigoCtrl.estaMorrendo;
@@ -118,7 +128,10 @@ public class FantasmaVeneno : MonoBehaviour
         if (proxRastro <= 0f)
         {
             proxRastro = intervaloRastro;
-            FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemRastro, duracaoNuvemRastro, danoRastroPorTick));
+            FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemRastro, duracaoNuvemRastro, danoRastroPorTick, comDano: true));
+            // Co-op: replica a nuvem do rastro tóxico pro P2 (é uma AoE com dano — precisa aparecer).
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VenenoNuvem,
+                transform.position, raioNuvemRastro, duracaoNuvemRastro);
         }
 
         float dist = Vector2.Distance(transform.position, player.transform.position);
@@ -198,12 +211,15 @@ public class FantasmaVeneno : MonoBehaviour
                 dirBase.x * cos - dirBase.y * sen,
                 dirBase.x * sen + dirBase.y * cos);
 
-            FxRunner.Instance.StartCoroutine(ProjetilFantasma(transform.position, dir));
+            FxRunner.Instance.StartCoroutine(ProjetilFantasma(transform.position, dir, comDano: true));
+            // Co-op: replica cada projétil (o primeiro leva o som do disparo) pro P2.
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VenenoProjetil,
+                transform.position, dir.x, dir.y, i == 0 ? 1f : 0f);
             yield return new WaitForSeconds(0.12f);
         }
     }
 
-    IEnumerator ProjetilFantasma(Vector2 origem, Vector2 dir)
+    public IEnumerator ProjetilFantasma(Vector2 origem, Vector2 dir, bool comDano)
     {
         var go = new GameObject("ProjetilFantasmaVeneno");
         go.transform.position = origem;
@@ -233,30 +249,38 @@ public class FantasmaVeneno : MonoBehaviour
             go.transform.position += (Vector3)(dir * velocidadeProjetilFantasma * slow.fatorVelocidade * Time.deltaTime);
             SpawnParticula(go.transform.position, new Color(0.3f, 1f, 0.4f, 0.5f));
 
-            var alvo = Physics2D.OverlapCircle(go.transform.position, raioImpactoProjetilFantasma);
-            if (alvo != null && alvo.CompareTag("Player"))
+            if (comDano)
             {
-                var ps = alvo.GetComponent<PlayerStats>();
-                if (ps != null) ps.TakeDamage(danoProjetilFantasma);
-                ExplodirEmFumaca(go.transform.position);
-                projeteisAtivos.Remove(go);
-                Destroy(go);
-                yield break;
+                var alvo = Physics2D.OverlapCircle(go.transform.position, raioImpactoProjetilFantasma);
+                if (alvo != null && alvo.CompareTag("Player"))
+                {
+                    var ps = alvo.GetComponent<PlayerStats>();
+                    if (ps != null) ps.TakeDamage(danoProjetilFantasma);
+                    ExplodirEmFumaca(go.transform.position);
+                    projeteisAtivos.Remove(go);
+                    Destroy(go);
+                    yield break;
+                }
             }
             yield return null;
         }
 
-        ExplodirEmFumaca(go.transform.position);
+        if (comDano) ExplodirEmFumaca(go.transform.position);
         projeteisAtivos.Remove(go);
         if (go != null) Destroy(go);
     }
 
     void ExplodirEmFumaca(Vector2 pos)
     {
-        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(pos, raioNuvemProjetil, duracaoNuvemProjetil, danoNuvemProjetilPorTick));
+        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(pos, raioNuvemProjetil, duracaoNuvemProjetil, danoNuvemProjetilPorTick, comDano: true));
+        // Co-op: replica a nuvem da explosão do projétil pro P2. (Guarda de vida: chamado
+        // de corrotina no FxRunner — o fantasma pode já ter morrido.)
+        if (this != null)
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VenenoNuvem,
+                pos, raioNuvemProjetil, duracaoNuvemProjetil);
     }
 
-    IEnumerator NuvemDeVeneno(Vector2 pos, float raio, float duracao, float danoPorTick)
+    public IEnumerator NuvemDeVeneno(Vector2 pos, float raio, float duracao, float danoPorTick, bool comDano)
     {
         var root = new GameObject("NuvemVeneno");
         root.transform.position = pos;
@@ -272,7 +296,7 @@ public class FantasmaVeneno : MonoBehaviour
         {
             if (root == null) yield break;
             tick += Time.deltaTime;
-            if (tick >= 1f && player != null)
+            if (comDano && tick >= 1f && player != null)
             {
                 tick = 0f;
                 if (Vector2.Distance(player.transform.position, pos) <= raio)

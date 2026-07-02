@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class InimigoSuporte : MonoBehaviour
+public class InimigoSuporte : MonoBehaviour, IEnemyCosmetic
 {
     [Header("Configurações de Cura")]
     public float taxaCura = 10f;
@@ -70,19 +70,27 @@ public class InimigoSuporte : MonoBehaviour
             audioSource.playOnAwake = false;
         }
 
-        if (particulasCura != null)
-        {
-            GameObject particulas = Instantiate(particulasCura, transform);
-            particulas.transform.localPosition = Vector3.zero;
+        CriarAuraParticulas();
+    }
 
-            ParticleSystem ps = particulas.GetComponent<ParticleSystem>();
-            if (ps != null)
-            {
-                var shape = ps.shape;
-                shape.radius = raioCura * 0.8f;
-            }
+    void CriarAuraParticulas()
+    {
+        if (particulasCura == null) return;
+
+        GameObject particulas = Instantiate(particulasCura, transform);
+        particulas.transform.localPosition = Vector3.zero;
+
+        ParticleSystem ps = particulas.GetComponent<ParticleSystem>();
+        if (ps != null)
+        {
+            var shape = ps.shape;
+            shape.radius = raioCura * 0.8f;
         }
     }
+
+    // Co-op (cliente): o script é desligado no fantoche — o EnemyNet chama isto pra
+    // montar só a aura de partículas de cura (visual ambiente).
+    public void SetupVisualCosmetico() => CriarAuraParticulas();
 
     IEnumerator IniciarAposDelay()
     {
@@ -185,6 +193,10 @@ public class InimigoSuporte : MonoBehaviour
         var go = new GameObject("OndaRepulsao");
         go.transform.position = transform.position;
         StartCoroutine(AnimarOndaRepulsao(go));
+
+        // Co-op: replica a onda de repulsão (anel verde) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaCor,
+            transform.position, raioRepulsao, 0.25f, 1f, 0.45f, duracaoOndaRep);
     }
 
     IEnumerator AnimarOndaRepulsao(GameObject go)

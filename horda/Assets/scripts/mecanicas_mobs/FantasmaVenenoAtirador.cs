@@ -5,7 +5,7 @@ using UnityEngine.Rendering.Universal;
 // Fantasma elemental de Veneno (variante Atiradora): mantém distância do player,
 // orbitando, e dispara projéteis tóxicos que causam dano e aplicam envenenamento.
 // Ao morrer, libera uma nuvem de veneno como o fantasma_veneno comum.
-public class FantasmaVenenoAtirador : MonoBehaviour
+public class FantasmaVenenoAtirador : MonoBehaviour, IEnemyCosmetic
 {
     [Header("Movimento")]
     public float velocidade          = 2.6f;
@@ -76,10 +76,17 @@ public class FantasmaVenenoAtirador : MonoBehaviour
 
     void OnDestroy() => InimigoController.OnPreMorte -= OnPreMorteHandler;
 
+    // Co-op (cliente): brilho ambiente do fantoche.
+    public void SetupVisualCosmetico() =>
+        CriarLuz(transform, corBrilho, intensidadeBrilho, raioInternoBrilho, raioExternoBrilho);
+
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
-        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemMorte, duracaoNuvemMorte, danoNuvemMortePorTick));
+        // Co-op: replica a nuvem de morte pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VenenoNuvem,
+            transform.position, raioNuvemMorte, duracaoNuvemMorte);
+        FxRunner.Instance.StartCoroutine(NuvemDeVeneno(transform.position, raioNuvemMorte, duracaoNuvemMorte, danoNuvemMortePorTick, comDano: true));
     }
 
     bool Morto() => inimigoCtrl != null && inimigoCtrl.estaMorrendo;
@@ -108,7 +115,10 @@ public class FantasmaVenenoAtirador : MonoBehaviour
         if (proxTiro <= 0f && dist <= distanciaTiro)
         {
             proxTiro = cooldownTiro;
-            FxRunner.Instance.StartCoroutine(ProjetilVeneno(transform.position, dirParaPlayer));
+            FxRunner.Instance.StartCoroutine(ProjetilVeneno(transform.position, dirParaPlayer, comDano: true));
+            // Co-op: replica o projétil tóxico pro P2.
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VenenoProjetil,
+                transform.position, dirParaPlayer.x, dirParaPlayer.y);
         }
 
         // Deformação flutuante de fantasma
@@ -137,7 +147,7 @@ public class FantasmaVenenoAtirador : MonoBehaviour
         proxContato = Time.time + intervaloContato;
     }
 
-    IEnumerator ProjetilVeneno(Vector2 origem, Vector2 dir)
+    public IEnumerator ProjetilVeneno(Vector2 origem, Vector2 dir, bool comDano)
     {
         var go = new GameObject("ProjetilVeneno");
         go.transform.position = origem;
@@ -158,7 +168,7 @@ public class FantasmaVenenoAtirador : MonoBehaviour
             go.transform.position += (Vector3)(dir * velocidadeProjetil * slow.fatorVelocidade * Time.deltaTime);
             SpawnParticula(go.transform.position, new Color(0.3f, 1f, 0.4f, 0.5f));
 
-            if (player != null &&
+            if (comDano && player != null &&
                 Vector2.Distance(go.transform.position, player.transform.position) <= raioImpactoProjetil)
             {
                 player.TakeDamage(danoProjetil);
@@ -171,7 +181,7 @@ public class FantasmaVenenoAtirador : MonoBehaviour
         if (go != null) Destroy(go);
     }
 
-    IEnumerator NuvemDeVeneno(Vector2 pos, float raio, float duracao, float danoPorTick)
+    public IEnumerator NuvemDeVeneno(Vector2 pos, float raio, float duracao, float danoPorTick, bool comDano)
     {
         var root = new GameObject("NuvemVeneno");
         root.transform.position = pos;

@@ -121,6 +121,10 @@ public class projetil_inimigo : MonoBehaviour
             // Toca som de impacto
             TocarSomImpacto();
 
+            // Co-op: replica som + vinhas do impacto pro P2 (antes do despawn — o RPC
+            // chega antes da mensagem de despawn, então o objeto ainda existe no cliente).
+            GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.ImpactoLentidao, transform.position);
+
             // Despawna (em co-op o host remove em todos; cliente que detectou no-op).
             NetSpawn.Despawnar(gameObject);
         }
@@ -139,9 +143,25 @@ public class projetil_inimigo : MonoBehaviour
             efeito = player.AddComponent<EfeitoLentidao>();
         }
 
-        // Aplica o efeito
+        // Aplica o efeito (no host: tinge/deixa lento a cópia local do player atingido)
         efeito.AplicarLentidao(duracaoLentidao, fatorLentidao, corEfeito);
 
+        // Co-op: se o atingido é um player REMOTO, o movimento dele é owner-autoritativo —
+        // manda o DONO aplicar a lentidão (tint + velocidade) na máquina dele.
+        var pn = player.GetComponent<PlayerNet>();
+        if (pn != null && !pn.IsOwner)
+            pn.LentidaoOwnerRpc(duracaoLentidao, fatorLentidao, corEfeito.r, corEfeito.g, corEfeito.b);
+    }
+
+    // Co-op (cliente): som + vinhas no ponto do impacto (versão que não segue o player).
+    public void ImpactoCosmetico(Vector3 pos)
+    {
+        TocarSomImpacto();
+        if (prefabVinhas == null) return;
+        var vinhas = Instantiate(prefabVinhas, pos, Quaternion.identity);
+        var controller = vinhas.GetComponent<VinhasController>();
+        if (controller != null) controller.Iniciar(duracaoVinhas);
+        else Destroy(vinhas, duracaoVinhas);
     }
 
     void CriarVinhas(GameObject player)
