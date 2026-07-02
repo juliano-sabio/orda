@@ -309,7 +309,9 @@ public class GerenciadorEventos : MonoBehaviour
 
         // Os indicadores (setas que apontam pro objetivo) só aparecem na SEGUNDA METADE do
         // evento — dá um tempo pro player procurar sozinho antes de a seta ajudar.
-        bool indicadorLiberado = eventoAtual != null && timerContagem <= eventoAtual.duracao * 0.5f;
+        // Antes só liberava na 2ª metade — mas isso era só no host (o cliente/P2 cria via cosmético
+        // na hora), então em co-op o indicador aparecia "só pro P2". Liberado desde o início nos dois.
+        bool indicadorLiberado = eventoAtual != null;
 
         if (indicadorLiberado
             && eventoAtual.tipo == TipoEvento.EliminarSlimeColorida

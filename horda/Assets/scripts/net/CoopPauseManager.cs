@@ -13,7 +13,7 @@ public class CoopPauseManager : NetworkBehaviour
 
     // Estado só-no-host.
     readonly HashSet<ulong> retentoresEscolha = new HashSet<ulong>();
-    bool menuAberto;
+    readonly HashSet<ulong> menuAbertoPor = new HashSet<ulong>(); // quem tem o menu de pausa aberto
 
     // Sincronizado pra todos.
     public readonly NetworkVariable<bool> pausado = new NetworkVariable<bool>(
@@ -60,24 +60,29 @@ public class CoopPauseManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void AbrirMenuServerRpc(RpcParams rpc = default)
     {
-        menuAberto = true;
+        menuAbertoPor.Add(rpc.Receive.SenderClientId);
         donoMenu.Value = rpc.Receive.SenderClientId;
         Recomputar();
     }
 
-    // Sem RpcParams de propósito: qualquer player pode fechar a pausa do menu (não só quem abriu).
+    // Cada player fecha só o PRÓPRIO menu — a pausa só sai quando TODOS fecharem. (Antes, um
+    // fechando despausava o jogo mesmo com o menu do outro ainda aberto.)
     [Rpc(SendTo.Server)]
-    public void FecharMenuServerRpc()
+    public void FecharMenuServerRpc(RpcParams rpc = default)
     {
-        menuAberto = false;
-        donoMenu.Value = SemDono;
+        menuAbertoPor.Remove(rpc.Receive.SenderClientId);
+        if (donoMenu.Value == rpc.Receive.SenderClientId)
+            donoMenu.Value = menuAbertoPor.Count > 0 ? PrimeiroMenu() : SemDono;
         Recomputar();
     }
+
+    ulong PrimeiroMenu() { foreach (var id in menuAbertoPor) return id; return SemDono; }
 
     void AoDesconectar(ulong id)
     {
         retentoresEscolha.Remove(id);
-        if (menuAberto && donoMenu.Value == id) { menuAberto = false; donoMenu.Value = SemDono; }
+        menuAbertoPor.Remove(id);
+        if (donoMenu.Value == id) donoMenu.Value = menuAbertoPor.Count > 0 ? PrimeiroMenu() : SemDono;
         Recomputar();
     }
 
@@ -94,7 +99,7 @@ public class CoopPauseManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void VoltarAoLobbyServerRpc()
     {
-        menuAberto = false; donoMenu.Value = SemDono; retentoresEscolha.Clear();
+        menuAbertoPor.Clear(); donoMenu.Value = SemDono; retentoresEscolha.Clear();
         Recomputar();
         Time.timeScale = 1f;
         LobbyState.EmLobby = true;
@@ -104,7 +109,7 @@ public class CoopPauseManager : NetworkBehaviour
 
     void Recomputar()
     {
-        pausado.Value = retentoresEscolha.Count > 0 || menuAberto;
+        pausado.Value = retentoresEscolha.Count > 0 || menuAbertoPor.Count > 0;
     }
 
     GUIStyle estiloOverlay; // cacheado: OnGUI roda várias vezes por frame (sem alocar por frame)

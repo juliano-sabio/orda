@@ -64,10 +64,12 @@ public class EfeitoLentidao : MonoBehaviour
             animator.speed *= fator;
         }
 
-        // Muda cor para indicar efeito
+        // Muda cor para indicar efeito. Usa a cor VERDADEIRA do player (CorBasePlayer, capturada
+        // 1x) em vez de sr.color na hora — senão, se já havia outro tint ativo, restaurava na cor
+        // errada e o player ficava verde/tingido permanentemente.
         if (spriteRenderer != null)
         {
-            corOriginal = spriteRenderer.color;
+            corOriginal = CorBasePlayer.Obter(spriteRenderer);
             spriteRenderer.color = corEfeito;
         }
 
