@@ -41,6 +41,9 @@ public class SlimeCurativaOnda : MonoBehaviour
         var go = new GameObject("OndaCura");
         go.transform.position = pos;
         go.AddComponent<OndaCuraVisual>().Iniciar(raioOnda, duracaoOnda);
+
+        // Co-op: replica a onda (visual + som) pro P2 (a slime não roda o gameplay no cliente).
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaCura, pos, raioOnda, duracaoOnda);
     }
 }
 

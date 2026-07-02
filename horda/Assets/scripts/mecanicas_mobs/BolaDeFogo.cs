@@ -7,6 +7,32 @@ public class BolaDeFogoInimigo : MonoBehaviour
 {
     float raioExp, danoExp, duracaoFogo, danoPorTick, intervaloTick;
     bool  explodiu;
+    bool  cosmetico; // co-op cliente: só visual (viaja + explode visualmente, sem dano)
+
+    // Co-op (cliente): mesma bola visual, mas sem dano. Explode visualmente ao colidir/timeout.
+    public void InicializarCosmetico(Vector2 dir, float vel, float raioExp, float duracaoFogo)
+    {
+        cosmetico        = true;
+        this.raioExp     = raioExp;
+        this.duracaoFogo = duracaoFogo;
+        this.danoExp     = 0f; this.danoPorTick = 0f; this.intervaloTick = 1f;
+
+        var sr = gameObject.AddComponent<SpriteRenderer>();
+        sr.sprite = FogoSprites.Disco;
+        sr.color  = new Color(1f, 0.45f, 0.05f, 1f);
+        sr.sortingOrder = 14;
+        transform.localScale = Vector3.one * 0.45f;
+
+        var col = gameObject.AddComponent<CircleCollider2D>();
+        col.isTrigger = true; col.radius = 0.22f;
+
+        var rb = gameObject.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic; rb.gravityScale = 0f;
+        rb.linearVelocity = dir * vel;
+
+        StartCoroutine(PulsarCor(sr));
+        Destroy(gameObject, 5f);
+    }
 
     public void Inicializar(Vector2 dir, float vel, float raioExp, float danoExp,
         float duracaoFogo, float danoPorTick, float intervaloTick)
@@ -81,21 +107,26 @@ public class BolaDeFogoInimigo : MonoBehaviour
 
         SomSkill.Tocar(SomSkill.Tipo.SlimeMagaExplosao, pos, 0.55f);
 
-        // Dano direto ao player se estiver no raio
-        var hits = Physics2D.OverlapCircleAll(pos, raioExp);
-        foreach (var c in hits)
+        // Dano direto ao player (só no host/SP — no cosmético do cliente é só visual)
+        if (!cosmetico)
         {
-            if (c.CompareTag("Player"))
+            var hits = Physics2D.OverlapCircleAll(pos, raioExp);
+            foreach (var c in hits)
             {
-                c.GetComponent<PlayerStats>()?.TakeDamage(danoExp);
-                break;
+                if (c.CompareTag("Player"))
+                {
+                    c.GetComponent<PlayerStats>()?.TakeDamage(danoExp);
+                    break;
+                }
             }
         }
 
-        // Área de fogo persistente
+        // Área de fogo persistente (cosmético = só chamas, sem dano)
         var areaGO = new GameObject("AreaFogo");
         areaGO.transform.position = pos;
-        areaGO.AddComponent<AreaFogoInimigo>().Inicializar(raioExp, duracaoFogo, danoPorTick, intervaloTick);
+        var area = areaGO.AddComponent<AreaFogoInimigo>();
+        if (cosmetico) area.InicializarCosmetico(raioExp, duracaoFogo);
+        else           area.Inicializar(raioExp, duracaoFogo, danoPorTick, intervaloTick);
 
         // Anel de explosão
         var expGO = new GameObject("ExplosaoRing");
@@ -129,6 +160,14 @@ public class AreaFogoInimigo : MonoBehaviour
         for (int i = 0; i < 14; i++)
             CriarChama(raio, duracao);
 
+        StartCoroutine(Vida(duracao));
+    }
+
+    // Co-op (cliente): só as chamas, sem collider/dano (o host aplica o fogo).
+    public void InicializarCosmetico(float raio, float duracao)
+    {
+        danoPorTick = 0f; intervaloTick = 1f;
+        for (int i = 0; i < 14; i++) CriarChama(raio, duracao);
         StartCoroutine(Vida(duracao));
     }
 

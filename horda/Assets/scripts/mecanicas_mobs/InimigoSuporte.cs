@@ -157,6 +157,9 @@ public class InimigoSuporte : MonoBehaviour
         ondaGO.transform.position = transform.position;
         ondaGO.AddComponent<OndaCuraVisual>().Iniciar(raioCura, 0.6f);
 
+        // Co-op: replica o pulso de cura (onda + som) pro P2 (a slime não roda gameplay no cliente).
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaCura, transform.position, raioCura, 0.6f);
+
         EmitirOndaRepulsao();
 
         if (somCura != null && audioSource != null)

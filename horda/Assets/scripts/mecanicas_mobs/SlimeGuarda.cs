@@ -52,7 +52,9 @@ public class SlimeGuarda : MonoBehaviour
     void OnPreMorteHandler(InimigoController ic)
     {
         if (ic != inimigoCtrl) return;
-        StartCoroutine(EfeitoMorte());
+        CriarSplat(transform.position);
+        // Co-op: replica o splat de morte pro P2 (a slime não roda o gameplay no cliente).
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.SplatGuarda, transform.position);
     }
 
     void Update()
@@ -166,22 +168,21 @@ public class SlimeGuarda : MonoBehaviour
 
     // ── VFX de Morte ──────────────────────────────────────────────────────────
 
-    IEnumerator EfeitoMorte()
+    // Splat de morte (10 gotas verdes). Static pra o cosmético de co-op reusar (MobCosmeticos).
+    public static void CriarSplat(Vector3 pos)
     {
         for (int i = 0; i < 10; i++)
         {
             var go  = new GameObject("SplatGuarda");
-            go.transform.position = transform.position;
+            go.transform.position = pos;
             var sr2 = go.AddComponent<SpriteRenderer>();
             sr2.sprite       = GerarSprite(Random.Range(6, 14), new Color(0.15f, 0.55f, 0.15f));
             sr2.sortingOrder = 14;
             go.transform.localScale = Vector3.one * Random.Range(0.4f, 1.1f);
             float ang = i * 36f * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-            // Corre no próprio GO do splat — não depende do SlimeGuarda continuar vivo
             go.AddComponent<SplatParticula>().Iniciar(dir, Random.Range(3f, 7f), Random.Range(0.5f, 1f));
         }
-        yield break;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

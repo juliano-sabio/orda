@@ -20,10 +20,20 @@ public class SlimeVenenosaDeathEffect : MonoBehaviour
     void Start()
     {
         controller = GetComponent<InimigoController>();
+        InimigoController.OnPreMorte += AoPreMorte;
+    }
+
+    // Roda no host/SP DENTRO do Morrer() (antes do despawn) → o EnemyNet ainda está spawnado
+    // pra replicar a fumaça pro P2. No cliente o Morrer não roda → sem duplicar.
+    void AoPreMorte(InimigoController ic)
+    {
+        if (ic == controller && !jaSpawnou) SpawnarFumaca();
     }
 
     void OnDestroy()
     {
+        InimigoController.OnPreMorte -= AoPreMorte;
+        // Fallback: morte sem passar pelo Morrer().
         if (controller != null && controller.vidaAtual <= 0 && !jaSpawnou && gameObject.scene.isLoaded)
             SpawnarFumaca();
     }
@@ -31,10 +41,14 @@ public class SlimeVenenosaDeathEffect : MonoBehaviour
     void SpawnarFumaca()
     {
         jaSpawnou = true;
+        // Host/SP: nuvem REAL (com dano) local.
         var go = new GameObject("FumacaVenenosa");
         go.transform.position = transform.position;
         go.AddComponent<FumacaVenenosaCloud>().Inicializar(
             raioFumaca, duracaoFumaca, danoPorTick, intervalTick, duracaoVeneno);
+        // Co-op: replica a fumaça VISUAL pros clientes (o P2 não roda o gameplay da slime).
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.FumacaVeneno,
+            transform.position, raioFumaca, duracaoFumaca);
     }
 }
 
@@ -64,6 +78,15 @@ public class FumacaVenenosaCloud : MonoBehaviour
         rb.bodyType     = RigidbodyType2D.Kinematic;
         rb.gravityScale = 0f;
 
+        CriarVisual();
+        StartCoroutine(Vida());
+    }
+
+    // Co-op (cliente): só o visual da nuvem — sem collider/dano (o host aplica o veneno).
+    public void InicializarCosmetico(float raio, float duracao)
+    {
+        this.raio    = raio;
+        this.duracao = duracao;
         CriarVisual();
         StartCoroutine(Vida());
     }

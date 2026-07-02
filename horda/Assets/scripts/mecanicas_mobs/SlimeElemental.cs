@@ -82,7 +82,9 @@ public class SlimeElemental : MonoBehaviour
     {
         if (ic != inimigoCtrl) return;
         LimparEfeitoCarga();
-        SpawnCacosGelo(transform.position);
+        CriarCacosGelo(transform.position);
+        // Co-op: replica os cacos de gelo da morte pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.CacosGelo, transform.position);
     }
 
     void LimparEfeitoCarga()
@@ -97,7 +99,7 @@ public class SlimeElemental : MonoBehaviour
         if (vorticeRoot  != null) { Destroy(vorticeRoot);  vorticeRoot  = null; }
     }
 
-    void SpawnCacosGelo(Vector3 pos)
+    public static void CriarCacosGelo(Vector3 pos)
     {
         int num = 14;
         for (int i = 0; i < num; i++)
@@ -285,6 +287,9 @@ public class SlimeElemental : MonoBehaviour
         var ctrl = root.AddComponent<ZonaGeloController>();
         ctrl.Iniciar(player, centro, raioGelo, duracaoGelo, danoGelo, fatorLentidao);
 
+        // Co-op: marca a zona de gelo (anel + som) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.ZonaGeloAoe, centro, raioGelo, duracaoGelo);
+
         var anelExt = CriarAnel(root, raioGelo,         new Color(0.4f, 0.8f, 1f, 0.8f),  0.14f);
         var anelMed = CriarAnel(root, raioGelo * 0.65f, new Color(0.6f, 0.9f, 1f, 0.5f),  0.07f);
         var fill    = CriarSpriteFilho(root, GerarDisco(64, new Color(0.35f, 0.7f, 1f, 0.12f)), 6, raioGelo * 2f);
@@ -432,6 +437,9 @@ public class SlimeElemental : MonoBehaviour
     {
         SomSkill.Tocar(SomSkill.Tipo.SlimeElemVento, centro, 0.55f);
 
+        // Co-op: marca o vórtice (anel + som) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.VorticeAoe, centro, raioVento, duracaoVento);
+
         vorticeRoot = new GameObject("Vortice");
         var root = vorticeRoot;
         root.transform.position = centro;
@@ -559,6 +567,9 @@ public class SlimeElemental : MonoBehaviour
 
     IEnumerator Meteoro(Vector2 destino)
     {
+        // Co-op: marca o alvo do meteoro (anel) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.MeteoroAoe, destino, raioExplosao, 1.2f);
+
         // Marcador de alvo — dois anéis pulsantes
         var marcGO  = new GameObject("MarcadorFogo");
         marcGO.transform.position = destino;

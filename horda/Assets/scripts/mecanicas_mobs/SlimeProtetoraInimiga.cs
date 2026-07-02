@@ -247,6 +247,8 @@ public class SlimeProtetoraInimiga : MonoBehaviour
         meuEscudo.Ativar(vidaEscudo * 0.5f);
 
         StartCoroutine(OndaCircular(raioEscudo, new Color(0.6f, 0.2f, 1f), 0.6f));
+        // Co-op: replica a onda de cast do escudo pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaCor, CentroSprite, raioEscudo, 0.6f, 0.2f, 1f, 0.6f);
         yield return new WaitForSeconds(0.4f);
         atacando = false;
     }
@@ -280,6 +282,8 @@ public class SlimeProtetoraInimiga : MonoBehaviour
         }
 
         StartCoroutine(OndaCircular(raioBuff, new Color(1f, 0.85f, 0.1f), 0.55f));
+        // Co-op: replica a onda de cast do buff pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.OndaCor, CentroSprite, raioBuff, 1f, 0.85f, 0.1f, 0.55f);
         yield return new WaitForSeconds(0.4f);
         atacando = false;
     }
@@ -319,6 +323,9 @@ public class SlimeProtetoraInimiga : MonoBehaviour
         var comp = projGO.AddComponent<ProjetilAntiUltiComp>();
         comp.duracaoBloqueio = duracaoBloqueioUlti;
         comp.player          = player;
+
+        // Co-op: replica o projétil anti-ulti (visual) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.ProjetilAntiUlti, CentroSprite, dir.x, dir.y, velocidadeProjetil);
 
         yield return new WaitForSeconds(0.3f);
         atacando = false;

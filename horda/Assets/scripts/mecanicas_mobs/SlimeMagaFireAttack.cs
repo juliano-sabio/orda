@@ -157,5 +157,9 @@ public class SlimeMagaFireAttack : MonoBehaviour
         go.AddComponent<BolaDeFogoInimigo>().Inicializar(
             dir, velocidadeProjetil, raioExplosao, danoExplosao,
             duracaoFogo, danoPorTick, intervaloTick);
+
+        // Co-op: replica a bola de fogo (viaja + explode + área, visual) pro P2.
+        GetComponent<EnemyNet>()?.BroadcastCosmetico(MobCosmeticos.BolaFogoMaga,
+            pontoDisparo.position, dir.x, dir.y, velocidadeProjetil, raioExplosao, duracaoFogo);
     }
 }
