@@ -14,6 +14,7 @@ public class MusicManager : MonoBehaviour
 
     AudioSource _a, _b, _ativo;          // dois canais pra crossfade
     AudioClip _batalha, _boss, _menu;
+    AudioClip[] _batalhas;               // variações do tema de batalha (sorteadas)
     Faixa _faixaAtual = Faixa.Nenhuma;
     Coroutine _fade;
 
@@ -42,7 +43,17 @@ public class MusicManager : MonoBehaviour
         // Volume vindo das opções (slider "Música" do PauseManager). Mesmo default do slider (0.6).
         volume = PlayerPrefs.GetFloat("MusicVolume", 0.6f);
 
-        _batalha = Resources.Load<AudioClip>("music/trilha_horda");
+        // Variações do tema de batalha — sorteia uma ao ENTRAR em batalha (runs mais variadas;
+        // também troca ao voltar da luta de boss). Basta soltar mais "trilha_hordaN" na pasta.
+        var vars = new System.Collections.Generic.List<AudioClip>();
+        foreach (var n in new[] { "trilha_horda", "trilha_horda2", "trilha_horda3" })
+        {
+            var c = Resources.Load<AudioClip>("music/" + n);
+            if (c != null) vars.Add(c);
+        }
+        _batalhas = vars.ToArray();
+        _batalha  = _batalhas.Length > 0 ? _batalhas[0] : null;
+
         _boss    = Resources.Load<AudioClip>("music/trilha_boss");
         _menu    = Resources.Load<AudioClip>("music/trilha_interludio");
 
@@ -98,6 +109,9 @@ public class MusicManager : MonoBehaviour
     void Trocar(Faixa nova)
     {
         _faixaAtual = nova;
+        // Entrando em batalha (início de run, ou voltando da luta de boss): sorteia a variação.
+        if (nova == Faixa.Batalha && _batalhas != null && _batalhas.Length > 0)
+            _batalha = _batalhas[Random.Range(0, _batalhas.Length)];
         var clip = ClipDe(nova);
         if (clip == null) return; // placeholder ausente → não troca (sem crash)
         if (_fade != null) StopCoroutine(_fade);
