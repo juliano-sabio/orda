@@ -615,9 +615,21 @@ public class LobbyUI : MonoBehaviour
         CriarOpcaoConf(pai, Loc.T("lobby.map"), 0.70f, 0.87f,
             new[]{ Loc.T("terrain.p1.name"), Loc.T("terrain.p2.name"), Loc.T("terrain.p3.name"), Loc.T("terrain.surv.name") },
             idx => mapaIdx = idx, bloqMapa);
-        CriarOpcaoConf(pai, Loc.T("lobby.max_players"), 0.46f, 0.63f,
-            new[]{ "2", "3", "4" },
-            idx => maxJogadoresSel = idx + 2);
+        // Co-op travado em 2 por enquanto (3–4 ainda não validado) → só a opção "2".
+        // No modo simulado (single/local) mantém 2/3/4.
+        if (emCoop)
+        {
+            maxJogadoresSel = 2;
+            CriarOpcaoConf(pai, Loc.T("lobby.max_players"), 0.46f, 0.63f,
+                new[]{ "2" },
+                idx => maxJogadoresSel = 2);
+        }
+        else
+        {
+            CriarOpcaoConf(pai, Loc.T("lobby.max_players"), 0.46f, 0.63f,
+                new[]{ "2", "3", "4" },
+                idx => maxJogadoresSel = idx + 2);
+        }
 
         TextoPN(pai, "LblVis", new Vector2(0.08f, 0.36f), new Vector2(0.50f, 0.45f),
             Loc.T("lobby.visibility"), 12f, FontStyles.Bold, new Color(0.88f, 0.78f, 0.55f))
@@ -1405,7 +1417,7 @@ public class LobbyUI : MonoBehaviour
             await NetBootstrap.InitAsync();
             if (souHost)
             {
-                codigoSala = await RelayConnector.HostAsync(MAX_JOGADORES);
+                codigoSala = await RelayConnector.HostAsync(RelayConnector.MaxJogadoresCoop);
                 PlayerPrefs.SetString("LobbyCode", codigoSala);
                 statusCoop = "Sala criada.";
                 if (txtCodigoSala != null) txtCodigoSala.text = codigoSala;
@@ -1593,6 +1605,7 @@ public class LobbyUI : MonoBehaviour
     {
         if (emCoop)
         {
+            CoopDesconexaoUI.SaidaIntencional = true; // saída voluntária → sem tela de "conexão perdida"
             var nm = NetworkManager.Singleton;
             if (nm != null) nm.Shutdown();
             LobbyState.EmLobby = false;

@@ -137,9 +137,11 @@ public class LobbyCoopUI : MonoBehaviour
 
         if (GUI.Button(new Rect(20, y, 120, 28), "Sair"))
         {
+            CoopDesconexaoUI.SaidaIntencional = true; // saída voluntária → sem tela de "conexão perdida"
             if (nm != null) nm.Shutdown();
             LobbyState.EmLobby = false;
             UnityEngine.SceneManagement.SceneManager.LoadScene("menu_inicial");
         }
+
     }
 }

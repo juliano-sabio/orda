@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
@@ -10,6 +11,10 @@ using Unity.Services.Relay.Models;
 // o GerarCodigo() falso de LobbyUI.cs.
 public static class RelayConnector
 {
+    // Limite de jogadores do co-op. Por enquanto travado em 2 (3–4 ainda não validado).
+    // Para reabrir depois: suba este número e a alocação do Relay acompanha.
+    public const int MaxJogadoresCoop = 2;
+
     static UnityTransport Transport =>
         NetworkManager.Singleton.GetComponent<UnityTransport>();
 
@@ -24,12 +29,31 @@ public static class RelayConnector
 
     public static async Task<string> HostAsync(int maxPlayers)
     {
+        // Trava em 2 por enquanto (independente do que a UI pedir).
+        maxPlayers = Mathf.Clamp(maxPlayers, 2, MaxJogadoresCoop);
+
         Allocation alloc = await RelayService.Instance.CreateAllocationAsync(maxPlayers);
         string joinCode = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
         Transport.SetRelayServerData(new RelayServerData(alloc, "dtls"));
         ConfigurarTransport();
-        NetworkManager.Singleton.StartHost();
+
+        // Backstop autoritativo: mesmo que alguém entre por código, o host chuta quem
+        // exceder o limite logo após conectar (não mexe no auto-spawn de player do NGO).
+        var nm = NetworkManager.Singleton;
+        nm.OnClientConnectedCallback -= AoClienteConectar;
+        nm.OnClientConnectedCallback += AoClienteConectar;
+
+        nm.StartHost();
         return joinCode;
+    }
+
+    static void AoClienteConectar(ulong clientId)
+    {
+        var nm = NetworkManager.Singleton;
+        if (nm == null || !nm.IsServer) return;
+        // ConnectedClientsIds inclui o host → count > MaxJogadoresCoop = excedente.
+        if (nm.ConnectedClientsIds.Count > MaxJogadoresCoop)
+            nm.DisconnectClient(clientId, "Sala cheia — o co-op está limitado a 2 jogadores por enquanto.");
     }
 
     public static async Task JoinAsync(string joinCode)

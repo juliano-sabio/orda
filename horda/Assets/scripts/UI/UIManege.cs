@@ -286,6 +286,9 @@ public class UIManager : MonoBehaviour
             Sprite s = Resources.Load<Sprite>("DashIconBota");
             if (s == null) s = Resources.Load<Sprite>("DashIcon");
             if (s != null) { dashIcon.sprite = s; dashIcon.color = Color.white; dashIcon.preserveAspect = true; }
+            // Sem sprite disponível → não deixa um quadrado branco na HUD: esconde o ícone
+            // (a contagem de cargas continua). Antes ficava branco quando o Resources falhava.
+            else if (dashIcon.sprite == null) dashIcon.enabled = false;
         }
         if (dashIcon != null)
             SkillTooltipHUD.AttachRawPublic(dashIcon, "Dash", "Movimentação rápida.\nConsome uma carga e recarrega com o tempo.",
@@ -812,10 +815,23 @@ public class UIManager : MonoBehaviour
     private void UpdateUltimateSkillIcon()
     {
         var ultimateSkill = playerStats?.GetUltimateSkill();
-        if (ultimateSkill == null) return;
+
+        // Ultimate ainda não resolvida (comum no cliente co-op antes do PlayerNet sincronizar o
+        // índice): não deixa o slot como quadrado branco — mostra esmaecido até chegar.
+        if (ultimateSkill == null)
+        {
+            if (ultimateSkillIcon != null)
+            {
+                ultimateSkillIcon.sprite = defaultSkillIcon;
+                ultimateSkillIcon.color  = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+                ultimateSkillIcon.enabled = defaultSkillIcon != null; // sem default → some em vez de branco
+            }
+            return;
+        }
 
         if (ultimateSkillIcon != null)
         {
+            ultimateSkillIcon.enabled = true;
             if (ultimateSkill.isActive)
             {
                 ultimateSkillIcon.sprite = ultimateSkill.icon != null
