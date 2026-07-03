@@ -11,8 +11,8 @@ public class moviment_player2 : MonoBehaviour
     private Vector3 originalScale;
 
     [Header("Dash")]
-    public float dashSpeed = 20f;
-    public float dashDuration = 0.15f;
+    public float dashSpeed = 24f;
+    public float dashDuration = 0.12f;
 
     [Header("Velocidade")]
     public float velocidadeMultiplicador = 0.5f; // metade da velocidade (pedido)

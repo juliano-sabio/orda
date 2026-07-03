@@ -280,10 +280,12 @@ public class UIManager : MonoBehaviour
     // --- INICIALIZAÇÃO DA UI (CHAMADA NO START) ---
     void InitializeUI()
     {
-        // Ícone do dash — carrega em runtime se não foi atribuído no editor
+        // Ícone do dash — carrega em runtime se não foi atribuído no editor.
+        // Preferência: iconedash (arte do .ase) → DashIconBota (bota procedural) → DashIcon.
         if (dashIcon != null && dashIcon.sprite == null)
         {
-            Sprite s = Resources.Load<Sprite>("DashIconBota");
+            Sprite s = Resources.Load<Sprite>("iconedash");
+            if (s == null) s = Resources.Load<Sprite>("DashIconBota");
             if (s == null) s = Resources.Load<Sprite>("DashIcon");
             if (s != null) { dashIcon.sprite = s; dashIcon.color = Color.white; dashIcon.preserveAspect = true; }
             // Sem sprite disponível → não deixa um quadrado branco na HUD: esconde o ícone
