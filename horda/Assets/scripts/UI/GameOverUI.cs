@@ -17,8 +17,9 @@ public class GameOverUI : MonoBehaviour
     private Image overlayImg;
     private Texture2D bgSnapshot;
 
-    private readonly GameObject[] botoes = new GameObject[5];
-    private readonly CanvasGroup[] botoesGroups = new CanvasGroup[5];
+    // Dimensionados pela quantidade real de botões (pode variar com os CTAs de demo).
+    private GameObject[] botoes = new GameObject[5];
+    private CanvasGroup[] botoesGroups = new CanvasGroup[5];
 
     public static void Mostrar(Texture2D snapshot = null)
     {
@@ -267,17 +268,27 @@ public class GameOverUI : MonoBehaviour
         bool veioDoLobby = PlayerPrefs.GetInt("VeioDoLobby", 0) == 1;
 
         // monta a lista de botões (insere "Voltar ao Lobby" só quando veio do lobby)
+        bool pt = Loc.Current == Language.PT_BR;
         var defs = new System.Collections.Generic.List<(string label, UnityEngine.Events.UnityAction acao)>();
         defs.Add((Loc.T("ui.restart"), Recomecar));
+        // CTA de demo: só aparece quando os links estão configurados (LinksJogo).
+        if (LinksJogo.TemWishlist)
+            defs.Add((pt ? "⭐ WISHLIST NA STEAM" : "⭐ WISHLIST ON STEAM",
+                () => LinksJogo.Abrir(LinksJogo.SteamWishlist)));
+        if (LinksJogo.TemDiscord)
+            defs.Add((pt ? "DISCORD" : "DISCORD",
+                () => LinksJogo.Abrir(LinksJogo.Discord)));
         if (veioDoLobby) defs.Add(("VOLTAR AO LOBBY", VoltarAoLobby));
         defs.Add(("CONFIGURAÇÕES", AbrirConfiguracoesMenu));
         defs.Add(("SELEÇÃO", IrParaSelecao));
         defs.Add((Loc.T("ui.quit"), Sair));
 
         int   n      = defs.Count;
+        botoes       = new GameObject[n];           // dimensiona pela qtd real (CTAs podem passar de 5)
+        botoesGroups = new CanvasGroup[n];
         float centro = -90f;                       // empurra os botões pra baixo do resumo da run
-        float espac  = n <= 4 ? 78f : 68f;
-        float altura = n <= 4 ? 60f : 54f;
+        float espac  = n <= 4 ? 78f : (n <= 6 ? 64f : 56f);
+        float altura = n <= 4 ? 60f : (n <= 6 ? 50f : 44f);
         float yTopo  = centro + (n - 1) * espac / 2f;
 
         for (int i = 0; i < n; i++)
@@ -580,6 +591,7 @@ public class GameOverUI : MonoBehaviour
 
     private void Sair()
     {
+        CoopDesconexaoUI.SaidaIntencional = true; // co-op: ida ao menu proposital, sem tela de queda
         Time.timeScale = 1f;
         if (bgSnapshot != null) Destroy(bgSnapshot);
         LimparManagersPersistentes();
