@@ -19,9 +19,19 @@ public class CameraShaker : MonoBehaviour
             CoopPauseManager.Instance.TremerClientRpc(intensidade, duracao);
     }
 
+    // Preferência "CameraShake" (aba Jogo das opções). Cacheada; o toggle chama
+    // AtualizarPreferencia() pra refletir ao vivo.
+    static int _ativoCache = -1; // -1 = ainda não lido
+    public static bool Ativo
+    {
+        get { if (_ativoCache < 0) _ativoCache = PlayerPrefs.GetInt("CameraShake", 1); return _ativoCache == 1; }
+    }
+    public static void AtualizarPreferencia() => _ativoCache = PlayerPrefs.GetInt("CameraShake", 1);
+
     // Aplica o shake só na câmera local (sem propagar). Usado pelo broadcast co-op.
     public static void TremerLocal(float intensidade, float duracao)
     {
+        if (!Ativo) return; // opção "Camera Shake" desligada
         if (Camera.main == null) return;
         CameraShaker s = Camera.main.GetComponent<CameraShaker>();
         if (s == null) s = Camera.main.gameObject.AddComponent<CameraShaker>();

@@ -177,7 +177,7 @@ public class MenuInicialUI : MonoBehaviour
         AudioListener.volume      = PlayerPrefs.GetFloat("MasterVolume", 1f);
         Application.targetFrameRate = PlayerPrefs.GetInt("TargetFPS", 60);
         if (PlayerPrefs.HasKey("Fullscreen"))
-            Screen.fullScreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
+            ConfigTela.AplicarFullscreen(PlayerPrefs.GetInt("Fullscreen", 1) == 1, salvar: false);
         QualitySettings.vSyncCount = PlayerPrefs.GetInt("VSync", 0);
         if (PlayerPrefs.HasKey("QualityLevel"))
             QualitySettings.SetQualityLevel(PlayerPrefs.GetInt("QualityLevel", 2), true);
@@ -772,7 +772,7 @@ public class MenuInicialUI : MonoBehaviour
     {
         Rotulo(p,Loc.T("settings.fullscreen"),0.80f,0.92f);
         Toggle(p,"TF",new Vector2(0.70f,0.80f),new Vector2(0.90f,0.92f),
-            Screen.fullScreen,v=>{Screen.fullScreen=v;PlayerPrefs.SetInt("Fullscreen",v?1:0);});
+            Screen.fullScreen,v=>ConfigTela.AplicarFullscreen(v));
 
         Rotulo(p,"VSync",0.64f,0.76f);
         Toggle(p,"TV",new Vector2(0.70f,0.64f),new Vector2(0.90f,0.76f),
@@ -808,12 +808,12 @@ public class MenuInicialUI : MonoBehaviour
         Rotulo(p,Loc.T("settings.show_fps"),0.38f,0.50f);
         Toggle(p,"TF",new Vector2(0.70f,0.38f),new Vector2(0.90f,0.50f),
             PlayerPrefs.GetInt("ShowFPS",0)==1,
-            v=>PlayerPrefs.SetInt("ShowFPS",v?1:0));
+            v=>{PlayerPrefs.SetInt("ShowFPS",v?1:0);FpsDisplay.AtualizarPreferencia();});
 
         Rotulo(p,Loc.T("settings.camera_shake"),0.22f,0.34f);
         Toggle(p,"TS",new Vector2(0.70f,0.22f),new Vector2(0.90f,0.34f),
             PlayerPrefs.GetInt("CameraShake",1)==1,
-            v=>PlayerPrefs.SetInt("CameraShake",v?1:0));
+            v=>{PlayerPrefs.SetInt("CameraShake",v?1:0);CameraShaker.AtualizarPreferencia();});
     }
 
     // ── Aba Controles (remapeamento de teclas) ──────────────────────────────

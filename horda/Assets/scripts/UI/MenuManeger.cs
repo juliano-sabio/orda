@@ -126,8 +126,7 @@ public class MenuManager : MonoBehaviour
 
     void OnFullscreenToggle(bool isFullscreen)
     {
-        Screen.fullScreen = isFullscreen;
-        PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
+        ConfigTela.AplicarFullscreen(isFullscreen);
     }
 
     void LoadSettings()
@@ -138,6 +137,6 @@ public class MenuManager : MonoBehaviour
 
         bool savedFullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
         if (fullscreenToggle) fullscreenToggle.isOn = savedFullscreen;
-        Screen.fullScreen = savedFullscreen;
+        ConfigTela.AplicarFullscreen(savedFullscreen, salvar: false);
     }
 }

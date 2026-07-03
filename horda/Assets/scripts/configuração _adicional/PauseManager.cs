@@ -720,7 +720,7 @@ public class PauseManager : MonoBehaviour
 
     private void SetFullscreen(bool isFullscreen)
     {
-        Screen.fullScreen = isFullscreen;
+        ConfigTela.AplicarFullscreen(isFullscreen);
     }
 
     private void LoadSettings()

@@ -567,8 +567,7 @@ public class GameOverUI : MonoBehaviour
     private void ToggleFullscreen()
     {
         bool novoEstado = !Screen.fullScreen;
-        Screen.fullScreen = novoEstado;
-        PlayerPrefs.SetInt("Fullscreen", novoEstado ? 1 : 0);
+        ConfigTela.AplicarFullscreen(novoEstado);
         if (labelFullscreen != null)
             labelFullscreen.text = Loc.T("ui.fullscreen") + ": " + (novoEstado ? "ON" : "OFF");
     }
