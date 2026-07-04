@@ -1905,6 +1905,7 @@ public class PlayerStats : MonoBehaviour
 
     private void Die()
     {
+        RunState.Desligar(); // fim de run (SP): para spawn/eventos/timer e congela inimigos na hora
         GetComponent<MascaraCaido>()?.Cair(false); // animação de morte (SP): corpo some + máscara cai e some
         OnPlayerMorreu?.Invoke();
         GetComponent<PlayerDeathEffect>()?.Executar();

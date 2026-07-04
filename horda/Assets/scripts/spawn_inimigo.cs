@@ -91,6 +91,7 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
     void Update()
     {
+        if (!RunState.Ativo) return;       // run não ligou (players não prontos) ou já acabou
         if (!NetSpawn.PodeSpawnar) return; // clientes não spawnam horda
         if (player == null && PlayerStats.All.Count == 0) return;
 

@@ -73,6 +73,9 @@ public class TimerManager : MonoBehaviour
 
     void Update()
     {
+        // Run não ligou (players não prontos) ou já acabou → cronômetro parado.
+        if (!RunState.Ativo) return;
+
         // Esperando o boss final morrer: nao conta tempo, so monitora.
         if (aguardandoBossFinal)
         {

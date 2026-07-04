@@ -290,6 +290,7 @@ public class GerenciadorEventos : MonoBehaviour
     {
         // Não roda eventos fora da fase (ex.: após morrer → lobby continuava gerando evento/som).
         if (!cenaDeJogo) return;
+        if (!RunState.Ativo) return; // run não ligou (players não prontos) ou já acabou
 
         // Co-op: eventos são host-autoritativos. Clientes não rodam a lógica de
         // evento; os inimigos de evento (NetworkObject) spawnados no host replicam.

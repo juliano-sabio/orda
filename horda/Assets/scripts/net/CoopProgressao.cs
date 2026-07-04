@@ -39,6 +39,8 @@ public class CoopProgressao : NetworkBehaviour
         xpAtual.OnValueChanged     += AoMudarXP;
         nivel.OnValueChanged       += AoMudarNivel;
         xpProxNivel.OnValueChanged += AoMudarProx;
+        // Host: se um player SAIR/desconectar no meio da run, encerra a fase pro grupo.
+        if (IsServer) NetworkManager.OnClientDisconnectCallback += AoClienteSair;
         EspelharUI();
     }
 
@@ -47,9 +49,29 @@ public class CoopProgressao : NetworkBehaviour
         xpAtual.OnValueChanged     -= AoMudarXP;
         nivel.OnValueChanged       -= AoMudarNivel;
         xpProxNivel.OnValueChanged -= AoMudarProx;
+        if (NetworkManager.Singleton != null) NetworkManager.Singleton.OnClientDisconnectCallback -= AoClienteSair;
         foreach (var go in cosmeticos.Values) if (go != null) Destroy(go);
         cosmeticos.Clear();
         if (Instance == this) Instance = null;
+    }
+
+    // Host: um cliente saiu. Se a run está rolando, encerra pro grupo — desliga a fase e
+    // manda todos ao lobby (decisão: "todos caem OU alguém sai" encerra a run).
+    void AoClienteSair(ulong clientId)
+    {
+        if (!IsServer || !RunState.Ativo) return;
+        RunState.Desligar();
+        StartCoroutine(VoltarAoLobbyGrupo());
+    }
+
+    System.Collections.IEnumerator VoltarAoLobbyGrupo()
+    {
+        yield return new WaitForSecondsRealtime(0.5f);
+        Time.timeScale = 1f;
+        LobbyState.EmLobby = true;
+        var nm = NetworkManager.Singleton;
+        if (nm != null && nm.IsServer)
+            nm.SceneManager.LoadScene("lobby_mp", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     // ── Objetos de evento procedurais ─────────────────────────────────────────

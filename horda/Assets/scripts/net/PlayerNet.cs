@@ -437,6 +437,7 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             if (todosCaidos)
             {
                 gameOverDisparado = true;
+                RunState.Desligar(); // desliga a fase na hora (para spawn/eventos/timer, congela inimigos)
                 GameOverGrupoRpc();
                 if (!voltandoAoLobby) { voltandoAoLobby = true; StartCoroutine(VoltarAoLobby()); }
             }
