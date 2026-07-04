@@ -213,6 +213,22 @@ public class SkillManager : MonoBehaviour
             (skillChoiceUI.allAvailableSkills == null || skillChoiceUI.allAvailableSkills.Count == 0))
             skillChoiceUI.allAvailableSkills = new List<SkillData>(availableSkills);
 
+        // SP: cada carga de fase = RUN NOVA → começa com build LIMPA e re-oferece a escolha
+        // inicial. O SkillManager é DontDestroyOnLoad e senão RECONECTAVA a build da run anterior
+        // (skills + escolha inicial já "usada"). O player SP é recriado a cada reload (nasce limpo),
+        // então basta zerar a LISTA — sem RemoveFromPlayer (nada a remover no player novo).
+        // (Co-op reseta via FaseCoopBootstrap.ResetarParaNovaRun.)
+        string cena = SceneManager.GetActiveScene().name;
+        bool ehFase = !string.IsNullOrEmpty(cena) && (cena.Contains("fase") || cena.Contains("sobrevivencia"));
+        if (ehFase && !NetSpawn.EmRede)
+        {
+            activeSkills.Clear();
+            currentlyEquippedSkill = null;
+            selectedSkillIndex     = 0;
+            initialChoiceOffered   = false;
+            SkillEvolutionManager.Instance?.Resetar();
+        }
+
         // Reconectar skill equipada após carregar cena
         if (currentlyEquippedSkill != null && activeSkills.Contains(currentlyEquippedSkill))
             OnSkillEquippedChanged?.Invoke(currentlyEquippedSkill);
