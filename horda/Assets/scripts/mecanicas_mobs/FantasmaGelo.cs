@@ -422,7 +422,9 @@ public class FantasmaGelo : MonoBehaviour, IEnemyCosmetic
         light.blendStyleIndex = 0;
     }
 
-    static Sprite GerarAnel(int sz, Color cor)
+    static Sprite GerarAnel(int sz, Color cor) => FXTexCache.Obter("FantasmaGelo.Anel", sz, cor, GerarAnelRaw);
+
+    static Sprite GerarAnelRaw(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         float cx = sz * 0.5f;
@@ -439,7 +441,9 @@ public class FantasmaGelo : MonoBehaviour, IEnemyCosmetic
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
     }
 
-    static Sprite GerarDisco(int sz, Color cor)
+    static Sprite GerarDisco(int sz, Color cor) => FXTexCache.Obter("FantasmaGelo.Disco", sz, cor, GerarDiscoRaw);
+
+    static Sprite GerarDiscoRaw(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         float cx = sz * 0.5f;
@@ -453,7 +457,9 @@ public class FantasmaGelo : MonoBehaviour, IEnemyCosmetic
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
     }
 
-    static Sprite GerarCristal(int sz, Color cor)
+    static Sprite GerarCristal(int sz, Color cor) => FXTexCache.Obter("FantasmaGelo.Cristal", sz, cor, GerarCristalRaw);
+
+    static Sprite GerarCristalRaw(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Point;

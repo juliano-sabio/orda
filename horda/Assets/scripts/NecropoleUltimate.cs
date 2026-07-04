@@ -658,7 +658,9 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
 
     // ─── SPRITES PROCEDURAIS ─────────────────────────────────────────────────
 
-    static Sprite GerarDisco(int sz)
+    static Sprite GerarDisco(int sz) => FXTexCache.Obter("NecropoleUltimate.Disco", sz, GerarDiscoRaw);
+
+    static Sprite GerarDiscoRaw(int sz)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Bilinear;
@@ -673,7 +675,9 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
     }
 
     // Forma de fantasma: oval na cabeça afunilando numa cauda ondulada
-    static Sprite GerarFantasma()
+    static Sprite GerarFantasma() => FXTexCache.Obter("NecropoleUltimate.Fantasma", GerarFantasmaRaw);
+
+    static Sprite GerarFantasmaRaw()
     {
         const int W = 14, H = 22;
         var tex = new Texture2D(W, H, TextureFormat.RGBA32, false);
@@ -699,7 +703,9 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
     }
 
     // Cruz (runa) 4 braços
-    static Sprite GerarCruz()
+    static Sprite GerarCruz() => FXTexCache.Obter("NecropoleUltimate.Cruz", GerarCruzRaw);
+
+    static Sprite GerarCruzRaw()
     {
         const int SZ = 10;
         var tex = new Texture2D(SZ, SZ, TextureFormat.RGBA32, false);
@@ -715,7 +721,9 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
     }
 
     // Mantido para compatibilidade
-    static Sprite GerarSprite(int sz, Color cor)
+    static Sprite GerarSprite(int sz, Color cor) => FXTexCache.Obter("NecropoleUltimate.Sprite", sz, cor, GerarSpriteRaw);
+
+    static Sprite GerarSpriteRaw(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Bilinear;

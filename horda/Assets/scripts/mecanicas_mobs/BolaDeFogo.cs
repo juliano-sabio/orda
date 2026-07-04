@@ -303,7 +303,9 @@ public static class FogoSprites
     public static Sprite Disco => _disco != null ? _disco : (_disco = GerarDisco(64));
     public static Sprite Anel  => _anel  != null ? _anel  : (_anel  = GerarAnel(64, 7));
 
-    static Sprite GerarDisco(int sz)
+    static Sprite GerarDisco(int sz) => FXTexCache.Obter("FogoSprites.Disco", sz, GerarDiscoRaw);
+
+    static Sprite GerarDiscoRaw(int sz)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Bilinear;

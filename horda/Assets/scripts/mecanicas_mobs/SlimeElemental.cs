@@ -938,7 +938,9 @@ public class SlimeElemental : MonoBehaviour
 
     // ─── Geração de Sprites ────────────────────────────────────────────────
 
-    static Sprite GerarSprite(int sz, Color cor)
+    static Sprite GerarSprite(int sz, Color cor) => FXTexCache.Obter("SlimeElemental.Sprite", sz, cor, GerarSpriteRaw);
+
+    static Sprite GerarSpriteRaw(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Bilinear;
@@ -953,7 +955,9 @@ public class SlimeElemental : MonoBehaviour
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
     }
 
-    static Sprite GerarDisco(int sz, Color cor)
+    static Sprite GerarDisco(int sz, Color cor) => FXTexCache.Obter("SlimeElemental.Disco", sz, cor, GerarDiscoRaw);
+
+    static Sprite GerarDiscoRaw(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Bilinear;
@@ -968,7 +972,9 @@ public class SlimeElemental : MonoBehaviour
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
     }
 
-    static Sprite GerarCristal(int sz, Color cor)
+    static Sprite GerarCristal(int sz, Color cor) => FXTexCache.Obter("SlimeElemental.Cristal", sz, cor, GerarCristalRaw);
+
+    static Sprite GerarCristalRaw(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         tex.filterMode = FilterMode.Point;

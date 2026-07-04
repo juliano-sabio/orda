@@ -431,7 +431,9 @@ public class FantasmaFogo : MonoBehaviour, IEnemyCosmetic
         light.blendStyleIndex = 0;
     }
 
-    static Sprite GerarDisco(int sz, Color cor)
+    static Sprite GerarDisco(int sz, Color cor) => FXTexCache.Obter("FantasmaFogo.Disco", sz, cor, GerarDiscoRaw);
+
+    static Sprite GerarDiscoRaw(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
         float cx = sz * 0.5f;
