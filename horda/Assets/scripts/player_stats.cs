@@ -624,11 +624,18 @@ public class PlayerStats : MonoBehaviour
 
     void AtualizarIconePassivaUI()
     {
-        if (uiManager == null || characterData == null) return;
-        if (characterData.passivasDisponiveis == null || characterData.passivasDisponiveis.Length == 0) return;
-        int charIdx    = PlayerPrefs.GetInt("SelectedCharacter", 0);
-        int passIdx    = Mathf.Clamp(PlayerPrefs.GetInt($"SelectedPassiva_{charIdx}", 0), 0, characterData.passivasDisponiveis.Length - 1);
-        PassiveData p  = characterData.passivasDisponiveis[passIdx];
+        if (uiManager == null) return;
+
+        // Preferência: a passiva REALMENTE aplicada (correta em co-op, onde o índice vem do
+        // networkvar por jogador — não do PlayerPrefs compartilhado). Fallback pra PlayerPrefs (SP).
+        PassiveData p = passivaAplicada;
+        if (p == null)
+        {
+            if (characterData == null || characterData.passivasDisponiveis == null || characterData.passivasDisponiveis.Length == 0) return;
+            int charIdx = PlayerPrefs.GetInt("SelectedCharacter", 0);
+            int passIdx = Mathf.Clamp(PlayerPrefs.GetInt($"SelectedPassiva_{charIdx}", 0), 0, characterData.passivasDisponiveis.Length - 1);
+            p = characterData.passivasDisponiveis[passIdx];
+        }
         if (p != null) uiManager.SetPassivaIcon(p.passiveIcon, p.passiveName, p.description ?? "");
     }
 
@@ -1397,8 +1404,12 @@ public class PlayerStats : MonoBehaviour
         speed = originalSpeed;
     }
 
+    PassiveData passivaAplicada; // a passiva realmente aplicada (co-op: por networkvar; SP: PlayerPrefs)
+
     void AplicarPassiva(PassiveData p)
     {
+        passivaAplicada = p; // guarda pra UI mostrar SEMPRE a passiva certa (evita derivar de PlayerPrefs em co-op)
+
         if (p.xpBonusPercent   > 0) xpMultiplier       *= (1f + p.xpBonusPercent);
         if (p.attackBonus      > 0) attack              += p.attackBonus;
         if (p.defenseBonus     > 0) defense             += p.defenseBonus;

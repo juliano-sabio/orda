@@ -77,6 +77,15 @@ public class InimigoController : MonoBehaviour
     public static int BossesVivos { get; private set; }
     private bool _contadoBoss;
 
+    // Zera o contador global de bosses no início de CADA cena. Sem isto, se uma run terminava
+    // com um boss vivo (ou a contagem drifta em co-op), o valor vazava pra próxima run e o
+    // MusicManager começava tocando o tema de boss sem boss nenhum ("bugado entre runs").
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void _RegistrarResetBosses()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += (_, __) => BossesVivos = 0;
+    }
+
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -84,7 +93,17 @@ public class InimigoController : MonoBehaviour
         danoInimigoComponent = GetComponent<DanoInimigo>();
 
         if (spriteRenderer != null)
+        {
             corOriginal = spriteRenderer.color;
+            // Fixa a cor-base VERDADEIRA (do spawn) no tracker de status. Sem isto, o
+            // EnemyStatusVisual capturava sr.color no 1º efeito — se a slime estivesse
+            // tingida (telegraph/carga/flash), salvava a cor errada e restaurava nela,
+            // acumulando até ficar PRETA. Agora todo status restaura pra esta cor.
+            var tracker = GetComponent<EnemyColorTracker>();
+            if (tracker == null) tracker = gameObject.AddComponent<EnemyColorTracker>();
+            tracker.originalColor  = corOriginal;
+            tracker.baseCapturada  = true;
+        }
 
         InicializarComData();
 

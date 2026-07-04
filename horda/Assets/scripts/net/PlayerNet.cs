@@ -215,6 +215,19 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         if (u != null) u.ExecutarCosmetico();
     }
 
+    // Co-op: a Necropole spawna fantasmas em OnPreMorte (só no host) → sem isto o P2 não via
+    // nenhum. O host avisa os clientes pra criarem o fantasma cosmético (sem dano) na posição.
+    public void SincronizarNecropoleFantasma(Vector3 pos)
+    {
+        if (IsServer && IsSpawned) NecropoleFantasmaRpc(pos);
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void NecropoleFantasmaRpc(Vector3 pos)
+    {
+        GetComponent<NecropoleUltimate>()?.SpawnarFantasmaCosmeticoRemoto(pos);
+    }
+
     // Co-op: o dono disparou uma defensiva (teia/fuga/instinto/segunda chance) → o fantoche
     // do colega reproduz SÓ o visual. tipo = (int)SpecificSkillType. Shield tem caminho próprio.
     public void SincronizarDefensiva(int tipo)
@@ -458,6 +471,19 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
             sb.enabled = !caido;
         foreach (var mb in GetComponentsInChildren<MonoBehaviour>(true))
             if (mb is IUltimateCosmetico) mb.enabled = !caido;
+
+        // Player caído não pode ser empurrado por mobs/knockback: congela o corpo do DONO
+        // (Kinematic + velocidade zero) e restaura ao reviver. As cópias remotas já são
+        // Kinematic — só o dono tem corpo dinâmico, então só ele precisa disso.
+        if (IsOwner)
+        {
+            var rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.bodyType = caido ? RigidbodyType2D.Kinematic : RigidbodyType2D.Dynamic;
+                if (caido) rb.linearVelocity = Vector2.zero;
+            }
+        }
     }
 
     IndicadorSlime indicadorAliado; // co-op: seta apontando pro player remoto

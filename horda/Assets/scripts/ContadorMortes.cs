@@ -13,6 +13,7 @@ public class ContadorMortes : MonoBehaviour
     static ContadorMortes _instance;
     public static ContadorMortes Instance => _instance;
 
+    // (mantido só como referência das cenas SP; a checagem real é por nome — ver EhCenaJogo)
     static readonly string[] CENAS_JOGO =
         { "primeira_fase", "segunda_fase", "terceira_fase", "Modo_sobrevivencia" };
 
@@ -56,8 +57,11 @@ public class ContadorMortes : MonoBehaviour
         if (ehJogo) ResetarContador();
     }
 
+    // Qualquer fase (SP ou co-op) + sobrevivência. Cobre "primeira_fase", "primeira_fase_mp",
+    // "mp_fase_teste", etc. Antes a lista fixa não tinha as cenas _mp → contador sumia no co-op.
     static bool EhCenaJogo(string nome) =>
-        System.Array.Exists(CENAS_JOGO, s => s == nome);
+        !string.IsNullOrEmpty(nome) &&
+        (nome.Contains("fase") || nome.Contains("sobrevivencia") || nome.Contains("Modo_sobrevivencia"));
 
     void AtualizarVisibilidade(string sceneName)
     {

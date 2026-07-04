@@ -42,7 +42,8 @@ public class movi_inimigo : MonoBehaviour
 
     void Update()
     {
-        if (player == null) { if (!procurandoPlayer) EncontrarPlayer(); return; }
+        // Alvo inválido (sumiu OU caiu/downed em co-op) → procura outro vivo.
+        if (AlvoInvalido()) { if (!procurandoPlayer) { player = null; EncontrarPlayer(); } return; }
 
         Transform alvo = FlowField.AlvoOverride != null ? FlowField.AlvoOverride : player;
         Vector2 dir = FlowField.Instance != null
@@ -122,9 +123,16 @@ public class movi_inimigo : MonoBehaviour
     void EncontrarPlayer()
     {
         procurandoPlayer = true;
-        var maisProx = PlayerStats.MaisProximoTransform(transform.position);
-        if (maisProx != null) player = maisProx;
+        player = PlayerStats.MaisProximoTransform(transform.position); // já ignora caídos; null se todos caíram
         procurandoPlayer = false;
+    }
+
+    // Alvo inválido = sumiu ou está caído (downed) em co-op.
+    bool AlvoInvalido()
+    {
+        if (player == null) return true;
+        var ps = player.GetComponent<PlayerStats>();
+        return ps != null && ps.EstaCaido;
     }
 
     IEnumerator ProcurarPlayerPeriodicamente()
@@ -132,7 +140,7 @@ public class movi_inimigo : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(3f);
-            if (player == null) EncontrarPlayer();
+            if (AlvoInvalido()) EncontrarPlayer();
         }
     }
 }

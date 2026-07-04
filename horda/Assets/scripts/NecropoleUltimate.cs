@@ -109,8 +109,21 @@ public class NecropoleUltimate : MonoBehaviour, IUltimateCosmetico
         Vector2 pos = ic.transform.position;
         StartCoroutine(SpawnarFantasma(pos));
 
+        // Co-op: os fantasmas nascem em OnPreMorte (só no host) → o P2 não via nenhum.
+        // O host (real) avisa os clientes pra spawnarem o fantasma COSMÉTICO (sem dano).
+        if (!cosmetico)
+            GetComponent<PlayerNet>()?.SincronizarNecropoleFantasma(pos);
+
         if (SkillEvolutionManager.Tem(SkillEvolutionType.NecropoleContaminacao))
             StartCoroutine(ContaminarVizinhos(pos));
+    }
+
+    // Co-op (cliente): spawna um fantasma SÓ visual no ponto avisado pelo host.
+    public void SpawnarFantasmaCosmeticoRemoto(Vector2 pos)
+    {
+        if (!ativo) return;      // só durante a zona ativa
+        cosmetico = true;        // garante que o fantasma remoto nunca cause dano
+        StartCoroutine(SpawnarFantasma(pos));
     }
 
     IEnumerator ContaminarVizinhos(Vector2 pos)

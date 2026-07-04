@@ -50,7 +50,9 @@ public class movi_inimigo_manter_distancia : MonoBehaviour
 
     void Update()
     {
-        if (player == null && !procurandoPlayer) { EncontrarPlayer(); return; }
+        // Alvo inválido (sumiu OU caiu/downed em co-op) → procura outro vivo. Sem isto o mob
+        // continuava mirando/atirando no player caído.
+        if (AlvoInvalido() && !procurandoPlayer) { player = null; EncontrarPlayer(); }
         if (player == null) return;
 
         distanciaAtual = Vector2.Distance(transform.position, player.position);
@@ -153,9 +155,17 @@ public class movi_inimigo_manter_distancia : MonoBehaviour
     void EncontrarPlayer()
     {
         procurandoPlayer = true;
-        var maisProx = PlayerStats.MaisProximoTransform(transform.position);
-        if (maisProx != null) player = maisProx;
+        var maisProx = PlayerStats.MaisProximoTransform(transform.position); // já ignora caídos
+        player = maisProx; // pode ser null se todos caíram → o mob para de atirar
         procurandoPlayer = false;
+    }
+
+    // Alvo inválido = sumiu ou está caído (downed) em co-op.
+    bool AlvoInvalido()
+    {
+        if (player == null) return true;
+        var ps = player.GetComponent<PlayerStats>();
+        return ps != null && ps.EstaCaido;
     }
 
     IEnumerator ProcurarPlayerPeriodicamente()
@@ -163,7 +173,7 @@ public class movi_inimigo_manter_distancia : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(3f);
-            if (player == null) EncontrarPlayer();
+            if (AlvoInvalido()) EncontrarPlayer();
         }
     }
 

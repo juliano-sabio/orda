@@ -25,6 +25,8 @@ public class SilenciadorLog : MonoBehaviour
             try
             {
                 string msg = string.Format(format, args);
+                // Diagnóstico co-op (temporário) — silencia o spam de console.
+                if (msg.Contains("[Coop")) return; // [CoopEvt], [CoopBoss...], [CoopNetDiag]
                 if (msg.Contains("Screen position out of view frustum")) return;
                 if (msg.Contains("UnityEditor.Graphs")) return;
                 if (msg.Contains("was not found in the") && msg.Contains("font asset")) return;

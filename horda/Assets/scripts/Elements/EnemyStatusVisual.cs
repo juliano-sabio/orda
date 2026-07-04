@@ -6,6 +6,7 @@ public class EnemyColorTracker : MonoBehaviour
 {
     public Color originalColor = Color.white;
     public int   activeEffects = 0;
+    public bool  baseCapturada = false; // true quando a cor-base do spawn já foi fixada (InimigoController)
 }
 
 // Adiciona/remove efeitos visuais em inimigos quando recebem status elemental
@@ -25,11 +26,17 @@ public static class EnemyStatusVisual
         var sr = alvo.GetComponent<SpriteRenderer>();
         if (sr == null) { yield return new WaitForSeconds(duracao); yield break; }
 
-        // Tracker garante que a cor original (pré-qualquer tint) não é corrompida por efeitos sobrepostos
+        // Tracker garante que a cor original (pré-qualquer tint) não é corrompida por efeitos sobrepostos.
+        // A base é fixada no spawn pelo InimigoController (baseCapturada). Só capturamos aqui como
+        // FALLBACK (inimigo sem InimigoController) e, mesmo assim, só quando não há efeito ativo —
+        // nunca sobrescrevendo a base do spawn (evita salvar cor tingida → slime preta).
         var tracker = alvo.GetComponent<EnemyColorTracker>();
         if (tracker == null) tracker = alvo.AddComponent<EnemyColorTracker>();
-        if (tracker.activeEffects == 0)
+        if (!tracker.baseCapturada && tracker.activeEffects == 0)
+        {
             tracker.originalColor = sr.color;
+            tracker.baseCapturada = true;
+        }
         tracker.activeEffects++;
 
         // Adiciona partículas do efeito
