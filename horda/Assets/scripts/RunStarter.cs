@@ -56,8 +56,11 @@ public class RunStarter : MonoBehaviour
         if (presentes == 0) return false; // nenhum player na fase ainda
 
         // Co-op: espera TODOS os clientes conectados terem seu PlayerStats spawnado na fase.
+        // ConnectedClientsIds só é válido/seguro no SERVIDOR (no cliente pode lançar exceção ou
+        // vir incompleto). Como quem spawna horda/eventos/timer é o host, o gate estrito roda
+        // nele; no cliente basta o player local existir (já coberto por presentes > 0).
         var nm = NetworkManager.Singleton;
-        if (nm != null && nm.IsListening)
+        if (nm != null && nm.IsListening && nm.IsServer)
         {
             int esperados = nm.ConnectedClientsIds.Count;
             if (esperados > 0 && presentes < esperados) return false;

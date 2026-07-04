@@ -154,7 +154,13 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
 
     // Game over de grupo em todos.
     [Rpc(SendTo.Everyone)]
-    public void GameOverGrupoRpc() { GameOverUI.Mostrar(); }
+    public void GameOverGrupoRpc()
+    {
+        // Fecha o card de evento em TODAS as telas (o RunState.Desligar só roda no host, então
+        // o card do CLIENTE ficaria "rodando" após a morte do grupo).
+        GerenciadorEventos.Instance?.EncerrarPorFimDeRun();
+        GameOverUI.Mostrar();
+    }
 
     // Co-op: o host manda este player (no cliente dono) ofertar a própria evolução.
     [Rpc(SendTo.Owner)]
