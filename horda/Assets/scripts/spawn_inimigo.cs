@@ -202,13 +202,18 @@ public class EnemySpawnerCompleto : MonoBehaviour
 
     // Meia-diagonal da câmera (em unidades de mundo) — distância a partir do player além da
     // qual um ponto está garantidamente fora da tela. Usada como raio "fora de visão".
+    //
+    // Co-op: o spawner roda no HOST e só conhece a câmera DELE. O P2 pode ter tela mais larga
+    // (aspect/resolução diferentes) → usando o aspect real do host, um ponto fora da tela do
+    // host podia cair DENTRO da tela do P2. Por isso assumimos um aspect GENEROSO (cobre ultra-
+    // wide) e uma margem maior — garante que o ponto fique fora da visão dos DOIS players.
     float RaioTela()
     {
         var cam = Camera.main;
-        if (cam == null || !cam.orthographic) return distanciaMinima;
-        float h = cam.orthographicSize;
-        float w = h * cam.aspect;
-        return Mathf.Sqrt(h * h + w * w) + 1f; // + margem
+        float h = (cam != null && cam.orthographic) ? cam.orthographicSize : 6f; // fallback razoável
+        float aspectGeneroso = 2.1f;      // ~21:9; cobre telas mais largas que a do host
+        float w = h * aspectGeneroso;
+        return Mathf.Sqrt(h * h + w * w) + 2.5f; // meia-diagonal + margem folgada
     }
 
     // Em co-op o host não enxerga a câmera do P2, mas sabe a POSIÇÃO dele: um ponto a >= raioTela

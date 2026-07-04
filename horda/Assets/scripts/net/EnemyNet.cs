@@ -65,6 +65,23 @@ public class EnemyNet : NetworkBehaviour
         if (ic != null) ic.ReceberDano(dano, isCrit, mostrarNumero); // roda no host -> aplica
     }
 
+    // Co-op: o CLIENTE dono detectou que seu player está encostando neste inimigo (hitbox
+    // preciso, do ponto de vista dele) e pede o dano de contato. O host aplica o dano REAL
+    // (escalado) do inimigo no player — autoritativo. Resolve o "toma dano sem encostar".
+    [Rpc(SendTo.Server, RequireOwnership = false)]
+    public void ContatoDanoServerRpc(ulong playerObjId)
+    {
+        if (!IsServer) return;
+        var dano = GetComponent<DanoInimigo>();
+        if (dano == null) return;
+        var sm = NetworkManager != null ? NetworkManager.SpawnManager : null;
+        if (sm != null && sm.SpawnedObjects.TryGetValue(playerObjId, out var no) && no != null)
+        {
+            var ps = no.GetComponent<PlayerStats>();
+            if (ps != null) ps.TakeDamage(dano.dano);
+        }
+    }
+
     // Co-op: o host mostra o número de dano (pós-mitigação) também nos clientes. Sem isto,
     // o cliente que bate via ServerRpc nunca vê o próprio número (o controller está
     // desligado no cliente, e o dano é processado só no host).

@@ -495,6 +495,12 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         if (IsOwner)
         {
             PlayerStats.SetLocal(stats);
+
+            // Co-op: no CLIENTE, o contato com inimigos é detectado localmente (hitbox preciso)
+            // e o dano é pedido ao host. No host (P1) o DanoInimigo já detecta com precisão.
+            if (!IsServer && GetComponent<ContatoInimigoNet>() == null)
+                gameObject.AddComponent<ContatoInimigoNet>();
+
             charIndex.Value = PlayerPrefs.GetInt("SelectedCharacter", 0);
             // valor inicial do PlayerPrefs; o lobby sobrescreve POR JOGADOR via SetUltimate/SetPassiva.
             ultimateIdx.Value = PlayerPrefs.GetInt($"SelectedUltimate_{charIndex.Value}", 0);

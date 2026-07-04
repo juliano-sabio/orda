@@ -52,8 +52,16 @@ public class DanoInimigo : MonoBehaviour
 
     private void AplicarDano(PlayerStats stats)
     {
-        if (stats != null)
-            stats.TakeDamage(dano);
+        if (stats == null) return;
+
+        // Co-op: só machuca o player LOCAL desta máquina (o dono). O contato de um player
+        // REMOTO (fantoche movido pelo NetworkTransform, com lag) era detectado aqui no host
+        // com a posição defasada → o P2 tomava dano "sem encostar". Agora o contato de cada
+        // player é detectado na máquina DELE (ContatoInimigoNet) e o dano é pedido ao host.
+        var pn = stats.GetComponent<PlayerNet>();
+        if (pn != null && pn.IsSpawned && !pn.IsOwner) return;
+
+        stats.TakeDamage(dano);
     }
 
     // Método para configurar o dano dinamicamente
