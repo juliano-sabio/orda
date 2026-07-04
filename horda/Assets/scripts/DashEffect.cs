@@ -4,19 +4,19 @@ using UnityEngine;
 public class DashEffect : MonoBehaviour
 {
     [Header("Afterimage")]
-    public float intervalo = 0.03f;
-    public float duracaoFade = 0.2f;
-    public Color corInicial = new Color(0.4f, 0.7f, 1f, 0.8f);
+    public float intervalo = 0.05f;
+    public float duracaoFade = 0.14f;
+    public Color corInicial = new Color(0.4f, 0.7f, 1f, 0.4f);
 
     [Header("Partículas")]
-    public int quantidadeParticulas = 14;
-    public float velocidadeParticula = 2.5f;
-    public float tempoVidaParticula = 0.4f;
-    public Color corParticula = new Color(0.4f, 0.8f, 1f, 1f);
+    public int quantidadeParticulas = 6;
+    public float velocidadeParticula = 1.8f;
+    public float tempoVidaParticula = 0.25f;
+    public Color corParticula = new Color(0.4f, 0.8f, 1f, 0.7f);
 
     [Header("Sprite Dash")]
-    public Color corDash = new Color(0.5f, 0.85f, 1f, 0.9f);
-    public float duracaoDashSprite = 0.35f;
+    public Color corDash = new Color(0.5f, 0.85f, 1f, 0.5f);
+    public float duracaoDashSprite = 0.22f;
 
     private SpriteRenderer spriteRenderer;
     private Coroutine spawnarCoroutine;

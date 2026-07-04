@@ -199,9 +199,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InimigoController
   dadosInimigo: {fileID: 0}
-  vidaAtual: 500
+  vidaAtual: 2000
   danoAtual: 20
-  vidaMaxima: 500
+  vidaMaxima: 2000
   xpOrbPrefab: {fileID: 0}
   minOrbs: 10
   maxOrbs: 20

@@ -26,6 +26,12 @@ public class InimigoController : MonoBehaviour
     public float xpPorOrbe = 5f;
     public float forcaDrop = 2f;
 
+    [Header("Drop de Carga de Dash")]
+    [Range(0f, 1f)] public float chanceDropDash = 0.05f; // 5% de chance
+    [Tooltip("Prefab do pickup de dash. Se vazio, carrega de Resources/dash.")]
+    public GameObject dashPickupPrefab;
+    static GameObject _dashPrefabCache;
+
     [Header("Drops Adicionais")]
     public List<DropEntry> drops = new List<DropEntry>();
 
@@ -530,6 +536,7 @@ public class InimigoController : MonoBehaviour
 
             DroparOrbesXP();
             DroparPowerup();
+            DroparDash();
             OnInimigoDerrotado?.Invoke();
 
             BossController        boss    = GetComponent<BossController>();
@@ -628,7 +635,25 @@ public class InimigoController : MonoBehaviour
                 rb.AddForce(direcaoAleatoria * forcaDrop, ForceMode2D.Impulse);
             }
         }
+    }
 
+    // Chance de dropar uma carga de dash na morte — independente do XP (funciona mesmo sem
+    // xpOrbPrefab). Mesmo esquema de rede do XP: em co-op só o host spawna e replica.
+    private void DroparDash()
+    {
+        if (UnityEngine.Random.value >= chanceDropDash) return;
+        var dashPrefab = ObterDashPrefab();
+        if (dashPrefab == null) return;
+        Vector3 posDrop = AjustarPosicaoForaDeObstaculo(transform.position);
+        NetSpawn.Spawnar(dashPrefab, posDrop);
+    }
+
+    // Prefab do pickup de dash: usa o campo se atribuído, senão carrega de Resources/dash (cache).
+    private GameObject ObterDashPrefab()
+    {
+        if (dashPickupPrefab != null) return dashPickupPrefab;
+        if (_dashPrefabCache == null) _dashPrefabCache = Resources.Load<GameObject>("dash");
+        return _dashPrefabCache;
     }
 
     private void DroparPowerup()

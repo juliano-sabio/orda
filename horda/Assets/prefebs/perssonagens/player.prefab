@@ -354,13 +354,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf4f5ffaf438a9044b1c406ca7022f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DashEffect
-  intervalo: 0.03
-  duracaoFade: 0.2
-  corInicial: {r: 0.4, g: 0.7, b: 1, a: 0.8}
-  quantidadeParticulas: 14
-  velocidadeParticula: 2.5
-  tempoVidaParticula: 0.4
-  corParticula: {r: 0.4, g: 0.8, b: 1, a: 1}
+  intervalo: 0.05
+  duracaoFade: 0.14
+  corInicial: {r: 0.4, g: 0.7, b: 1, a: 0.4}
+  quantidadeParticulas: 6
+  velocidadeParticula: 1.8
+  tempoVidaParticula: 0.25
+  corParticula: {r: 0.4, g: 0.8, b: 1, a: 0.7}
 --- !u!114 &-8740842057439862192
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 public static class CriarIconeDash
 {
     const string ICON_PATH   = "Assets/Skills/DashIcon.png";
-    const string PREFAB_PATH = "Assets/prefebs/dash/dash.prefab";
+    const string PREFAB_PATH = "Assets/Resources/dash.prefab";
     const string ASE_PATH    = "Assets/prefebs/dash/iconedash.ase";
 
     [MenuItem("Tools/UI Manager/Gerar e Adicionar Icone Dash")]

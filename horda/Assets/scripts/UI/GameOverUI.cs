@@ -88,6 +88,14 @@ public class GameOverUI : MonoBehaviour
     {
         Color corOverlay = overlayImg.color;
 
+        // Desliga o highlight (ColorTint) durante a entrada: senão o mouse parado por cima já
+        // deixa o botão "aceso"/animando enquanto ele aparece (o bug reportado).
+        foreach (var b in botoes)
+        {
+            var bt = b != null ? b.GetComponent<UnityEngine.UI.Button>() : null;
+            if (bt != null) bt.transition = UnityEngine.UI.Selectable.Transition.None;
+        }
+
         // Fase 1: overlay fade in (0.35s)
         yield return StartCoroutine(Animar(0.35f, t =>
             overlayImg.color = new Color(corOverlay.r, corOverlay.g, corOverlay.b,
@@ -130,6 +138,15 @@ public class GameOverUI : MonoBehaviour
                 botoesGroups[idx].alpha = Mathf.Lerp(0f, 1f, t * 2.5f);
             }));
             yield return new WaitForSecondsRealtime(0.1f);
+        }
+
+        // Entrada terminou: religa o highlight normal dos botões (só engata se o mouse
+        // realmente estiver por cima a partir de agora).
+        yield return new WaitForSecondsRealtime(0.25f);
+        foreach (var b in botoes)
+        {
+            var bt = b != null ? b.GetComponent<UnityEngine.UI.Button>() : null;
+            if (bt != null) bt.transition = UnityEngine.UI.Selectable.Transition.ColorTint;
         }
     }
 

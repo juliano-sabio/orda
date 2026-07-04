@@ -108,6 +108,20 @@ public class BossHudNet : NetworkBehaviour
         GetComponent<BossController>()?.RaioCosmetico(alvo);
     }
 
+    // ── Som genérico do boss: o host toca localmente e replica pros clientes (que não rodam
+    //    o script do boss). Use pra sons de ataque que não têm um cosmético próprio no cliente. ──
+    public void BroadcastSom(int tipo, Vector3 pos, float volume)
+    {
+        if (!IsServer || !IsSpawned) return;
+        SomBossClientRpc(tipo, pos, volume);
+    }
+
+    [Rpc(SendTo.NotServer)]
+    void SomBossClientRpc(int tipo, Vector3 pos, float volume)
+    {
+        SomSkill.Tocar((SomSkill.Tipo)tipo, pos, volume);
+    }
+
     // ── Caveira: o host replica a nuvem de veneno da investida (só visual) nos clientes ──
     public void BroadcastNuvemVeneno(Vector2 pos, float raio, float duracao)
     {

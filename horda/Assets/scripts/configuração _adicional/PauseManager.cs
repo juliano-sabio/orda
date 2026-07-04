@@ -164,9 +164,15 @@ public class PauseManager : MonoBehaviour
 
         var go = Instantiate(modelo.gameObject, pausePanel.transform);
         go.name = "QuitButton";
+        go.transform.localScale = Vector3.one; // garante escala cheia (não herda algo do modelo)
 
         var rt = go.GetComponent<RectTransform>();
-        if (rt != null) rt.anchoredPosition = new Vector2(0f, -190f); // abaixo do "Seleção"
+        var modeloRT = modelo.GetComponent<RectTransform>();
+        if (rt != null)
+        {
+            if (modeloRT != null) rt.sizeDelta = modeloRT.sizeDelta; // mesmo tamanho do ExitButton
+            rt.anchoredPosition = new Vector2(0f, -190f); // abaixo do "Seleção"
+        }
 
         var txt = go.transform.Find("Text");
         if (txt != null)
@@ -216,6 +222,7 @@ public class PauseManager : MonoBehaviour
 
         var go = Instantiate(modelo.gameObject, pausePanel.transform);
         go.name = "LobbyButton";
+        go.transform.localScale = Vector3.one; // garante escala cheia
 
         // espaçamento consistente com os demais botões (gap Configurações→Seleção)
         var exitRT = modelo.GetComponent<RectTransform>();
@@ -584,11 +591,29 @@ public class PauseManager : MonoBehaviour
         }
         for (int i = 0; i < alvos.Count; i++)
             StartCoroutine(PopInUI(alvos[i], i * 0.06f));
-        yield break;
+
+        // Rede de segurança: espera a entrada terminar e conserta qualquer botão que tenha
+        // ficado preso numa escala menor (ex.: clones SAIR/Seleção). Não briga com o hover,
+        // que sempre deixa a escala >= 0.97.
+        float espera = alvos.Count * 0.06f + 0.35f;
+        float w = 0f;
+        while (w < espera) { w += Time.unscaledDeltaTime; yield return null; }
+        foreach (var a in alvos)
+            if (a != null && a.localScale.x < 0.95f)
+                a.localScale = Vector3.one;
     }
 
     private IEnumerator PopInUI(Transform t, float delay)
     {
+        // Trava o hover enquanto o botão "pula" pra dentro (evita o mouse por cima disparar
+        // o hover no meio da entrada e brigar com esta animação de escala).
+        var hover = t != null ? t.GetComponent<CardHover>() : null;
+        hover?.Travar();
+        // Idem para o highlight de cor (ColorTint) do Button.
+        var btn = t != null ? t.GetComponent<UnityEngine.UI.Button>() : null;
+        var transOrig = btn != null ? btn.transition : UnityEngine.UI.Selectable.Transition.ColorTint;
+        if (btn != null) btn.transition = UnityEngine.UI.Selectable.Transition.None;
+
         float e = 0f;
         while (e < delay) { e += Time.unscaledDeltaTime; yield return null; }
         const float dur = 0.22f;
@@ -599,6 +624,9 @@ public class PauseManager : MonoBehaviour
             yield return null;
         }
         if (t != null) t.localScale = Vector3.one;
+
+        hover?.Liberar();
+        if (btn != null) btn.transition = transOrig;
     }
 
     private static float EaseOutBackPause(float t)

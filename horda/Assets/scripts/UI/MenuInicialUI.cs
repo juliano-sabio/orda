@@ -355,6 +355,9 @@ public class MenuInicialUI : MonoBehaviour
         }
         rt.anchoredPosition = Vector2.zero;
         cg.alpha = 1f;
+
+        // Só agora libera o hover — se o mouse estiver parado em cima, ele engata suave (sem "pop")
+        rt.GetComponent<BotaoMenuHover>()?.Liberar();
     }
 
     // ── Rodapé ──────────────────────────────────────────────────────────
@@ -1367,9 +1370,20 @@ public class BotaoMenuHover : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     bool  sobre = false;
     float escala = 1f, escalaAlvo = 1f;
     float barraAlpha = 0f;
+    bool  pronto = false; // só reage ao mouse depois que a animação de entrada termina
+
+    // Chamado ao fim da EntradaBotao: libera o hover e sincroniza com o estado real do mouse
+    // (evita o "pop" quando o botão desliza por baixo do cursor durante a entrada).
+    public void Liberar()
+    {
+        pronto     = true;
+        escalaAlvo = sobre ? 1.07f : 1.00f;
+    }
 
     void Update()
     {
+        if (!pronto) { transform.localScale = Vector3.one; return; } // trava até a entrada terminar
+
         escala = Mathf.Lerp(escala, escalaAlvo, Time.deltaTime * 16f);
         transform.localScale = Vector3.one * escala;
 
@@ -1389,9 +1403,9 @@ public class BotaoMenuHover : MonoBehaviour, IPointerEnterHandler, IPointerExitH
             txt.color = Color.Lerp(txt.color, sobre ? new Color(1f, 0.95f, 0.80f) : Color.white, Time.deltaTime * 14f);
     }
 
-    public void OnPointerEnter(PointerEventData e) { sobre = true;  escalaAlvo = 1.07f; }
-    public void OnPointerExit (PointerEventData e) { sobre = false; escalaAlvo = 1.00f; }
-    public void OnPointerClick(PointerEventData e) => StartCoroutine(Flash());
+    public void OnPointerEnter(PointerEventData e) { sobre = true;  if (pronto) escalaAlvo = 1.07f; }
+    public void OnPointerExit (PointerEventData e) { sobre = false; if (pronto) escalaAlvo = 1.00f; }
+    public void OnPointerClick(PointerEventData e) { if (pronto) StartCoroutine(Flash()); }
 
     System.Collections.IEnumerator Flash()
     {

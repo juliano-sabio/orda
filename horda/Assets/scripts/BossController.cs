@@ -261,7 +261,7 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator TransicaoFase2()
     {
-        SomSkill.Tocar(SomSkill.Tipo.MagaFase2, transform.position, 0.8f);
+        SomCoop(SomSkill.Tipo.MagaFase2, transform.position, 0.8f);
 
         // Resistência a dano permanente
         controller.AplicarBuffDefesa(reducaoDanoFase2, 99999f);
@@ -399,7 +399,7 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         GameObject prefab = prefabProjetilEspecial != null ? prefabProjetilEspecial : prefabProjetil;
         if (prefab == null || player == null) return;
 
-        SomSkill.Tocar(SomSkill.Tipo.MagaEspecial, PosicaoOlho(), 0.65f);
+        SomCoop(SomSkill.Tipo.MagaEspecial, PosicaoOlho(), 0.65f);
 
         int qtd = fase2Ativada ? 3 : 1;
         Vector3 spawnPos = PosicaoOlho();
@@ -493,11 +493,18 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
         return transform.position + new Vector3(offsetOlho.x * sinalX, offsetOlho.y, 0f);
     }
 
+    // Co-op: o boss só roda no host. Toca o som local E replica pros clientes via BossHudNet.
+    void SomCoop(SomSkill.Tipo t, Vector3 pos, float v)
+    {
+        SomSkill.Tocar(t, pos, v);
+        GetComponent<BossHudNet>()?.BroadcastSom((int)t, pos, v);
+    }
+
     void Disparar()
     {
         if (prefabProjetil == null || player == null) return;
 
-        SomSkill.Tocar(SomSkill.Tipo.MagaDisparo, PosicaoOlho(), 0.55f);
+        SomCoop(SomSkill.Tipo.MagaDisparo, PosicaoOlho(), 0.55f);
 
         Vector3 spawnPos  = PosicaoOlho();
         Vector2 dirBase   = ((Vector2)player.position - (Vector2)spawnPos).normalized;

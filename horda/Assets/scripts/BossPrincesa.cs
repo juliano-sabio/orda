@@ -514,6 +514,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         if (animator != null) animator.SetTrigger("canalizar");
         if (canalSrc != null) Destroy(canalSrc.gameObject);
         canalSrc = SomSkill.TocarLoop(SomSkill.Tipo.PrincesaCanalizar, transform, 0.55f);
+        GetComponent<BossHudNet>()?.BroadcastSom((int)SomSkill.Tipo.PrincesaCanalizar, transform.position, 0.5f); // P2: início da canalização (one-shot)
 
         int qtdProjeteis = sequenciaProjeteis[Mathf.Min(ataqueCicloIdx, sequenciaProjeteis.Length - 1)];
         ataqueCicloIdx   = Mathf.Min(ataqueCicloIdx + 1, sequenciaProjeteis.Length - 1);
@@ -628,10 +629,17 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
         }
     }
 
+    // Co-op: o boss só roda no host. Toca o som local E replica pros clientes via BossHudNet.
+    void SomCoop(SomSkill.Tipo t, Vector3 pos, float v)
+    {
+        SomSkill.Tocar(t, pos, v);
+        GetComponent<BossHudNet>()?.BroadcastSom((int)t, pos, v);
+    }
+
     void LancarProjeteis(Vector2 centro)
     {
         if (canalSrc != null) { Destroy(canalSrc.gameObject); canalSrc = null; } // fim da canalização
-        SomSkill.Tocar(SomSkill.Tipo.PrincesaDisparo, transform.position, 0.6f);
+        SomCoop(SomSkill.Tipo.PrincesaDisparo, transform.position, 0.6f);
         foreach (var go in projeteisCanalizando)
         {
             if (go == null) continue;
@@ -1190,7 +1198,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator EntradaFase2()
     {
-        SomSkill.Tocar(SomSkill.Tipo.PrincesaFase2, transform.position, 0.85f);
+        SomCoop(SomSkill.Tipo.PrincesaFase2, transform.position, 0.85f);
         yield return StartCoroutine(ExplosaoBulletHell());
         loopCoroutine = StartCoroutine(LoopComportamento());
     }
@@ -1381,7 +1389,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
     IEnumerator EfeitoMortePrincesa()
     {
         if (canalSrc != null) { Destroy(canalSrc.gameObject); canalSrc = null; } // corta canalização se morreu canalizando
-        SomSkill.Tocar(SomSkill.Tipo.PrincesaMorte, transform.position, 0.85f);
+        SomCoop(SomSkill.Tipo.PrincesaMorte, transform.position, 0.85f);
         if (loopCoroutine != null) { StopCoroutine(loopCoroutine); loopCoroutine = null; }
         estaDashando = false;
 

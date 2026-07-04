@@ -96,11 +96,6 @@ public class XPOrb : MonoBehaviour
         if (EhClienteFantoche) return; // só o host coleta em co-op
         coletado = true;
 
-        // Blip suave de coleta (curto/baixo pra não empastar com vários orbes de uma vez).
-        // Só toca o som procedural se não houver um collectSound atribuído no prefab.
-        if (collectSound == null)
-            SomSkill.Tocar(SomSkill.Tipo.XpColetar, transform.position, 0.3f);
-
         // Co-op: soma no pool de XP compartilhado e despawna em todos.
         if (NetSpawn.EmRede)
         {
@@ -132,6 +127,10 @@ public class XPOrb : MonoBehaviour
         // scene.isLoaded evita disparar em troca de cena (teardown).
         if (!gameObject.scene.isLoaded) return;
         XpColetaVFX.Tocar(transform.position, new Color(0.41f, 0.95f, 0.96f));
+        // Blip de coleta AQUI (não no Collect) pra tocar nos DOIS lados em co-op — o cliente
+        // despawna o orbe mas não roda Collect. Só o procedural se não houver collectSound manual.
+        if (collectSound == null)
+            SomSkill.Tocar(SomSkill.Tipo.XpColetar, transform.position, 0.3f);
     }
 
     void OnTriggerEnter2D(Collider2D other)

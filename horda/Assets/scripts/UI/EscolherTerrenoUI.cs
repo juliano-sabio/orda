@@ -490,18 +490,22 @@ public class CardHover : MonoBehaviour,
     UnityEngine.EventSystems.IPointerUpHandler
 {
     Coroutine cor;
+    bool pronto = true; // enquanto false (durante a animação de entrada) ignora o mouse
+
+    public void Travar()  => pronto = false;
+    public void Liberar() => pronto = true;
 
     public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData _)
-        => Animar(1.06f, 0.15f);
+    { if (pronto) Animar(1.06f, 0.15f); }
 
     public void OnPointerExit(UnityEngine.EventSystems.PointerEventData _)
-        => Animar(1.00f, 0.15f);
+    { if (pronto) Animar(1.00f, 0.15f); }
 
     public void OnPointerDown(UnityEngine.EventSystems.PointerEventData _)
-        => Animar(0.97f, 0.08f);
+    { if (pronto) Animar(0.97f, 0.08f); }
 
     public void OnPointerUp(UnityEngine.EventSystems.PointerEventData _)
-        => Animar(1.06f, 0.08f);
+    { if (pronto) Animar(1.06f, 0.08f); }
 
     void Animar(float alvo, float dur)
     {
@@ -511,8 +515,10 @@ public class CardHover : MonoBehaviour,
 
     System.Collections.IEnumerator EscalaParaAlvo(float alvo, float dur)
     {
+        // unscaled: funciona mesmo com o jogo pausado (menu de pause tem timeScale = 0),
+        // senão o Time.deltaTime vira 0 e a animação de hover trava.
         float inicio = transform.localScale.x;
-        for (float t = 0f; t < dur; t += Time.deltaTime)
+        for (float t = 0f; t < dur; t += Time.unscaledDeltaTime)
         {
             float e = 1f - Mathf.Pow(1f - t / dur, 2f);
             float s = Mathf.Lerp(inicio, alvo, e);

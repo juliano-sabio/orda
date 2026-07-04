@@ -320,7 +320,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         go.transform.SetParent(painelPassivas.transform, false);
         go.AddComponent<RectTransform>();
         var le = go.AddComponent<UnityEngine.UI.LayoutElement>();
-        le.preferredHeight = 100f;
+        le.preferredHeight = 128f; // mais alto: cabe passiva com 3 linhas de bônus sem sobrepor
         le.flexibleWidth   = 1f;
 
         var img = go.AddComponent<UnityEngine.UI.Image>();
@@ -367,7 +367,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         var goNome = new GameObject("Nome");
         goNome.transform.SetParent(go.transform, false);
         var rNome = goNome.AddComponent<RectTransform>();
-        rNome.anchorMin = new Vector2(nomeX, 0.70f); rNome.anchorMax = new Vector2(0.97f, 0.97f);
+        rNome.anchorMin = new Vector2(nomeX, 0.83f); rNome.anchorMax = new Vector2(0.97f, 0.98f);
         rNome.offsetMin = rNome.offsetMax = Vector2.zero;
         var txtNome = goNome.AddComponent<TMPro.TextMeshProUGUI>();
         txtNome.text      = pd.GetDisplayName();
@@ -375,18 +375,19 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         txtNome.fontStyle = TMPro.FontStyles.Bold;
         txtNome.color     = new Color(0.92f, 0.82f, 0.62f);
         txtNome.alignment = TMPro.TextAlignmentOptions.MidlineLeft;
-        txtNome.textWrappingMode = TMPro.TextWrappingModes.Normal;
+        txtNome.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+        txtNome.overflowMode     = TMPro.TextOverflowModes.Ellipsis;
 
         var goBonus = new GameObject("Bonus");
         goBonus.transform.SetParent(go.transform, false);
         var rBonus = goBonus.AddComponent<RectTransform>();
-        rBonus.anchorMin = new Vector2(nomeX, 0.48f); rBonus.anchorMax = new Vector2(0.97f, 0.68f);
+        rBonus.anchorMin = new Vector2(nomeX, 0.46f); rBonus.anchorMax = new Vector2(0.97f, 0.81f);
         rBonus.offsetMin = rBonus.offsetMax = Vector2.zero;
         var txtBonus = goBonus.AddComponent<TMPro.TextMeshProUGUI>();
         txtBonus.text             = pd.GetBonusDescription();
         txtBonus.fontSize         = 9f;
         txtBonus.color            = new Color(0.90f, 0.82f, 0.65f);
-        txtBonus.alignment        = TMPro.TextAlignmentOptions.MidlineLeft;
+        txtBonus.alignment        = TMPro.TextAlignmentOptions.TopLeft;
         txtBonus.textWrappingMode = TMPro.TextWrappingModes.Normal;
         txtBonus.richText         = true;
 
@@ -394,7 +395,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         var goDesc = new GameObject("Desc");
         goDesc.transform.SetParent(go.transform, false);
         var rDesc = goDesc.AddComponent<RectTransform>();
-        rDesc.anchorMin = new Vector2(descX, 0.02f); rDesc.anchorMax = new Vector2(0.97f, 0.46f);
+        rDesc.anchorMin = new Vector2(descX, 0.04f); rDesc.anchorMax = new Vector2(0.97f, 0.43f);
         rDesc.offsetMin = rDesc.offsetMax = Vector2.zero;
         var txtDesc = goDesc.AddComponent<TMPro.TextMeshProUGUI>();
         txtDesc.text             = pd.GetDisplayDescription();

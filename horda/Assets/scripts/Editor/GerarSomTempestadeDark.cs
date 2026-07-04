@@ -19,35 +19,36 @@ public static class GerarSomTempestadeDark
         if (!AssetDatabase.IsValidFolder(PASTA))
             AssetDatabase.CreateFolder("Assets/Resources", "Sons");
 
-        GravarWav("tempestade_inicio", Reverb(GerarInicio(), 0.5f, 8, 34f, 0.4f));
+        GravarWav("tempestade_inicio", Reverb(GerarInicio(), 0.55f, 9, 38f, 0.42f));
         GravarWav("tempestade_loop",   GerarLoop());           // SEM reverb (precisa loopar sem emenda)
-        GravarWav("tempestade_raio",   Reverb(GerarRaio(),   0.45f, 6, 26f, 0.32f));
+        GravarWav("tempestade_raio",   Reverb(GerarRaio(),   0.4f,  5, 20f, 0.24f));
 
         AssetDatabase.Refresh();
         Debug.Log("[SonsDark] Tempestade gerada em " + PASTA + "/ (inicio, loop, raio)");
     }
 
-    // Início: a tempestade se forma — ronco subindo + surto elétrico + boom no pico.
+    // Início (suave): a tempestade se forma devagar — ronco grave subindo + hum quente +
+    // boom arredondado no pico (sem estalo seco). Bem menos ruído branco que a versão antiga.
     static float[] GerarInicio()
     {
-        int dur = (int)(SR * 0.7f);
+        int dur = (int)(SR * 0.8f);
         var s = new float[dur];
         for (int i = 0; i < dur; i++)
         {
             float t = (float)i / SR;
-            float master = Mathf.Clamp01(t * 12f);
-            float build = Mathf.Clamp01(t / 0.4f);
-            float rumble = (Random.value * 2f - 1f) * (0.3f + 0.7f * build) * 0.35f;
-            float swell = Mathf.Sin(2f * Mathf.PI * Mathf.Lerp(60f, 140f, build) * t) * (0.3f + 0.7f * build) * 0.3f;
-            float p2 = Mathf.Max(0f, t - 0.4f);
-            float ativo2 = t >= 0.4f ? 1f : 0f;
-            float boom = Mathf.Sin(2f * Mathf.PI * 45f * t) * Mathf.Exp(-p2 * 4f) * 0.5f * ativo2;
-            float crack = (Random.value * 2f - 1f) * Mathf.Exp(-Mathf.Abs(t - 0.4f) * 10f) * 0.3f;
-            float raw = (rumble + swell + boom + crack) * master;
+            float master = Mathf.Clamp01(t * 8f);            // ataque mais lento/suave
+            float build = Mathf.Clamp01(t / 0.5f);
+            float swell = Mathf.Sin(2f * Mathf.PI * Mathf.Lerp(55f, 120f, build) * t) * (0.3f + 0.7f * build) * 0.34f;
+            float subhum = Mathf.Sin(2f * Mathf.PI * 70f * t) * 0.16f;               // sustentação quente
+            float sub = Mathf.Sin(2f * Mathf.PI * 38f * t) * 0.14f * build;          // grave que entra
+            float p2 = Mathf.Max(0f, t - 0.5f);
+            float ativo2 = t >= 0.5f ? 1f : 0f;
+            float boom = Mathf.Sin(2f * Mathf.PI * 42f * t) * Mathf.Exp(-p2 * 3.5f) * 0.45f * ativo2; // boom rolando
+            float raw = (swell + subhum + sub + boom) * master;                       // SEM ruído branco
             float sign = raw >= 0f ? 1f : -1f;
-            s[i] = Mathf.Clamp(sign * Mathf.Pow(Mathf.Abs(raw), 0.7f), -1f, 1f);
+            s[i] = Mathf.Clamp(sign * Mathf.Pow(Mathf.Abs(raw), 0.9f), -1f, 1f);
         }
-        SuavizarRuido(s, 2);
+        SuavizarRuido(s, 3);
         return Normalizar(s);
     }
 
@@ -60,33 +61,45 @@ public static class GerarSomTempestadeDark
         for (int i = 0; i < dur; i++)
         {
             float t = (float)i / SR;
-            float rumble = (Random.value * 2f - 1f) * (0.6f + 0.4f * Mathf.Sin(2f * Mathf.PI * 0.5f * t)) * 0.3f;
-            float vento  = Mathf.Sin(2f * Mathf.PI * 40f * t) * 0.2f + Mathf.Sin(2f * Mathf.PI * 60f * t) * 0.15f;
-            float crepit = (Random.value * 2f - 1f) * (0.5f + 0.5f * Mathf.Sin(2f * Mathf.PI * 3f * t)) * 0.08f;
-            s[i] = Mathf.Clamp(rumble + vento + crepit, -1f, 1f);
+            // Ronco 100% tonal (sem ruído branco = sem chiado). LFOs a 0.5/1Hz completam ciclos
+            // inteiros em 2s -> loop sem emenda; dão o "trovão rolando" pela amplitude.
+            float lfo1 = 0.6f + 0.4f * Mathf.Sin(2f * Mathf.PI * 0.5f * t);
+            float lfo2 = 0.6f + 0.4f * Mathf.Sin(2f * Mathf.PI * 1.0f * t + 1.2f);
+            float bed = Mathf.Sin(2f * Mathf.PI * 20f * t) * 0.10f
+                      + Mathf.Sin(2f * Mathf.PI * 30f * t) * 0.13f * lfo1
+                      + Mathf.Sin(2f * Mathf.PI * 40f * t) * 0.20f * lfo2
+                      + Mathf.Sin(2f * Mathf.PI * 60f * t) * 0.12f * lfo1;
+            s[i] = Mathf.Clamp(bed, -1f, 1f);
         }
-        SuavizarRuido(s, 3); // low-pass forte = ronco profundo
+        SuavizarRuido(s, 3);
         return Normalizar(s);
     }
 
-    // Raio: queda do céu — estalo seco + zap descendente + baque + ronco curto.
+    // Raio (suave): queda do céu — estalo mais macio + zap descendente arredondado + baque grave.
+    // Menos ruído seco e menos grit que a versão antiga, mantendo o impacto.
     static float[] GerarRaio()
     {
-        int dur = (int)(SR * 0.35f);
+        int dur = (int)(SR * 0.4f);
         var s = new float[dur];
         for (int i = 0; i < dur; i++)
         {
             float t = (float)i / SR;
-            float env = Mathf.Exp(-t * 7f);
-            float crack = (Random.value * 2f - 1f) * Mathf.Exp(-t * 30f) * 0.7f;
-            float zap = Mathf.Sin(2f * Mathf.PI * Mathf.Lerp(800f, 150f, Mathf.Clamp01(t * 5f)) * t) * Mathf.Exp(-t * 9f) * 0.4f;
-            float baque = Mathf.Sin(2f * Mathf.PI * 60f * t) * Mathf.Exp(-t * 12f) * 0.5f;
-            float rumble = (Random.value * 2f - 1f) * Mathf.Exp(-t * 7f) * 0.3f;
-            float raw = (crack * 0.7f + zap + baque + rumble * 0.5f) * env;
+            float env = Mathf.Exp(-t * 6f);
+            // Zap elétrico brilhante descendo do agudo pro grave
+            float zap = Mathf.Sin(2f * Mathf.PI * Mathf.Lerp(900f, 140f, Mathf.Clamp01(t * 4f)) * t) * Mathf.Exp(-t * 7f) * 0.4f;
+            // "zzzt" elétrico: tom médio com modulação de amplitude rápida (dá o caráter de raio, SEM ruído)
+            float buzz = Mathf.Sin(2f * Mathf.PI * 600f * t) * (0.5f + 0.5f * Mathf.Sin(2f * Mathf.PI * 90f * t)) * Mathf.Exp(-t * 14f) * 0.25f;
+            // Crack curto e brilhante feito de harmônicos agudos (em vez de ruído branco)
+            float crack = (Mathf.Sin(2f * Mathf.PI * 1500f * t) + Mathf.Sin(2f * Mathf.PI * 2200f * t) * 0.6f) * Mathf.Exp(-t * 35f) * 0.18f;
+            float snap = (Random.value * 2f - 1f) * Mathf.Exp(-t * 50f) * 0.10f; // clique minúsculo pro ataque
+            // Impacto grave (o raio "batendo" no inimigo)
+            float baque = Mathf.Sin(2f * Mathf.PI * 55f * t) * Mathf.Exp(-t * 8f) * 0.6f;
+            float sub = Mathf.Sin(2f * Mathf.PI * 35f * t) * Mathf.Exp(-t * 6f) * 0.3f;
+            float raw = (zap + buzz + crack + snap * 0.5f + baque + sub) * env;
             float sign = raw >= 0f ? 1f : -1f;
-            s[i] = Mathf.Clamp(sign * Mathf.Pow(Mathf.Abs(raw), 0.7f), -1f, 1f);
+            s[i] = Mathf.Clamp(sign * Mathf.Pow(Mathf.Abs(raw), 0.8f), -1f, 1f);
         }
-        SuavizarRuido(s, 1);
+        SuavizarRuido(s, 1); // janela curta preserva o brilho do crack
         return Normalizar(s);
     }
 
