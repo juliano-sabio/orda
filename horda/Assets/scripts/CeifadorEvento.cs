@@ -254,7 +254,8 @@ void AdicionarBrilhoVermelho()
             float d = Vector2.Distance(transform.position, player.position);
             if (d <= raioContato)
             {
-                player.GetComponent<PlayerStats>()?.TakeDamage(danoContato);
+                var ps = player.GetComponent<PlayerStats>();
+                if (ps != null) ps.TakeDamage(DanoCapado(ps, danoContato));
                 proxDanoContato = Time.time + intervaloContato;
             }
         }
@@ -294,6 +295,11 @@ void AdicionarBrilhoVermelho()
             else if (vel.x < -0.05f) sr.flipX = true;
         }
     }
+
+    // O Ceifador nunca tira mais que 30% da vida MÁXIMA do player num hit (não pode quase
+    // one-shotar) — cap pedido pelo design.
+    static float DanoCapado(PlayerStats ps, float bruto)
+        => ps == null ? bruto : Mathf.Min(bruto, 0.30f * ps.maxHealth);
 
     void FixedUpdate()
     {
@@ -341,7 +347,8 @@ void AdicionarBrilhoVermelho()
                 {
                     dashAcertouPlayer = true;
                     EfeitoCorte((Vector2)player.position, dashDir);
-                    player.GetComponent<PlayerStats>()?.TakeDamage(danoContato * 2f);
+                    var psDash = player.GetComponent<PlayerStats>();
+                    if (psDash != null) psDash.TakeDamage(DanoCapado(psDash, danoContato * 2f));
                     proxDanoContato = Time.time + intervaloContato;
                 }
             }

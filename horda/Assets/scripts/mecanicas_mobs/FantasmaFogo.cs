@@ -122,7 +122,8 @@ public class FantasmaFogo : MonoBehaviour, IEnemyCosmetic
 
     void Update()
     {
-        if (Morto() || player == null || atacando) return;
+        if (Morto() || atacando) return;
+        if (!PlayerStats.AlvoValido(player)) { player = PlayerStats.MaisProximo(transform.position); if (player == null) return; }
 
         proxCarga -= Time.deltaTime;
         proxProjeteisFantasmas -= Time.deltaTime;

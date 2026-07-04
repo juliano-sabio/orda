@@ -97,7 +97,8 @@ public class FantasmaEletrico : MonoBehaviour, IEnemyCosmetic
 
     void Update()
     {
-        if (Morto() || player == null) return;
+        if (Morto()) return;
+        if (!PlayerStats.AlvoValido(player)) { player = PlayerStats.MaisProximo(transform.position); if (player == null) return; }
         proxParalisia -= Time.deltaTime;
         proxRaio      -= Time.deltaTime;
 

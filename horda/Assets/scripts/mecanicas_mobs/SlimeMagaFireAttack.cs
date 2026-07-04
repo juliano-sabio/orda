@@ -41,11 +41,14 @@ public class SlimeMagaFireAttack : MonoBehaviour
         if (inimigoCtrl != null && inimigoCtrl.estaMorrendo) return;
         if (carregando) return;
 
-        if (playerTr == null)
+        // Alvo inválido (sumiu OU caiu) → reprocura um vivo. Sem isto a maga ficava mirando o
+        // P1 caído e parava de atacar o P2.
+        var alvoPs = playerTr != null ? playerTr.GetComponent<PlayerStats>() : null;
+        if (!PlayerStats.AlvoValido(alvoPs))
         {
             var ps = PlayerStats.MaisProximo(transform.position);
-            if (ps != null) playerTr = ps.transform;
-            return;
+            playerTr = ps != null ? ps.transform : null;
+            if (playerTr == null) return;
         }
 
         if (Time.time >= proxAtaque)

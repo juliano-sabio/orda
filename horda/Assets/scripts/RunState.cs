@@ -23,7 +23,8 @@ public static class RunState
     {
         if (!Ativo) return;
         Ativo = false;
-        CongelarInimigos(); // "parar tudo": os inimigos que restaram param na hora
+        CongelarInimigos();                             // inimigos que restaram param na hora
+        GerenciadorEventos.Instance?.EncerrarPorFimDeRun(); // fecha o card de evento (não fica "rodando")
     }
 
     // Congela todos os inimigos vivos (para movimento/IA) — deixa a tela de fim de run limpa,

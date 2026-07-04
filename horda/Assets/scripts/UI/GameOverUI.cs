@@ -592,6 +592,16 @@ public class GameOverUI : MonoBehaviour
     private void Recomecar()
     {
         Time.timeScale = 1f;
+
+        // Co-op: recarregar a cena localmente quebra a sessão NGO (o cliente ia parar no menu).
+        // Em vez disso, o host leva o GRUPO de volta ao lobby conectado (lobby_mp).
+        if (NetSpawn.EmRede)
+        {
+            CoopDesconexaoUI.SaidaIntencional = true; // volta ao lobby não é "queda"
+            var pn = PlayerStats.Local != null ? PlayerStats.Local.GetComponent<PlayerNet>() : null;
+            if (pn != null) { pn.VoltarLobbyServerRpc(); return; }
+        }
+
         if (bgSnapshot != null) Destroy(bgSnapshot);
         LimparManagersPersistentes();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);

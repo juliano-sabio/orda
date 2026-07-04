@@ -120,7 +120,8 @@ public class FantasmaVeneno : MonoBehaviour, IEnemyCosmetic
 
     void Update()
     {
-        if (Morto() || player == null) return;
+        if (Morto()) return;
+        if (!PlayerStats.AlvoValido(player)) { player = PlayerStats.MaisProximo(transform.position); if (player == null) return; }
         proxVeneno -= Time.deltaTime;
         proxRastro -= Time.deltaTime;
         proxProjeteisFantasmas -= Time.deltaTime;

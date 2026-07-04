@@ -133,7 +133,7 @@ public class SlimeElemental : MonoBehaviour
     void Update()
     {
         if (Morto()) return;
-        if (player == null) { BuscarPlayer(); return; }
+        if (!PlayerStats.AlvoValido(player)) { BuscarPlayer(); if (!PlayerStats.AlvoValido(player)) return; }
 
         proxGelo   -= Time.deltaTime;
         proxVento  -= Time.deltaTime;

@@ -55,6 +55,11 @@ public class PlayerStats : MonoBehaviour
         return p != null ? p.transform : null;
     }
 
+    // true se o alvo é um player VÁLIDO (existe e não está caído). Os inimigos usam isto pra
+    // largar um alvo que caiu (downed) e reprocurar um vivo — senão, quando o P1 caía, os
+    // atacantes ficavam mirando o caído e paravam de atacar o P2.
+    public static bool AlvoValido(PlayerStats p) => p != null && !p.EstaCaido;
+
     void OnEnable()  { if (!All.Contains(this)) All.Add(this); }
     void OnDisable() { All.Remove(this); }
 
@@ -134,7 +139,7 @@ public class PlayerStats : MonoBehaviour
     [Header("Configurações de Ativação")]
     public float attackActivationInterval = 2f;
     public float defenseActivationInterval = 3f;
-    public float critChance = 0.1f;
+    public float critChance = 0.15f; // base 15% (era 10%) — crítico mais frequente
 
     [Header("⚡ Sistema de Elementos")]
     public ElementSystem elementSystem = new ElementSystem();
@@ -251,7 +256,7 @@ public class PlayerStats : MonoBehaviour
         defenseActivationInterval = characterData.baseDefenseCooldown * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 7);
 
         // --- Crítico ---
-        critChance = 0.1f * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 2);
+        critChance = 0.15f * EspiritoUpgradeSystem.GetMultiplicador(espCharIndex, 2); // base 15% (era 10%)
 
         // --- Progressão ---
         xpMultiplier = characterData.xpMultiplier;
@@ -1012,7 +1017,7 @@ public class PlayerStats : MonoBehaviour
                     isCrit = UnityEngine.Random.value < critChance;
                 }
 
-                float finalDamage = isCrit ? damage * 2f : damage;
+                float finalDamage = isCrit ? damage * 2.5f : damage; // crít 2.5x (era 2x)
                 inimigo.ReceberDano(finalDamage, isCrit);
 
                 // Aplica efeito elemental

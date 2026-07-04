@@ -116,7 +116,7 @@ public class SlimeProtetoraInimiga : MonoBehaviour
     void Update()
     {
         if (Morto()) return;
-        if (player == null) { BuscarPlayer(); return; }
+        if (!PlayerStats.AlvoValido(player)) { BuscarPlayer(); if (!PlayerStats.AlvoValido(player)) return; }
 
         proxEscudo   -= Time.deltaTime;
         proxBuff     -= Time.deltaTime;

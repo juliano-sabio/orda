@@ -93,7 +93,8 @@ public class FantasmaVenenoAtirador : MonoBehaviour, IEnemyCosmetic
 
     void Update()
     {
-        if (Morto() || player == null) return;
+        if (Morto()) return;
+        if (!PlayerStats.AlvoValido(player)) { player = PlayerStats.MaisProximo(transform.position); if (player == null) return; }
         proxTiro -= Time.deltaTime;
 
         float dist = Vector2.Distance(transform.position, player.transform.position);

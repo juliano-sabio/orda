@@ -463,20 +463,12 @@ void TentarIniciarEvento()
     if (painelEvento == null)
         CriarPainelUI();
 
-    int idx;
-    if (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
-        idx = debugForcarEvento;
-    else if (!primeiroEventoDisparado)
-    {
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "segunda_fase")
-            idx = eventos.FindIndex(e => e.tipo == TipoEvento.VorticeDevorador);
-        else
-            idx = eventos.FindIndex(e => e.tipo == TipoEvento.Colapso);
-        if (idx < 0) idx = 0;
-        RemoverDoSaco(idx); // o evento forçado também conta como "já usado" na run
-    }
-    else
-        idx = ProximoEventoAleatorio();
+    // Ordem SEMPRE aleatória (saco embaralhado sem repetição) — inclusive o primeiro evento.
+    // Antes o 1º era forçado (Colapso na fase 1 / Vórtice na fase 2), o que fazia a run parecer
+    // ter ordem fixa. Só o override de debug continua tendo prioridade.
+    int idx = (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
+        ? debugForcarEvento
+        : ProximoEventoAleatorio();
     primeiroEventoDisparado = true;
     eventoAtual = eventos[idx];
     eventoAtivo = true;
@@ -537,6 +529,27 @@ void TentarIniciarEvento()
     }
 
 }
+
+    // Fim de run (morte/saída/desligar): encerra o evento AGORA e ESCONDE o card na hora —
+    // sem resultado/cura/evolução/próximo evento. Antes o card ficava "rodando" na tela após
+    // a morte. Chamado pelo RunState.Desligar.
+    public void EncerrarPorFimDeRun()
+    {
+        StopAllCoroutines(); // mata animações de entrada/saída/resultado e spawns pendentes
+        eventoAtivo = false;
+
+        LimparEspiritos();
+        if (slimeColoridaAtiva != null) { NetSpawn.Despawnar(slimeColoridaAtiva); slimeColoridaAtiva = null; }
+        if (indicadorSlime != null) { Destroy(indicadorSlime.gameObject); indicadorSlime = null; }
+        LimparCeifadores(); LimparSlimePercurso(); LimparZonaEliminacao(); LimparColapso();
+        LimparTempestadeEletrica(); LimparPortal(); LimparNucleo(); LimparCristais(); LimparVortice();
+
+        if (painelEvento != null)
+        {
+            if (painelRT != null) painelRT.anchoredPosition = POS_ESCONDIDO;
+            painelEvento.SetActive(false);
+        }
+    }
 
     void EncerrarEvento(bool sucesso)
     {

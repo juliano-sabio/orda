@@ -449,6 +449,16 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     System.Collections.IEnumerator VoltarAoLobby()
     {
         yield return new WaitForSecondsRealtime(4f);
+        VoltarAoLobbyAgora();
+    }
+
+    // Co-op: qualquer player pediu "Recomeçar" no game over → o host leva o GRUPO ao lobby_mp
+    // (sessão NGO viva). O cliente não pode dar LoadScene de cena em rede — por isso pede pro host.
+    [Rpc(SendTo.Server)]
+    public void VoltarLobbyServerRpc() => VoltarAoLobbyAgora();
+
+    void VoltarAoLobbyAgora()
+    {
         Time.timeScale = 1f; // não carregar o lobby congelado
         LobbyState.EmLobby = true;
         var nm = NetworkManager.Singleton;

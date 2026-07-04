@@ -60,7 +60,7 @@ public class SlimeGuarda : MonoBehaviour
     void Update()
     {
         if (Morto()) return;
-        if (player == null) { player = PlayerStats.MaisProximo(transform.position); return; }
+        if (!PlayerStats.AlvoValido(player)) { player = PlayerStats.MaisProximo(transform.position); if (player == null) return; }
 
         if (!sequenciaAtiva)
         {
