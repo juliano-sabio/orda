@@ -53,11 +53,26 @@ public class CicloDia : MonoBehaviour
     void Update()
     {
         float duracao = duracaoTransicao;
-        if (timerManager != null)
-            duracao = timerManager.levelDuration;
 
-        tempoDecorrido += Time.deltaTime;
-        float t = Mathf.Clamp01(tempoDecorrido / duracao);
+        // Dirige o entardecer pelo RELÓGIO DA RUN (TimerManager.currentTime) em vez de um
+        // contador local. Em co-op isso mantém P1 e P2 no MESMO nível de escuridão: os dois
+        // começam do t=0 quando a run liga (players prontos) e contam igual — antes cada
+        // máquina contava do próprio Start, então a escuridão dessincronizava e começava
+        // antes do P2 entrar. Fallback pro contador local em cenas sem TimerManager.
+        if (timerManager == null) timerManager = FindAnyObjectByType<TimerManager>();
+        float elapsed;
+        if (timerManager != null)
+        {
+            duracao = timerManager.levelDuration;
+            elapsed = timerManager.currentTime;
+        }
+        else
+        {
+            tempoDecorrido += Time.deltaTime;
+            elapsed = tempoDecorrido;
+        }
+
+        float t = Mathf.Clamp01(elapsed / duracao);
         float ease = Mathf.SmoothStep(0f, 1f, t);
 
         if (luzGlobal != null)
