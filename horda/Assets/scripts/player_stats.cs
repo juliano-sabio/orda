@@ -221,6 +221,35 @@ public class PlayerStats : MonoBehaviour
         ApplyCharacterData(PlayerPrefs.GetInt("SelectedCharacter", 0));
     }
 
+    // Limpa TODOS os efeitos de status ativos (veneno/queima/slow/paralisia/luz + lentidão +
+    // invuln/bloqueio de ulti) e restaura cor/animação. Crítico entre runs: o NetworkPlayer é
+    // DontDestroyOnLoad e PERSISTE (lobby↔fase), então sem isto a run nova começava envenenada/
+    // lenta/tingida. Chamado no início do ApplyCharacterData (que roda em todo início de run).
+    public void LimparEfeitosStatus()
+    {
+        if (corotinaVeneno        != null) { StopCoroutine(corotinaVeneno);        corotinaVeneno = null; }
+        if (corotinaQueimadura    != null) { StopCoroutine(corotinaQueimadura);    corotinaQueimadura = null; }
+        if (corotinaRestaurarSlow != null) { StopCoroutine(corotinaRestaurarSlow); corotinaRestaurarSlow = null; }
+        if (corotinaParalisia     != null) { StopCoroutine(corotinaParalisia);     corotinaParalisia = null; }
+        if (corotinaDebuffLuz     != null) { StopCoroutine(corotinaDebuffLuz);     corotinaDebuffLuz = null; }
+
+        estaSlowado = false;
+        estaQueimando = false;
+        tempoVenenoRestante = 0f;
+        tempoQueimaduraRestante = 0f;
+        semLuzDebuffAtivo = false;
+        ultimateBloqueada = false;
+        invulneravel = false;
+
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null) sr.color = CorBasePlayer.Obter(sr); // limpa tint (veneno/queima/slow)
+        var anim = GetComponent<Animator>();
+        if (anim != null) anim.speed = 1f;                  // desfaz a desaceleração de animação do slow
+
+        var lent = GetComponent<EfeitoLentidao>();
+        if (lent != null) Destroy(lent);                    // remove o componente de lentidão grudado
+    }
+
     // Overload por índice explícito: usado no co-op para aplicar o personagem
     // do dono (índice sincronizado) também nas cópias remotas.
     // Co-op: o lobby preenche este registro (índice -> CharacterData) pra a fase de rede
@@ -236,6 +265,8 @@ public class PlayerStats : MonoBehaviour
             characterData = RegistroPersonagens[selectedCharacter];
 
         if (characterData == null) return;
+
+        LimparEfeitosStatus(); // run nova começa sem veneno/slow/tint da anterior (player persiste em co-op)
 
         // --- Espíritos de Evolução (upgrades permanentes por personagem) ---
         int espCharIndex = selectedCharacter;
