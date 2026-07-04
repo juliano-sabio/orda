@@ -41,7 +41,22 @@
       "Bash(git commit *)",
       "Bash(git merge *)",
       "Bash(git commit -q -m 'chore: usa a versao do colaborador para CartaSelecaoEfeito \\(efeito de selecao da carta\\) *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(grep -nE \"nameFileIdTable:|iconedash|^\\\\s+[A-Za-z_]+: [0-9]{5,}\" \"Assets/prefebs/dash/iconedash.ase.meta\")",
+      "Bash(grep -nA3 \"nameFileIdTable:\" \"Assets/prefebs/dash/iconedash.ase.meta\")",
+      "Bash(awk '/&511664373/{f=1} f&&/m_Sprite:/{print NR\": \"$0; exit}' \"Assets/Scenes/primeira_fase.unity\")",
+      "PowerShell(& \"C:\\\\Users\\\\rafin\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-rafin-OneDrive-Documentos-GitHub-projeto-rpg-orda-horda\\\\bdf51fbf-262e-4290-93b5-5160fc4b7b13\\\\scratchpad\\\\GerarRaio.ps1\")",
+      "Bash(awk '/class CardHover/{f=1} f{print NR\": \"$0} f&&/^}/{c++; if\\(c>=1 && /^}/ && NR>0\\){}} f&&/^\\\\}/{exit}' \"Assets/scripts/UI/EscolherTerrenoUI.cs\")",
+      "Bash(git mv *)",
+      "Bash(mv \"Assets/prefebs/dash/dash.prefab.meta\" \"Assets/Resources/dash.prefab.meta\")",
+      "Bash(awk '/public.*CosmeticoCarga|void CosmeticoCarga|IEnumerator CosmeticoCarga/{f=1} f{print NR\": \"$0} f&&/SomSkill|EfeitoCarga|^    \\\\}/{if\\(/SomSkill|EfeitoCarga/\\) print \"   >> \"$0} f&&/^    \\\\}/{c++; if\\(c>=1\\)exit}' \"Assets/scripts/mecanicas_mobs/SlimeElemental.cs\")",
+      "Bash(awk '/^--- !u!4 /{tf=$0} /m_GameObject:/{go=$0} /m_Father: \\\\{fileID: 0\\\\}/{print \"Transform:\", tf; print \"  \"go}' \"Assets/prefebs/boss/bossprincesa/bossprincesa.prefab\")",
+      "Bash(awk '/^ eventos:/{f=1} f{print} f&&/^ [a-zA-Z]/&&!/^ eventos:/{if\\(NR>l+1\\)exit} /nome:/{l=NR}' \"Assets/Scenes/primeira_fase_mp.unity\")",
+      "Bash(grep '\\\\.cs$')",
+      "Bash(grep -nB2 -A4 \"sprBotao =\" Assets/scripts/UI/MenuInicialUI.cs)",
+      "Bash(git commit -m ' *)",
+      "Bash(git rebase *)",
+      "Bash(git stash *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda\\horda",
