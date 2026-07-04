@@ -6,10 +6,19 @@ using System.Collections;
 
 public class MissaoEspiritoManager : MonoBehaviour
 {
-    const int META_KILLS = 50;
+    // Marcos de kills TOTAIS (acumulados, nunca zeram). Cada marco é uma missão one-time
+    // que dá +1 Espírito de Evolução ao ser coletada — depois de coletar, não repete.
+    public static readonly int[] Marcos =
+        { 50, 150, 300, 500, 750, 1050, 1400, 1800, 2250, 2750, 3300 };
+
+    public static int  TotalKills => PlayerPrefs.GetInt("MissaoEspiritoTotal", 0);
+    public static int  Coletadas  => PlayerPrefs.GetInt("MissaoEspiritoColetadas", 0);
+    public static int  ProximoMarco => Coletadas < Marcos.Length ? Marcos[Coletadas] : -1;
+    // Há uma missão já completa e ainda não coletada?
+    public static bool HaMissaoParaColetar => Coletadas < Marcos.Length && TotalKills >= Marcos[Coletadas];
+
     const float DURACAO_CARD_CONCLUIDO = 10f;
 
-    int mortes = 0;
     GameObject canvasGO;
     GameObject cardConcluido;
     Coroutine corCardConcluido;
@@ -37,7 +46,6 @@ public class MissaoEspiritoManager : MonoBehaviour
 
     void Start()
     {
-        mortes = PlayerPrefs.GetInt("MissaoEspiritoMortes", 0);
         CriarCanvas();
         CriarCardConcluido();
         InimigoController.OnInimigoDerrotado += OnMorteInimigo;
@@ -68,15 +76,17 @@ public class MissaoEspiritoManager : MonoBehaviour
 
     void OnMorteInimigo()
     {
-        mortes++;
-        if (mortes >= META_KILLS)
+        if (Coletadas >= Marcos.Length) return; // todas as 11 missões já foram coletadas
+
+        int total = TotalKills + 1;
+        PlayerPrefs.SetInt("MissaoEspiritoTotal", total);
+
+        // Acabou de atingir o marco da próxima missão não coletada → avisa (a coleta é na UI).
+        if (total == Marcos[Coletadas])
         {
-            mortes = 0;
-            PlayerPrefs.SetInt("MissaoEspiritoPendente", 1);
             UIManager.Instance?.ShowSkillAcquired(Loc.T("mission.complete"), Loc.T("mission.spirit_reward"));
             MostrarCardConcluido();
         }
-        PlayerPrefs.SetInt("MissaoEspiritoMortes", mortes);
         PlayerPrefs.Save();
     }
 

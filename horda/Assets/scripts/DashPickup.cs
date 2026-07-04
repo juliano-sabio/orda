@@ -129,6 +129,8 @@ public class DashPickup : MonoBehaviour
         // Pop de coleta (azul-dash), nos dois lados em co-op (host e cliente despawnam o pickup).
         if (!gameObject.scene.isLoaded) return;
         XpColetaVFX.Tocar(transform.position, new Color(0.4f, 0.85f, 1f));
+        if (collectSound == null)
+            SomSkill.Tocar(SomSkill.Tipo.DashColetar, transform.position, 0.45f);
     }
 
     void OnTriggerEnter2D(Collider2D other)

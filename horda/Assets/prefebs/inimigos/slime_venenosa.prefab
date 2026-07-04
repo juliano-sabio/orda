@@ -295,7 +295,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SlimeVenenosaDeathEffect
   raioFumaca: 2.5
   duracaoFumaca: 4
-  danoPorTick: 15
+  danoPorTick: 8
   intervalTick: 0.8
   duracaoVeneno: 5
 --- !u!114 &3049852238940096906

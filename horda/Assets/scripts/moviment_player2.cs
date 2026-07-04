@@ -119,7 +119,8 @@ public class moviment_player2 : MonoBehaviour
     {
         isDashing = true;
         dashEffect?.IniciarEfeito(dashDirection);
-        playerStats.GetComponent<PlayerNet>()?.BroadcastDash(dashDirection); // co-op: o fantoche do colega também mostra o rastro
+        SomSkill.Tocar(SomSkill.Tipo.DashUsar, transform.position, 0.5f);
+        playerStats.GetComponent<PlayerNet>()?.BroadcastDash(dashDirection); // co-op: o fantoche do colega também mostra o rastro (e som)
 
         yield return new WaitForSeconds(dashDuration);
 

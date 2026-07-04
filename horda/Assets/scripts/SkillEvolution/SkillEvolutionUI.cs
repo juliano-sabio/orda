@@ -139,6 +139,10 @@ public class SkillEvolutionUI : MonoBehaviour
             var btn = c.GetComponent<Button>();
             if (btn == null) btn = c.GetComponentInChildren<Button>();
             if (btn != null) btn.interactable = false;
+            // Desliga o animador (flutuação/hover) JÁ AQUI — senão o Lerp dele puxa a carta
+            // de volta pra posição do grid enquanto a CartaSelecaoEfeito a leva pro centro.
+            var anim = c.GetComponent<EvoCardAnimador>();
+            if (anim != null) { anim.StopAllCoroutines(); anim.enabled = false; }
         }
 
         if (cartaSelecionada != null)
@@ -393,7 +397,9 @@ public class SkillEvolutionUI : MonoBehaviour
 
         for (float e = 0f; e < 0.4f; e += Time.unscaledDeltaTime)
         {
-            if (card == null) yield break;
+            // Se já escolheu, PARA: senão a entrada continua escrevendo a posição do grid e
+            // briga com a CartaSelecaoEfeito (a carta ia pro centro e "voltava" pra posição antiga).
+            if (card == null || selecionou) yield break;
             float p = e / 0.4f;
             float ease = 1f - Mathf.Pow(1f - p, 3f);
             float bounce = 1f + Mathf.Sin(p * Mathf.PI) * 0.18f;
@@ -401,7 +407,7 @@ public class SkillEvolutionUI : MonoBehaviour
             if (rt != null) rt.anchoredPosition = Vector2.LerpUnclamped(posAlvo + new Vector2(0f, -120f), posAlvo, ease);
             yield return null;
         }
-        if (card != null)
+        if (card != null && !selecionou)
         {
             card.transform.localScale = Vector3.one;
             if (rt != null) rt.anchoredPosition = posAlvo;

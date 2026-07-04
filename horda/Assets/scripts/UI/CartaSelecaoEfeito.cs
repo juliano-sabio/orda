@@ -71,6 +71,11 @@ public class CartaSelecaoEfeito : MonoBehaviour
             if (s != null) { s.StopAllCoroutines(); s.enabled = false; }
         }
 
+        // Zera a rotação (tilt 3D) e a escala que o hover do EvoCardAnimador deixou — senão a
+        // carta selecionada segue TORTA/escalada durante toda a animação e parece bugada.
+        carta.localRotation = Quaternion.identity;
+        carta.localScale    = Vector3.one;
+
         // Outras cartas
         var outras = new List<RectTransform>();
         var outrasCG = new List<CanvasGroup>();
@@ -80,6 +85,8 @@ public class CartaSelecaoEfeito : MonoBehaviour
             var rt = g.GetComponent<RectTransform>();
             if (rt == null) continue;
             outras.Add(rt);
+            rt.localRotation = Quaternion.identity; // zera tilt/escala do hover também nas outras
+            rt.localScale    = Vector3.one;
             var cg = g.GetComponent<CanvasGroup>();
             if (cg == null) cg = g.AddComponent<CanvasGroup>();
             outrasCG.Add(cg);
@@ -145,9 +152,11 @@ public class CartaSelecaoEfeito : MonoBehaviour
         while (t < dur)
         {
             t += Time.unscaledDeltaTime;
+            carta.anchoredPosition = centroTela; // trava no meio (nada puxa de volta pro grid)
             carta.localScale = Vector3.one * (1f + 0.22f * Mathf.Sin(t / dur * Mathf.PI));
             yield return null;
         }
+        carta.anchoredPosition = centroTela;
         carta.localScale = Vector3.one;
 
         // ── Fase 4: explodir em bolinhas de energia ──────────────────────
@@ -187,12 +196,10 @@ public class CartaSelecaoEfeito : MonoBehaviour
             new Color(0.5f,  0.85f, 1f),   // azul suave
         };
 
-        // Posição REAL da carta AGORA (em coords locais do canvas) — os fragmentos nascem
-        // exatamente onde ela está, em vez de um centro recalculado que podia divergir.
-        carta.GetWorldCorners(corners);
-        Vector2 cartaScreen = (corners[0] + corners[2]) / 2f;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRT, cartaScreen, canvas.worldCamera, out Vector2 cartaCentro);
+        // Os fragmentos nascem no CENTRO pra onde a carta foi levada na Fase 2 (centroTela).
+        // Antes isso relia a posição via GetWorldCorners, mas no frame da explosão a carta às
+        // vezes reportava a posição ANTIGA (grid) — as partículas apareciam voltando pro lugar.
+        Vector2 cartaCentro = centroTela;
 
         // Grade de origem dos fragmentos (onde a carta estava)
         int cols = 5, rows = 7;
@@ -275,7 +282,7 @@ public class CartaSelecaoEfeito : MonoBehaviour
             playerScreenPos = Camera.main.WorldToScreenPoint(playerGO.transform.position);
 
         float durBurst = 0.5f;
-        float durVoo   = 2.0f;
+        float durVoo   = 1.6f;
         float durTotal = durBurst + durVoo;
         t = 0f;
 
@@ -302,8 +309,7 @@ public class CartaSelecaoEfeito : MonoBehaviour
                 else
                 {
                     float pv   = Mathf.SmoothStep(0f, 1f, (t - durBurst) / durVoo);
-                    // Os fragmentos VOAM pro player que escolheu a evolução (efeito NOSSO).
-                    // Mantém a centralização/posicionamento do parceiro nas fases anteriores.
+                    // Nascem no MEIO (fragPos0 já parte de centroTela) e VOAM pro player.
                     Vector2 p0 = fragPos0[i] + fragVel[i];
                     pos    = Vector2.Lerp(p0, playerCanvasPos, pv);
                     alpha  = Mathf.Clamp01(1f - Mathf.Pow(pv, 1.4f));

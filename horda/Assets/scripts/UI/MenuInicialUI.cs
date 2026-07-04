@@ -307,10 +307,13 @@ public class MenuInicialUI : MonoBehaviour
         imgBarra.color = new Color(corBorda.r, corBorda.g, corBorda.b, 0f);
 
         var img = go.AddComponent<Image>();
-        if (sprBotao != null)
+        // Usa o btn_stone (9-slice) em vez do bar_charselect esticado: assim a moldura não
+        // distorce/"inclina" ao ser esticada pra largura do botão (fica reta em qualquer tamanho).
+        Sprite sprBtn = sprBotaoOpcoes != null ? sprBotaoOpcoes : sprBotao;
+        if (sprBtn != null)
         {
-            img.sprite = sprBotao;
-            img.type   = Image.Type.Simple;
+            img.sprite = sprBtn;
+            img.type   = sprBotaoOpcoes != null ? Image.Type.Sliced : Image.Type.Simple;
             img.color  = Color.white;
             img.preserveAspect = false;
         }
@@ -332,8 +335,8 @@ public class MenuInicialUI : MonoBehaviour
         hover.img       = img;
         hover.barraImg  = imgBarra;
         hover.txt       = txt;
-        hover.corNormal = sprBotao != null ? Color.white : corBotao;
-        hover.corHover  = sprBotao != null ? new Color(0.82f, 0.82f, 0.82f) : corBotaoHover;
+        hover.corNormal = sprBtn != null ? Color.white : corBotao;
+        hover.corHover  = sprBtn != null ? new Color(0.82f, 0.82f, 0.82f) : corBotaoHover;
         hover.corBarra  = corBorda;
         hover.bordaGO   = null;
 

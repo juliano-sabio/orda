@@ -27,7 +27,7 @@ public class InimigoController : MonoBehaviour
     public float forcaDrop = 2f;
 
     [Header("Drop de Carga de Dash")]
-    [Range(0f, 1f)] public float chanceDropDash = 0.05f; // 5% de chance
+    [Range(0f, 1f)] public float chanceDropDash = 0.02f; // 2% de chance
     [Tooltip("Prefab do pickup de dash. Se vazio, carrega de Resources/dash.")]
     public GameObject dashPickupPrefab;
     static GameObject _dashPrefabCache;

@@ -385,26 +385,12 @@ public class MissoesUI : MonoBehaviour
 
     void PopularPersonagens(int playerLevel)
     {
-        // Missão de Espírito de Evolução (repetível, recompensa usada na seleção de personagem)
         int charIndex = PlayerPrefs.GetInt("SelectedCharacter", 0);
-        int espiritos = EspiritoUpgradeSystem.GetEspiritos(charIndex);
-        bool missaoPendente = PlayerPrefs.GetInt("MissaoEspiritoPendente", 0) == 1;
 
-        if (missaoPendente)
-        {
-            CriarCard(Loc.T("missions.spirit_mission.title"),
-                Loc.T("missions.spirit_mission.collect"),
-                Loc.T("missions.spirit_mission.desc"),
-                new Color(0.30f, 0.85f, 1.00f), true, spriteEspiritoMissao,
-                brilhando: true,
-                onClick: () => ColetarMissaoEspirito(charIndex));
-        }
+        // Lista as 11 missões de Espírito de Evolução (marcos de kills one-time).
+        CriarCardsMissoesEspirito(charIndex);
 
-        if (personagens == null)
-        {
-            if (!missaoPendente) CriarCardMissaoApagada(espiritos);
-            return;
-        }
+        if (personagens == null) return;
 
         foreach (var p in personagens)
         {
@@ -414,23 +400,55 @@ public class MissoesUI : MonoBehaviour
             CriarCard(p.GetDisplayName(), status, p.GetDisplayMissao(),
                 CharacterData.GetElementColor(p.baseElement), desbloqueado, p.icon);
         }
-
-        if (!missaoPendente) CriarCardMissaoApagada(espiritos);
     }
 
-    void CriarCardMissaoApagada(int espiritos)
+    // Cria um card por missão de Espírito (todas as 11), mostrando o estado de cada uma.
+    void CriarCardsMissoesEspirito(int charIndex)
     {
-        CriarCard(Loc.T("missions.spirit_mission.title"),
-            string.Format(Loc.T("missions.spirits"), espiritos),
-            Loc.T("missions.spirit_mission.desc"),
-            new Color(0.30f, 0.85f, 1.00f), true, spriteEspiritoMissao,
-            apagado: true);
+        var   marcos    = MissaoEspiritoManager.Marcos;
+        int   coletadas = MissaoEspiritoManager.Coletadas;
+        int   total     = MissaoEspiritoManager.TotalKills;
+        Color cor       = new Color(0.30f, 0.85f, 1.00f);
+        string tituloBase = Loc.T("missions.spirit_mission.title");
+
+        for (int i = 0; i < marcos.Length; i++)
+        {
+            int marco   = marcos[i];
+            string nome = $"{tituloBase} ({i + 1}/{marcos.Length})";
+            string desc = $"Derrote {marco} inimigos no total para ganhar +1 Espirito de Evolucao.";
+
+            if (i < coletadas)
+            {
+                // já coletada — one-time, não pode ser refeita
+                CriarCard(nome, Loc.T("missions.done"), desc, cor, true, spriteEspiritoMissao);
+            }
+            else if (i == coletadas && total >= marco)
+            {
+                // completa e pronta pra coletar
+                CriarCard(nome, Loc.T("missions.spirit_mission.collect"), desc, cor, true,
+                    spriteEspiritoMissao, brilhando: true,
+                    onClick: () => ColetarMissaoEspirito(charIndex));
+            }
+            else if (i == coletadas)
+            {
+                // missão atual, em progresso
+                CriarCard(nome, $"{total}/{marco}", desc, cor, false, spriteEspiritoMissao);
+            }
+            else
+            {
+                // missões futuras (bloqueadas)
+                CriarCard(nome, Loc.T("missions.incomplete"), desc, cor, false,
+                    spriteEspiritoMissao, apagado: true);
+            }
+        }
     }
+
 
     void ColetarMissaoEspirito(int charIndex)
     {
         EspiritoUpgradeSystem.AdicionarEspirito(charIndex);
-        PlayerPrefs.SetInt("MissaoEspiritoPendente", 0);
+        // Avança o marco: a missão coletada NÃO pode ser refeita (one-time).
+        PlayerPrefs.SetInt("MissaoEspiritoColetadas", MissaoEspiritoManager.Coletadas + 1);
         PlayerPrefs.Save();
         charSelUI?.AtualizarEspiritos();
         MostrarAba(abaAtiva);

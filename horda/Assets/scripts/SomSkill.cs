@@ -37,7 +37,8 @@ public static class SomSkill
         FantasmaEletrico, FantasmaFogo, FantasmaGelo, FantasmaVeneno,
         XpColetar,
         SlimeElemCarga, SlimeElemGelo, SlimeElemVento, SlimeElemFogo,
-        SlimeProtCarga, SlimeProtEscudo, SlimeProtBuff, SlimeProtProjetil
+        SlimeProtCarga, SlimeProtEscudo, SlimeProtBuff, SlimeProtProjetil,
+        DashUsar, DashColetar
     }
 
     static AudioClip _impacto, _disparo, _explosao;
@@ -70,6 +71,7 @@ public static class SomSkill
     static AudioClip _xpColeta;
     static AudioClip _seCarga, _seGelo, _seVento, _seFogo;
     static AudioClip _spCarga, _spEscudo, _spBuff, _spProjetil;
+    static AudioClip _dashUsar, _dashColetar;
 
     static AudioClip Carregar(string nome)
     {
@@ -156,6 +158,8 @@ public static class SomSkill
     static AudioClip SpEscudo   => _spEscudo  ??= Carregar("slimeprot_escudo");
     static AudioClip SpBuff     => _spBuff    ??= Carregar("slimeprot_buff");
     static AudioClip SpProjetil => _spProjetil ??= Carregar("slimeprot_projetil");
+    static AudioClip DashUsarC    => _dashUsar    ??= Carregar("dash_usar");
+    static AudioClip DashColetarC => _dashColetar ??= Carregar("dash_coletar");
 
     static AudioClip ClipDe(Tipo tipo)
     {
@@ -239,6 +243,8 @@ public static class SomSkill
             Tipo.SlimeProtEscudo   => SpEscudo,
             Tipo.SlimeProtBuff     => SpBuff,
             Tipo.SlimeProtProjetil => SpProjetil,
+            Tipo.DashUsar    => DashUsarC,
+            Tipo.DashColetar => DashColetarC,
             _             => null
         };
     }

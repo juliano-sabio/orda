@@ -348,6 +348,7 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     [Rpc(SendTo.NotOwner)]
     void DashFxClientRpc(Vector2 dir)
     {
+        SomSkill.Tocar(SomSkill.Tipo.DashUsar, transform.position, 0.5f); // co-op: ouvir o dash do colega
         var fx = GetComponent<DashEffect>();
         if (fx == null) return;
         fx.IniciarEfeito(dir);
