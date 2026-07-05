@@ -86,6 +86,14 @@ public class ContadorMortes : MonoBehaviour
     // Co-op: espelha o total compartilhado (host e cliente exibem o MESMO número).
     void Update()
     {
+        // Auto-corrige a visibilidade a cada frame (self-heal): o canvas some/aparece conforme
+        // a cena. Sem isto o contador não aparecia no HOST em co-op (timing do sceneLoaded).
+        if (canvasGO != null)
+        {
+            bool deveMostrar = EhCenaJogo(SceneManager.GetActiveScene().name);
+            if (canvasGO.activeSelf != deveMostrar) canvasGO.SetActive(deveMostrar);
+        }
+
         if (!NetSpawn.EmRede) return;
         var cp = CoopProgressao.Instance;
         if (cp == null) return;

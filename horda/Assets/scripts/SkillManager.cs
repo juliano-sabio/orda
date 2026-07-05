@@ -220,13 +220,21 @@ public class SkillManager : MonoBehaviour
         // (Co-op reseta via FaseCoopBootstrap.ResetarParaNovaRun.)
         string cena = SceneManager.GetActiveScene().name;
         bool ehFase = !string.IsNullOrEmpty(cena) && (cena.Contains("fase") || cena.Contains("sobrevivencia"));
-        if (ehFase && !NetSpawn.EmRede)
+        if (ehFase)
         {
-            activeSkills.Clear();
-            currentlyEquippedSkill = null;
-            selectedSkillIndex     = 0;
-            initialChoiceOffered   = false;
-            SkillEvolutionManager.Instance?.Resetar();
+            // A escolha inicial de skill é re-oferecida em TODA run nova (SP e co-op). Sem isto,
+            // ao recomeçar/voltar pro lobby+iniciar, a escolha inicial não aparecia de novo.
+            initialChoiceOffered = false;
+
+            // A LISTA de skills: SP zera aqui (player recriado, nada a remover). Co-op zera via
+            // FaseCoopBootstrap.ResetarParaNovaRun (ClearAllSkills, por dono).
+            if (!NetSpawn.EmRede)
+            {
+                activeSkills.Clear();
+                currentlyEquippedSkill = null;
+                selectedSkillIndex     = 0;
+                SkillEvolutionManager.Instance?.Resetar();
+            }
         }
 
         // Reconectar skill equipada após carregar cena

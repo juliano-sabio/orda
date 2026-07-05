@@ -268,6 +268,12 @@ public class PlayerStats : MonoBehaviour
 
         LimparEfeitosStatus(); // run nova começa sem veneno/slow/tint da anterior (player persiste em co-op)
 
+        // Nível/XP zeram na run nova. Sem isto, em co-op (player DontDestroyOnLoad) a run seguinte
+        // começava no nível da anterior E a escolha inicial de skill (que exige level==1) não aparecia.
+        level = 1;
+        currentXP = 0f;
+        xpToNextLevel = CalculateXPForNextLevel();
+
         // --- Espíritos de Evolução (upgrades permanentes por personagem) ---
         int espCharIndex = selectedCharacter;
 

@@ -160,7 +160,12 @@ public class LobbyUI : MonoBehaviour
         emCoop = SceneManager.GetActiveScene().name == "lobby_mp";
         if (emCoop)
         {
-            souHost = PlayerPrefs.GetInt("LobbyHost", 1) == 1;
+            // souHost pelo PAPEL REAL do NGO (a sessão continua viva ao voltar da run).
+            // Antes vinha do PlayerPrefs "LobbyHost", que ficava stale ao RETORNAR pro lobby
+            // depois de uma run → o host aparecia como cliente e o botão START sumia.
+            var nm = NetworkManager.Singleton;
+            if (nm != null && nm.IsListening) souHost = nm.IsServer;
+            else                              souHost = PlayerPrefs.GetInt("LobbyHost", 1) == 1;
             codigoSala = souHost ? "..." : "";   // host preenche com o código real do Relay
         }
 
