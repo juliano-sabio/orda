@@ -304,8 +304,11 @@ public class PlayerStats : MonoBehaviour
     {
         // Co-op: sem CharacterSelectionManager, resolve o characterData pelo índice sincronizado
         // (senão a ultimate cai no fallback sem ícone → ícone branco em jogo).
-        if (characterData == null && RegistroPersonagens != null &&
-            selectedCharacter >= 0 && selectedCharacter < RegistroPersonagens.Length)
+        // Em REDE re-resolve SEMPRE (não só quando null): a pessoa pode TROCAR de personagem entre
+        // runs e, com o guard "== null", o characterData ficava preso no personagem anterior. No SP
+        // o registro é null (preenchido só pelo lobby co-op), então o characterData do seletor é mantido.
+        if (RegistroPersonagens != null && selectedCharacter >= 0 && selectedCharacter < RegistroPersonagens.Length &&
+            (characterData == null || NetSpawn.EmRede))
             characterData = RegistroPersonagens[selectedCharacter];
 
         if (characterData == null) return;
@@ -1516,32 +1519,25 @@ public class PlayerStats : MonoBehaviour
 
     void AplicarComportamentoPassiva(string behaviorName)
     {
+        // Igual ao AplicarComportamentoUltimate: remove QUALQUER passiva antiga antes de aplicar a
+        // nova. O player persiste entre runs em co-op e a pessoa pode TROCAR de passiva no lobby —
+        // sem isto a passiva anterior continuava grudada (duas ativas). DestroyImmediate é síncrono
+        // (Destroy() é deferido e o AddComponent abaixo veria a antiga ainda viva).
+        var ufAntigo   = GetComponent<UltimoFolegoPassiva>();  if (ufAntigo   != null) DestroyImmediate(ufAntigo);
+        var svAntigo   = GetComponent<SombraVelozPassiva>();   if (svAntigo   != null) DestroyImmediate(svAntigo);
+        var pvAntigo   = GetComponent<PulsoVitalPassiva>();     if (pvAntigo   != null) DestroyImmediate(pvAntigo);
+        var impAntigo  = GetComponent<ImposicaoPassiva>();      if (impAntigo  != null) DestroyImmediate(impAntigo);
+        var focoAntigo = GetComponent<FocoPassiva>();           if (focoAntigo != null) DestroyImmediate(focoAntigo);
+        var ressAntigo = GetComponent<RessurgenciaPassiva>();   if (ressAntigo != null) DestroyImmediate(ressAntigo);
+
         switch (behaviorName)
         {
-            case "UltimoFolegoPassiva":
-                if (GetComponent<UltimoFolegoPassiva>() == null)
-                    gameObject.AddComponent<UltimoFolegoPassiva>();
-                break;
-            case "SombraVelozPassiva":
-                if (GetComponent<SombraVelozPassiva>() == null)
-                    gameObject.AddComponent<SombraVelozPassiva>();
-                break;
-            case "PulsoVitalPassiva":
-                if (GetComponent<PulsoVitalPassiva>() == null)
-                    gameObject.AddComponent<PulsoVitalPassiva>();
-                break;
-            case "ImposicaoPassiva":
-                if (GetComponent<ImposicaoPassiva>() == null)
-                    gameObject.AddComponent<ImposicaoPassiva>();
-                break;
-            case "FocoPassiva":
-                if (GetComponent<FocoPassiva>() == null)
-                    gameObject.AddComponent<FocoPassiva>();
-                break;
-            case "RessurgenciaPassiva":
-                if (GetComponent<RessurgenciaPassiva>() == null)
-                    gameObject.AddComponent<RessurgenciaPassiva>();
-                break;
+            case "UltimoFolegoPassiva":   gameObject.AddComponent<UltimoFolegoPassiva>();  break;
+            case "SombraVelozPassiva":    gameObject.AddComponent<SombraVelozPassiva>();   break;
+            case "PulsoVitalPassiva":     gameObject.AddComponent<PulsoVitalPassiva>();    break;
+            case "ImposicaoPassiva":      gameObject.AddComponent<ImposicaoPassiva>();     break;
+            case "FocoPassiva":           gameObject.AddComponent<FocoPassiva>();          break;
+            case "RessurgenciaPassiva":   gameObject.AddComponent<RessurgenciaPassiva>();  break;
         }
     }
 
