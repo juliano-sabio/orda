@@ -2378,6 +2378,10 @@ public class PlayerStats : MonoBehaviour
 
     public void AddShieldAuraBehavior(SkillData skill)
     {
+        // [ShieldDiag temp] — remover depois de diagnosticar a aura do P2 em co-op.
+        var _pnDiag = GetComponent<PlayerNet>();
+        Debug.Log($"[ShieldDiag] AddShieldAuraBehavior em '{gameObject.name}' | IsOwner={( _pnDiag != null ? _pnDiag.IsOwner.ToString() : "semPN")} | jaTemAura={(GetComponentInChildren<ShieldAuraBehavior>() != null)} | visualEffect={(skill != null && skill.visualEffect != null)}");
+
         if (GetComponentInChildren<ShieldAuraBehavior>() != null) return;
 
         if (skill.visualEffect != null)
