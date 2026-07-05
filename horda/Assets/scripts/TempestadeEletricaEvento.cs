@@ -143,6 +143,16 @@ public class TempestadeEletricaEvento : MonoBehaviour
 
     void AplicarDano(Vector2 pos)
     {
+        // [StormDiag temp] — remover após diagnosticar. Mostra, em CADA máquina, quem é o player-alvo,
+        // se é o dono local, a distância do raio e se aplicou dano.
+        if (player != null)
+        {
+            var _pn = player.GetComponent<PlayerNet>();
+            float _d = Vector2.Distance(player.transform.position, pos);
+            Debug.Log($"[StormDiag] alvo='{player.gameObject.name}' isOwner={(_pn != null ? _pn.IsOwner.ToString() : "semPN")} cosmetico={cosmetico} dist={_d:0.0} raio={raioImpacto} bateu={_d <= raioImpacto} dano={danoJogador}");
+        }
+        else Debug.Log("[StormDiag] player NULL no AplicarDano");
+
         if (player != null && Vector2.Distance(player.transform.position, pos) <= raioImpacto)
             player.TakeDamage(danoJogador);
 
