@@ -77,115 +77,67 @@ public class ElementApplicationUI : MonoBehaviour
         MostrarEtapa1();
     }
 
+    // Etapa 1 recriada no MESMO visual da evolução/etapa 2: sem moldura de masmorra — uma carta por
+    // skill flutua sobre o backdrop escuro. Disponíveis são clicáveis; já infundidas ficam esmaecidas.
     void MostrarEtapa1()
     {
-        if (painelEtapa1 != null) Destroy(painelEtapa1);
-        if (painelEtapa2 != null) Destroy(painelEtapa2);
+        if (painelEtapa1 != null) { Destroy(painelEtapa1); painelEtapa1 = null; }
+        if (painelEtapa2 != null) { Destroy(painelEtapa2); painelEtapa2 = null; }
+        _selecionouEtapa2 = false;
 
         var reg = ElementRegistry.Instance;
         var def = reg?.Get(elementoAtual);
         string nomeElem = def != null ? def.nomeDisplay : elementoAtual.ToString();
-        Color corElem   = def != null ? def.cor : Color.white;
 
-        painelEtapa1 = CriarPainel("PainelEtapa1");
+        painelEtapa1 = new GameObject("PainelEtapa1", typeof(RectTransform));
+        painelEtapa1.transform.SetParent(canvas.transform, false);
         var rt = painelEtapa1.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.25f, 0.12f);
-        rt.anchorMax = new Vector2(0.75f, 0.92f);
-        rt.offsetMin = rt.offsetMax = Vector2.zero;
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
 
-        TituloBanner(painelEtapa1,
-            string.Format(Loc.T("ui.elem_collected_fmt"), nomeElem.ToUpper()),
-            new Vector2(0.08f, 0.88f), new Vector2(0.92f, 0.99f));
-
-        var sub = CriarTexto(painelEtapa1, "Sub",
-            Loc.T("ui.choose_skill_infuse"), corTexto, 13f);
-        Ancora(sub, new Vector2(0f, 0.80f), new Vector2(1f, 0.89f), new Vector2(10f, 0f), new Vector2(-10f, 0f));
-
-        var lista = CriarScrollArea(painelEtapa1, "ListaSkills",
-            new Vector2(0f, 0.06f), new Vector2(1f, 0.80f));
+        var titulo = CriarTexto(painelEtapa1, "Titulo",
+            string.Format(Loc.T("ui.elem_collected_fmt"), nomeElem.ToUpper()), corTitulo, 30f, FontStyles.Bold);
+        Ancora(titulo, new Vector2(0.1f, 0.84f), new Vector2(0.9f, 0.94f));
+        var sub = CriarTexto(painelEtapa1, "Sub", Loc.T("ui.choose_skill_infuse"), corTexto, 16f);
+        Ancora(sub, new Vector2(0.1f, 0.78f), new Vector2(0.9f, 0.84f));
 
         var skills = ObterSkillsDisponiveis();
-        bool temDisponivel = false;
-        foreach (var skill in skills)
-        {
-            bool pode = skill.appliedElement == ElementType.None;
-            if (pode) temDisponivel = true;
-            CriarLinhaSkill(lista, skill, pode, corElem);
-        }
+        bool temDisponivel = skills.Exists(s => s != null && s.appliedElement == ElementType.None);
 
+        // Nenhuma skill infundível → mensagem + descartar (não monta cards).
         if (!temDisponivel)
         {
-            string msg = skills.Count == 0
-                ? Loc.T("ui.no_skills_yet")
-                : Loc.T("ui.all_skills_infused");
-            var aviso = CriarTexto(lista, "Aviso", msg, corTexto, 13f);
-            Ancora(aviso, Vector2.zero, Vector2.one);
-
-            var btnF = CriarBotao(painelEtapa1, "BtnFechar", Loc.T("ui.discard"),
-                new Color(0.4f, 0.1f, 0.1f), Fechar);
-            Ancora(btnF, new Vector2(0.2f, 0.01f), new Vector2(0.8f, 0.07f));
+            string msg = skills.Count == 0 ? Loc.T("ui.no_skills_yet") : Loc.T("ui.all_skills_infused");
+            var aviso = CriarTexto(painelEtapa1, "Aviso", msg, corTexto, 18f);
+            Ancora(aviso, new Vector2(0.2f, 0.45f), new Vector2(0.8f, 0.6f));
+            var btnF = CriarBotao(painelEtapa1, "BtnFechar", Loc.T("ui.discard"), new Color(0.4f, 0.1f, 0.1f), Fechar);
+            Ancora(btnF, new Vector2(0.35f, 0.12f), new Vector2(0.65f, 0.19f));
+            return;
         }
 
-        AnimarEntrada(painelEtapa1);
+        var containerGO = new GameObject("CardsRow", typeof(RectTransform));
+        containerGO.transform.SetParent(painelEtapa1.transform, false);
+        var contRT = containerGO.GetComponent<RectTransform>();
+        contRT.anchorMin = contRT.anchorMax = new Vector2(0.5f, 0.5f);
+        contRT.pivot     = new Vector2(0.5f, 0.5f);
+        contRT.sizeDelta = new Vector2(1200f, 500f);
+        contRT.anchoredPosition = new Vector2(0f, -10f);
+
+        StartCoroutine(MontarCartasEtapa1(containerGO.transform, skills));
     }
 
-    void CriarLinhaSkill(GameObject pai, SkillData skill, bool disponivel, Color corElem)
+    IEnumerator MontarCartasEtapa1(Transform container, List<SkillData> skills)
     {
-        // root sem Image — irmãos controlam renderização
-        var go = new GameObject($"Linha_{skill.skillName}");
-        go.transform.SetParent(pai.transform, false);
-        go.AddComponent<RectTransform>();
-        var le = go.AddComponent<LayoutElement>();
-        le.preferredHeight = 62f; le.flexibleWidth = 1f;
-
-        // irmão 0: borda (dourada se disponível, apagada se bloqueada)
-        var brd = new GameObject("Brd"); brd.transform.SetParent(go.transform, false);
-        var brdRT = brd.AddComponent<RectTransform>();
-        brdRT.anchorMin = Vector2.zero; brdRT.anchorMax = Vector2.one;
-        brdRT.offsetMin = new Vector2(-1f,-1f); brdRT.offsetMax = new Vector2(1f,1f);
-        brd.AddComponent<Image>().color = new Color(corBorda.r, corBorda.g, corBorda.b, disponivel ? 0.55f : 0.20f);
-
-        // irmão 1: corpo
-        var corpo = new GameObject("Corpo"); corpo.transform.SetParent(go.transform, false);
-        var corpoRT = corpo.AddComponent<RectTransform>();
-        corpoRT.anchorMin = Vector2.zero; corpoRT.anchorMax = Vector2.one; corpoRT.offsetMin = corpoRT.offsetMax = Vector2.zero;
-        corpo.AddComponent<Image>().color = disponivel ? corBotao : corBloqueado;
-
-        // irmão 2: acento esquerdo com cor do elemento
-        var ac = new GameObject("Ac"); ac.transform.SetParent(go.transform, false);
-        var acRT = ac.AddComponent<RectTransform>();
-        acRT.anchorMin = Vector2.zero; acRT.anchorMax = new Vector2(0f,1f);
-        acRT.offsetMin = Vector2.zero; acRT.offsetMax = new Vector2(5f,0f);
-        ac.AddComponent<Image>().color = disponivel ? corElem : new Color(corElem.r,corElem.g,corElem.b,0.25f);
-
-        // ícone
-        if (skill.icon != null)
+        var cartas = new List<GameObject>();
+        yield return null;
+        foreach (var skill in skills)
         {
-            var ic = new GameObject("Icone"); ic.transform.SetParent(go.transform, false);
-            var icRT = ic.AddComponent<RectTransform>();
-            icRT.anchorMin = new Vector2(0f,0f); icRT.anchorMax = new Vector2(0f,1f);
-            icRT.pivot = new Vector2(0f,0.5f);
-            icRT.anchoredPosition = new Vector2(10f,0f); icRT.sizeDelta = new Vector2(44f,-10f);
-            var icImg = ic.AddComponent<Image>(); icImg.sprite = skill.icon; icImg.preserveAspect = true;
+            if (skill == null) continue;
+            bool disp = skill.appliedElement == ElementType.None;
+            var card = CriarCartaSkillInfusao(container, skill, disp);
+            if (card != null) cartas.Add(card);
         }
-
-        var nome = CriarTexto(go, "Nome", skill.GetDisplayName(), disponivel ? corTexto : new Color(0.5f,0.5f,0.5f), 14f, FontStyles.Bold);
-        Ancora(nome, new Vector2(0f,0.5f), new Vector2(0.7f,1f), new Vector2(60f,0f), Vector2.zero);
-        nome.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
-
-        var statusStr = disponivel ? Loc.T("ui.no_element") : $"{Loc.T("ui.has_element")}: {ElementRegistry.Instance?.GetNome(skill.appliedElement) ?? skill.appliedElement.ToString()}";
-        var status = CriarTexto(go, "Status", statusStr,
-            disponivel ? new Color(0.5f,0.7f,0.5f) : new Color(0.6f,0.4f,0.4f), 10f);
-        Ancora(status, new Vector2(0f,0f), new Vector2(0.7f,0.5f), new Vector2(60f,0f), Vector2.zero);
-        status.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
-
-        if (disponivel)
-        {
-            var cap = skill;
-            Color corBtn = corElem * 0.5f + corBotao * 0.5f;
-            var btn = CriarBotao(go, "BtnInfundir", Loc.T("ui.infuse"), corBtn, () => SelecionarSkill(cap));
-            Ancora(btn, new Vector2(0.72f,0.15f), new Vector2(0.97f,0.85f));
-        }
+        yield return null;
+        PosicionarEAnimarCartas(cartas);
     }
 
     void SelecionarSkill(SkillData skill) { skillSelecionada = skill; MostrarEtapa2(); }
@@ -300,26 +252,32 @@ public class ElementApplicationUI : MonoBehaviour
             if (card != null) _cartasEtapa2.Add(card);
         }
 
-        // 2) posiciona manualmente, centralizadas e espaçadas (anchor/pivot no centro) — igual evolução
+        // 2+3) posiciona centralizado + anima entrada/hover (compartilhado com a etapa 1)
         yield return null;
-        int n = _cartasEtapa2.Count;
+        PosicionarEAnimarCartas(_cartasEtapa2);
+    }
+
+    // Layout em fileira central (geometria da evolução) + animação de entrada escalonada. O animador
+    // de hover/flutuação só entra em cartas clicáveis (uma skill já infundida fica esmaecida e parada).
+    void PosicionarEAnimarCartas(List<GameObject> cartas)
+    {
+        int n = cartas.Count;
         float cw = _cardSizeEvo.x, esp = 40f;
         float largTotal = n * cw + Mathf.Max(0, n - 1) * esp;
         for (int i = 0; i < n; i++)
         {
-            var crt = _cartasEtapa2[i].GetComponent<RectTransform>();
+            var crt = cartas[i] != null ? cartas[i].GetComponent<RectTransform>() : null;
             if (crt == null) continue;
             crt.anchorMin = crt.anchorMax = new Vector2(0.5f, 0.5f);
             crt.pivot     = new Vector2(0.5f, 0.5f);
             crt.anchoredPosition = new Vector2(-largTotal * 0.5f + cw * 0.5f + i * (cw + esp), 0f);
         }
-
-        // 3) só agora anima entrada + liga o animador de hover/flutuação
-        yield return null;
-        for (int i = 0; i < _cartasEtapa2.Count; i++)
+        for (int i = 0; i < n; i++)
         {
-            _cartasEtapa2[i].AddComponent<EvoCardAnimador>();
-            StartCoroutine(AnimarEntradaCard(_cartasEtapa2[i], i * 0.12f));
+            if (cartas[i] == null) continue;
+            var b = cartas[i].GetComponent<Button>() ?? cartas[i].GetComponentInChildren<Button>();
+            if (b != null && b.interactable) cartas[i].AddComponent<EvoCardAnimador>();
+            StartCoroutine(AnimarEntradaCard(cartas[i], i * 0.12f));
         }
     }
 
@@ -443,17 +401,18 @@ public class ElementApplicationUI : MonoBehaviour
     static Sprite GetCaracteristicaDefensivaIcone(DefensiveCharacteristicType tipo)
         => _defIconMap.TryGetValue(tipo, out var nome) ? IconePorNome(nome) : null;
 
-    // Uma carta de característica no MESMO molde da carta de evolução: instancia o prefab de card,
-    // inicializa via SkillCardRuntimeManager, troca a moldura pela de evolução e usa a área de
-    // raridade pra exibir o ELEMENTO na cor dele. Clique → efeito voar-pro-player + confirma.
-    GameObject CriarCartaCaracteristica(Transform container, string nomeStr, string descStr,
-        Sprite icone, int idx, string nomeElem, Color corElem)
+    // Construtor de carta no MESMO molde da evolução (usado pelas DUAS etapas da infusão): instancia
+    // o prefab de card, inicializa via SkillCardRuntimeManager (nome/desc/ícone), troca a moldura pela
+    // de evolução e usa a área de "raridade" pra um rótulo colorido. NÃO fia o clique — cada etapa
+    // liga o próprio (etapa1 → escolher skill; etapa2 → confirmar com efeito). Deixa o Button pronto.
+    GameObject ConstruirCartaEvo(Transform container, string cardName, string nomeStr, string descStr,
+        Sprite icone, string rotulo, Color rotuloCor)
     {
         GameObject prefab = ObterCardPrefab();
-        if (prefab == null) return CriarCartaFallbackEvo(container, nomeStr, descStr, icone, idx, corElem);
+        if (prefab == null) return ConstruirCartaFallbackEvo(container, cardName, nomeStr, descStr, icone, rotulo, rotuloCor);
 
         var card = Instantiate(prefab, container);
-        card.name = $"CartaInfusao_{idx}";
+        card.name = cardName;
         card.SetActive(true);
 
         var rect = card.GetComponent<RectTransform>();
@@ -461,12 +420,13 @@ public class ElementApplicationUI : MonoBehaviour
         var le = card.GetComponent<LayoutElement>(); if (le == null) le = card.AddComponent<LayoutElement>();
         le.preferredWidth = _cardSizeEvo.x; le.preferredHeight = _cardSizeEvo.y; le.flexibleWidth = 0; le.flexibleHeight = 0;
 
+        bool temRotulo = !string.IsNullOrEmpty(rotulo);
         var rm = card.GetComponent<SkillCardRuntimeManager>();
         if (rm != null)
         {
             var temp = ScriptableObject.CreateInstance<SkillData>();
             temp.skillName   = nomeStr;
-            temp.description = descStr;
+            temp.description  = descStr;
             temp.icon        = icone;
             temp.element     = PlayerStats.Element.None;
             rm.InitializeRuntime(temp);
@@ -485,17 +445,17 @@ public class ElementApplicationUI : MonoBehaviour
                     t.fontSizeMax      = Mathf.Min(t.fontSizeMax > 0f ? t.fontSizeMax : t.fontSize, 11f);
                 }
             }
-            // reaproveita a área de "raridade" pra rotular o ELEMENTO na cor do elemento
+            // reaproveita a área de "raridade" pro rótulo colorido (elemento / status da skill)
             foreach (var t in card.GetComponentsInChildren<TextMeshProUGUI>(true))
             {
                 string nm = t.name.ToLower();
                 if (nm.Contains("rarity") || nm.Contains("rarid"))
-                { t.gameObject.SetActive(true); t.text = nomeElem.ToUpper(); t.color = corElem; }
+                { t.gameObject.SetActive(temRotulo); if (temRotulo) { t.text = rotulo; t.color = rotuloCor; } }
                 else if (nm.Contains("stat") || nm.Contains("bonus"))
                     t.gameObject.SetActive(false);
             }
             foreach (var img in card.GetComponentsInChildren<Image>(true))
-                if (img.name == "RarityBorder") { img.gameObject.SetActive(true); img.color = corElem; }
+                if (img.name == "RarityBorder") { img.gameObject.SetActive(temRotulo); if (temRotulo) img.color = rotuloCor; }
         }
         else
         {
@@ -504,7 +464,7 @@ public class ElementApplicationUI : MonoBehaviour
                 string n = t.name.ToLower();
                 if      (n.Contains("name") || n.Contains("nome") || n.Contains("title")) t.text = nomeStr;
                 else if (n.Contains("desc") || n.Contains("detail")) t.text = descStr;
-                else if (n.Contains("rarity") || n.Contains("rarid")) { t.text = nomeElem.ToUpper(); t.color = corElem; }
+                else if (n.Contains("rarity") || n.Contains("rarid")) { t.gameObject.SetActive(temRotulo); if (temRotulo) { t.text = rotulo; t.color = rotuloCor; } }
             }
             var inner = card.transform.Find("IconArea/IconImageSlot/IconInner")?.GetComponent<Image>();
             if (inner != null && icone != null) { inner.sprite = icone; inner.color = Color.white; inner.preserveAspect = true; }
@@ -525,14 +485,52 @@ public class ElementApplicationUI : MonoBehaviour
             if (spSlot != null) { slotImg.sprite = spSlot; slotImg.color = Color.white; slotImg.type = Image.Type.Simple; }
         }
 
-        var btn = card.GetComponent<Button>();
-        if (btn == null) btn = card.GetComponentInChildren<Button>();
+        // Garante um Button pronto (listeners limpos); o clique é ligado pela etapa chamadora.
+        var btn = card.GetComponent<Button>() ?? card.GetComponentInChildren<Button>();
+        if (btn == null) { btn = card.AddComponent<Button>(); if (cardBg != null) btn.targetGraphic = cardBg; }
+        btn.onClick.RemoveAllListeners();
+        btn.interactable = true;
+        return card;
+    }
+
+    // Etapa 2 — carta de característica: clique dispara os fragmentos voando pro player + confirma.
+    GameObject CriarCartaCaracteristica(Transform container, string nomeStr, string descStr,
+        Sprite icone, int idx, string nomeElem, Color corElem)
+    {
+        var card = ConstruirCartaEvo(container, $"CartaInfusao_{idx}", nomeStr, descStr, icone, nomeElem.ToUpper(), corElem);
+        if (card == null) return null;
+        var btn = card.GetComponent<Button>() ?? card.GetComponentInChildren<Button>();
         if (btn != null)
         {
-            btn.onClick.RemoveAllListeners();
             int capture = idx; var cap = card;
             btn.onClick.AddListener(() => SelecionarEtapa2(capture, cap));
-            btn.interactable = true;
+        }
+        return card;
+    }
+
+    // Etapa 1 — carta de skill a infundir: disponível → clique escolhe (vai pra etapa 2); já infundida
+    // → carta esmaecida e não-clicável, com o elemento aplicado no rótulo.
+    GameObject CriarCartaSkillInfusao(Transform container, SkillData skill, bool disponivel)
+    {
+        string rotulo = disponivel
+            ? Loc.T("ui.no_element")
+            : $"{Loc.T("ui.has_element")}: {(ElementRegistry.Instance != null ? ElementRegistry.Instance.GetNome(skill.appliedElement) : skill.appliedElement.ToString())}";
+        Color rotuloCor = disponivel ? new Color(0.55f, 0.85f, 0.55f) : new Color(0.72f, 0.5f, 0.5f);
+
+        var card = ConstruirCartaEvo(container, $"CartaSkill_{skill.skillName}",
+            skill.GetDisplayName(), skill.GetDisplayDescription(), skill.icon, rotulo, rotuloCor);
+        if (card == null) return null;
+
+        var btn = card.GetComponent<Button>() ?? card.GetComponentInChildren<Button>();
+        if (btn != null)
+        {
+            if (disponivel) { var cap = skill; btn.onClick.AddListener(() => SelecionarSkill(cap)); btn.interactable = true; }
+            else btn.interactable = false;
+        }
+        if (!disponivel)
+        {
+            var cg = card.GetComponent<CanvasGroup>() ?? card.AddComponent<CanvasGroup>();
+            cg.alpha = 0.45f; // esmaece a skill já infundida
         }
         return card;
     }
@@ -555,10 +553,11 @@ public class ElementApplicationUI : MonoBehaviour
     }
 
     // Fallback procedural (só se nenhum prefab de card existir) — dimensionado pro layout manual.
-    GameObject CriarCartaFallbackEvo(Transform container, string nomeStr, string descStr,
-        Sprite icone, int idx, Color corElem)
+    // Retorna a carta com Button pronto (sem clique fiado); a etapa chamadora liga o próprio.
+    GameObject ConstruirCartaFallbackEvo(Transform container, string cardName, string nomeStr, string descStr,
+        Sprite icone, string rotulo, Color rotuloCor)
     {
-        var go = new GameObject($"CartaInfusao_{idx}", typeof(RectTransform));
+        var go = new GameObject(cardName, typeof(RectTransform));
         go.transform.SetParent(container, false);
         var rt = go.GetComponent<RectTransform>();
         rt.sizeDelta = _cardSizeEvo;
@@ -579,9 +578,15 @@ public class ElementApplicationUI : MonoBehaviour
         var nome = CriarTexto(go, "Nome", nomeStr, new Color(0.95f, 0.82f, 0.40f), 18f, FontStyles.Bold);
         Ancora(nome, new Vector2(0.06f, 0.52f), new Vector2(0.94f, 0.64f));
         var desc = CriarTexto(go, "Desc", descStr, new Color(0.90f, 0.82f, 0.65f), 13f);
-        Ancora(desc, new Vector2(0.10f, 0.14f), new Vector2(0.90f, 0.50f));
+        Ancora(desc, new Vector2(0.10f, 0.16f), new Vector2(0.90f, 0.50f));
         var dTxt = desc.GetComponent<TextMeshProUGUI>();
         dTxt.textWrappingMode = TextWrappingModes.Normal; dTxt.alignment = TextAlignmentOptions.Top;
+
+        if (!string.IsNullOrEmpty(rotulo))
+        {
+            var rot = CriarTexto(go, "Rotulo", rotulo, rotuloCor, 11f, FontStyles.Bold);
+            Ancora(rot, new Vector2(0.06f, 0.05f), new Vector2(0.94f, 0.14f));
+        }
 
         var btn = go.AddComponent<Button>(); btn.targetGraphic = bg;
         btn.transition = Selectable.Transition.ColorTint;
@@ -591,8 +596,6 @@ public class ElementApplicationUI : MonoBehaviour
             pressedColor = new Color(0.85f,0.83f,0.78f), selectedColor = comFrame ? new Color(1f,0.96f,0.85f) : corFundo,
             disabledColor = new Color(1f,1f,1f,0.5f), colorMultiplier = 1f, fadeDuration = 0.1f
         };
-        int capture = idx; var cap = go;
-        btn.onClick.AddListener(() => SelecionarEtapa2(capture, cap));
         return go;
     }
 
