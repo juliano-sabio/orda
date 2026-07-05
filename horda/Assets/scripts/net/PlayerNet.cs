@@ -600,11 +600,22 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         if (IsOwner)  downed.Value          = false;
         if (IsServer) reviveProgresso.Value = 0f;
 
+        // Aura de escudo (ShieldAuraBehavior) é um GameObject FILHO — no dono e no fantoche. Não sai
+        // no ClearAllSkills nem na varredura de root abaixo; sem isto fica pendurada entre runs.
+        foreach (var a in GetComponentsInChildren<ShieldAuraBehavior>(true))
+            if (a != null && a.gameObject != gameObject) Destroy(a.gameObject);
+
         if (IsOwner)
         {
-            SkillManager.Instance?.ClearAllSkills();           // skills reais + behaviors + bônus de stat
+            SkillManager.Instance?.ClearAllSkills();           // bônus de stat + 3 tipos de behavior
+            // ClearAllSkills só derruba 3 dos ~28 SkillBehavior → varre TODAS as skills REAIS grudadas
+            // (defensivas inclusas, que o TakeDamage lê via GetComponent). Passivas/ultimates NÃO são
+            // SkillBehavior, então não são afetadas; as cosméticas ficam com o fantoche do colega.
+            foreach (var b in GetComponents<SkillBehavior>())
+                if (b != null && !b.cosmetico) Destroy(b);
+            SkillManager.Instance?.LimparElementosAplicados(); // zera appliedElement nos assets (persiste em co-op!)
             SkillEvolutionManager.Instance?.Resetar();         // evoluções
-            if (stats != null) stats.ApplyCharacterData(charIndex.Value); // stats/health base (zera cartas) + reaplica build
+            if (stats != null) stats.ApplyCharacterData(charIndex.Value); // stats/health base + reaplica build
         }
         else
         {

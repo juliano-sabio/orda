@@ -42,6 +42,14 @@ public static class CoopPause
         else Time.timeScale = 1f;
     }
 
+    // Zera SÓ as flags locais (sem RPC) — usado no início de cada run pra não herdar um estado de
+    // "escolhendo/pendente" da run anterior (ex.: run terminou com painel aberto → overlay preso).
+    public static void ResetarLocal()
+    {
+        EuEscolhendo    = false;
+        EscolhaPendente = false;
+    }
+
     // Menu de pausa do grupo: qualquer um abre (congela todos), qualquer um fecha.
     public static void AbrirMenu()
     {

@@ -55,7 +55,9 @@ public class SkillManager : MonoBehaviour
         LimparElementosAplicados();
     }
 
-    void LimparElementosAplicados()
+    // Público: precisa ser re-chamado a cada run nova em co-op (o SkillManager é DontDestroyOnLoad,
+    // então o Awake só limpa 1x na vida; sem isto a infusão elemental fica gravada no asset da skill).
+    public void LimparElementosAplicados()
     {
         foreach (var skill in availableSkills)
         {

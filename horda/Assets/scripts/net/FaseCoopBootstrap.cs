@@ -11,6 +11,7 @@ public class FaseCoopBootstrap : MonoBehaviour
     void Start()
     {
         LobbyState.EmLobby = false;
+        CoopPause.ResetarLocal(); // não herda "escolhendo/pendente" da run anterior (overlay preso)
 
         // Co-op: a run nova começa LIMPA. Roda em cada máquina, pra todos os players (o dono
         // reseta as próprias skills/stats; nos fantoches limpa as cópias cosméticas). Sem isto,

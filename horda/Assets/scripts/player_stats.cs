@@ -108,6 +108,7 @@ public class PlayerStats : MonoBehaviour
     public float xpCollectionRadius = 3f;
     public float orbMoveSpeedMultiplier = 1f;
     public bool autoCollectXP = true;
+    float _baseXpRadius; bool _baseXpCapturado;  // base do raio de coleta (Ímã cresce +=; restaura na run nova)
 
     [Header("📦 Sistema de Coleta de Itens")]
     public float itemCollectionRadius = 2f;
@@ -232,6 +233,8 @@ public class PlayerStats : MonoBehaviour
         if (corotinaRestaurarSlow != null) { StopCoroutine(corotinaRestaurarSlow); corotinaRestaurarSlow = null; }
         if (corotinaParalisia     != null) { StopCoroutine(corotinaParalisia);     corotinaParalisia = null; }
         if (corotinaDebuffLuz     != null) { StopCoroutine(corotinaDebuffLuz);     corotinaDebuffLuz = null; }
+        if (corotinaBloqueioUlti  != null) { StopCoroutine(corotinaBloqueioUlti);  corotinaBloqueioUlti = null; }
+        if (_auraBloqueioUlti     != null) { Destroy(_auraBloqueioUlti);           _auraBloqueioUlti = null; }
 
         estaSlowado = false;
         estaQueimando = false;
@@ -268,6 +271,15 @@ public class PlayerStats : MonoBehaviour
 
         // Dash
         dashCharges = 0;
+
+        // Coleta de XP: raio (Ímã cresce +=) volta à base; multiplicador de velocidade do orbe volta a 1.
+        if (!_baseXpCapturado) { _baseXpRadius = xpCollectionRadius; _baseXpCapturado = true; }
+        xpCollectionRadius     = _baseXpRadius;
+        orbMoveSpeedMultiplier = 1f;
+
+        // Barra de luz da segunda fase: recomeça cheia (senão a run nova em segunda_fase começa no
+        // escuro → slow + dano imediatos da run anterior).
+        luzAtual = luzMaxima;
 
         // Ultimate: carga/estado/marcador (a build é reaplicada em seguida no ApplyCharacterData)
         ultimateReady      = false;
@@ -2260,6 +2272,7 @@ public class PlayerStats : MonoBehaviour
     // Roteado como os outros efeitos: em co-op o host manda pro cliente DONO, que aplica
     // localmente (é lá que a ultimate é castada e o X do ícone é desenhado).
     Coroutine corotinaBloqueioUlti;
+    GameObject _auraBloqueioUlti; // ref pra poder destruir no reset de run (senão a aura roxa vaza)
 
     public void BloquearUltimate(float duracao)
     {
@@ -2274,13 +2287,13 @@ public class PlayerStats : MonoBehaviour
         ultimateChargeTime = 0f;
         ultimateBloqueada  = true;
 
-        var aura = CriarAuraBloqueioUlti();
+        _auraBloqueioUlti = CriarAuraBloqueioUlti();
 
         yield return new WaitForSeconds(duracao);
 
         ultimateBloqueada    = false;
         corotinaBloqueioUlti = null;
-        if (aura != null) Destroy(aura);
+        if (_auraBloqueioUlti != null) { Destroy(_auraBloqueioUlti); _auraBloqueioUlti = null; }
     }
 
     GameObject CriarAuraBloqueioUlti()
