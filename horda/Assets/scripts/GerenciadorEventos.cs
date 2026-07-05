@@ -256,6 +256,10 @@ public class GerenciadorEventos : MonoBehaviour
 
     void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
     {
+        // Garante fase LIMPA: fecha o painel e limpa objetos de evento que possam ter sobrado da
+        // run anterior (ex.: acabou por vitória com evento na tela; indicador é DontDestroyOnLoad).
+        EncerrarPorFimDeRun();
+
         ReconectarReferencias();
         tilemapsObstaculo = null; // cache de tilemaps da cena anterior (destruídos) → re-cacheia na próxima checagem
         proximoEventoTempo = scene.name == "segunda_fase" ? delayCristal : delayInicial;
