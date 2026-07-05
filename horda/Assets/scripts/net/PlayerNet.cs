@@ -592,6 +592,14 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     // e os players persistem (NGO) → sem isto as skills/stats/cartas da run anterior carregavam.
     public void ResetarParaNovaRun()
     {
+        // Limpa o estado de "caído" (downed) da run anterior — SEM isto o player nascia MORTO na run
+        // nova. O game-over de grupo deixa todos downed; o objeto persiste na sessão NGO e a única
+        // coisa que tirava do caído era o revive por companheiro. downed é owner-writable; o progresso
+        // de revive é server-writable (o host zera pra qualquer player). Ao virar false, o OnValueChanged
+        // levanta a máscara e o Update religa skills + volta o Rigidbody pra Dynamic.
+        if (IsOwner)  downed.Value          = false;
+        if (IsServer) reviveProgresso.Value = 0f;
+
         if (IsOwner)
         {
             SkillManager.Instance?.ClearAllSkills();           // skills reais + behaviors + bônus de stat
