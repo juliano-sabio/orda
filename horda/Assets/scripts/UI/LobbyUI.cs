@@ -48,6 +48,7 @@ public class LobbyUI : MonoBehaviour
     // e passa a refletir a sessão real (Relay + PlayerNet + LobbyManager). Na cena
     // single-player ("lobby") nada disso liga e o comportamento local é o de antes.
     bool emCoop = false;
+    bool jaConectadoCoop = false; // true = voltou de uma run com a sessão NGO viva (não re-hostar/re-entrar)
     string statusCoop = "";
     TextMeshProUGUI txtCodigoSala;          // label do código (host mostra o real do Relay)
     float proxRefreshCoop = 0f;             // throttle do refresh do roster
@@ -164,9 +165,13 @@ public class LobbyUI : MonoBehaviour
             // Antes vinha do PlayerPrefs "LobbyHost", que ficava stale ao RETORNAR pro lobby
             // depois de uma run → o host aparecia como cliente e o botão START sumia.
             var nm = NetworkManager.Singleton;
+            // Sessão NGO já viva (voltou de uma run pelo LoadScene em rede) → NÃO reconectar.
+            jaConectadoCoop = nm != null && nm.IsListening && (nm.IsServer || nm.IsConnectedClient);
             if (nm != null && nm.IsListening) souHost = nm.IsServer;
             else                              souHost = PlayerPrefs.GetInt("LobbyHost", 1) == 1;
-            codigoSala = souHost ? "..." : "";   // host preenche com o código real do Relay
+            // Ao voltar já conectado, reusa o código salvo; senão o host preenche com o real do Relay.
+            codigoSala = jaConectadoCoop ? PlayerPrefs.GetString("LobbyCode", codigoSala)
+                                         : (souHost ? "..." : "");
         }
 
         // popula jogadores simulados
@@ -191,7 +196,8 @@ public class LobbyUI : MonoBehaviour
         {
             // sessão real: conecta via Relay e popula o roster pelo PlayerNet.
             LobbyState.EmLobby = true;
-            if (!souHost) CriarPainelJoinCliente();   // cliente precisa digitar o código
+            // Cliente só precisa digitar o código numa conexão NOVA; ao voltar de uma run já está conectado.
+            if (!souHost && !jaConectadoCoop) CriarPainelJoinCliente();
             ConectarCoop();
         }
         else
@@ -1415,6 +1421,18 @@ public class LobbyUI : MonoBehaviour
 
     async void ConectarCoop()
     {
+        // Voltou de uma run com a sessão NGO ainda viva: re-hostar (nova alocação Relay) ou re-entrar
+        // é o que forçava a reconexão. Aqui só reflete o estado atual e sai.
+        if (jaConectadoCoop)
+        {
+            codigoSala = PlayerPrefs.GetString("LobbyCode", codigoSala);
+            if (souHost && txtCodigoSala != null && !string.IsNullOrEmpty(codigoSala) && codigoSala != "...")
+                txtCodigoSala.text = codigoSala;
+            statusCoop = "Conectado.";
+            AtualizarStatusCoop();
+            return;
+        }
+
         statusCoop = "Conectando...";
         AtualizarStatusCoop();
         try
