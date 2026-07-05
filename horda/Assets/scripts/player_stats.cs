@@ -235,6 +235,7 @@ public class PlayerStats : MonoBehaviour
 
         estaSlowado = false;
         estaQueimando = false;
+        estaParalizado = false;          // sem isto o player podia nascer paralisado (congelado) na run nova
         tempoVenenoRestante = 0f;
         tempoQueimaduraRestante = 0f;
         semLuzDebuffAtivo = false;
@@ -248,6 +249,49 @@ public class PlayerStats : MonoBehaviour
 
         var lent = GetComponent<EfeitoLentidao>();
         if (lent != null) Destroy(lent);                    // remove o componente de lentidão grudado
+    }
+
+    // Zera TODO o estado de RUN do player (escudo, dash, carga de ultimate, timers, regen, skills
+    // adquiridas, behaviors legados, velocidade) + limpa status effects. NÃO mexe nos stats base —
+    // o ApplyCharacterData reaplica logo em seguida. É o funil único de "run nova": chamado pelo
+    // ApplyCharacterData (SP e co-op). Em co-op o player PERSISTE (NGO) então, sem isto, tudo isso
+    // vazava da run anterior — o downed é resetado à parte no PlayerNet.ResetarParaNovaRun.
+    public void ResetarEstadoDeRun()
+    {
+        LimparEfeitosStatus();
+
+        // Escudo (o max é recomputado das skills ativas — após ClearAllSkills fica na base)
+        shieldPoints      = 0f;
+        bonusShieldPoints = 0f;
+        shieldImmuneTimer = 0f;
+        RecalcMaxShield();
+
+        // Dash
+        dashCharges = 0;
+
+        // Ultimate: carga/estado/marcador (a build é reaplicada em seguida no ApplyCharacterData)
+        ultimateReady      = false;
+        ultimateChargeTime = 0f;
+        ultimateBloqueada  = false;
+        temPosicaoMarcada  = false;
+        if (marcadorVisual != null) { Destroy(marcadorVisual); marcadorVisual = null; }
+
+        // Timers / regeneração
+        attackTimer         = 0f;
+        defenseTimer        = 0f;
+        timeSinceLastDamage = 0f;
+        isRegenerating      = false;
+
+        // Skills adquiridas + behaviors legados grudados no player (ClearAllSkills já derruba os de
+        // skill; aqui garantimos a lista e as adquiridas — evita acúmulo/refs penduradas na run nova)
+        acquiredSkills.Clear();
+        for (int i = 0; i < activeSkillBehaviors.Count; i++)
+            if (activeSkillBehaviors[i] != null) Destroy(activeSkillBehaviors[i]);
+        activeSkillBehaviors.Clear();
+
+        // Corpo parado — não herda a velocidade/knockback do fim da run anterior
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        if (rb != null && rb.bodyType == RigidbodyType2D.Dynamic) rb.linearVelocity = Vector2.zero;
     }
 
     // Overload por índice explícito: usado no co-op para aplicar o personagem
@@ -266,7 +310,7 @@ public class PlayerStats : MonoBehaviour
 
         if (characterData == null) return;
 
-        LimparEfeitosStatus(); // run nova começa sem veneno/slow/tint da anterior (player persiste em co-op)
+        ResetarEstadoDeRun(); // run nova começa 100% limpa: status + escudo/dash/ultimate/timers/skills (player persiste em co-op)
 
         // Nível/XP zeram na run nova. Sem isto, em co-op (player DontDestroyOnLoad) a run seguinte
         // começava no nível da anterior E a escolha inicial de skill (que exige level==1) não aparecia.
