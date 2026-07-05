@@ -515,6 +515,11 @@ public class ElementApplicationUI : MonoBehaviour
         if (def != null) skillSelecionada.elementColor = def.cor;
         SkillIconsHUD.Instance?.AtualizarBadgeElemento(skillSelecionada);
 
+        // Feedback visual: partículas da cor do elemento convergindo no player (como as evoluções).
+        var plFx = PlayerStats.Local;
+        if (plFx != null && def != null)
+            InfusaoFXParticulas.Disparar(plFx.transform.position, def.cor);
+
         // Co-op: avisa o fantoche do colega pra recolorir a cópia cosmética desta skill.
         if (NetSpawn.EmRede)
         {
