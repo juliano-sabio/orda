@@ -47,6 +47,7 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator LancarMisseis()
     {
         int qtdReal = SkillEvolutionManager.Tem(SkillEvolutionType.SalvaMisseis) ? qtdMisseis + 2 : qtdMisseis;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisLend)) qtdReal = qtdMisseis + 5; // Enxame Devastador
         var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
@@ -185,7 +186,8 @@ public class MissilProjetil : MonoBehaviour
         {
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisExplosivos))
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisExplosivos)
+                || SkillEvolutionManager.Tem(SkillEvolutionType.MisseisLend)) // Enxame Devastador: todos explodem
             {
                 EvolutionFX.SpawnExplosao(transform.position, 2f, dano * 0.6f, new Color(1f, 0.5f, 0.1f), this);
                 SomSkill.Tocar(SomSkill.Tipo.MissilExplosaoDark, transform.position, 0.6f);

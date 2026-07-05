@@ -66,6 +66,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
 
         int qtdReal  = SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteReforcada) ? qtdAlvos + 1 : qtdAlvos;
         float danoMult = SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteReforcada) ? 2f : 1f;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend)) { qtdReal = qtdAlvos + 3; danoMult = 3f; } // Corrente do Fim
         var alvos = EncontrarAlvos(qtdReal);
         if (alvos.Count == 0) yield break;
 
@@ -155,7 +156,8 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
                             SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual * danoMult, this);
                         }
                         StartCoroutine(FlashAlvo(ic.transform));
-                        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante))
+                        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante)
+                            || SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend)) // Corrente do Fim: paralisa
                         {
                             var movi = ic.GetComponent<movi_inimigo>();
                             if (movi != null)
@@ -194,7 +196,8 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
         yield return StartCoroutine(FadeLinhas(linhas, 0.08f));
 
         // Restaura velocidade dos alvos paralisados
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante))
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante)
+            || SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend))
             foreach (var ic in alvos)
                 if (ic != null && !ic.estaMorrendo)
                 {

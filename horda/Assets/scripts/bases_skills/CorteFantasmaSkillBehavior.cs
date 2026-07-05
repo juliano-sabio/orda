@@ -52,6 +52,7 @@ public class CorteFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga
     void Disparar()
     {
         int qtdReal = SkillEvolutionManager.Tem(SkillEvolutionType.CorteTriple) ? qtdCortes + 1 : qtdCortes;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorteFantasmaLend)) qtdReal = qtdCortes + 2; // Ceifa Fantasma
         var alvos = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
@@ -256,6 +257,15 @@ public class CorteFantasmaProjetil : MonoBehaviour
                 ic.ReceberDano(dano, false); // 2º hit no mesmo inimigo
                 SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
                 EvolutionFX.AplicarLentidao(ic, 1f, 0f); // velocidade 0 = atordoamento
+            }
+
+            // Ceifa Fantasma: 3 golpes por corte no mesmo inimigo + atordoamento
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.CorteFantasmaLend))
+            {
+                ic.ReceberDano(dano, false);
+                ic.ReceberDano(dano, false);
+                SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+                EvolutionFX.AplicarLentidao(ic, 1f, 0f);
             }
         }
 

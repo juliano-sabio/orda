@@ -53,7 +53,8 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
         if (!cosmetico && playerStats != null)
             SomSkill.Tocar(SomSkill.Tipo.SombraCruzDisparoDark, playerStats.transform.position, 0.5f);
 
-        Vector2[] direcoes = SkillEvolutionManager.Tem(SkillEvolutionType.CruzDupla)
+        Vector2[] direcoes = (SkillEvolutionManager.Tem(SkillEvolutionType.CruzDupla)
+                           || SkillEvolutionManager.Tem(SkillEvolutionType.SombrasCruzLend)) // Cruz do Apocalipse: 8 direções
             ? new[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right,
                       new Vector2(1,1).normalized, new Vector2(-1,1).normalized,
                       new Vector2(1,-1).normalized, new Vector2(-1,-1).normalized }
@@ -109,7 +110,8 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
 
     IEnumerator PulsoBeam(Vector2 dir)
     {
-        float alcanceReal = SkillEvolutionManager.Tem(SkillEvolutionType.SombrasPerfurantes) ? alcance * 2f : alcance;
+        float alcanceReal = (SkillEvolutionManager.Tem(SkillEvolutionType.SombrasPerfurantes)
+                          || SkillEvolutionManager.Tem(SkillEvolutionType.SombrasCruzLend)) ? alcance * 2f : alcance;
         float dur = alcanceReal / velocidade;
 
         // Glow externo (mais largo, semi-transparente)
@@ -202,8 +204,9 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
                 hashset.Add(id);
                 if (!cosmetico)
                 {
-                    ic.ReceberDano(DanoAtual, false);
-                    SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
+                    float danoCruz = SkillEvolutionManager.Tem(SkillEvolutionType.SombrasCruzLend) ? DanoAtual * 2f : DanoAtual; // Cruz do Apocalipse
+                    ic.ReceberDano(danoCruz, false);
+                    SkillElementEffect.Aplicar(skillData, ic.gameObject, danoCruz, this);
                     if (!somImpactoTocado) { somImpactoTocado = true; SomSkill.Tocar(SomSkill.Tipo.SombraCruzImpactoDark, ic.transform.position, 0.35f); }
                 }
             }

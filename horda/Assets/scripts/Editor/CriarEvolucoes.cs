@@ -117,6 +117,24 @@ public static class CriarEvolucoes
         lista.Add(Criar("CristaisDuplos",     "Cristais Duplos",     "5 cristais orbitam em vez de 3.",                         SpecificSkillType.CristaisGelo, SkillEvolutionType.CristaisDuplos,     SkillRarity.Rare,  new Color(0.45f,0.88f,1f)));
         lista.Add(Criar("CristaisExplosivos", "Cristais Explosivos", "Cada tiro de cristal explode em area de gelo ao acertar.", SpecificSkillType.CristaisGelo, SkillEvolutionType.CristaisExplosivos, SkillRarity.Epic,  new Color(0.3f,0.75f,1f)));
 
+        // ── Novas evoluções de ATAQUE ────────────────────────────────────────────
+        lista.Add(Criar("ChuvaCongelante",     "Chuva Congelante",     "Estrelas deixam os inimigos atingidos lentos por 2s.",     SpecificSkillType.ChuvaEstrelas, SkillEvolutionType.ChuvaCongelante,     SkillRarity.Rare, new Color(0.5f, 0.85f, 1f)));
+        lista.Add(Criar("EspinhosFlamejantes", "Espinhos Flamejantes", "Cada tick incendeia os inimigos (dano contínuo por 3s).",  SpecificSkillType.CampoEspinhos, SkillEvolutionType.EspinhosFlamejantes, SkillRarity.Epic, new Color(1f,   0.5f,  0.1f)));
+        lista.Add(Criar("LaminasSangrentas",   "Lâminas Sangrentas",   "As lâminas causam sangramento (dano contínuo por 2.5s).",  SpecificSkillType.FuriaLaminas,  SkillEvolutionType.LaminasSangrentas,   SkillRarity.Rare, new Color(0.9f, 0.2f,  0.3f)));
+
+        // ── Evoluções LENDÁRIAS de assinatura (uma por skill de ataque) ──────────
+        lista.Add(Criar("CampoEspinhosLend",   "Coração do Abismo",   "LENDÁRIA: dano dobrado e executa inimigos abaixo de 15% de vida no campo.", SpecificSkillType.CampoEspinhos,     SkillEvolutionType.CampoEspinhosLend,   SkillRarity.Legendary, new Color(0.6f, 1f, 0.4f)));
+        lista.Add(Criar("ChuvaEstrelasLend",   "Cataclismo Estelar",  "LENDÁRIA: +3 estrelas e cada impacto gera uma onda de choque devastadora.", SpecificSkillType.ChuvaEstrelas,     SkillEvolutionType.ChuvaEstrelasLend,   SkillRarity.Legendary, new Color(1f, 0.7f, 0.15f)));
+        lista.Add(Criar("FuriaLaminasLend",    "Vendaval Cortante",   "LENDÁRIA: dispara o triplo de lâminas e cada uma explode ao acertar.",      SpecificSkillType.FuriaLaminas,      SkillEvolutionType.FuriaLaminasLend,    SkillRarity.Legendary, new Color(0.9f, 0.95f, 1f)));
+        lista.Add(Criar("LancaLuzLend",        "Lança do Juízo",      "LENDÁRIA: a lança atravessa todos, explode em cada um e causa +50% de dano.", SpecificSkillType.LancaLuz,          SkillEvolutionType.LancaLuzLend,        SkillRarity.Legendary, new Color(1f, 0.95f, 0.35f)));
+        lista.Add(Criar("SombrasCruzLend",     "Cruz do Apocalipse",  "LENDÁRIA: dispara em 8 direções com o dobro de dano e o dobro de alcance.",  SpecificSkillType.SombrasCruz,       SkillEvolutionType.SombrasCruzLend,     SkillRarity.Legendary, new Color(0.55f, 0.2f, 1f)));
+        lista.Add(Criar("CorteFantasmaLend",   "Ceifa Fantasma",      "LENDÁRIA: +2 cortes, 3 golpes por corte e atordoa os inimigos atingidos.",   SpecificSkillType.CorteFantasma,     SkillEvolutionType.CorteFantasmaLend,   SkillRarity.Legendary, new Color(0.6f, 0.85f, 1f)));
+        lista.Add(Criar("ChicoteEnergiaLend",  "Chicote do Caos",     "LENDÁRIA: gira 3 vezes, deixa lentos e explode em cada inimigo atingido.",   SpecificSkillType.ChicoteEnergia,    SkillEvolutionType.ChicoteEnergiaLend,  SkillRarity.Legendary, new Color(0.2f, 0.85f, 1f)));
+        lista.Add(Criar("MisseisLend",         "Enxame Devastador",   "LENDÁRIA: +5 mísseis por ativação e todos explodem em área ao impactar.",    SpecificSkillType.MisseisTeleguiados,SkillEvolutionType.MisseisLend,         SkillRarity.Legendary, new Color(1f, 0.45f, 0.1f)));
+        lista.Add(Criar("PulsoRitmicoLend",    "Pulso Aniquilador",   "LENDÁRIA: triplica o dano por pulso e sempre propaga em cadeia aos vizinhos.", SpecificSkillType.PulsoRitmico,      SkillEvolutionType.PulsoRitmicoLend,    SkillRarity.Legendary, new Color(0.25f, 1f, 0.5f)));
+        lista.Add(Criar("EspadaFantasmaLend",  "Lâmina Espectral",    "LENDÁRIA: corta na frente e atrás, deixa chamas e causa o dobro de dano.",   SpecificSkillType.EspadaFantasma,    SkillEvolutionType.EspadaFantasmaLend,  SkillRarity.Legendary, new Color(0.85f, 0.85f, 1f)));
+        lista.Add(Criar("CorrenteSombriaLend", "Corrente do Fim",     "LENDÁRIA: +3 alvos, triplica o dano e paralisa todos os acorrentados.",      SpecificSkillType.CorrenteSombria,   SkillEvolutionType.CorrenteSombriaLend, SkillRarity.Legendary, new Color(0.5f, 0.15f, 0.9f)));
+
         // Espada Rotatória, Projétil Base, Espiral e Spirit Homing removidos a pedido do usuário
 
         // ── ULTIMATES ────────────────────────────────────────────────────────────

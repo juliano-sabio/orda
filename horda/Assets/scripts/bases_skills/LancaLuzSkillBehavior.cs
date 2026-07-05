@@ -86,7 +86,9 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
             var lp = go.AddComponent<LancaLuzProjetil>();
             lp.skillDataRef = skillData;
             lp.cosmetico = cosmetico;
-            lp.Iniciar(dirFinal, velocidade, DanoAtual, alcance);
+            // Lança do Juízo: +50% de dano (perfuração/explosão ficam no projétil)
+            float danoUsar = SkillEvolutionManager.Tem(SkillEvolutionType.LancaLuzLend) ? DanoAtual * 1.5f : DanoAtual;
+            lp.Iniciar(dirFinal, velocidade, danoUsar, alcance);
         }
     }
 
@@ -197,7 +199,8 @@ public class LancaLuzProjetil : MonoBehaviour
         {
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva))
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva)
+                || SkillEvolutionManager.Tem(SkillEvolutionType.LancaLuzLend)) // Lança do Juízo: também explode
             {
                 EvolutionFX.SpawnExplosao(transform.position, 2.5f, dano * 0.6f, new Color(1f, 0.9f, 0.3f), this);
                 SomSkill.Tocar(SomSkill.Tipo.MissilExplosaoDark, transform.position, 0.55f);
@@ -205,7 +208,8 @@ public class LancaLuzProjetil : MonoBehaviour
             else
                 SomSkill.Tocar(SomSkill.Tipo.LancaImpactoDark, transform.position, 0.5f);
         }
-        bool perfura = SkillEvolutionManager.Tem(SkillEvolutionType.LancaPerfurante);
+        bool perfura = SkillEvolutionManager.Tem(SkillEvolutionType.LancaPerfurante)
+                    || SkillEvolutionManager.Tem(SkillEvolutionType.LancaLuzLend); // Lança do Juízo: perfura
         if (!perfura) atingiu = true;
         SpawnImpacto();
         if (!perfura) StartCoroutine(FadeOut());

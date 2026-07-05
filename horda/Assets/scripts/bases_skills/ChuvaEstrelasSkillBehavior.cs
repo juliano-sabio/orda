@@ -101,15 +101,24 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
         {
             var ic = col.GetComponent<InimigoController>()
                   ?? col.GetComponentInParent<InimigoController>();
-            if (ic != null) { ic.ReceberDano(DanoAtual, false); SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this); }
+            if (ic != null)
+            {
+                ic.ReceberDano(DanoAtual, false);
+                SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaCongelante))
+                    EvolutionFX.AplicarLentidao(ic, 2f, 0.5f); // Chuva Congelante: -50% velocidade por 2s
+            }
         }
         if (SkillEvolutionManager.Tem(SkillEvolutionType.ImpactoSismico))
             EvolutionFX.SpawnShockwave(pos, raioImpacto * 2.5f, DanoAtual * 0.5f, this);
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaEstrelasLend)) // Cataclismo Estelar
+            EvolutionFX.SpawnShockwave(pos, raioImpacto * 3.5f, DanoAtual, this);
     }
 
     IEnumerator DispararChuva()
     {
         int extra = SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaIntensa) ? 2 : 0;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaEstrelasLend)) extra += 3; // Cataclismo Estelar
         var alvos = EncontrarAlvosMaisProximos(qtdEstrelas + extra);
         foreach (var alvo in alvos)
         {

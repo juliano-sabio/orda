@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
+  m_Name: EspinhosFlamejantes
+  m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
+  nomeEvolucao: Espinhos Flamejantes
+  descricao: "Cada tick incendeia os inimigos (dano cont\xEDnuo por 3s)."
+  icone: {fileID: 2074562285758952879, guid: f1634cf9c29535f41935d3842ba7c60c, type: 3}
+  corDestaque: {r: 1, g: 0.5, b: 0.1, a: 1}
+  nameKey: 
+  descriptionKey: 
+  skillAlvo: 24
+  tipoEvolucao: 98
+  raridade: 3

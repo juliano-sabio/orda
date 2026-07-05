@@ -50,8 +50,9 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
             ? ((Vector2)alvo.transform.position - origem).normalized
             : Vector2.right;
 
-        // Espada Dupla: também corta por trás
-        float[] angulos = SkillEvolutionManager.Tem(SkillEvolutionType.EspadaDuplaFantasma)
+        // Espada Dupla / Lâmina Espectral: também corta por trás
+        float[] angulos = (SkillEvolutionManager.Tem(SkillEvolutionType.EspadaDuplaFantasma)
+                        || SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFantasmaLend))
             ? new float[] { -25f, 0f, 25f, 155f, 180f, 205f }
             : new float[] { -25f, 0f, 25f };
         foreach (float angOffset in angulos)
@@ -90,10 +91,12 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
             var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
             if (ic == null || ic.estaMorrendo) continue;
             if (cosmetico) continue; // co-op: cópia cosmética não aplica dano
-            ic.ReceberDano(DanoAtual, false);
-            SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFlamejante))
-                EvolutionFX.AplicarChamas(ic, this, DanoAtual * 0.3f, 3f);
+            float danoEsp = SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFantasmaLend) ? DanoAtual * 2f : DanoAtual; // Lâmina Espectral
+            ic.ReceberDano(danoEsp, false);
+            SkillElementEffect.Aplicar(skillData, ic.gameObject, danoEsp, this);
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFlamejante)
+                || SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFantasmaLend))
+                EvolutionFX.AplicarChamas(ic, this, danoEsp * 0.3f, 3f);
             if (!somHit) { somHit = true; SomSkill.Tocar(SomSkill.Tipo.EspadaImpactoDark, ic.transform.position, 0.35f); }
         }
 

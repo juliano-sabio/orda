@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
+  m_Name: LaminasSangrentas
+  m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
+  nomeEvolucao: "L\xE2minas Sangrentas"
+  descricao: "As l\xE2minas causam sangramento (dano cont\xEDnuo por 2.5s)."
+  icone: {fileID: -2262114113205104707, guid: 343f7942e7a9d7a429e3a0acc4b73478, type: 3}
+  corDestaque: {r: 0.9, g: 0.2, b: 0.3, a: 1}
+  nameKey: 
+  descriptionKey: 
+  skillAlvo: 27
+  tipoEvolucao: 99
+  raridade: 2

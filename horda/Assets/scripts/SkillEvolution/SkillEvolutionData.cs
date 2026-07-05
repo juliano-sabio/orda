@@ -193,6 +193,25 @@ public enum SkillEvolutionType
     // Maré Implacável
     MareEletrica,    // dano de afogamento +50%
     MarePersistente, // +3s de duração e +1.5 de raio
+
+    // ── Novas evoluções de skills de ATAQUE (adicionar sempre no fim do enum
+    //    pra não deslocar os valores já serializados nos assets/cenas) ──
+    ChuvaCongelante,      // Chuva de Estrelas: inimigos atingidos ficam lentos
+    EspinhosFlamejantes,  // Campo de Espinhos: cada tick incendeia (chamas/DoT)
+    LaminasSangrentas,    // Fúria de Lâminas: lâminas causam sangramento (DoT)
+
+    // ── Evoluções LENDÁRIAS de assinatura (uma por skill de ataque) ──
+    CampoEspinhosLend,    // Coração do Abismo: dano ×2 + executa inimigos <15% HP
+    ChuvaEstrelasLend,    // Cataclismo Estelar: +3 estrelas + onda de choque por impacto
+    FuriaLaminasLend,     // Vendaval Cortante: ×3 lâminas + cada lâmina explode
+    LancaLuzLend,         // Lança do Juízo: perfura + explode + dano ×1.5
+    SombrasCruzLend,      // Cruz do Apocalipse: 8 direções + dano ×2 + alcance ×2
+    CorteFantasmaLend,    // Ceifa Fantasma: +2 cortes + 3 hits por corte + atordoa
+    ChicoteEnergiaLend,   // Chicote do Caos: 3 rotações + lentidão + explosão
+    MisseisLend,          // Enxame Devastador: +5 mísseis + todos explodem
+    PulsoRitmicoLend,     // Pulso Aniquilador: dano ×3 + propaga em cadeia sempre
+    EspadaFantasmaLend,   // Lâmina Espectral: corte duplo + chamas + dano ×2
+    CorrenteSombriaLend,  // Corrente do Fim: +3 alvos + dano ×3 + paralisa
 }
 
 [CreateAssetMenu(fileName = "New Evolution", menuName = "Survivor/Skill Evolution")]

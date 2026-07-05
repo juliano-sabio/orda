@@ -51,6 +51,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
     void DispararLaminas()
     {
         int qtdReal = SkillEvolutionManager.Tem(SkillEvolutionType.LaminasDuplas) ? qtdLaminas * 2 : qtdLaminas;
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.FuriaLaminasLend)) qtdReal = qtdLaminas * 3; // Vendaval Cortante
         var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
@@ -192,8 +193,11 @@ public class LaminaProjetil : MonoBehaviour
         {
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas))
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas)
+                || SkillEvolutionManager.Tem(SkillEvolutionType.FuriaLaminasLend)) // Vendaval Cortante: também explode
                 EvolutionFX.SpawnExplosao(transform.position, 1.5f, dano * 0.5f, new Color(0.85f, 0.92f, 1f), this);
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasSangrentas))
+                EvolutionFX.AplicarVeneno(ic, dano * 0.25f, 2.5f); // Lâminas Sangrentas: sangramento (DoT)
             if (Random.value < 0.35f) SomSkill.Tocar(SomSkill.Tipo.LaminaImpactoDark, transform.position, 0.3f);
         }
         atingiu = true;

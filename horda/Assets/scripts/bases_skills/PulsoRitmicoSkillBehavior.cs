@@ -49,6 +49,7 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
         if (!cosmetico) // co-op: cópia cosmética só faz o visual do pulso
         {
             float danoReal = SkillEvolutionManager.Tem(SkillEvolutionType.PulsoIntenso) ? DanoAtual * 2f : DanoAtual;
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.PulsoRitmicoLend)) danoReal = DanoAtual * 3f; // Pulso Aniquilador
 
             var hits = Physics2D.OverlapCircleAll(centro, raio);
             var atingidos = new System.Collections.Generic.List<InimigoController>();
@@ -60,8 +61,9 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
                 SkillElementEffect.Aplicar(skillData, ic.gameObject, danoReal, this);
                 atingidos.Add(ic);
             }
-            // Pulso em Cadeia: propaga 50% para vizinhos
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.PulsoCadeia))
+            // Pulso em Cadeia (e Pulso Aniquilador): propaga para vizinhos
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.PulsoCadeia)
+                || SkillEvolutionManager.Tem(SkillEvolutionType.PulsoRitmicoLend))
                 foreach (var ic in atingidos)
                     EvolutionFX.SpawnShockwave(ic.transform.position, 2f, danoReal * 0.5f, this);
         }

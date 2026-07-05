@@ -46,7 +46,13 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
     IEnumerator ChicotearComEvo()
     {
         yield return StartCoroutine(Chicotear());
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.DuplaRotacao))
+        bool lend = SkillEvolutionManager.Tem(SkillEvolutionType.ChicoteEnergiaLend); // Chicote do Caos: 3 rotações
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.DuplaRotacao) || lend)
+        {
+            yield return new WaitForSeconds(0.1f);
+            yield return StartCoroutine(Chicotear());
+        }
+        if (lend)
         {
             yield return new WaitForSeconds(0.1f);
             yield return StartCoroutine(Chicotear());
@@ -143,6 +149,11 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
                     ic.ReceberDano(DanoAtual, false);
                     SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
                     if (SkillEvolutionManager.Tem(SkillEvolutionType.ChicoteEletrico)) EvolutionFX.AplicarLentidao(ic, 1f, 0.4f);
+                    if (SkillEvolutionManager.Tem(SkillEvolutionType.ChicoteEnergiaLend)) // Chicote do Caos: lentidão + explosão
+                    {
+                        EvolutionFX.AplicarLentidao(ic, 1f, 0.4f);
+                        EvolutionFX.SpawnExplosao(ic.transform.position, 1.5f, DanoAtual * 0.5f, new Color(0.2f, 0.85f, 1f), this);
+                    }
                     if (!somImpacto) { somImpacto = true; SomSkill.Tocar(SomSkill.Tipo.ChicoteImpactoDark, ic.transform.position, 0.3f); }
                 }
                 StartCoroutine(FlashInimigo(ic));
