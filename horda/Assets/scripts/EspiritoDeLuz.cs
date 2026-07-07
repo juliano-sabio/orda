@@ -3,44 +3,17 @@ using UnityEngine.Rendering.Universal;
 
 // Espírito de Luz: drop da segunda fase. Coletado por proximidade (ímã, igual outros
 // drops) e recarrega a barra de luz do player.
-// Segue o padrão do espírito de cura/imã: é um PREFAB (sprite dourada animada em 5 frames +
-// collider + brilho pulsante) em Resources/EspiritoLuz. O Criar instancia o prefab; se ele
-// não existir (build sem o asset), cai num fallback procedural com disco.
 public class EspiritoDeLuz : MonoBehaviour
 {
     public float quantidadeLuz = 12f;
     public float moveSpeed     = 6f;
 
-    [Header("Animação (atribuída no prefab)")]
-    public Sprite[] frames;   // 5 frames dourados (cópia recolorida do espírito de cura)
-    public float    fps = 8f;
-
-    SpriteRenderer sr;
-    float          animT;
-    Transform      player;
-    PlayerStats    playerStats;
-    bool           isAttracted;
-    bool           collected;
-
-    static GameObject _prefab;
-    const string PREFAB_PATH = "EspiritoLuz/espirito de luz";
+    Transform   player;
+    PlayerStats playerStats;
+    bool        isAttracted;
+    bool        collected;
 
     public static GameObject Criar(Vector3 pos, float quantidadeLuz)
-    {
-        if (_prefab == null) _prefab = Resources.Load<GameObject>(PREFAB_PATH);
-        if (_prefab != null)
-        {
-            var inst = Instantiate(_prefab, pos, Quaternion.identity);
-            inst.name = "EspiritoDeLuz";
-            var e = inst.GetComponent<EspiritoDeLuz>();
-            if (e != null) e.quantidadeLuz = quantidadeLuz;
-            return inst;
-        }
-        return CriarProcedural(pos, quantidadeLuz);
-    }
-
-    // Fallback (build sem o prefab): disco dourado procedural + brilho, como era antes.
-    static GameObject CriarProcedural(Vector3 pos, float quantidadeLuz)
     {
         var go = new GameObject("EspiritoDeLuz");
         go.transform.position = pos;
@@ -50,7 +23,7 @@ public class EspiritoDeLuz : MonoBehaviour
         sr.sortingOrder = 9;
         go.transform.localScale = Vector3.one * 0.4f;
 
-        // a luz é criada pelo próprio EspiritoDeLuz no Awake (mesmo caminho do prefab)
+        CriarLuz(go.transform, new Color(1f, 0.9f, 0.5f), 1.5f, 0.1f, 1f);
 
         var col = go.AddComponent<CircleCollider2D>();
         col.isTrigger = true;
@@ -60,17 +33,6 @@ public class EspiritoDeLuz : MonoBehaviour
         espirito.quantidadeLuz = quantidadeLuz;
 
         return go;
-    }
-
-    void Awake()
-    {
-        sr = GetComponent<SpriteRenderer>();
-
-        // Cria a luz EM RUNTIME (igual ao comportamento anterior) — um Light2D assado no prefab
-        // via script sai sem sorting-layers alvo e NÃO ilumina. Criado aqui, o Unity inicializa
-        // os defaults e o brilho volta a aparecer no player. Só cria se ainda não existir.
-        if (GetComponentInChildren<Light2D>() == null)
-            CriarLuz(transform, new Color(1f, 0.9f, 0.5f), 1.5f, 0.1f, 1f);
     }
 
     void Start()
@@ -91,14 +53,6 @@ public class EspiritoDeLuz : MonoBehaviour
 
     void Update()
     {
-        // Animação de frames (5 frames dourados) — quando o prefab as fornece.
-        if (sr != null && frames != null && frames.Length > 0)
-        {
-            animT += Time.deltaTime * fps;
-            int idx = ((int)animT) % frames.Length;
-            if (frames[idx] != null) sr.sprite = frames[idx];
-        }
-
         // Co-op: segue o player mais próximo (pode mudar enquanto se move).
         if (NetSpawn.EmRede)
         {
@@ -140,9 +94,6 @@ public class EspiritoDeLuz : MonoBehaviour
         if (collected || playerStats == null) return;
         collected = true;
 
-        // Flash de luz no player ao coletar (feedback visual — clarão dourado que segue o player e some).
-        FlashColeta(player != null ? player : playerStats.transform);
-
         // Co-op: a luz vai pro DONO do player que coletou (não pra cópia local/fantoche).
         if (NetSpawn.EmRede)
         {
@@ -177,24 +128,6 @@ public class EspiritoDeLuz : MonoBehaviour
         light.blendStyleIndex = 0;
     }
 
-    // Clarão dourado no player ao coletar — objeto independente (o espírito é destruído em seguida),
-    // acompanha o player por ~0.5s e some. Criado em runtime (mesma razão da luz: inicializa as
-    // sorting-layers alvo, senão não ilumina).
-    static void FlashColeta(Transform player)
-    {
-        if (player == null) return;
-        var go = new GameObject("FlashLuzColeta");
-        go.transform.position = player.position;
-        var light = go.AddComponent<Light2D>();
-        light.lightType             = Light2D.LightType.Point;
-        light.color                 = new Color(1f, 0.95f, 0.6f);
-        light.intensity             = 0f;
-        light.pointLightInnerRadius = 0.3f;
-        light.pointLightOuterRadius = 4f;
-        light.blendStyleIndex       = 0;
-        go.AddComponent<FlashLuzRunner>().Iniciar(light, player);
-    }
-
     static Sprite GerarDisco(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
@@ -207,32 +140,5 @@ public class EspiritoDeLuz : MonoBehaviour
         }
         tex.Apply();
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
-    }
-}
-
-// Clarão de coleta: acompanha o player, sobe rápido e some, depois se autodestrói.
-public class FlashLuzRunner : MonoBehaviour
-{
-    Transform alvo;
-
-    public void Iniciar(UnityEngine.Rendering.Universal.Light2D luz, Transform seguir)
-    {
-        alvo = seguir;
-        StartCoroutine(Anim(luz));
-    }
-
-    System.Collections.IEnumerator Anim(UnityEngine.Rendering.Universal.Light2D luz)
-    {
-        const float dur = 0.5f;
-        for (float t = 0f; t < dur; t += Time.deltaTime)
-        {
-            if (alvo != null) transform.position = alvo.position;
-            float p = t / dur;
-            // sobe rápido (primeiro 25%) e desce suave
-            float k = p < 0.25f ? (p / 0.25f) : (1f - (p - 0.25f) / 0.75f);
-            if (luz != null) luz.intensity = k * 5f;
-            yield return null;
-        }
-        Destroy(gameObject);
     }
 }
