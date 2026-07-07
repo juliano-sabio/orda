@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6ef315a684fbb0a448bff6c972dbdf0e
+guid: 1c146c6c4701e9142afc7cdf1a008c0f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3998322998344668677
-    second: espirito_de_luz_0
+      213: 5098092307785858614
+    second: luz_2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -178,11 +178,11 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: espirito_de_luz_0
+      name: luz_2_0
       rect:
         serializedVersion: 2
         x: 21
-        y: 29
+        y: 30
         width: 14
         height: 12
       alignment: 0
@@ -193,8 +193,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bf92462ca6a1388c0800000000000000
-      internalID: -3998322998344668677
+      spriteID: 63e3abd61ff00c640800000000000000
+      internalID: 5098092307785858614
       vertices: []
       indices: 
       edges: []
@@ -213,7 +213,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      espirito_de_luz_0: -3998322998344668677
+      luz_2_0: 5098092307785858614
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

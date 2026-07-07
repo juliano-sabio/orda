@@ -3,36 +3,52 @@ using UnityEngine.Rendering.Universal;
 
 // Espírito de Luz: drop da segunda fase. Coletado por proximidade (ímã, igual outros
 // drops) e recarrega a barra de luz do player.
+// Segue o padrão do espírito de cura/imã: é um PREFAB (sprite dourada animada em 5 frames +
+// collider + brilho pulsante) em Resources/EspiritoLuz. O Criar instancia o prefab; se ele
+// não existir (build sem o asset), cai num fallback procedural com disco.
 public class EspiritoDeLuz : MonoBehaviour
 {
     public float quantidadeLuz = 12f;
     public float moveSpeed     = 6f;
 
-    Transform   player;
-    PlayerStats playerStats;
-    bool        isAttracted;
-    bool        collected;
+    [Header("Animação (atribuída no prefab)")]
+    public Sprite[] frames;   // 5 frames dourados (cópia recolorida do espírito de cura)
+    public float    fps = 8f;
+
+    SpriteRenderer sr;
+    float          animT;
+    Transform      player;
+    PlayerStats    playerStats;
+    bool           isAttracted;
+    bool           collected;
+
+    static GameObject _prefab;
+    const string PREFAB_PATH = "EspiritoLuz/espirito de luz";
 
     public static GameObject Criar(Vector3 pos, float quantidadeLuz)
+    {
+        if (_prefab == null) _prefab = Resources.Load<GameObject>(PREFAB_PATH);
+        if (_prefab != null)
+        {
+            var inst = Instantiate(_prefab, pos, Quaternion.identity);
+            inst.name = "EspiritoDeLuz";
+            var e = inst.GetComponent<EspiritoDeLuz>();
+            if (e != null) e.quantidadeLuz = quantidadeLuz;
+            return inst;
+        }
+        return CriarProcedural(pos, quantidadeLuz);
+    }
+
+    // Fallback (build sem o prefab): disco dourado procedural + brilho, como era antes.
+    static GameObject CriarProcedural(Vector3 pos, float quantidadeLuz)
     {
         var go = new GameObject("EspiritoDeLuz");
         go.transform.position = pos;
 
         var sr = go.AddComponent<SpriteRenderer>();
-        // Sprite do espírito de luz: cópia recolorida (dourada) da sprite do espírito de cura,
-        // em Resources. Fallback pro disco procedural se não encontrar (build sem o asset).
-        var sp = Resources.Load<Sprite>("espirito_de_luz");
-        if (sp != null)
-        {
-            sr.sprite = sp;
-            go.transform.localScale = Vector3.one * 2f; // ajusta pro tamanho de pickup (tunável)
-        }
-        else
-        {
-            sr.sprite = GerarDisco(20, new Color(1f, 0.95f, 0.6f, 0.95f));
-            go.transform.localScale = Vector3.one * 0.4f;
-        }
+        sr.sprite       = GerarDisco(20, new Color(1f, 0.95f, 0.6f, 0.95f));
         sr.sortingOrder = 9;
+        go.transform.localScale = Vector3.one * 0.4f;
 
         CriarLuz(go.transform, new Color(1f, 0.9f, 0.5f), 1.5f, 0.1f, 1f);
 
@@ -44,6 +60,11 @@ public class EspiritoDeLuz : MonoBehaviour
         espirito.quantidadeLuz = quantidadeLuz;
 
         return go;
+    }
+
+    void Awake()
+    {
+        sr = GetComponent<SpriteRenderer>();
     }
 
     void Start()
@@ -64,6 +85,14 @@ public class EspiritoDeLuz : MonoBehaviour
 
     void Update()
     {
+        // Animação de frames (5 frames dourados) — quando o prefab as fornece.
+        if (sr != null && frames != null && frames.Length > 0)
+        {
+            animT += Time.deltaTime * fps;
+            int idx = ((int)animT) % frames.Length;
+            if (frames[idx] != null) sr.sprite = frames[idx];
+        }
+
         // Co-op: segue o player mais próximo (pode mudar enquanto se move).
         if (NetSpawn.EmRede)
         {
