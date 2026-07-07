@@ -50,7 +50,7 @@ public class EspiritoDeLuz : MonoBehaviour
         sr.sortingOrder = 9;
         go.transform.localScale = Vector3.one * 0.4f;
 
-        CriarLuz(go.transform, new Color(1f, 0.9f, 0.5f), 1.5f, 0.1f, 1f);
+        // a luz é criada pelo próprio EspiritoDeLuz no Awake (mesmo caminho do prefab)
 
         var col = go.AddComponent<CircleCollider2D>();
         col.isTrigger = true;
@@ -65,6 +65,12 @@ public class EspiritoDeLuz : MonoBehaviour
     void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
+
+        // Cria a luz EM RUNTIME (igual ao comportamento anterior) — um Light2D assado no prefab
+        // via script sai sem sorting-layers alvo e NÃO ilumina. Criado aqui, o Unity inicializa
+        // os defaults e o brilho volta a aparecer no player. Só cria se ainda não existir.
+        if (GetComponentInChildren<Light2D>() == null)
+            CriarLuz(transform, new Color(1f, 0.9f, 0.5f), 1.5f, 0.1f, 1f);
     }
 
     void Start()
