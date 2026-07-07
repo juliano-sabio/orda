@@ -106,6 +106,9 @@ public class EspiritoDeLuz : MonoBehaviour
             playerStats.AdicionarLuz(quantidadeLuz);
         }
 
+        // Clarão de luz no player ao coletar (feedback visual — segue o player e some).
+        FlashColeta(player != null ? player : playerStats.transform);
+
         Destroy(gameObject);
     }
 
@@ -128,6 +131,24 @@ public class EspiritoDeLuz : MonoBehaviour
         light.blendStyleIndex = 0;
     }
 
+    // Clarão dourado no player ao coletar — objeto independente (o espírito é destruído em seguida),
+    // acompanha o player por ~0.5s e some. Luz modesta de propósito (as luzes gigantes do prefab
+    // scale-6 é que pesavam/travavam). Criado em runtime pra inicializar as sorting-layers alvo.
+    static void FlashColeta(Transform player)
+    {
+        if (player == null) return;
+        var go = new GameObject("FlashLuzColeta");
+        go.transform.position = player.position;
+        var light = go.AddComponent<Light2D>();
+        light.lightType             = Light2D.LightType.Point;
+        light.color                 = new Color(1f, 0.95f, 0.6f);
+        light.intensity             = 0f;
+        light.pointLightInnerRadius = 0.2f;
+        light.pointLightOuterRadius = 2.5f;
+        light.blendStyleIndex       = 0;
+        go.AddComponent<FlashLuzRunner>().Iniciar(light, player);
+    }
+
     static Sprite GerarDisco(int sz, Color cor)
     {
         var tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
@@ -140,5 +161,31 @@ public class EspiritoDeLuz : MonoBehaviour
         }
         tex.Apply();
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
+    }
+}
+
+// Clarão de coleta: acompanha o player, sobe rápido e some, depois se autodestrói.
+public class FlashLuzRunner : MonoBehaviour
+{
+    Transform alvo;
+
+    public void Iniciar(UnityEngine.Rendering.Universal.Light2D luz, Transform seguir)
+    {
+        alvo = seguir;
+        StartCoroutine(Anim(luz));
+    }
+
+    System.Collections.IEnumerator Anim(UnityEngine.Rendering.Universal.Light2D luz)
+    {
+        const float dur = 0.5f;
+        for (float t = 0f; t < dur; t += Time.deltaTime)
+        {
+            if (alvo != null) transform.position = alvo.position;
+            float p = t / dur;
+            float k = p < 0.25f ? (p / 0.25f) : (1f - (p - 0.25f) / 0.75f); // sobe rápido, desce suave
+            if (luz != null) luz.intensity = k * 4f;
+            yield return null;
+        }
+        Destroy(gameObject);
     }
 }
