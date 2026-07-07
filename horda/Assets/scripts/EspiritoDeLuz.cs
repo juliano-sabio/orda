@@ -19,9 +19,20 @@ public class EspiritoDeLuz : MonoBehaviour
         go.transform.position = pos;
 
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite       = GerarDisco(20, new Color(1f, 0.95f, 0.6f, 0.95f));
+        // Sprite do espírito de luz: cópia recolorida (dourada) da sprite do espírito de cura,
+        // em Resources. Fallback pro disco procedural se não encontrar (build sem o asset).
+        var sp = Resources.Load<Sprite>("espirito_de_luz");
+        if (sp != null)
+        {
+            sr.sprite = sp;
+            go.transform.localScale = Vector3.one * 2f; // ajusta pro tamanho de pickup (tunável)
+        }
+        else
+        {
+            sr.sprite = GerarDisco(20, new Color(1f, 0.95f, 0.6f, 0.95f));
+            go.transform.localScale = Vector3.one * 0.4f;
+        }
         sr.sortingOrder = 9;
-        go.transform.localScale = Vector3.one * 0.4f;
 
         CriarLuz(go.transform, new Color(1f, 0.9f, 0.5f), 1.5f, 0.1f, 1f);
 
