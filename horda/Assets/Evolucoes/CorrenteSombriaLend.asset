@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: CorrenteSombriaLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: Corrente do Fim
-  descricao: "LEND\xC1RIA: +3 alvos, triplica o dano e paralisa todos os acorrentados."
+  nomeEvolucao: Corrente da Alma
+  descricao: "LEND\xC1RIA: os acorrentados compartilham dano \u2014 quanto mais elos,
+    mais d\xF3i em todos."
   icone: {fileID: -8977548862602377259, guid: 14481da4c03d07d4f91fb58dea5aa33d, type: 3}
   corDestaque: {r: 0.5, g: 0.15, b: 0.9, a: 1}
   nameKey: 

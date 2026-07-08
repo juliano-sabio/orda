@@ -66,7 +66,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
 
         int qtdReal  = SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteReforcada) ? qtdAlvos + 1 : qtdAlvos;
         float danoMult = SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteReforcada) ? 2f : 1f;
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend)) { qtdReal = qtdAlvos + 3; danoMult = 3f; } // Corrente do Fim
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend)) qtdReal += 1; // Corrente da Alma: +1 elo
         var alvos = EncontrarAlvos(qtdReal);
         if (alvos.Count == 0) yield break;
 
@@ -147,17 +147,20 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
                 proxDano = 0.5f;
                 if (!cosmetico && playerStats != null)
                     SomSkill.Tocar(SomSkill.Tipo.CorrenteTickDark, playerStats.transform.position, 0.25f);
+                // Corrente da Alma (Lendária): a dor é COMPARTILHADA — cada elo recebe dano
+                // proporcional a quantos estão acorrentados (quanto mais elos, mais dói em todos).
+                int nElos = 0; foreach (var a in alvos) if (a != null && !a.estaMorrendo) nElos++;
+                float fatorAlma = SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend) ? Mathf.Max(1, nElos) : 1f;
                 foreach (var ic in alvos)
                     if (ic != null && !ic.estaMorrendo && ic.gameObject != null)
                     {
                         if (!cosmetico) // co-op: cópia cosmética não aplica dano
                         {
-                            ic.ReceberDano(DanoAtual * danoMult, false);
-                            SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual * danoMult, this);
+                            ic.ReceberDano(DanoAtual * danoMult * fatorAlma, false);
+                            SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual * danoMult * fatorAlma, this);
                         }
                         StartCoroutine(FlashAlvo(ic.transform));
-                        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante)
-                            || SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend)) // Corrente do Fim: paralisa
+                        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante))
                         {
                             var movi = ic.GetComponent<movi_inimigo>();
                             if (movi != null)
@@ -196,8 +199,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
         yield return StartCoroutine(FadeLinhas(linhas, 0.08f));
 
         // Restaura velocidade dos alvos paralisados
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante)
-            || SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend))
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante))
             foreach (var ic in alvos)
                 if (ic != null && !ic.estaMorrendo)
                 {

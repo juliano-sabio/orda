@@ -46,10 +46,17 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
     {
         Vector2 centro = playerStats.transform.position;
         SomSkill.Tocar(SomSkill.Tipo.PulsoDark, centro, 0.45f); // co-op: toca tb na cópia cosmética (outro player ouve)
+        // Pulso Gravitacional (Lendária): implode os inimigos pro centro e depois os arremessa
+        if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.PulsoRitmicoLend))
+        {
+            StartCoroutine(PulsoGravitacional());
+            StartCoroutine(VisualPulso(centro));
+            return;
+        }
+
         if (!cosmetico) // co-op: cópia cosmética só faz o visual do pulso
         {
             float danoReal = SkillEvolutionManager.Tem(SkillEvolutionType.PulsoIntenso) ? DanoAtual * 2f : DanoAtual;
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.PulsoRitmicoLend)) danoReal = DanoAtual * 3f; // Pulso Aniquilador
 
             var hits = Physics2D.OverlapCircleAll(centro, raio);
             var atingidos = new System.Collections.Generic.List<InimigoController>();
@@ -61,14 +68,31 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
                 SkillElementEffect.Aplicar(skillData, ic.gameObject, danoReal, this);
                 atingidos.Add(ic);
             }
-            // Pulso em Cadeia (e Pulso Aniquilador): propaga para vizinhos
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.PulsoCadeia)
-                || SkillEvolutionManager.Tem(SkillEvolutionType.PulsoRitmicoLend))
+            // Pulso em Cadeia: propaga para vizinhos
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.PulsoCadeia))
                 foreach (var ic in atingidos)
                     EvolutionFX.SpawnShockwave(ic.transform.position, 2f, danoReal * 0.5f, this);
         }
 
         StartCoroutine(VisualPulso(centro));
+    }
+
+    IEnumerator PulsoGravitacional()
+    {
+        float raioG = raio * 1.7f;
+        // Fase 1: implosão — puxa os inimigos pro centro
+        for (float t = 0f; t < 0.45f && playerStats != null; t += Time.deltaTime)
+        {
+            EvolutionFX.PuxarInimigos(playerStats.transform.position, raioG, 7f, 0.2f);
+            yield return null;
+        }
+        if (playerStats == null) yield break;
+        // Fase 2: arremesso radial + dano de colisão + onda de choque
+        Vector2 c = playerStats.transform.position;
+        EvolutionFX.ArremessarInimigos(c, raioG, DanoAtual * 2f, this);
+        EvolutionFX.SpawnShockwave(c, raioG, DanoAtual, this);
+        SomSkill.Tocar(SomSkill.Tipo.PulsoDark, c, 0.6f);
+        CameraShaker.Tremer(0.1f, 1f);
     }
 
     IEnumerator VisualPulso(Vector2 centro)

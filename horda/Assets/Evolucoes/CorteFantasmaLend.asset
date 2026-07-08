@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: CorteFantasmaLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: Ceifa Fantasma
-  descricao: "LEND\xC1RIA: +2 cortes, 3 golpes por corte e atordoa os inimigos atingidos."
+  nomeEvolucao: Marca da Morte
+  descricao: "LEND\xC1RIA: cada corte marca o inimigo; ao juntar 3 marcas, ele detona."
   icone: {fileID: 3839737597979073872, guid: eef9bd520f7b0b644844faadba846285, type: 3}
-  corDestaque: {r: 0.6, g: 0.85, b: 1, a: 1}
+  corDestaque: {r: 0.6, g: 0.25, b: 1, a: 1}
   nameKey: 
   descriptionKey: 
   skillAlvo: 29

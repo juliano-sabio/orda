@@ -1373,6 +1373,118 @@ MonoBehaviour:
     - \uC0AC\uC6A9 \uBD88\uAC00
     - NIET BESCHIKBAAR
     - TIDAK TERSEDIA
+  - key: mission.desc.domo
+    translations:
+    - Derrote a Princesa Slime {0}x para desbloquear.
+    - Defeat the Slime Princess {0}x to unlock.
+    - Derrota a la Princesa Slime {0} veces para desbloquear.
+    - Besiege die Schleimprinzessin {0}x zum Freischalten.
+    - Vainquez la Princesse Slime {0} fois pour débloquer.
+    - Sconfiggi la Principessa Slime {0} volte per sbloccare.
+    - Победите Принцессу-слизь {0} раз, чтобы разблокировать.
+    - Pokonaj Księżniczkę Slime {0} razy, aby odblokować.
+    - Kilidi açmak için Slime Prensesi'ni {0} kez yen.
+    - 击败史莱姆公主 {0} 次以解锁。
+    - スライム姫を{0}回倒して解放。
+    - 슬라임 공주를 {0}번 처치하여 해금.
+    - Versla de Slijmprinses {0}x om te ontgrendelen.
+    - Kalahkan Putri Slime {0}x untuk membuka.
+  - key: mission.desc.tempestade
+    translations:
+    - Conclua {0} eventos de Tempestade para desbloquear.
+    - Complete {0} Storm events to unlock.
+    - Completa {0} eventos de Tormenta para desbloquear.
+    - Schließe {0} Sturm-Ereignisse ab, um freizuschalten.
+    - Terminez {0} événements Tempête pour débloquer.
+    - Completa {0} eventi Tempesta per sbloccare.
+    - Пройдите {0} события «Гроза», чтобы разблокировать.
+    - Ukończ {0} wydarzenia Burzy, aby odblokować.
+    - Kilidi açmak için {0} Fırtına etkinliğini tamamla.
+    - 完成 {0} 次风暴事件以解锁。
+    - 嵐イベントを{0}回クリアして解放。
+    - 폭풍 이벤트를 {0}회 완료하여 해금.
+    - Voltooi {0} Storm-gebeurtenissen om te ontgrendelen.
+    - Selesaikan {0} acara Badai untuk membuka.
+  - key: mission.desc.necropole
+    translations:
+    - Elimine {0} fantasmas para desbloquear.
+    - Eliminate {0} ghosts to unlock.
+    - Elimina {0} fantasmas para desbloquear.
+    - Eliminiere {0} Geister zum Freischalten.
+    - Éliminez {0} fantômes pour débloquer.
+    - Elimina {0} fantasmi per sbloccare.
+    - Уничтожьте {0} призраков, чтобы разблокировать.
+    - Wyeliminuj {0} duchów, aby odblokować.
+    - Kilidi açmak için {0} hayalet yok et.
+    - 消灭 {0} 个幽灵以解锁。
+    - 幽霊を{0}体倒して解放。
+    - 유령 {0}마리를 처치하여 해금.
+    - Elimineer {0} geesten om te ontgrendelen.
+    - Hilangkan {0} hantu untuk membuka.
+  - key: mission.desc.drenagem
+    translations:
+    - Elimine {0} slimes curandeiras para desbloquear.
+    - Eliminate {0} healer slimes to unlock.
+    - Elimina {0} slimes curanderas para desbloquear.
+    - Eliminiere {0} Heiler-Schleime zum Freischalten.
+    - Éliminez {0} slimes soigneurs pour débloquer.
+    - Elimina {0} slime guaritori per sbloccare.
+    - Уничтожьте {0} слизней-целителей, чтобы разблокировать.
+    - Wyeliminuj {0} lecznicze slime, aby odblokować.
+    - Kilidi açmak için {0} iyileştirici slime yok et.
+    - 消灭 {0} 个治疗史莱姆以解锁。
+    - 回復スライムを{0}体倒して解放。
+    - 치유 슬라임 {0}마리를 처치하여 해금.
+    - Elimineer {0} genezende slimes om te ontgrendelen.
+    - Hilangkan {0} slime penyembuh untuk membuka.
+  - key: mission.desc.coracao
+    translations:
+    - Elimine {0} inimigos para desbloquear.
+    - Eliminate {0} enemies to unlock.
+    - Elimina {0} enemigos para desbloquear.
+    - Eliminiere {0} Feinde zum Freischalten.
+    - Éliminez {0} ennemis pour débloquer.
+    - Elimina {0} nemici per sbloccare.
+    - Уничтожьте {0} врагов, чтобы разблокировать.
+    - Wyeliminuj {0} wrogów, aby odblokować.
+    - Kilidi açmak için {0} düşman yok et.
+    - 消灭 {0} 个敌人以解锁。
+    - 敵を{0}体倒して解放。
+    - 적 {0}명을 처치하여 해금.
+    - Elimineer {0} vijanden om te ontgrendelen.
+    - Hilangkan {0} musuh untuk membuka.
+  - key: mission.desc.cacador
+    translations:
+    - Elimine {0} slimes corrompidas para desbloquear.
+    - Eliminate {0} corrupted slimes to unlock.
+    - Elimina {0} slimes corruptos para desbloquear.
+    - Eliminiere {0} verdorbene Schleime zum Freischalten.
+    - Éliminez {0} slimes corrompus pour débloquer.
+    - Elimina {0} slime corrotti per sbloccare.
+    - Уничтожьте {0} испорченных слизней, чтобы разблокировать.
+    - Wyeliminuj {0} skażone slime, aby odblokować.
+    - Kilidi açmak için {0} bozulmuş slime yok et.
+    - 消灭 {0} 个腐化史莱姆以解锁。
+    - 汚染スライムを{0}体倒して解放。
+    - 부패한 슬라임 {0}마리를 처치하여 해금.
+    - Elimineer {0} verdorven slimes om te ontgrendelen.
+    - Hilangkan {0} slime terkorupsi untuk membuka.
+  - key: mission.desc.asceta
+    translations:
+    - Conclua a primeira área para desbloquear.
+    - Complete the first area to unlock.
+    - Completa la primera área para desbloquear.
+    - Schließe das erste Gebiet ab, um freizuschalten.
+    - Terminez la première zone pour débloquer.
+    - Completa la prima area per sbloccare.
+    - Пройдите первую область, чтобы разблокировать.
+    - Ukończ pierwszy obszar, aby odblokować.
+    - Kilidi açmak için ilk bölgeyi tamamla.
+    - 完成第一区域以解锁。
+    - 最初のエリアをクリアして解放。
+    - 첫 번째 지역을 완료하여 해금.
+    - Voltooi het eerste gebied om te ontgrendelen.
+    - Selesaikan area pertama untuk membuka.
   - key: terrain.record
     translations:
     - 'Recorde:'

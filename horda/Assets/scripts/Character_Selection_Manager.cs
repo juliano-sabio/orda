@@ -300,7 +300,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             if (disponivel)
                 botao.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => SelectPassiva(idx));
             else
-                MarcarBotaoIndisponivel(botao, ehMissaoPass ? "BLOQUEADO" : "INDISPONÍVEL");
+                MarcarBotaoIndisponivel(botao, ehMissaoPass);
 
             botoesPassiva.Add(botao);
             botoesPassivaDisp.Add(disponivel);
@@ -577,7 +577,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
                 // as realmente indisponíveis continuam "INDISPONÍVEL".
                 string nomeUlt = NormalizarUlt(ud.GetDisplayName() + " " + ud.ultimateName + " " + ud.name);
                 bool ehMissao = nomeUlt.Contains("domo retardante") || nomeUlt.Contains("tempestade") || nomeUlt.Contains("necropole") || nomeUlt.Contains("drenagem");
-                MarcarBotaoIndisponivel(botao, ehMissao ? "BLOQUEADO" : "INDISPONÍVEL");
+                MarcarBotaoIndisponivel(botao, ehMissao);
             }
 
             botoesUltimate.Add(botao);
@@ -844,7 +844,7 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     }
 
     // Aplica visual de "indisponível" num botão (apagado + não clicável) + rótulo "INDISPONÍVEL".
-    void MarcarBotaoIndisponivel(GameObject botao, string rotulo = "INDISPONÍVEL")
+    void MarcarBotaoIndisponivel(GameObject botao, bool bloqueadoPorMissao = false)
     {
         var btn = botao.GetComponent<Button>();
         if (btn != null) btn.interactable = false;
@@ -869,11 +869,12 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rtx.anchorMin = Vector2.zero; rtx.anchorMax = Vector2.one;
         rtx.offsetMin = rtx.offsetMax = Vector2.zero;
         var tmp = txtGO.AddComponent<TextMeshProUGUI>();
-        tmp.text = rotulo;
+        // Traduzido: terrain.locked = "BLOQUEADO" (destrancável por missão, dourado);
+        //            terrain.unavailable = "INDISPONÍVEL" (permanente, vermelho).
+        tmp.text = bloqueadoPorMissao ? Loc.T("terrain.locked") : Loc.T("terrain.unavailable");
         tmp.fontSize = 15f;
         tmp.fontStyle = FontStyles.Bold;
-        // "BLOQUEADO" (destrancável por missão) em dourado; "INDISPONÍVEL" permanente em vermelho
-        tmp.color = rotulo == "BLOQUEADO" ? new Color(1f, 0.82f, 0.3f, 1f) : new Color(0.85f, 0.32f, 0.32f, 1f);
+        tmp.color = bloqueadoPorMissao ? new Color(1f, 0.82f, 0.3f, 1f) : new Color(0.85f, 0.32f, 0.32f, 1f);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.raycastTarget = false;
     }

@@ -321,7 +321,7 @@ public class EscolherTerrenoUI : MonoBehaviour
             // Abismo é destrancável por missão (matar a Maga Slime) → "BLOQUEADO" dourado;
             // as demais fases travadas continuam "INDISPONÍVEL" vermelho.
             bool   ehBloqMissao = fase.nomeCena == "segunda_fase";
-            string rotuloBloq   = ehBloqMissao ? "BLOQUEADO" : Loc.T("terrain.unavailable");
+            string rotuloBloq   = ehBloqMissao ? Loc.T("terrain.locked") : Loc.T("terrain.unavailable");
             Color  corRotulo    = ehBloqMissao ? new Color(1f, 0.82f, 0.3f) : new Color(1f, 0.45f, 0.4f);
             AdicionarTexto(banner, "Texto",
                 Vector2.zero, Vector2.one,

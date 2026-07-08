@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: EspadaFantasmaLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: "L\xE2mina Espectral"
-  descricao: "LEND\xC1RIA: corta na frente e atr\xE1s, deixa chamas e causa o dobro
-    de dano."
+  nomeEvolucao: Espadas Orbitais
+  descricao: "LEND\xC1RIA: invoca 3 espadas que orbitam o player, cortando quem chega
+    perto."
   icone: {fileID: -3114996697606224331, guid: 71436e97be366334287171ba430ff64d, type: 3}
   corDestaque: {r: 0.85, g: 0.85, b: 1, a: 1}
   nameKey: 

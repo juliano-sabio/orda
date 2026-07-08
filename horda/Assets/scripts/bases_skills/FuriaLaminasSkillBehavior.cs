@@ -51,7 +51,6 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
     void DispararLaminas()
     {
         int qtdReal = SkillEvolutionManager.Tem(SkillEvolutionType.LaminasDuplas) ? qtdLaminas * 2 : qtdLaminas;
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.FuriaLaminasLend)) qtdReal = qtdLaminas * 3; // Vendaval Cortante
         var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
@@ -68,6 +67,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
             var lp = go.AddComponent<LaminaProjetil>();
             lp.skillDataRef = skillData;
             lp.cosmetico = cosmetico;
+            lp.bumerangue = SkillEvolutionManager.Tem(SkillEvolutionType.FuriaLaminasLend); // Lâminas Bumerangue
             lp.Iniciar(dir, velocidade, DanoAtual);
         }
 
@@ -80,6 +80,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
             var lp = go.AddComponent<LaminaProjetil>();
             lp.skillDataRef = skillData;
             lp.cosmetico = cosmetico;
+            lp.bumerangue = SkillEvolutionManager.Tem(SkillEvolutionType.FuriaLaminasLend); // Lâminas Bumerangue
             lp.Iniciar(dir, velocidade, DanoAtual);
         }
 
@@ -121,6 +122,9 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
 public class LaminaProjetil : MonoBehaviour
 {
     public bool cosmetico; // co-op: fantasma do colega — só visual, sem dano
+    public bool bumerangue; // Lâminas Bumerangue: volta ao fim do alcance, cortando de novo
+    bool voltando;
+    readonly System.Collections.Generic.HashSet<int> jaAtingidos = new System.Collections.Generic.HashSet<int>();
 
     public SkillData skillDataRef;
     Vector2 dir;
@@ -163,8 +167,8 @@ public class LaminaProjetil : MonoBehaviour
         col.isTrigger  = true;
         col.size       = new Vector2(0.2f, 0.6f);
 
-        // Failsafe: destrói após 1.5s independente de qualquer coisa
-        Destroy(gameObject, 1.5f);
+        // Failsafe: destrói após um tempo independente de qualquer coisa (bumerangue precisa de mais)
+        Destroy(gameObject, bumerangue ? 2.6f : 1.5f);
     }
 
     void Update()
@@ -178,8 +182,14 @@ public class LaminaProjetil : MonoBehaviour
 
         if (Time.frameCount % 3 == 0) SpawnRastro();
 
-        // Destrói ao atingir o alcance máximo a partir da origem
-        if (Vector2.Distance(transform.position, origem) >= ALCANCE_MAX)
+        float distOrigem = Vector2.Distance(transform.position, origem);
+        if (bumerangue)
+        {
+            // No fim do alcance, inverte e volta cortando de novo (reseta quem já cortou nesta passada)
+            if (!voltando && distOrigem >= ALCANCE_MAX) { voltando = true; dir = -dir; jaAtingidos.Clear(); }
+            else if (voltando && distOrigem <= 0.6f) Destroy(gameObject);
+        }
+        else if (distOrigem >= ALCANCE_MAX)
             Destroy(gameObject);
     }
 
@@ -189,12 +199,29 @@ public class LaminaProjetil : MonoBehaviour
         var ic = other.GetComponent<InimigoController>()
               ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
+
+        // Bumerangue: atravessa e corta na ida e na volta (sem repetir na mesma passada), não destrói
+        if (bumerangue)
+        {
+            int id = ic.gameObject.GetInstanceID();
+            if (jaAtingidos.Contains(id)) return;
+            jaAtingidos.Add(id);
+            if (!cosmetico)
+            {
+                ic.ReceberDano(dano, false);
+                SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+                if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasSangrentas))
+                    EvolutionFX.AplicarVeneno(ic, dano * 0.25f, 2.5f);
+                if (Random.value < 0.35f) SomSkill.Tocar(SomSkill.Tipo.LaminaImpactoDark, transform.position, 0.3f);
+            }
+            return;
+        }
+
         if (!cosmetico) // co-op: cópia cosmética só faz o visual
         {
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas)
-                || SkillEvolutionManager.Tem(SkillEvolutionType.FuriaLaminasLend)) // Vendaval Cortante: também explode
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasExplosivas))
                 EvolutionFX.SpawnExplosao(transform.position, 1.5f, dano * 0.5f, new Color(0.85f, 0.92f, 1f), this);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.LaminasSangrentas))
                 EvolutionFX.AplicarVeneno(ic, dano * 0.25f, 2.5f); // Lâminas Sangrentas: sangramento (DoT)

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: LancaLuzLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: "Lan\xE7a do Ju\xEDzo"
-  descricao: "LEND\xC1RIA: a lan\xE7a atravessa todos, explode em cada um e causa
-    +50% de dano."
+  nomeEvolucao: "Lan\xE7a Teleguiada"
+  descricao: "LEND\xC1RIA: a lan\xE7a persegue o alvo e relan\xE7a sozinha pro pr\xF3ximo
+    inimigo."
   icone: {fileID: -3898843575368328328, guid: c67cd95abc64cd248aa05d3f147e4794, type: 3}
   corDestaque: {r: 1, g: 0.95, b: 0.35, a: 1}
   nameKey: 

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: PulsoRitmicoLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: Pulso Aniquilador
-  descricao: "LEND\xC1RIA: triplica o dano por pulso e sempre propaga em cadeia aos
-    vizinhos."
+  nomeEvolucao: Pulso Gravitacional
+  descricao: "LEND\xC1RIA: implode os inimigos pro centro e depois os arremessa com
+    for\xE7a."
   icone: {fileID: 6551422454796549251, guid: c03f239cc99ba30418b99d4c90f4848b, type: 3}
   corDestaque: {r: 0.25, g: 1, b: 0.5, a: 1}
   nameKey: 

@@ -47,7 +47,6 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator LancarMisseis()
     {
         int qtdReal = SkillEvolutionManager.Tem(SkillEvolutionType.SalvaMisseis) ? qtdMisseis + 2 : qtdMisseis;
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisLend)) qtdReal = qtdMisseis + 5; // Enxame Devastador
         var alvos  = EncontrarAlvos(qtdReal);
         Vector2 origem = playerStats.transform.position;
 
@@ -114,6 +113,7 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
 public class MissilProjetil : MonoBehaviour
 {
     public bool cosmetico; // co-op: fantasma do colega — só visual, sem dano
+    public bool fragmento; // mini-míssil de fragmentação (não fragmenta de novo)
 
     public SkillData skillDataRef;
     InimigoController alvo;
@@ -186,16 +186,49 @@ public class MissilProjetil : MonoBehaviour
         {
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisExplosivos)
-                || SkillEvolutionManager.Tem(SkillEvolutionType.MisseisLend)) // Enxame Devastador: todos explodem
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisExplosivos))
             {
                 EvolutionFX.SpawnExplosao(transform.position, 2f, dano * 0.6f, new Color(1f, 0.5f, 0.1f), this);
                 SomSkill.Tocar(SomSkill.Tipo.MissilExplosaoDark, transform.position, 0.6f);
             }
             else
                 SomSkill.Tocar(SomSkill.Tipo.MissilImpactoDark, transform.position, 0.5f);
+
+            // Mísseis de Fragmentação (Lendária): o míssil se divide em 4 mini-mísseis teleguiados
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisLend) && !fragmento)
+                Fragmentar();
         }
         StartCoroutine(EfeitoImpacto());
+    }
+
+    void Fragmentar()
+    {
+        var todos = FindObjectsByType<InimigoController>(FindObjectsSortMode.None);
+        System.Array.Sort(todos, (a, b) =>
+            Vector2.Distance(a.transform.position, transform.position)
+            .CompareTo(Vector2.Distance(b.transform.position, transform.position)));
+
+        int criados = 0;
+        for (int i = 0; i < todos.Length && criados < 4; i++)
+        {
+            var t = todos[i];
+            if (t == null || t.estaMorrendo) continue;
+            if (Vector2.Distance(t.transform.position, transform.position) > 8f) break;
+            SpawnMini(t);
+            criados++;
+        }
+        for (; criados < 4; criados++) SpawnMini(null); // completa com direções aleatórias
+    }
+
+    void SpawnMini(InimigoController t)
+    {
+        var go = new GameObject("MiniMissil");
+        go.transform.position = transform.position;
+        var mp = go.AddComponent<MissilProjetil>();
+        mp.skillDataRef = skillDataRef;
+        mp.cosmetico = cosmetico;
+        mp.fragmento = true;
+        mp.Iniciar(t, 12f, dano * 0.4f);
     }
 
     IEnumerator PulsoCor()

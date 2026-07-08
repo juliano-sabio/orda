@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: ChicoteEnergiaLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: Chicote do Caos
-  descricao: "LEND\xC1RIA: gira 3 vezes, deixa lentos e explode em cada inimigo atingido."
+  nomeEvolucao: Chicote Condutor
+  descricao: "LEND\xC1RIA: deixa um campo el\xE9trico que arqueia e danifica os inimigos
+    pr\xF3ximos."
   icone: {fileID: 6843361105861325913, guid: da8bd35793f74004aba2e7e45b5c39ed, type: 3}
   corDestaque: {r: 0.2, g: 0.85, b: 1, a: 1}
   nameKey: 

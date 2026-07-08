@@ -111,14 +111,18 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
         }
         if (SkillEvolutionManager.Tem(SkillEvolutionType.ImpactoSismico))
             EvolutionFX.SpawnShockwave(pos, raioImpacto * 2.5f, DanoAtual * 0.5f, this);
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaEstrelasLend)) // Cataclismo Estelar
-            EvolutionFX.SpawnShockwave(pos, raioImpacto * 3.5f, DanoAtual, this);
     }
 
     IEnumerator DispararChuva()
     {
+        // Estrela Cadente (Lendária): 1 meteoro GIGANTE no maior aglomerado + cratera em chamas
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaEstrelasLend))
+        {
+            yield return StartCoroutine(MeteoroGigante());
+            yield break;
+        }
+
         int extra = SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaIntensa) ? 2 : 0;
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaEstrelasLend)) extra += 3; // Cataclismo Estelar
         var alvos = EncontrarAlvosMaisProximos(qtdEstrelas + extra);
         foreach (var alvo in alvos)
         {
@@ -127,6 +131,56 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
             StartCoroutine(QuedaEstrela(pos));
             yield return new WaitForSeconds(0.15f);
         }
+    }
+
+    // Estrela Cadente (Lendária): cai UM meteoro gigante no maior aglomerado de inimigos,
+    // com raio/dano enormes, e deixa uma cratera em chamas no chão por alguns segundos.
+    IEnumerator MeteoroGigante()
+    {
+        Vector2 origem = playerStats != null ? (Vector2)playerStats.transform.position : Vector2.zero;
+        var inimigos = FindObjectsByType<InimigoController>(FindObjectsSortMode.None);
+
+        // Alvo = inimigo com mais vizinhos por perto (centro do maior aglomerado)
+        Vector2 alvo = origem + Vector2.up * 3f;
+        int melhor = -1;
+        float raioCluster = raioImpacto * 2.5f;
+        foreach (var ic in inimigos)
+        {
+            if (ic == null || ic.estaMorrendo) continue;
+            int viz = 0;
+            foreach (var o in inimigos)
+                if (o != null && !o.estaMorrendo && Vector2.Distance(o.transform.position, ic.transform.position) <= raioCluster) viz++;
+            if (viz > melhor) { melhor = viz; alvo = ic.transform.position; }
+        }
+
+        float raioG = raioImpacto * 3f;
+        float danoG = DanoAtual * 4f;
+
+        // Aviso maior no chão
+        var aviso = CriarAvisoChao(alvo, raioG);
+        for (float t = 0f; t < 1.1f; t += Time.deltaTime) { if (aviso == null) break; yield return null; }
+        if (aviso != null) Destroy(aviso);
+
+        // Queda do meteoro
+        Vector2 origemQueda = alvo + Vector2.up * (alturaQueda * 1.5f);
+        SomSkill.Tocar(SomSkill.Tipo.EstrelaQuedaDark, alvo, 0.6f);
+        StartCoroutine(AnimarEstrela(origemQueda, alvo));
+        yield return new WaitForSeconds(0.25f);
+
+        // Impacto em área grande + cratera em chamas
+        if (!cosmetico)
+        {
+            var cols = Physics2D.OverlapCircleAll(alvo, raioG);
+            foreach (var col in cols)
+            {
+                var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
+                if (ic != null) { ic.ReceberDano(danoG, false); SkillElementEffect.Aplicar(skillData, ic.gameObject, danoG, this); }
+            }
+            EvolutionFX.SpawnZonaFogo(alvo, raioG * 0.9f, DanoAtual * 0.4f, 4f); // cratera em chamas
+        }
+        SomSkill.Tocar(SomSkill.Tipo.EstrelaImpactoDark, alvo, 0.6f);
+        StartCoroutine(EfeitoImpacto(alvo));
+        CameraShaker.Tremer(0.15f, 2f);
     }
 
     List<GameObject> EncontrarAlvosMaisProximos(int qtd)

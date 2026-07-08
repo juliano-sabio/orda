@@ -1194,7 +1194,7 @@ public class LobbyUI : MonoBehaviour
             // Ultimates bloqueadas por MISSÃO (Domo, Tempestade) mostram "BLOQUEADO" dourado
             string nomeNorm = Normalizar(nome);
             bool ehBloqueado = nomeNorm.Contains("domo retardante") || nomeNorm.Contains("tempestade") || nomeNorm.Contains("necropole") || nomeNorm.Contains("drenagem") || nomeNorm.Contains("robusto") || nomeNorm.Contains("cacador") || nomeNorm.Contains("asceta");
-            string rotuloBloq = ehBloqueado ? "BLOQUEADO" : "INDISPONÍVEL";
+            string rotuloBloq = ehBloqueado ? Loc.T("terrain.locked") : Loc.T("terrain.unavailable");
             Color  corBloq    = ehBloqueado ? new Color(1f, 0.82f, 0.3f) : new Color(0.85f, 0.32f, 0.32f);
             var tx = TextoPN(ov, "Txt", Vector2.zero, Vector2.one,
                 rotuloBloq, 12f, FontStyles.Bold, corBloq);

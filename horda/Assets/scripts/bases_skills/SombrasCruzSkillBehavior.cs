@@ -53,8 +53,16 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
         if (!cosmetico && playerStats != null)
             SomSkill.Tocar(SomSkill.Tipo.SombraCruzDisparoDark, playerStats.transform.position, 0.5f);
 
-        Vector2[] direcoes = (SkillEvolutionManager.Tem(SkillEvolutionType.CruzDupla)
-                           || SkillEvolutionManager.Tem(SkillEvolutionType.SombrasCruzLend)) // Cruz do Apocalipse: 8 direções
+        // Cruz Rotatória (Lendária): feixes que GIRAM 360° ao redor do player (varredura)
+        if (SkillEvolutionManager.Tem(SkillEvolutionType.SombrasCruzLend))
+        {
+            StartCoroutine(VarreduraRotatoria());
+            StartCoroutine(FlashPlayer());
+            StartCoroutine(AnelDisparo());
+            return;
+        }
+
+        Vector2[] direcoes = SkillEvolutionManager.Tem(SkillEvolutionType.CruzDupla)
             ? new[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right,
                       new Vector2(1,1).normalized, new Vector2(-1,1).normalized,
                       new Vector2(1,-1).normalized, new Vector2(-1,-1).normalized }
@@ -64,6 +72,20 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
 
         StartCoroutine(FlashPlayer());
         StartCoroutine(AnelDisparo());
+    }
+
+    // Cruz Rotatória: dispara feixes em ângulos que giram, varrendo 360° como um farol
+    IEnumerator VarreduraRotatoria()
+    {
+        const int passos = 24;
+        float ang = Random.Range(0f, 360f);
+        for (int i = 0; i < passos; i++)
+        {
+            float rad = ang * Mathf.Deg2Rad;
+            StartCoroutine(PulsoBeam(new Vector2(Mathf.Cos(rad), Mathf.Sin(rad))));
+            ang += 360f / passos;
+            yield return new WaitForSeconds(0.03f);
+        }
     }
 
     // Anel expansivo no player ao disparar
@@ -110,8 +132,7 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
 
     IEnumerator PulsoBeam(Vector2 dir)
     {
-        float alcanceReal = (SkillEvolutionManager.Tem(SkillEvolutionType.SombrasPerfurantes)
-                          || SkillEvolutionManager.Tem(SkillEvolutionType.SombrasCruzLend)) ? alcance * 2f : alcance;
+        float alcanceReal = SkillEvolutionManager.Tem(SkillEvolutionType.SombrasPerfurantes) ? alcance * 2f : alcance;
         float dur = alcanceReal / velocidade;
 
         // Glow externo (mais largo, semi-transparente)
@@ -204,9 +225,8 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
                 hashset.Add(id);
                 if (!cosmetico)
                 {
-                    float danoCruz = SkillEvolutionManager.Tem(SkillEvolutionType.SombrasCruzLend) ? DanoAtual * 2f : DanoAtual; // Cruz do Apocalipse
-                    ic.ReceberDano(danoCruz, false);
-                    SkillElementEffect.Aplicar(skillData, ic.gameObject, danoCruz, this);
+                    ic.ReceberDano(DanoAtual, false);
+                    SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this);
                     if (!somImpactoTocado) { somImpactoTocado = true; SomSkill.Tocar(SomSkill.Tipo.SombraCruzImpactoDark, ic.transform.position, 0.35f); }
                 }
             }

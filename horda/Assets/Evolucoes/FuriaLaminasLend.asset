@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: FuriaLaminasLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: Vendaval Cortante
-  descricao: "LEND\xC1RIA: dispara o triplo de l\xE2minas e cada uma explode ao acertar."
+  nomeEvolucao: "L\xE2minas Bumerangue"
+  descricao: "LEND\xC1RIA: as l\xE2minas voltam ao fim do alcance, cortando os inimigos
+    de novo."
   icone: {fileID: -2262114113205104707, guid: 343f7942e7a9d7a429e3a0acc4b73478, type: 3}
   corDestaque: {r: 0.9, g: 0.95, b: 1, a: 1}
   nameKey: 

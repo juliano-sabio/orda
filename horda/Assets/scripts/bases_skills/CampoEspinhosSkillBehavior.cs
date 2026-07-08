@@ -67,6 +67,10 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
         Vector2 pos = playerStats.transform.position;
         if (auraGO != null) auraGO.transform.position = pos;
 
+        // Vórtice de Espinhos (Lendária): o campo vira um buraco negro e puxa os inimigos pra dentro
+        if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.CampoEspinhosLend))
+            EvolutionFX.PuxarInimigos(pos, raio * 1.9f, 3.5f, raio * 0.35f);
+
         // Gira espinhos
         angRot += Time.deltaTime * 80f;
         AtualizarEspinhos(pos);
@@ -109,9 +113,6 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
         float raioReal = SkillEvolutionManager.Tem(SkillEvolutionType.CampoAmpliado) ? raio * 1.5f : raio;
         float danoReal = SkillEvolutionManager.Tem(SkillEvolutionType.CampoAmpliado) ? DanoAtual * 1.3f : DanoAtual;
 
-        bool lend = SkillEvolutionManager.Tem(SkillEvolutionType.CampoEspinhosLend); // Coração do Abismo
-        if (lend) danoReal *= 2f;
-
         bool acertou = false;
         var cols = Physics2D.OverlapCircleAll(playerStats.transform.position, raioReal);
         foreach (var col in cols)
@@ -126,10 +127,6 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
                 EvolutionFX.AplicarVeneno(ic, danoReal * 0.3f, 2f);
             if (SkillEvolutionManager.Tem(SkillEvolutionType.EspinhosFlamejantes))
                 EvolutionFX.AplicarChamas(ic, this, danoReal * 0.25f, 3f); // Espinhos Flamejantes: incendeia
-            // Coração do Abismo: executa inimigos comuns abaixo de 15% de vida
-            if (lend && !ic.EhBoss() && ic.vidaMaxima > 0f && ic.vidaAtual > 0f
-                && ic.vidaAtual / ic.vidaMaxima <= 0.15f)
-                ic.ReceberDano(ic.vidaAtual + 1f, false);
             acertou = true;
         }
         return acertou;

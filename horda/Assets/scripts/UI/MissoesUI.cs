@@ -476,7 +476,7 @@ public class MissoesUI : MonoBehaviour
                     bool   desb    = MissaoDomoManager.DomoDesbloqueado;
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoDomoManager.KillsPrincesa}/{MissaoDomoManager.META}";
-                    string descD   = $"[{p.GetDisplayName()}]  Mate a Princesa Slime {MissaoDomoManager.META}x para desbloquear.";
+                    string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.domo"), MissaoDomoManager.META);
                     CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
                     continue;
                 }
@@ -487,7 +487,7 @@ public class MissoesUI : MonoBehaviour
                     bool   desb    = MissaoTempestadeManager.Desbloqueada;
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoTempestadeManager.Completas}/{MissaoTempestadeManager.META}";
-                    string descD   = $"[{p.GetDisplayName()}]  Conclua {MissaoTempestadeManager.META} eventos de Tempestade para desbloquear.";
+                    string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.tempestade"), MissaoTempestadeManager.META);
                     CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
                     continue;
                 }
@@ -498,7 +498,7 @@ public class MissoesUI : MonoBehaviour
                     bool   desb    = MissaoNecropoleManager.Desbloqueada;
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoNecropoleManager.Kills}/{MissaoNecropoleManager.META}";
-                    string descD   = $"[{p.GetDisplayName()}]  Elimine {MissaoNecropoleManager.META} fantasmas para desbloquear.";
+                    string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.necropole"), MissaoNecropoleManager.META);
                     CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
                     continue;
                 }
@@ -509,7 +509,7 @@ public class MissoesUI : MonoBehaviour
                     bool   desb    = MissaoDrenagemManager.Desbloqueada;
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoDrenagemManager.Kills}/{MissaoDrenagemManager.META}";
-                    string descD   = $"[{p.GetDisplayName()}]  Elimine {MissaoDrenagemManager.META} slimes curandeiras para desbloquear.";
+                    string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.drenagem"), MissaoDrenagemManager.META);
                     CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
                     continue;
                 }
@@ -524,7 +524,7 @@ public class MissoesUI : MonoBehaviour
                 }
                 else
                 {
-                    CriarCard(u.GetDisplayName(), "INDISPONÍVEL",
+                    CriarCard(u.GetDisplayName(), Loc.T("terrain.unavailable"),
                         $"[{p.GetDisplayName()}]  {u.GetDisplayDescription()}",
                         u.GetElementColor(), false, u.ultimateIcon, apagado: true);
                 }
@@ -559,7 +559,7 @@ public class MissoesUI : MonoBehaviour
                     bool   desb    = MissaoCoracaoManager.Desbloqueada;
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoCoracaoManager.Kills}/{MissaoCoracaoManager.META}";
-                    string descD   = $"[{p.GetDisplayName()}]  Elimine {MissaoCoracaoManager.META} inimigos para desbloquear.";
+                    string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.coracao"), MissaoCoracaoManager.META);
                     CriarCard(passiva.GetDisplayName(), statusD, descD,
                         CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
                     continue;
@@ -571,7 +571,7 @@ public class MissoesUI : MonoBehaviour
                     bool   desb    = MissaoCacadorManager.Desbloqueada;
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoCacadorManager.Kills}/{MissaoCacadorManager.META}";
-                    string descD   = $"[{p.GetDisplayName()}]  Elimine {MissaoCacadorManager.META} slimes corrompidas para desbloquear.";
+                    string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.cacador"), MissaoCacadorManager.META);
                     CriarCard(passiva.GetDisplayName(), statusD, descD,
                         CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
                     continue;
@@ -582,7 +582,7 @@ public class MissoesUI : MonoBehaviour
                 {
                     bool   desb    = MissaoAscetaManager.Desbloqueada;
                     string statusD = desb ? Loc.T("missions.done") : "0/1";
-                    string descD   = $"[{p.GetDisplayName()}]  Conclua a primeira área para desbloquear.";
+                    string descD   = $"[{p.GetDisplayName()}]  " + Loc.T("mission.desc.asceta");
                     CriarCard(passiva.GetDisplayName(), statusD, descD,
                         CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
                     continue;
@@ -597,7 +597,7 @@ public class MissoesUI : MonoBehaviour
                 }
                 else
                 {
-                    CriarCard(passiva.GetDisplayName(), "INDISPONÍVEL", $"[{p.GetDisplayName()}]  {desc}",
+                    CriarCard(passiva.GetDisplayName(), Loc.T("terrain.unavailable"), $"[{p.GetDisplayName()}]  {desc}",
                         CharacterData.GetElementColor(p.baseElement), false, passiva.passiveIcon, apagado: true);
                 }
             }

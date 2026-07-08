@@ -86,9 +86,8 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
             var lp = go.AddComponent<LancaLuzProjetil>();
             lp.skillDataRef = skillData;
             lp.cosmetico = cosmetico;
-            // Lança do Juízo: +50% de dano (perfuração/explosão ficam no projétil)
-            float danoUsar = SkillEvolutionManager.Tem(SkillEvolutionType.LancaLuzLend) ? DanoAtual * 1.5f : DanoAtual;
-            lp.Iniciar(dirFinal, velocidade, danoUsar, alcance);
+            lp.teleguiada = SkillEvolutionManager.Tem(SkillEvolutionType.LancaLuzLend); // Lança Teleguiada
+            lp.Iniciar(dirFinal, velocidade, DanoAtual, alcance);
         }
     }
 
@@ -134,6 +133,8 @@ public class LancaLuzProjetil : MonoBehaviour
 {
     public SkillData skillDataRef;
     public bool      cosmetico; // co-op: fantasma do colega — só visual, sem dano
+    public bool      teleguiada; // Lança Teleguiada: persegue alvos e relança pro próximo ao acertar
+    int     ultimoId = -1;
     Vector2 dir, origem;
     float   vel, dano, alcance;
     bool    atingiu;
@@ -178,16 +179,44 @@ public class LancaLuzProjetil : MonoBehaviour
     void Update()
     {
         if (atingiu) return;
+
+        // Teleguiada: curva a direção em direção ao inimigo mais próximo (homing)
+        if (teleguiada)
+        {
+            var alvo = MaisProximoExcluindo(ultimoId);
+            if (alvo != null)
+            {
+                Vector2 desejada = ((Vector2)alvo.position - (Vector2)transform.position).normalized;
+                dir = Vector2.Lerp(dir, desejada, 7f * Time.deltaTime).normalized;
+                float ang2 = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.Euler(0f, 0f, ang2 - 90f);
+            }
+        }
+
         transform.position += (Vector3)(dir * vel * Time.deltaTime);
 
         // Partícula de energia ao longo do voo
         if (Time.frameCount % 4 == 0) SpawnParticulaVoo();
 
-        if (Vector2.Distance(transform.position, origem) >= alcance)
+        // A teleguiada não morre no alcance — vive pela vida-limite (Destroy em Iniciar) caçando alvos
+        if (!teleguiada && Vector2.Distance(transform.position, origem) >= alcance)
         {
             SpawnImpacto();
             Destroy(gameObject);
         }
+    }
+
+    Transform MaisProximoExcluindo(int excluirId)
+    {
+        var todos = FindObjectsByType<InimigoController>(FindObjectsSortMode.None);
+        Transform melhor = null; float menor = float.MaxValue;
+        foreach (var ic in todos)
+        {
+            if (ic == null || ic.estaMorrendo || ic.gameObject.GetInstanceID() == excluirId) continue;
+            float d = Vector2.Distance(ic.transform.position, transform.position);
+            if (d < menor) { menor = d; melhor = ic.transform; }
+        }
+        return melhor;
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -195,12 +224,27 @@ public class LancaLuzProjetil : MonoBehaviour
         if (atingiu) return;
         var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
         if (ic == null) return;
+
+        // Teleguiada: acerta, dá dano e SEGUE caçando o próximo alvo (não destrói)
+        if (teleguiada)
+        {
+            if (ic.gameObject.GetInstanceID() == ultimoId) return; // evita re-acertar o mesmo em sequência
+            if (!cosmetico)
+            {
+                ic.ReceberDano(dano, false);
+                SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
+                SomSkill.Tocar(SomSkill.Tipo.LancaImpactoDark, transform.position, 0.4f);
+            }
+            ultimoId = ic.gameObject.GetInstanceID();
+            SpawnImpacto();
+            return;
+        }
+
         if (!cosmetico) // co-op: cópia cosmética não aplica dano (só visual)
         {
             ic.ReceberDano(dano, false);
             SkillElementEffect.Aplicar(skillDataRef, ic.gameObject, dano, this);
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva)
-                || SkillEvolutionManager.Tem(SkillEvolutionType.LancaLuzLend)) // Lança do Juízo: também explode
+            if (SkillEvolutionManager.Tem(SkillEvolutionType.LancaExplosiva))
             {
                 EvolutionFX.SpawnExplosao(transform.position, 2.5f, dano * 0.6f, new Color(1f, 0.9f, 0.3f), this);
                 SomSkill.Tocar(SomSkill.Tipo.MissilExplosaoDark, transform.position, 0.55f);
@@ -208,8 +252,7 @@ public class LancaLuzProjetil : MonoBehaviour
             else
                 SomSkill.Tocar(SomSkill.Tipo.LancaImpactoDark, transform.position, 0.5f);
         }
-        bool perfura = SkillEvolutionManager.Tem(SkillEvolutionType.LancaPerfurante)
-                    || SkillEvolutionManager.Tem(SkillEvolutionType.LancaLuzLend); // Lança do Juízo: perfura
+        bool perfura = SkillEvolutionManager.Tem(SkillEvolutionType.LancaPerfurante);
         if (!perfura) atingiu = true;
         SpawnImpacto();
         if (!perfura) StartCoroutine(FadeOut());

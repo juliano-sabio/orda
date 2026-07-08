@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: SombrasCruzLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: Cruz do Apocalipse
-  descricao: "LEND\xC1RIA: dispara em 8 dire\xE7\xF5es com o dobro de dano e o dobro
-    de alcance."
+  nomeEvolucao: "Cruz Rotat\xF3ria"
+  descricao: "LEND\xC1RIA: os feixes giram 360\xB0 ao redor do player, varrendo tudo
+    como um farol."
   icone: {fileID: 1330450550990237758, guid: 60c473160ebf68e499fd92cd34276c80, type: 3}
   corDestaque: {r: 0.55, g: 0.2, b: 1, a: 1}
   nameKey: 

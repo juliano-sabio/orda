@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa088ad7aaffafa42ad7a03e99ae72fd, type: 3}
   m_Name: MisseisLend
   m_EditorClassIdentifier: Assembly-CSharp::SkillEvolutionData
-  nomeEvolucao: Enxame Devastador
-  descricao: "LEND\xC1RIA: +5 m\xEDsseis por ativa\xE7\xE3o e todos explodem em \xE1rea
+  nomeEvolucao: "M\xEDsseis de Fragmenta\xE7\xE3o"
+  descricao: "LEND\xC1RIA: cada m\xEDssil se divide em 4 mini-m\xEDsseis teleguiados
     ao impactar."
   icone: {fileID: 2189855817262734761, guid: 13a9755d7b0785c469d526adab2ecd11, type: 3}
   corDestaque: {r: 1, g: 0.45, b: 0.1, a: 1}
