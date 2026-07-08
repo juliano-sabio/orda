@@ -547,6 +547,10 @@ public class InimigoController : MonoBehaviour
         if (estaMorrendo && vidaAtual <= 0)
         {
             OnPreMorte?.Invoke(this);
+            MissaoNecropoleManager.RegistrarSeFantasma(this);   // missão: 500 fantasmas desbloqueiam a Necrópole
+            MissaoDrenagemManager.RegistrarSeCurandeira(this);  // missão: 500 slimes curandeiras desbloqueiam a Drenagem de Vida
+            MissaoCoracaoManager.RegistrarKill();               // missão: 150 inimigos desbloqueiam a passiva Coração Robusto
+            MissaoCacadorManager.RegistrarSeCorrompida(this);   // missão: 200 slimes corrompidas desbloqueiam a passiva Caçador
 
             if (suporteComponent != null)
             {

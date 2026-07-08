@@ -588,6 +588,10 @@ void TentarIniciarEvento()
             playerStats.Heal(playerStats.maxHealth * pctCura);
         }
 
+        // Missão: concluir 3 eventos de Tempestade desbloqueia a ultimate Tempestade Elétrica (host/SP)
+        if (sucesso && eventoAtual.tipo == TipoEvento.TempestadeEletrica)
+            MissaoTempestadeManager.RegistrarEventoTempestade();
+
         StartCoroutine(MostrarResultado(sucesso));
         // co-op: replica o card de resultado no cliente.
         if (NetSpawn.EmRede && NetSpawn.PodeSpawnar && CoopProgressao.Instance != null)
@@ -779,6 +783,10 @@ void TentarIniciarEvento()
 
         StopCoroutine("EsconderResultadoCoop");
         StartCoroutine("EsconderResultadoCoop");
+
+        // Missão da Tempestade Elétrica: conta também no cliente co-op (progresso local dele)
+        if (sucesso && tipo == TipoEvento.TempestadeEletrica)
+            MissaoTempestadeManager.RegistrarEventoTempestade();
     }
 
     IEnumerator EsconderResultadoCoop()

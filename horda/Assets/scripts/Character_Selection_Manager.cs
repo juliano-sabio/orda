@@ -277,6 +277,14 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             int ci = PlayerPrefs.GetInt("SelectedCharacter", 0);
             PlayerPrefs.SetInt($"SelectedPassiva_{ci}", 0);
         }
+        // Passiva bloqueada por missão selecionada e ainda não liberada: volta pra 0
+        if (passivaSelecionadaIndex >= 0 && passivaSelecionadaIndex < data.passivasDisponiveis.Length
+            && PassivaMissao(data.passivasDisponiveis[passivaSelecionadaIndex], out bool selPassDesb) && !selPassDesb)
+        {
+            passivaSelecionadaIndex = 0;
+            int ci = PlayerPrefs.GetInt("SelectedCharacter", 0);
+            PlayerPrefs.SetInt($"SelectedPassiva_{ci}", 0);
+        }
 
         for (int i = 0; i < data.passivasDisponiveis.Length; i++)
         {
@@ -284,12 +292,15 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             if (pd == null) continue;
             int  idx = i;
             bool disponivel = (i < PASSIVAS_LIBERADAS_SEL);
+            // Passivas bloqueadas por missão (Coração Robusto, Caçador) dependem da missão
+            bool ehMissaoPass = PassivaMissao(pd, out bool passDesb);
+            if (ehMissaoPass) disponivel = passDesb;
             var botao = CriarBotaoPassiva(pd);
 
             if (disponivel)
                 botao.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => SelectPassiva(idx));
             else
-                MarcarBotaoIndisponivel(botao);
+                MarcarBotaoIndisponivel(botao, ehMissaoPass ? "BLOQUEADO" : "INDISPONÍVEL");
 
             botoesPassiva.Add(botao);
             botoesPassivaDisp.Add(disponivel);
@@ -561,7 +572,13 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
             if (disponivel)
                 botao.GetComponent<Button>().onClick.AddListener(() => SelectUltimate(capturedIndex));
             else
-                MarcarBotaoIndisponivel(botao);
+            {
+                // Ultimates bloqueadas por MISSÃO (Domo, Tempestade) mostram "BLOQUEADO";
+                // as realmente indisponíveis continuam "INDISPONÍVEL".
+                string nomeUlt = NormalizarUlt(ud.GetDisplayName() + " " + ud.ultimateName + " " + ud.name);
+                bool ehMissao = nomeUlt.Contains("domo retardante") || nomeUlt.Contains("tempestade") || nomeUlt.Contains("necropole") || nomeUlt.Contains("drenagem");
+                MarcarBotaoIndisponivel(botao, ehMissao ? "BLOQUEADO" : "INDISPONÍVEL");
+            }
 
             botoesUltimate.Add(botao);
             botoesUltimateOrig.Add(capturedIndex);
@@ -801,12 +818,33 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
     {
         if (u == null) return false;
         string nome = NormalizarUlt(u.GetDisplayName() + " " + u.ultimateName + " " + u.name);
+        // Domo Retardante fica BLOQUEADA até completar a missão (matar Princesa Slime 2x)
+        if (nome.Contains("domo retardante")) return MissaoDomoManager.DomoDesbloqueado;
+        // Tempestade Elétrica fica BLOQUEADA até concluir 3 eventos de Tempestade
+        if (nome.Contains("tempestade")) return MissaoTempestadeManager.Desbloqueada;
+        // Necrópole fica BLOQUEADA até eliminar 500 fantasmas
+        if (nome.Contains("necropole")) return MissaoNecropoleManager.Desbloqueada;
+        // Drenagem de Vida fica BLOQUEADA até eliminar 500 slimes curandeiras
+        if (nome.Contains("drenagem")) return MissaoDrenagemManager.Desbloqueada;
         foreach (var kw in ultimatesLiberadasSel) if (nome.Contains(kw)) return true;
         return false;
     }
 
+    // Passivas bloqueadas por MISSÃO. Retorna true se 'pd' é uma delas;
+    // 'desbloqueada' informa se a missão já foi concluída.
+    bool PassivaMissao(PassiveData pd, out bool desbloqueada)
+    {
+        desbloqueada = false;
+        if (pd == null) return false;
+        string n = NormalizarUlt(pd.GetDisplayName() + " " + pd.name);
+        if (n.Contains("robusto")) { desbloqueada = MissaoCoracaoManager.Desbloqueada; return true; } // Coração Robusto: 150 inimigos
+        if (n.Contains("cacador")) { desbloqueada = MissaoCacadorManager.Desbloqueada; return true; }  // Caçador: 200 slimes corrompidas
+        if (n.Contains("asceta"))  { desbloqueada = MissaoAscetaManager.Desbloqueada;  return true; }  // Asceta: concluir a primeira área
+        return false;
+    }
+
     // Aplica visual de "indisponível" num botão (apagado + não clicável) + rótulo "INDISPONÍVEL".
-    void MarcarBotaoIndisponivel(GameObject botao)
+    void MarcarBotaoIndisponivel(GameObject botao, string rotulo = "INDISPONÍVEL")
     {
         var btn = botao.GetComponent<Button>();
         if (btn != null) btn.interactable = false;
@@ -831,10 +869,11 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
         rtx.anchorMin = Vector2.zero; rtx.anchorMax = Vector2.one;
         rtx.offsetMin = rtx.offsetMax = Vector2.zero;
         var tmp = txtGO.AddComponent<TextMeshProUGUI>();
-        tmp.text = "INDISPONÍVEL";
+        tmp.text = rotulo;
         tmp.fontSize = 15f;
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = new Color(0.85f, 0.32f, 0.32f, 1f);
+        // "BLOQUEADO" (destrancável por missão) em dourado; "INDISPONÍVEL" permanente em vermelho
+        tmp.color = rotulo == "BLOQUEADO" ? new Color(1f, 0.82f, 0.3f, 1f) : new Color(0.85f, 0.32f, 0.32f, 1f);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.raycastTarget = false;
     }

@@ -56,7 +56,8 @@
       "Bash(grep -nB2 -A4 \"sprBotao =\" Assets/scripts/UI/MenuInicialUI.cs)",
       "Bash(git commit -m ' *)",
       "Bash(git rebase *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(xargs -n1 basename)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda\\horda",

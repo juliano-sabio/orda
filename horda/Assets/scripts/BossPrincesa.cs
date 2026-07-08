@@ -1388,6 +1388,7 @@ public class BossPrincesa : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator EfeitoMortePrincesa()
     {
+        MissaoDomoManager.RegistrarKillPrincesa(); // missão: matar Princesa 2x desbloqueia o Domo Retardante (conta no host e no cliente)
         if (canalSrc != null) { Destroy(canalSrc.gameObject); canalSrc = null; } // corta canalização se morreu canalizando
         SomCoop(SomSkill.Tipo.PrincesaMorte, transform.position, 0.85f);
         if (loopCoroutine != null) { StopCoroutine(loopCoroutine); loopCoroutine = null; }

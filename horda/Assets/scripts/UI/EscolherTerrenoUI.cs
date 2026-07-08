@@ -172,6 +172,10 @@ public class EscolherTerrenoUI : MonoBehaviour
 
     void CriarCard(GameObject canvas, ConfigFase fase, Vector2 ancMin, Vector2 ancMax)
     {
+        // Abismo (segunda área) fica BLOQUEADO até matar a boss Maga Slime
+        if (fase.nomeCena == "segunda_fase")
+            fase.desbloqueada = MissaoSegundaAreaManager.Desbloqueada;
+
         GameObject card = new GameObject($"Card_{fase.nome}");
         card.transform.SetParent(canvas.transform, false);
 
@@ -314,9 +318,14 @@ public class EscolherTerrenoUI : MonoBehaviour
             rBanner.offsetMin = Vector2.zero; rBanner.offsetMax = Vector2.zero;
             banner.AddComponent<Image>().color = new Color(0.15f, 0.15f, 0.15f, 0.35f);
 
+            // Abismo é destrancável por missão (matar a Maga Slime) → "BLOQUEADO" dourado;
+            // as demais fases travadas continuam "INDISPONÍVEL" vermelho.
+            bool   ehBloqMissao = fase.nomeCena == "segunda_fase";
+            string rotuloBloq   = ehBloqMissao ? "BLOQUEADO" : Loc.T("terrain.unavailable");
+            Color  corRotulo    = ehBloqMissao ? new Color(1f, 0.82f, 0.3f) : new Color(1f, 0.45f, 0.4f);
             AdicionarTexto(banner, "Texto",
                 Vector2.zero, Vector2.one,
-                Loc.T("terrain.unavailable"), 22f, FontStyles.Bold, new Color(1f, 0.45f, 0.4f));
+                rotuloBloq, 22f, FontStyles.Bold, corRotulo);
         }
     }
 
@@ -491,9 +500,25 @@ public class CardHover : MonoBehaviour,
 {
     Coroutine cor;
     bool pronto = true; // enquanto false (durante a animação de entrada) ignora o mouse
+    float tempoTravado = 0f;
+    const float FAILSAFE_LIBERAR = 1.5f;
 
     public void Travar()  => pronto = false;
     public void Liberar() => pronto = true;
+
+    void Update()
+    {
+        // Failsafe: se a animação de entrada for interrompida e o Liberar() nunca chegar, o card
+        // ficaria preso numa escala menor e sem responder ao mouse (menu "bugado"). Passado o tempo
+        // limite, libera sozinho e normaliza a escala — garante que sempre termine no lugar certo.
+        if (pronto) { tempoTravado = 0f; return; }
+        tempoTravado += Time.unscaledDeltaTime;
+        if (tempoTravado >= FAILSAFE_LIBERAR)
+        {
+            if (transform.localScale.x < 0.999f) transform.localScale = Vector3.one;
+            pronto = true;
+        }
+    }
 
     public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData _)
     { if (pronto) Animar(1.06f, 0.15f); }

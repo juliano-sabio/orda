@@ -327,6 +327,10 @@ public class TimerManager : MonoBehaviour
 
     void AbrirEscolhaVitoria()
     {
+        // Missão: concluir a primeira área desbloqueia a passiva Asceta
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.StartsWith("primeira_fase"))
+            MissaoAscetaManager.MarcarPrimeiraAreaConcluida();
+
         if (modoSobrevivencia)
         {
             // No modo Sobrevivencia o jogador ja escolheu o infinito: apenas recicla.

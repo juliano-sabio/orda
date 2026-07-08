@@ -903,6 +903,14 @@ public class LobbyUI : MonoBehaviour
     {
         if (u == null) return false;
         string nome = Normalizar(u.GetDisplayName() + " " + u.ultimateName + " " + u.name);
+        // Domo Retardante fica BLOQUEADA até completar a missão (matar Princesa Slime 2x)
+        if (nome.Contains("domo retardante")) return MissaoDomoManager.DomoDesbloqueado;
+        // Tempestade Elétrica fica BLOQUEADA até concluir 3 eventos de Tempestade
+        if (nome.Contains("tempestade")) return MissaoTempestadeManager.Desbloqueada;
+        // Necrópole fica BLOQUEADA até eliminar 500 fantasmas
+        if (nome.Contains("necropole")) return MissaoNecropoleManager.Desbloqueada;
+        // Drenagem de Vida fica BLOQUEADA até eliminar 500 slimes curandeiras
+        if (nome.Contains("drenagem")) return MissaoDrenagemManager.Desbloqueada;
         foreach (var kw in ultimatesLiberadas) if (nome.Contains(kw)) return true;
         return false;
     }
@@ -962,7 +970,16 @@ public class LobbyUI : MonoBehaviour
         if (pass.Length == 0) { passItemBG = new Image[0]; passDisponivel = new bool[0]; return; }
         passItemBG = new Image[pass.Length];
         passDisponivel = new bool[pass.Length];
-        for (int i = 0; i < pass.Length; i++) passDisponivel[i] = (i < PASSIVAS_LIBERADAS);
+        for (int i = 0; i < pass.Length; i++)
+        {
+            passDisponivel[i] = (i < PASSIVAS_LIBERADAS);
+            if (pass[i] == null) continue;
+            string np = Normalizar(pass[i].GetDisplayName() + " " + pass[i].name);
+            // Passivas bloqueadas por missão
+            if (np.Contains("robusto")) passDisponivel[i] = MissaoCoracaoManager.Desbloqueada; // Coração Robusto: 150 inimigos
+            if (np.Contains("cacador")) passDisponivel[i] = MissaoCacadorManager.Desbloqueada; // Caçador: 200 slimes corrompidas
+            if (np.Contains("asceta"))  passDisponivel[i] = MissaoAscetaManager.Desbloqueada;  // Asceta: concluir a primeira área
+        }
 
         // garante que a passiva selecionada esteja disponível
         passivaIdx = Mathf.Clamp(passivaIdx, 0, pass.Length - 1);
@@ -1174,8 +1191,13 @@ public class LobbyUI : MonoBehaviour
             ovImg.color = new Color(0.03f, 0.02f, 0.04f, 0.62f);
             ovImg.raycastTarget = false;
 
+            // Ultimates bloqueadas por MISSÃO (Domo, Tempestade) mostram "BLOQUEADO" dourado
+            string nomeNorm = Normalizar(nome);
+            bool ehBloqueado = nomeNorm.Contains("domo retardante") || nomeNorm.Contains("tempestade") || nomeNorm.Contains("necropole") || nomeNorm.Contains("drenagem") || nomeNorm.Contains("robusto") || nomeNorm.Contains("cacador") || nomeNorm.Contains("asceta");
+            string rotuloBloq = ehBloqueado ? "BLOQUEADO" : "INDISPONÍVEL";
+            Color  corBloq    = ehBloqueado ? new Color(1f, 0.82f, 0.3f) : new Color(0.85f, 0.32f, 0.32f);
             var tx = TextoPN(ov, "Txt", Vector2.zero, Vector2.one,
-                "INDISPONÍVEL", 12f, FontStyles.Bold, new Color(0.85f, 0.32f, 0.32f));
+                rotuloBloq, 12f, FontStyles.Bold, corBloq);
             tx.alignment = TextAlignmentOptions.Center;
             tx.raycastTarget = false;
         }

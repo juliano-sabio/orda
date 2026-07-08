@@ -1372,17 +1372,38 @@ public class BotaoMenuHover : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     float barraAlpha = 0f;
     bool  pronto = false; // só reage ao mouse depois que a animação de entrada termina
 
+    RectTransform rt;
+    float tempoSemLiberar = 0f;
+    const float FAILSAFE_LIBERAR = 1.5f; // se a entrada travar e nunca liberar, libera sozinho
+
+    void Awake() { rt = GetComponent<RectTransform>(); }
+
     // Chamado ao fim da EntradaBotao: libera o hover e sincroniza com o estado real do mouse
     // (evita o "pop" quando o botão desliza por baixo do cursor durante a entrada).
     public void Liberar()
     {
         pronto     = true;
+        if (rt != null) rt.anchoredPosition = Vector2.zero; // garante a posição final correta
+        var cg = GetComponent<CanvasGroup>();
+        if (cg != null) cg.alpha = 1f;                      // garante visibilidade total
         escalaAlvo = sobre ? 1.07f : 1.00f;
     }
 
     void Update()
     {
-        if (!pronto) { transform.localScale = Vector3.one; return; } // trava até a entrada terminar
+        if (!pronto)
+        {
+            transform.localScale = Vector3.one; // trava a escala até a entrada terminar
+            // Failsafe: se a entrada for interrompida e o Liberar() nunca chegar, o botão ficaria
+            // congelado num x intermediário do slide (menu "escalonado torto"). Libera sozinho.
+            tempoSemLiberar += Time.deltaTime;
+            if (tempoSemLiberar >= FAILSAFE_LIBERAR) Liberar();
+            return;
+        }
+
+        // Já liberado: trava a posição no lugar certo (o hover só deve mexer na ESCALA).
+        // Sem isto, uma interrupção da entrada deixava o botão preso num x errado.
+        if (rt != null) rt.anchoredPosition = Vector2.zero;
 
         escala = Mathf.Lerp(escala, escalaAlvo, Time.deltaTime * 16f);
         transform.localScale = Vector3.one * escala;

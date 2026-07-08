@@ -1536,6 +1536,7 @@ public class BossController : MonoBehaviour, IBoss, IBossHud
 
     IEnumerator EfeitoMorte()
     {
+        MissaoSegundaAreaManager.MarcarBossMagaMorta(); // matar a Maga Slime desbloqueia a 2ª área (Abismo)
         Collider2D col = GetComponent<Collider2D>();
         if (col != null) col.enabled = false;
 

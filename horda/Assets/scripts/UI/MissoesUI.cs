@@ -466,6 +466,54 @@ public class MissoesUI : MonoBehaviour
                 var u = ults[i];
                 if (u == null) continue;
 
+                // Raio Certeiro é item base (sem missão) — não aparece na lista de missões
+                if (NormalizarMis(u.GetDisplayName() + " " + u.ultimateName + " " + u.name).Contains("raio certeiro"))
+                    continue;
+
+                // Domo Retardante: missão especial — matar a Princesa Slime 2x pra desbloquear
+                if (EhDomoMis(u))
+                {
+                    bool   desb    = MissaoDomoManager.DomoDesbloqueado;
+                    string statusD = desb ? Loc.T("missions.done")
+                                          : $"{MissaoDomoManager.KillsPrincesa}/{MissaoDomoManager.META}";
+                    string descD   = $"[{p.GetDisplayName()}]  Mate a Princesa Slime {MissaoDomoManager.META}x para desbloquear.";
+                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
+                    continue;
+                }
+
+                // Tempestade Elétrica: missão especial — concluir 3 eventos de Tempestade
+                if (EhTempestadeMis(u))
+                {
+                    bool   desb    = MissaoTempestadeManager.Desbloqueada;
+                    string statusD = desb ? Loc.T("missions.done")
+                                          : $"{MissaoTempestadeManager.Completas}/{MissaoTempestadeManager.META}";
+                    string descD   = $"[{p.GetDisplayName()}]  Conclua {MissaoTempestadeManager.META} eventos de Tempestade para desbloquear.";
+                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
+                    continue;
+                }
+
+                // Necrópole: missão especial — eliminar 500 fantasmas
+                if (EhNecropoleMis(u))
+                {
+                    bool   desb    = MissaoNecropoleManager.Desbloqueada;
+                    string statusD = desb ? Loc.T("missions.done")
+                                          : $"{MissaoNecropoleManager.Kills}/{MissaoNecropoleManager.META}";
+                    string descD   = $"[{p.GetDisplayName()}]  Elimine {MissaoNecropoleManager.META} fantasmas para desbloquear.";
+                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
+                    continue;
+                }
+
+                // Drenagem de Vida: missão especial — eliminar 500 slimes curandeiras
+                if (EhDrenagemMis(u))
+                {
+                    bool   desb    = MissaoDrenagemManager.Desbloqueada;
+                    string statusD = desb ? Loc.T("missions.done")
+                                          : $"{MissaoDrenagemManager.Kills}/{MissaoDrenagemManager.META}";
+                    string descD   = $"[{p.GetDisplayName()}]  Elimine {MissaoDrenagemManager.META} slimes curandeiras para desbloquear.";
+                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
+                    continue;
+                }
+
                 if (UltimateLiberadaMis(u))
                 {
                     bool desbloqueado = u.isUnlocked && playerLevel >= u.requiredLevel;
@@ -496,9 +544,49 @@ public class MissoesUI : MonoBehaviour
             {
                 var passiva = p.passivasDisponiveis[i];
                 if (passiva == null) continue;
+
+                // Colheita é item base (sem missão) — não aparece na lista de missões
+                if (NormalizarMis(passiva.GetDisplayName() + " " + passiva.name).Contains("colheita"))
+                    continue;
+
                 alguma = true;
                 string bonus  = passiva.GetBonusDescription();
                 string desc   = string.IsNullOrEmpty(bonus) ? passiva.GetDisplayDescription() : bonus;
+
+                // Coração Robusto: missão especial — eliminar 150 inimigos
+                if (EhCoracaoMis(passiva))
+                {
+                    bool   desb    = MissaoCoracaoManager.Desbloqueada;
+                    string statusD = desb ? Loc.T("missions.done")
+                                          : $"{MissaoCoracaoManager.Kills}/{MissaoCoracaoManager.META}";
+                    string descD   = $"[{p.GetDisplayName()}]  Elimine {MissaoCoracaoManager.META} inimigos para desbloquear.";
+                    CriarCard(passiva.GetDisplayName(), statusD, descD,
+                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
+                    continue;
+                }
+
+                // Caçador: missão especial — eliminar 200 slimes corrompidas
+                if (EhCacadorMis(passiva))
+                {
+                    bool   desb    = MissaoCacadorManager.Desbloqueada;
+                    string statusD = desb ? Loc.T("missions.done")
+                                          : $"{MissaoCacadorManager.Kills}/{MissaoCacadorManager.META}";
+                    string descD   = $"[{p.GetDisplayName()}]  Elimine {MissaoCacadorManager.META} slimes corrompidas para desbloquear.";
+                    CriarCard(passiva.GetDisplayName(), statusD, descD,
+                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
+                    continue;
+                }
+
+                // Asceta: missão especial (binária) — concluir a primeira área
+                if (EhAscetaMis(passiva))
+                {
+                    bool   desb    = MissaoAscetaManager.Desbloqueada;
+                    string statusD = desb ? Loc.T("missions.done") : "0/1";
+                    string descD   = $"[{p.GetDisplayName()}]  Conclua a primeira área para desbloquear.";
+                    CriarCard(passiva.GetDisplayName(), statusD, descD,
+                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
+                    continue;
+                }
 
                 if (i < PASSIVAS_LIBERADAS_MIS)
                 {
@@ -529,6 +617,55 @@ public class MissoesUI : MonoBehaviour
         string nome = NormalizarMis(u.GetDisplayName() + " " + u.ultimateName + " " + u.name);
         foreach (var kw in ultimatesLiberadasMis) if (nome.Contains(kw)) return true;
         return false;
+    }
+
+    // Domo Retardante tem card de missão próprio (desbloqueio por matar a Princesa Slime 2x)
+    bool EhDomoMis(UltimateData u)
+    {
+        if (u == null) return false;
+        return NormalizarMis(u.GetDisplayName() + " " + u.ultimateName + " " + u.name).Contains("domo retardante");
+    }
+
+    // Tempestade Elétrica tem card de missão próprio (desbloqueio por concluir 3 eventos de Tempestade)
+    bool EhTempestadeMis(UltimateData u)
+    {
+        if (u == null) return false;
+        return NormalizarMis(u.GetDisplayName() + " " + u.ultimateName + " " + u.name).Contains("tempestade");
+    }
+
+    // Necrópole tem card de missão próprio (desbloqueio por eliminar 500 fantasmas)
+    bool EhNecropoleMis(UltimateData u)
+    {
+        if (u == null) return false;
+        return NormalizarMis(u.GetDisplayName() + " " + u.ultimateName + " " + u.name).Contains("necropole");
+    }
+
+    // Drenagem de Vida tem card de missão próprio (desbloqueio por eliminar 500 slimes curandeiras)
+    bool EhDrenagemMis(UltimateData u)
+    {
+        if (u == null) return false;
+        return NormalizarMis(u.GetDisplayName() + " " + u.ultimateName + " " + u.name).Contains("drenagem");
+    }
+
+    // Coração Robusto (passiva) tem card de missão próprio (desbloqueio por eliminar 150 inimigos)
+    bool EhCoracaoMis(PassiveData pd)
+    {
+        if (pd == null) return false;
+        return NormalizarMis(pd.GetDisplayName() + " " + pd.name).Contains("robusto");
+    }
+
+    // Caçador (passiva) tem card de missão próprio (desbloqueio por eliminar 200 slimes corrompidas)
+    bool EhCacadorMis(PassiveData pd)
+    {
+        if (pd == null) return false;
+        return NormalizarMis(pd.GetDisplayName() + " " + pd.name).Contains("cacador");
+    }
+
+    // Asceta (passiva) tem card de missão próprio (desbloqueio por concluir a primeira área)
+    bool EhAscetaMis(PassiveData pd)
+    {
+        if (pd == null) return false;
+        return NormalizarMis(pd.GetDisplayName() + " " + pd.name).Contains("asceta");
     }
 
     // ordem: liberadas primeiro (sequência fixa), depois o resto (pseudo-aleatório estável)

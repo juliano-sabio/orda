@@ -20,7 +20,12 @@ public class EscolherTerrenoMenu : MonoBehaviour
     void Start()
     {
         if (botaoArea1) botaoArea1.onClick.AddListener(() => IrPara(cenaArea1));
-        if (botaoArea2) botaoArea2.onClick.AddListener(() => IrPara(cenaArea2));
+        if (botaoArea2)
+        {
+            botaoArea2.onClick.AddListener(() => IrPara(cenaArea2));
+            // Abismo (2ª área) fica bloqueado até matar a boss Maga Slime
+            botaoArea2.interactable = MissaoSegundaAreaManager.Desbloqueada;
+        }
         if (botaoArea3) botaoArea3.onClick.AddListener(() => IrPara(cenaArea3));
         if (botaoSobrevivencia) botaoSobrevivencia.onClick.AddListener(() => IrPara(cenaSobrevivencia));
         if (botaoVoltar) botaoVoltar.onClick.AddListener(Voltar);
