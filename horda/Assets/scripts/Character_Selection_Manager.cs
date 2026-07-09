@@ -61,6 +61,11 @@ public class CharacterSelectionManagerIntegrated : MonoBehaviour
 
     private void Start()
     {
+        // Registra a lista de personagens (índice → CharacterData) pra o ApplyCharacterData resolver
+        // o personagem escolhido POR ÍNDICE também no SP — senão o gameplay usava um characterData
+        // stale (servo) mesmo escolhendo o lobo.
+        if (characters != null && characters.Length > 0) PlayerStats.RegistroPersonagens = characters;
+
         LoadProgress();
         UpdateCurrencyUI();
         CriarPainelUltimates();

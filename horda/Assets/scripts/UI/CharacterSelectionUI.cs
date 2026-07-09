@@ -110,6 +110,10 @@ public class CharacterSelectionUI : MonoBehaviour
 
     void Start()
     {
+        // Registra a lista (índice → CharacterData) pra o gameplay resolver o personagem escolhido
+        // POR ÍNDICE (SP). Sem isto o characterData ficava stale (servo) mesmo escolhendo o lobo.
+        if (characters != null && characters.Length > 0) PlayerStats.RegistroPersonagens = characters;
+
 #if UNITY_EDITOR
         if (spriteSlotPlayer == null)
             foreach (var a in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(

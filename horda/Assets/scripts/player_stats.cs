@@ -314,13 +314,12 @@ public class PlayerStats : MonoBehaviour
 
     public void ApplyCharacterData(int selectedCharacter)
     {
-        // Co-op: sem CharacterSelectionManager, resolve o characterData pelo índice sincronizado
-        // (senão a ultimate cai no fallback sem ícone → ícone branco em jogo).
-        // Em REDE re-resolve SEMPRE (não só quando null): a pessoa pode TROCAR de personagem entre
-        // runs e, com o guard "== null", o characterData ficava preso no personagem anterior. No SP
-        // o registro é null (preenchido só pelo lobby co-op), então o characterData do seletor é mantido.
+        // O ÍNDICE escolhido é a fonte de verdade. Quando o registro de personagens está disponível
+        // (lobby co-op OU seleção SP — ambos setam RegistroPersonagens), resolve o characterData SEMPRE
+        // por índice. Sem isto, no SP o characterData vinha stale (servo) mesmo escolhendo o lobo:
+        // o índice chegava 1 (lobo) mas o objeto continuava servo.
         if (RegistroPersonagens != null && selectedCharacter >= 0 && selectedCharacter < RegistroPersonagens.Length &&
-            (characterData == null || NetSpawn.EmRede))
+            RegistroPersonagens[selectedCharacter] != null)
             characterData = RegistroPersonagens[selectedCharacter];
 
         if (characterData == null) return;
@@ -328,12 +327,9 @@ public class PlayerStats : MonoBehaviour
         // Visual por personagem: aplica o AnimatorController do CharacterData (ex.: lobo). Assim cada
         // personagem escolhido tem sua própria animação in-game (SP e co-op usam o mesmo Animator).
         var animChar = GetComponent<Animator>();
-        // [CharDiag temp] — remover após diagnosticar o "servo instanciado".
-        Debug.Log($"[CharDiag] char='{characterData.characterName}' idx={selectedCharacter} EmRede={NetSpawn.EmRede} animCtrlCD={(characterData.animatorController != null ? characterData.animatorController.name : "null")} anim={(animChar != null)} ctrlAntes={(animChar != null && animChar.runtimeAnimatorController != null ? animChar.runtimeAnimatorController.name : "null")}");
         if (animChar != null && characterData.animatorController != null &&
             animChar.runtimeAnimatorController != characterData.animatorController)
             animChar.runtimeAnimatorController = characterData.animatorController;
-        Debug.Log($"[CharDiag] ctrlDepois={(animChar != null && animChar.runtimeAnimatorController != null ? animChar.runtimeAnimatorController.name : "null")}");
 
         ResetarEstadoDeRun(); // run nova começa 100% limpa: status + escudo/dash/ultimate/timers/skills (player persiste em co-op)
 
