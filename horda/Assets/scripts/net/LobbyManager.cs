@@ -28,7 +28,11 @@ public class LobbyManager : NetworkBehaviour
         if (!TodosProntos()) return;
         LobbyState.EmLobby = false; // host sai do estado de lobby
         string fase = Fases[Mathf.Clamp(faseEscolhida.Value, 0, Fases.Length - 1)];
-        NetworkManager.SceneManager.LoadScene(fase, UnityEngine.SceneManagement.LoadSceneMode.Single);
+        // Passa pela tela de load ANTES da fase (em rede). O LoadingScreenUI, no host, dispara o
+        // load NGO da fase após a animação; os clientes vão junto. ProximaCena diz qual fase.
+        PlayerPrefs.SetString("ProximaCena", fase);
+        PlayerPrefs.Save();
+        NetworkManager.SceneManager.LoadScene("loading_screen", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     public bool TodosProntos()

@@ -50,7 +50,13 @@ public class LoadingScreenUI : MonoBehaviour
         StartCoroutine(AnimarPontos());
         StartCoroutine(AnimarSpinner());
         StartCoroutine(AnimarDicas());
-        StartCoroutine(Carregar(proxima));
+        // Co-op: em rede a fase é carregada via NGO (o host dispara; os clientes vão junto).
+        // SP: load assíncrono normal.
+        var nmLoad = Unity.Netcode.NetworkManager.Singleton;
+        if (nmLoad != null && nmLoad.IsListening)
+            StartCoroutine(CarregarCoop(proxima));
+        else
+            StartCoroutine(Carregar(proxima));
     }
 
     // ── Canvas ────────────────────────────────────────────────────────
@@ -223,6 +229,25 @@ public class LoadingScreenUI : MonoBehaviour
     }
 
     // ── Carregamento ──────────────────────────────────────────────────
+    // Co-op: NÃO usar SceneManager.LoadSceneAsync (quebra a sessão NGO). Mostra a animação por
+    // tempoMinimo e só o HOST dispara o load NGO da fase — que leva todos os clientes junto.
+    IEnumerator CarregarCoop(string cena)
+    {
+        float inicio = Time.time;
+        while (Time.time - inicio < tempoMinimo)
+        {
+            AtualizarBarra(Mathf.Clamp01((Time.time - inicio) / tempoMinimo));
+            yield return null;
+        }
+        AtualizarBarra(1f);
+        yield return new WaitForSeconds(0.25f);
+
+        var nm = Unity.Netcode.NetworkManager.Singleton;
+        if (nm != null && nm.IsServer)
+            nm.SceneManager.LoadScene(cena, UnityEngine.SceneManagement.LoadSceneMode.Single);
+        // clientes: o load NGO do host os traz junto (não fazem load local).
+    }
+
     IEnumerator Carregar(string cena)
     {
         float inicio = Time.time;
