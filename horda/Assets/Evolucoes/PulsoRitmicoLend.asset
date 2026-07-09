@@ -17,8 +17,8 @@ MonoBehaviour:
     for\xE7a."
   icone: {fileID: 6551422454796549251, guid: c03f239cc99ba30418b99d4c90f4848b, type: 3}
   corDestaque: {r: 0.25, g: 1, b: 0.5, a: 1}
-  nameKey: 
-  descriptionKey: 
+  nameKey: evo.pulsoritmicolend.name
+  descriptionKey: evo.pulsoritmicolend.desc
   skillAlvo: 36
   tipoEvolucao: 108
   raridade: 4

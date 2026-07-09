@@ -57,7 +57,8 @@
       "Bash(git commit -m ' *)",
       "Bash(git rebase *)",
       "Bash(git stash *)",
-      "Bash(xargs -n1 basename)"
+      "Bash(xargs -n1 basename)",
+      "Bash(git rev-list *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\rafin\\OneDrive\\Documentos\\GitHub\\projeto-rpg\\orda\\horda",

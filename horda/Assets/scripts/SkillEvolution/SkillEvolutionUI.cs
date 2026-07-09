@@ -260,7 +260,7 @@ public class SkillEvolutionUI : MonoBehaviour
                 string nd = t.name.ToLower();
                 if (nd.Contains("desc") || nd.Contains("detail"))
                 {
-                    t.margin           = new Vector4(16f, t.margin.y, 16f, t.margin.w);
+                    t.margin           = new Vector4(16f, Mathf.Max(t.margin.y, 6f), 16f, Mathf.Max(t.margin.w, 12f));
                     t.textWrappingMode = TMPro.TextWrappingModes.Normal;
                     t.overflowMode     = TMPro.TextOverflowModes.Truncate;
                     t.enableAutoSizing = true;
@@ -295,6 +295,7 @@ public class SkillEvolutionUI : MonoBehaviour
                     t.fontSizeMin = 7f;
                     t.fontSizeMax = Mathf.Min(t.fontSize, 12f); // encolhe pra caber, não passa da borda
                     t.overflowMode = TMPro.TextOverflowModes.Truncate;
+                    t.margin = new Vector4(16f, Mathf.Max(t.margin.y, 6f), 16f, Mathf.Max(t.margin.w, 12f));
                 }
                 else if (n.Contains("rarity") || n.Contains("rarid"))
                     { t.text = data.raridade.ToString().ToUpper(); t.color = data.corDestaque; }

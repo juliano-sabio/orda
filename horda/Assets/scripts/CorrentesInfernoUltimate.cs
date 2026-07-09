@@ -68,6 +68,7 @@ public class CorrentesInfernoUltimate : MonoBehaviour, IUltimateCosmetico
         foreach (var e in acorrentados)
         {
             if (e.rb == null || e.go == null) continue;
+            if (e.ic != null && e.ic.EhBoss()) continue; // boss não é puxado/preso pela corrente
             Vector2 dir = (Vector2)transform.position - (Vector2)e.go.transform.position;
             e.rb.linearVelocity = dir.magnitude > 0.3f ? dir.normalized * 1.5f : Vector2.zero;
         }
@@ -158,7 +159,7 @@ public class CorrentesInfernoUltimate : MonoBehaviour, IUltimateCosmetico
         var scripts = new List<MonoBehaviour>();
 
         var mi = go.GetComponent<movi_inimigo>();
-        if (mi != null) { mi.enabled = false; scripts.Add(mi); }
+        if (mi != null && !ic.EhBoss()) { mi.enabled = false; scripts.Add(mi); } // boss não é imobilizado (só queima)
 
         var corrGO = CriarCorrenteGO();
 

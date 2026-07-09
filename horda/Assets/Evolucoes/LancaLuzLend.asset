@@ -17,8 +17,8 @@ MonoBehaviour:
     inimigo."
   icone: {fileID: -3898843575368328328, guid: c67cd95abc64cd248aa05d3f147e4794, type: 3}
   corDestaque: {r: 1, g: 0.95, b: 0.35, a: 1}
-  nameKey: 
-  descriptionKey: 
+  nameKey: evo.lancaluzlend.name
+  descriptionKey: evo.lancaluzlend.desc
   skillAlvo: 33
   tipoEvolucao: 103
   raridade: 4

@@ -228,8 +228,18 @@ public class SkillEvolutionData : ScriptableObject
     public string nameKey = "";
     public string descriptionKey = "";
 
-    public string GetDisplayName()        => !string.IsNullOrEmpty(nameKey)        ? Loc.T(nameKey)        : nomeEvolucao;
-    public string GetDisplayDescription() => !string.IsNullOrEmpty(descriptionKey) ? Loc.T(descriptionKey) : descricao;
+    // Usa a chave de tradução se ela existir no GameStrings; senão cai no texto PT do asset.
+    // (Loc.T devolve a própria chave quando não acha — nesse caso usamos o texto fixo.)
+    public string GetDisplayName()
+    {
+        if (!string.IsNullOrEmpty(nameKey)) { var t = Loc.T(nameKey); if (t != nameKey) return t; }
+        return nomeEvolucao;
+    }
+    public string GetDisplayDescription()
+    {
+        if (!string.IsNullOrEmpty(descriptionKey)) { var t = Loc.T(descriptionKey); if (t != descriptionKey) return t; }
+        return descricao;
+    }
 
     [Header("Skill Alvo")]
     public SpecificSkillType skillAlvo;

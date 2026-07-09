@@ -180,7 +180,6 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
         }
         SomSkill.Tocar(SomSkill.Tipo.EstrelaImpactoDark, alvo, 0.6f);
         StartCoroutine(EfeitoImpacto(alvo));
-        CameraShaker.Tremer(0.15f, 2f);
     }
 
     List<GameObject> EncontrarAlvosMaisProximos(int qtd)

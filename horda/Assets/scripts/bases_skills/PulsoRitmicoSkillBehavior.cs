@@ -92,7 +92,6 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
         EvolutionFX.ArremessarInimigos(c, raioG, DanoAtual * 2f, this);
         EvolutionFX.SpawnShockwave(c, raioG, DanoAtual, this);
         SomSkill.Tocar(SomSkill.Tipo.PulsoDark, c, 0.6f);
-        CameraShaker.Tremer(0.1f, 1f);
     }
 
     IEnumerator VisualPulso(Vector2 centro)

@@ -160,7 +160,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
                             SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual * danoMult * fatorAlma, this);
                         }
                         StartCoroutine(FlashAlvo(ic.transform));
-                        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante))
+                        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteParalisante) && !ic.EhBoss()) // boss imune a paralisia
                         {
                             var movi = ic.GetComponent<movi_inimigo>();
                             if (movi != null)

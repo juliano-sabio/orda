@@ -15,7 +15,7 @@ MonoBehaviour:
   nomeInimigo: slime_curativa
   prefab: {fileID: 7137502516410988737, guid: 57b0afd25cb60074982d37e2963b7c3a, type: 3}
   icon: {fileID: 0}
-  vidaBase: 250
+  vidaBase: 150
   danoBase: 10
   velocidadeBase: 3
   tamanho: 7

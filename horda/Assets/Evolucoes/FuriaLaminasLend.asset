@@ -17,8 +17,8 @@ MonoBehaviour:
     de novo."
   icone: {fileID: -2262114113205104707, guid: 343f7942e7a9d7a429e3a0acc4b73478, type: 3}
   corDestaque: {r: 0.9, g: 0.95, b: 1, a: 1}
-  nameKey: 
-  descriptionKey: 
+  nameKey: evo.furialaminaslend.name
+  descriptionKey: evo.furialaminaslend.desc
   skillAlvo: 27
   tipoEvolucao: 102
   raridade: 4

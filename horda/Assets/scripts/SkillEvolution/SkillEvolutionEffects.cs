@@ -66,7 +66,7 @@ public static class EvolutionFX
 
     public static void AplicarLentidao(InimigoController ic, float duracao, float fator = 0.4f)
     {
-        if (ic == null) return;
+        if (ic == null || ic.EhBoss()) return; // bosses são IMUNES a lentidão/atordoamento
         var movi = ic.GetComponent<movi_inimigo>();
         if (movi != null) ic.StartCoroutine(LentidaoCoroutine(movi, duracao, fator));
     }

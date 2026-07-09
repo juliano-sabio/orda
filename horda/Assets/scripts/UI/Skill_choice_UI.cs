@@ -604,6 +604,8 @@ public class SkillChoiceUI : MonoBehaviour
         t.fontSizeMax = tamanhoMax;
         t.textWrappingMode = TMPro.TextWrappingModes.Normal;
         t.overflowMode = TMPro.TextOverflowModes.Truncate;
+        // Recua o texto das bordas (laterais e embaixo) pra não cruzar a linha/borda do card.
+        t.margin = new Vector4(14f, Mathf.Max(t.margin.y, 6f), 14f, Mathf.Max(t.margin.w, 12f));
     }
 
     private void CriarTextoArea(GameObject parent, string areaName, string textName,

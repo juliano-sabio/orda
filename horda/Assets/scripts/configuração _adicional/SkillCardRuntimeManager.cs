@@ -105,9 +105,9 @@ public class SkillCardRuntimeManager : MonoBehaviour
         t.fontSizeMax = tamanhoMax;
         t.textWrappingMode = TextWrappingModes.Normal;
         t.overflowMode = TextOverflowModes.Truncate;
-        // Margem lateral: o rect do texto é mais largo que a moldura interna do card,
-        // então recua o texto pra ele não cruzar a linha/borda do card.
-        t.margin = new Vector4(14f, t.margin.y, 14f, t.margin.w);
+        // Margem: o rect do texto é maior que a moldura interna do card (laterais E embaixo),
+        // então recua o texto em todos os lados pra ele não cruzar a linha/borda do card.
+        t.margin = new Vector4(14f, Mathf.Max(t.margin.y, 6f), 14f, Mathf.Max(t.margin.w, 12f));
     }
 
     private void ApplyRuntimeColors()

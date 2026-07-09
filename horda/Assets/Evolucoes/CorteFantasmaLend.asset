@@ -16,8 +16,8 @@ MonoBehaviour:
   descricao: "LEND\xC1RIA: cada corte marca o inimigo; ao juntar 3 marcas, ele detona."
   icone: {fileID: 3839737597979073872, guid: eef9bd520f7b0b644844faadba846285, type: 3}
   corDestaque: {r: 0.6, g: 0.25, b: 1, a: 1}
-  nameKey: 
-  descriptionKey: 
+  nameKey: evo.cortefantasmalend.name
+  descriptionKey: evo.cortefantasmalend.desc
   skillAlvo: 29
   tipoEvolucao: 105
   raridade: 4

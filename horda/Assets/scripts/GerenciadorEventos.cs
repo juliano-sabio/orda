@@ -53,6 +53,9 @@ public class GerenciadorEventos : MonoBehaviour
     [Tooltip("-1 = aleatório | 0..N = força índice da lista eventos")]
     public int debugForcarEvento = -1;
 
+    [Tooltip("Tipo do PRIMEIRO evento da run (-1 = aleatório). Ex.: 10 = Colapso.")]
+    public int primeiroEventoForcadoTipo = -1;
+
     [Header("Eventos Disponíveis")]
     public List<EventoAleatorio> eventos = new List<EventoAleatorio>();
 
@@ -470,9 +473,18 @@ void TentarIniciarEvento()
     // Ordem SEMPRE aleatória (saco embaralhado sem repetição) — inclusive o primeiro evento.
     // Antes o 1º era forçado (Colapso na fase 1 / Vórtice na fase 2), o que fazia a run parecer
     // ter ordem fixa. Só o override de debug continua tendo prioridade.
-    int idx = (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
-        ? debugForcarEvento
-        : ProximoEventoAleatorio();
+    int idx;
+    if (debugForcarEvento >= 0 && debugForcarEvento < eventos.Count)
+        idx = debugForcarEvento;
+    else if (!primeiroEventoDisparado && primeiroEventoForcadoTipo >= 0)
+    {
+        // 1º evento forçado por cena (ex.: Colapso na fase 1). Se não achar, cai no aleatório.
+        idx = eventos.FindIndex(e => (int)e.tipo == primeiroEventoForcadoTipo);
+        if (idx >= 0) RemoverDoSaco(idx);
+        else idx = ProximoEventoAleatorio();
+    }
+    else
+        idx = ProximoEventoAleatorio();
     primeiroEventoDisparado = true;
     eventoAtual = eventos[idx];
     eventoAtivo = true;

@@ -17,8 +17,8 @@ MonoBehaviour:
     como um farol."
   icone: {fileID: 1330450550990237758, guid: 60c473160ebf68e499fd92cd34276c80, type: 3}
   corDestaque: {r: 0.55, g: 0.2, b: 1, a: 1}
-  nameKey: 
-  descriptionKey: 
+  nameKey: evo.sombrascruzlend.name
+  descriptionKey: evo.sombrascruzlend.desc
   skillAlvo: 28
   tipoEvolucao: 104
   raridade: 4

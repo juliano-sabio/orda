@@ -123,7 +123,7 @@ public static class CriarEvolucoes
         lista.Add(Criar("LaminasSangrentas",   "Lâminas Sangrentas",   "As lâminas causam sangramento (dano contínuo por 2.5s).",  SpecificSkillType.FuriaLaminas,  SkillEvolutionType.LaminasSangrentas,   SkillRarity.Rare, new Color(0.9f, 0.2f,  0.3f)));
 
         // ── Evoluções LENDÁRIAS de assinatura (uma por skill de ataque) ──────────
-        lista.Add(Criar("CampoEspinhosLend",   "Vórtice de Espinhos",  "LENDÁRIA: o campo vira um buraco negro e puxa os inimigos pra dentro.",         SpecificSkillType.CampoEspinhos,     SkillEvolutionType.CampoEspinhosLend,   SkillRarity.Legendary, new Color(0.6f, 1f, 0.4f)));
+        lista.Add(Criar("CampoEspinhosLend",   "Espinhos Perfurantes", "LENDÁRIA: a cada pulso o campo dispara espinhos pra fora, atingindo inimigos à distância.", SpecificSkillType.CampoEspinhos, SkillEvolutionType.CampoEspinhosLend, SkillRarity.Legendary, new Color(0.6f, 1f, 0.4f)));
         lista.Add(Criar("ChuvaEstrelasLend",   "Estrela Cadente",      "LENDÁRIA: cai um meteoro GIGANTE no maior aglomerado e deixa uma cratera em chamas.", SpecificSkillType.ChuvaEstrelas, SkillEvolutionType.ChuvaEstrelasLend,   SkillRarity.Legendary, new Color(1f, 0.7f, 0.15f)));
         lista.Add(Criar("FuriaLaminasLend",    "Lâminas Bumerangue",   "LENDÁRIA: as lâminas voltam ao fim do alcance, cortando os inimigos de novo.",  SpecificSkillType.FuriaLaminas,      SkillEvolutionType.FuriaLaminasLend,    SkillRarity.Legendary, new Color(0.9f, 0.95f, 1f)));
         lista.Add(Criar("LancaLuzLend",        "Lança Teleguiada",     "LENDÁRIA: a lança persegue o alvo e relança sozinha pro próximo inimigo.",      SpecificSkillType.LancaLuz,          SkillEvolutionType.LancaLuzLend,        SkillRarity.Legendary, new Color(1f, 0.95f, 0.35f)));
@@ -248,6 +248,9 @@ public static class CriarEvolucoes
         data.raridade     = raridade;
         data.corDestaque  = cor;
         data.icone        = BuscarIconeSkill(skillAlvo);
+        // Chaves de localização (o GameStrings traduz; sem a chave, cai no texto PT acima).
+        data.nameKey        = "evo." + id.ToLowerInvariant() + ".name";
+        data.descriptionKey = "evo." + id.ToLowerInvariant() + ".desc";
         EditorUtility.SetDirty(data);
         return data;
     }

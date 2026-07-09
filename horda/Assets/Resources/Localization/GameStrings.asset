@@ -1496,6 +1496,406 @@ MonoBehaviour:
     - "\uCCAB \uBC88\uC9F8 \uC9C0\uC5ED\uC744 \uC644\uB8CC\uD558\uC5EC \uD574\uAE08."
     - Voltooi het eerste gebied om te ontgrendelen.
     - Selesaikan area pertama untuk membuka.
+  - key: mission.desc.espirito
+    translations:
+    - Derrote {0} inimigos no total para ganhar +1 Espírito de Evolução.
+    - Defeat {0} enemies total to earn +1 Evolution Spirit.
+    - Derrota {0} enemigos en total para ganar +1 Espíritu de Evolución.
+    - Besiege insgesamt {0} Feinde für +1 Evolutionsgeist.
+    - Vainquez {0} ennemis au total pour gagner +1 Esprit d'Évolution.
+    - Sconfiggi {0} nemici in totale per ottenere +1 Spirito di Evoluzione.
+    - Победите всего {0} врагов, чтобы получить +1 Дух Эволюции.
+    - Pokonaj łącznie {0} wrogów, aby zdobyć +1 Ducha Ewolucji.
+    - +1 Evrim Ruhu için toplam {0} düşman yen.
+    - 累计击败 {0} 个敌人以获得 +1 进化之魂。
+    - 合計{0}体の敵を倒して進化の精霊+1を獲得。
+    - 총 {0}명의 적을 처치하여 진화의 정령 +1 획득.
+    - Versla in totaal {0} vijanden voor +1 Evolutiegeest.
+    - Kalahkan total {0} musuh untuk mendapat +1 Roh Evolusi.
+  - key: evo.campoespinhoslend.name
+    translations:
+    - Espinhos Perfurantes
+    - Piercing Thorns
+    - Espinas Perforantes
+    - Durchbohrende Dornen
+    - Épines Perforantes
+    - Spine Perforanti
+    - Пронзающие шипы
+    - Przebijające Ciernie
+    - Delen Dikenler
+    - 穿刺荆棘
+    - 貫通の棘
+    - 관통 가시
+    - Doorborende Doornen
+    - Duri Penembus
+  - key: evo.campoespinhoslend.desc
+    translations:
+    - "LEND\xC1RIA: a cada pulso o campo dispara espinhos pra fora, atingindo inimigos \xE0 dist\xE2ncia."
+    - "LEGENDARY: each pulse the field shoots thorns outward, hitting enemies at range."
+    - "LEGENDARIA: en cada pulso el campo dispara espinas hacia fuera, alcanzando enemigos a distancia."
+    - "LEGEND\xC4R: bei jedem Puls schie\xDFt das Feld Dornen nach au\xDFen und trifft Feinde aus der Ferne."
+    - "L\xC9GENDAIRE : \xE0 chaque impulsion, le champ projette des \xE9pines vers l'ext\xE9rieur, touchant les ennemis \xE0 distance."
+    - "LEGGENDARIA: a ogni impulso il campo spara spine verso l'esterno, colpendo i nemici a distanza."
+    - "ЛЕГЕНДАРНАЯ: с каждым импульсом поле выстреливает шипами наружу, поражая врагов на расстоянии."
+    - "LEGENDARNA: przy każdym impulsie pole wystrzeliwuje ciernie na zewnątrz, trafiając wrog\xF3w z dystansu."
+    - "EFSANEVİ: her darbede alan dışa doğru dikenler fırlatır ve d\xFCşmanlara mesafeden vurur."
+    - 传奇：每次脉冲，力场向外射出荆棘，远程命中敌人。
+    - 伝説：脈動ごとにフィールドが棘を外へ放ち、遠くの敵を攻撃する。
+    - "전설: 맥동할 때마다 장이 가시를 바깥으로 발사해 원거리의 적을 맞힌다."
+    - "LEGENDARISCH: bij elke puls schiet het veld doornen naar buiten en raakt vijanden op afstand."
+    - "LEGENDARIS: setiap denyut, medan menembakkan duri ke luar, mengenai musuh dari jarak jauh."
+  - key: evo.chuvaestrelaslend.name
+    translations:
+    - Estrela Cadente
+    - Falling Star
+    - Estrella Fugaz
+    - Sternschnuppe
+    - Étoile Filante
+    - Stella Cadente
+    - Падающая звезда
+    - Spadająca Gwiazda
+    - Kayan Yıldız
+    - 流星
+    - 流れ星
+    - 별똥별
+    - Vallende Ster
+    - Bintang Jatuh
+  - key: evo.chuvaestrelaslend.desc
+    translations:
+    - "LEND\xC1RIA: cai um meteoro GIGANTE no maior aglomerado e deixa uma cratera em chamas."
+    - "LEGENDARY: a GIANT meteor falls on the biggest cluster and leaves a burning crater."
+    - "LEGENDARIA: cae un meteoro GIGANTE sobre el mayor grupo y deja un cráter en llamas."
+    - "LEGEND\xC4R: ein RIESIGER Meteor f\xE4llt auf die gr\xF6\xDFte Gruppe und hinterl\xE4sst einen brennenden Krater."
+    - "L\xC9GENDAIRE : un m\xE9t\xE9ore G\xC9ANT s'abat sur le plus grand groupe et laisse un cratère en flammes."
+    - "LEGGENDARIA: un meteorite GIGANTE cade sul gruppo più numeroso e lascia un cratere in fiamme."
+    - "ЛЕГЕНДАРНАЯ: ГИГАНТСКИЙ метеорит падает на самое большое скопление и оставляет пылающий кратер."
+    - "LEGENDARNA: OLBRZYMI meteor spada na największe skupisko i zostawia płonący krater."
+    - "EFSANEVİ: DEV bir g\xF6ktaşı en büyük kümeye düşer ve alev alev bir krater bırakır."
+    - 传奇：一颗巨型陨石砸向最密集的敌群，留下燃烧的陨石坑。
+    - 伝説：巨大な隕石が最大の群れに落ち、燃える火口を残す。
+    - "전설: 거대한 운석이 가장 큰 무리에 떨어져 불타는 분화구를 남긴다."
+    - "LEGENDARISCH: een REUZEN-meteoor valt op de grootste groep en laat een brandende krater achter."
+    - "LEGENDARIS: meteor RAKSASA jatuh di kelompok terbesar dan meninggalkan kawah berapi."
+  - key: evo.furialaminaslend.name
+    translations:
+    - Lâminas Bumerangue
+    - Boomerang Blades
+    - Cuchillas Bumerán
+    - Bumerang-Klingen
+    - Lames Boomerang
+    - Lame Boomerang
+    - Клинки-бумеранги
+    - Ostrza Bumerang
+    - Bumerang Bıçaklar
+    - 回旋刀刃
+    - ブーメランの刃
+    - 부메랑 칼날
+    - Boemerangmessen
+    - Bilah Bumerang
+  - key: evo.furialaminaslend.desc
+    translations:
+    - "LEND\xC1RIA: as l\xE2minas voltam ao fim do alcance, cortando os inimigos de novo."
+    - "LEGENDARY: the blades return at the end of their range, cutting enemies again."
+    - "LEGENDARIA: las cuchillas regresan al final de su alcance, cortando a los enemigos de nuevo."
+    - "LEGEND\xC4R: die Klingen kehren am Ende ihrer Reichweite zur\xFCck und schneiden Feinde erneut."
+    - "L\xC9GENDAIRE : les lames reviennent au bout de leur port\xE9e, tranchant \xE0 nouveau les ennemis."
+    - "LEGGENDARIA: le lame tornano indietro a fine gittata, tagliando di nuovo i nemici."
+    - "ЛЕГЕНДАРНАЯ: клинки возвращаются в конце дальности, снова разрезая врагов."
+    - "LEGENDARNA: ostrza wracają na końcu zasięgu, ponownie tnąc wrogów."
+    - "EFSANEVİ: bıçaklar menzil sonunda geri döner ve düşmanları tekrar keser."
+    - 传奇：刀刃在射程尽头返回，再次切割敌人。
+    - 伝説：刃は射程の端で戻り、敵を再び切り裂く。
+    - "전설: 칼날이 사거리 끝에서 돌아오며 적을 다시 벤다."
+    - "LEGENDARISCH: de messen keren terug aan het einde van hun bereik en snijden vijanden opnieuw."
+    - "LEGENDARIS: bilah kembali di ujung jangkauan, memotong musuh lagi."
+  - key: evo.lancaluzlend.name
+    translations:
+    - Lança Teleguiada
+    - Homing Spear
+    - Lanza Teledirigida
+    - Zielsuchender Speer
+    - Lance à Tête Chercheuse
+    - Lancia Guidata
+    - Самонаводящееся копьё
+    - Naprowadzana Włócznia
+    - Güdümlü Mızrak
+    - 追踪长矛
+    - 追尾の槍
+    - 유도 창
+    - Zoekende Speer
+    - Tombak Pengejar
+  - key: evo.lancaluzlend.desc
+    translations:
+    - "LEND\xC1RIA: a lan\xE7a persegue o alvo e relan\xE7a sozinha pro pr\xF3ximo inimigo."
+    - "LEGENDARY: the spear chases its target and relaunches itself at the next enemy."
+    - "LEGENDARIA: la lanza persigue a su objetivo y se relanza sola hacia el siguiente enemigo."
+    - "LEGEND\xC4R: der Speer verfolgt sein Ziel und startet von selbst zum nächsten Feind."
+    - "L\xC9GENDAIRE : la lance poursuit sa cible et se relance seule vers l'ennemi suivant."
+    - "LEGGENDARIA: la lancia insegue il bersaglio e si rilancia da sola verso il nemico successivo."
+    - "ЛЕГЕНДАРНАЯ: копьё преследует цель и само перезапускается к следующему врагу."
+    - "LEGENDARNA: włócznia ściga cel i sama wystrzeliwuje w następnego wroga."
+    - "EFSANEVİ: mızrak hedefini kovalar ve kendini bir sonraki düşmana yeniden fırlatır."
+    - 传奇：长矛追踪目标，并自动飞向下一个敌人。
+    - 伝説：槍は標的を追尾し、自動で次の敵へ再射出される。
+    - "전설: 창이 대상을 추격하고 스스로 다음 적에게 다시 날아간다."
+    - "LEGENDARISCH: de speer achtervolgt zijn doel en lanceert zichzelf opnieuw naar de volgende vijand."
+    - "LEGENDARIS: tombak mengejar targetnya dan meluncur sendiri ke musuh berikutnya."
+  - key: evo.sombrascruzlend.name
+    translations:
+    - Cruz Rotatória
+    - Rotating Cross
+    - Cruz Giratoria
+    - Rotierendes Kreuz
+    - Croix Rotative
+    - Croce Rotante
+    - Вращающийся крест
+    - Wirujący Krzyż
+    - Dönen Haç
+    - 旋转十字
+    - 回転する十字
+    - 회전하는 십자
+    - Draaiend Kruis
+    - Salib Berputar
+  - key: evo.sombrascruzlend.desc
+    translations:
+    - "LEND\xC1RIA: os feixes giram 360\xB0 ao redor do player, varrendo tudo como um farol."
+    - "LEGENDARY: the beams spin 360° around the player, sweeping everything like a lighthouse."
+    - "LEGENDARIA: los rayos giran 360° alrededor del jugador, barriendo todo como un faro."
+    - "LEGEND\xC4R: die Strahlen drehen sich 360° um den Spieler und fegen alles wie ein Leuchtturm."
+    - "L\xC9GENDAIRE : les faisceaux tournent \xE0 360° autour du joueur, balayant tout comme un phare."
+    - "LEGGENDARIA: i raggi ruotano di 360° attorno al giocatore, spazzando tutto come un faro."
+    - "ЛЕГЕНДАРНАЯ: лучи вращаются на 360° вокруг игрока, сметая всё как маяк."
+    - "LEGENDARNA: wiązki obracają się o 360° wokół gracza, zamiatając wszystko jak latarnia."
+    - "EFSANEVİ: ışınlar oyuncunun etrafında 360° döner ve her şeyi bir deniz feneri gibi süpürür."
+    - 传奇：光束绕玩家旋转360°，像灯塔一样横扫一切。
+    - 伝説：ビームがプレイヤーの周囲を360°回転し、灯台のように全てをなぎ払う。
+    - "전설: 광선이 플레이어 주위를 360° 회전하며 등대처럼 모든 것을 쓸어버린다."
+    - "LEGENDARISCH: de stralen draaien 360° om de speler en vegen alles weg als een vuurtoren."
+    - "LEGENDARIS: sinar berputar 360° mengelilingi pemain, menyapu semua seperti mercusuar."
+  - key: evo.cortefantasmalend.name
+    translations:
+    - Marca da Morte
+    - Death Mark
+    - Marca de la Muerte
+    - Todesmal
+    - Marque de la Mort
+    - Marchio della Morte
+    - Метка смерти
+    - Znak Śmierci
+    - Ölüm İşareti
+    - 死亡印记
+    - 死の刻印
+    - 죽음의 표식
+    - Doodsmerk
+    - Tanda Kematian
+  - key: evo.cortefantasmalend.desc
+    translations:
+    - "LEND\xC1RIA: cada corte marca o inimigo; ao juntar 3 marcas, ele detona."
+    - "LEGENDARY: each slash marks the enemy; upon reaching 3 marks, it detonates."
+    - "LEGENDARIA: cada corte marca al enemigo; al acumular 3 marcas, detona."
+    - "LEGEND\xC4R: jeder Hieb markiert den Feind; bei 3 Marken detoniert er."
+    - "L\xC9GENDAIRE : chaque coup marque l'ennemi ; \xE0 3 marques, il explose."
+    - "LEGGENDARIA: ogni taglio marchia il nemico; a 3 marchi, esplode."
+    - "ЛЕГЕНДАРНАЯ: каждый удар помечает врага; при 3 метках он взрывается."
+    - "LEGENDARNA: każde cięcie znaczy wroga; po 3 znakach eksploduje."
+    - "EFSANEVİ: her kesik düşmanı işaretler; 3 işarete ulaşınca patlar."
+    - 传奇：每次挥砍标记敌人；集齐3个标记时引爆。
+    - 伝説：斬撃ごとに敵を刻印し、3つ集まると起爆する。
+    - "전설: 벨 때마다 적에게 표식을 남기고, 3개가 모이면 폭발한다."
+    - "LEGENDARISCH: elke houw markeert de vijand; bij 3 markeringen ontploft hij."
+    - "LEGENDARIS: setiap tebasan menandai musuh; saat 3 tanda terkumpul, ia meledak."
+  - key: evo.chicoteenergialend.name
+    translations:
+    - Chicote Condutor
+    - Conducting Whip
+    - Látigo Conductor
+    - Leitende Peitsche
+    - Fouet Conducteur
+    - Frusta Conduttrice
+    - Проводящий хлыст
+    - Przewodzący Bicz
+    - İletken Kırbaç
+    - 导电之鞭
+    - 導電の鞭
+    - 전도 채찍
+    - Geleidende Zweep
+    - Cambuk Penghantar
+  - key: evo.chicoteenergialend.desc
+    translations:
+    - "LEND\xC1RIA: deixa um campo el\xE9trico que arqueia e danifica os inimigos pr\xF3ximos."
+    - "LEGENDARY: leaves an electric field that arcs to and damages nearby enemies."
+    - "LEGENDARIA: deja un campo eléctrico que se arquea y daña a los enemigos cercanos."
+    - "LEGEND\xC4R: hinterl\xE4sst ein elektrisches Feld, das zu nahen Feinden \xFCberspringt und sie sch\xE4digt."
+    - "L\xC9GENDAIRE : laisse un champ \xE9lectrique qui arque vers les ennemis proches et les blesse."
+    - "LEGGENDARIA: lascia un campo elettrico che si dirama verso i nemici vicini e li danneggia."
+    - "ЛЕГЕНДАРНАЯ: оставляет электрическое поле, которое бьёт дугами по ближним врагам."
+    - "LEGENDARNA: zostawia pole elektryczne, które łukami razi pobliskich wrogów."
+    - "EFSANEVİ: yakındaki düşmanlara yay çizip hasar veren bir elektrik alanı bırakır."
+    - 传奇：留下一片电场，向附近敌人放出电弧并造成伤害。
+    - 伝説：近くの敵へ電弧を放ちダメージを与える電場を残す。
+    - "전설: 근처 적에게 전기 아크를 흘려 피해를 주는 전기장을 남긴다."
+    - "LEGENDARISCH: laat een elektrisch veld achter dat naar nabije vijanden overslaat en schade doet."
+    - "LEGENDARIS: meninggalkan medan listrik yang melengkung ke musuh terdekat dan melukainya."
+  - key: evo.misseislend.name
+    translations:
+    - Mísseis de Fragmentação
+    - Fragmentation Missiles
+    - Misiles de Fragmentación
+    - Splittergeschosse
+    - Missiles à Fragmentation
+    - Missili a Frammentazione
+    - Осколочные ракеты
+    - Pociski Odłamkowe
+    - Parça Tesirli Füzeler
+    - 分裂导弹
+    - 分裂ミサイル
+    - 파편 미사일
+    - Fragmentatieraketten
+    - Rudal Fragmentasi
+  - key: evo.misseislend.desc
+    translations:
+    - "LEND\xC1RIA: cada m\xEDssil se divide em 4 mini-m\xEDsseis teleguiados ao impactar."
+    - "LEGENDARY: each missile splits into 4 homing mini-missiles on impact."
+    - "LEGENDARIA: cada misil se divide en 4 mini-misiles teledirigidos al impactar."
+    - "LEGEND\xC4R: jedes Geschoss teilt sich beim Aufprall in 4 zielsuchende Mini-Geschosse."
+    - "L\xC9GENDAIRE : chaque missile se divise en 4 mini-missiles \xE0 t\xEAte chercheuse \xE0 l'impact."
+    - "LEGGENDARIA: ogni missile si divide in 4 mini-missili a ricerca all'impatto."
+    - "ЛЕГЕНДАРНАЯ: каждая ракета при попадании делится на 4 самонаводящиеся мини-ракеты."
+    - "LEGENDARNA: każdy pocisk przy uderzeniu dzieli się na 4 naprowadzane mini-pociski."
+    - "EFSANEVİ: her füze çarpınca 4 güdümlü mini-füzeye bölünür."
+    - 传奇：每枚导弹命中时分裂成4枚追踪迷你导弹。
+    - 伝説：各ミサイルは着弾時に4発の追尾ミニミサイルに分裂する。
+    - "전설: 각 미사일이 명중 시 4개의 유도 미니 미사일로 분열한다."
+    - "LEGENDARISCH: elke raket splitst bij inslag in 4 zoekende miniraketten."
+    - "LEGENDARIS: setiap rudal terpecah menjadi 4 mini-rudal pengejar saat mengenai."
+  - key: evo.pulsoritmicolend.name
+    translations:
+    - Pulso Gravitacional
+    - Gravitational Pulse
+    - Pulso Gravitacional
+    - Gravitationspuls
+    - Impulsion Gravitationnelle
+    - Impulso Gravitazionale
+    - Гравитационный импульс
+    - Impuls Grawitacyjny
+    - Yerçekimi Darbesi
+    - 引力脉冲
+    - 重力パルス
+    - 중력 파동
+    - Zwaartekrachtpuls
+    - Denyut Gravitasi
+  - key: evo.pulsoritmicolend.desc
+    translations:
+    - "LEND\xC1RIA: implode os inimigos pro centro e depois os arremessa com for\xE7a."
+    - "LEGENDARY: implodes enemies toward the center, then hurls them away with force."
+    - "LEGENDARIA: implosiona a los enemigos hacia el centro y luego los lanza con fuerza."
+    - "LEGEND\xC4R: implodiert Feinde zur Mitte und schleudert sie dann mit Wucht weg."
+    - "L\xC9GENDAIRE : implose les ennemis vers le centre puis les projette avec force."
+    - "LEGGENDARIA: implode i nemici verso il centro e poi li scaglia via con forza."
+    - "ЛЕГЕНДАРНАЯ: втягивает врагов к центру, а затем отбрасывает их с силой."
+    - "LEGENDARNA: implozją ściąga wrogów do środka, a potem odrzuca ich z siłą."
+    - "EFSANEVİ: düşmanları merkeze doğru çöktürür, sonra güçle savurur."
+    - 传奇：将敌人内爆聚向中心，然后猛力抛飞。
+    - 伝説：敵を中心へ引き込み、その後強く弾き飛ばす。
+    - "전설: 적을 중심으로 끌어당긴 뒤 강하게 날려버린다."
+    - "LEGENDARISCH: implodeert vijanden naar het midden en slingert ze dan met kracht weg."
+    - "LEGENDARIS: mengimplosikan musuh ke pusat, lalu melemparnya dengan kuat."
+  - key: evo.espadafantasmalend.name
+    translations:
+    - Espadas Orbitais
+    - Orbiting Swords
+    - Espadas Orbitales
+    - Kreisende Schwerter
+    - Épées Orbitales
+    - Spade Orbitanti
+    - Орбитальные мечи
+    - Orbitujące Miecze
+    - Yörüngedeki Kılıçlar
+    - 环绕之剑
+    - 周回する剣
+    - 궤도 검
+    - Cirkelende Zwaarden
+    - Pedang Mengorbit
+  - key: evo.espadafantasmalend.desc
+    translations:
+    - "LEND\xC1RIA: invoca 3 espadas que orbitam o player, cortando quem chega perto."
+    - "LEGENDARY: summons 3 swords that orbit the player, cutting anyone who comes near."
+    - "LEGENDARIA: invoca 3 espadas que orbitan al jugador, cortando a quien se acerca."
+    - "LEGEND\xC4R: beschw\xF6rt 3 Schwerter, die den Spieler umkreisen und alle Nahenden zerschneiden."
+    - "L\xC9GENDAIRE : invoque 3 \xE9p\xE9es qui gravitent autour du joueur, tranchant ceux qui approchent."
+    - "LEGGENDARIA: evoca 3 spade che orbitano attorno al giocatore, tagliando chi si avvicina."
+    - "ЛЕГЕНДАРНАЯ: призывает 3 меча, вращающихся вокруг игрока и разрубающих подошедших."
+    - "LEGENDARNA: przyzywa 3 miecze krążące wokół gracza, tnące zbliżających się."
+    - "EFSANEVİ: oyuncunun etrafında dönen ve yaklaşanı kesen 3 kılıç çağırır."
+    - 传奇：召唤3把环绕玩家的剑，切割靠近者。
+    - 伝説：プレイヤーを周回する3本の剣を召喚し、近づく者を斬る。
+    - "전설: 플레이어를 도는 검 3자루를 소환해 접근하는 적을 벤다."
+    - "LEGENDARISCH: roept 3 zwaarden op die om de speler cirkelen en iedereen die nadert snijden."
+    - "LEGENDARIS: memanggil 3 pedang yang mengorbit pemain, memotong siapa pun yang mendekat."
+  - key: evo.correntesombrialend.name
+    translations:
+    - Corrente da Alma
+    - Soul Chain
+    - Cadena del Alma
+    - Seelenkette
+    - Chaîne de l'Âme
+    - Catena dell'Anima
+    - Цепь души
+    - Łańcuch Duszy
+    - Ruh Zinciri
+    - 灵魂锁链
+    - 魂の鎖
+    - 영혼의 사슬
+    - Zielenketen
+    - Rantai Jiwa
+  - key: evo.correntesombrialend.desc
+    translations:
+    - "LEND\xC1RIA: os acorrentados compartilham dano — quanto mais elos, mais d\xF3i em todos."
+    - "LEGENDARY: chained enemies share damage — the more links, the more it hurts them all."
+    - "LEGENDARIA: los encadenados comparten daño: cuantos más eslabones, más les duele a todos."
+    - "LEGEND\xC4R: die Angeketteten teilen sich Schaden — je mehr Glieder, desto mehr schmerzt es alle."
+    - "L\xC9GENDAIRE : les encha\xEEn\xE9s partagent les d\xE9g\xE2ts — plus il y a de maillons, plus \xE7a fait mal \xE0 tous."
+    - "LEGGENDARIA: gli incatenati condividono i danni — pi\xF9 anelli, pi\xF9 fa male a tutti."
+    - "ЛЕГЕНДАРНАЯ: скованные делят урон — чем больше звеньев, тем больнее всем."
+    - "LEGENDARNA: skuci dzielą obrażenia — im więcej ogniw, tym bardziej boli wszystkich."
+    - "EFSANEVİ: zincirlenenler hasarı paylaşır — ne kadar çok halka, o kadar çok acı."
+    - 传奇：被锁链者共享伤害——链接越多，所有人受创越重。
+    - 伝説：鎖につながれた敵はダメージを共有する——鎖が多いほど全員に響く。
+    - "전설: 사슬에 묶인 적들이 피해를 공유한다 — 고리가 많을수록 모두 더 아프다."
+    - "LEGENDARISCH: geketende vijanden delen schade — hoe meer schakels, hoe meer het iedereen pijn doet."
+    - "LEGENDARIS: yang terikat berbagi kerusakan — makin banyak mata rantai, makin sakit bagi semua."
+  - key: evo.execucao.name
+    translations:
+    - Execução
+    - Execution
+    - Ejecución
+    - Hinrichtung
+    - Exécution
+    - Esecuzione
+    - Казнь
+    - Egzekucja
+    - İnfaz
+    - 处决
+    - 処刑
+    - 처형
+    - Executie
+    - Eksekusi
+  - key: evo.execucao.desc
+    translations:
+    - "Inimigos abaixo de 25% HP s\xE3o eliminados na hora."
+    - "Enemies below 25% HP are instantly eliminated."
+    - "Los enemigos por debajo del 25% de HP son eliminados al instante."
+    - "Feinde unter 25% HP werden sofort ausgel\xF6scht."
+    - "Les ennemis sous 25% de PV sont \xE9limin\xE9s instantan\xE9ment."
+    - "I nemici sotto il 25% dei PV vengono eliminati all'istante."
+    - "Враги ниже 25% здоровья мгновенно уничтожаются."
+    - "Wrogowie poniżej 25% HP są natychmiast eliminowani."
+    - "Canı %25'in altındaki düşmanlar anında yok edilir."
+    - 生命值低于25%的敌人被立即消灭。
+    - HPが25%未満の敵を即座に排除する。
+    - "체력 25% 미만의 적을 즉시 처치한다."
+    - "Vijanden onder 25% HP worden onmiddellijk uitgeschakeld."
+    - "Musuh di bawah 25% HP langsung dieliminasi."
   - key: terrain.record
     translations:
     - 'Recorde:'

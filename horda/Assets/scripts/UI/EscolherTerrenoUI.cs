@@ -498,58 +498,41 @@ public class CardHover : MonoBehaviour,
     UnityEngine.EventSystems.IPointerDownHandler,
     UnityEngine.EventSystems.IPointerUpHandler
 {
-    Coroutine cor;
-    bool pronto = true; // enquanto false (durante a animação de entrada) ignora o mouse
+    bool  pronto = true;      // enquanto false (animação de entrada) a escala é controlada por fora
+    bool  sobre = false;      // mouse em cima
+    bool  pressionado = false;
     float tempoTravado = 0f;
     const float FAILSAFE_LIBERAR = 1.5f;
 
     public void Travar()  => pronto = false;
     public void Liberar() => pronto = true;
 
+    // Ao esconder/reabrir o painel, zera o estado do mouse (senão reabre "achando" que está em cima).
+    void OnDisable() { sobre = false; pressionado = false; }
+
     void Update()
     {
-        // Failsafe: se a animação de entrada for interrompida e o Liberar() nunca chegar, o card
-        // ficaria preso numa escala menor e sem responder ao mouse (menu "bugado"). Passado o tempo
-        // limite, libera sozinho e normaliza a escala — garante que sempre termine no lugar certo.
-        if (pronto) { tempoTravado = 0f; return; }
-        tempoTravado += Time.unscaledDeltaTime;
-        if (tempoTravado >= FAILSAFE_LIBERAR)
+        if (!pronto)
         {
-            if (transform.localScale.x < 0.999f) transform.localScale = Vector3.one;
-            pronto = true;
+            // Failsafe: se a entrada travar e o Liberar() nunca chegar, libera sozinho.
+            tempoTravado += Time.unscaledDeltaTime;
+            if (tempoTravado >= FAILSAFE_LIBERAR) pronto = true;
+            return; // durante a entrada, a animação externa (PopInUI) controla a escala
         }
+        tempoTravado = 0f;
+
+        // Escala DIRIGIDA por Update: todo frame a escala é puxada suavemente pro alvo do estado
+        // atual do mouse. Assim NUNCA fica presa numa escala errada — que era o bug no hover.
+        // (unscaled pra funcionar com o jogo pausado, timeScale = 0.)
+        float destino = pressionado ? 0.96f : (sobre ? 1.06f : 1.00f);
+        float atual   = transform.localScale.x;
+        float novo    = Mathf.Lerp(atual, destino, Mathf.Clamp01(16f * Time.unscaledDeltaTime));
+        if (Mathf.Abs(novo - destino) < 0.001f) novo = destino;
+        transform.localScale = new Vector3(novo, novo, 1f);
     }
 
-    public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData _)
-    { if (pronto) Animar(1.06f, 0.15f); }
-
-    public void OnPointerExit(UnityEngine.EventSystems.PointerEventData _)
-    { if (pronto) Animar(1.00f, 0.15f); }
-
-    public void OnPointerDown(UnityEngine.EventSystems.PointerEventData _)
-    { if (pronto) Animar(0.97f, 0.08f); }
-
-    public void OnPointerUp(UnityEngine.EventSystems.PointerEventData _)
-    { if (pronto) Animar(1.06f, 0.08f); }
-
-    void Animar(float alvo, float dur)
-    {
-        if (cor != null) StopCoroutine(cor);
-        cor = StartCoroutine(EscalaParaAlvo(alvo, dur));
-    }
-
-    System.Collections.IEnumerator EscalaParaAlvo(float alvo, float dur)
-    {
-        // unscaled: funciona mesmo com o jogo pausado (menu de pause tem timeScale = 0),
-        // senão o Time.deltaTime vira 0 e a animação de hover trava.
-        float inicio = transform.localScale.x;
-        for (float t = 0f; t < dur; t += Time.unscaledDeltaTime)
-        {
-            float e = 1f - Mathf.Pow(1f - t / dur, 2f);
-            float s = Mathf.Lerp(inicio, alvo, e);
-            transform.localScale = new Vector3(s, s, 1f);
-            yield return null;
-        }
-        transform.localScale = new Vector3(alvo, alvo, 1f);
-    }
+    public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData _) { sobre = true; }
+    public void OnPointerExit (UnityEngine.EventSystems.PointerEventData _) { sobre = false; pressionado = false; }
+    public void OnPointerDown (UnityEngine.EventSystems.PointerEventData _) { pressionado = true; }
+    public void OnPointerUp   (UnityEngine.EventSystems.PointerEventData _) { pressionado = false; }
 }

@@ -181,6 +181,9 @@ public class CampoDeGeloUltimate : MonoBehaviour, IUltimateCosmetico
 
     void Congelar(GameObject go)
     {
+        // Bosses são IMUNES a congelamento
+        if (go.GetComponent<IBoss>() != null || go.GetComponentInParent<IBoss>() != null) return;
+
         Color gelo = new Color(0.55f, 0.85f, 1f);
 
         var scripts = new List<MonoBehaviour>();

@@ -415,7 +415,7 @@ public class MissoesUI : MonoBehaviour
         {
             int marco   = marcos[i];
             string nome = $"{tituloBase} ({i + 1}/{marcos.Length})";
-            string desc = $"Derrote {marco} inimigos no total para ganhar +1 Espirito de Evolucao.";
+            string desc = string.Format(Loc.T("mission.desc.espirito"), marco);
 
             if (i < coletadas)
             {
@@ -477,7 +477,7 @@ public class MissoesUI : MonoBehaviour
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoDomoManager.KillsPrincesa}/{MissaoDomoManager.META}";
                     string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.domo"), MissaoDomoManager.META);
-                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
+                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: false);
                     continue;
                 }
 
@@ -488,7 +488,7 @@ public class MissoesUI : MonoBehaviour
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoTempestadeManager.Completas}/{MissaoTempestadeManager.META}";
                     string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.tempestade"), MissaoTempestadeManager.META);
-                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
+                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: false);
                     continue;
                 }
 
@@ -499,7 +499,7 @@ public class MissoesUI : MonoBehaviour
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoNecropoleManager.Kills}/{MissaoNecropoleManager.META}";
                     string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.necropole"), MissaoNecropoleManager.META);
-                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
+                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: false);
                     continue;
                 }
 
@@ -510,7 +510,7 @@ public class MissoesUI : MonoBehaviour
                     string statusD = desb ? Loc.T("missions.done")
                                           : $"{MissaoDrenagemManager.Kills}/{MissaoDrenagemManager.META}";
                     string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.drenagem"), MissaoDrenagemManager.META);
-                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: desb);
+                    CriarCard(u.GetDisplayName(), statusD, descD, u.GetElementColor(), desb, u.ultimateIcon, brilhando: false);
                     continue;
                 }
 
@@ -561,7 +561,7 @@ public class MissoesUI : MonoBehaviour
                                           : $"{MissaoCoracaoManager.Kills}/{MissaoCoracaoManager.META}";
                     string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.coracao"), MissaoCoracaoManager.META);
                     CriarCard(passiva.GetDisplayName(), statusD, descD,
-                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
+                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: false);
                     continue;
                 }
 
@@ -573,7 +573,7 @@ public class MissoesUI : MonoBehaviour
                                           : $"{MissaoCacadorManager.Kills}/{MissaoCacadorManager.META}";
                     string descD   = $"[{p.GetDisplayName()}]  " + string.Format(Loc.T("mission.desc.cacador"), MissaoCacadorManager.META);
                     CriarCard(passiva.GetDisplayName(), statusD, descD,
-                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
+                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: false);
                     continue;
                 }
 
@@ -584,7 +584,7 @@ public class MissoesUI : MonoBehaviour
                     string statusD = desb ? Loc.T("missions.done") : "0/1";
                     string descD   = $"[{p.GetDisplayName()}]  " + Loc.T("mission.desc.asceta");
                     CriarCard(passiva.GetDisplayName(), statusD, descD,
-                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: desb);
+                        CharacterData.GetElementColor(p.baseElement), desb, passiva.passiveIcon, brilhando: false);
                     continue;
                 }
 

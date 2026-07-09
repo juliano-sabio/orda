@@ -67,10 +67,6 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
         Vector2 pos = playerStats.transform.position;
         if (auraGO != null) auraGO.transform.position = pos;
 
-        // Vórtice de Espinhos (Lendária): o campo vira um buraco negro e puxa os inimigos pra dentro
-        if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.CampoEspinhosLend))
-            EvolutionFX.PuxarInimigos(pos, raio * 1.9f, 3.5f, raio * 0.35f);
-
         // Gira espinhos
         angRot += Time.deltaTime * 80f;
         AtualizarEspinhos(pos);
@@ -100,10 +96,29 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
                 SomSkill.Tocar(SomSkill.Tipo.EspinhoPulsoDark, playerStats.transform.position, 0.4f);
             SkillElementEffect.AplicarDefensivo(skillData, playerStats, DefensiveTrigger.AuraContinua, null, this);
             StartCoroutine(FlashEspinhos());
+
+            // Espinhos Perfurantes (Lendária): dispara espinhos pra FORA em várias direções
+            if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.CampoEspinhosLend))
+                DispararEspinhos(pos);
         }
     }
 
     public override void ApplyEffect() => DanificarInimigos();
+
+    // Espinhos Perfurantes (Lendária): dispara espinhos radialmente pra fora do campo.
+    void DispararEspinhos(Vector2 origem)
+    {
+        const int qtd = 8;
+        float ang0 = Random.Range(0f, 360f);
+        for (int i = 0; i < qtd; i++)
+        {
+            float a = (ang0 + 360f / qtd * i) * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+            var go = new GameObject("EspinhoPerfurante");
+            go.transform.position = origem + dir * (raio * 0.6f);
+            go.AddComponent<EspinhoProjetilCampo>().Iniciar(dir, 12f, DanoAtual, raio * 2.2f, skillData, CorElemento(), this);
+        }
+    }
 
     // ── Dano ──────────────────────────────────────────────────────────────────
 
@@ -239,6 +254,63 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
         }
         tex.Apply();
         return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f), sz);
+    }
+}
+
+// Espinho disparado pelo campo (Lendária "Espinhos Perfurantes"): voa pra fora e fere o 1º inimigo.
+public class EspinhoProjetilCampo : MonoBehaviour
+{
+    Vector2 dir, origem;
+    float   vel, dano, alcance;
+    SkillData skillRef;
+    MonoBehaviour dono;
+    bool    atingiu;
+
+    public void Iniciar(Vector2 d, float v, float dmg, float alc, SkillData sd, Color cor, MonoBehaviour owner)
+    {
+        dir = d; vel = v; dano = dmg; alcance = alc; skillRef = sd; dono = owner; origem = transform.position;
+
+        var sr = gameObject.AddComponent<SpriteRenderer>();
+        sr.sprite = GerarEspinho(); sr.color = cor; sr.sortingOrder = 12;
+        transform.localScale = new Vector3(0.28f, 0.6f, 1f);
+        float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, ang - 90f);
+
+        var col = gameObject.AddComponent<CapsuleCollider2D>();
+        col.isTrigger = true; col.size = new Vector2(0.25f, 0.6f);
+        Destroy(gameObject, 1.2f);
+    }
+
+    void Update()
+    {
+        if (atingiu) return;
+        transform.position += (Vector3)(dir * vel * Time.deltaTime);
+        if (Vector2.Distance(transform.position, origem) >= alcance) Destroy(gameObject);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (atingiu) return;
+        var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
+        if (ic == null || ic.estaMorrendo) return;
+        atingiu = true;
+        ic.ReceberDano(dano, false);
+        if (skillRef != null && dono != null) SkillElementEffect.Aplicar(skillRef, ic.gameObject, dano, dono);
+        Destroy(gameObject);
+    }
+
+    static Sprite GerarEspinho()
+    {
+        int w = 6, h = 16; var tex = new Texture2D(w, h, TextureFormat.RGBA32, false); tex.filterMode = FilterMode.Point;
+        float cx = w * 0.5f;
+        for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
+        {
+            float nx = Mathf.Abs(x + 0.5f - cx) / cx; float ny = y / (float)(h - 1);
+            float larg = 1f - ny; // afina até a ponta
+            tex.SetPixel(x, y, new Color(1f, 1f, 1f, nx < larg ? 1f : 0f));
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0f), w);
     }
 }
 

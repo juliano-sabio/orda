@@ -17,8 +17,8 @@ MonoBehaviour:
     pr\xF3ximos."
   icone: {fileID: 6843361105861325913, guid: da8bd35793f74004aba2e7e45b5c39ed, type: 3}
   corDestaque: {r: 0.2, g: 0.85, b: 1, a: 1}
-  nameKey: 
-  descriptionKey: 
+  nameKey: evo.chicoteenergialend.name
+  descriptionKey: evo.chicoteenergialend.desc
   skillAlvo: 34
   tipoEvolucao: 106
   raridade: 4

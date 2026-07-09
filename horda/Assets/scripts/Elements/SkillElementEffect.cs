@@ -164,7 +164,7 @@ public static class SkillElementEffect
 
     static IEnumerator AplicarCC(InimigoController ic, float duracao, string tipo)
     {
-        if (ic == null) yield break;
+        if (ic == null || ic.EhBoss()) yield break; // bosses são IMUNES a controle (atordoar/paralisar/congelar)
 
         // Desabilita script de movimento para garantir imobilização
         var movi = ic.GetComponent<movi_inimigo>();
@@ -191,7 +191,7 @@ public static class SkillElementEffect
 
     static IEnumerator AplicarSlow(InimigoController ic, float duracao, float fator)
     {
-        if (ic == null) yield break;
+        if (ic == null || ic.EhBoss()) yield break; // bosses são IMUNES a lentidão
         var movi = ic.GetComponent<movi_inimigo>();
         if (movi != null)
         {
@@ -232,6 +232,8 @@ public static class SkillElementEffect
     static IEnumerator AplicarKnockbackCoroutine(GameObject alvo, float forca)
     {
         if (alvo == null) yield break;
+        var icAlvo = alvo.GetComponent<InimigoController>() ?? alvo.GetComponentInParent<InimigoController>();
+        if (icAlvo != null && icAlvo.EhBoss()) yield break; // bosses são IMUNES a recuo/knockback
         var rb = alvo.GetComponent<Rigidbody2D>();
         if (rb == null) yield break;
         var player = FindPlayer();

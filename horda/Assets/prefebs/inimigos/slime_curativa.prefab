@@ -211,8 +211,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a9ee5af9be91bd49809fa012c3205df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InimigoSuporte
-  taxaCura: 10
-  intervaloCura: 4
+  taxaCura: 5
+  intervaloCura: 6.5
   raioCura: 2
   alvosCuraLayer:
     serializedVersion: 2

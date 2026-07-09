@@ -140,6 +140,9 @@ public class PulsoMagneticoUltimate : MonoBehaviour, IUltimateCosmetico
 
     void AdicionarAtraido(GameObject go)
     {
+        // Bosses são IMUNES à atração/repulsão magnética
+        if (go.GetComponent<IBoss>() != null || go.GetComponentInParent<IBoss>() != null) return;
+
         var scripts = new List<MonoBehaviour>();
         Desativar(go.GetComponent<movi_inimigo>(),                   scripts);
         Desativar(go.GetComponent<movi_inimigo_manter_distancia>(),  scripts);

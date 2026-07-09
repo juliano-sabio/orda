@@ -25,6 +25,8 @@ public class TempestadeEletricaEvento : MonoBehaviour
     CanvasGroup bordaCG;
     float tempoOscilacao;
     bool  flashAtivo;
+    // Área 2 (Abismo) tem fundo escuro → o flash amarelo fica muito forte; aqui suaviza.
+    float fatorBrilho = 1f;
 
     public void Iniciar(PlayerStats ps, float dur)
     {
@@ -57,7 +59,7 @@ public class TempestadeEletricaEvento : MonoBehaviour
         elapsed += Time.deltaTime;
         if (bordaCG == null || flashAtivo) return;
         tempoOscilacao += Time.deltaTime * 1.8f;
-        bordaCG.alpha = 0.12f + Mathf.Sin(tempoOscilacao) * 0.06f;
+        bordaCG.alpha = (0.12f + Mathf.Sin(tempoOscilacao) * 0.06f) * fatorBrilho;
     }
 
     // Intervalo diminui exponencialmente: começa lento, fica frenético no final
@@ -332,11 +334,11 @@ public class TempestadeEletricaEvento : MonoBehaviour
     {
         if (bordaCG == null) yield break;
         flashAtivo    = true;
-        bordaCG.alpha = 0.75f;
+        bordaCG.alpha = 0.75f * fatorBrilho;
         for (float t = 0f; t < 0.35f; t += Time.deltaTime)
         {
             if (bordaCG == null) { flashAtivo = false; yield break; }
-            bordaCG.alpha = Mathf.Lerp(0.75f, 0.12f, t / 0.35f);
+            bordaCG.alpha = Mathf.Lerp(0.75f, 0.12f, t / 0.35f) * fatorBrilho;
             yield return null;
         }
         flashAtivo = false;
@@ -379,6 +381,9 @@ public class TempestadeEletricaEvento : MonoBehaviour
 
     void CriarBordaEletrica()
     {
+        // Na área 2 (Abismo, fundo escuro) o flash amarelo fica muito intenso → suaviza pela metade.
+        fatorBrilho = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.StartsWith("segunda_fase") ? 0.5f : 1f;
+
         var canvasGO = new GameObject("TempestadeCanvas");
         canvasGO.transform.SetParent(transform, false);
         var canvas        = canvasGO.AddComponent<Canvas>();

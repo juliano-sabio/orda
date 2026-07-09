@@ -16,8 +16,8 @@ MonoBehaviour:
   descricao: "Cada tick incendeia os inimigos (dano cont\xEDnuo por 3s)."
   icone: {fileID: 2074562285758952879, guid: f1634cf9c29535f41935d3842ba7c60c, type: 3}
   corDestaque: {r: 1, g: 0.5, b: 0.1, a: 1}
-  nameKey: 
-  descriptionKey: 
+  nameKey: evo.espinhosflamejantes.name
+  descriptionKey: evo.espinhosflamejantes.desc
   skillAlvo: 24
   tipoEvolucao: 98
   raridade: 3

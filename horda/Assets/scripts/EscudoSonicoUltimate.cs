@@ -338,7 +338,7 @@ public class EscudoSonicoUltimate : MonoBehaviour, IUltimateCosmetico
 
     IEnumerator AtordoarInimigo(InimigoController ic, float duracao)
     {
-        if (ic == null) yield break;
+        if (ic == null || ic.EhBoss()) yield break; // bosses são IMUNES a atordoamento
         var movi = ic.GetComponent<movi_inimigo>();
         var moviD = ic.GetComponent<movi_inimigo_manter_distancia>();
         if (movi   != null) movi.enabled   = false;

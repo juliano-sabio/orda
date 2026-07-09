@@ -92,8 +92,8 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
         // Atualiza posição (inimigo pode ter se movido)
         pos = ic.transform.position;
 
-        // Dano e prende
-        bool execucao = SkillEvolutionManager.Tem(SkillEvolutionType.Execucao) &&
+        // Dano e prende (bosses são IMUNES a execução instantânea)
+        bool execucao = SkillEvolutionManager.Tem(SkillEvolutionType.Execucao) && !ic.EhBoss() &&
                         ic.vidaAtual / Mathf.Max(1f, ic.vidaMaxima) < 0.25f;
         if (cosmetico) { } // co-op: cópia cosmética não aplica dano (só o visual da garra)
         else if (execucao) { ic.ReceberDano(ic.vidaAtual + 1f, false); SkillElementEffect.Aplicar(skillData, ic.gameObject, DanoAtual, this); }
@@ -110,7 +110,7 @@ public override void Initialize(PlayerStats stats) => base.Initialize(stats);
 
     IEnumerator PrederInimigo(InimigoController ic, float duracao)
     {
-        if (ic == null) yield break;
+        if (ic == null || ic.EhBoss()) yield break; // bosses são IMUNES a serem presos/imobilizados
 
         var rb = ic.GetComponent<Rigidbody2D>();
         var movi = ic.GetComponent<movi_inimigo>();
