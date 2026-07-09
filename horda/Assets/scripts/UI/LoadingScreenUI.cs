@@ -349,13 +349,18 @@ public class LoadingScreenUI : MonoBehaviour
     // ── Helpers ───────────────────────────────────────────────────────
     string NomeFase(string cena)
     {
-        switch (cena)
+        // Co-op usa cenas "_mp" (ex.: primeira_fase_mp) — normaliza pro nome base pra traduzir igual
+        // (senão o load mostrava "primeira fase mp" cru, sem tradução).
+        string c = !string.IsNullOrEmpty(cena) && cena.EndsWith("_mp")
+            ? cena.Substring(0, cena.Length - 3)
+            : cena;
+        switch (c)
         {
             case "primeira_fase":      return Loc.T("terrain.p1.name");
             case "segunda_fase":       return Loc.T("terrain.p2.name");
             case "terceira_fase":      return Loc.T("terrain.p3.name");
             case "Modo_sobrevivencia": return Loc.T("terrain.surv.name");
-            default:                   return cena.Replace("_", " ");
+            default:                   return (c ?? "").Replace("_", " ");
         }
     }
 
