@@ -325,6 +325,13 @@ public class PlayerStats : MonoBehaviour
 
         if (characterData == null) return;
 
+        // Visual por personagem: aplica o AnimatorController do CharacterData (ex.: lobo). Assim cada
+        // personagem escolhido tem sua própria animação in-game (SP e co-op usam o mesmo Animator).
+        var animChar = GetComponent<Animator>();
+        if (animChar != null && characterData.animatorController != null &&
+            animChar.runtimeAnimatorController != characterData.animatorController)
+            animChar.runtimeAnimatorController = characterData.animatorController;
+
         ResetarEstadoDeRun(); // run nova começa 100% limpa: status + escudo/dash/ultimate/timers/skills (player persiste em co-op)
 
         // Nível/XP zeram na run nova. Sem isto, em co-op (player DontDestroyOnLoad) a run seguinte

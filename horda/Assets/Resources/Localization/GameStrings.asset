@@ -1379,14 +1379,15 @@ MonoBehaviour:
     - Defeat the Slime Princess {0}x to unlock.
     - Derrota a la Princesa Slime {0} veces para desbloquear.
     - Besiege die Schleimprinzessin {0}x zum Freischalten.
-    - Vainquez la Princesse Slime {0} fois pour débloquer.
+    - "Vainquez la Princesse Slime {0} fois pour d\xE9bloquer."
     - Sconfiggi la Principessa Slime {0} volte per sbloccare.
-    - Победите Принцессу-слизь {0} раз, чтобы разблокировать.
-    - Pokonaj Księżniczkę Slime {0} razy, aby odblokować.
-    - Kilidi açmak için Slime Prensesi'ni {0} kez yen.
-    - 击败史莱姆公主 {0} 次以解锁。
-    - スライム姫を{0}回倒して解放。
-    - 슬라임 공주를 {0}번 처치하여 해금.
+    - "\u041F\u043E\u0431\u0435\u0434\u0438\u0442\u0435 \u041F\u0440\u0438\u043D\u0446\u0435\u0441\u0441\u0443-\u0441\u043B\u0438\u0437\u044C
+      {0} \u0440\u0430\u0437, \u0447\u0442\u043E\u0431\u044B \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u0442\u044C."
+    - "Pokonaj Ksi\u0119\u017Cniczk\u0119 Slime {0} razy, aby odblokowa\u0107."
+    - "Kilidi a\xE7mak i\xE7in Slime Prensesi'ni {0} kez yen."
+    - "\u51FB\u8D25\u53F2\u83B1\u59C6\u516C\u4E3B {0} \u6B21\u4EE5\u89E3\u9501\u3002"
+    - "\u30B9\u30E9\u30A4\u30E0\u59EB\u3092{0}\u56DE\u5012\u3057\u3066\u89E3\u653E\u3002"
+    - "\uC2AC\uB77C\uC784 \uACF5\uC8FC\uB97C {0}\uBC88 \uCC98\uCE58\uD558\uC5EC \uD574\uAE08."
     - Versla de Slijmprinses {0}x om te ontgrendelen.
     - Kalahkan Putri Slime {0}x untuk membuka.
   - key: mission.desc.tempestade
@@ -1394,15 +1395,16 @@ MonoBehaviour:
     - Conclua {0} eventos de Tempestade para desbloquear.
     - Complete {0} Storm events to unlock.
     - Completa {0} eventos de Tormenta para desbloquear.
-    - Schließe {0} Sturm-Ereignisse ab, um freizuschalten.
-    - Terminez {0} événements Tempête pour débloquer.
+    - "Schlie\xDFe {0} Sturm-Ereignisse ab, um freizuschalten."
+    - "Terminez {0} \xE9v\xE9nements Temp\xEAte pour d\xE9bloquer."
     - Completa {0} eventi Tempesta per sbloccare.
-    - Пройдите {0} события «Гроза», чтобы разблокировать.
-    - Ukończ {0} wydarzenia Burzy, aby odblokować.
-    - Kilidi açmak için {0} Fırtına etkinliğini tamamla.
-    - 完成 {0} 次风暴事件以解锁。
-    - 嵐イベントを{0}回クリアして解放。
-    - 폭풍 이벤트를 {0}회 완료하여 해금.
+    - "\u041F\u0440\u043E\u0439\u0434\u0438\u0442\u0435 {0} \u0441\u043E\u0431\u044B\u0442\u0438\u044F
+      \xAB\u0413\u0440\u043E\u0437\u0430\xBB, \u0447\u0442\u043E\u0431\u044B \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u0442\u044C."
+    - "Uko\u0144cz {0} wydarzenia Burzy, aby odblokowa\u0107."
+    - "Kilidi a\xE7mak i\xE7in {0} F\u0131rt\u0131na etkinli\u011Fini tamamla."
+    - "\u5B8C\u6210 {0} \u6B21\u98CE\u66B4\u4E8B\u4EF6\u4EE5\u89E3\u9501\u3002"
+    - "\u5D50\u30A4\u30D9\u30F3\u30C8\u3092{0}\u56DE\u30AF\u30EA\u30A2\u3057\u3066\u89E3\u653E\u3002"
+    - "\uD3ED\uD48D \uC774\uBCA4\uD2B8\uB97C {0}\uD68C \uC644\uB8CC\uD558\uC5EC \uD574\uAE08."
     - Voltooi {0} Storm-gebeurtenissen om te ontgrendelen.
     - Selesaikan {0} acara Badai untuk membuka.
   - key: mission.desc.necropole
@@ -1411,14 +1413,15 @@ MonoBehaviour:
     - Eliminate {0} ghosts to unlock.
     - Elimina {0} fantasmas para desbloquear.
     - Eliminiere {0} Geister zum Freischalten.
-    - Éliminez {0} fantômes pour débloquer.
+    - "\xC9liminez {0} fant\xF4mes pour d\xE9bloquer."
     - Elimina {0} fantasmi per sbloccare.
-    - Уничтожьте {0} призраков, чтобы разблокировать.
-    - Wyeliminuj {0} duchów, aby odblokować.
-    - Kilidi açmak için {0} hayalet yok et.
-    - 消灭 {0} 个幽灵以解锁。
-    - 幽霊を{0}体倒して解放。
-    - 유령 {0}마리를 처치하여 해금.
+    - "\u0423\u043D\u0438\u0447\u0442\u043E\u0436\u044C\u0442\u0435 {0} \u043F\u0440\u0438\u0437\u0440\u0430\u043A\u043E\u0432,
+      \u0447\u0442\u043E\u0431\u044B \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u0442\u044C."
+    - "Wyeliminuj {0} duch\xF3w, aby odblokowa\u0107."
+    - "Kilidi a\xE7mak i\xE7in {0} hayalet yok et."
+    - "\u6D88\u706D {0} \u4E2A\u5E7D\u7075\u4EE5\u89E3\u9501\u3002"
+    - "\u5E7D\u970A\u3092{0}\u4F53\u5012\u3057\u3066\u89E3\u653E\u3002"
+    - "\uC720\uB839 {0}\uB9C8\uB9AC\uB97C \uCC98\uCE58\uD558\uC5EC \uD574\uAE08."
     - Elimineer {0} geesten om te ontgrendelen.
     - Hilangkan {0} hantu untuk membuka.
   - key: mission.desc.drenagem
@@ -1427,14 +1430,16 @@ MonoBehaviour:
     - Eliminate {0} healer slimes to unlock.
     - Elimina {0} slimes curanderas para desbloquear.
     - Eliminiere {0} Heiler-Schleime zum Freischalten.
-    - Éliminez {0} slimes soigneurs pour débloquer.
+    - "\xC9liminez {0} slimes soigneurs pour d\xE9bloquer."
     - Elimina {0} slime guaritori per sbloccare.
-    - Уничтожьте {0} слизней-целителей, чтобы разблокировать.
-    - Wyeliminuj {0} lecznicze slime, aby odblokować.
-    - Kilidi açmak için {0} iyileştirici slime yok et.
-    - 消灭 {0} 个治疗史莱姆以解锁。
-    - 回復スライムを{0}体倒して解放。
-    - 치유 슬라임 {0}마리를 처치하여 해금.
+    - "\u0423\u043D\u0438\u0447\u0442\u043E\u0436\u044C\u0442\u0435 {0} \u0441\u043B\u0438\u0437\u043D\u0435\u0439-\u0446\u0435\u043B\u0438\u0442\u0435\u043B\u0435\u0439,
+      \u0447\u0442\u043E\u0431\u044B \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u0442\u044C."
+    - "Wyeliminuj {0} lecznicze slime, aby odblokowa\u0107."
+    - "Kilidi a\xE7mak i\xE7in {0} iyile\u015Ftirici slime yok et."
+    - "\u6D88\u706D {0} \u4E2A\u6CBB\u7597\u53F2\u83B1\u59C6\u4EE5\u89E3\u9501\u3002"
+    - "\u56DE\u5FA9\u30B9\u30E9\u30A4\u30E0\u3092{0}\u4F53\u5012\u3057\u3066\u89E3\u653E\u3002"
+    - "\uCE58\uC720 \uC2AC\uB77C\uC784 {0}\uB9C8\uB9AC\uB97C \uCC98\uCE58\uD558\uC5EC
+      \uD574\uAE08."
     - Elimineer {0} genezende slimes om te ontgrendelen.
     - Hilangkan {0} slime penyembuh untuk membuka.
   - key: mission.desc.coracao
@@ -1443,14 +1448,15 @@ MonoBehaviour:
     - Eliminate {0} enemies to unlock.
     - Elimina {0} enemigos para desbloquear.
     - Eliminiere {0} Feinde zum Freischalten.
-    - Éliminez {0} ennemis pour débloquer.
+    - "\xC9liminez {0} ennemis pour d\xE9bloquer."
     - Elimina {0} nemici per sbloccare.
-    - Уничтожьте {0} врагов, чтобы разблокировать.
-    - Wyeliminuj {0} wrogów, aby odblokować.
-    - Kilidi açmak için {0} düşman yok et.
-    - 消灭 {0} 个敌人以解锁。
-    - 敵を{0}体倒して解放。
-    - 적 {0}명을 처치하여 해금.
+    - "\u0423\u043D\u0438\u0447\u0442\u043E\u0436\u044C\u0442\u0435 {0} \u0432\u0440\u0430\u0433\u043E\u0432,
+      \u0447\u0442\u043E\u0431\u044B \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u0442\u044C."
+    - "Wyeliminuj {0} wrog\xF3w, aby odblokowa\u0107."
+    - "Kilidi a\xE7mak i\xE7in {0} d\xFC\u015Fman yok et."
+    - "\u6D88\u706D {0} \u4E2A\u654C\u4EBA\u4EE5\u89E3\u9501\u3002"
+    - "\u6575\u3092{0}\u4F53\u5012\u3057\u3066\u89E3\u653E\u3002"
+    - "\uC801 {0}\uBA85\uC744 \uCC98\uCE58\uD558\uC5EC \uD574\uAE08."
     - Elimineer {0} vijanden om te ontgrendelen.
     - Hilangkan {0} musuh untuk membuka.
   - key: mission.desc.cacador
@@ -1459,30 +1465,35 @@ MonoBehaviour:
     - Eliminate {0} corrupted slimes to unlock.
     - Elimina {0} slimes corruptos para desbloquear.
     - Eliminiere {0} verdorbene Schleime zum Freischalten.
-    - Éliminez {0} slimes corrompus pour débloquer.
+    - "\xC9liminez {0} slimes corrompus pour d\xE9bloquer."
     - Elimina {0} slime corrotti per sbloccare.
-    - Уничтожьте {0} испорченных слизней, чтобы разблокировать.
-    - Wyeliminuj {0} skażone slime, aby odblokować.
-    - Kilidi açmak için {0} bozulmuş slime yok et.
-    - 消灭 {0} 个腐化史莱姆以解锁。
-    - 汚染スライムを{0}体倒して解放。
-    - 부패한 슬라임 {0}마리를 처치하여 해금.
+    - "\u0423\u043D\u0438\u0447\u0442\u043E\u0436\u044C\u0442\u0435 {0} \u0438\u0441\u043F\u043E\u0440\u0447\u0435\u043D\u043D\u044B\u0445
+      \u0441\u043B\u0438\u0437\u043D\u0435\u0439, \u0447\u0442\u043E\u0431\u044B
+      \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u0442\u044C."
+    - "Wyeliminuj {0} ska\u017Cone slime, aby odblokowa\u0107."
+    - "Kilidi a\xE7mak i\xE7in {0} bozulmu\u015F slime yok et."
+    - "\u6D88\u706D {0} \u4E2A\u8150\u5316\u53F2\u83B1\u59C6\u4EE5\u89E3\u9501\u3002"
+    - "\u6C5A\u67D3\u30B9\u30E9\u30A4\u30E0\u3092{0}\u4F53\u5012\u3057\u3066\u89E3\u653E\u3002"
+    - "\uBD80\uD328\uD55C \uC2AC\uB77C\uC784 {0}\uB9C8\uB9AC\uB97C \uCC98\uCE58\uD558\uC5EC
+      \uD574\uAE08."
     - Elimineer {0} verdorven slimes om te ontgrendelen.
     - Hilangkan {0} slime terkorupsi untuk membuka.
   - key: mission.desc.asceta
     translations:
-    - Conclua a primeira área para desbloquear.
+    - "Conclua a primeira \xE1rea para desbloquear."
     - Complete the first area to unlock.
-    - Completa la primera área para desbloquear.
-    - Schließe das erste Gebiet ab, um freizuschalten.
-    - Terminez la première zone pour débloquer.
+    - "Completa la primera \xE1rea para desbloquear."
+    - "Schlie\xDFe das erste Gebiet ab, um freizuschalten."
+    - "Terminez la premi\xE8re zone pour d\xE9bloquer."
     - Completa la prima area per sbloccare.
-    - Пройдите первую область, чтобы разблокировать.
-    - Ukończ pierwszy obszar, aby odblokować.
-    - Kilidi açmak için ilk bölgeyi tamamla.
-    - 完成第一区域以解锁。
-    - 最初のエリアをクリアして解放。
-    - 첫 번째 지역을 완료하여 해금.
+    - "\u041F\u0440\u043E\u0439\u0434\u0438\u0442\u0435 \u043F\u0435\u0440\u0432\u0443\u044E
+      \u043E\u0431\u043B\u0430\u0441\u0442\u044C, \u0447\u0442\u043E\u0431\u044B
+      \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u0442\u044C."
+    - "Uko\u0144cz pierwszy obszar, aby odblokowa\u0107."
+    - "Kilidi a\xE7mak i\xE7in ilk b\xF6lgeyi tamamla."
+    - "\u5B8C\u6210\u7B2C\u4E00\u533A\u57DF\u4EE5\u89E3\u9501\u3002"
+    - "\u6700\u521D\u306E\u30A8\u30EA\u30A2\u3092\u30AF\u30EA\u30A2\u3057\u3066\u89E3\u653E\u3002"
+    - "\uCCAB \uBC88\uC9F8 \uC9C0\uC5ED\uC744 \uC644\uB8CC\uD558\uC5EC \uD574\uAE08."
     - Voltooi het eerste gebied om te ontgrendelen.
     - Selesaikan area pertama untuk membuka.
   - key: terrain.record
@@ -13232,3 +13243,37 @@ MonoBehaviour:
     - "\uC2A4\uD0AC \uCE74\uB4DC"
     - Vaardigheidskaarten
     - Kartu Keterampilan
+  - key: char.lobo.name
+    translations:
+    - Lobo
+    - Wolf
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+  - key: char.lobo.desc
+    translations:
+    - "\xC1gil e feroz \u2014 r\xE1pido e forte no ataque, mas fr\xE1gil. Um ca\xE7ador
+      que aposta na velocidade."
+    - "Agile and fierce \u2014 fast and hard-hitting, but fragile. A hunter that
+      bets on speed."
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 

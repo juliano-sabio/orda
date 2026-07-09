@@ -10,28 +10,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 227619ca6a352bd4b8662f00ca1a329f, type: 3}
-  m_Name: servo
+  m_Name: lobo
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
-  characterName: servo
+  characterName: lobo
   description: "Outrora soberano de uma dimens\xE3o grandiosa, viu seu trono ser
     tomado e seus poderes arrancados. Exilado do pr\xF3prio destino, encontrou ref\xFAgio
     em uma clareira habitada por esp\xEDritos. Eles o acolheram como um dos seus,
     oferecendo companhia e conforto para sua alma ferida. Ainda assim, sob a luz
     p\xE1lida da lua, as mem\xF3rias de sua antiga gl\xF3ria permanecem vivas, lembrando-o
     de tudo o que perdeu \u2014 e de tudo o que um dia poder\xE1 recuperar."
-  icon: {fileID: -3745306912610426398, guid: 0273d57e95b5be74d8fcba6fe6031430, type: 3}
+  icon: {fileID: 5147790913906322788, guid: 4fddc738276d81449b0a02715e602d73, type: 3}
   unlocked: 1
-  characterPrefab: {fileID: 2605273054779499284, guid: 589b7ed9bfced39428ac3a669c3c48ab, type: 3}
-  nameKey: char.servo.name
-  descriptionKey: char.servo.desc
+  characterPrefab: {fileID: 2605273054779499284, guid: 76a9b66ade2f87b47afd7974c2b4c214, type: 3}
+  nameKey: char.lobo.name
+  descriptionKey: char.lobo.desc
   missaoKey: char.servo.missao
-  maxHealth: 84
-  baseAttack: 10
-  baseDefense: 5
-  baseSpeed: 14.2
+  maxHealth: 70
+  baseAttack: 13
+  baseDefense: 3
+  baseSpeed: 18
   baseHealthRegen: 1
   baseRegenDelay: 5
-  baseAttackCooldown: 2
+  baseAttackCooldown: 1.6
   baseDefenseCooldown: 3
   baseElement: 0
   strongAgainst: 
@@ -140,4 +140,4 @@ MonoBehaviour:
       m_NumAlphaKeys: 2
     m_ColorMin: {r: 0, g: 0, b: 0, a: 0}
     m_ColorMax: {r: 0, g: 0, b: 0, a: 0}
-  animatorController: {fileID: 9100000, guid: 01540922ab185294f980d35256eb2c2a, type: 2}
+  animatorController: {fileID: 9100000, guid: 57217df1f1829004a8d84ec7c848fcfc, type: 2}
