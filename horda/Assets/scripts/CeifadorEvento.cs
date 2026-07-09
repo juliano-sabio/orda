@@ -246,6 +246,15 @@ void AdicionarBrilhoVermelho()
 
     void Update()
     {
+        // Co-op: se o alvo caiu (downed), SOLTA e mira outro player válido — senão o ceifador
+        // continuava perseguindo/atacando o player 2 morto. MaisProximo já ignora caídos;
+        // se todos estão caídos, fica sem alvo (não persegue ninguém).
+        var psAtual = player != null ? player.GetComponent<PlayerStats>() : null;
+        if (player == null || (psAtual != null && psAtual.EstaCaido))
+        {
+            var novo = PlayerStats.MaisProximo(transform.position);
+            player = novo != null ? novo.transform : null;
+        }
         if (player == null) return;
 
         // Dano de contato por proximidade (sem colisão física)
