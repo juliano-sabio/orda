@@ -121,11 +121,17 @@ public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     const float VEL    = 12f;    // suavidade do lerp
 
     RectTransform rt;
+    Canvas canvas;
     Vector2 posBase;
     Vector3 escBase;
     bool baseOk, hover, semSom, semCalc;
 
-    void Awake() => rt = transform as RectTransform;
+    void Awake() { rt = transform as RectTransform; canvas = GetComponentInParent<Canvas>(); }
+
+    // Reabrir um painel/cena com o mouse em cima deixava o botão preso no tamanho de hover (a base
+    // era capturada no OnPointerEnter, que dispara cedo/errado, e o OnPointerExit às vezes não vem).
+    // Ao (re)ativar, reseta: a base é recapturada só num frame de REPOUSO → nunca fica bugado.
+    void OnEnable() { hover = false; baseOk = false; }
 
     void GarantirSemSom()
     {
@@ -137,7 +143,6 @@ public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public void OnPointerEnter(PointerEventData _)
     {
         GarantirSemSom();
-        if (!baseOk && rt != null) { posBase = rt.anchoredPosition; escBase = rt.localScale; baseOk = true; }
         hover = true;
         if (!semSom) UISons.Hover();
     }
@@ -150,9 +155,29 @@ public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         if (!semSom) UISons.Click();
     }
 
+    Camera CamUI()
+    {
+        if (canvas == null) canvas = GetComponentInParent<Canvas>();
+        return (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay) ? canvas.worldCamera : null;
+    }
+
     void Update()
     {
-        if (!baseOk || rt == null) return;
+        if (rt == null) return;
+
+        // Captura a base SÓ em repouso (sem hover). Se o botão abriu com o mouse em cima, não captura
+        // um valor bugado — só aplica o efeito depois de ter uma base limpa.
+        if (!baseOk)
+        {
+            if (hover) return;
+            posBase = rt.anchoredPosition; escBase = rt.localScale; baseOk = true;
+        }
+
+        // Auto-corrige hover preso: se acha que está em hover mas o mouse NÃO está sobre o botão, solta
+        // (cobre o OnPointerExit que não dispara quando o painel abre sob o cursor).
+        if (hover && !RectTransformUtility.RectangleContainsScreenPoint(rt, Input.mousePosition, CamUI()))
+            hover = false;
+
         Vector2 ap = hover ? posBase + Vector2.up * ALTURA : posBase;
         Vector3 ae = hover ? escBase * ESCALA : escBase;
         if (!hover && (rt.anchoredPosition - posBase).sqrMagnitude < 0.01f
