@@ -328,9 +328,12 @@ public class PlayerStats : MonoBehaviour
         // Visual por personagem: aplica o AnimatorController do CharacterData (ex.: lobo). Assim cada
         // personagem escolhido tem sua própria animação in-game (SP e co-op usam o mesmo Animator).
         var animChar = GetComponent<Animator>();
+        // [CharDiag temp] — remover após diagnosticar o "servo instanciado".
+        Debug.Log($"[CharDiag] char='{characterData.characterName}' idx={selectedCharacter} EmRede={NetSpawn.EmRede} animCtrlCD={(characterData.animatorController != null ? characterData.animatorController.name : "null")} anim={(animChar != null)} ctrlAntes={(animChar != null && animChar.runtimeAnimatorController != null ? animChar.runtimeAnimatorController.name : "null")}");
         if (animChar != null && characterData.animatorController != null &&
             animChar.runtimeAnimatorController != characterData.animatorController)
             animChar.runtimeAnimatorController = characterData.animatorController;
+        Debug.Log($"[CharDiag] ctrlDepois={(animChar != null && animChar.runtimeAnimatorController != null ? animChar.runtimeAnimatorController.name : "null")}");
 
         ResetarEstadoDeRun(); // run nova começa 100% limpa: status + escudo/dash/ultimate/timers/skills (player persiste em co-op)
 
