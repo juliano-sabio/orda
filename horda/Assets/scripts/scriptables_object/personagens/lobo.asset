@@ -24,7 +24,7 @@ MonoBehaviour:
   characterPrefab: {fileID: 2605273054779499284, guid: 76a9b66ade2f87b47afd7974c2b4c214, type: 3}
   nameKey: char.lobo.name
   descriptionKey: char.lobo.desc
-  missaoKey: char.servo.missao
+  missaoKey: char.lobo.missao
   maxHealth: 70
   baseAttack: 13
   baseDefense: 3
