@@ -579,60 +579,22 @@ public class PauseManager : MonoBehaviour
         }
     }
 
-    // Entrada dinâmica: título e botões "pulam" pra dentro de forma escalonada.
+    // Entrada do menu de pause: agora é APENAS fade (via CanvasGroup, feito em ShowPauseMenu).
+    //
+    // Antes os botões "pulavam" de escala 0.7 até 1.0. Esse pop-in fazia o botão ENCOLHER ao
+    // aparecer e, com o mouse em cima, ainda brigava com o hover — o que o usuário via como bug
+    // ("o botão encolhe"). Removido: os botões entram direto no tamanho final e só o hover
+    // (CardHover) mexe na escala. Garantimos escala 1 caso um hover/press anterior tenha deixado
+    // algum alvo com escala diferente.
     private IEnumerator AnimarEntradaPause()
     {
         string[] nomes = { "Title", "ResumeButton", "SettingsButton", "ExitButton", "LobbyButton", "QuitButton" };
-        var alvos = new System.Collections.Generic.List<Transform>();
         foreach (var n in nomes)
         {
             var t = pausePanel.transform.Find(n);
-            if (t != null) { t.localScale = Vector3.one * 0.7f; alvos.Add(t); }
+            if (t != null) t.localScale = Vector3.one;
         }
-        for (int i = 0; i < alvos.Count; i++)
-            StartCoroutine(PopInUI(alvos[i], i * 0.06f));
-
-        // Rede de segurança: espera a entrada terminar e conserta qualquer botão que tenha
-        // ficado preso numa escala menor (ex.: clones SAIR/Seleção). Não briga com o hover,
-        // que sempre deixa a escala >= 0.97.
-        float espera = alvos.Count * 0.06f + 0.35f;
-        float w = 0f;
-        while (w < espera) { w += Time.unscaledDeltaTime; yield return null; }
-        foreach (var a in alvos)
-            if (a != null && a.localScale.x < 0.95f)
-                a.localScale = Vector3.one;
-    }
-
-    private IEnumerator PopInUI(Transform t, float delay)
-    {
-        // Trava o hover enquanto o botão "pula" pra dentro (evita o mouse por cima disparar
-        // o hover no meio da entrada e brigar com esta animação de escala).
-        var hover = t != null ? t.GetComponent<CardHover>() : null;
-        hover?.Travar();
-        // Idem para o highlight de cor (ColorTint) do Button.
-        var btn = t != null ? t.GetComponent<UnityEngine.UI.Button>() : null;
-        var transOrig = btn != null ? btn.transition : UnityEngine.UI.Selectable.Transition.ColorTint;
-        if (btn != null) btn.transition = UnityEngine.UI.Selectable.Transition.None;
-
-        float e = 0f;
-        while (e < delay) { e += Time.unscaledDeltaTime; yield return null; }
-        const float dur = 0.22f;
-        for (float x = 0f; x < dur; x += Time.unscaledDeltaTime)
-        {
-            float s = Mathf.Lerp(0.7f, 1f, EaseOutBackPause(x / dur));
-            if (t != null) t.localScale = new Vector3(s, s, 1f);
-            yield return null;
-        }
-        if (t != null) t.localScale = Vector3.one;
-
-        hover?.Liberar();
-        if (btn != null) btn.transition = transOrig;
-    }
-
-    private static float EaseOutBackPause(float t)
-    {
-        const float c1 = 1.70158f, c3 = 2.70158f;
-        return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
+        yield break;
     }
 
     // Esconde/mostra os HUDs que renderizam acima do pause (contador de mortes e painel de evento).

@@ -498,37 +498,75 @@ public class CardHover : MonoBehaviour,
     UnityEngine.EventSystems.IPointerDownHandler,
     UnityEngine.EventSystems.IPointerUpHandler
 {
-    bool  pronto = true;      // enquanto false (animação de entrada) a escala é controlada por fora
-    bool  sobre = false;      // mouse em cima
+    bool  sobre = false;         // mouse em cima
     bool  pressionado = false;
-    float tempoTravado = 0f;
-    const float FAILSAFE_LIBERAR = 1.5f;
 
-    public void Travar()  => pronto = false;
-    public void Liberar() => pronto = true;
+    // Animação de entrada (pop-in) OPCIONAL, dirigida pelo MESMO Update do hover.
+    // Antes a entrada era feita por fora (PopInUI no PauseManager) e brigava com o hover
+    // pela escala — com o mouse em cima os dois escreviam localScale no mesmo frame e o
+    // botão "buga". Agora há UM único dono da escala: entrada e hover se combinam
+    // multiplicativamente (base da entrada × multiplicador do hover), nunca conflitam.
+    bool  animandoEntrada = false;
+    float entradaDelay = 0f;
+    float entradaTempo = 0f;
+    float baseEscala = 1f;       // escala-base vinda da entrada (0.7 → 1.0); 1 fora da entrada
+    const float ENTRADA_DUR = 0.22f;
 
-    // Ao esconder/reabrir o painel, zera o estado do mouse (senão reabre "achando" que está em cima).
-    void OnDisable() { sobre = false; pressionado = false; }
+    // Dispara o pop-in: o botão "pula" de 0.7 para 1.0 após 'delay' (escalonado).
+    public void AnimarEntrada(float delay)
+    {
+        animandoEntrada = true;
+        entradaDelay = Mathf.Max(0f, delay);
+        entradaTempo = 0f;
+        baseEscala = 0.7f;
+        transform.localScale = Vector3.one * 0.7f;
+    }
+
+    // Ao esconder/reabrir o painel, zera o estado (senão reabre "achando" que está em cima
+    // ou no meio de uma entrada antiga).
+    void OnDisable()
+    {
+        sobre = false; pressionado = false;
+        animandoEntrada = false; baseEscala = 1f;
+    }
 
     void Update()
     {
-        if (!pronto)
-        {
-            // Failsafe: se a entrada travar e o Liberar() nunca chegar, libera sozinho.
-            tempoTravado += Time.unscaledDeltaTime;
-            if (tempoTravado >= FAILSAFE_LIBERAR) pronto = true;
-            return; // durante a entrada, a animação externa (PopInUI) controla a escala
-        }
-        tempoTravado = 0f;
+        // Multiplicador do hover (o jogo pode estar pausado, então tudo em unscaled).
+        float mult = pressionado ? 0.96f : (sobre ? 1.06f : 1.00f);
 
-        // Escala DIRIGIDA por Update: todo frame a escala é puxada suavemente pro alvo do estado
-        // atual do mouse. Assim NUNCA fica presa numa escala errada — que era o bug no hover.
-        // (unscaled pra funcionar com o jogo pausado, timeScale = 0.)
-        float destino = pressionado ? 0.96f : (sobre ? 1.06f : 1.00f);
+        // Durante a entrada: escala DIRETA (pop-in nítido) já combinada com o hover.
+        if (animandoEntrada)
+        {
+            if (entradaDelay > 0f)
+            {
+                entradaDelay -= Time.unscaledDeltaTime;
+            }
+            else
+            {
+                entradaTempo += Time.unscaledDeltaTime;
+                float p = Mathf.Clamp01(entradaTempo / ENTRADA_DUR);
+                baseEscala = Mathf.Lerp(0.7f, 1f, EaseOutBack(p));
+                if (p >= 1f) { baseEscala = 1f; animandoEntrada = false; }
+            }
+            float e = baseEscala * mult;
+            transform.localScale = new Vector3(e, e, 1f);
+            return;
+        }
+
+        // Fora da entrada: um lerp suave puxa a escala pro alvo do hover. Assim NUNCA fica
+        // presa numa escala errada — que era o bug.
+        float destino = mult;
         float atual   = transform.localScale.x;
         float novo    = Mathf.Lerp(atual, destino, Mathf.Clamp01(16f * Time.unscaledDeltaTime));
         if (Mathf.Abs(novo - destino) < 0.001f) novo = destino;
         transform.localScale = new Vector3(novo, novo, 1f);
+    }
+
+    static float EaseOutBack(float t)
+    {
+        const float c1 = 1.70158f, c3 = 2.70158f;
+        return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
     }
 
     public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData _) { sobre = true; }

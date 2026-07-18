@@ -15,7 +15,7 @@ MonoBehaviour:
   nomeInimigo: Fantasminha
   prefab: {fileID: 0}
   icon: {fileID: -6458494001477832625, guid: 429f243b1a3455c4e93be3911c44fba7, type: 3}
-  vidaBase: 90
+  vidaBase: 77
   danoBase: 8
   velocidadeBase: 4
   tamanho: 7

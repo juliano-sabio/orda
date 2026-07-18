@@ -33,6 +33,10 @@ public class SilenciadorLog : MonoBehaviour
                 if (msg.Contains("atlas texture. Please make the texture") && msg.Contains("readable")) return;
                 if (msg.Contains("Unable to add the requested character to font asset")) return;
                 if (msg.Contains("CharacterSelectionManager não encontrado")) return;
+                // Unity Recorder: quando o áudio pausa (cartas/pause) ou o gravador perde frame,
+                // ele spama "Failed to add audio samples/video frame to Unity Media Encoder".
+                // Inofensivo — só ruído de console na gravação. Pega áudio e vídeo de uma vez.
+                if (msg.Contains("Unity Media Encoder")) return;
             }
             catch { }
             inner.LogFormat(logType, context, format, args);

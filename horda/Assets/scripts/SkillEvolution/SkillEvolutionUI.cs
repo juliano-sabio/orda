@@ -440,13 +440,30 @@ public class EvoCardAnimador : MonoBehaviour
         entradaPronta = true;
     }
 
+    // Hover estável: converte o mouse pro espaço do PAI e testa contra o retângulo BASE da carta
+    // (posBase + tamanho base). Não usa o transform vivo da carta, então escala/tilt/flutuação
+    // do hover não afetam a detecção — sem realimentação, sem piscar.
+    bool HoverEstavel()
+    {
+        var pai = rt.parent as RectTransform;
+        if (pai == null) return false;
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(pai, Input.mousePosition, null, out var p))
+            return false;
+        Vector2 meio = rt.rect.size * 0.5f; // tamanho base (não muda com localScale)
+        return Mathf.Abs(p.x - posBase.x) <= meio.x && Mathf.Abs(p.y - posBase.y) <= meio.y;
+    }
+
     void Update()
     {
         if (!entradaPronta || rt == null) return;
 
         floatTimer += Time.unscaledDeltaTime;
 
-        bool hover = RectTransformUtility.RectangleContainsScreenPoint(rt, Input.mousePosition, null);
+        // Hover por ÁREA FIXA (footprint base da carta), não pelo rt vivo. Se usássemos o rt,
+        // a escala (1.12) e o tilt do hover mudariam a área detectada e criariam realimentação:
+        // detecta → cresce/inclina → sai da área → encolhe → detecta de novo = a carta pisca
+        // ("encolhe"). Checando contra posBase + tamanho base (que não mudam), o hover é estável.
+        bool hover = HoverEstavel();
 
         // ── Escala no hover ───────────────────────────────────────────────────
         float escalaAlvo  = hover ? 1.12f : 1f;

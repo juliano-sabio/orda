@@ -125,6 +125,7 @@ public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     Vector2 posBase;
     Vector3 escBase;
     bool baseOk, hover, semSom, semCalc;
+    bool temAnimadorProprio;   // objeto já tem hover próprio (CardHover/EvoCardAnimador) → não mexemos na escala/posição
 
     void Awake() { rt = transform as RectTransform; canvas = GetComponentInParent<Canvas>(); }
 
@@ -164,6 +165,17 @@ public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     void Update()
     {
         if (rt == null) return;
+
+        // Se o objeto já tem um animador de hover próprio (ex.: CardHover nos botões de pause,
+        // EvoCardAnimador nas cartas de evolução), NÃO aplicamos o efeito visual — senão os dois
+        // escrevem localScale/posição no mesmo frame e brigam (a carta/botão "cresce e encolhe").
+        // O som continua funcionando (tratado nos handlers de ponteiro). Re-checa enquanto não achou,
+        // pois o animador pode ser adicionado depois deste componente.
+        if (!temAnimadorProprio)
+            temAnimadorProprio = GetComponentInParent<CardHover>() != null
+                              || GetComponentInParent<EvoCardAnimador>() != null
+                              || GetComponentInParent<CartaSkillAnimador>() != null;
+        if (temAnimadorProprio) return;
 
         // Captura a base SÓ em repouso (sem hover). Se o botão abriu com o mouse em cima, não captura
         // um valor bugado — só aplica o efeito depois de ter uma base limpa.
