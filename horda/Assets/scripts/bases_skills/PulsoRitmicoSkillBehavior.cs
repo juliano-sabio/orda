@@ -47,9 +47,11 @@ public class PulsoRitmicoSkillBehavior : SkillBehavior, ISkillComRecarga, IEvolu
         Vector2 centro = playerStats.transform.position;
         SomSkill.Tocar(SomSkill.Tipo.PulsoDark, centro, 0.45f); // co-op: toca tb na cópia cosmética (outro player ouve)
         // Pulso Gravitacional (Lendária): implode os inimigos pro centro e depois os arremessa
-        if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.PulsoRitmicoLend))
+        // Co-op: o VISUAL aparece em todos; a atração/arremesso (desloca inimigos) roda só no
+        // dono, senão a cópia moveria os inimigos na tela do colega e dessincronizaria.
+        if (TemEvolucao(SkillEvolutionType.PulsoRitmicoLend))
         {
-            StartCoroutine(PulsoGravitacional());
+            if (!cosmetico) StartCoroutine(PulsoGravitacional());
             StartCoroutine(VisualPulso(centro));
             return;
         }

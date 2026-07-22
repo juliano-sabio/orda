@@ -98,7 +98,8 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
             StartCoroutine(FlashEspinhos());
 
             // Espinhos Perfurantes (Lendária): dispara espinhos pra FORA em várias direções
-            if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.CampoEspinhosLend))
+            // Co-op: roda também na cópia cosmética (visual); os espinhos não dão dano lá.
+            if (TemEvolucao(SkillEvolutionType.CampoEspinhosLend))
                 DispararEspinhos(pos);
         }
     }
@@ -116,7 +117,7 @@ public class CampoEspinhosSkillBehavior : SkillBehavior, ISkillComRecarga
             Vector2 dir = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
             var go = new GameObject("EspinhoPerfurante");
             go.transform.position = origem + dir * (raio * 0.6f);
-            go.AddComponent<EspinhoProjetilCampo>().Iniciar(dir, 12f, DanoAtual, raio * 2.2f, skillData, CorElemento(), this);
+            go.AddComponent<EspinhoProjetilCampo>().Iniciar(dir, 12f, DanoAtual, raio * 2.2f, skillData, CorElemento(), this, cosmetico);
         }
     }
 
@@ -265,10 +266,11 @@ public class EspinhoProjetilCampo : MonoBehaviour
     SkillData skillRef;
     MonoBehaviour dono;
     bool    atingiu;
+    bool    cosmetico; // co-op: cópia só visual, sem dano
 
-    public void Iniciar(Vector2 d, float v, float dmg, float alc, SkillData sd, Color cor, MonoBehaviour owner)
+    public void Iniciar(Vector2 d, float v, float dmg, float alc, SkillData sd, Color cor, MonoBehaviour owner, bool cos = false)
     {
-        dir = d; vel = v; dano = dmg; alcance = alc; skillRef = sd; dono = owner; origem = transform.position;
+        dir = d; vel = v; dano = dmg; alcance = alc; skillRef = sd; dono = owner; cosmetico = cos; origem = transform.position;
 
         var sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite = GerarEspinho(); sr.color = cor; sr.sortingOrder = 12;
@@ -294,8 +296,11 @@ public class EspinhoProjetilCampo : MonoBehaviour
         var ic = other.GetComponent<InimigoController>() ?? other.GetComponentInParent<InimigoController>();
         if (ic == null || ic.estaMorrendo) return;
         atingiu = true;
-        ic.ReceberDano(dano, false);
-        if (skillRef != null && dono != null) SkillElementEffect.Aplicar(skillRef, ic.gameObject, dano, dono);
+        if (!cosmetico) // co-op: cópia cosmética só voa (visual), sem dano
+        {
+            ic.ReceberDano(dano, false);
+            if (skillRef != null && dono != null) SkillElementEffect.Aplicar(skillRef, ic.gameObject, dano, dono);
+        }
         Destroy(gameObject);
     }
 

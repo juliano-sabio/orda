@@ -169,7 +169,7 @@ public class PortalController : MonoBehaviour
         var origColors    = new Color[renderers.Length];
         for (int i = 0; i < renderers.Length; i++) origColors[i] = renderers[i].color;
 
-        if (rb) { rb.linearVelocity = Vector2.zero; rb.isKinematic = true; }
+        if (rb) { rb.linearVelocity = Vector2.zero; rb.bodyType = RigidbodyType2D.Kinematic; }
 
         yield return AnimateScale(player, renderers, origScale, origColors[0],
                                   origScale * 0.08f, energyColor, shrinkDuration);
@@ -196,7 +196,7 @@ public class PortalController : MonoBehaviour
 
         player.localScale = origScale;
         for (int i = 0; i < renderers.Length; i++) renderers[i].color = origColors[i];
-        if (rb) rb.isKinematic = false;
+        if (rb) rb.bodyType = RigidbodyType2D.Dynamic;
     }
 
     private IEnumerator AnimateScale(Transform target, SpriteRenderer[] renderers,

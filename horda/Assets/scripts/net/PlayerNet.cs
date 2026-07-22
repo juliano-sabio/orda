@@ -174,6 +174,11 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
     readonly System.Collections.Generic.Dictionary<int, SkillBehavior> cosmeticasPorIdx =
         new System.Collections.Generic.Dictionary<int, SkillBehavior>();
 
+    // Co-op: evoluções que o DONO deste player já aplicou (replicadas pra cá). Guardadas pra
+    // marcar tanto as cópias cosméticas atuais quanto as que forem criadas depois.
+    readonly System.Collections.Generic.HashSet<SkillEvolutionType> evolucoesReplicadas =
+        new System.Collections.Generic.HashSet<SkillEvolutionType>();
+
     // Co-op: o dono adquiriu uma skill (suportada) → o fantoche do colega passa a rodar
     // a versão COSMÉTICA dela. idx = índice no skillsRegistro; elemento = appliedElement do dono.
     public void SincronizarSkillCosmetica(int idx, int elemento)
@@ -190,7 +195,33 @@ public class PlayerNet : NetworkBehaviour, INetOwnership
         var fx = GetComponent<SkillFxNet>();
         if (fx == null || fx.skillsRegistro == null || idx < 0 || idx >= fx.skillsRegistro.Length) return;
         var b = SkillFxCosmetico.Adicionar(stats, fx.skillsRegistro[idx], elemento);
-        if (b != null) cosmeticasPorIdx[idx] = b;
+        if (b != null)
+        {
+            cosmeticasPorIdx[idx] = b;
+            // aplica as evoluções do dono já conhecidas (skill adquirida depois de já ter evoluído)
+            foreach (var evo in evolucoesReplicadas) b.MarcarEvolucaoReplicada(evo);
+        }
+    }
+
+    // Co-op: o dono aplicou uma evolução → replica pro fantoche do colega, pra as cópias
+    // cosméticas desenharem o visual evoluído (lendárias etc.). Só visual — o dano é do dono.
+    public void SincronizarEvolucao(int tipo)
+    {
+        if (IsOwner && IsSpawned) EvolucaoCosmeticaServerRpc(tipo);
+    }
+
+    [Rpc(SendTo.Server)]
+    void EvolucaoCosmeticaServerRpc(int tipo) { EvolucaoCosmeticaRpc(tipo); }
+
+    [Rpc(SendTo.NotOwner)]
+    void EvolucaoCosmeticaRpc(int tipo)
+    {
+        var evo = (SkillEvolutionType)tipo;
+        evolucoesReplicadas.Add(evo);
+        // marca todas as cópias cosméticas já existentes no fantoche
+        var alvo = stats != null ? stats.gameObject : gameObject;
+        foreach (var b in alvo.GetComponentsInChildren<SkillBehavior>(true))
+            if (b != null && b.cosmetico) b.MarcarEvolucaoReplicada(evo);
     }
 
     // Co-op: o dono infundiu uma skill → recolorir a cópia cosmética no fantoche.

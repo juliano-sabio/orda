@@ -51,6 +51,11 @@ public class SkillEvolutionManager : MonoBehaviour
         var player = PlayerStats.Local; // co-op: aplica no player local (build individual)
         if (player == null) return;
 
+        // Co-op: replica a evolução pro fantoche do colega, pra as cópias cosméticas desenharem
+        // o visual evoluído (lendárias). Só visual — o dano continua sendo do dono/host.
+        if (NetSpawn.EmRede)
+            player.GetComponent<PlayerNet>()?.SincronizarEvolucao((int)data.tipoEvolucao);
+
         // Notifica behaviors com interface IEvoluivel
         foreach (var b in player.GetComponents<SkillBehavior>())
             if (b is IEvoluivel ev) ev.OnEvolucaoAplicada(data.tipoEvolucao);

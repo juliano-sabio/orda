@@ -67,7 +67,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
             var lp = go.AddComponent<LaminaProjetil>();
             lp.skillDataRef = skillData;
             lp.cosmetico = cosmetico;
-            lp.bumerangue = SkillEvolutionManager.Tem(SkillEvolutionType.FuriaLaminasLend); // Lâminas Bumerangue
+            lp.bumerangue = TemEvolucao(SkillEvolutionType.FuriaLaminasLend); // Lâminas Bumerangue (usa evolução replicada no co-op)
             lp.Iniciar(dir, velocidade, DanoAtual);
         }
 
@@ -80,7 +80,7 @@ public class FuriaLaminasSkillBehavior : SkillBehavior, ISkillComRecarga
             var lp = go.AddComponent<LaminaProjetil>();
             lp.skillDataRef = skillData;
             lp.cosmetico = cosmetico;
-            lp.bumerangue = SkillEvolutionManager.Tem(SkillEvolutionType.FuriaLaminasLend); // Lâminas Bumerangue
+            lp.bumerangue = TemEvolucao(SkillEvolutionType.FuriaLaminasLend); // Lâminas Bumerangue (usa evolução replicada no co-op)
             lp.Iniciar(dir, velocidade, DanoAtual);
         }
 

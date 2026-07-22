@@ -46,8 +46,9 @@ public class ChicoteEnergiaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
     IEnumerator ChicotearComEvo()
     {
         // Chicote Condutor (Lendária): deixa um campo elétrico que arqueia pros inimigos por perto
-        if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.ChicoteEnergiaLend) && playerStats != null)
-            EvolutionFX.SpawnTeiaEletrica(playerStats.transform, 4.5f, DanoAtual * 0.35f, 2.6f);
+        // Co-op: roda também na cópia cosmética (visual), mas sem dano (flag cosmetico).
+        if (TemEvolucao(SkillEvolutionType.ChicoteEnergiaLend) && playerStats != null)
+            EvolutionFX.SpawnTeiaEletrica(playerStats.transform, 4.5f, DanoAtual * 0.35f, 2.6f, cosmetico);
 
         yield return StartCoroutine(Chicotear());
         if (SkillEvolutionManager.Tem(SkillEvolutionType.DuplaRotacao))

@@ -66,6 +66,7 @@ public class MisseisTeleguiadosSkillBehavior : SkillBehavior, ISkillComRecarga
             var mp = go.AddComponent<MissilProjetil>();
             mp.skillDataRef = skillData;
             mp.cosmetico = cosmetico;
+            mp.misseisLend = TemEvolucao(SkillEvolutionType.MisseisLend); // co-op: evolução replicada
             mp.Iniciar(alvo, velocidade, DanoAtual);
             yield return new WaitForSeconds(0.12f);
         }
@@ -114,6 +115,7 @@ public class MissilProjetil : MonoBehaviour
 {
     public bool cosmetico; // co-op: fantasma do colega — só visual, sem dano
     public bool fragmento; // mini-míssil de fragmentação (não fragmenta de novo)
+    public bool misseisLend; // Lendária "Mísseis de Fragmentação": setado pelo dono (replicado no co-op)
 
     public SkillData skillDataRef;
     InimigoController alvo;
@@ -193,11 +195,13 @@ public class MissilProjetil : MonoBehaviour
             }
             else
                 SomSkill.Tocar(SomSkill.Tipo.MissilImpactoDark, transform.position, 0.5f);
-
-            // Mísseis de Fragmentação (Lendária): o míssil se divide em 4 mini-mísseis teleguiados
-            if (SkillEvolutionManager.Tem(SkillEvolutionType.MisseisLend) && !fragmento)
-                Fragmentar();
         }
+
+        // Mísseis de Fragmentação (Lendária): divide em 4 mini-mísseis. Roda também na cópia
+        // cosmética (visual) — os minis herdam 'cosmetico' (SpawnMini) e não dão dano lá.
+        if (misseisLend && !fragmento)
+            Fragmentar();
+
         StartCoroutine(EfeitoImpacto());
     }
 

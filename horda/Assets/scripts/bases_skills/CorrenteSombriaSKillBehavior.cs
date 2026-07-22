@@ -66,7 +66,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
 
         int qtdReal  = SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteReforcada) ? qtdAlvos + 1 : qtdAlvos;
         float danoMult = SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteReforcada) ? 2f : 1f;
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend)) qtdReal += 1; // Corrente da Alma: +1 elo
+        if (TemEvolucao(SkillEvolutionType.CorrenteSombriaLend)) qtdReal += 1; // Corrente da Alma: +1 elo (co-op: evolução replicada)
         var alvos = EncontrarAlvos(qtdReal);
         if (alvos.Count == 0) yield break;
 
@@ -150,7 +150,7 @@ public class CorrenteSombriaSkillBehavior : SkillBehavior, ISkillComRecarga, IEv
                 // Corrente da Alma (Lendária): a dor é COMPARTILHADA — cada elo recebe dano
                 // proporcional a quantos estão acorrentados (quanto mais elos, mais dói em todos).
                 int nElos = 0; foreach (var a in alvos) if (a != null && !a.estaMorrendo) nElos++;
-                float fatorAlma = SkillEvolutionManager.Tem(SkillEvolutionType.CorrenteSombriaLend) ? Mathf.Max(1, nElos) : 1f;
+                float fatorAlma = TemEvolucao(SkillEvolutionType.CorrenteSombriaLend) ? Mathf.Max(1, nElos) : 1f;
                 foreach (var ic in alvos)
                     if (ic != null && !ic.estaMorrendo && ic.gameObject != null)
                     {

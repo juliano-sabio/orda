@@ -86,7 +86,7 @@ public class LancaLuzSkillBehavior : SkillBehavior, ISkillComRecarga, IEvoluivel
             var lp = go.AddComponent<LancaLuzProjetil>();
             lp.skillDataRef = skillData;
             lp.cosmetico = cosmetico;
-            lp.teleguiada = SkillEvolutionManager.Tem(SkillEvolutionType.LancaLuzLend); // Lança Teleguiada
+            lp.teleguiada = TemEvolucao(SkillEvolutionType.LancaLuzLend); // Lança Teleguiada (usa evolução replicada no co-op)
             lp.Iniciar(dirFinal, velocidade, DanoAtual, alcance);
         }
     }

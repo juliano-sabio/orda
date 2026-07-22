@@ -177,17 +177,17 @@ public static class EvolutionFX
     }
 
     // Campo elétrico persistente que segue o alvo, arqueia pra inimigos próximos e os danifica.
-    public static void SpawnTeiaEletrica(Transform seguir, float raio, float danoTick, float dur)
+    public static void SpawnTeiaEletrica(Transform seguir, float raio, float danoTick, float dur, bool cosmetico = false)
     {
         var go = new GameObject("TeiaEletrica");
-        go.AddComponent<TeiaEletricaFX>().Iniciar(seguir, raio, danoTick, dur);
+        go.AddComponent<TeiaEletricaFX>().Iniciar(seguir, raio, danoTick, dur, cosmetico);
     }
 
     // Invoca lâminas que orbitam o player por 'dur' segundos, cortando quem chega perto.
-    public static GameObject SpawnEspadasOrbitais(Transform player, int qtd, float dano, float raio, float dur)
+    public static GameObject SpawnEspadasOrbitais(Transform player, int qtd, float dano, float raio, float dur, bool cosmetico = false)
     {
         var go = new GameObject("EspadasOrbitais");
-        go.AddComponent<EspadasOrbitaisFX>().Iniciar(player, qtd, dano, raio, dur);
+        go.AddComponent<EspadasOrbitaisFX>().Iniciar(player, qtd, dano, raio, dur, cosmetico);
         return go;
     }
 }
@@ -255,8 +255,8 @@ public class MarcaMorteFX : MonoBehaviour
 // Chicote Condutor: campo elétrico que segue o player, arqueia pros inimigos próximos e os danifica.
 public class TeiaEletricaFX : MonoBehaviour
 {
-    Transform seguir; float raio, danoTick, dur;
-    public void Iniciar(Transform s, float r, float d, float du) { seguir = s; raio = r; danoTick = d; dur = du; StartCoroutine(Run()); }
+    Transform seguir; float raio, danoTick, dur; bool cosmetico;
+    public void Iniciar(Transform s, float r, float d, float du, bool cos = false) { seguir = s; raio = r; danoTick = d; dur = du; cosmetico = cos; StartCoroutine(Run()); }
 
     IEnumerator Run()
     {
@@ -276,7 +276,7 @@ public class TeiaEletricaFX : MonoBehaviour
                 {
                     var ic = col.GetComponent<InimigoController>() ?? col.GetComponentInParent<InimigoController>();
                     if (ic == null || ic.estaMorrendo) continue;
-                    ic.ReceberDano(danoTick, false);
+                    if (!cosmetico) ic.ReceberDano(danoTick, false); // co-op: cópia só visual
                     var ago = new GameObject("Arco");
                     var lr = ago.AddComponent<LineRenderer>();
                     lr.useWorldSpace = true; lr.positionCount = 5;
@@ -305,12 +305,12 @@ public class TeiaEletricaFX : MonoBehaviour
 // Espadas Orbitais: lâminas girando ao redor do player que cortam inimigos próximos por um tempo.
 public class EspadasOrbitaisFX : MonoBehaviour
 {
-    Transform player; int qtd; float dano, raio, dur;
+    Transform player; int qtd; float dano, raio, dur; bool cosmetico;
     Transform[] laminas;
     readonly System.Collections.Generic.Dictionary<int, float> cd = new System.Collections.Generic.Dictionary<int, float>();
 
-    public void Iniciar(Transform p, int q, float d, float r, float du)
-    { player = p; qtd = Mathf.Max(1, q); dano = d; raio = r; dur = du; Criar(); StartCoroutine(Run()); }
+    public void Iniciar(Transform p, int q, float d, float r, float du, bool cos = false)
+    { player = p; qtd = Mathf.Max(1, q); dano = d; raio = r; dur = du; cosmetico = cos; Criar(); StartCoroutine(Run()); }
 
     void Criar()
     {
@@ -352,7 +352,7 @@ public class EspadasOrbitaisFX : MonoBehaviour
                     int id = ic.gameObject.GetInstanceID();
                     if (cd.TryGetValue(id, out float q) && Time.time < q) continue;
                     cd[id] = Time.time + 0.4f;
-                    ic.ReceberDano(dano, false);
+                    if (!cosmetico) ic.ReceberDano(dano, false); // co-op: cópia só visual
                 }
             }
             yield return null;

@@ -66,7 +66,7 @@ public class LobbyUI : MonoBehaviour
     static readonly bool[]   mapaBloqueado   = { false, false, true, true };
     int  mapaIdx        = 0;
     int  maxJogadoresSel = 2;
-    bool salaPublica    = true;
+    public bool salaPublica = true; // WIP: toggle publico/privado da sala (setado pelos toggles do lobby)
 
     // ── Refs de UI ────────────────────────────────────────────────────
     GameObject   canvasGO;

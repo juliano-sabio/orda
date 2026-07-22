@@ -20,8 +20,8 @@ public class ElementTokenNet : NetworkBehaviour
         else SolicitarColetaServerRpc();
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    void SolicitarColetaServerRpc(ServerRpcParams p = default)
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    void SolicitarColetaServerRpc(RpcParams p = default)
     {
         ConcederColeta(p.Receive.SenderClientId);
     }

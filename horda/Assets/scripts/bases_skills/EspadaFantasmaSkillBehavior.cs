@@ -52,9 +52,10 @@ public class EspadaFantasmaSkillBehavior : SkillBehavior, ISkillComRecarga, IEvo
             : Vector2.right;
 
         // Espadas Orbitais (Lendária): invoca 3 lâminas que orbitam o player por alguns segundos
-        if (!cosmetico && SkillEvolutionManager.Tem(SkillEvolutionType.EspadaFantasmaLend)
+        // Co-op: aparece também na cópia cosmética (visual); lá as lâminas não dão dano.
+        if (TemEvolucao(SkillEvolutionType.EspadaFantasmaLend)
             && orbitais == null && playerStats != null)
-            orbitais = EvolutionFX.SpawnEspadasOrbitais(playerStats.transform, 3, DanoAtual * 0.6f, 1.7f, 3.5f);
+            orbitais = EvolutionFX.SpawnEspadasOrbitais(playerStats.transform, 3, DanoAtual * 0.6f, 1.7f, 3.5f, cosmetico);
 
         // Espada Dupla: também corta por trás
         float[] angulos = SkillEvolutionManager.Tem(SkillEvolutionType.EspadaDuplaFantasma)

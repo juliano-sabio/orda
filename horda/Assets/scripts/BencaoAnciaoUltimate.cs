@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class BencaoAnciaoUltimate : MonoBehaviour, IUltimateCosmetico
 {
-    bool cosmetico;
-    public void ExecutarCosmetico() { if (ativo) return; cosmetico = true; StartCoroutine(CorotinaAtivacao()); }
+    public void ExecutarCosmetico() { if (ativo) return; StartCoroutine(CorotinaAtivacao()); }
 
     [Header("Configurações")]
     public float cooldown        = 27f;

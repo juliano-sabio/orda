@@ -28,7 +28,6 @@ public class FlowField : MonoBehaviour
     private Vector2Int gridTamanho;
     private Vector2 gridOrigem;
     private Vector2 gridCentroAtual;
-    private float tempoUltimaReconstrucao = -999f;
     private Transform playerTransform;
     public static Transform AlvoOverride;
 

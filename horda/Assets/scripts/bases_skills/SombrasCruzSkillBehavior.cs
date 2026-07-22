@@ -54,7 +54,7 @@ public class SombrasCruzSkillBehavior : SkillBehavior, ISkillComRecarga
             SomSkill.Tocar(SomSkill.Tipo.SombraCruzDisparoDark, playerStats.transform.position, 0.5f);
 
         // Cruz Rotatória (Lendária): feixes que GIRAM 360° ao redor do player (varredura)
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.SombrasCruzLend))
+        if (TemEvolucao(SkillEvolutionType.SombrasCruzLend)) // co-op: usa evolução replicada
         {
             StartCoroutine(VarreduraRotatoria());
             StartCoroutine(FlashPlayer());

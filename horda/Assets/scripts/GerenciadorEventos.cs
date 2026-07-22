@@ -1871,6 +1871,40 @@ void LimparSlimePercurso()
     [Header("Evolução de Skills")]
     public List<SkillEvolutionData> todasEvolucoes = new List<SkillEvolutionData>();
 
+    // Peso de sorteio por raridade — quanto MENOR, mais raro de aparecer nas cartas de evolução.
+    static float PesoRaridade(SkillRarity r)
+    {
+        switch (r)
+        {
+            case SkillRarity.Common:    return 100f;
+            case SkillRarity.Uncommon:  return 70f;
+            case SkillRarity.Rare:      return 45f;
+            case SkillRarity.Epic:      return 20f;
+            case SkillRarity.Legendary: return 4f;   // lendária: bem mais difícil de aparecer
+            case SkillRarity.Mythic:    return 2f;
+            default:                    return 30f;
+        }
+    }
+
+    // Sorteia um índice da lista proporcional ao peso da raridade de cada evolução.
+    static int SortearPorRaridade(List<SkillEvolutionData> lista)
+    {
+        float total = 0f;
+        for (int i = 0; i < lista.Count; i++)
+            total += (lista[i] != null) ? PesoRaridade(lista[i].raridade) : 0f;
+
+        if (total <= 0f) return UnityEngine.Random.Range(0, lista.Count); // fallback
+
+        float r = UnityEngine.Random.value * total;
+        for (int i = 0; i < lista.Count; i++)
+        {
+            if (lista[i] == null) continue;
+            r -= PesoRaridade(lista[i].raridade);
+            if (r <= 0f) return i;
+        }
+        return lista.Count - 1;
+    }
+
     // Chamado pelo PlayerNet (SendTo.Owner) em co-op: cada cliente oferta a própria evolução.
     public void OfertarEvolucaoLocal() => StartCoroutine(OfertarEvolucaoAposEvento());
 
@@ -1961,13 +1995,15 @@ void LimparSlimePercurso()
         Debug.Log($"[Evolução] Disponíveis para o player: {disponiveis.Count}");
         if (disponiveis.Count == 0) { Debug.LogWarning("[Evolução] Nenhuma evolução disponível para as skills atuais."); yield break; }
 
-        // Sorteia 2 opções aleatórias
+        // Sorteia 2 opções COM PESO POR RARIDADE: lendárias (e míticas) aparecem bem menos que
+        // as comuns/raras. Antes era uniforme (raridade ignorada), então lendária saía tanto
+        // quanto qualquer outra.
         var opcoes = new List<SkillEvolutionData>();
         var copia  = new List<SkillEvolutionData>(disponiveis);
         int qtd    = Mathf.Min(2, copia.Count);
         for (int i = 0; i < qtd; i++)
         {
-            int idx = UnityEngine.Random.Range(0, copia.Count);
+            int idx = SortearPorRaridade(copia);
             opcoes.Add(copia[idx]);
             copia.RemoveAt(idx);
         }

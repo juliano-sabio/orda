@@ -58,7 +58,7 @@ public class EnemyNet : NetworkBehaviour
     }
 
     // Qualquer cliente pode requisitar dano a qualquer inimigo (co-op de amigos).
-    [ServerRpc(RequireOwnership = false)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     public void ReceberDanoServerRpc(float dano, bool isCrit, bool mostrarNumero = true)
     {
         var ic = GetComponent<InimigoController>();
@@ -68,7 +68,7 @@ public class EnemyNet : NetworkBehaviour
     // Co-op: o CLIENTE dono detectou que seu player está encostando neste inimigo (hitbox
     // preciso, do ponto de vista dele) e pede o dano de contato. O host aplica o dano REAL
     // (escalado) do inimigo no player — autoritativo. Resolve o "toma dano sem encostar".
-    [Rpc(SendTo.Server, RequireOwnership = false)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     public void ContatoDanoServerRpc(ulong playerObjId)
     {
         if (!IsServer) return;

@@ -116,7 +116,7 @@ public class ChuvaEstrelasSkillBehavior : SkillBehavior, ISkillComRecarga
     IEnumerator DispararChuva()
     {
         // Estrela Cadente (Lendária): 1 meteoro GIGANTE no maior aglomerado + cratera em chamas
-        if (SkillEvolutionManager.Tem(SkillEvolutionType.ChuvaEstrelasLend))
+        if (TemEvolucao(SkillEvolutionType.ChuvaEstrelasLend)) // co-op: usa evolução replicada
         {
             yield return StartCoroutine(MeteoroGigante());
             yield break;
