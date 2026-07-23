@@ -59,6 +59,11 @@ public class StatusCardSystem : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(0.5f);
 
+        // Espera o TUTORIAL fechar (sem timeout — pode ficar aberto o quanto o player quiser).
+        // Assim as cartas de status só começam a aparecer depois de fechar o tutorial.
+        while (TutorialUI.Ativo)
+            yield return new WaitForSecondsRealtime(0.1f);
+
         // Aguarda outras UIs de seleção fecharem antes de abrir
         float timeout = 10f;
         while (timeout > 0f &&

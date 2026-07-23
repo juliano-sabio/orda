@@ -150,6 +150,9 @@ public class SkillManager : MonoBehaviour
         // Realtime: em co-op o painel do outro player pausa o jogo (timeScale=0); com WaitForSeconds
         // normal este timer congelaria e a escolha NUNCA abriria (cliente ficava preso no "aguardando").
         yield return new WaitForSecondsRealtime(1.5f);
+        // Espera o tutorial fechar antes de mostrar a escolha inicial de skill (não abre por cima).
+        while (TutorialUI.Ativo)
+            yield return new WaitForSecondsRealtime(0.1f);
         AplicarFiltroSlot();
         OfferSkillChoice();
     }
@@ -278,6 +281,9 @@ public class SkillManager : MonoBehaviour
     private IEnumerator OfferSkillChoiceWithDelay()
     {
         yield return null; // apenas 1 frame de delay
+        // Espera o tutorial fechar antes de mostrar as cartas de skill (não abre por cima).
+        while (TutorialUI.Ativo)
+            yield return new WaitForSecondsRealtime(0.1f);
         OfferSkillChoice();
     }
 

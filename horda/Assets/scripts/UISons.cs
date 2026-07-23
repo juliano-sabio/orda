@@ -174,7 +174,8 @@ public class UISomBotao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         if (!temAnimadorProprio)
             temAnimadorProprio = GetComponentInParent<CardHover>() != null
                               || GetComponentInParent<EvoCardAnimador>() != null
-                              || GetComponentInParent<CartaSkillAnimador>() != null;
+                              || GetComponentInParent<CartaSkillAnimador>() != null
+                              || GetComponentInParent<BotaoMenuHover>() != null; // menu inicial: trava a posição → brigava (tremor)
         if (temAnimadorProprio) return;
 
         // Captura a base SÓ em repouso (sem hover). Se o botão abriu com o mouse em cima, não captura

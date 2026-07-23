@@ -28,9 +28,7 @@ public class TutorialUI : MonoBehaviour
     readonly Passo[] passos = new Passo[]
     {
         new Passo { titulo = "MOVIMENTO",   icone = "W A S D",         descricao = "Use WASD para mover o personagem em todas as direções.",                                       cor = new Color(0.90f, 0.40f, 0.22f), tituloKey = "tutorial.movement.title", descKey = "tutorial.movement.desc" },
-        new Passo { titulo = "DASH",        icone = "SHIFT",            descricao = "Pressione SHIFT para dar um dash rápido e escapar dos inimigos.",                              cor = new Color(0.95f, 0.60f, 0.22f), tituloKey = "tutorial.dash.title",     descKey = "tutorial.dash.desc" },
-        new Passo { titulo = "ATAQUE",      icone = "CLIQUE\nESQUERDO",descricao = "Clique com o botão esquerdo do mouse para atacar na direção do cursor.",                       cor = new Color(1.0f, 0.5f, 0.2f), tituloKey = "tutorial.attack.title",   descKey = "tutorial.attack.desc",   iconeKey = "tutorial.left_click" },
-        new Passo { titulo = "HABILIDADES", icone = "Q  E",             descricao = "Use Q e E para ativar suas habilidades especiais. Cada uma tem um cooldown.",                 cor = new Color(0.88f, 0.32f, 0.40f), tituloKey = "tutorial.skills.title",   descKey = "tutorial.skills.desc" },
+        new Passo { titulo = "DASH",        icone = "ESPAÇO",           descricao = "Pressione ESPAÇO para dar um dash rápido e escapar dos inimigos.",                              cor = new Color(0.95f, 0.60f, 0.22f), tituloKey = "tutorial.dash.title",     descKey = "tutorial.dash.desc" },
         new Passo { titulo = "ULTIMATE",    icone = "R",                descricao = "Pressione R para usar sua Ultimate. Ela carrega conforme você causa dano.",                    cor = new Color(1.0f, 0.8f, 0.1f), tituloKey = "tutorial.ultimate.title", descKey = "tutorial.ultimate.desc" },
         new Passo { titulo = "SOBREVIVA!",  icone = "♥",               descricao = "Derrote inimigos, colete XP e suba de nível. Se sua vida chegar a zero, é game over.",        cor = new Color(1.0f, 0.3f, 0.3f), tituloKey = "tutorial.survive.title",  descKey = "tutorial.survive.desc" },
     };
@@ -38,6 +36,9 @@ public class TutorialUI : MonoBehaviour
     // ── Estado ───────────────────────────────────────────────────
     int   passoAtual = 0;
     bool  ativo      = false;
+    // true enquanto o tutorial está na tela — outros sistemas (ex.: cartas de status) esperam
+    // fechar antes de abrir suas próprias UIs.
+    public static bool Ativo { get; private set; }
 
     GameObject painelTutorial;
     TextMeshProUGUI txtTitulo, txtIcone, txtDescricao, txtContador;
@@ -64,6 +65,7 @@ public class TutorialUI : MonoBehaviour
         MostrarPasso(0);
         PausarJogo(true);
         ativo = true;
+        Ativo = true;
     }
 
     void Update()
@@ -218,12 +220,17 @@ public class TutorialUI : MonoBehaviour
             Fechar();
     }
 
+    // Segurança: se o tutorial for destruído sem passar pelo Fechar (ex.: troca de cena),
+    // libera o flag pra as cartas de status não ficarem esperando pra sempre.
+    void OnDestroy() { Ativo = false; }
+
     void Fechar()
     {
         PlayerPrefs.SetInt(CHAVE, 1);
         PlayerPrefs.Save();
         PausarJogo(false);
         ativo = false;
+        Ativo = false;
 
         var canvas = GameObject.Find("Canvas_Tutorial");
         if (canvas != null) Destroy(canvas);
